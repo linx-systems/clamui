@@ -59,7 +59,7 @@ jobs:
           echo "Signature member verified in .deb archive"
 
       - name: Upload Debian package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debian-package
           path: clamui_*.deb
