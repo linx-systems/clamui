@@ -123,13 +123,16 @@ class TestRestoreStripsSetuidBits:
         # Attacker tampers with DB to inject setuid+setgid+sticky bits.
         # Even if the DB layer masks at write time, we directly inject raw bits
         # to verify the read/restore path also enforces masking.
-        with sqlite3.connect(manager._database._db_path) as raw_conn:
+        raw_conn = sqlite3.connect(manager._database._db_path)
+        try:
             raw_conn.execute("PRAGMA ignore_check_constraints = ON")
             raw_conn.execute(
                 "UPDATE quarantine SET original_permissions = ? WHERE id = ?",
                 (0o6755, entry_id),
             )
             raw_conn.commit()
+        finally:
+            raw_conn.close()
 
         restore_result = manager.restore_file(entry_id)
         assert restore_result.is_success, restore_result.error_message
@@ -153,11 +156,14 @@ class TestRestoreStripsSetuidBits:
             )
             assert entry_id is not None
 
-            with sqlite3.connect(db_path) as raw:
+            raw = sqlite3.connect(db_path)
+            try:
                 row = raw.execute(
                     "SELECT original_permissions FROM quarantine WHERE id = ?",
                     (entry_id,),
                 ).fetchone()
+            finally:
+                raw.close()
             assert row[0] == 0o755, f"Expected stored value 0o755, got {oct(row[0])}"
         finally:
             db.close()
@@ -185,7 +191,8 @@ class TestSchemaCheckConstraints:
         db_path = os.path.join(temp_dir, "check.db")
         db = QuarantineDatabase(db_path=db_path, pool_size=0)
         try:
-            with sqlite3.connect(db_path) as raw:
+            raw = sqlite3.connect(db_path)
+            try:
                 with pytest.raises(sqlite3.IntegrityError):
                     raw.execute(
                         """
@@ -196,6 +203,8 @@ class TestSchemaCheckConstraints:
                         """,
                         ("/o", "/q", "T", "2024-01-01T00:00:00", 100, "h", 1023),
                     )
+            finally:
+                raw.close()
         finally:
             db.close()
 
@@ -203,7 +212,8 @@ class TestSchemaCheckConstraints:
         db_path = os.path.join(temp_dir, "check2.db")
         db = QuarantineDatabase(db_path=db_path, pool_size=0)
         try:
-            with sqlite3.connect(db_path) as raw:
+            raw = sqlite3.connect(db_path)
+            try:
                 with pytest.raises(sqlite3.IntegrityError):
                     raw.execute(
                         """
@@ -214,6 +224,8 @@ class TestSchemaCheckConstraints:
                         """,
                         ("/o", "/q2", "T", "2024-01-01T00:00:00", 100, "h", 0o644, "garbage"),
                     )
+            finally:
+                raw.close()
         finally:
             db.close()
 
