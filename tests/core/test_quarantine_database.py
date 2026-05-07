@@ -523,6 +523,7 @@ class TestQuarantineDatabasePermissionMasking:
         db_path = os.path.join(temp_db_dir, "test_quarantine.db")
         conn = sqlite3.connect(db_path)
         try:
+            conn.execute("PRAGMA ignore_check_constraints = ON")
             conn.execute(
                 """
                 INSERT INTO quarantine

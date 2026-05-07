@@ -732,8 +732,8 @@ class TestRestorePermissionErrors:
             assert result.status == FileOperationStatus.PERMISSION_DENIED
             assert result.error_message is not None
 
-    def test_restore_shutil_move_permission_error(self, tmp_path):
-        """Test restore fails with PERMISSION_DENIED when shutil.move raises PermissionError."""
+    def test_restore_link_permission_error(self, tmp_path):
+        """Test restore fails with PERMISSION_DENIED when os.link raises PermissionError."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
@@ -745,9 +745,7 @@ class TestRestorePermissionErrors:
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        with mock.patch(
-            "shutil.move", side_effect=PermissionError("Permission denied during move")
-        ):
+        with mock.patch("os.link", side_effect=PermissionError("Permission denied during restore")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.PERMISSION_DENIED
@@ -927,9 +925,16 @@ class TestRestoreShutilErrors:
 
         restore_path = tmp_path / "restored" / "file.txt"
 
+        import errno
         import shutil
 
-        with mock.patch("shutil.move", side_effect=shutil.Error("Move operation failed")):
+        with (
+            mock.patch("os.link", side_effect=OSError(errno.EXDEV, "Cross-device link")),
+            mock.patch(
+                "src.core.quarantine.file_handler._atomic_create_at_destination",
+                side_effect=shutil.Error("Move operation failed"),
+            ),
+        ):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.ERROR
@@ -948,7 +953,7 @@ class TestRestoreShutilErrors:
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        with mock.patch("shutil.move", side_effect=OSError("Disk I/O error")):
+        with mock.patch("os.link", side_effect=OSError("Disk I/O error")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.ERROR

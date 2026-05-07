@@ -585,6 +585,7 @@ class TestQuarantineManagerPermissions:
         db_path = manager._database._db_path
         conn = sqlite3.connect(db_path)
         try:
+            conn.execute("PRAGMA ignore_check_constraints = ON")
             conn.execute(
                 "UPDATE quarantine SET original_permissions = ? WHERE id = ?",
                 (0o6755, entry_id),
