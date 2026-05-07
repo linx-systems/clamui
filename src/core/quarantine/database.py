@@ -246,6 +246,9 @@ class QuarantineDatabase:
                             file_size INTEGER NOT NULL,
                             file_hash TEXT NOT NULL,
                             original_permissions INTEGER NOT NULL DEFAULT 420
+                                CHECK (original_permissions BETWEEN 0 AND 511),
+                            state TEXT NOT NULL DEFAULT 'active'
+                                CHECK (state IN ('active', 'restored', 'deleted'))
                         )
                         """
                     )
@@ -272,6 +275,15 @@ class QuarantineDatabase:
                             """
                             ALTER TABLE quarantine
                             ADD COLUMN original_permissions INTEGER NOT NULL DEFAULT 420
+                                CHECK (original_permissions BETWEEN 0 AND 511)
+                            """
+                        )
+                    if "state" not in columns:
+                        conn.execute(
+                            """
+                            ALTER TABLE quarantine
+                            ADD COLUMN state TEXT NOT NULL DEFAULT 'active'
+                                CHECK (state IN ('active', 'restored', 'deleted'))
                             """
                         )
 

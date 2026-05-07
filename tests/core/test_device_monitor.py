@@ -475,3 +475,124 @@ class TestStartStop:
 
         monitor.update_settings()
         assert monitor.is_running is True
+
+
+class TestRequeueSourceTracking:
+    """BUG-009: Re-queued GLib timeout sources must be tracked.
+
+    When MAX_CONCURRENT_SCANS is reached, _start_background_scan re-queues
+    via GLib.timeout_add_seconds(10, ...). The returned source id must be
+    stored in _scheduled_sources so stop() can cancel it. Otherwise, a
+    pending re-queue can fire after monitor shutdown and instantiate a
+    Scanner against a torn-down DeviceMonitor.
+    """
+
+    def _make_monitor(self):
+        mock_settings = MagicMock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "device_auto_scan_enabled": True,
+            "device_auto_scan_delay_seconds": 0,
+        }.get(key, default)
+        monitor = DeviceMonitor(
+            settings_manager=mock_settings,
+            scanner=MagicMock(),
+        )
+        monitor._battery_manager = MagicMock()
+        monitor._battery_manager.is_on_battery.return_value = False
+        return monitor
+
+    @patch("src.core.device_monitor.GLib")
+    def test_requeue_source_tracked_in_scheduled_sources(self, mock_glib):
+        """When concurrent limit hits, the re-queue source id is tracked."""
+        mock_glib.SOURCE_REMOVE = False
+        mock_glib.timeout_add_seconds.return_value = 12345  # fake source id
+
+        monitor = self._make_monitor()
+
+        info = MountInfo(
+            mount_point="/media/usb1",
+            device_name="USB1",
+            device_type=DeviceType.REMOVABLE,
+        )
+
+        # Simulate two active scans (hits MAX_CONCURRENT_SCANS = 2)
+        monitor._active_scans["/media/scanA"] = MagicMock()
+        monitor._active_scans["/media/scanB"] = MagicMock()
+
+        monitor._start_background_scan(info)
+
+        # The re-queued source id must be in _scheduled_sources
+        assert info.mount_point in monitor._scheduled_sources
+        assert monitor._scheduled_sources[info.mount_point] == 12345
+        # And no Scanner should have been started (still requeued)
+        assert info.mount_point not in monitor._active_scans
+
+    @patch("src.core.device_monitor.GLib")
+    def test_stop_removes_pending_requeue_sources(self, mock_glib):
+        """stop() must call GLib.source_remove for any tracked re-queue source."""
+        mock_glib.SOURCE_REMOVE = False
+        mock_glib.timeout_add_seconds.return_value = 67890
+
+        monitor = self._make_monitor()
+        monitor._running = True  # bypass start() VolumeMonitor side-effects
+
+        info = MountInfo(
+            mount_point="/media/usb2",
+            device_name="USB2",
+            device_type=DeviceType.REMOVABLE,
+        )
+
+        # Force the re-queue branch
+        monitor._active_scans["/media/scanA"] = MagicMock()
+        monitor._active_scans["/media/scanB"] = MagicMock()
+        monitor._start_background_scan(info)
+        # Drop the active sentinels so stop() doesn't try to cancel them too
+        monitor._active_scans.clear()
+
+        # Sanity: source is tracked
+        assert monitor._scheduled_sources.get(info.mount_point) == 67890
+
+        # Now stop the monitor
+        monitor.stop()
+
+        # GLib.source_remove must have been called with the re-queue id
+        calls = [c.args[0] for c in mock_glib.source_remove.call_args_list]
+        assert 67890 in calls
+        # And the dict must be empty
+        assert monitor._scheduled_sources == {}
+
+    @patch("src.core.device_monitor.GLib")
+    def test_requeue_lambda_clears_own_source_id_on_fire(self, mock_glib):
+        """When the re-queue lambda fires, it removes its own id from the dict."""
+        mock_glib.SOURCE_REMOVE = False
+        # First call (the re-queue itself): return source id 111.
+        # Second call (the inner _start_background_scan -> if the recursion
+        #  itself also hits the requeue branch): return 222.
+        mock_glib.timeout_add_seconds.side_effect = [111, 222]
+
+        monitor = self._make_monitor()
+
+        info = MountInfo(
+            mount_point="/media/usb3",
+            device_name="USB3",
+            device_type=DeviceType.REMOVABLE,
+        )
+
+        monitor._active_scans["/media/A"] = MagicMock()
+        monitor._active_scans["/media/B"] = MagicMock()
+        monitor._start_background_scan(info)
+
+        assert monitor._scheduled_sources[info.mount_point] == 111
+
+        # Capture the lambda passed to timeout_add_seconds and invoke it.
+        # Simulate the limit being lifted before fire so the recursive
+        # _start_background_scan would proceed normally — but we also drop
+        # the active scans to ensure that path is taken.
+        cb = mock_glib.timeout_add_seconds.call_args_list[0].args[1]
+        monitor._active_scans.clear()
+        with patch.object(monitor, "_start_background_scan") as mock_inner:
+            cb()
+            mock_inner.assert_called_once_with(info)
+
+        # After firing, the source id for this mount_point must be gone
+        assert info.mount_point not in monitor._scheduled_sources

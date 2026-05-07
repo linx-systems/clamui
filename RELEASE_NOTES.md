@@ -10,6 +10,7 @@ Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish tra
 - Added UID-checked staging directories, `O_NOFOLLOW` source validation, destination allowlisting, and atomic config installs for `clamui-apply-preferences`
 - Prevented ClamAV scan path arguments from being interpreted as command-line flags by inserting `--` before user-selected paths
 - Masked stored quarantine permissions to regular mode bits so restore cannot reapply setuid, setgid, or sticky bits
+- Refused symlink restore destinations and added no-follow restore fallback handling for cross-filesystem quarantine restores
 - Hardened scheduled-scan crontab updates so unrelated user crontab entries are not removed by marker-like text
 
 ### Flatpak & Packaging
@@ -25,6 +26,9 @@ Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish tra
 - Fixed an updater gettext regression that could break force-update error handling
 - Stopped live scanner output parsing from spinning at 100% CPU after stdout EOF
 - Restored tray profile menu updates and added crash detection with bounded tray subprocess respawns
+- Tracked delayed removable-device scan requeues so shutdown and removal can cancel pending scan starts
+- Cleaned up temporary EICAR self-test files on normal completion, errors, and process exit
+- Parsed timezone-aware scan timestamps consistently for statistics timeframes
 - Stored VirusTotal scan timestamps in UTC instead of local-naive time
 - Added visible ClamUI website links to the README and refreshed release workflow dependencies
 

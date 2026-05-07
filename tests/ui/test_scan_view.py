@@ -1946,23 +1946,21 @@ class TestEicarTest:
         """Test that EICAR test creates a temporary test file."""
         self._setup_eicar_mocks(mock_scan_view)
 
-        with mock.patch("src.ui.scan_view.tempfile") as mock_tempfile:
-            mock_file = mock.MagicMock()
-            mock_file.name = str(tmp_path / "eicar_test.txt")
-            mock_file.__enter__ = mock.MagicMock(return_value=mock_file)
-            mock_file.__exit__ = mock.MagicMock(return_value=False)
-            mock_tempfile.NamedTemporaryFile.return_value = mock_file
-
-            with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
-                with mock.patch("src.ui.scan_view.GLib"):
-                    with mock.patch("src.ui.scan_view.format_scan_path", return_value="/test"):
-                        mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
+        eicar_path = str(tmp_path / "eicar_test.txt")
+        with mock.patch(
+            "src.ui.scan_view.create_eicar_temp", return_value=eicar_path
+        ) as mock_create:
+            with mock.patch("src.ui.scan_view.register_eicar_atexit_cleanup"):
+                with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
+                    with mock.patch("src.ui.scan_view.GLib"):
+                        with mock.patch("src.ui.scan_view.format_scan_path", return_value="/test"):
+                            mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
 
             # Verify temp file was created
-            mock_tempfile.NamedTemporaryFile.assert_called_once()
-            call_kwargs = mock_tempfile.NamedTemporaryFile.call_args[1]
-            assert call_kwargs["delete"] is False
-            assert ".txt" in call_kwargs["suffix"]
+            mock_create.assert_called_once()
+            # Non-Flatpak: parent_dir should be None (system default)
+            call_kwargs = mock_create.call_args.kwargs
+            assert call_kwargs.get("parent_dir") is None
 
     def test_eicar_test_uses_cache_dir_in_flatpak(self, mock_scan_view, tmp_path):
         """Test that EICAR test uses ~/.cache/clamui directory in Flatpak.
@@ -1972,39 +1970,43 @@ class TestEicarTest:
         """
         self._setup_eicar_mocks(mock_scan_view)
 
-        with mock.patch("src.ui.scan_view.tempfile") as mock_tempfile:
-            mock_file = mock.MagicMock()
-            mock_file.name = "/home/test/.cache/clamui/eicar_test.txt"
-            mock_file.__enter__ = mock.MagicMock(return_value=mock_file)
-            mock_file.__exit__ = mock.MagicMock(return_value=False)
-            mock_tempfile.NamedTemporaryFile.return_value = mock_file
-
-            with mock.patch("src.ui.scan_view.is_flatpak", return_value=True):
-                with mock.patch("src.ui.scan_view.Path") as mock_path:
-                    mock_home = mock.MagicMock()
-                    mock_cache_dir = mock.MagicMock()
-                    mock_cache_dir.__str__ = mock.MagicMock(return_value="/home/test/.cache/clamui")
-                    mock_home.__truediv__ = mock.MagicMock(return_value=mock_cache_dir)
-                    mock_cache_dir.__truediv__ = mock.MagicMock(return_value=mock_cache_dir)
-                    mock_path.home.return_value = mock_home
-                    with mock.patch("src.ui.scan_view.GLib"):
-                        with mock.patch("src.ui.scan_view.format_scan_path", return_value="/test"):
-                            mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
+        eicar_path = "/home/test/.cache/clamui/eicar_test.txt"
+        with mock.patch(
+            "src.ui.scan_view.create_eicar_temp", return_value=eicar_path
+        ) as mock_create:
+            with mock.patch("src.ui.scan_view.register_eicar_atexit_cleanup"):
+                with mock.patch("src.ui.scan_view.is_flatpak", return_value=True):
+                    with mock.patch("src.ui.scan_view.Path") as mock_path:
+                        mock_home = mock.MagicMock()
+                        mock_cache_dir = mock.MagicMock()
+                        mock_cache_dir.__str__ = mock.MagicMock(
+                            return_value="/home/test/.cache/clamui"
+                        )
+                        mock_home.__truediv__ = mock.MagicMock(return_value=mock_cache_dir)
+                        mock_cache_dir.__truediv__ = mock.MagicMock(return_value=mock_cache_dir)
+                        mock_path.home.return_value = mock_home
+                        with mock.patch("src.ui.scan_view.GLib"):
+                            with mock.patch(
+                                "src.ui.scan_view.format_scan_path", return_value="/test"
+                            ):
+                                mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
 
             # Verify cache dir was used (not /tmp)
-            call_kwargs = mock_tempfile.NamedTemporaryFile.call_args[1]
-            assert call_kwargs["dir"] == "/home/test/.cache/clamui"
+            call_kwargs = mock_create.call_args.kwargs
+            assert call_kwargs["parent_dir"] == "/home/test/.cache/clamui"
 
     def test_eicar_test_handles_oserror(self, mock_scan_view):
         """Test that EICAR test handles OSError gracefully."""
         self._setup_eicar_mocks(mock_scan_view)
 
-        with mock.patch("src.ui.scan_view.tempfile") as mock_tempfile:
-            mock_tempfile.NamedTemporaryFile.side_effect = OSError("Permission denied")
-
-            with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
-                with mock.patch("src.ui.scan_view.set_status_class"):
-                    mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
+        with mock.patch(
+            "src.ui.scan_view.create_eicar_temp",
+            side_effect=OSError("Permission denied"),
+        ):
+            with mock.patch("src.ui.scan_view.register_eicar_atexit_cleanup"):
+                with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
+                    with mock.patch("src.ui.scan_view.set_status_class"):
+                        mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
 
             # Should show error in status banner
             mock_scan_view._status_banner.set_title.assert_called()
@@ -2018,20 +2020,32 @@ class TestEicarTest:
         mock_scan_view._set_selected_path = mock.MagicMock()
         mock_scan_view._start_scanning = mock.MagicMock()
 
-        with mock.patch("src.ui.scan_view.tempfile") as mock_tempfile:
-            mock_file = mock.MagicMock()
-            mock_file.name = str(tmp_path / "eicar_test.txt")
-            mock_file.__enter__ = mock.MagicMock(return_value=mock_file)
-            mock_file.__exit__ = mock.MagicMock(return_value=False)
-            mock_tempfile.NamedTemporaryFile.return_value = mock_file
-
-            with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
-                mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
+        eicar_path = str(tmp_path / "eicar_test.txt")
+        with mock.patch("src.ui.scan_view.create_eicar_temp", return_value=eicar_path):
+            with mock.patch("src.ui.scan_view.register_eicar_atexit_cleanup"):
+                with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
+                    mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
 
         assert mock_scan_view._scan_backend_override == "daemon"
         assert mock_scan_view._scan_daemon_force_stream is True
-        mock_scan_view._set_selected_path.assert_called_once_with(str(tmp_path / "eicar_test.txt"))
+        mock_scan_view._set_selected_path.assert_called_once_with(eicar_path)
         mock_scan_view._start_scanning.assert_called_once()
+
+    def test_eicar_test_registers_atexit_cleanup_on_create(self, mock_scan_view, tmp_path):
+        """Click handler must register atexit cleanup so a force-quit/crash
+        does not leave the EICAR file lying around (UI-010)."""
+        self._setup_eicar_mocks(mock_scan_view)
+        mock_scan_view._set_selected_path = mock.MagicMock()
+        mock_scan_view._start_scanning = mock.MagicMock()
+
+        eicar_path = str(tmp_path / "eicar_test.txt")
+        with mock.patch("src.ui.scan_view.create_eicar_temp", return_value=eicar_path):
+            with mock.patch("src.ui.scan_view.register_eicar_atexit_cleanup") as mock_register:
+                mock_register.return_value = lambda: None
+                with mock.patch("src.ui.scan_view.is_flatpak", return_value=False):
+                    mock_scan_view._on_eicar_test_clicked(mock.MagicMock())
+
+                mock_register.assert_called_once_with(eicar_path)
 
 
 class TestBackendIndicator:

@@ -234,21 +234,31 @@ class StatisticsCalculator:
         """
         Parse an ISO format timestamp string to datetime.
 
+        Tz-aware inputs (Z suffix, explicit offsets) are converted to the
+        local timezone, then their tzinfo is dropped so the result can be
+        compared against ``datetime.now()`` (which is naive local). Naive
+        inputs are returned as-is. This avoids mis-bucketing entries near
+        midnight or DST boundaries (BUG-003).
+
         Args:
             timestamp: ISO format timestamp string
 
         Returns:
-            datetime object or None if parsing fails or timestamp is None
+            datetime object (always naive) or None if parsing fails or
+            timestamp is None.
         """
         if timestamp is None:
             return None
         try:
-            # Handle ISO format with or without microseconds
-            if "." in timestamp:
-                return datetime.fromisoformat(timestamp.replace("Z", "+00:00").split("+")[0])
-            return datetime.fromisoformat(timestamp.replace("Z", ""))
-        except (ValueError, AttributeError):
+            # Python 3.11+ fromisoformat accepts trailing 'Z'.
+            parsed = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError, TypeError):
             return None
+        if parsed.tzinfo is not None:
+            # Convert tz-aware -> local naive for consistent comparison
+            # with datetime.now() (which is local naive).
+            parsed = parsed.astimezone().replace(tzinfo=None)
+        return parsed
 
     def _filter_entries_by_timeframe(
         self, entries: list[LogEntry], timeframe: str

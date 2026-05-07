@@ -10,6 +10,7 @@ Provides secure file movement to/from quarantine with:
 """
 
 import contextlib
+import errno
 import hashlib
 import logging
 import os
@@ -52,6 +53,31 @@ class FileOperationResult:
     def is_success(self) -> bool:
         """Check if the operation was successful."""
         return self.status == FileOperationStatus.SUCCESS
+
+
+def _atomic_create_at_destination(source: Path, destination: Path, permissions: int) -> None:
+    """Copy source into a newly created destination without following symlinks."""
+    masked_permissions = permissions & 0o777
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+
+    fd: int | None = None
+    try:
+        fd = os.open(destination, flags, masked_permissions)
+        with source.open("rb") as src, os.fdopen(fd, "wb") as dst:
+            fd = None
+            shutil.copyfileobj(src, dst, length=SecureFileHandler.HASH_BUFFER_SIZE)
+            dst.flush()
+            os.fsync(dst.fileno())
+        os.chmod(destination, masked_permissions)
+    except Exception:
+        if fd is not None:
+            with contextlib.suppress(OSError):
+                os.close(fd)
+        with contextlib.suppress(OSError):
+            destination.unlink()
+        raise
 
 
 class SecureFileHandler:
@@ -803,15 +829,34 @@ class SecureFileHandler:
                     error_message=f"Security: destination is a symlink, possible attack: {original_path}",
                 )
 
+            masked_permissions = original_permissions & 0o777
+            destination_created = False
             try:
-                # Atomic move operation
-                shutil.move(quarantine_path, original_path)
+                try:
+                    os.link(quarantine_path_obj, destination_obj)
+                    destination_created = True
+                    os.chmod(destination_obj, masked_permissions)
+                except OSError as e:
+                    if e.errno == errno.EXDEV:
+                        _atomic_create_at_destination(
+                            quarantine_path_obj,
+                            destination_obj,
+                            masked_permissions,
+                        )
+                        destination_created = True
+                    elif e.errno == errno.EEXIST:
+                        return FileOperationResult(
+                            status=FileOperationStatus.ALREADY_EXISTS,
+                            source_path=quarantine_path,
+                            destination_path=original_path,
+                            file_size=file_size,
+                            file_hash=file_hash or "",
+                            error_message=f"Destination file already exists: {original_path}",
+                        )
+                    else:
+                        raise
 
-                # Restore original file permissions.
-                # VULN-004: defense-in-depth — mask to the low 9 bits so a
-                # tampered DB row cannot inject setuid/setgid/sticky bits
-                # onto the restored file.
-                os.chmod(original_path, original_permissions & 0o777)
+                quarantine_path_obj.unlink()
 
                 return FileOperationResult(
                     status=FileOperationStatus.SUCCESS,
@@ -820,10 +865,13 @@ class SecureFileHandler:
                     file_size=file_size,
                     file_hash=file_hash or "",
                     error_message=None,
-                    original_permissions=original_permissions,
+                    original_permissions=masked_permissions,
                 )
 
             except PermissionError as e:
+                if destination_created and quarantine_path_obj.exists():
+                    with contextlib.suppress(OSError):
+                        destination_obj.unlink()
                 return FileOperationResult(
                     status=FileOperationStatus.PERMISSION_DENIED,
                     source_path=quarantine_path,
@@ -833,6 +881,9 @@ class SecureFileHandler:
                     error_message=f"Permission denied during restore: {e}",
                 )
             except shutil.Error as e:
+                if destination_created and quarantine_path_obj.exists():
+                    with contextlib.suppress(OSError):
+                        destination_obj.unlink()
                 return FileOperationResult(
                     status=FileOperationStatus.ERROR,
                     source_path=quarantine_path,
@@ -842,6 +893,9 @@ class SecureFileHandler:
                     error_message=f"Move operation failed: {e}",
                 )
             except OSError as e:
+                if destination_created and quarantine_path_obj.exists():
+                    with contextlib.suppress(OSError):
+                        destination_obj.unlink()
                 return FileOperationResult(
                     status=FileOperationStatus.ERROR,
                     source_path=quarantine_path,

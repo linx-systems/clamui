@@ -1323,3 +1323,70 @@ class TestNotificationManagerAllIds:
             NotificationManager.NOTIFICATION_ID_DEVICE_SCAN_COMPLETE,
         ]
         assert len(ids) == len(set(ids))
+
+
+class TestNotificationManagerNoAppDefense:
+    """BUG-012: defensive checks against _app is None.
+
+    A code path that fires a notification before set_application() must
+    fail gracefully (return False) instead of raising AttributeError on
+    self._app.send_notification(...).
+    """
+
+    @pytest.fixture
+    def temp_config_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    def test_can_notify_returns_false_when_no_app(self, temp_config_dir):
+        """_can_notify() must return False when no app reference is set."""
+        settings = SettingsManager(config_dir=temp_config_dir)
+        settings.set("notifications_enabled", True)
+        manager = NotificationManager(settings_manager=settings)
+        # Note: set_application() not called
+        assert manager._app is None
+        assert manager._can_notify() is False
+
+    def test_send_before_set_application_does_not_crash(self, temp_config_dir):
+        """_send() must not raise when called before set_application()."""
+        settings = SettingsManager(config_dir=temp_config_dir)
+        manager = NotificationManager(settings_manager=settings)
+        # No set_application called
+
+        # Direct _send call should not raise — should return False.
+        # Use mock.patch to avoid Gio side-effects in case the guard ever
+        # fails and we accidentally reach Gio.Notification.new().
+        with mock.patch("src.core.notification_manager.Gio"):
+            result = manager._send(
+                notification_id="test",
+                title="t",
+                body="b",
+                priority=mock.MagicMock(),
+                default_action="app.show-scan",
+            )
+        assert result is False
+
+    def test_public_notify_methods_do_not_crash_without_app(self, temp_config_dir):
+        """All notify_* public entrypoints return False (no crash) without app."""
+        settings = SettingsManager(config_dir=temp_config_dir)
+        settings.set("notifications_enabled", True)
+        manager = NotificationManager(settings_manager=settings)
+        assert manager._app is None
+
+        # Each method returns False without raising AttributeError.
+        assert manager.notify_scan_complete(is_clean=True, scanned_count=10) is False
+        assert manager.notify_update_complete(success=True) is False
+        assert manager.notify_scheduled_scan_complete(is_clean=True, scanned_count=5) is False
+        assert manager.notify_virustotal_scan_complete(is_clean=True, total_engines=70) is False
+        assert manager.notify_virustotal_rate_limit() is False
+        assert manager.notify_virustotal_no_key() is False
+        assert (
+            manager.notify_device_scan_started(device_name="USB", mount_point="/media/usb") is False
+        )
+
+    def test_withdraw_notification_does_not_crash_without_app(self, temp_config_dir):
+        """withdraw_notification() also guards against missing app."""
+        settings = SettingsManager(config_dir=temp_config_dir)
+        manager = NotificationManager(settings_manager=settings)
+        assert manager._app is None
+        assert manager.withdraw_notification("scan-complete") is False

@@ -362,11 +362,22 @@ class DeviceMonitor:
                     "Max concurrent scans reached, requeueing %s",
                     info.device_name,
                 )
-                # Re-schedule after a short delay
+                # Re-schedule after a short delay. Track the source id in
+                # _scheduled_sources so stop() / _on_mount_removed can cancel
+                # it; otherwise a pending re-queue can fire after monitor
+                # shutdown and instantiate a Scanner against a torn-down
+                # DeviceMonitor (BUG-009).
                 self._scan_queue[info.mount_point] = info
-                GLib.timeout_add_seconds(
-                    10, lambda: self._start_background_scan(info) or GLib.SOURCE_REMOVE
-                )
+                mount_point = info.mount_point
+
+                def on_requeue_expired() -> bool:
+                    with self._lock:
+                        self._scheduled_sources.pop(mount_point, None)
+                    self._start_background_scan(info)
+                    return GLib.SOURCE_REMOVE
+
+                requeue_source_id = GLib.timeout_add_seconds(10, on_requeue_expired)
+                self._scheduled_sources[mount_point] = requeue_source_id
                 return
 
             self._scan_queue.pop(info.mount_point, None)

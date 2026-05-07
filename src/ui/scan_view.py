@@ -5,9 +5,7 @@ Scan interface component for ClamUI with folder picker, scan button, and results
 
 import logging
 import os
-import tempfile
 import time
-from contextlib import suppress
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -27,6 +25,14 @@ from ..core.utils import (
 )
 from .clipboard_helper import ClipboardHelper
 from .compat import create_banner, open_paths_dialog
+from .eicar_helper import (
+    EICAR_TEST_STRING as _EICAR_HELPER_STRING,
+)
+from .eicar_helper import (
+    cleanup_eicar_path,
+    create_eicar_temp,
+    register_eicar_atexit_cleanup,
+)
 from .fullscreen_dialog import FullscreenLogDialog
 from .profile_dialogs import ProfileListDialog
 from .scan_results_dialog import ScanResultsDialog
@@ -48,9 +54,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# EICAR test string - industry-standard antivirus test pattern
-# This is NOT malware - it's a safe test string recognized by all AV software
-EICAR_TEST_STRING = r"X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
+# EICAR test string - industry-standard antivirus test pattern.
+# Re-exported from eicar_helper so existing imports keep working.
+EICAR_TEST_STRING = _EICAR_HELPER_STRING
 STATUS_DETAIL_SUMMARY_MAX_CHARS = 160
 STATUS_DETAIL_MIN_HEIGHT = 120
 STATUS_DETAIL_MAX_HEIGHT = 260
@@ -106,6 +112,10 @@ class ScanView(Gtk.Box):
 
         # Temp file path for EICAR test (for cleanup)
         self._eicar_temp_path: str = ""
+        # atexit unregister handle for the EICAR cleanup safety net.
+        # Replaced with a real unregister callable when the EICAR temp file
+        # is created; reset to a no-op once it has been cleaned up.
+        self._eicar_atexit_unregister = lambda: None
         # Optional one-shot backend override for the current scan session.
         self._scan_backend_override: str | None = None
         # Optional one-shot daemon mode override for the current scan session.
@@ -1828,15 +1838,14 @@ class ScanView(Gtk.Box):
                 temp_dir = str(cache_dir)
             else:
                 temp_dir = None  # Use system default
-            with tempfile.NamedTemporaryFile(
-                mode="w",
-                suffix=".txt",
-                prefix="eicar_test_",
-                delete=False,
-                dir=temp_dir,
-            ) as f:
-                f.write(EICAR_TEST_STRING)
-                self._eicar_temp_path = f.name
+            self._eicar_temp_path = create_eicar_temp(parent_dir=temp_dir)
+            # Belt-and-braces cleanup: if the app is force-quit / crashes mid-
+            # scan, the normal _on_scan_complete cleanup never runs and the
+            # EICAR file lingers — the next scan of that directory then flags
+            # it as a real threat (UI-010). Register an atexit handler as a
+            # safety net; the unregister handle is invoked on the happy path
+            # to avoid a redundant double-unlink at interpreter shutdown.
+            self._eicar_atexit_unregister = register_eicar_atexit_cleanup(self._eicar_temp_path)
 
             # The daemon fast path may ask clamd to open the temporary file
             # server-side, which can fail for fresh user-owned EICAR files.
@@ -2192,13 +2201,13 @@ class ScanView(Gtk.Box):
         Args:
             result: The ScanResult object containing scan findings
         """
-        # Clean up temp EICAR file
-        if self._eicar_temp_path and os.path.exists(self._eicar_temp_path):
-            try:
-                os.remove(self._eicar_temp_path)
-            except OSError as e:
-                logger.warning(f"Failed to clean up EICAR file: {e}")
+        # Clean up temp EICAR file (and drop the atexit safety net so it
+        # doesn't fire a second unlink at interpreter shutdown).
+        if self._eicar_temp_path:
+            cleanup_eicar_path(self._eicar_temp_path)
             self._eicar_temp_path = ""
+            self._eicar_atexit_unregister()
+            self._eicar_atexit_unregister = lambda: None
         self._scan_backend_override = None
         self._scan_daemon_force_stream = False
 
@@ -2276,11 +2285,12 @@ class ScanView(Gtk.Box):
         Args:
             error_msg: The error message to display
         """
-        # Clean up temp EICAR file if it exists
-        if self._eicar_temp_path and os.path.exists(self._eicar_temp_path):
-            with suppress(OSError):
-                os.remove(self._eicar_temp_path)
+        # Clean up temp EICAR file (and drop the atexit safety net).
+        if self._eicar_temp_path:
+            cleanup_eicar_path(self._eicar_temp_path)
             self._eicar_temp_path = ""
+            self._eicar_atexit_unregister()
+            self._eicar_atexit_unregister = lambda: None
         self._scan_backend_override = None
         self._scan_daemon_force_stream = False
 

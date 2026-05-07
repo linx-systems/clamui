@@ -1780,3 +1780,131 @@ class TestStatisticsCalculatorMergedEdgeCases:
         stats = calculator.get_statistics()
         assert stats.average_duration == 0.0
         assert stats.total_duration == 0.0
+
+
+class TestParseTimestampTimezone:
+    """Tests for _parse_timestamp tz-aware behavior (BUG-003)."""
+
+    @pytest.fixture
+    def calculator(self, mock_log_manager):
+        return StatisticsCalculator(log_manager=mock_log_manager)
+
+    def test_parse_timestamp_with_z_suffix_converts_to_local_naive(self, calculator):
+        """Z-suffixed UTC string converts to local naive datetime consistently."""
+        from datetime import UTC
+
+        ts = "2025-12-31T23:59:00Z"
+        result = calculator._parse_timestamp(ts)
+        # Expected: parse as aware UTC, convert to local, drop tzinfo
+        expected = datetime(2025, 12, 31, 23, 59, 0, tzinfo=UTC).astimezone().replace(tzinfo=None)
+        assert result == expected
+        # Result must be naive (so it can be compared to datetime.now())
+        assert result is not None
+        assert result.tzinfo is None
+
+    def test_parse_timestamp_with_offset_handles_correctly(self, calculator):
+        """Timestamp with explicit offset converts to local naive consistently."""
+        from datetime import UTC, timedelta, timezone
+
+        ts = "2025-12-31T20:00:00-04:00"
+        result = calculator._parse_timestamp(ts)
+        # 20:00 -04:00 == 00:00 UTC next day
+        expected_utc = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
+        # Equivalent: aware datetime with -04:00 offset
+        aware = datetime(2025, 12, 31, 20, 0, 0, tzinfo=timezone(timedelta(hours=-4)))
+        assert aware == expected_utc
+        expected = aware.astimezone().replace(tzinfo=None)
+        assert result == expected
+        assert result is not None
+        assert result.tzinfo is None
+
+    def test_parse_timestamp_preserves_instant_across_offsets(self, calculator):
+        """Same instant expressed in different ways yields same naive local time."""
+        ts_utc = "2025-06-15T12:00:00+00:00"
+        ts_z = "2025-06-15T12:00:00Z"
+        ts_offset = "2025-06-15T08:00:00-04:00"  # same instant
+        a = calculator._parse_timestamp(ts_utc)
+        b = calculator._parse_timestamp(ts_z)
+        c = calculator._parse_timestamp(ts_offset)
+        assert a == b == c
+
+    def test_parse_timestamp_naive_input_still_returns_datetime(self, calculator):
+        """Naive ISO timestamps (no tz) still parse and return a naive datetime."""
+        ts = "2024-01-15T10:00:00"
+        result = calculator._parse_timestamp(ts)
+        assert result is not None
+        assert result.tzinfo is None
+        assert result == datetime(2024, 1, 15, 10, 0, 0)
+
+    def test_parse_timestamp_with_microseconds_and_z(self, calculator):
+        """Timestamp with microseconds and Z suffix parses to local naive."""
+        from datetime import UTC
+
+        ts = "2025-12-31T23:59:59.123456Z"
+        result = calculator._parse_timestamp(ts)
+        expected = (
+            datetime(2025, 12, 31, 23, 59, 59, 123456, tzinfo=UTC).astimezone().replace(tzinfo=None)
+        )
+        assert result == expected
+        assert result is not None
+        assert result.tzinfo is None
+
+    def test_parse_timestamp_none_returns_none(self, calculator):
+        """None input returns None (preserves existing contract)."""
+        assert calculator._parse_timestamp(None) is None
+
+    def test_parse_timestamp_invalid_returns_none(self, calculator):
+        """Invalid input returns None (preserves existing contract)."""
+        assert calculator._parse_timestamp("not a timestamp") is None
+
+    def test_filter_does_not_misbucket_at_utc_local_boundary(self, calculator):
+        """Two UTC timestamps that map to same local 'today' both pass daily filter.
+
+        Picks two UTC timestamps separated by 30 minutes that both fall within
+        the same local day after UTC->local conversion. The previous (buggy)
+        implementation stripped the timezone, mis-bucketing entries near
+        midnight boundaries. With proper tz-aware parsing, both timestamps
+        compare correctly against datetime.now() (local naive).
+        """
+        from datetime import UTC
+
+        # Pick a 'now' well into the local day so 30 minutes earlier and the
+        # current moment both fall on the same local day regardless of host tz.
+        local_now = datetime.now().replace(hour=12, minute=30, second=0, microsecond=0)
+        # Express same instants as UTC ISO strings
+        utc_now = local_now.astimezone(UTC)
+        ts_recent = utc_now.isoformat().replace("+00:00", "Z")
+        ts_30min_ago = (utc_now - timedelta(minutes=30)).isoformat().replace("+00:00", "Z")
+
+        with mock.patch("src.core.statistics_calculator.datetime") as mock_dt:
+            # Make datetime.now() return our fixed local naive time
+            mock_dt.now.return_value = local_now
+            mock_dt.fromisoformat = datetime.fromisoformat
+            mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
+
+            entries = [
+                LogEntry(
+                    id="r1",
+                    timestamp=ts_recent,
+                    type="scan",
+                    status="clean",
+                    summary="recent",
+                    details="",
+                    duration=0.0,
+                ),
+                LogEntry(
+                    id="r2",
+                    timestamp=ts_30min_ago,
+                    type="scan",
+                    status="clean",
+                    summary="30 min ago",
+                    details="",
+                    duration=0.0,
+                ),
+            ]
+            filtered = calculator._filter_entries_by_timeframe(entries, Timeframe.DAILY.value)
+
+        assert len(filtered) == 2, (
+            "Both timestamps within the last 30 minutes should pass the daily "
+            "filter when timestamps are tz-aware-parsed correctly"
+        )
