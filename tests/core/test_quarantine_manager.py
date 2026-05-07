@@ -599,8 +599,7 @@ class TestQuarantineManagerPermissions:
 
         restored_mode = os.stat(file_path).st_mode & 0o7777
         assert restored_mode == 0o755, (
-            f"Restored file mode is {oct(restored_mode)}; setuid/setgid leaked "
-            f"from tampered DB row"
+            f"Restored file mode is {oct(restored_mode)}; setuid/setgid leaked from tampered DB row"
         )
 
 

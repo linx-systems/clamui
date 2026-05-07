@@ -31,39 +31,39 @@
     <screenshots>
         <screenshot type="default">
             <caption>Main application window</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/main_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/main_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Scan results display</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/main_view_with_scan_result.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/main_view_with_scan_result.png</image>
         </screenshot>
         <screenshot>
             <caption>Analysis view</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/analysis_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/analysis_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Components view</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/components_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/components_view.png</image>
         </screenshot>
         <screenshot>
             <caption>System security audit</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/audit_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/audit_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Configuration settings</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/config_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/config_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Scan history</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/history_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/history_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Profile management</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/profile_management.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/profile_management.png</image>
         </screenshot>
         <screenshot>
             <caption>Quarantine management</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/quarantine_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/quarantine_view.png</image>
         </screenshot>
     </screenshots>
 
@@ -100,6 +100,23 @@
     </keywords>
 
     <releases>
+        <release version="0.1.8" date="2026-05-07">
+            <description>
+                <p>Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish translation support</p>
+                <ul>
+                    <li>Harden privileged ClamAV config saving with UID-checked staging, source validation, destination allowlisting, and atomic installs</li>
+                    <li>Prevent scan path arguments from being interpreted as ClamAV command-line flags</li>
+                    <li>Mask quarantine restore permissions to regular mode bits and avoid restoring setuid, setgid, or sticky bits</li>
+                    <li>Protect scheduled-scan crontab updates from deleting unrelated user entries</li>
+                    <li>Require host ClamAV tools for Flatpak and improve host config, detection, updater, and audit behavior from the sandbox</li>
+                    <li>Fix Flatpak daemon file-list scans with host-visible paths</li>
+                    <li>Refresh Python dependency locks and Flatpak runtime pins including cryptography, packaging, and more-itertools</li>
+                    <li>Fix updater gettext error handling, scanner EOF CPU spinning, tray profile updates, tray crash recovery, and VirusTotal UTC timestamps</li>
+                    <li>Add Spanish translation support</li>
+                    <li>Add draft GitHub release workflow and refresh CI/action dependencies</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.1.7" date="2026-04-21">
             <description>
                 <p>System security audit, Flatpak hardening, AppImage delta updates, and tray reliability</p>

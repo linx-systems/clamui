@@ -4,4 +4,4 @@ ClamUI provides a graphical user interface for the ClamAV antivirus tool.
 Built with GTK4 and Adwaita for a modern Linux desktop experience.
 """
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
