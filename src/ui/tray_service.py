@@ -136,9 +136,12 @@ STATUS_NOTIFIER_ITEM_XML = """
     <property type="s" name="Status" access="read"/>
     <property type="u" name="WindowId" access="read"/>
     <property type="s" name="IconName" access="read"/>
+    <property type="a(iiay)" name="IconPixmap" access="read"/>
     <property type="s" name="IconThemePath" access="read"/>
     <property type="s" name="OverlayIconName" access="read"/>
+    <property type="a(iiay)" name="OverlayIconPixmap" access="read"/>
     <property type="s" name="AttentionIconName" access="read"/>
+    <property type="a(iiay)" name="AttentionIconPixmap" access="read"/>
     <property type="s" name="AttentionMovieName" access="read"/>
     <property type="(sa(iiay)ss)" name="ToolTip" access="read"/>
     <property type="b" name="ItemIsMenu" access="read"/>
@@ -161,6 +164,7 @@ STATUS_NOTIFIER_ITEM_XML = """
     </method>
     <signal name="NewTitle"/>
     <signal name="NewIcon"/>
+    <signal name="NewIconThemePath"/>
     <signal name="NewAttentionIcon"/>
     <signal name="NewOverlayIcon"/>
     <signal name="NewToolTip"/>
@@ -216,6 +220,7 @@ class TrayService:
         self._watcher_registered = False
         self._watcher_name: str | None = None
         self._watcher_retry_source_id = 0
+        self._icon_pixmap_cache: dict[tuple[str, int], GLib.Variant] = {}
 
         # Status state
         self._current_status = "protected"
@@ -403,6 +408,26 @@ class TrayService:
             return self._icon_generator.get_icon_name(self._current_status)
         return self.ICON_MAP.get(self._current_status, "object-select-symbolic")
 
+    def _get_attention_status(self) -> str:
+        # SNI hosts only render AttentionIcon when Status == "NeedsAttention",
+        # which we set for "threat" and "warning". Reuse the current status so
+        # the alert icon matches what triggered attention; default to "threat"
+        # for non-attention states (the value is unused by hosts then).
+        if self._current_status in ("threat", "warning"):
+            return self._current_status
+        return "threat"
+
+    def _get_attention_icon_name(self) -> str:
+        # Mirror _get_icon_name so the AttentionIcon stays branded. Hosts
+        # (Plasma 6, xapp-sn-watcher, ayatana) that prefer AttentionIcon over
+        # Icon in NeedsAttention state otherwise render a generic theme icon
+        # — which is the wrong icon in Flatpak where the host theme may not
+        # even contain "dialog-error-symbolic".
+        status = self._get_attention_status()
+        if self._using_custom_icons and self._icon_generator:
+            return self._icon_generator.get_icon_name(status)
+        return self.ICON_MAP.get(status, "dialog-error-symbolic")
+
     def _get_icon_theme_path(self) -> str:
         """Get the icon theme path for custom icons."""
         if self._using_custom_icons and self._icon_generator:
@@ -412,6 +437,57 @@ class TrayService:
             # Theme path should be ~/.local/share/icons/hicolor
             return str(cache_dir.parent.parent)
         return ""
+
+    def _empty_icon_pixmap(self) -> GLib.Variant:
+        """Return an empty SNI icon pixmap array."""
+        return GLib.Variant("a(iiay)", [])
+
+    def _get_icon_pixmap(self, status: str | None = None) -> GLib.Variant:
+        """
+        Return a StatusNotifierItem IconPixmap fallback.
+
+        Some tray hosts do not honor IconThemePath reliably, especially when
+        the app is sandboxed. Keep IconName as the preferred path, but expose a
+        real pixmap so those hosts can still render the icon.
+        """
+        if not (self._using_custom_icons and self._icon_generator):
+            return self._empty_icon_pixmap()
+
+        icon_status = status or self._current_status
+        try:
+            icon_path = self._icon_generator.get_icon_path(icon_status)
+            return self._load_icon_pixmap(icon_path)
+        except Exception as e:
+            logger.debug(f"Failed to load tray icon pixmap for {icon_status}: {e}")
+            return self._empty_icon_pixmap()
+
+    def _load_icon_pixmap(self, icon_path: str) -> GLib.Variant:
+        """Load a PNG icon as SNI's ARGB32 icon pixmap variant."""
+        path = Path(icon_path)
+        mtime_ns = path.stat().st_mtime_ns
+        cache_key = (str(path), mtime_ns)
+        cached = self._icon_pixmap_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        from PIL import Image
+
+        with Image.open(path) as image:
+            rgba = image.convert("RGBA")
+            width, height = rgba.size
+            rgba_bytes = rgba.tobytes()
+
+        argb_bytes = bytearray(len(rgba_bytes))
+        for index in range(0, len(rgba_bytes), 4):
+            red, green, blue, alpha = rgba_bytes[index : index + 4]
+            argb_bytes[index : index + 4] = bytes((alpha, red, green, blue))
+
+        pixmap = GLib.Variant("a(iiay)", [(width, height, bytes(argb_bytes))])
+        # There are only a handful of status icons; keep the cache bounded.
+        if len(self._icon_pixmap_cache) > len(self.ICON_MAP) * 2:
+            self._icon_pixmap_cache.clear()
+        self._icon_pixmap_cache[cache_key] = pixmap
+        return pixmap
 
     def _get_tooltip(self) -> str:
         """Get the tooltip text."""
@@ -487,12 +563,18 @@ class TrayService:
             return GLib.Variant("u", 0)
         elif property_name == "IconName":
             return GLib.Variant("s", self._get_icon_name())
+        elif property_name == "IconPixmap":
+            return self._get_icon_pixmap()
         elif property_name == "IconThemePath":
             return GLib.Variant("s", self._get_icon_theme_path())
         elif property_name == "OverlayIconName":
             return GLib.Variant("s", "")
+        elif property_name == "OverlayIconPixmap":
+            return self._empty_icon_pixmap()
         elif property_name == "AttentionIconName":
-            return GLib.Variant("s", self.ICON_MAP.get("threat", "dialog-error-symbolic"))
+            return GLib.Variant("s", self._get_attention_icon_name())
+        elif property_name == "AttentionIconPixmap":
+            return self._get_icon_pixmap(self._get_attention_status())
         elif property_name == "AttentionMovieName":
             return GLib.Variant("s", "")
         elif property_name == "ToolTip":
@@ -565,12 +647,15 @@ class TrayService:
 
         watcher_name = self.WATCHER_NAMES[watcher_index]
         try:
+            # Register the object path instead of a well-known item bus name.
+            # Watchers then use the caller's unique bus name, which works
+            # across Flatpak's D-Bus proxy and avoids broad org.kde.* ownership.
             self._bus.call(
                 watcher_name,
                 "/StatusNotifierWatcher",
                 "org.kde.StatusNotifierWatcher",
                 "RegisterStatusNotifierItem",
-                GLib.Variant("(s)", (self.DBUS_NAME,)),
+                GLib.Variant("(s)", (self.SNI_PATH,)),
                 None,
                 Gio.DBusCallFlags.NONE,
                 -1,
@@ -652,6 +737,7 @@ class TrayService:
 
         # Emit signals to update the icon
         self._emit_signal("NewIcon")
+        self._emit_signal("NewAttentionIcon")
         self._emit_signal("NewToolTip")
         self._emit_signal("NewStatus", GLib.Variant("(s)", (self._get_sni_status(),)))
 
@@ -726,6 +812,7 @@ class TrayService:
         # Release bus name
         if self._bus_name_id:
             Gio.bus_unown_name(self._bus_name_id)
+            self._bus_name_id = 0
 
         self._watcher_registered = False
         self._watcher_name = None
@@ -737,15 +824,13 @@ class TrayService:
 
     def run(self) -> None:
         """Run the tray service main loop."""
-        # Own a name on the session bus
-        self._bus_name_id = Gio.bus_own_name(
-            Gio.BusType.SESSION,
-            self.DBUS_NAME,
-            Gio.BusNameOwnerFlags.NONE,
-            self._on_bus_acquired,
-            self._on_name_acquired,
-            self._on_name_lost,
-        )
+        # Export on our session-bus connection and register the object path
+        # with the watcher. This avoids requiring a StatusNotifierItem-style
+        # well-known bus name, which is fragile under Flatpak.
+        connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        connection_name = connection.get_unique_name() or "session bus"
+        self._on_bus_acquired(connection, connection_name)
+        self._register_with_watcher()
 
         # Send ready event
         self._send_message({"event": "ready"})

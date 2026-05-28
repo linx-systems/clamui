@@ -1,59 +1,44 @@
 {
-    "name": "python3-hatchling",
-    "buildsystem": "simple",
-    "build-commands": [
-        "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"hatchling>=1.29.0\" --no-build-isolation"
-    ],
-    "sources": [
-        {
-            "type": "file",
-            "url": "https://files.pythonhosted.org/packages/d3/8a/44032265776062a89171285ede55a0bdaadc8ac00f27f0512a71a9e3e1c8/hatchling-1.29.0-py3-none-any.whl",
-            "sha256": "50af9343281f34785fab12da82e445ed987a6efb34fd8c2fc0f6e6630dbcc1b0",
-            "x-checker-data": {
-                "type": "pypi",
-                "name": "hatchling",
-                "packagetype": "bdist_wheel"
-            }
-        },
-        {
-            "type": "file",
-            "url": "https://files.pythonhosted.org/packages/7a/c2/920ef838e2f0028c8262f16101ec09ebd5969864e5a64c4c05fad0617c56/packaging-26.1-py3-none-any.whl",
-            "sha256": "5d9c0669c6285e491e0ced2eee587eaf67b670d94a19e94e3984a481aba6802f",
-            "x-checker-data": {
-                "type": "pypi",
-                "name": "packaging",
-                "packagetype": "bdist_wheel"
-            }
-        },
-        {
-            "type": "file",
-            "url": "https://files.pythonhosted.org/packages/fa/c9/8eed0486f074e9f1ca7f8ce5ad663e65f12fdab344028d658fa1b03d35e0/pathspec-1.1.0-py3-none-any.whl",
-            "sha256": "574b128f7456bd899045ccd142dd446af7e6cfd0072d63ad73fbc55fbb4aaa42",
-            "x-checker-data": {
-                "type": "pypi",
-                "name": "pathspec",
-                "packagetype": "bdist_wheel"
-            }
-        },
-        {
-            "type": "file",
-            "url": "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl",
-            "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
-            "x-checker-data": {
-                "type": "pypi",
-                "name": "pluggy",
-                "packagetype": "bdist_wheel"
-            }
-        },
-        {
-            "type": "file",
-            "url": "https://files.pythonhosted.org/packages/bb/4a/2e5583e544bc437d5e8e54b47db87430df9031b29b48d17f26d129fa60c0/trove_classifiers-2026.1.14.14-py3-none-any.whl",
-            "sha256": "1f9553927f18d0513d8e5ff80ab8980b8202ce37ecae0e3274ed2ef11880e74d",
-            "x-checker-data": {
-                "type": "pypi",
-                "name": "trove_classifiers",
-                "packagetype": "bdist_wheel"
-            }
-        }
-    ]
+  "name": "python3-hatchling",
+  "buildsystem": "simple",
+  "build-commands": [
+    "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"hatchling>=1.29.0\" --no-build-isolation"
+  ],
+  "sources": [
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/d3/8a/44032265776062a89171285ede55a0bdaadc8ac00f27f0512a71a9e3e1c8/hatchling-1.29.0-py3-none-any.whl",
+      "sha256": "50af9343281f34785fab12da82e445ed987a6efb34fd8c2fc0f6e6630dbcc1b0",
+      "x-checker-data": {
+        "type": "pypi",
+        "name": "hatchling",
+        "packagetype": "bdist_wheel"
+      }
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/df/b2/87e62e8c3e2f4b32e5fe99e0b86d576da1312593b39f47d8ceef365e95ed/packaging-26.2-py3-none-any.whl",
+      "sha256": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl",
+      "sha256": "a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl",
+      "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+      "x-checker-data": {
+        "type": "pypi",
+        "name": "pluggy",
+        "packagetype": "bdist_wheel"
+      }
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/15/96/9666c8ba2e7695e804b2b2129e45202320d2a8b5e2c9f6e5e837a61708f5/trove_classifiers-2026.5.20.19-py3-none-any.whl",
+      "sha256": "7a173916960d0635fcbf610550d2c27bcc9125164d6f397adf46fc1ef6455c7c"
+    }
+  ]
 }

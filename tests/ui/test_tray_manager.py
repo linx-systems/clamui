@@ -1412,10 +1412,13 @@ class TestTrayManagerEdgeCases:
         mock_module.__file__ = "/fake/path/to/tray_service.py"
 
         # Mock Path.exists to return False for first path, True for second
+        import src.ui as ui_package
+
         with mock.patch.object(Path, "exists", side_effect=[False, True]):
             with mock.patch.dict("sys.modules", {"src.ui.tray_service": mock_module}):
-                # This should try the module import path
-                result = manager._get_service_path()
+                with mock.patch.object(ui_package, "tray_service", mock_module, create=True):
+                    # This should try the module import path
+                    result = manager._get_service_path()
 
         # Should return the module path
         assert result == Path("/fake/path/to/tray_service.py")

@@ -228,6 +228,120 @@ class TestStreamProcessOutput:
         assert "/path/file2.txt: OK" in lines
         assert "/path/file3.txt: FOUND" in lines
 
+    def test_stream_output_does_not_deadlock_on_large_stderr(self):
+        """Regression test for issue #146: full scan hanging at ~72%.
+
+        When clamscan emits more than the kernel pipe buffer (~64 KiB on Linux)
+        to stderr without anyone reading it, its write() blocks and the entire
+        scan freezes. stream_process_output() must drain stderr concurrently
+        with stdout to prevent this deadlock.
+        """
+        import sys
+        import time as _time
+
+        # Spawn a real subprocess that fills stderr beyond any reasonable pipe
+        # buffer (1 MiB >> 64 KiB) and prints one line to stdout at the end.
+        # If stderr isn't drained concurrently, the child blocks on write()
+        # and this test hangs until pytest times out.
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-u",
+                "-c",
+                (
+                    "import sys\n"
+                    "sys.stderr.write('x' * (1024 * 1024))\n"
+                    "sys.stderr.flush()\n"
+                    "sys.stdout.write('done\\n')\n"
+                    "sys.stdout.flush()\n"
+                ),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        lines_received: list[str] = []
+        start = _time.monotonic()
+
+        try:
+            stdout, stderr, cancelled = stream_process_output(
+                child,
+                lambda: False,
+                lambda line: lines_received.append(line),
+                poll_interval=0.05,
+            )
+        finally:
+            if child.poll() is None:
+                child.kill()
+                child.wait()
+            if child.stdout is not None:
+                child.stdout.close()
+            if child.stderr is not None:
+                child.stderr.close()
+
+        elapsed = _time.monotonic() - start
+
+        # Without the fix this hangs forever; with it the child completes
+        # almost instantly. Allow generous slack for CI.
+        assert elapsed < 10.0, f"stream_process_output hung for {elapsed:.1f}s"
+        assert cancelled is False
+        assert lines_received == ["done"]
+        # stderr should contain the bulk of what the child wrote (subject to
+        # MAX_ACCUMULATED_BYTES truncation, which doesn't kick in at 1 MiB).
+        assert len(stderr) >= 1024 * 1024
+        assert "x" in stderr
+        # Process must have exited cleanly, not been killed by the test.
+        assert child.returncode == 0
+
+    def test_stream_output_handles_stderr_eof_before_stdout(self):
+        """stderr closing first must not prevent stdout from being read.
+
+        Subprocesses can close their streams in any order. The select loop
+        must keep selecting on the live fd after one side hits EOF.
+        """
+        import sys
+
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-u",
+                "-c",
+                (
+                    "import sys, os\n"
+                    "os.close(2)\n"  # Close stderr immediately
+                    "sys.stdout.write('line1\\nline2\\n')\n"
+                    "sys.stdout.flush()\n"
+                ),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        lines_received: list[str] = []
+        try:
+            _stdout, _stderr, cancelled = stream_process_output(
+                child,
+                lambda: False,
+                lambda line: lines_received.append(line),
+                poll_interval=0.05,
+            )
+        finally:
+            if child.poll() is None:
+                child.kill()
+                child.wait()
+            if child.stdout is not None:
+                child.stdout.close()
+            if child.stderr is not None:
+                child.stderr.close()
+
+        assert cancelled is False
+        assert "line1" in lines_received
+        assert "line2" in lines_received
+
 
 class TestCleanupProcess:
     """Tests for cleanup_process function."""

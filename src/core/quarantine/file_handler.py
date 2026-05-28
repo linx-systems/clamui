@@ -15,6 +15,7 @@ import hashlib
 import logging
 import os
 import shutil
+import stat
 import threading
 import uuid
 from dataclasses import dataclass
@@ -22,6 +23,15 @@ from enum import Enum
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# O_NOFOLLOW is required on every code path that opens user-controlled paths.
+# It is available on Linux, macOS, and BSDs but not on Windows. ClamUI targets
+# Linux only, so fail loudly at import time rather than silently degrading.
+if not hasattr(os, "O_NOFOLLOW"):
+    raise RuntimeError(
+        "O_NOFOLLOW is not available on this platform. "
+        "Quarantine file operations cannot be performed safely."
+    )
 
 
 class FileOperationStatus(Enum):
@@ -55,29 +65,22 @@ class FileOperationResult:
         return self.status == FileOperationStatus.SUCCESS
 
 
-def _atomic_create_at_destination(source: Path, destination: Path, permissions: int) -> None:
-    """Copy source into a newly created destination without following symlinks."""
-    masked_permissions = permissions & 0o777
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
 
-    fd: int | None = None
+def _unlinkat(path: Path) -> None:
+    """Remove a file relative to its parent directory fd, without re-resolving the full path.
+
+    Uses os.unlink(..., dir_fd=...) to anchor the operation to an already-opened
+    parent directory, avoiding TOCTOU on path components.
+    """
+    parent_fd = os.open(
+        path.parent,
+        os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+    )
     try:
-        fd = os.open(destination, flags, masked_permissions)
-        with source.open("rb") as src, os.fdopen(fd, "wb") as dst:
-            fd = None
-            shutil.copyfileobj(src, dst, length=SecureFileHandler.HASH_BUFFER_SIZE)
-            dst.flush()
-            os.fsync(dst.fileno())
-        os.chmod(destination, masked_permissions)
-    except Exception:
-        if fd is not None:
-            with contextlib.suppress(OSError):
-                os.close(fd)
+        os.unlink(path.name, dir_fd=parent_fd)
+    finally:
         with contextlib.suppress(OSError):
-            destination.unlink()
-        raise
+            os.close(parent_fd)
 
 
 class SecureFileHandler:
@@ -85,7 +88,7 @@ class SecureFileHandler:
     Handler for secure file operations with permission management.
 
     Provides methods for moving files to/from quarantine with:
-    - Atomic file operations using shutil.move
+    - Atomic fd-based copy + unlink (O_NOFOLLOW throughout, no shutil.move)
     - SHA256 hash calculation before operations
     - Restrictive permissions on quarantine directory and files
     - Thread-safe operations with file locking
@@ -142,21 +145,31 @@ class SecureFileHandler:
             Tuple of (success, error_message)
         """
         try:
-            # Create directory with parents if it doesn't exist
-            # Use mode= parameter to set permissions atomically, avoiding TOCTOU race
-            # Note: mode is modified by umask, so we also call chmod after
             self._quarantine_dir.mkdir(
                 parents=True, exist_ok=True, mode=self.QUARANTINE_DIR_PERMISSIONS
             )
 
-            # Ensure restrictive permissions even if umask modified them
-            os.chmod(self._quarantine_dir, self.QUARANTINE_DIR_PERMISSIONS)
+            # O_NOFOLLOW rejects the quarantine dir being a symlink (ELOOP → error below).
+            # fchmod via the resulting fd bypasses umask and avoids a path-based TOCTOU
+            # window between mkdir and the permission set.
+            dir_fd = os.open(
+                self._quarantine_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            )
+            try:
+                os.fchmod(dir_fd, self.QUARANTINE_DIR_PERMISSIONS)
+            finally:
+                os.close(dir_fd)
 
             return (True, None)
 
         except PermissionError as e:
             return (False, f"Permission denied creating quarantine directory: {e}")
         except OSError as e:
+            if e.errno == errno.ELOOP:
+                return (
+                    False,
+                    f"Quarantine directory path is a symlink: {self._quarantine_dir}",
+                )
             return (False, f"Error creating quarantine directory: {e}")
 
     def calculate_hash(self, file_path: Path) -> tuple[str | None, str | None]:
@@ -189,10 +202,19 @@ class SecureFileHandler:
         """
         try:
             sha256_hash = hashlib.sha256()
-
-            with open(file_path, "rb") as f:
-                for block in iter(lambda: f.read(self.HASH_BUFFER_SIZE), b""):
-                    sha256_hash.update(block)
+            flags = os.O_RDONLY | os.O_NOFOLLOW
+            fd: int | None = None
+            try:
+                fd = os.open(file_path, flags)
+                with os.fdopen(fd, "rb") as f:
+                    fd = None  # fdopen owns it now
+                    for block in iter(lambda: f.read(self.HASH_BUFFER_SIZE), b""):
+                        sha256_hash.update(block)
+            except Exception:
+                if fd is not None:
+                    with contextlib.suppress(OSError):
+                        os.close(fd)
+                raise
 
             return (sha256_hash.hexdigest(), None)
 
@@ -216,7 +238,7 @@ class SecureFileHandler:
             - (-1, error_message) if failed
         """
         try:
-            return (file_path.stat().st_size, None)
+            return (os.lstat(file_path).st_size, None)
         except FileNotFoundError:
             return (-1, f"File not found: {file_path}")
         except PermissionError:
@@ -237,7 +259,7 @@ class SecureFileHandler:
             - (0o644, error_message) if failed (returns safe default)
         """
         try:
-            return (file_path.stat().st_mode & 0o777, None)
+            return (os.lstat(file_path).st_mode & 0o777, None)
         except FileNotFoundError:
             return (0o644, f"File not found: {file_path}")
         except PermissionError:
@@ -428,8 +450,8 @@ class SecureFileHandler:
 
         Ensures the quarantine path:
         1. Is not empty
-        2. Is not a symlink (prevents symlink attacks)
-        3. Resolves to a location inside self._quarantine_dir
+        2. Resolves to a location inside self._quarantine_dir
+           (symlink rejection is handled downstream by O_NOFOLLOW)
 
         This validation prevents attacks where a caller could pass an arbitrary
         filesystem path to restore_from_quarantine or delete_from_quarantine,
@@ -461,15 +483,9 @@ class SecureFileHandler:
         except (ValueError, TypeError) as e:
             return (False, f"Invalid path format: {e}")
 
-        # Security check: Reject symlinks to prevent symlink attacks
-        # A symlink could point outside the quarantine directory
-        if path_obj.is_symlink():
-            return (
-                False,
-                f"Quarantine path cannot be a symlink: {quarantine_path}",
-            )
-
-        # Resolve the path to handle .. and get absolute path
+        # Resolve to handle .. and get absolute path for containment check.
+        # Symlink rejection is handled downstream by O_NOFOLLOW; a separate
+        # is_symlink() check here would introduce a new TOCTOU window.
         try:
             resolved_path = path_obj.resolve()
             resolved_quarantine_dir = self._quarantine_dir.resolve()
@@ -518,130 +534,206 @@ class SecureFileHandler:
         source_path_obj = Path(source_path)
 
         with self._lock:
-            # Security check: Reject symlinks to prevent symlink attacks
-            # A malicious symlink could point to system files or escape quarantine
-            if source_path_obj.is_symlink():
-                target = source_path_obj.resolve()
+            # Open source with O_NOFOLLOW — atomically rejects symlinks without a separate
+            # is_symlink() check, eliminating the TOCTOU window between check and open.
+
+            try:
+                src_fd = os.open(source_path_obj, os.O_RDONLY | os.O_NOFOLLOW)
+            except OSError as e:
+                if e.errno == errno.ELOOP:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Cannot quarantine symlinks for security reasons: {source_path}",
+                    )
+                if e.errno == errno.ENOENT:
+                    return FileOperationResult(
+                        status=FileOperationStatus.FILE_NOT_FOUND,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Source file not found: {source_path}",
+                    )
                 return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
+                    status=FileOperationStatus.PERMISSION_DENIED
+                    if e.errno == errno.EACCES
+                    else FileOperationStatus.ERROR,
                     source_path=source_path,
                     destination_path=None,
                     file_size=0,
                     file_hash="",
-                    error_message=(
-                        f"Cannot quarantine symlinks for security reasons: "
-                        f"{source_path} -> {target}"
-                    ),
+                    error_message=f"Cannot open source file: {e}",
                 )
 
-            source = source_path_obj.resolve()
-
-            # Validate source file exists
-            if not source.exists():
-                return FileOperationResult(
-                    status=FileOperationStatus.FILE_NOT_FOUND,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=0,
-                    file_hash="",
-                    error_message=f"Source file not found: {source}",
-                )
-
-            # Check if it's a file (not directory)
-            if not source.is_file():
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=0,
-                    file_hash="",
-                    error_message=f"Source is not a file: {source}",
-                )
-
-            # Get file size
-            file_size, size_error = self.get_file_size(source)
-            if size_error:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=0,
-                    file_hash="",
-                    error_message=size_error,
-                )
-
-            # Get original file permissions before quarantine
-            original_permissions, _ = self.get_file_permissions(source)
-
-            # Calculate hash before moving
-            file_hash, hash_error = self.calculate_hash(source)
-            if hash_error:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash="",
-                    error_message=hash_error,
-                )
-
-            # Ensure quarantine directory exists
-            dir_ok, dir_error = self._ensure_quarantine_dir()
-            if not dir_ok:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=dir_error,
-                )
-
-            # Check disk space
-            has_space, space_error = self._check_disk_space(file_size)
-            if not has_space:
-                return FileOperationResult(
-                    status=FileOperationStatus.DISK_FULL,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=space_error,
-                )
-
-            # Generate unique quarantine filename
-            quarantine_filename = self._generate_quarantine_filename(source)
-            destination = self._quarantine_dir / quarantine_filename
-
-            # Check if destination already exists (shouldn't happen with UUID)
-            if destination.exists():
-                return FileOperationResult(
-                    status=FileOperationStatus.ALREADY_EXISTS,
-                    source_path=str(source),
-                    destination_path=str(destination),
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Destination already exists: {destination}",
-                )
+            file_size = 0
+            original_permissions = 0o644
+            destination: Path | None = None
+            file_hash: str | None = None
 
             try:
-                # Atomic move operation using shutil.move():
-                # - Same filesystem: Uses os.rename() - atomic, instant
-                # - Cross-filesystem: Falls back to copy+delete (not atomic but safe)
-                #   * Copies file to destination with temp name
-                #   * Verifies copy succeeded
-                #   * Deletes source only after successful copy
-                #   * If interrupted, source remains intact (no data loss)
-                # Why not os.rename(): Fails across filesystems (e.g., /home to /tmp)
-                # Why not copy+delete manually: shutil.move handles cross-fs automatically
-                shutil.move(str(source), str(destination))
+                # fstat through the open fd — no TOCTOU between open and stat.
+                try:
+                    st = os.fstat(src_fd)
+                except OSError as e:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Cannot stat source file: {e}",
+                    )
 
-                # Set restrictive permissions on quarantined file
-                os.chmod(destination, self.QUARANTINE_FILE_PERMISSIONS)
+                if not stat.S_ISREG(st.st_mode):
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Source is not a regular file: {source_path}",
+                    )
+
+                file_size = st.st_size
+                original_permissions = st.st_mode & 0o777
+
+                # Ensure directory exists first — disk_usage() requires the path to exist
+                # and must measure the correct filesystem.
+                dir_ok, dir_error = self._ensure_quarantine_dir()
+                if not dir_ok:
+                    return FileOperationResult(
+                        status=FileOperationStatus.PERMISSION_DENIED,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=dir_error,
+                    )
+
+                has_space, space_error = self._check_disk_space(file_size)
+                if not has_space:
+                    return FileOperationResult(
+                        status=FileOperationStatus.DISK_FULL,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=space_error,
+                    )
+
+                quarantine_filename = self._generate_quarantine_filename(source_path_obj)
+                destination = self._quarantine_dir / quarantine_filename
+
+                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW — atomically creates and
+                # rejects any pre-existing path, eliminating the exists()-then-create TOCTOU.
+                dst_fd: int | None = None
+                dst_created = False
+                try:
+                    dst_fd = os.open(
+                        destination,
+                        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                        self.QUARANTINE_FILE_PERMISSIONS,
+                    )
+                    dst_created = True
+                    sha256_hash = hashlib.sha256()
+                    while True:
+                        block = os.read(src_fd, self.HASH_BUFFER_SIZE)
+                        if not block:
+                            break
+                        sha256_hash.update(block)
+                        os.write(dst_fd, block)
+                    os.fsync(dst_fd)
+                    # fchmod via fd before close — no path-based TOCTOU window, and
+                    # bypasses umask so permissions are applied exactly as specified.
+                    os.fchmod(dst_fd, self.QUARANTINE_FILE_PERMISSIONS)
+                    os.close(dst_fd)
+                    dst_fd = None
+                    file_hash = sha256_hash.hexdigest()
+                except OSError as e:
+                    if dst_fd is not None:
+                        with contextlib.suppress(OSError):
+                            os.close(dst_fd)
+                    if dst_created:
+                        with contextlib.suppress(OSError):
+                            _unlinkat(destination)
+                    if e.errno == errno.EEXIST:
+                        return FileOperationResult(
+                            status=FileOperationStatus.ALREADY_EXISTS,
+                            source_path=source_path,
+                            destination_path=str(destination),
+                            file_size=file_size,
+                            file_hash="",
+                            error_message=f"Destination already exists: {destination}",
+                        )
+                    if e.errno == errno.ENOSPC:
+                        return FileOperationResult(
+                            status=FileOperationStatus.DISK_FULL,
+                            source_path=source_path,
+                            destination_path=None,
+                            file_size=file_size,
+                            file_hash="",
+                            error_message=f"Disk full during quarantine: {e}",
+                        )
+                    return FileOperationResult(
+                        status=FileOperationStatus.PERMISSION_DENIED
+                        if e.errno == errno.EACCES
+                        else FileOperationStatus.ERROR,
+                        source_path=source_path,
+                        destination_path=None,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=f"File operation error: {e}",
+                    )
+
+                # Before unlinking, verify the source path still names the same inode
+                # we originally opened and copied. If an attacker swapped the file
+                # between the copy and this point, the lstat would show a different
+                # (st_dev, st_ino) and we abort rather than unlink the wrong file.
+                # src_fd is still open (inode pinned), so st.st_ino is authoritative.
+                try:
+                    lst = os.lstat(source_path_obj)
+                    if (lst.st_dev, lst.st_ino) != (st.st_dev, st.st_ino):
+                        with contextlib.suppress(OSError):
+                            if destination is not None:
+                                _unlinkat(destination)
+                        return FileOperationResult(
+                            status=FileOperationStatus.ERROR,
+                            source_path=source_path,
+                            destination_path=str(destination) if destination else None,
+                            file_size=file_size,
+                            file_hash=file_hash or "",
+                            error_message=f"Source file was replaced during quarantine; aborting: {source_path}",
+                        )
+                except OSError:
+                    pass  # lstat failure: proceed — _unlinkat will raise ENOENT if gone
+
+                # Unlink source while src_fd is still open (inode pinned) and via
+                # _unlinkat() so the name is resolved relative to an already-opened
+                # parent directory fd, closing the TOCTOU window on path components.
+                try:
+                    _unlinkat(source_path_obj)
+                except OSError as e:
+                    with contextlib.suppress(OSError):
+                        if destination is not None:
+                            _unlinkat(destination)
+                    return FileOperationResult(
+                        status=FileOperationStatus.PERMISSION_DENIED
+                        if e.errno == errno.EACCES
+                        else FileOperationStatus.ERROR,
+                        source_path=source_path,
+                        destination_path=str(destination) if destination else None,
+                        file_size=file_size,
+                        file_hash=file_hash or "",
+                        error_message=f"Could not remove source file after copying to quarantine: {e}",
+                    )
 
                 return FileOperationResult(
                     status=FileOperationStatus.SUCCESS,
-                    source_path=str(source),
+                    source_path=source_path,
                     destination_path=str(destination),
                     file_size=file_size,
                     file_hash=file_hash or "",
@@ -649,33 +741,9 @@ class SecureFileHandler:
                     original_permissions=original_permissions,
                 )
 
-            except PermissionError as e:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Permission denied during move: {e}",
-                )
-            except shutil.Error as e:
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Move operation failed: {e}",
-                )
-            except OSError as e:
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=str(source),
-                    destination_path=None,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"File operation error: {e}",
-                )
+            finally:
+                with contextlib.suppress(OSError):
+                    os.close(src_fd)
 
     def restore_from_quarantine(
         self,
@@ -738,125 +806,159 @@ class SecureFileHandler:
                     error_message=validation_error,
                 )
 
-            # Check if quarantined file exists
-            if not quarantine_path_obj.exists():
-                return FileOperationResult(
-                    status=FileOperationStatus.FILE_NOT_FOUND,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=0,
-                    file_hash="",
-                    error_message=f"Quarantined file not found: {quarantine_path}",
-                )
-
-            # Check if it's a file (not directory)
-            if not quarantine_path_obj.is_file():
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=0,
-                    file_hash="",
-                    error_message=f"Quarantined path is not a file: {quarantine_path}",
-                )
-
-            # Get file size
-            file_size, size_error = self.get_file_size(quarantine_path_obj)
-            if size_error:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=0,
-                    file_hash="",
-                    error_message=size_error,
-                )
-
-            # Calculate hash before moving
-            file_hash, hash_error = self.calculate_hash(quarantine_path_obj)
-            if hash_error:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash="",
-                    error_message=hash_error,
-                )
-
-            # Create destination directory if needed
-            destination_obj = Path(original_path)
+            # Open quarantine file with O_NOFOLLOW — rejects symlinks atomically, gives a
+            # safe fd; eliminates exists()+is_file()+stat()+hash-open TOCTOU windows.
             try:
-                destination_obj.parent.mkdir(parents=True, exist_ok=True)
-            except PermissionError as e:
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Permission denied creating destination directory: {e}",
-                )
+                src_fd = os.open(quarantine_path_obj, os.O_RDONLY | os.O_NOFOLLOW)
             except OSError as e:
+                if e.errno == errno.ENOENT:
+                    return FileOperationResult(
+                        status=FileOperationStatus.FILE_NOT_FOUND,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Quarantined file not found: {quarantine_path}",
+                    )
+                if e.errno == errno.ELOOP:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Security: quarantine path is a symlink: {quarantine_path}",
+                    )
                 return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
+                    status=FileOperationStatus.PERMISSION_DENIED
+                    if e.errno == errno.EACCES
+                    else FileOperationStatus.ERROR,
                     source_path=quarantine_path,
                     destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Error creating destination directory: {e}",
-                )
-
-            # Check if destination already exists
-            if destination_obj.exists():
-                return FileOperationResult(
-                    status=FileOperationStatus.ALREADY_EXISTS,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Destination file already exists: {original_path}",
-                )
-
-            # Security: Check for symlink attack (TOCTOU mitigation)
-            if destination_obj.is_symlink():
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Security: destination is a symlink, possible attack: {original_path}",
+                    file_size=0,
+                    file_hash="",
+                    error_message=f"Cannot open quarantine file: {e}",
                 )
 
             masked_permissions = original_permissions & 0o777
-            destination_created = False
+            destination_obj = Path(original_path)
+            file_size = 0
+            file_hash: str | None = None
+
             try:
                 try:
-                    os.link(quarantine_path_obj, destination_obj)
-                    destination_created = True
-                    os.chmod(destination_obj, masked_permissions)
+                    st = os.fstat(src_fd)
                 except OSError as e:
-                    if e.errno == errno.EXDEV:
-                        _atomic_create_at_destination(
-                            quarantine_path_obj,
-                            destination_obj,
-                            masked_permissions,
-                        )
-                        destination_created = True
-                    elif e.errno == errno.EEXIST:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Cannot stat quarantine file: {e}",
+                    )
+
+                if not stat.S_ISREG(st.st_mode):
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Quarantined path is not a regular file: {quarantine_path}",
+                    )
+
+                file_size = st.st_size
+
+                # Create destination directory if needed
+                try:
+                    destination_obj.parent.mkdir(parents=True, exist_ok=True)
+                except PermissionError as e:
+                    return FileOperationResult(
+                        status=FileOperationStatus.PERMISSION_DENIED,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=f"Permission denied creating destination directory: {e}",
+                    )
+                except OSError as e:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=f"Error creating destination directory: {e}",
+                    )
+
+                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW — atomically creates and
+                # rejects pre-existing paths (files and symlinks), eliminating both the
+                # exists()-then-write and is_symlink()-then-write TOCTOU windows.
+                dst_fd: int | None = None
+                dst_created = False
+                try:
+                    dst_fd = os.open(
+                        destination_obj,
+                        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                        masked_permissions,
+                    )
+                    dst_created = True
+                    sha256_hash = hashlib.sha256()
+                    while True:
+                        block = os.read(src_fd, self.HASH_BUFFER_SIZE)
+                        if not block:
+                            break
+                        sha256_hash.update(block)
+                        os.write(dst_fd, block)
+                    os.fsync(dst_fd)
+                    # fchmod via fd — no path-based window, bypasses umask.
+                    os.fchmod(dst_fd, masked_permissions)
+                    os.close(dst_fd)
+                    dst_fd = None
+                    file_hash = sha256_hash.hexdigest()
+                except OSError as e:
+                    if dst_fd is not None:
+                        with contextlib.suppress(OSError):
+                            os.close(dst_fd)
+                    if dst_created:
+                        with contextlib.suppress(OSError):
+                            _unlinkat(destination_obj)
+                    if e.errno == errno.EEXIST:
                         return FileOperationResult(
                             status=FileOperationStatus.ALREADY_EXISTS,
                             source_path=quarantine_path,
                             destination_path=original_path,
                             file_size=file_size,
-                            file_hash=file_hash or "",
+                            file_hash="",
                             error_message=f"Destination file already exists: {original_path}",
                         )
-                    else:
-                        raise
+                    if e.errno == errno.ELOOP:
+                        return FileOperationResult(
+                            status=FileOperationStatus.ERROR,
+                            source_path=quarantine_path,
+                            destination_path=original_path,
+                            file_size=file_size,
+                            file_hash="",
+                            error_message=f"Security: destination is a symlink, possible attack: {original_path}",
+                        )
+                    return FileOperationResult(
+                        status=FileOperationStatus.PERMISSION_DENIED
+                        if e.errno == errno.EACCES
+                        else FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=original_path,
+                        file_size=file_size,
+                        file_hash="",
+                        error_message=f"File operation error: {e}",
+                    )
 
-                quarantine_path_obj.unlink()
+                # Unlink quarantine file while src_fd is still open (same inode-pinning
+                # rationale as in move_to_quarantine; same _unlinkat parent-fd anchoring).
+                try:
+                    _unlinkat(quarantine_path_obj)
+                except OSError as e:
+                    logger.warning("Could not remove quarantine file after restore: %s", e)
 
                 return FileOperationResult(
                     status=FileOperationStatus.SUCCESS,
@@ -868,42 +970,9 @@ class SecureFileHandler:
                     original_permissions=masked_permissions,
                 )
 
-            except PermissionError as e:
-                if destination_created and quarantine_path_obj.exists():
-                    with contextlib.suppress(OSError):
-                        destination_obj.unlink()
-                return FileOperationResult(
-                    status=FileOperationStatus.PERMISSION_DENIED,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Permission denied during restore: {e}",
-                )
-            except shutil.Error as e:
-                if destination_created and quarantine_path_obj.exists():
-                    with contextlib.suppress(OSError):
-                        destination_obj.unlink()
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"Move operation failed: {e}",
-                )
-            except OSError as e:
-                if destination_created and quarantine_path_obj.exists():
-                    with contextlib.suppress(OSError):
-                        destination_obj.unlink()
-                return FileOperationResult(
-                    status=FileOperationStatus.ERROR,
-                    source_path=quarantine_path,
-                    destination_path=original_path,
-                    file_size=file_size,
-                    file_hash=file_hash or "",
-                    error_message=f"File operation error: {e}",
-                )
+            finally:
+                with contextlib.suppress(OSError):
+                    os.close(src_fd)
 
     def list_quarantined_files(self) -> list[dict]:
         """
@@ -925,21 +994,28 @@ class SecureFileHandler:
         files = []
 
         try:
-            for file_path in self._quarantine_dir.iterdir():
-                if file_path.is_file():
-                    stat_info = file_path.stat()
-                    files.append(
-                        {
-                            "filename": file_path.name,
-                            "size": stat_info.st_size,
-                            "path": str(file_path),
-                            "modified": stat_info.st_mtime,
-                        }
-                    )
+            for entry in self._quarantine_dir.iterdir():
+                # lstat() in one call — avoids the is_file()+stat() TOCTOU window and
+                # never follows symlinks, so stale/malicious symlinks are skipped cleanly.
+                try:
+                    st = os.lstat(entry)
+                except OSError as e:
+                    logger.debug("Failed to lstat quarantine entry: %s", e)
+                    continue
+                if not stat.S_ISREG(st.st_mode):
+                    continue
+                files.append(
+                    {
+                        "filename": entry.name,
+                        "size": st.st_size,
+                        "path": str(entry),
+                        "modified": st.st_mtime,
+                    }
+                )
         except PermissionError as e:
-            logger.warning("Permission denied accessing quarantine file: %s", e)
+            logger.warning("Permission denied accessing quarantine directory: %s", e)
         except OSError as e:
-            logger.debug("Failed to stat quarantine file: %s", e)
+            logger.debug("Failed to list quarantine directory: %s", e)
 
         return files
 
@@ -976,29 +1052,54 @@ class SecureFileHandler:
                     error_message=validation_error,
                 )
 
-            # Check if file exists
-            if not quarantine_path_obj.exists():
+            # Open with O_NOFOLLOW — confirms the target is a real file (not a symlink) and
+            # captures size via fstat, eliminating the exists()+stat() TOCTOU window.
+            try:
+                fd = os.open(quarantine_path_obj, os.O_RDONLY | os.O_NOFOLLOW)
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    return FileOperationResult(
+                        status=FileOperationStatus.FILE_NOT_FOUND,
+                        source_path=quarantine_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Quarantined file not found: {quarantine_path}",
+                    )
+                if e.errno == errno.ELOOP:
+                    return FileOperationResult(
+                        status=FileOperationStatus.ERROR,
+                        source_path=quarantine_path,
+                        destination_path=None,
+                        file_size=0,
+                        file_hash="",
+                        error_message=f"Security: quarantine path is a symlink: {quarantine_path}",
+                    )
                 return FileOperationResult(
-                    status=FileOperationStatus.FILE_NOT_FOUND,
+                    status=FileOperationStatus.PERMISSION_DENIED
+                    if e.errno == errno.EACCES
+                    else FileOperationStatus.ERROR,
                     source_path=quarantine_path,
                     destination_path=None,
                     file_size=0,
                     file_hash="",
-                    error_message=f"Quarantined file not found: {quarantine_path}",
+                    error_message=f"Cannot open quarantine file: {e}",
                 )
 
-            # Get file size before deletion
-            file_size, size_error = self.get_file_size(quarantine_path_obj)
-            if size_error:
-                file_size = 0
-
+            # Keep fd open through the unlink so the inode is pinned during the
+            # operation — same rationale as move_to_quarantine.
+            file_size = 0
             try:
-                # Remove file permissions to prevent accidental execution
-                with contextlib.suppress(OSError):
-                    os.chmod(quarantine_path_obj, 0o000)
+                try:
+                    st = os.fstat(fd)
+                    file_size = st.st_size
+                    # fchmod via fd — no path-based window between stat and chmod.
+                    with contextlib.suppress(OSError):
+                        os.fchmod(fd, 0o000)
+                except OSError:
+                    file_size = 0
 
-                # Delete the file
-                quarantine_path_obj.unlink()
+                _unlinkat(quarantine_path_obj)
 
                 return FileOperationResult(
                     status=FileOperationStatus.SUCCESS,
@@ -1027,3 +1128,6 @@ class SecureFileHandler:
                     file_hash="",
                     error_message=f"Error deleting file: {e}",
                 )
+            finally:
+                with contextlib.suppress(OSError):
+                    os.close(fd)

@@ -32,6 +32,8 @@ from .clamav_detection import (
 )
 from .flatpak import get_clean_env, is_flatpak, wrap_host_command
 from .i18n import _
+from .keyring_manager import delete_portmaster_token, get_portmaster_token
+from .portmaster_client import PortmasterStatus, probe_portmaster
 from .sanitize import sanitize_log_line
 
 logger = logging.getLogger(__name__)
@@ -62,6 +64,7 @@ class AuditCategory(Enum):
     AUTO_UPDATES = "auto_updates"
     INTRUSION_DETECTION = "intrusion_detection"
     SSH_HARDENING = "ssh_hardening"
+    PORTMASTER = "portmaster"
     DEEP_SCAN_LYNIS = "deep_scan_lynis"
     DEEP_SCAN_ROOTKIT = "deep_scan_rootkit"
 
@@ -85,6 +88,9 @@ _URLS = {
     "lynis": "https://cisofy.com/lynis/",
     "chkrootkit": "https://www.chkrootkit.org/",
     "open_ports": "https://wiki.archlinux.org/title/Security#Network",
+    "portmaster": "https://safing.io/portmaster/",
+    "portmaster_install": "https://docs.safing.io/portmaster/install/linux",
+    "portmaster_api": "https://docs.safing.io/portmaster/api",
 }
 
 # Status priority for overall_status computation (worst wins)
@@ -1392,6 +1398,115 @@ def run_rootkit_check() -> AuditSectionResult:
 
 
 # =============================================================================
+# Portmaster (optional)
+# =============================================================================
+#
+# Portmaster is an optional Safing.io privacy filter. If it is not installed
+# and not running, this check returns a single SKIPPED row — SKIPPED has the
+# lowest priority in _STATUS_PRIORITY, so the section contributes zero to the
+# FAIL/WARNING counts in the audit summary. The UI renders this section inside
+# a collapsed Gtk.Expander when nothing was detected.
+
+
+def _portmaster_module_status_to_audit(status: str) -> AuditStatus:
+    """Map Portmaster module status strings to AuditStatus."""
+    normalized = status.lower()
+    if normalized in ("online", "ready", "active", "ok"):
+        return AuditStatus.PASS
+    if normalized in ("error", "failed", "failure"):
+        return AuditStatus.FAIL
+    if normalized in ("warning", "degraded"):
+        return AuditStatus.WARNING
+    return AuditStatus.UNKNOWN
+
+
+def check_portmaster() -> AuditSectionResult:
+    """Check Portmaster privacy filter status (optional — silent if not installed)."""
+    section = AuditSectionResult(
+        category=AuditCategory.PORTMASTER,
+        title=_("Portmaster"),
+        icon_name="network-vpn-symbolic",
+    )
+
+    token = get_portmaster_token()
+    result = probe_portmaster(token=token)
+
+    if result.modules_unauthorized:
+        # Stale token — drop it so the user gets a fresh prompt next time.
+        try:
+            delete_portmaster_token()
+        except Exception as e:
+            logger.debug("Could not delete stale Portmaster token: %s", e)
+
+    if result.status == PortmasterStatus.RUNNING:
+        section.checks.append(
+            AuditCheckResult(
+                name=_("Portmaster"),
+                status=AuditStatus.PASS,
+                detail=_("Portmaster is running and protecting connections"),
+                info_url=_URLS["portmaster"],
+            )
+        )
+        if result.module_rows:
+            for module in result.module_rows[:8]:  # cap to avoid runaway lists
+                module_status = _portmaster_module_status_to_audit(module.status)
+                detail = module.failure_msg or module.status
+                section.checks.append(
+                    AuditCheckResult(
+                        name=module.name,
+                        status=module_status,
+                        detail=detail,
+                        info_url=_URLS["portmaster_api"],
+                    )
+                )
+        elif token is None or result.modules_unauthorized:
+            # The launch_command sentinel is intercepted by audit_view's
+            # button handler and triggers request_app_token() instead of
+            # spawning a subprocess.
+            section.checks.append(
+                AuditCheckResult(
+                    name=_("Module Status"),
+                    status=AuditStatus.SKIPPED,
+                    detail=_("Authorize ClamUI in Portmaster for per-module health"),
+                    launch_command="__portmaster_authorize__",
+                    launch_label=_("Authorize"),
+                    info_url=_URLS["portmaster_api"],
+                )
+            )
+    elif result.status == PortmasterStatus.INSTALLED_NOT_RUNNING:
+        section.checks.append(
+            AuditCheckResult(
+                name=_("Portmaster"),
+                status=AuditStatus.WARNING,
+                detail=_("Portmaster is installed but not running"),
+                recommendation=_("Start the Portmaster service to enable network protection"),
+                install_command="sudo systemctl start portmaster",
+                info_url=_URLS["portmaster"],
+            )
+        )
+    elif result.status == PortmasterStatus.NOT_INSTALLED:
+        section.checks.append(
+            AuditCheckResult(
+                name=_("Portmaster"),
+                status=AuditStatus.SKIPPED,
+                detail=_("Not detected — optional network monitor and application firewall"),
+                info_url=_URLS["portmaster_install"],
+            )
+        )
+    else:  # PortmasterStatus.ERROR
+        section.checks.append(
+            AuditCheckResult(
+                name=_("Portmaster"),
+                status=AuditStatus.UNKNOWN,
+                detail=_("Could not probe Portmaster: {error}").format(error=result.error or ""),
+                info_url=_URLS["portmaster_api"],
+            )
+        )
+
+    return section
+
+
+# =============================================================================
 # Audit Runner
 # =============================================================================
 
@@ -1403,4 +1518,5 @@ TIER1_CHECKS = [
     check_auto_updates,
     check_intrusion_detection,
     check_ssh_hardening,
+    check_portmaster,
 ]

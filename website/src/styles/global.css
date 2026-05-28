@@ -1,6 +1,80 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Preserve Tailwind 3 behavior: dark: utilities react to .dark on the html
+   element, not prefers-color-scheme. The project's tri-state theme
+   (default-dark, html.dark, html.light) depends on the class-based trigger. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-clam-forest: #3d7a4e;
+  --color-clam-forest-deep: #2d5c3a;
+  --color-clam-sage: #a8c9b0;
+  --color-clam-sage-pale: #e0ede3;
+  --color-clam-slate: #2c3e50;
+  --color-clam-slate-deep: #1a2634;
+  --color-clam-slate-ink: #0f1721;
+  --color-clam-sky: #3498db;
+  --color-clam-sky-deep: #2980b9;
+  --color-clam-amber: #e0b657;
+
+  --font-sans: Cantarell, Inter, ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --shadow-window: 0 1px 2px rgba(0, 0, 0, 0.15),
+    0 8px 24px -8px rgba(0, 0, 0, 0.35), 0 32px 64px -24px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 0 1px rgba(61, 122, 78, 0.4),
+    0 0 48px -8px rgba(61, 122, 78, 0.45);
+
+  --animate-scan-sweep: scan-sweep 2.4s ease-in-out 1;
+  --animate-caret-blink: caret-blink 1.1s steps(1) infinite;
+  --animate-fade-up: fade-up 0.7s ease-out both;
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tailwind 4 requires @utility for custom classes that other rules @apply.
+   The .btn-primary / .btn-ghost rules below @apply btn, so btn must be a
+   real utility, not a @layer components class. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clam-sage/60;
+}
 
 @layer base {
   :root {
@@ -99,9 +173,6 @@
     @apply text-white/40;
   }
 
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clam-sage/60;
-  }
   .btn-primary {
     @apply btn bg-clam-forest text-white border-clam-forest/0 hover:bg-clam-forest-deep shadow-[0_1px_0_rgba(255,255,255,0.08)_inset];
   }

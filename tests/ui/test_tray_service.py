@@ -83,6 +83,7 @@ def tray_service(tray_service_class):
     service._watcher_registered = False
     service._watcher_name = None
     service._watcher_retry_source_id = 0
+    service._icon_pixmap_cache = {}
 
     # Status state
     service._current_status = "protected"
@@ -530,6 +531,11 @@ class TestSNIProtocol:
         result = self._get_prop(tray_service, "IconName")
         assert result is not None
 
+    def test_get_property_icon_pixmap_returns_variant(self, tray_service):
+        """Test IconPixmap property returns a non-None result."""
+        result = self._get_prop(tray_service, "IconPixmap")
+        assert result is not None
+
     def test_get_property_window_id_returns_variant(self, tray_service):
         """Test WindowId property returns a non-None result."""
         result = self._get_prop(tray_service, "WindowId")
@@ -550,9 +556,19 @@ class TestSNIProtocol:
         result = self._get_prop(tray_service, "OverlayIconName")
         assert result is not None
 
+    def test_get_property_overlay_icon_pixmap_returns_variant(self, tray_service):
+        """Test OverlayIconPixmap property returns a non-None result."""
+        result = self._get_prop(tray_service, "OverlayIconPixmap")
+        assert result is not None
+
     def test_get_property_attention_icon_name_returns_variant(self, tray_service):
         """Test AttentionIconName property returns a non-None result."""
         result = self._get_prop(tray_service, "AttentionIconName")
+        assert result is not None
+
+    def test_get_property_attention_icon_pixmap_returns_variant(self, tray_service):
+        """Test AttentionIconPixmap property returns a non-None result."""
+        result = self._get_prop(tray_service, "AttentionIconPixmap")
         assert result is not None
 
     def test_get_property_tooltip_returns_variant(self, tray_service):
@@ -587,7 +603,11 @@ class TestSNIProtocol:
         mock_bus = mock.MagicMock()
         tray_service._bus = mock_bus
 
-        tray_service._register_with_watcher()
+        with mock.patch(
+            "src.ui.tray_service.GLib.Variant",
+            side_effect=lambda signature, value: (signature, value),
+        ):
+            tray_service._register_with_watcher()
 
         mock_bus.call.assert_called_once()
         call_args = mock_bus.call.call_args
@@ -595,6 +615,7 @@ class TestSNIProtocol:
         assert "StatusNotifierWatcher" in call_args[0][0]
         # Method name
         assert call_args[0][3] == "RegisterStatusNotifierItem"
+        assert call_args[0][4] == ("(s)", (tray_service.SNI_PATH,))
 
     def test_register_with_watcher_falls_back_to_next_watcher(self, tray_service):
         """Test watcher registration falls back when the first watcher is unavailable."""
@@ -1065,6 +1086,103 @@ class TestIconThemePath:
 
         # Should return grandparent: /home/user/.local/share/icons/hicolor
         assert result == "/home/user/.local/share/icons/hicolor"
+
+
+# =============================================================================
+# TestIconPixmap - SNI pixmap fallback for stricter tray hosts
+# =============================================================================
+
+
+class TestIconPixmap:
+    """Tests for icon pixmap generation."""
+
+    def test_get_icon_pixmap_empty_without_custom_icons(self, tray_service):
+        """Without generated custom icons, IconPixmap should be an empty array."""
+        tray_service._using_custom_icons = False
+
+        with mock.patch(
+            "src.ui.tray_service.GLib.Variant",
+            side_effect=lambda signature, value: (signature, value),
+        ):
+            result = tray_service._get_icon_pixmap()
+
+        assert result == ("a(iiay)", [])
+
+    def test_load_icon_pixmap_converts_rgba_to_argb(self, tray_service, tmp_path):
+        """SNI IconPixmap bytes should be ARGB32 in network byte order."""
+        image_module = pytest.importorskip("PIL.Image")
+        icon_path = tmp_path / "icon.png"
+        image_module.new("RGBA", (1, 1), (1, 2, 3, 4)).save(icon_path)
+
+        with mock.patch(
+            "src.ui.tray_service.GLib.Variant",
+            side_effect=lambda signature, value: (signature, value),
+        ):
+            result = tray_service._load_icon_pixmap(str(icon_path))
+
+        assert result == ("a(iiay)", [(1, 1, bytes([4, 1, 2, 3]))])
+
+    def test_get_icon_pixmap_uses_generated_status_icon(self, tray_service):
+        """IconPixmap should load the generated PNG for the requested status."""
+        tray_service._using_custom_icons = True
+        tray_service._icon_generator = mock.MagicMock()
+        tray_service._icon_generator.get_icon_path.return_value = "/tmp/clamui-tray-threat.png"
+        tray_service._load_icon_pixmap = mock.MagicMock(return_value=mock.sentinel.pixmap)
+
+        result = tray_service._get_icon_pixmap("threat")
+
+        assert result is mock.sentinel.pixmap
+        tray_service._icon_generator.get_icon_path.assert_called_once_with("threat")
+        tray_service._load_icon_pixmap.assert_called_once_with("/tmp/clamui-tray-threat.png")
+
+
+# =============================================================================
+# TestAttentionIcon - branded AttentionIcon for NeedsAttention statuses
+# =============================================================================
+
+
+class TestAttentionIcon:
+    """Tests for the AttentionIcon mirroring the branded status icon."""
+
+    def test_attention_icon_name_uses_custom_icon_for_threat(self, tray_service):
+        """When status=threat with custom icons, AttentionIconName mirrors the custom name."""
+        tray_service._current_status = "threat"
+        tray_service._using_custom_icons = True
+        tray_service._icon_generator = mock.MagicMock()
+        tray_service._icon_generator.get_icon_name.return_value = "clamui-tray-threat"
+
+        assert tray_service._get_attention_icon_name() == "clamui-tray-threat"
+        tray_service._icon_generator.get_icon_name.assert_called_with("threat")
+
+    def test_attention_icon_name_uses_custom_icon_for_warning(self, tray_service):
+        """When status=warning with custom icons, AttentionIconName uses warning icon, not threat."""
+        tray_service._current_status = "warning"
+        tray_service._using_custom_icons = True
+        tray_service._icon_generator = mock.MagicMock()
+        tray_service._icon_generator.get_icon_name.return_value = "clamui-tray-warning"
+
+        assert tray_service._get_attention_icon_name() == "clamui-tray-warning"
+        tray_service._icon_generator.get_icon_name.assert_called_with("warning")
+
+    def test_attention_icon_name_falls_back_to_threat_theme_icon(self, tray_service):
+        """Without custom icons, AttentionIconName uses the threat theme icon."""
+        tray_service._current_status = "protected"
+        tray_service._using_custom_icons = False
+        tray_service._icon_generator = None
+
+        # Maps to ICON_MAP["threat"] = "dialog-error-symbolic"
+        assert tray_service._get_attention_icon_name() == "dialog-error-symbolic"
+
+    def test_update_status_emits_new_attention_icon(self, tray_service):
+        """update_status must signal NewAttentionIcon so hosts re-read the branded attention icon."""
+        tray_service._emit_signal = mock.MagicMock()
+
+        tray_service.update_status("threat")
+
+        emitted_signals = [call.args[0] for call in tray_service._emit_signal.call_args_list]
+        assert "NewAttentionIcon" in emitted_signals
+        assert "NewIcon" in emitted_signals
+        assert "NewStatus" in emitted_signals
 
 
 # =============================================================================

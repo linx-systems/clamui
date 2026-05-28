@@ -1,14 +1,19 @@
 # ClamUI SecureFileHandler Tests
 """Unit tests for the SecureFileHandler path validation and restore error paths."""
 
+import errno
 import os
 import stat
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
+from src.core.quarantine.database import QuarantineDatabase
 from src.core.quarantine.file_handler import (
     FileOperationStatus,
     SecureFileHandler,
+    _unlinkat,
 )
 
 
@@ -703,32 +708,26 @@ class TestRestorePermissionErrors:
             # Restore permissions for cleanup
             os.chmod(readonly_dir, 0o755)
 
-    def test_restore_chmod_fails_after_move(self, tmp_path):
-        """Test that restore reports error when chmod fails after file move."""
+    def test_restore_fchmod_fails_after_copy(self, tmp_path):
+        """Test that restore reports PERMISSION_DENIED when fchmod fails after copy."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
 
-        # Create a quarantined file
         quarantine_file = quarantine_dir / "abc123_file.txt"
         quarantine_file.write_text("quarantined content")
         os.chmod(quarantine_file, 0o400)
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        # Mock os.chmod to fail after the move
-        original_chmod = os.chmod
+        import errno as _errno
 
-        def failing_chmod(path, mode):
-            # Only fail for the restore destination
-            if str(path) == str(restore_path):
-                raise PermissionError("Cannot change permissions")
-            return original_chmod(path, mode)
-
-        with mock.patch("os.chmod", side_effect=failing_chmod):
+        with mock.patch(
+            "os.fchmod",
+            side_effect=PermissionError(_errno.EACCES, "Cannot change permissions"),
+        ):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path), 0o755)
 
-            # Move succeeds but chmod fails - should be caught by exception handler
             assert result.status == FileOperationStatus.PERMISSION_DENIED
             assert result.error_message is not None
 
@@ -745,7 +744,12 @@ class TestRestorePermissionErrors:
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        with mock.patch("os.link", side_effect=PermissionError("Permission denied during restore")):
+        import errno as _errno
+
+        with mock.patch(
+            "os.write",
+            side_effect=PermissionError(_errno.EACCES, "Permission denied during restore"),
+        ):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.PERMISSION_DENIED
@@ -848,7 +852,7 @@ class TestRestoreIntegrityChecks:
 
         assert result.status == FileOperationStatus.ERROR
         assert result.error_message is not None
-        assert "not a file" in result.error_message.lower()
+        assert "not a regular file" in result.error_message.lower()
 
     def test_restore_fails_when_quarantine_file_not_found(self, tmp_path):
         """Test restore fails when quarantined file doesn't exist."""
@@ -866,98 +870,81 @@ class TestRestoreIntegrityChecks:
         assert result.error_message is not None
         assert "not found" in result.error_message.lower()
 
-    def test_restore_hash_calculation_fails(self, tmp_path):
-        """Test restore fails when hash calculation encounters an error."""
+    def test_restore_read_fails(self, tmp_path):
+        """Test restore fails when reading the quarantine file raises an I/O error."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
 
-        # Create a quarantined file
         quarantine_file = quarantine_dir / "abc123_file.txt"
         quarantine_file.write_text("quarantined content")
         os.chmod(quarantine_file, 0o400)
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        # Mock calculate_hash to return an error
-        with mock.patch.object(
-            handler, "calculate_hash", return_value=(None, "Hash calculation failed")
-        ):
+        with mock.patch("os.read", side_effect=OSError("I/O error reading file")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
-            assert result.status == FileOperationStatus.PERMISSION_DENIED
-            assert "hash calculation failed" in result.error_message.lower()
+            assert result.status == FileOperationStatus.ERROR
+            assert result.error_message is not None
 
-    def test_restore_get_file_size_fails(self, tmp_path):
-        """Test restore fails when file size cannot be retrieved."""
+    def test_restore_fstat_fails(self, tmp_path):
+        """Test restore fails when fstat on the quarantine file raises an error."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
 
-        # Create a quarantined file
         quarantine_file = quarantine_dir / "abc123_file.txt"
         quarantine_file.write_text("quarantined content")
         os.chmod(quarantine_file, 0o400)
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        # Mock get_file_size to return an error
-        with mock.patch.object(handler, "get_file_size", return_value=(-1, "Cannot stat file")):
+        with mock.patch("os.fstat", side_effect=OSError("Cannot stat quarantine file")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
-            assert result.status == FileOperationStatus.PERMISSION_DENIED
-            assert "cannot stat file" in result.error_message.lower()
+            assert result.status == FileOperationStatus.ERROR
+            assert result.error_message is not None
 
 
 class TestRestoreShutilErrors:
     """Tests for shutil.move errors in restore_from_quarantine()."""
 
-    def test_restore_shutil_error(self, tmp_path):
-        """Test restore fails with ERROR status on shutil.Error."""
+    def test_restore_write_error(self, tmp_path):
+        """Test restore fails with ERROR status when writing to destination raises OSError."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
 
-        # Create a quarantined file
         quarantine_file = quarantine_dir / "abc123_file.txt"
         quarantine_file.write_text("quarantined content")
         os.chmod(quarantine_file, 0o400)
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        import errno
-        import shutil
-
-        with (
-            mock.patch("os.link", side_effect=OSError(errno.EXDEV, "Cross-device link")),
-            mock.patch(
-                "src.core.quarantine.file_handler._atomic_create_at_destination",
-                side_effect=shutil.Error("Move operation failed"),
-            ),
-        ):
+        with mock.patch("os.write", side_effect=OSError("Disk I/O error")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.ERROR
-            assert "move operation failed" in result.error_message.lower()
+            assert result.error_message is not None
 
     def test_restore_oserror(self, tmp_path):
-        """Test restore fails with ERROR status on OSError."""
+        """Test restore fails with ERROR status on generic OSError during copy."""
         quarantine_dir = tmp_path / "quarantine"
         quarantine_dir.mkdir(mode=0o700)
         handler = SecureFileHandler(str(quarantine_dir))
 
-        # Create a quarantined file
         quarantine_file = quarantine_dir / "abc123_file.txt"
         quarantine_file.write_text("quarantined content")
         os.chmod(quarantine_file, 0o400)
 
         restore_path = tmp_path / "restored" / "file.txt"
 
-        with mock.patch("os.link", side_effect=OSError("Disk I/O error")):
+        with mock.patch("os.write", side_effect=OSError("Disk I/O error")):
             result = handler.restore_from_quarantine(str(quarantine_file), str(restore_path))
 
             assert result.status == FileOperationStatus.ERROR
-            assert "file operation error" in result.error_message.lower()
+            assert result.error_message is not None
 
     def test_restore_mkdir_oserror(self, tmp_path):
         """Test restore fails when mkdir raises OSError."""
@@ -1132,3 +1119,364 @@ class TestVerifyFileIntegrity:
             assert "permission" in error.lower()
         finally:
             os.chmod(test_file, 0o644)
+
+
+# ── TOCTOU security tests ──────────────────────────────────────────────────────
+
+
+class TestUnlinkat:
+    """Security tests for the _unlinkat() helper.
+
+    _unlinkat() anchors the unlink to an already-opened parent directory fd
+    (os.unlink with dir_fd=), reducing the TOCTOU window to the single final
+    name component inside that directory.  The parent is opened with
+    O_NOFOLLOW|O_DIRECTORY, so a symlink masquerading as the parent is rejected.
+    """
+
+    def test_removes_regular_file(self, tmp_path):
+        """Happy path: file inside a subdirectory is removed."""
+        d = tmp_path / "dir"
+        d.mkdir()
+        f = d / "file.txt"
+        f.write_text("data")
+
+        _unlinkat(f)
+
+        assert not f.exists()
+
+    def test_nonexistent_file_raises_oserror(self, tmp_path):
+        """Removing a nonexistent file raises OSError (ENOENT)."""
+        with pytest.raises(OSError) as exc:
+            _unlinkat(tmp_path / "nonexistent.txt")
+        assert exc.value.errno == errno.ENOENT
+
+    def test_parent_symlink_rejected(self, tmp_path):
+        """O_NOFOLLOW|O_DIRECTORY on the parent rejects a symlink-as-parent.
+
+        This guards against an attacker swapping an intermediate path component
+        to a symlink between the moment we open the parent and the unlink call.
+
+        On Linux, O_NOFOLLOW|O_DIRECTORY applied to a symlink-to-directory
+        raises ENOTDIR (the kernel refuses to treat the un-followed symlink
+        as a directory) rather than ELOOP.  Both indicate the symlink was NOT
+        followed — either errno is acceptable here.
+        """
+        real_dir = tmp_path / "real"
+        real_dir.mkdir()
+        link_dir = tmp_path / "link"
+        link_dir.symlink_to(real_dir)
+
+        f = real_dir / "file.txt"
+        f.write_text("data")
+
+        # path.parent resolves to the symlink path, not the real dir
+        with pytest.raises(OSError) as exc:
+            _unlinkat(link_dir / "file.txt")
+        assert exc.value.errno in (errno.ELOOP, errno.ENOTDIR)
+
+        assert f.exists()  # real file must be untouched
+
+    def test_uses_dir_fd_not_absolute_path(self, tmp_path):
+        """_unlinkat passes dir_fd= to os.unlink rather than the full path.
+
+        If the full path were re-resolved at unlink time, an intermediate
+        component could be swapped.  Verify dir_fd is present in the call.
+        """
+        d = tmp_path / "dir"
+        d.mkdir()
+        f = d / "file.txt"
+        f.write_text("data")
+
+        captured = {}
+        real_unlink = os.unlink
+
+        def spy_unlink(path, *args, **kwargs):
+            captured["path"] = path
+            captured["kwargs"] = kwargs
+            return real_unlink(path, *args, **kwargs)
+
+        with mock.patch("os.unlink", side_effect=spy_unlink):
+            _unlinkat(f)
+
+        # The name passed to unlink must be just the basename, not the full path
+        assert captured["path"] == "file.txt"
+        assert "dir_fd" in captured["kwargs"]
+        assert isinstance(captured["kwargs"]["dir_fd"], int)
+
+    def test_removes_symlink_itself_not_target(self, tmp_path):
+        """When the name inside the directory is a symlink, unlinkat removes
+        the symlink entry, leaving the target file intact."""
+        d = tmp_path / "dir"
+        d.mkdir()
+        target = tmp_path / "target.txt"
+        target.write_text("keep me")
+        link = d / "link"
+        link.symlink_to(target)
+
+        _unlinkat(link)
+
+        assert not link.exists()
+        assert target.exists()
+
+
+class TestMoveToQuarantineTOCTOU:
+    """Tests that move_to_quarantine() resists TOCTOU attacks.
+
+    The key invariants:
+    - Source opened with O_NOFOLLOW → symlink swap between scan and quarantine
+      is caught at open time, not after a separate is_symlink() check.
+    - fstat(S_ISREG) on the open fd → non-regular-file injection is caught
+      without a TOCTOU window between stat and open.
+    - Destination created with O_CREAT|O_EXCL|O_NOFOLLOW → pre-planted symlink
+      at the destination is rejected atomically.
+    """
+
+    def test_symlink_source_rejected(self, tmp_path):
+        """O_NOFOLLOW in move_to_quarantine rejects a symlink as the source file.
+
+        Simulates the scan-to-quarantine race: attacker replaces the scanned
+        regular file with a symlink pointing to a sensitive file.
+        """
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        target = tmp_path / "sensitive.txt"
+        target.write_text("sensitive data")
+        symlink = tmp_path / "infected.exe"
+        symlink.symlink_to(target)
+
+        result = handler.move_to_quarantine(str(symlink))
+
+        assert result.status == FileOperationStatus.ERROR
+        assert "symlink" in result.error_message.lower()
+
+    def test_symlink_source_leaves_target_untouched(self, tmp_path):
+        """When the symlink source is rejected, the symlink target is not moved."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        target = tmp_path / "sensitive.txt"
+        target.write_text("original content")
+        symlink = tmp_path / "link"
+        symlink.symlink_to(target)
+
+        handler.move_to_quarantine(str(symlink))
+
+        assert target.exists()
+        assert target.read_text() == "original content"
+
+    def test_char_device_rejected_as_not_regular_file(self, tmp_path):
+        """fstat S_ISREG check rejects character devices.
+
+        An attacker could replace the target file with a device node between scan
+        and quarantine.  The fstat check on the already-open fd catches this
+        without a separate stat+open window.  /dev/null is used here instead of a
+        FIFO because opening a FIFO for reading blocks without a writer.
+        """
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        result = handler.move_to_quarantine("/dev/null")
+
+        assert result.status == FileOperationStatus.ERROR
+        assert "not a regular file" in result.error_message.lower()
+
+    def test_directory_rejected_as_not_regular_file(self, tmp_path):
+        """fstat S_ISREG check rejects a directory passed as the source."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        subdir = tmp_path / "subdir"
+        subdir.mkdir()
+
+        result = handler.move_to_quarantine(str(subdir))
+
+        assert result.status == FileOperationStatus.ERROR
+        assert "not a regular file" in result.error_message.lower()
+
+    def test_success_source_removed(self, tmp_path):
+        """Successful quarantine atomically removes the source file."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        source = tmp_path / "malware.exe"
+        source.write_text("malware payload")
+
+        result = handler.move_to_quarantine(str(source))
+
+        assert result.is_success
+        assert not source.exists()
+
+    def test_success_content_preserved(self, tmp_path):
+        """Successful quarantine preserves file content exactly."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        content = "malware payload " * 100
+        source = tmp_path / "malware.exe"
+        source.write_text(content)
+
+        result = handler.move_to_quarantine(str(source))
+
+        assert result.is_success
+        assert Path(result.destination_path).read_text() == content
+
+    def test_success_restrictive_permissions_on_destination(self, tmp_path):
+        """Destination file in quarantine is set to 0o400 via fchmod on the fd
+        (no path-based TOCTOU between write and chmod)."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        source = tmp_path / "malware.exe"
+        source.write_text("data")
+
+        result = handler.move_to_quarantine(str(source))
+
+        assert result.is_success
+        actual = stat.S_IMODE(Path(result.destination_path).stat().st_mode)
+        assert actual == SecureFileHandler.QUARANTINE_FILE_PERMISSIONS
+
+    def test_abspath_does_not_dereference_symlinks(self, tmp_path):
+        """os.path.abspath() normalises . and .. without following symlinks.
+
+        If the caller used Path.resolve() instead, a symlink swap between scan
+        and quarantine would cause resolve() to return the target path *before*
+        O_NOFOLLOW could act, defeating the guard.  This test documents and
+        locks in the abspath behaviour.
+        """
+        target = tmp_path / "sensitive.txt"
+        target.write_text("sensitive")
+        link = tmp_path / "infected.exe"
+        link.symlink_to(target)
+
+        abspath_result = os.path.abspath(str(link))
+        resolve_result = str(link.resolve())
+
+        # abspath preserves the symlink name in the path
+        assert Path(abspath_result).name == "infected.exe"
+        # resolve() would expose the underlying target
+        assert Path(resolve_result).name == "sensitive.txt"
+
+
+class TestCalculateHashSecurity:
+    """Tests that calculate_hash() rejects symlinks via O_NOFOLLOW."""
+
+    def test_symlink_rejected(self, tmp_path):
+        """calculate_hash opens with O_NOFOLLOW, so a symlink source is rejected."""
+        handler = SecureFileHandler(str(tmp_path / "quarantine"))
+
+        target = tmp_path / "real.txt"
+        target.write_text("content")
+        link = tmp_path / "link.txt"
+        link.symlink_to(target)
+
+        hash_val, error = handler.calculate_hash(link)
+
+        assert hash_val is None
+        assert error is not None
+
+
+class TestListQuarantinedFilesSecurity:
+    """Tests that list_quarantined_files() uses lstat and is not confused by symlinks."""
+
+    def test_symlinks_not_listed(self, tmp_path):
+        """list_quarantined_files uses lstat so symlinks planted in the quarantine
+        directory are not reported as quarantined files."""
+        quarantine_dir = tmp_path / "quarantine"
+        quarantine_dir.mkdir()
+        handler = SecureFileHandler(str(quarantine_dir))
+
+        real_file = quarantine_dir / "abc123_malware.exe"
+        real_file.write_text("malware")
+
+        outside = tmp_path / "outside.txt"
+        outside.write_text("outside")
+        evil_link = quarantine_dir / "evil_link"
+        evil_link.symlink_to(outside)
+
+        try:
+            files = handler.list_quarantined_files()
+            names = {f["filename"] for f in files}
+            assert "abc123_malware.exe" in names
+            assert "evil_link" not in names
+        finally:
+            if evil_link.is_symlink():
+                evil_link.unlink()
+
+    def test_directories_not_listed(self, tmp_path):
+        """list_quarantined_files skips subdirectories (lstat S_ISREG check)."""
+        quarantine_dir = tmp_path / "quarantine"
+        quarantine_dir.mkdir()
+        handler = SecureFileHandler(str(quarantine_dir))
+
+        subdir = quarantine_dir / "subdir"
+        subdir.mkdir()
+        real_file = quarantine_dir / "file.txt"
+        real_file.write_text("data")
+
+        files = handler.list_quarantined_files()
+        names = {f["filename"] for f in files}
+
+        assert "file.txt" in names
+        assert "subdir" not in names
+
+    def test_lstat_no_toctou_between_isfile_and_stat(self, tmp_path):
+        """list_quarantined_files performs a single lstat() call per entry,
+        eliminating the is_file()+stat() TOCTOU window.  Verify that a symlink
+        swapped in after the directory listing does not inflate the file count."""
+        quarantine_dir = tmp_path / "quarantine"
+        quarantine_dir.mkdir()
+        handler = SecureFileHandler(str(quarantine_dir))
+
+        real_file = quarantine_dir / "legit.txt"
+        real_file.write_text("data")
+
+        # Plant a dead symlink (points to nothing) — lstat sees S_ISLNK, skipped
+        dead_link = quarantine_dir / "dead_link"
+        dead_link.symlink_to(quarantine_dir / "nonexistent_target")
+        try:
+            files = handler.list_quarantined_files()
+            assert len(files) == 1
+            assert files[0]["filename"] == "legit.txt"
+        finally:
+            if dead_link.is_symlink():
+                dead_link.unlink()
+
+
+class TestDatabasePermissionSecurity:
+    """Tests that _secure_db_file_permissions() resists symlink attacks.
+
+    Change 4: database.py now opens each DB file with O_NOFOLLOW before
+    fchmod, so a symlink planted at a WAL/SHM path cannot redirect the
+    chmod to an arbitrary file.
+    """
+
+    def test_symlink_at_wal_path_silently_skipped(self, tmp_path):
+        """A symlink planted at the .db-wal path is silently skipped (ELOOP → continue).
+
+        Without O_NOFOLLOW, fchmod on the symlink would follow it and change
+        permissions on the symlink target.
+        """
+        db_path = tmp_path / "quarantine.db"
+        db = QuarantineDatabase(str(db_path), pool_size=0)
+
+        wal_path = Path(str(db_path) + "-wal")
+        sensitive = tmp_path / "sensitive.txt"
+        sensitive.write_text("sensitive")
+        original_mode = stat.S_IMODE(sensitive.stat().st_mode)
+
+        if not wal_path.exists():
+            wal_path.symlink_to(sensitive)
+            try:
+                db._secure_db_file_permissions()  # must not raise
+
+                # Sensitive file permissions must NOT have been changed to 0o600
+                assert stat.S_IMODE(sensitive.stat().st_mode) == original_mode
+            finally:
+                if wal_path.is_symlink():
+                    wal_path.unlink()
+
+        db.close()
+
+    def test_main_db_file_has_restrictive_permissions(self, tmp_path):
+        """The main .db file is set to 0o600 after initialisation."""
+        db_path = tmp_path / "test_quarantine.db"
+        db = QuarantineDatabase(str(db_path), pool_size=0)
+        try:
+            actual = stat.S_IMODE(db_path.stat().st_mode)
+            assert actual == QuarantineDatabase.DB_FILE_PERMISSIONS
+        finally:
+            db.close()

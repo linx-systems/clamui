@@ -103,6 +103,11 @@ class AuditView(Gtk.Box):
         self._section_status_icons: dict[str, Gtk.Image] = {}
         self._section_spinners: dict[str, Gtk.Spinner] = {}
 
+        # Optional collapsible wrapper for Portmaster (single instance — only
+        # this section needs collapsed-when-absent behavior).
+        self._portmaster_expander: Gtk.Expander | None = None
+        self._portmaster_authorize_running = False
+
         # Deep scan state
         self._lynis_running = False
         self._rootkit_running = False
@@ -204,6 +209,7 @@ class AuditView(Gtk.Box):
                 "dialog-warning-symbolic",
             ),
             (AuditCategory.SSH_HARDENING, _("SSH Security"), "network-server-symbolic"),
+            (AuditCategory.PORTMASTER, _("Portmaster"), "network-vpn-symbolic"),
         ]
 
         for category, title, _icon_name in sections:
@@ -238,7 +244,20 @@ class AuditView(Gtk.Box):
             self._section_spinners[key] = spinner
             self._section_status_icons[key] = status_icon
 
-            parent.append(group)
+            if category is AuditCategory.PORTMASTER:
+                # Wrap Portmaster in an expander so the section stays present
+                # but collapses to just the hint label when Portmaster is not
+                # detected (per user request: collapsed with hint when absent,
+                # default-open when detected). _update_section_ui flips the
+                # expanded state after the check completes.
+                expander = Gtk.Expander()
+                expander.set_label(_("Portmaster — checking…"))
+                expander.set_expanded(True)
+                expander.set_child(group)
+                self._portmaster_expander = expander
+                parent.append(expander)
+            else:
+                parent.append(group)
 
     def _create_deep_scan_section(self, parent: Gtk.Box):
         """Create the deep scans section with opt-in buttons."""
@@ -520,7 +539,27 @@ class AuditView(Gtk.Box):
             self._set_status_icon(status_icon, result.overall_status)
             status_icon.set_visible(True)
 
+        # Portmaster collapses when nothing was detected. The hint stays
+        # visible in the expander label so users still discover the feature.
+        if result.category is AuditCategory.PORTMASTER and self._portmaster_expander is not None:
+            self._apply_portmaster_expander_state(result)
+
         return False  # Don't repeat
+
+    def _apply_portmaster_expander_state(self, result: AuditSectionResult):
+        """Set the Portmaster expander label and expanded state from a result."""
+        expander = self._portmaster_expander
+        if expander is None:
+            return
+        if result.overall_status == AuditStatus.SKIPPED:
+            expander.set_label(_("Portmaster — not detected (optional)"))
+            expander.set_expanded(False)
+        elif result.overall_status == AuditStatus.UNKNOWN:
+            expander.set_label(_("Portmaster — could not probe"))
+            expander.set_expanded(False)
+        else:
+            expander.set_label(_("Portmaster"))
+            expander.set_expanded(True)
 
     def _add_check_row(
         self, group: Adw.PreferencesGroup, check: AuditCheckResult
@@ -782,6 +821,13 @@ class AuditView(Gtk.Box):
 
         from ..core.flatpak import is_flatpak
 
+        # Sentinel: instead of spawning a subprocess, kick off Portmaster's
+        # third-party authorization flow. Handled here (rather than in a
+        # separate widget) to reuse the existing launch-button UX.
+        if command == "__portmaster_authorize__":
+            self._start_portmaster_authorize(button)
+            return
+
         try:
             cmd = ["flatpak-spawn", "--host", command] if is_flatpak() else [command]
             subprocess.Popen(
@@ -794,6 +840,57 @@ class AuditView(Gtk.Box):
             logger.warning("Could not launch: %s (not found)", command)
         except OSError as e:
             logger.warning("Could not launch %s: %s", command, e)
+
+    def _start_portmaster_authorize(self, button: Gtk.Button):
+        """Request a Portmaster app token in a background thread.
+
+        The /api/v1/app/auth endpoint blocks until the user accepts or
+        declines inside Portmaster's UI, so we must not block the main loop.
+        On success the token is stored via keyring_manager and the Portmaster
+        section is re-run to show the per-module rows.
+        """
+        if self._portmaster_authorize_running:
+            return
+        self._portmaster_authorize_running = True
+        button.set_sensitive(False)
+
+        def _worker():
+            from ..core.keyring_manager import set_portmaster_token
+            from ..core.portmaster_client import request_app_token
+
+            token, err = request_app_token(read_scope="user")
+            if not self._destroyed:
+                GLib.idle_add(self._on_portmaster_authorize_done, button, token, err)
+            if token:
+                ok, msg = set_portmaster_token(token)
+                if not ok:
+                    logger.warning("Could not persist Portmaster token: %s", msg)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _on_portmaster_authorize_done(
+        self, button: Gtk.Button, token: str | None, err: str | None
+    ) -> bool:
+        """Handle Portmaster authorization completion on the main thread."""
+        self._portmaster_authorize_running = False
+        if self._destroyed:
+            return False
+        button.set_sensitive(True)
+        if err:
+            logger.info("Portmaster authorization failed: %s", err)
+        if token:
+            # Re-run just the Portmaster section to pick up module status now
+            # that we have a token. Reuse the existing audit-run path so the
+            # spinner/status-icon UI is consistent.
+            from ..core.system_audit import check_portmaster
+
+            def _rerun():
+                section = check_portmaster()
+                if not self._destroyed:
+                    GLib.idle_add(self._update_section_ui, section)
+
+            threading.Thread(target=_rerun, daemon=True).start()
+        return False
 
     def _on_info_clicked(self, button: Gtk.Button, url: str):
         """Open info URL in the default browser."""

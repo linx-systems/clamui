@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 # Keyring configuration
 SERVICE_NAME = "clamui"
 VT_API_KEY_NAME = "virustotal_api_key"
+PM_API_TOKEN_NAME = "portmaster_api_token"  # noqa: S105 - keyring entry name, not a password
+PM_SETTINGS_KEY = "portmaster_api_token"
 
 
 def _get_keyring():
@@ -233,3 +235,85 @@ def validate_api_key_format(api_key: str) -> tuple[bool, str | None]:
         return False, _("API key must contain only hexadecimal characters")
 
     return True, None
+
+
+# =============================================================================
+# Portmaster API token accessors
+# =============================================================================
+#
+# Portmaster's developer API issues opaque tokens via the /api/v1/app/auth
+# authorization flow. Format is undocumented and may change, so we treat the
+# token as an opaque string and skip format validation.
+
+
+def get_portmaster_token(settings_manager: SettingsManager | None = None) -> str | None:
+    """Return the stored Portmaster API token, or None if not configured."""
+    keyring = _get_keyring()
+    if keyring is not None:
+        try:
+            token = keyring.get_password(SERVICE_NAME, PM_API_TOKEN_NAME)
+            if token:
+                return token
+        except Exception as e:
+            logger.warning(f"Failed to read Portmaster token from keyring: {e}")
+
+    if settings_manager is None:
+        from .settings_manager import SettingsManager
+
+        settings_manager = SettingsManager()
+    return settings_manager.get(PM_SETTINGS_KEY)
+
+
+def set_portmaster_token(
+    token: str, settings_manager: SettingsManager | None = None
+) -> tuple[bool, str | None]:
+    """Persist the Portmaster API token (keyring preferred, settings fallback gated)."""
+    if not token:
+        return False, _("Token cannot be empty")
+
+    keyring = _get_keyring()
+    if keyring is not None:
+        try:
+            keyring.set_password(SERVICE_NAME, PM_API_TOKEN_NAME, token)
+            logger.info("Stored Portmaster token in keyring")
+            return True, None
+        except Exception as e:
+            logger.warning(f"Failed to store Portmaster token in keyring: {e}")
+
+    if settings_manager is None:
+        from .settings_manager import SettingsManager
+
+        settings_manager = SettingsManager()
+
+    if not settings_manager.get("allow_plaintext_api_key_fallback"):
+        return False, _(
+            "System keyring is unavailable. To store the Portmaster token without a keyring, "
+            "enable the plaintext fallback in preferences (less secure)."
+        )
+
+    if settings_manager.set(PM_SETTINGS_KEY, token):
+        logger.info("Stored Portmaster token in settings (plaintext fallback)")
+        return True, _("Stored in settings file (keyring unavailable — less secure)")
+    return False, _("Failed to save Portmaster token to settings")
+
+
+def delete_portmaster_token(settings_manager: SettingsManager | None = None) -> bool:
+    """Remove the Portmaster API token from keyring and settings fallback."""
+    deleted = False
+
+    keyring = _get_keyring()
+    if keyring is not None:
+        try:
+            keyring.delete_password(SERVICE_NAME, PM_API_TOKEN_NAME)
+            deleted = True
+        except Exception as e:
+            logger.debug(f"Could not delete Portmaster token from keyring: {e}")
+
+    if settings_manager is None:
+        from .settings_manager import SettingsManager
+
+        settings_manager = SettingsManager()
+
+    if settings_manager.set(PM_SETTINGS_KEY, None):
+        deleted = True
+    return deleted

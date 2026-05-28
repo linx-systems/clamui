@@ -189,8 +189,16 @@ def stream_process_output(
         )
         return MAX_ACCUMULATED_BYTES
 
-    # Get file descriptor for stdout
+    # Get file descriptors for both streams. We must drain stderr concurrently
+    # with stdout to avoid a pipe-buffer deadlock: clamscan/clamdscan write
+    # LibClamAV warnings and permission errors to stderr, and a single
+    # write(stderr_fd) blocks once the kernel pipe buffer (~64 KiB on Linux)
+    # fills. While blocked, the process never advances, process.poll() stays
+    # None, and the scan freezes mid-run. See issue #146.
     stdout_fd = process.stdout.fileno()
+    stderr_fd = process.stderr.fileno()
+    stdout_eof = False
+    stderr_eof = False
     incomplete_line = ""
 
     try:
@@ -207,7 +215,7 @@ def stream_process_output(
                 # with the TextIOWrapper used by process.communicate()
                 for fd, parts, stream_name in [
                     (stdout_fd, stdout_parts, "stdout"),
-                    (process.stderr.fileno(), stderr_parts, "stderr"),
+                    (stderr_fd, stderr_parts, "stderr"),
                 ]:
                     local_total = stdout_total if stream_name == "stdout" else stderr_total
                     while True:
@@ -243,7 +251,6 @@ def stream_process_output(
                         break
                 remaining_stdout = "".join(remaining_chunks)
 
-                stderr_fd = process.stderr.fileno()
                 remaining_stderr_chunks = []
                 while True:
                     try:
@@ -271,47 +278,70 @@ def stream_process_output(
                     stderr_total = _append(stderr_parts, stderr_total, remaining_stderr, "stderr")
                 break
 
-            # Use select to wait for data with timeout
-            readable = select.select([stdout_fd], [], [], poll_interval)[0]
+            # Build the active read set. Once a stream reaches EOF we drop it
+            # so select() doesn't spin on a closed fd.
+            read_fds = []
+            if not stdout_eof:
+                read_fds.append(stdout_fd)
+            if not stderr_eof:
+                read_fds.append(stderr_fd)
 
-            if readable:
+            if not read_fds:
+                # Both streams closed but process still hasn't exited.
+                # Give it a moment, then escalate to kill so the next poll()
+                # iteration takes the drain-and-exit branch above.
+                try:
+                    process.wait(timeout=2.0)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                continue
+
+            # Use select to wait for data with timeout
+            readable = select.select(read_fds, [], [], poll_interval)[0]
+
+            for fd in readable:
                 # Use os.read() for truly non-blocking reads.
                 # process.stdout.read(n) uses TextIOWrapper which internally
                 # loops to accumulate n chars, blocking on the pipe even after
                 # select() returns readable.
-                raw_bytes = os.read(stdout_fd, 4096)
+                raw_bytes = os.read(fd, 4096)
                 if not raw_bytes:
-                    # EOF reached: stdout closed before process exited.
-                    # Wait for process to exit so the next iteration's
-                    # process.poll() check enters the drain branch above
-                    # instead of spinning on select() over a closed fd.
-                    try:
-                        process.wait(timeout=2.0)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
+                    # EOF on this stream. Mark it closed and stop selecting
+                    # on it; the other stream may still have data, and the
+                    # process.poll() branch will run the final drain.
+                    if fd == stdout_fd:
+                        stdout_eof = True
+                    else:
+                        stderr_eof = True
                     continue
 
                 chunk = raw_bytes.decode("utf-8", errors="replace")
 
-                # Accumulate for final parsing (capped to avoid memory exhaustion)
-                stdout_total = _append(stdout_parts, stdout_total, chunk, "stdout")
+                if fd == stdout_fd:
+                    # Accumulate for final parsing (capped to avoid memory exhaustion)
+                    stdout_total = _append(stdout_parts, stdout_total, chunk, "stdout")
 
-                # Incomplete line handling: Buffer partial lines until newline arrives
-                # - incomplete_line holds text from previous read that didn't end with \n
-                # - Prepend it to current chunk to reassemble the full line
-                # - lines[-1] becomes the new incomplete_line (empty string if chunk ended with \n)
-                # - This ensures callbacks always receive complete lines
-                # Process lines for callback
-                data = incomplete_line + chunk
-                lines = data.split("\n")
+                    # Incomplete line handling: Buffer partial lines until newline arrives
+                    # - incomplete_line holds text from previous read that didn't end with \n
+                    # - Prepend it to current chunk to reassemble the full line
+                    # - lines[-1] becomes the new incomplete_line (empty string if chunk ended with \n)
+                    # - This ensures callbacks always receive complete lines
+                    data = incomplete_line + chunk
+                    lines = data.split("\n")
 
-                # The last element might be incomplete (no newline yet)
-                incomplete_line = lines[-1]
+                    # The last element might be incomplete (no newline yet)
+                    incomplete_line = lines[-1]
 
-                # Process complete lines
-                for line in lines[:-1]:
-                    if line:  # Skip empty lines
-                        on_line(line)
+                    # Process complete lines
+                    for line in lines[:-1]:
+                        if line:  # Skip empty lines
+                            on_line(line)
+                else:
+                    # stderr: accumulate only (no line callback). Both parsers
+                    # in scanner.py and daemon_scanner.py operate on stdout only,
+                    # and routing stderr ERROR-suffixed lines into on_line would
+                    # corrupt the progress counter.
+                    stderr_total = _append(stderr_parts, stderr_total, chunk, "stderr")
 
     except OSError as e:
         logger.warning("Error streaming process output: %s", e)

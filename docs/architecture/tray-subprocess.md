@@ -146,13 +146,14 @@ graph TB
 - Standalone Python script that runs in separate process
 - Implements StatusNotifierItem (SNI) D-Bus protocol using GIO's D-Bus API
 - Creates context menu using `Dbusmenu.Server` (libdbusmenu-glib)
+- Exposes both icon names and IconPixmap fallback data for stricter tray hosts
 - Runs background thread to read stdin for commands
 - Uses `GLib.idle_add()` to schedule updates on GLib main loop
 - Sends JSON events to stdout
 
 #### D-Bus Integration
 
-- **StatusNotifierItem**: Registers as `org.kde.StatusNotifierItem` on session bus
+- **StatusNotifierItem**: Exports `/StatusNotifierItem` and registers that object path with the watcher, so the host uses the connection's unique bus name
 - **DBusMenu**: Exports context menu via `com.canonical.dbusmenu` protocol
 - **Supported DEs**: KDE Plasma, Cinnamon, XFCE (with SNI plugin), MATE, Budgie
 - Updates icon based on protection status via D-Bus property changes
@@ -225,7 +226,7 @@ sequenceDiagram
     App->>TrayMgr: start()
     TrayMgr->>TrayService: spawn subprocess.Popen()
     activate TrayService
-    TrayService->>TrayService: Initialize GLib, Register SNI on D-Bus, Create DBusMenu
+    TrayService->>TrayService: Initialize GLib, export SNI object, register path with watcher, create DBusMenu
     TrayService-->>Pipe: {"event": "ready"}
     Pipe-->>TrayMgr: ready event
     TrayMgr->>TrayMgr: _ready = True
@@ -411,7 +412,7 @@ Sent via **stdout** from the subprocess:
    )
    ```
 3. **TrayManager** starts stdout/stderr reader threads
-4. **TrayService** registers SNI on D-Bus and creates DBusMenu
+4. **TrayService** exports the SNI object, registers `/StatusNotifierItem` with the watcher, and creates DBusMenu
 5. **TrayService** sends `{"event": "ready"}` to stdout
 6. **TrayManager** receives ready event and sets `_ready = True`
 

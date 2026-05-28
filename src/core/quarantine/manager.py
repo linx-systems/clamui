@@ -12,6 +12,8 @@ Orchestrates the QuarantineDatabase and SecureFileHandler to provide:
 """
 
 import logging
+import os
+import stat
 import threading
 import time
 from collections.abc import Callable
@@ -151,8 +153,11 @@ class QuarantineManager:
             ...     print(f"Quarantined at: {result.entry.quarantine_path}")
         """
         with self._lock:
-            source = Path(file_path).resolve()
-            source_str = str(source)
+            # Use abspath, not resolve(): resolve() follows symlinks, which would let an
+            # attacker swap the scanned file for a symlink between scan and quarantine,
+            # bypassing the O_NOFOLLOW guard in move_to_quarantine(). abspath() normalises
+            # . and .. components without dereferencing any symlink in the path.
+            source_str = os.path.abspath(file_path)
 
             # Move file to quarantine (duplicate paths allowed - each gets unique ID)
             file_result = self._file_handler.move_to_quarantine(source_str, threat_name)
@@ -544,9 +549,15 @@ class QuarantineManager:
         if entry is None:
             return (False, _("Quarantine entry not found: {id}").format(id=entry_id))
 
-        quarantine_path = Path(entry.quarantine_path)
-        if not quarantine_path.exists():
+        # lstat() does not follow symlinks — a symlink in the quarantine dir
+        # would not be treated as a present regular file.
+        try:
+            st = os.lstat(entry.quarantine_path)
+        except OSError:
             return (False, f"Quarantine file missing: {entry.quarantine_path}")
+
+        if not stat.S_ISREG(st.st_mode):
+            return (False, f"Quarantine path is not a regular file: {entry.quarantine_path}")
 
         return (True, None)
 
@@ -568,8 +579,14 @@ class QuarantineManager:
             removed_count = 0
 
             for entry in entries:
-                quarantine_path = Path(entry.quarantine_path)
-                if not quarantine_path.exists():
+                # lstat() does not follow symlinks — avoids a stale symlink in the
+                # quarantine dir masking a missing file.
+                try:
+                    st = os.lstat(entry.quarantine_path)
+                    file_present = stat.S_ISREG(st.st_mode)
+                except OSError:
+                    file_present = False
+                if not file_present:
                     logger.warning(
                         "Removing orphaned quarantine entry %d: file missing at %s",
                         entry.id,

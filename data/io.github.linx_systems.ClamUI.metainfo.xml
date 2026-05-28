@@ -31,39 +31,39 @@
     <screenshots>
         <screenshot type="default">
             <caption>Main application window</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/main_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/main_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Scan results display</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/main_view_with_scan_result.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/main_view_with_scan_result.png</image>
         </screenshot>
         <screenshot>
             <caption>Analysis view</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/analysis_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/analysis_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Components view</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/components_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/components_view.png</image>
         </screenshot>
         <screenshot>
             <caption>System security audit</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/audit_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/audit_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Configuration settings</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/config_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/config_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Scan history</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/history_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/history_view.png</image>
         </screenshot>
         <screenshot>
             <caption>Profile management</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/profile_management.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/profile_management.png</image>
         </screenshot>
         <screenshot>
             <caption>Quarantine management</caption>
-            <image>https://github.com/linx-systems/clamui/raw/v0.1.8/screenshots/quarantine_view.png</image>
+            <image>https://github.com/linx-systems/clamui/raw/v0.1.7/screenshots/quarantine_view.png</image>
         </screenshot>
     </screenshots>
 
@@ -100,6 +100,19 @@
     </keywords>
 
     <releases>
+        <release version="0.2.0" date="2026-05-28">
+            <description>
+                <p>Portmaster privacy-filter audit, quarantine restore hardening, and scanner reliability fixes</p>
+                <ul>
+                    <li>Add an optional Portmaster privacy-filter check to the security audit that reports running, installed, or not-installed status and per-module health without affecting summary counts when Portmaster is absent</li>
+                    <li>Harden quarantine restore handling against unsafe path and metadata manipulation (GHSA-xhhj-qvvr-vhwq)</li>
+                    <li>Fix full scans hanging mid-run by draining ClamAV stderr concurrently with stdout so the scanner no longer deadlocks on a full pipe buffer</li>
+                    <li>Improve system-tray compatibility under Flatpak and stricter StatusNotifierItem hosts (Plasma 6, Ayatana, xapp-sn-watcher) with ARGB icon fallbacks and attention-icon handling</li>
+                    <li>Document installation via AppMan / AM in the install guide</li>
+                    <li>Refresh Python and Flatpak runtime dependencies, including cryptography, urllib3, certifi, packaging, and PyGObject</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.1.8" date="2026-05-07">
             <description>
                 <p>Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish translation support</p>

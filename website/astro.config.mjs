@@ -1,12 +1,14 @@
 import { defineConfig } from "astro/config";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://clamui.com",
   base: "/",
   output: "static",
   compressHTML: true,
-  integrations: [tailwind({ applyBaseStyles: false })],
+  vite: {
+    plugins: [tailwindcss()],
+  },
   build: {
     inlineStylesheets: "auto",
   },

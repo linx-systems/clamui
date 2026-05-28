@@ -4,6 +4,11 @@
 import subprocess
 from unittest.mock import MagicMock, patch
 
+from src.core.portmaster_client import (
+    PortmasterModuleRow,
+    PortmasterProbeResult,
+    PortmasterStatus,
+)
 from src.core.system_audit import (
     TIER1_CHECKS,
     AuditCategory,
@@ -19,6 +24,7 @@ from src.core.system_audit import (
     check_firewall,
     check_intrusion_detection,
     check_mac_framework,
+    check_portmaster,
     check_ssh_hardening,
     run_lynis_audit,
     run_rootkit_check,
@@ -499,7 +505,7 @@ class TestTier1ChecksList:
     """Verify TIER1_CHECKS contains all expected functions."""
 
     def test_contains_all_checks(self):
-        assert len(TIER1_CHECKS) == 6
+        assert len(TIER1_CHECKS) == 7
         func_names = [f.__name__ for f in TIER1_CHECKS]
         assert "check_clamav_health" in func_names
         assert "check_firewall" in func_names
@@ -507,3 +513,78 @@ class TestTier1ChecksList:
         assert "check_auto_updates" in func_names
         assert "check_intrusion_detection" in func_names
         assert "check_ssh_hardening" in func_names
+        assert "check_portmaster" in func_names
+
+
+class TestCheckPortmaster:
+    """Tests for check_portmaster — must NEVER produce FAIL or WARNING when
+    Portmaster is simply not present (this is the contract enforced by the
+    user requirement 'if not detected or found it should not raise any flags').
+    """
+
+    @patch("src.core.system_audit.get_portmaster_token", return_value=None)
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_not_installed_is_skipped_only(self, mock_probe, mock_token):
+        mock_probe.return_value = PortmasterProbeResult(status=PortmasterStatus.NOT_INSTALLED)
+        section = check_portmaster()
+        assert section.category == AuditCategory.PORTMASTER
+        assert section.overall_status == AuditStatus.SKIPPED
+        # Critical invariant: never FAIL or WARNING when absent.
+        assert not any(c.status in (AuditStatus.FAIL, AuditStatus.WARNING) for c in section.checks)
+
+    @patch("src.core.system_audit.get_portmaster_token", return_value=None)
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_installed_not_running_is_warning(self, mock_probe, mock_token):
+        mock_probe.return_value = PortmasterProbeResult(
+            status=PortmasterStatus.INSTALLED_NOT_RUNNING
+        )
+        section = check_portmaster()
+        assert section.overall_status == AuditStatus.WARNING
+        assert any(c.install_command == "sudo systemctl start portmaster" for c in section.checks)
+
+    @patch("src.core.system_audit.get_portmaster_token", return_value=None)
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_running_without_token_offers_authorize(self, mock_probe, mock_token):
+        mock_probe.return_value = PortmasterProbeResult(status=PortmasterStatus.RUNNING)
+        section = check_portmaster()
+        assert section.overall_status == AuditStatus.PASS
+        # Without a token we should offer the Authorize sentinel.
+        assert any(c.launch_command == "__portmaster_authorize__" for c in section.checks)
+
+    @patch("src.core.system_audit.get_portmaster_token", return_value="cached-token")
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_running_with_modules_renders_module_rows(self, mock_probe, mock_token):
+        mock_probe.return_value = PortmasterProbeResult(
+            status=PortmasterStatus.RUNNING,
+            module_status={"core": {"Status": "online"}},
+            module_rows=[
+                PortmasterModuleRow(name="core", status="online"),
+                PortmasterModuleRow(name="filter", status="error", failure_msg="boom"),
+            ],
+        )
+        section = check_portmaster()
+        names = [c.name for c in section.checks]
+        assert "core" in names
+        assert "filter" in names
+        assert any(c.status == AuditStatus.FAIL and c.name == "filter" for c in section.checks)
+
+    @patch("src.core.system_audit.delete_portmaster_token")
+    @patch("src.core.system_audit.get_portmaster_token", return_value="stale-token")
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_stale_token_is_cleared(self, mock_probe, mock_token, mock_delete):
+        mock_probe.return_value = PortmasterProbeResult(
+            status=PortmasterStatus.RUNNING,
+            modules_unauthorized=True,
+        )
+        check_portmaster()
+        mock_delete.assert_called_once()
+
+    @patch("src.core.system_audit.get_portmaster_token", return_value=None)
+    @patch("src.core.system_audit.probe_portmaster")
+    def test_error_is_unknown_not_fail(self, mock_probe, mock_token):
+        mock_probe.return_value = PortmasterProbeResult(
+            status=PortmasterStatus.ERROR, error="connection reset"
+        )
+        section = check_portmaster()
+        assert section.overall_status == AuditStatus.UNKNOWN
+        assert not any(c.status == AuditStatus.FAIL for c in section.checks)

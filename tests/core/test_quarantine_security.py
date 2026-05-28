@@ -19,9 +19,7 @@ from pathlib import Path
 import pytest
 
 from src.core.quarantine.database import QuarantineDatabase, QuarantineEntry
-from src.core.quarantine.file_handler import (
-    _atomic_create_at_destination,
-)
+from src.core.quarantine.file_handler import SecureFileHandler, FileOperationStatus
 from src.core.quarantine.manager import QuarantineManager
 
 
@@ -88,13 +86,17 @@ class TestRestoreSymlinkAttack:
         with open(target, "rb") as f:
             assert hashlib.sha256(f.read()).hexdigest() == target_hash_before
 
-    def test_atomic_create_O_NOFOLLOW_rejects_symlink_dst(self, temp_dir):
-        """Direct test of helper: O_NOFOLLOW must reject pre-existing symlink at dst."""
-        # Create a "source" file inside the quarantine dir.
-        src = Path(temp_dir) / "source.bin"
-        src.write_bytes(b"source content")
+    def test_O_NOFOLLOW_rejects_symlink_dst(self, temp_dir):
+        """O_CREAT|O_EXCL|O_NOFOLLOW must refuse a pre-existing symlink at dst
+        and leave the real target file completely untouched."""
+        quarantine_dir = Path(temp_dir) / "quarantine"
+        quarantine_dir.mkdir(mode=0o700)
+        handler = SecureFileHandler(str(quarantine_dir))
 
-        # Real existing target the symlink points at.
+        quarantine_file = quarantine_dir / "abc123_malware.bin"
+        quarantine_file.write_bytes(b"malware content")
+        os.chmod(quarantine_file, 0o400)
+
         real_target = Path(temp_dir) / "real_target.bin"
         real_target.write_bytes(b"untouched")
 
@@ -103,10 +105,11 @@ class TestRestoreSymlinkAttack:
         dst_path = dst_dir / "victim.bin"
         os.symlink(str(real_target), str(dst_path))
 
-        with pytest.raises(OSError):
-            _atomic_create_at_destination(src, dst_path, 0o644)
+        result = handler.restore_from_quarantine(str(quarantine_file), str(dst_path))
 
-        # real_target must be untouched (still 'untouched')
+        assert result.status != FileOperationStatus.SUCCESS, (
+            "restore must refuse to create a file via a pre-existing symlink"
+        )
         assert real_target.read_bytes() == b"untouched"
 
 

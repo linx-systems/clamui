@@ -474,6 +474,15 @@ details, see [SIGNING.md](./SIGNING.md).
 ./ClamUI-*.AppImage --appimage-signature
 ```
 
+- Install via [AppMan](https://github.com/ivan-hc/AppMan) (rootless)
+  ```bash
+  appman -i clamui
+  ```
+- Install via [AM](https://github.com/ivan-hc/AM)
+  ```bash
+  am -i clamui
+  ```
+
 ### Debian Package
 
 ```bash

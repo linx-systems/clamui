@@ -1,40 +1,30 @@
-# ClamUI v0.1.8
+# ClamUI v0.2.0
 
-Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish translation support.
+Portmaster privacy-filter audit integration, quarantine restore hardening, and scanner reliability fixes.
 
 ## Highlights
 
+### Security Audit
+
+- **Portmaster privacy-filter check** — a new optional section in the system security audit probes the local Portmaster API (`127.0.0.1:817`) to report whether Portmaster is running, installed-but-stopped, or not installed, and shows per-module health when an API token is available. It uses Portmaster's own in-app authorization flow (no manual token paste), stores tokens in the system keyring, and only ever produces `SKIPPED` — never `FAIL`/`WARNING` — so it never pollutes the audit summary on systems without Portmaster.
+
 ### Security Hardening
 
-- Closed two privileged config-save escalation bugs by routing native and Flatpak config writes through one validated helper path
-- Added UID-checked staging directories, `O_NOFOLLOW` source validation, destination allowlisting, and atomic config installs for `clamui-apply-preferences`
-- Prevented ClamAV scan path arguments from being interpreted as command-line flags by inserting `--` before user-selected paths
-- Masked stored quarantine permissions to regular mode bits so restore cannot reapply setuid, setgid, or sticky bits
-- Refused symlink restore destinations and added no-follow restore fallback handling for cross-filesystem quarantine restores
-- Hardened scheduled-scan crontab updates so unrelated user crontab entries are not removed by marker-like text
-
-### Flatpak & Packaging
-
-- Flatpak now requires host ClamAV tools instead of bundling ClamAV, keeping virus database ownership on the host system
-- Fixed Flatpak daemon file-list scans so `clamdscan` receives host-visible paths correctly
-- Improved host ClamAV detection, config access, updater behavior, and audit checks from inside the Flatpak sandbox
-- Refreshed Python dependency locks and Flatpak runtime pins, including `cryptography 48.0.0`, `packaging 26.2`, and `more-itertools 11.0.2`
-- Added a draft GitHub release workflow for tag-triggered release artifacts
+- **Quarantine restore hardening** (GHSA-xhhj-qvvr-vhwq) — reworked quarantine file handling to close path- and metadata-handling vulnerabilities in the restore flow.
 
 ### Reliability & UX
 
-- Fixed an updater gettext regression that could break force-update error handling
-- Stopped live scanner output parsing from spinning at 100% CPU after stdout EOF
-- Restored tray profile menu updates and added crash detection with bounded tray subprocess respawns
-- Tracked delayed removable-device scan requeues so shutdown and removal can cancel pending scan starts
-- Cleaned up temporary EICAR self-test files on normal completion, errors, and process exit
-- Parsed timezone-aware scan timestamps consistently for statistics timeframes
-- Stored VirusTotal scan timestamps in UTC instead of local-naive time
-- Added visible ClamUI website links to the README and refreshed release workflow dependencies
+- **Scanner hang fixed** — full scans could freeze mid-run (reported around ~72%) when ClamAV filled its stderr pipe buffer with permission warnings and LibClamAV notices, blocking the child process. The scanner now drains stderr concurrently with stdout, with regression tests covering the deadlock. (Fixes #146)
+- **Tray reliability under Flatpak** — StatusNotifierItem registration reworked for stricter tray hosts (Plasma 6, Ayatana indicator, xapp-sn-watcher) and Flatpak's D-Bus proxy: registers the SNI object path instead of owning a well-known bus name, exposes ARGB32 icon-pixmap fallbacks, and mirrors the attention-icon so the correct icon renders.
 
-### Internationalization
+### Documentation
 
-- Added Spanish translation support, including `po/es.po` and `po/LINGUAS` registration
+- **INSTALL.md** now documents installation via AppMan / AM.
+
+### Maintenance
+
+- Website migrated to **Astro 6 + Tailwind 4** (Node ≥22.12), with the toolchain switched to a bun lockfile.
+- Refreshed Python and Flatpak runtime dependencies — cryptography 48, urllib3 2.7.0, certifi, packaging 26.2, idna 3.15, numpy, fonttools, PyGObject 3.56.3, and more (pins + wheel hashes regenerated).
 
 ## Install
 
@@ -43,9 +33,9 @@ Security hardening, Flatpak host-ClamAV fixes, tray reliability, and Spanish tra
 flatpak install flathub io.github.linx_systems.ClamUI
 ```
 
-**AppImage**: Download the `ClamUI-0.1.8-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.1.8). Existing AppImages can delta-update via zsync.
+**AppImage**: Download `ClamUI-0.2.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.2.0). Existing AppImages can delta-update via zsync.
 
-**GitHub Release**: Download from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.1.8)
+**GitHub Release**: Download from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.2.0)
 
 **From source**:
 ```bash
@@ -55,4 +45,4 @@ cd clamui && uv sync && uv run clamui
 
 ## Contributors
 
-Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.1.7...v0.1.8) for details.
+Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.1.8...v0.2.0) for details.
