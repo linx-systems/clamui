@@ -33,8 +33,10 @@ QuarantineManager (facade)
 - **SHA-256 integrity**: Hash computed on quarantine, verified on restore
 - **Atomic operations**: File move + DB insert in same logical transaction
 - **Thread safety**: `threading.Lock()` in manager, connection pool for DB
-- **Async pair**: `quarantine_async()` / `restore_async()` with `GLib.idle_add()` callbacks
-- **Permissions**: Quarantined files get `0o600`, quarantine dir gets `0o700`
+- **Async pair**: `quarantine_file_async()` / `restore_file_async()` / `delete_file_async()` / `get_all_entries_async()` with `GLib.idle_add()` callbacks
+- **Permissions**: Quarantined files get `0o400` (owner read-only), quarantine dir gets `0o700`, DB file (and WAL/SHM) `0o600`
+- **Outcome codes**: `QuarantineStatus` enum — `SUCCESS`, `FILE_NOT_FOUND`, `PERMISSION_DENIED`, `DISK_FULL`, `DATABASE_ERROR`, `ALREADY_QUARANTINED`, `ENTRY_NOT_FOUND`, `RESTORE_DESTINATION_EXISTS`, `INVALID_RESTORE_PATH`, `ERROR`
+- **ConnectionPool**: WAL mode, default `pool_size=5`
 
 ## Where to Look
 
@@ -49,4 +51,4 @@ QuarantineManager (facade)
 
 - **Direct DB access**: Always go through `QuarantineManager` — it coordinates file + DB ops
 - **Skipping hash verify**: Always verify SHA-256 before restore (integrity check)
-- **Missing permissions**: Quarantined files MUST be `0o600`, dir MUST be `0o700`
+- **Missing permissions**: Quarantined files MUST be `0o400`, dir MUST be `0o700`, DB file MUST be `0o600`

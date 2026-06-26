@@ -5,6 +5,7 @@ Stores user settings in JSON format following XDG conventions.
 """
 
 import contextlib
+import copy
 import json
 import logging
 import os
@@ -142,16 +143,16 @@ class SettingsManager:
                         if not isinstance(loaded, dict):
                             # Non-dict JSON (arrays, null, primitives) is invalid
                             self._backup_corrupted_file()
-                            return dict(self.DEFAULT_SETTINGS)
+                            return copy.deepcopy(self.DEFAULT_SETTINGS)
                         # Merge with defaults to ensure all keys exist
-                        return {**self.DEFAULT_SETTINGS, **loaded}
+                        return {**copy.deepcopy(self.DEFAULT_SETTINGS), **loaded}
             except json.JSONDecodeError:
                 # Handle corrupted files - backup for debugging
                 self._backup_corrupted_file()
             except (OSError, PermissionError):
                 # Handle permission issues silently
                 logger.debug("Failed to load settings file %s", self._settings_file, exc_info=True)
-            return dict(self.DEFAULT_SETTINGS)
+            return copy.deepcopy(self.DEFAULT_SETTINGS)
 
     def save(self) -> bool:
         """
@@ -281,7 +282,7 @@ class SettingsManager:
         changed_values: dict[str, Any] = {}
         with self._lock:
             previous_settings = dict(self._settings)
-            self._settings = dict(self.DEFAULT_SETTINGS)
+            self._settings = copy.deepcopy(self.DEFAULT_SETTINGS)
             changed_keys = set(previous_settings) | set(self._settings)
             for key in changed_keys:
                 new_value = self._settings.get(key)

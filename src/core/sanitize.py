@@ -24,7 +24,7 @@ ANSI_ESCAPE_PATTERN = re.compile(
         [0-9;]*  # Optional numeric parameters separated by semicolons
         [a-zA-Z] # Final character (command)
     |
-        [^[]   # Other ESC sequences (not CSI)
+        [@A-Z\\\]^_]   # Other ESC: ESC + one Fe final byte (0x40-0x5F, excl. '['); leaves a lone ESC for the control-char pass to strip, so newlines/printables after a stray ESC are preserved
     )
     """,
     re.VERBOSE,
@@ -33,7 +33,8 @@ ANSI_ESCAPE_PATTERN = re.compile(
 # Unicode bidirectional override characters that can be used to obscure text
 # U+202A - U+202E: LRE, RLE, PDF, LRO, RLO (deprecated but still supported)
 # U+2066 - U+2069: LRI, RLI, FSI, PDI (modern equivalents)
-UNICODE_BIDI_PATTERN = re.compile(r"[\u202A-\u202E\u2066-\u2069]")
+# U+200E, U+200F: LRM, RLM (bidi marks); U+061C: ALM (Arabic letter mark)
+UNICODE_BIDI_PATTERN = re.compile(r"[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]")
 
 # Sensitive value placeholders used across runtime and persisted logs.
 REDACTED_PATH = "[REDACTED_PATH]"
@@ -222,9 +223,15 @@ def sanitize_log_line(text: str | None) -> str:
         # reading non-UTF-8 filenames with surrogateescape error handling
         if 0xD800 <= code <= 0xDFFF:
             continue
+        # Unicode line separators (NEL, LS, PS) are treated as line breaks by
+        # str.splitlines(); map them to space so they cannot inject log lines.
+        if char in ("\u0085", "\u2028", "\u2029"):
+            result.append(" ")
+            continue
         # Keep printable characters (>= 0x20) and tab (0x09)
-        # Skip all other control characters (0x00-0x1F except 0x09) and DEL (0x7F)
-        if code >= 0x20 or code == 0x09:
+        # Skip all other control characters (0x00-0x1F except 0x09), DEL (0x7F),
+        # and C1 controls (0x80-0x9F, including the 8-bit CSI U+009B)
+        if (code >= 0x20 or code == 0x09) and not (0x80 <= code <= 0x9F):
             if code != 0x7F:  # Skip DEL character
                 result.append(char)
         # Control characters (including newlines) are replaced with space
@@ -281,8 +288,15 @@ def sanitize_log_text(text: str | None) -> str:
         # reading non-UTF-8 filenames with surrogateescape error handling
         if 0xD800 <= code <= 0xDFFF:
             continue
-        # Keep printable characters (>= 0x20) and safe whitespace
-        if code >= 0x20:
+        # Unicode line separators (NEL, LS, PS) are treated as line breaks by
+        # str.splitlines(); map them to space rather than preserving them as
+        # newlines (only LF/CR are legitimate line breaks here).
+        if char in ("\u0085", "\u2028", "\u2029"):
+            result.append(" ")
+            continue
+        # Keep printable characters (>= 0x20) and safe whitespace; drop C1
+        # controls (0x80-0x9F, including the 8-bit CSI U+009B)
+        if code >= 0x20 and not (0x80 <= code <= 0x9F):
             if code != 0x7F:  # Skip DEL character
                 result.append(char)
         elif code in (0x09, 0x0A, 0x0D):  # Keep tab, LF, CR

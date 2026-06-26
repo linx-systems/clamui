@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "clamui"
-version = "0.2.0"
+version = "0.3.0"
 description = "A modern Linux desktop application that provides a graphical user interface for the ClamAV antivirus command-line tool."
 readme = "README.md"
 license = "MIT"
@@ -29,10 +29,10 @@ dependencies = [
     "PyGObject>=3.56.3",
     "pycairo>=1.29.0",
     "psutil>=7.2.2",
-    "matplotlib>=3.10.9",
+    "matplotlib>=3.11.0",
     "requests>=2.34.2",
     "urllib3>=2.7.0",
-    "certifi>=2026.5.20",
+    "certifi>=2026.6.17",
     "keyring>=25.7.0",
     "Pillow>=12.2.0",
     "cairosvg>=2.9.0",
@@ -40,11 +40,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=9.0.3",
+    "pytest>=9.1.1",
     "pytest-mock>=3.15.1",
     "pytest-cov>=7.1.0",
-    "hypothesis>=6.153.2",
-    "ruff>=0.15.14",
+    "hypothesis>=6.155.7",
+    "ruff>=0.15.19",
     "pygobject-stubs>=2.17.0",
 ]
 
@@ -126,6 +126,7 @@ ignore = [
 "src/main.py" = ["T201"]              # Startup diagnostic
 "src/core/logging_config.py" = ["T201"] # Fallback when logger itself fails
 "src/core/log_manager.py" = ["T201"]   # Export error handling
+"tests/e2e/_gui_construction_probe.py" = ["T201"]  # standalone diagnostic probe
 "tests/**/*.py" = ["S101", "S105", "S106", "S107", "PT006", "PT008", "PT011", "PT018", "PT021", "PT022"]  # assert + test credentials + pytest style
 
 [tool.ruff.lint.isort]
@@ -183,11 +184,11 @@ directory = "htmlcov"
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.3",
+    "pytest>=9.1.1",
     "pytest-mock>=3.15.1",
     "pytest-cov>=7.1.0",
-    "hypothesis>=6.153.2",
-    "ruff>=0.15.14",
+    "hypothesis>=6.155.7",
+    "ruff>=0.15.19",
     "pygobject-stubs>=2.17.0",
 ]
 

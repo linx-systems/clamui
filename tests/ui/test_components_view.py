@@ -210,6 +210,32 @@ class TestCheckComponents:
         mock_clam.assert_not_called()
         _clear_src_modules()
 
+    @patch("src.ui.components_view.check_clamav_installed")
+    def test_check_background_failure_still_schedules_ui_reset(self, mock_clam, mock_gi_modules):
+        """A raising check must not strand the spinner.
+
+        Without a try/finally the worker thread dies before scheduling the UI
+        update, so _set_checking_state(False) never runs and the spinner spins
+        forever. The UI reset must still be scheduled with whatever results
+        were collected (here: none).
+        """
+        import src.ui.components_view as cv
+
+        ComponentsView, *_ = _import_view(mock_gi_modules)
+        view = _create_view(ComponentsView)
+        view._is_checking = True
+
+        mock_clam.side_effect = RuntimeError("subprocess blew up")
+
+        with patch.object(cv, "GLib") as mock_glib:
+            # Must not propagate the exception out of the worker.
+            view._check_components_background()
+            # The main-thread UI update (which resets the checking state) is
+            # still scheduled, with partial/empty results.
+            mock_glib.idle_add.assert_called_once_with(view._update_components_ui, {})
+
+        _clear_src_modules()
+
 
 class TestSetCheckingState:
     """Test _set_checking_state UI updates."""

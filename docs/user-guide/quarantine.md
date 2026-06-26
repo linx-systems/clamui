@@ -166,6 +166,13 @@ Click any quarantined file entry to expand it and see complete details:
 
 #### List Features
 
+**Search**:
+
+- A search box sits at the top of the list (placeholder *"Search by threat name or path..."*)
+- Filters entries by **case-insensitive substring** match against both the threat name and the original path
+- The header count switches to *"X of Y items"* while a search is active; the total size always reflects the full quarantine
+- If nothing matches, a **"No matching entries"** placeholder appears
+
 **Pagination** (for large lists):
 
 - **Initial display**: First 25 entries shown automatically
@@ -525,6 +532,24 @@ automatically remove files older than 30 days.
 ⚠️ **Warning**: The 30-day threshold is **fixed** and cannot be customized in the current version. If you want to keep
 files longer, don't use this feature - delete files individually instead.
 
+### Managing Quarantine from the Command Line
+
+ClamUI ships a headless `clamui quarantine` subcommand for managing isolated files without opening the GUI — useful over SSH or in scripts:
+
+```bash
+# List all quarantined files (add --json for machine-readable output)
+clamui quarantine list
+clamui quarantine list --json
+
+# Restore a quarantined file to its original location (by entry ID)
+clamui quarantine restore 42
+
+# Permanently delete a quarantined file (by entry ID)
+clamui quarantine delete 42
+```
+
+The numeric **ID** comes from the first column of `clamui quarantine list`. Restore performs the same SHA-256 integrity check as the GUI and refuses if a file already exists at the destination.
+
 ### Understanding Quarantine Storage
 
 Quarantined files are stored securely on your system. Understanding where and how they're stored helps with
@@ -571,13 +596,14 @@ This SQLite database stores metadata for each quarantined file:
 When you quarantine a file, ClamUI:
 
 1. **Generates a unique filename**:
-    - Uses timestamp + random identifier
-    - Example: `quarantined_20240115_143022_a3f9d8e1`
-    - Original filename is NOT preserved in storage
+    - Prefixes a random 16-character hex identifier (from a UUID) to the original filename
+    - Example: `a3f9d8e1c2b40f17_virus.exe`
+    - The original filename is preserved as a suffix for easier identification
 
-2. **Moves the file**:
+2. **Moves the file atomically**:
     - From original location (e.g., `/home/user/Downloads/virus.exe`)
-    - To quarantine directory (e.g., `~/.local/share/clamui/quarantine/quarantined_20240115_143022_a3f9d8e1`)
+    - To quarantine directory (e.g., `~/.local/share/clamui/quarantine/a3f9d8e1c2b40f17_virus.exe`)
+    - Uses an `O_NOFOLLOW` fd-based copy followed by unlink of the original (no symlink following)
 
 3. **Calculates SHA-256 hash**:
     - Creates a cryptographic fingerprint of the file
@@ -593,9 +619,9 @@ When you quarantine a file, ClamUI:
 ```
 ~/.local/share/clamui/
 ├── quarantine/
-│   ├── quarantined_20240115_143022_a3f9d8e1   (Win.Trojan.Generic)
-│   ├── quarantined_20240110_091530_b7e4f2c9   (PUA.Linux.Miner)
-│   └── quarantined_20240105_182045_c1d8a3f7   (Eicar-Test-Signature)
+│   ├── a3f9d8e1c2b40f17_suspicious.exe   (Win.Trojan.Generic)
+│   ├── b7e4f2c9d1086a35_crypto-miner     (PUA.Linux.Miner)
+│   └── c1d8a3f70e92b461_eicar.txt        (Eicar-Test-Signature)
 └── quarantine.db                               (Metadata database)
 ```
 
@@ -603,14 +629,17 @@ When you quarantine a file, ClamUI:
 
 **Security measures**:
 
-- Quarantine directory has restricted permissions (user-only access)
-- Files cannot execute from quarantine (standard file permissions)
-- No special attributes needed - isolation is through location and database tracking
+- The quarantine directory itself is owner-only (`0o700`); no other user can list or enter it
+- Quarantined files are stored **owner read-only** (`0o400`) so they cannot be executed or modified in place
+- All file operations use `O_NOFOLLOW` (symlinks are rejected) and an atomic fd-based copy-then-unlink — never a plain move — to close TOCTOU races
+- The metadata database and its WAL/SHM sidecar files are owner read/write only (`0o600`)
+- Isolation is enforced by both location and restrictive permissions, not just database tracking
 
 **Default permissions**:
 
-- Directory: `700` (rwx------, owner read/write/execute only)
-- Files: Preserve original permissions but cannot execute from this location
+- Quarantine directory (`quarantine/`): `700` (rwx------, owner only)
+- Quarantined files: `400` (r--------, owner read-only — cannot execute)
+- Metadata database (`quarantine.db`) and WAL/SHM files: `600` (rw-------, owner read/write)
 
 #### Storage Considerations
 
@@ -692,13 +721,13 @@ If you installed ClamUI via **Flatpak**, the quarantine location is different:
 **Flatpak Quarantine Directory**:
 
 ```
-~/.var/app/io.github.dave-kennedy.ClamUI/data/clamui/quarantine/
+~/.var/app/io.github.linx_systems.ClamUI/data/clamui/quarantine/
 ```
 
 **Flatpak Database**:
 
 ```
-~/.var/app/io.github.dave-kennedy.ClamUI/data/clamui/quarantine.db
+~/.var/app/io.github.linx_systems.ClamUI/data/clamui/quarantine.db
 ```
 
 **Accessing Flatpak quarantine**:
@@ -758,7 +787,8 @@ If output appears, you're using the Flatpak version.
 ```bash
 # Fix quarantine directory permissions:
 chmod 700 ~/.local/share/clamui/quarantine/
-chmod 644 ~/.local/share/clamui/quarantine.db
+chmod 400 ~/.local/share/clamui/quarantine/*
+chmod 600 ~/.local/share/clamui/quarantine.db
 ```
 
 ---

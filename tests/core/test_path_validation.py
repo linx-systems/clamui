@@ -99,6 +99,34 @@ class TestCheckSymlinkSafety:
         assert message is not None
         assert "protected directory" in message.lower()
 
+    def test_check_symlink_safety_resolves_to_var_tmp_is_safe(self, tmp_path):
+        """Test symlink resolving under /var/tmp is allowed (not falsely rejected as /var)."""
+        var_tmp = Path("/var/tmp")
+        if not var_tmp.is_dir():
+            import pytest
+
+            pytest.skip("/var/tmp not available on this system")
+        # Symlink in a user-writable dir (tmp_path is under /tmp) pointing into /var/tmp.
+        symlink_path = tmp_path / "vartmp_link"
+        symlink_path.symlink_to(var_tmp)
+
+        is_safe, message = check_symlink_safety(symlink_path)
+        assert is_safe is True
+        assert message is not None
+        assert "symlink" in message.lower()
+
+    def test_check_symlink_safety_escapes_to_var_lib_still_rejected(self, tmp_path):
+        """Test symlink escaping to /var/lib is still rejected (protection not weakened)."""
+        user_dir = tmp_path / "user"
+        user_dir.mkdir()
+        symlink_path = user_dir / "varlib_link"
+        symlink_path.symlink_to("/var/lib")
+
+        is_safe, message = check_symlink_safety(symlink_path)
+        assert is_safe is False
+        assert message is not None
+        assert "protected directory" in message.lower()
+
     def test_check_symlink_safety_symlink_outside_user_dirs(self, tmp_path):
         """Test check_symlink_safety allows symlinks outside user directories."""
         # Symlink in /opt pointing to /srv should be allowed (both are non-user dirs)

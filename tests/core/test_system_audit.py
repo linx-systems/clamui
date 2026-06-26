@@ -16,9 +16,13 @@ from src.core.system_audit import (
     AuditReport,
     AuditSectionResult,
     AuditStatus,
+    _check_open_ports,
     _check_systemd_service,
     _check_ufw_enabled,
+    _database_age_from_daemon,
+    _get_database_age,
     _parse_cvd_age,
+    _parse_sshd_config,
     check_auto_updates,
     check_clamav_health,
     check_firewall,
@@ -228,6 +232,89 @@ class TestParseCvdAge:
         assert days_old is None
         assert error is not None
 
+    def test_stime_followed_by_binary_payload(self, tmp_path):
+        """Regression: real .cld/.cvd files append the gzip-compressed payload
+        directly after the stime field with no delimiter.
+
+        ascii-decoding the raw 512-byte header (errors="ignore") drops bytes
+        >= 128 but keeps the many payload bytes that fall in 0-127 by chance,
+        appending them straight onto the stime digits. The old
+        strip().strip("\\x00") did not remove those arbitrary binary bytes, so
+        int(stime) raised ValueError and a healthy database was reported as
+        "age could not be determined". The fix takes only the leading digit run.
+        """
+        import time
+
+        build_ts = int(time.time()) - (3 * 86400)
+        header_text = f"ClamAV-VDB:24 Jun 2026:27000:2000000:90:md5:dsig:builder:{build_ts}"
+        # Binary payload appended directly after the stime digits -- NO null
+        # padding and NO newline, exactly as observed on a real daily.cld.
+        junk = b"\x1f\x08\x00\x1e-3<>i\x7f$2Yi\x01*X\x01wvi" + bytes(range(256)) * 2
+        cvd_file = tmp_path / "daily.cld"
+        cvd_file.write_bytes(header_text.encode("ascii") + junk)
+
+        days_old, date_str = _parse_cvd_age(str(cvd_file))
+        assert days_old == 3
+        assert date_str == "24 Jun 2026"
+
+
+class TestDatabaseAgeDaemonFallback:
+    """Tests for the daemon-based database-age fallback (issue #143).
+
+    When the database files are unreadable by the GUI user (e.g. Fedora
+    /var/lib/clamav is mode 0750 owned by clamupdate), the age is recovered by
+    asking the running daemon via ``clamdscan --version``.
+    """
+
+    @patch("src.core.system_audit._run_command")
+    def test_daemon_version_parsed_to_age(self, mock_run):
+        import time
+
+        # A build date ~2 days ago in clamdscan --version's format.
+        two_days_ago = time.strftime(
+            "%a %b %d %H:%M:%S %Y", time.localtime(time.time() - 2 * 86400)
+        )
+        mock_run.return_value = (0, f"ClamAV 1.0.3/27000/{two_days_ago}", "")
+
+        days_old, date_str = _database_age_from_daemon()
+
+        assert days_old is not None
+        assert days_old >= 1
+        assert date_str == two_days_ago
+        mock_run.assert_called_once_with(["clamdscan", "--version"])
+
+    @patch("src.core.system_audit._run_command")
+    def test_daemon_unavailable_returns_none(self, mock_run):
+        mock_run.return_value = (-1, "", "command not found")
+        assert _database_age_from_daemon() == (None, None)
+
+    @patch("src.core.system_audit._run_command")
+    def test_daemon_version_without_db_info_returns_none(self, mock_run):
+        # Daemon down: clamdscan prints just the program version, no /date.
+        mock_run.return_value = (0, "ClamAV 1.0.3", "")
+        assert _database_age_from_daemon() == (None, None)
+
+    @patch("src.core.system_audit._database_age_from_daemon")
+    @patch("src.core.system_audit._find_daily_cvd_path")
+    def test_get_database_age_falls_back_to_daemon(self, mock_find, mock_daemon):
+        # File not found / unreadable -> consult the daemon.
+        mock_find.return_value = None
+        mock_daemon.return_value = (2, "Thu May 28 09:00:00 2026")
+
+        assert _get_database_age() == (2, "Thu May 28 09:00:00 2026")
+        mock_daemon.assert_called_once()
+
+    @patch("src.core.system_audit._database_age_from_daemon")
+    @patch("src.core.system_audit._parse_cvd_age")
+    @patch("src.core.system_audit._find_daily_cvd_path")
+    def test_get_database_age_prefers_readable_file(self, mock_find, mock_parse, mock_daemon):
+        # A readable file header wins; the daemon is not consulted.
+        mock_find.return_value = "/var/lib/clamav/daily.cvd"
+        mock_parse.return_value = (1, "28 May 2026")
+
+        assert _get_database_age() == (1, "28 May 2026")
+        mock_daemon.assert_not_called()
+
 
 # =============================================================================
 # Check Function Tests
@@ -246,13 +333,17 @@ class TestCheckClamavHealth:
         # Should return early with just the installation check
         assert len(result.checks) == 1
 
+    @patch("src.core.system_audit._database_age_from_daemon")
     @patch("src.core.system_audit._check_systemd_service")
     @patch("src.core.system_audit.check_clamd_connection")
     @patch("src.core.system_audit._find_daily_cvd_path")
     @patch("src.core.system_audit.check_clamav_installed")
-    def test_clamav_healthy(self, mock_installed, mock_cvd_path, mock_clamd, mock_systemd):
+    def test_clamav_healthy(
+        self, mock_installed, mock_cvd_path, mock_clamd, mock_systemd, mock_daemon_age
+    ):
         mock_installed.return_value = (True, "ClamAV 1.0.0")
         mock_cvd_path.return_value = None
+        mock_daemon_age.return_value = (None, None)
         mock_clamd.return_value = (True, "PONG")
         # Simulate: clamav-daemon active on first call,
         # clamav-freshclam active on fourth call
@@ -323,6 +414,52 @@ class TestCheckFirewall:
         result = check_firewall()
         assert any(c.status == AuditStatus.FAIL for c in result.checks)
 
+    @patch("src.core.system_audit._check_firewall_gui")
+    @patch("src.core.system_audit._check_open_ports")
+    @patch("src.core.system_audit.is_binary_installed")
+    @patch("src.core.system_audit._run_command")
+    @patch("src.core.system_audit._check_systemd_service")
+    def test_firewalld_absent_not_reported_as_installed(
+        self, mock_systemd, mock_run_cmd, mock_binary, mock_ports, mock_gui
+    ):
+        """Under Flatpak, flatpak-spawn succeeds with a nonzero 'command not found'
+        when firewall-cmd is absent. We must NOT report 'installed but not running'
+        unless the binary actually exists."""
+        mock_systemd.return_value = (False, "inactive")
+        mock_run_cmd.return_value = (127, "", "command not found")
+        mock_binary.return_value = False  # firewall-cmd binary absent
+        mock_ports.return_value = None
+        mock_gui.return_value = None
+
+        result = check_firewall()
+        assert not any(
+            c.status == AuditStatus.WARNING and "Firewalld" in c.name for c in result.checks
+        )
+        # Falls through to the "no firewall" FAIL instead.
+        assert any(c.status == AuditStatus.FAIL for c in result.checks)
+
+
+class TestCheckOpenPorts:
+    """Tests for _check_open_ports function."""
+
+    @patch("src.core.system_audit.subprocess.run")
+    def test_multiline_ss_output_flags_risky_port(self, mock_run):
+        """Exercises the real _run_command sanitization: `ss` output has one
+        socket per line and every line must be parsed. Collapsing newlines into
+        one line means only field 4 of the first socket is read, so a risky port
+        on a later line (here 3389/RDP) is missed and never flagged FAIL."""
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout=(
+                "tcp   LISTEN 0 128 0.0.0.0:22   0.0.0.0:*\n"
+                "tcp   LISTEN 0 128 0.0.0.0:3389 0.0.0.0:*\n"
+            ),
+            stderr="",
+        )
+        section = AuditSectionResult(category=AuditCategory.FIREWALL, title="t", icon_name="i")
+        _check_open_ports(section)
+        assert any(c.status == AuditStatus.FAIL for c in section.checks)
+
 
 class TestCheckMacFramework:
     """Tests for check_mac_framework function."""
@@ -385,6 +522,61 @@ class TestCheckSshHardening:
         statuses = [c.status for c in result.checks]
         assert AuditStatus.FAIL in statuses
         assert AuditStatus.WARNING in statuses
+
+
+class TestParseSshdConfig:
+    """Tests for _parse_sshd_config function."""
+
+    @patch("src.core.system_audit.is_binary_installed", return_value=True)
+    @patch("src.core.system_audit._run_command")
+    def test_prefers_effective_config(self, mock_cmd, mock_binary):
+        """When sshd is available, parse the effective config from `sshd -T`."""
+        mock_cmd.return_value = (
+            0,
+            "permitrootlogin no\npasswordauthentication yes\n",
+            "",
+        )
+        settings = _parse_sshd_config()
+        assert settings == {
+            "permitrootlogin": "no",
+            "passwordauthentication": "yes",
+        }
+        mock_cmd.assert_called_once_with(["sshd", "-T"])
+
+    @patch("src.core.system_audit.is_binary_installed", return_value=False)
+    @patch("src.core.system_audit.is_flatpak", return_value=True)
+    @patch("src.core.system_audit._run_command")
+    def test_first_value_wins_and_stops_at_match(self, mock_cmd, mock_flatpak, mock_binary):
+        """sshd uses first-value-wins; directives after a Match block are ignored."""
+        config = (
+            "PermitRootLogin no\n"
+            "PermitRootLogin yes\n"  # duplicate: ignored (first wins)
+            "PasswordAuthentication no\n"
+            "Match User admin\n"
+            "X11Forwarding yes\n"  # after Match: must not be applied globally
+        )
+        mock_cmd.return_value = (0, config, "")
+        settings = _parse_sshd_config()
+        assert settings["permitrootlogin"] == "no"
+        assert settings["passwordauthentication"] == "no"
+        assert "x11forwarding" not in settings
+
+    @patch("src.core.system_audit.is_binary_installed", return_value=True)
+    @patch("src.core.system_audit.subprocess.run")
+    def test_effective_config_multiline_not_collapsed(self, mock_run, mock_binary):
+        """Exercises the real _run_command sanitization: `sshd -T` output is
+        multi-line and each directive must remain its own key. A single-line
+        sanitizer collapses newlines, merging every directive into one bogus key
+        and forcing defaults that can hide an insecure config (false-secure)."""
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="permitrootlogin yes\npasswordauthentication yes\nx11forwarding yes\n",
+            stderr="",
+        )
+        settings = _parse_sshd_config()
+        assert settings["permitrootlogin"] == "yes"
+        assert settings["passwordauthentication"] == "yes"
+        assert settings["x11forwarding"] == "yes"
 
 
 class TestCheckIntrustionDetection:
@@ -485,6 +677,22 @@ class TestRunRootkitCheck:
 
     @patch("src.core.system_audit.subprocess.run")
     @patch("src.core.system_audit._run_command")
+    def test_chkrootkit_nonzero_exit_is_not_clean(self, mock_cmd, mock_run):
+        """A non-zero chkrootkit exit means the scan did not complete; we must
+        report UNKNOWN, never a false 'No rootkits detected' PASS."""
+        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
+        mock_run.return_value = MagicMock(
+            returncode=2,
+            stdout="",
+            stderr="chkrootkit: cannot find a temporary directory\n",
+        )
+        result = run_rootkit_check()
+        statuses = [c.status for c in result.checks]
+        assert AuditStatus.UNKNOWN in statuses
+        assert not any(c.status == AuditStatus.PASS for c in result.checks)
+
+    @patch("src.core.system_audit.subprocess.run")
+    @patch("src.core.system_audit._run_command")
     def test_chkrootkit_infected(self, mock_cmd, mock_run):
         mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
         mock_run.return_value = MagicMock(
@@ -494,6 +702,26 @@ class TestRunRootkitCheck:
         )
         result = run_rootkit_check()
         assert any(c.status == AuditStatus.FAIL for c in result.checks)
+
+    @patch("src.core.system_audit.subprocess.run")
+    @patch("src.core.system_audit._run_command")
+    def test_chkrootkit_multiple_infected_counted_individually(self, mock_cmd, mock_run):
+        """Each INFECTED line must be parsed as a separate finding. Sanitizing the
+        whole multiline stdout with a single-line sanitizer collapses newlines and
+        would merge every finding into one, undercounting the rootkits."""
+        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout=(
+                "Checking `bindshell'... INFECTED\n"
+                "Checking `lkm'... INFECTED\n"
+                "Checking `sniffer'... INFECTED\n"
+            ),
+            stderr="",
+        )
+        result = run_rootkit_check()
+        findings = [c for c in result.checks if "INFECTED" in (c.detail or "")]
+        assert len(findings) == 3
 
 
 # =============================================================================

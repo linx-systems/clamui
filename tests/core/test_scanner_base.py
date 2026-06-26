@@ -539,7 +539,7 @@ class TestCollectClamavWarnings:
             "LibClamAV Error: index_local_file_headers_within_bounds: "
             "Invalid offset arguments: start_offset=123, end_offset=456, fsize=100\n"
         )
-        skipped, hard_errors = collect_clamav_warnings("", stderr)
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert hard_errors == []
         assert skipped == []
 
@@ -548,26 +548,26 @@ class TestCollectClamavWarnings:
         stderr = (
             "LibClamAV Error: Invalid offset arguments: start_offset=0, end_offset=0, fsize=50\n"
         )
-        skipped, hard_errors = collect_clamav_warnings("", stderr)
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert hard_errors == []
 
     def test_genuine_libclamav_error_still_hard_error(self):
         """Other LibClamAV Error lines should still be classified as hard errors."""
         stderr = "LibClamAV Error: Can't open database directory\n"
-        skipped, hard_errors = collect_clamav_warnings("", stderr)
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert len(hard_errors) == 1
         assert "Can't open database" in hard_errors[0]
 
     def test_ignorable_cli_realpath_warning(self):
         """The known-ignorable cli_realpath warning should be silently dropped."""
         stderr = "LibClamAV Warning: cli_realpath: Invalid arguments.\n"
-        skipped, hard_errors = collect_clamav_warnings("", stderr)
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert hard_errors == []
 
     def test_nonfatal_skip_markers_classified_as_skipped(self):
         """Files that couldn't be opened should go into skipped_files, not hard errors."""
         stdout = "/some/file: Failed to open file ERROR\n"
-        skipped, hard_errors = collect_clamav_warnings(stdout, "")
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
         assert len(skipped) == 1
         assert "/some/file" in skipped[0]
         assert hard_errors == []
@@ -579,6 +579,45 @@ class TestCollectClamavWarnings:
             "Invalid offset arguments: start_offset=0, end_offset=0, fsize=50\n"
             "ERROR: Can't open file or directory\n"
         )
-        skipped, hard_errors = collect_clamav_warnings("", stderr)
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert len(hard_errors) == 1
         assert "Can't open file" in hard_errors[0]
+
+    def test_scanxz_size_limit_warning_not_hard_error(self):
+        """Decompress-size-limit warnings (large .xz files) must not be hard errors."""
+        stderr = (
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+        )
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert hard_errors == []
+        assert skipped == []
+        assert len(nonfatal) == 1
+        assert "exceeds limits" in nonfatal[0]
+
+    def test_tnef_file_truncated_warning_not_hard_error(self):
+        """Truncated-container warnings must not be hard errors."""
+        stderr = "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert hard_errors == []
+        assert skipped == []
+        assert len(nonfatal) == 1
+
+    def test_recursion_limit_warning_not_hard_error(self):
+        """Archive recursion-limit warnings must not be hard errors."""
+        stderr = "LibClamAV Warning: cli_magic_scan: Max recursion level reached.\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert hard_errors == []
+        assert len(nonfatal) == 1
+
+    def test_size_limit_warnings_mixed_with_real_error(self):
+        """A genuine error alongside benign limit warnings must still be reported."""
+        stderr = (
+            "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+            "LibClamAV Error: Can't allocate memory\n"
+        )
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert len(hard_errors) == 1
+        assert "Can't allocate memory" in hard_errors[0]

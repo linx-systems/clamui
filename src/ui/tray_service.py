@@ -808,6 +808,7 @@ class TrayService:
         if self._bus:
             if self._sni_registration_id:
                 self._bus.unregister_object(self._sni_registration_id)
+                self._sni_registration_id = 0
 
         # Release bus name
         if self._bus_name_id:

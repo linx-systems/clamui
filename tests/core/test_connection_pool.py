@@ -1,8 +1,10 @@
 # ClamUI ConnectionPool Tests
 """Unit tests for the ConnectionPool class."""
 
+import os
 import queue
 import sqlite3
+import stat
 import tempfile
 import threading
 import time
@@ -391,3 +393,95 @@ class TestConnectionPoolGetConnection:
         conn2 = pool.acquire()
         assert isinstance(conn2, sqlite3.Connection)
         conn2.close()
+
+
+class TestConnectionPoolSecurePermissions:
+    """Tests for _secure_db_file_permissions O_NOFOLLOW hardening."""
+
+    @pytest.fixture
+    def temp_dir(self):
+        """Create a temporary directory for database files."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield Path(tmpdir)
+
+    def test_secure_permissions_applied_to_real_file(self, temp_dir):
+        """Test chmod is applied to a real database file (0o600)."""
+        db_path = temp_dir / "real.db"
+        db_path.write_bytes(b"data")
+        os.chmod(db_path, 0o644)
+
+        pool = ConnectionPool(str(db_path))
+        pool._secure_db_file_permissions()
+
+        assert stat.S_IMODE(os.stat(db_path).st_mode) == 0o600
+
+    def test_secure_permissions_skips_symlinked_db_file(self, temp_dir):
+        """Test a symlinked db file does NOT have its target's perms changed (O_NOFOLLOW)."""
+        # Target lives outside; perms must stay untouched.
+        target = temp_dir / "outside.txt"
+        target.write_bytes(b"secret")
+        os.chmod(target, 0o644)
+
+        # Plant a symlink at the WAL path (one of the secured db files).
+        db_path = temp_dir / "pool.db"
+        db_path.write_bytes(b"data")
+        wal_link = Path(str(db_path) + "-wal")
+        wal_link.symlink_to(target)
+
+        pool = ConnectionPool(str(db_path))
+        pool._secure_db_file_permissions()
+
+        # Symlink target untouched (O_NOFOLLOW raises ELOOP -> skipped).
+        assert stat.S_IMODE(os.lstat(target).st_mode) == 0o644
+        # The real db file is still secured.
+        assert stat.S_IMODE(os.stat(db_path).st_mode) == 0o600
+
+
+class TestConnectionPoolExhaustionRecovery:
+    """Regression: a blocked acquirer must recover when capacity frees up.
+
+    When the pool is at max capacity and an outstanding connection is discarded
+    by release() (because it failed its health check), _total_connections drops
+    below pool_size. A thread already blocked inside acquire() must be able to
+    create a fresh connection instead of stranding forever on an empty queue.
+    """
+
+    @pytest.fixture
+    def temp_db_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield str(Path(tmpdir) / "test_exhaust.db")
+
+    def test_blocked_acquirer_recovers_after_broken_connection_discarded(self, temp_db_path):
+        pool = ConnectionPool(temp_db_path, pool_size=1)
+        try:
+            # Hold the only connection: pool is now at capacity, queue is empty.
+            conn1 = pool.acquire()
+            assert pool._total_connections == 1
+
+            result: dict = {}
+
+            def waiter():
+                try:
+                    result["conn"] = pool.acquire(timeout=2.0)
+                except Exception as exc:  # record for assertion
+                    result["error"] = exc
+
+            t = threading.Thread(target=waiter)
+            t.start()
+
+            # Let the waiter reach the blocking wait, then discard a broken
+            # connection. This frees capacity but puts nothing back on the queue.
+            time.sleep(0.3)
+            conn1.close()
+            pool.release(conn1)
+            assert pool._total_connections == 0
+
+            t.join(timeout=3.0)
+            assert not t.is_alive()
+
+            # The waiter must have obtained a fresh connection, not timed out.
+            assert "error" not in result, f"acquirer was stranded: {result.get('error')!r}"
+            assert isinstance(result.get("conn"), sqlite3.Connection)
+            result["conn"].close()
+        finally:
+            pool.close_all()

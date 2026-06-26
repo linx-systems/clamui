@@ -1872,6 +1872,15 @@ class ScanView(Gtk.Box):
 
     def _start_scanning(self):
         """Start the scanning process."""
+        # Guard against re-entrant starts. A scan can be triggered from several
+        # paths (scan button, EICAR test, "run" from the manage-profiles dialog,
+        # the app-level start-scan action/accelerator). The scan/EICAR buttons
+        # are disabled while scanning, but the manage-profiles dialog and the
+        # app action are not — starting another scan here would spawn a second
+        # worker thread sharing the same Scanner, corrupting cancellation and
+        # leaving the UI in an inconsistent state. Ignore the duplicate request.
+        if self._is_scanning:
+            return
         self._is_scanning = True
         self._cancel_all_requested = False
         self._progress_session_id = getattr(self, "_progress_session_id", 0) + 1

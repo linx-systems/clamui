@@ -1009,3 +1009,146 @@ class TestGetCliCommandPath:
                     result
                     == "flatpak run --command=clamui-scheduled-scan io.github.linx_systems.ClamUI"
                 )
+
+
+class TestSchedulerMultiTokenAndPercentEscaping:
+    """Regression tests for multi-token CLI commands and '%' escaping.
+
+    - A multi-token cli_path (Flatpak / module-exec forms) must be emitted as
+      separate program args, not wrapped in a single shlex.quote() blob that
+      systemd/cron would treat as one non-executable program token.
+    - A literal '%' in a target path must be escaped per-backend: '%%' for
+      systemd specifiers, '\\%' for cron.
+    """
+
+    @pytest.fixture
+    def scheduler(self):
+        """Create a Scheduler instance."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield Scheduler(config_dir=Path(tmpdir))
+
+    def _capture_cron_entry(self, scheduler, targets, skip_on_battery=False, auto_quarantine=False):
+        """Run _enable_cron_schedule with mocked crontab subprocess calls.
+
+        Returns the cron command line that would have been written (the line
+        following the CRON_MARKER in the new crontab).
+        """
+        captured = {"new_crontab": None}
+
+        def fake_run(cmd, *args, **kwargs):
+            # First call is `crontab -l`, second is `crontab -` (write).
+            cmd_str = " ".join(cmd) if isinstance(cmd, list) else str(cmd)
+            if "-l" in cmd_str:
+                return mock.MagicMock(returncode=0, stdout="", stderr="")
+            captured["new_crontab"] = kwargs.get("input", "")
+            return mock.MagicMock(returncode=0, stdout="", stderr="")
+
+        with mock.patch("src.core.scheduler.subprocess.run", side_effect=fake_run):
+            success, _err = scheduler._enable_cron_schedule(
+                ScheduleFrequency.DAILY,
+                "02:00",
+                targets,
+                0,
+                1,
+                skip_on_battery,
+                auto_quarantine,
+            )
+
+        assert success is True
+        # The cron command line is the last line of the new crontab (after marker).
+        return captured["new_crontab"].splitlines()[-1]
+
+    def test_systemd_multitoken_cli_emitted_as_separate_args(self, scheduler):
+        """Multi-token cli_path must not be wrapped as one quoted ExecStart blob."""
+        cli_path = "flatpak run --command=clamui-scheduled-scan org.x.App"
+        service = scheduler._generate_service_file(
+            cli_path=cli_path,
+            targets=["/home/user/Documents"],
+            skip_on_battery=False,
+            auto_quarantine=False,
+        )
+
+        # Tokens appear as separate args, executable as-is.
+        assert "ExecStart=flatpak run --command=clamui-scheduled-scan org.x.App" in service
+        # The buggy single-token quoting would emit the whole command quoted.
+        assert f"'{cli_path}'" not in service
+
+    def test_cron_multitoken_cli_emitted_as_separate_args(self, scheduler):
+        """Multi-token cli_path must not be wrapped as one quoted cron command blob."""
+        cli_path = "flatpak run --command=clamui-scheduled-scan org.x.App"
+        with mock.patch.object(scheduler, "_get_cli_command_path", return_value=cli_path):
+            cron_line = self._capture_cron_entry(scheduler, ["/home/user/Documents"])
+
+        assert "flatpak run --command=clamui-scheduled-scan org.x.App" in cron_line
+        assert f"'{cli_path}'" not in cron_line
+
+    def test_systemd_escapes_literal_percent_in_target(self, scheduler):
+        """A '%' in a target path must be doubled to '%%' for systemd specifiers."""
+        service = scheduler._generate_service_file(
+            cli_path="/usr/bin/clamui-scheduled-scan",
+            targets=["/home/user/50%off"],
+            skip_on_battery=False,
+            auto_quarantine=False,
+        )
+
+        assert "--target /home/user/50%%off" in service
+        # No lone, unescaped '%' specifier survives.
+        assert "/home/user/50%off" not in service
+
+    def test_cron_escapes_literal_percent_in_target(self, scheduler):
+        """A '%' in a target path must be backslash-escaped for cron."""
+        with mock.patch.object(
+            scheduler, "_get_cli_command_path", return_value="/usr/bin/clamui-scheduled-scan"
+        ):
+            cron_line = self._capture_cron_entry(scheduler, ["/home/user/50%off"])
+
+        assert "--target /home/user/50\\%off" in cron_line
+        assert "/home/user/50%off" not in cron_line
+
+    def test_systemd_escapes_dollar_in_target(self, scheduler):
+        """A '${VAR}' in a target path must be escaped to '$$' for systemd.
+
+        systemd expands environment variables in ExecStart even inside single
+        quotes, so shlex.quote() alone does not protect a path; an unescaped
+        '${HOME}' would be silently rewritten to a wrong/empty path at scan
+        time.  The documented literal-dollar escape is '$$'.
+        """
+        service = scheduler._generate_service_file(
+            cli_path="/usr/bin/clamui-scheduled-scan",
+            targets=["/home/user/${HOME}/x"],
+            skip_on_battery=False,
+            auto_quarantine=False,
+        )
+
+        exec_line = next(line for line in service.splitlines() if line.startswith("ExecStart="))
+        # Escaped form is present...
+        assert "/home/user/$${HOME}/x" in exec_line
+        # ...and no lone (unescaped) dollar survives: every '$' is part of '$$'.
+        assert "$" not in exec_line.replace("$$", "")
+
+    def test_systemd_escapes_standalone_dollar_var_target(self, scheduler):
+        """A target that is exactly '$VAR' must also be neutralized."""
+        service = scheduler._generate_service_file(
+            cli_path="/usr/bin/clamui-scheduled-scan",
+            targets=["$HOME"],
+            skip_on_battery=False,
+            auto_quarantine=False,
+        )
+
+        exec_line = next(line for line in service.splitlines() if line.startswith("ExecStart="))
+        assert "$$HOME" in exec_line
+        assert "$" not in exec_line.replace("$$", "")
+
+    def test_cron_does_not_double_dollar_in_target(self, scheduler):
+        """cron runs via /bin/sh, which suppresses '$' inside single quotes.
+
+        The systemd '$$' escape must therefore NOT leak into the cron path,
+        or the literal '$$' would reach the shell verbatim.
+        """
+        with mock.patch.object(
+            scheduler, "_get_cli_command_path", return_value="/usr/bin/clamui-scheduled-scan"
+        ):
+            cron_line = self._capture_cron_entry(scheduler, ["/home/user/${HOME}/x"])
+
+        assert "/home/user/${HOME}/x" in cron_line
+        assert "$$" not in cron_line

@@ -70,7 +70,7 @@ class ScanContext:
         if self.log_manager is None:
             self.log_manager = LogManager()
         if self.scanner is None:
-            self.scanner = Scanner(log_manager=self.log_manager)
+            self.scanner = Scanner(log_manager=self.log_manager, settings_manager=self.settings)
 
 
 @dataclass

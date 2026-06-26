@@ -192,6 +192,32 @@ class TestSanitizeLogLine:
         assert sanitize_log_line("Clean\x00\x01") == "Clean"
         assert sanitize_log_line("Clean\n") == "Clean "
 
+    def test_sanitize_log_line_removes_unicode_line_separators(self):
+        """Test sanitize_log_line maps Unicode line separators to spaces.
+
+        U+0085 (NEL), U+2028 (LINE SEPARATOR), and U+2029 (PARAGRAPH
+        SEPARATOR) are treated as line breaks by str.splitlines(), so they
+        must not survive single-line sanitization (log injection bypass).
+        """
+        for separator in ("\u0085", "\u2028", "\u2029"):
+            result = sanitize_log_line(f"real{separator}FORGED")
+            assert len(result.splitlines()) == 1
+            assert separator not in result
+            assert result == "real FORGED"
+
+    def test_sanitize_log_line_removes_c1_control_characters(self):
+        """Test sanitize_log_line removes C1 control characters (0x80-0x9F)."""
+        # 8-bit CSI (U+009B) and a neighboring C1 control (U+0090)
+        assert sanitize_log_line("Text\u009bCSI") == "TextCSI"
+        assert sanitize_log_line("Text\u0090DCS") == "TextDCS"
+        assert "\u009b" not in sanitize_log_line("\u009b\u0080\u009f")
+
+    def test_sanitize_log_line_removes_bidi_marks(self):
+        """Test sanitize_log_line removes LRM/RLM/ALM bidi marks."""
+        assert sanitize_log_line("file\u200ename.txt") == "filename.txt"
+        assert sanitize_log_line("file\u200fname.txt") == "filename.txt"
+        assert sanitize_log_line("file\u061cname.txt") == "filename.txt"
+
 
 class TestSanitizeLogText:
     """Tests for the sanitize_log_text function (multi-line fields)."""
@@ -387,6 +413,44 @@ Time: 5.234 sec"""
         assert result == scan_output
         assert "Win.Trojan.Agent FOUND" in result
         assert result.count("\n") == 6
+
+    def test_sanitize_log_text_removes_unicode_line_separators(self):
+        """Test sanitize_log_text maps Unicode line separators to spaces.
+
+        U+0085 (NEL), U+2028 (LINE SEPARATOR), and U+2029 (PARAGRAPH
+        SEPARATOR) are not legitimate line breaks here (only LF/CR are), so
+        they must not survive as breaks that str.splitlines() would split on.
+        """
+        for separator in ("\u0085", "\u2028", "\u2029"):
+            result = sanitize_log_text(f"real{separator}FORGED")
+            assert len(result.splitlines()) == 1
+            assert separator not in result
+            assert result == "real FORGED"
+
+    def test_sanitize_log_text_removes_c1_control_characters(self):
+        """Test sanitize_log_text removes C1 control characters (0x80-0x9F)."""
+        # 8-bit CSI (U+009B) and a neighboring C1 control (U+0090)
+        assert sanitize_log_text("Text\u009bCSI") == "TextCSI"
+        assert sanitize_log_text("Text\u0090DCS") == "TextDCS"
+        assert "\u009b" not in sanitize_log_text("\u009b\u0080\u009f")
+
+    def test_sanitize_log_text_preserves_char_after_lone_esc(self):
+        """A stray ESC must not swallow the following newline or printable.
+
+        Regression: the ANSI pattern's non-CSI branch matched ESC + ANY char, so a
+        lone ESC before a newline merged two lines (breaking the multi-line
+        contract) and ESC before a letter ate the letter. The branch now only
+        consumes a valid Fe final byte (0x40-0x5F); a lone ESC is left for the
+        control-char pass to strip, preserving the following character.
+        """
+        # ESC immediately before a newline: the newline must survive.
+        assert sanitize_log_text("line1\x1b\nline2") == "line1\nline2"
+        # ESC before a lowercase letter (not a valid Fe escape): letter preserved.
+        assert sanitize_log_text("\x1bhello") == "hello"
+        # Real CSI sequences are still fully stripped (no regression).
+        assert sanitize_log_text("a\x1b[31mb\x1b[0m") == "ab"
+        # No ESC survives either way (injection-safe).
+        assert "\x1b" not in sanitize_log_text("x\x1b\ny")
 
 
 class TestSanitizationEdgeCases:

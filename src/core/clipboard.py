@@ -10,7 +10,6 @@ This module provides functions for:
 """
 
 import logging
-import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
@@ -211,9 +210,10 @@ def copy_to_clipboard_async(
     """
     Copy text to clipboard asynchronously with callback notification.
 
-    Runs the clipboard operation in a background thread to avoid
-    blocking the UI. The callback is invoked on the main thread
-    via GLib.idle_add() when the operation completes.
+    The GTK/GDK clipboard must be accessed from the main-loop thread, so the
+    copy is scheduled on the main loop via GLib.idle_add() rather than run on a
+    background thread (which would be a GTK thread-safety violation). The
+    callback is invoked on the main thread when the operation completes.
 
     This is recommended for content between 1-10 MB where the
     operation might take 10-100ms.
@@ -255,8 +255,8 @@ def copy_to_clipboard_async(
         callback(result)
         return
 
-    def thread_target():
-        """Background thread that performs the clipboard operation."""
+    def do_copy() -> bool:
+        """Perform the clipboard write on the main loop and notify the caller."""
         success = _do_clipboard_set(text)
 
         if success:
@@ -272,17 +272,18 @@ def copy_to_clipboard_async(
                 size_bytes=size_bytes,
             )
 
-        # Schedule callback on main thread
-        try:
-            from gi.repository import GLib
+        callback(result)
+        return False  # GLib.idle_add: run once, do not reschedule
 
-            GLib.idle_add(callback, result)
-        except Exception:
-            # If GLib isn't available, call directly (for testing)
-            callback(result)
+    # GTK/GDK is not thread-safe: clipboard access must happen on the main-loop
+    # thread. Schedule it there instead of spawning a worker thread.
+    try:
+        from gi.repository import GLib
 
-    thread = threading.Thread(target=thread_target, daemon=True)
-    thread.start()
+        GLib.idle_add(do_copy)
+    except Exception:
+        # If GLib isn't available (e.g. tests), run inline on the current thread.
+        do_copy()
 
 
 def get_clipboard_size_tier(text: str) -> str:

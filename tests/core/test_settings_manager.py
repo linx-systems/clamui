@@ -533,6 +533,25 @@ class TestSettingsManagerDefaults:
             # DEFAULT_SETTINGS should be unchanged
             assert original_defaults == SettingsManager.DEFAULT_SETTINGS
 
+    def test_mutable_default_not_shared_between_instances(self):
+        """Mutating a mutable default on one instance must not pollute the class default."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manager1 = SettingsManager(config_dir=tmpdir)
+            # exclusion_patterns is absent on disk -> served from defaults.
+            patterns = manager1.get("exclusion_patterns")
+            patterns.append({"pattern": "/tmp/evil"})
+
+            # Class-level default must remain unpolluted.
+            assert SettingsManager.DEFAULT_SETTINGS["exclusion_patterns"] == []
+
+            # A second manager and reset must both yield the clean default.
+            with tempfile.TemporaryDirectory() as tmpdir2:
+                manager2 = SettingsManager(config_dir=tmpdir2)
+                assert manager2.get("exclusion_patterns") == []
+
+            manager1.reset_to_defaults()
+            assert manager1.get("exclusion_patterns") == []
+
 
 class TestSettingsCloseBehavior:
     """Tests for close_behavior settings."""

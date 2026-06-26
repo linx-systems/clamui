@@ -730,3 +730,79 @@ class TestDatabaseAndFileHandlerIntegration:
             assert "mismatch" in error.lower()
         finally:
             db.close()
+
+
+class TestQuarantineDirectorySettingWiring:
+    """The ``quarantine_directory`` setting must actually drive where files go.
+
+    Regression coverage: the setting existed in DEFAULT_SETTINGS (and the docs)
+    but was never wired to QuarantineManager, so it silently had no effect.
+    """
+
+    def test_injected_setting_is_honored(self, tmp_path):
+        """An injected SettingsManager's quarantine_directory is used."""
+        custom = tmp_path / "configured_quarantine"
+        settings = SettingsManager(config_dir=str(tmp_path / "config"))
+        settings.set("quarantine_directory", str(custom))
+
+        mgr = QuarantineManager(
+            database_path=str(tmp_path / "q.db"),
+            enable_periodic_cleanup=False,
+            settings_manager=settings,
+        )
+        try:
+            assert mgr.quarantine_directory == custom
+            src = tmp_path / "evil.exe"
+            src.write_bytes(b"malware content")
+            result = mgr.quarantine_file(str(src), "Test.Threat")
+            assert result.is_success
+            assert Path(result.entry.quarantine_path).parent == custom
+        finally:
+            mgr._database.close()
+
+    def test_explicit_directory_overrides_setting(self, tmp_path):
+        """An explicit quarantine_directory argument wins over the setting."""
+        configured = tmp_path / "configured"
+        explicit = tmp_path / "explicit"
+        settings = SettingsManager(config_dir=str(tmp_path / "config"))
+        settings.set("quarantine_directory", str(configured))
+
+        mgr = QuarantineManager(
+            quarantine_directory=str(explicit),
+            database_path=str(tmp_path / "q.db"),
+            enable_periodic_cleanup=False,
+            settings_manager=settings,
+        )
+        try:
+            assert mgr.quarantine_directory == explicit
+        finally:
+            mgr._database.close()
+
+    def test_empty_setting_falls_back_to_default(self, tmp_path, monkeypatch):
+        """An empty setting falls back to the XDG default location."""
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+        settings = SettingsManager(config_dir=str(tmp_path / "config"))
+        # quarantine_directory defaults to "" -> use the XDG default.
+        mgr = QuarantineManager(
+            enable_periodic_cleanup=False,
+            settings_manager=settings,
+        )
+        try:
+            assert mgr.quarantine_directory == tmp_path / "data" / "clamui" / "quarantine"
+        finally:
+            mgr._database.close()
+
+    def test_lazy_default_reads_setting_from_disk(self, tmp_path, monkeypatch):
+        """With no injected SettingsManager (the CLI path), the setting is still honored."""
+        custom = tmp_path / "cli_quarantine"
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+        # Persist the setting where a lazily-created SettingsManager() will read it.
+        SettingsManager().set("quarantine_directory", str(custom))
+
+        # No settings_manager injected -> the manager must lazily read it from disk.
+        mgr = QuarantineManager(enable_periodic_cleanup=False)
+        try:
+            assert mgr.quarantine_directory == custom
+        finally:
+            mgr._database.close()

@@ -316,3 +316,48 @@ class TestThresholdConstants:
     def test_async_threshold_greater_than_sync(self):
         """Test async threshold is greater than sync threshold."""
         assert CLIPBOARD_ASYNC_THRESHOLD > CLIPBOARD_SYNC_THRESHOLD
+
+
+class TestAsyncRunsClipboardSetOnMainThread:
+    """Regression: GTK/GDK clipboard access must run on the main-loop thread.
+
+    The async copy previously performed _do_clipboard_set() inside a worker
+    thread, which is a GTK thread-safety violation (GDK is not thread-safe).
+    The fix schedules the clipboard write on the main loop via GLib.idle_add().
+    """
+
+    @patch("src.core.clipboard._do_clipboard_set")
+    def test_clipboard_set_invoked_on_main_thread(self, mock_set):
+        recorded: dict[str, threading.Thread] = {}
+
+        def fake_set(text):
+            recorded["thread"] = threading.current_thread()
+            return True
+
+        mock_set.side_effect = fake_set
+
+        done = threading.Event()
+
+        def callback(result):
+            done.set()
+
+        # Mock GLib.idle_add to run the scheduled function synchronously on the
+        # calling (main) thread, mirroring main-loop dispatch.
+        def mock_idle_add(func, *args):
+            func(*args)
+            return True
+
+        with patch.dict(
+            "sys.modules",
+            {
+                "gi.repository": type(
+                    "module",
+                    (),
+                    {"GLib": type("GLib", (), {"idle_add": staticmethod(mock_idle_add)})()},
+                )()
+            },
+        ):
+            copy_to_clipboard_async("payload", callback)
+            done.wait(timeout=5.0)
+
+        assert recorded.get("thread") is threading.main_thread()

@@ -1168,3 +1168,167 @@ class TestClamUIAppScanStateTrayUpdates:
 
         app._tray_indicator.update_scan_progress.assert_called_once_with(0)
         app._tray_indicator.update_status.assert_called_once_with("threat")
+
+
+class TestAppLifecycleDatabaseDir:
+    """Regression tests for AppLifecycleManager database directory creation."""
+
+    def test_ensure_db_dir_does_not_raise_when_fallback_also_fails(self, app):
+        """If both the XDG dir and the /var/lib/clamav fallback fail, startup must
+        not crash — ensure_clamav_database_dir should swallow the fallback OSError.
+        """
+        from pathlib import Path
+
+        with mock.patch.object(Path, "mkdir", side_effect=OSError("permission denied")):
+            # Must not raise; a normal user cannot create /var/lib/clamav, and an
+            # unhandled OSError here propagates out of do_startup and aborts launch.
+            app._lifecycle_manager.ensure_clamav_database_dir()
+
+
+class TestClamUIAppVirusTotalScan:
+    """Regression tests for the VirusTotal scan completion flow."""
+
+    def test_trigger_virustotal_scan_logs_and_shows_dialog(self, app, mock_gtk_modules):
+        """After a VT scan completes the result is logged via the real LogEntry/
+        save_log API and the results dialog is shown.
+
+        Regression: on_scan_complete called LogManager.add_virustotal_result (a
+        method that does not exist), raising AttributeError that the surrounding
+        try/except swallowed, so the results dialog (then inside the same try)
+        never appeared after a VirusTotal scan. autospec=True makes the mocked
+        LogManager enforce the real interface, so the old call would still raise.
+        """
+        from types import SimpleNamespace
+
+        glib = mock_gtk_modules["GLib"]
+        glib.idle_add.side_effect = lambda fn, *a: fn(*a)
+
+        result = SimpleNamespace(
+            status=SimpleNamespace(value="clean"),
+            file_path="/tmp/sample",
+            duration=1.0,
+            sha256="abc123",
+            detections=0,
+            total_engines=70,
+            detection_details=[],
+            permalink="https://vt/sample",
+            error_message=None,
+        )
+
+        fake_client = mock.MagicMock()
+        fake_client.scan_file_sync.return_value = result
+
+        app._show_virustotal_results_dialog = mock.MagicMock()
+
+        def fake_thread(target=None, daemon=None):
+            runner = mock.MagicMock()
+            runner.start.side_effect = target
+            return runner
+
+        with (
+            mock.patch("threading.Thread", side_effect=fake_thread),
+            mock.patch("src.core.virustotal.VirusTotalClient", return_value=fake_client),
+            mock.patch("src.core.log_manager.LogManager", autospec=True) as mock_lm,
+        ):
+            app._trigger_virustotal_scan("/tmp/sample", "api-key")
+
+        # The results dialog must be shown (the bug skipped this entirely).
+        app._show_virustotal_results_dialog.assert_called_once_with(result)
+        # The result is persisted via the real save_log API, not add_virustotal_result.
+        mock_lm.return_value.save_log.assert_called_once()
+
+    def test_show_virustotal_results_dialog_uses_correct_constructor(self, app):
+        """_show_virustotal_results_dialog passes the result as vt_result and sets
+        the parent separately.
+
+        Regression: it called VirusTotalResultsDialog(win, result), but the dialog's
+        first argument is vt_result (not the parent) and it accepts only one
+        positional arg -> TypeError once the dialog was actually reached (which the
+        add_virustotal_result bug had been masking).
+        """
+        result = mock.MagicMock()
+        app.props.active_window = mock.MagicMock()
+
+        captured = {}
+
+        class FakeDialog:
+            def __init__(self, vt_result, **kwargs):
+                captured["vt_result"] = vt_result
+
+            def set_transient_for(self, win):
+                captured["parent"] = win
+
+            def present(self):
+                captured["presented"] = True
+
+        with mock.patch("src.ui.virustotal_results_dialog.VirusTotalResultsDialog", FakeDialog):
+            app._show_virustotal_results_dialog(result)
+
+        assert captured.get("vt_result") is result
+        assert captured.get("parent") is app.props.active_window
+        assert captured.get("presented") is True
+
+
+class TestClamUIAppInitialScanPaths:
+    """Regression tests for forwarding CLI-provided scan targets to the UI."""
+
+    def test_multiple_clamav_paths_populate_all_targets(self, app):
+        """All CLI paths must be forwarded to the scan view, not just the first.
+
+        Regression: _process_initial_scan_paths called _set_selected_path(paths[0]),
+        so launching ClamUI from a file manager with N selected files only scanned
+        the first one ("Scan Target (1)" despite "Received N path(s)").
+        """
+        mock_scan_view = mock.MagicMock()
+        app._scan_view = mock_scan_view
+        app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
+        app._initial_use_virustotal = False
+
+        app._process_initial_scan_paths()
+
+        mock_scan_view._replace_selected_paths.assert_called_once_with(["/tmp/a.pdf", "/tmp/b.pdf"])
+        mock_scan_view._start_scan.assert_called_once_with()
+        mock_scan_view._set_selected_path.assert_not_called()
+        # State is consumed so a later activate() does not re-trigger the scan.
+        assert app._initial_scan_paths == []
+        assert app._initial_use_virustotal is False
+
+    def test_single_clamav_path_uses_multi_target_api(self, app):
+        """A single CLI path still goes through the multi-target replace API."""
+        mock_scan_view = mock.MagicMock()
+        app._scan_view = mock_scan_view
+        app._initial_scan_paths = ["/tmp/only.pdf"]
+        app._initial_use_virustotal = False
+
+        app._process_initial_scan_paths()
+
+        mock_scan_view._replace_selected_paths.assert_called_once_with(["/tmp/only.pdf"])
+        mock_scan_view._start_scan.assert_called_once_with()
+
+    def test_virustotal_path_uses_first_only(self, app):
+        """VirusTotal scans a single file per request, so only the first path is
+        forwarded to the setup dialog and the ClamAV auto-scan is not started."""
+        mock_scan_view = mock.MagicMock()
+        app._scan_view = mock_scan_view
+        app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
+        app._initial_use_virustotal = True
+        app._show_virustotal_setup_dialog = mock.MagicMock()
+
+        app._process_initial_scan_paths()
+
+        mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
+        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        mock_scan_view._replace_selected_paths.assert_not_called()
+        mock_scan_view._start_scan.assert_not_called()
+
+    def test_no_paths_is_noop(self, app):
+        """With no pending paths nothing is forwarded to the scan view."""
+        mock_scan_view = mock.MagicMock()
+        app._scan_view = mock_scan_view
+        app._initial_scan_paths = []
+
+        app._process_initial_scan_paths()
+
+        mock_scan_view._replace_selected_paths.assert_not_called()
+        mock_scan_view._set_selected_path.assert_not_called()
+        mock_scan_view._start_scan.assert_not_called()

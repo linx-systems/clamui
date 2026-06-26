@@ -596,3 +596,78 @@ class TestRequeueSourceTracking:
 
         # After firing, the source id for this mount_point must be gone
         assert info.mount_point not in monitor._scheduled_sources
+
+
+class TestRequeueTimerCancellation:
+    """A pending requeue timer must be cancelled when the scan actually starts.
+
+    When MAX_CONCURRENT_SCANS is reached, _start_background_scan stores a 10s
+    requeue timer in _scheduled_sources. When a slot frees, _on_scan_complete
+    restarts the queued mount via _start_background_scan directly. The stale
+    requeue source must be removed so it cannot later fire and start a SECOND
+    concurrent scan of the same mount.
+    """
+
+    def _make_monitor(self):
+        mock_settings = MagicMock()
+        mock_settings.get.side_effect = lambda key, default=None: {
+            "device_auto_scan_enabled": True,
+            "device_auto_scan_delay_seconds": 0,
+        }.get(key, default)
+        monitor = DeviceMonitor(
+            settings_manager=mock_settings,
+            scanner=MagicMock(),
+        )
+        monitor._battery_manager = MagicMock()
+        monitor._battery_manager.is_on_battery.return_value = False
+        return monitor
+
+    @patch("src.core.device_monitor.Scanner")
+    @patch("src.core.device_monitor.GLib")
+    def test_start_removes_pending_requeue_source(self, mock_glib, mock_scanner):
+        """Starting a scan cancels any pending requeue timer for that mount."""
+        mock_glib.SOURCE_REMOVE = False
+
+        monitor = self._make_monitor()
+
+        info = MountInfo(
+            mount_point="/media/usb1",
+            device_name="USB1",
+            device_type=DeviceType.REMOVABLE,
+        )
+
+        # Simulate a previously stored requeue timer for this mount.
+        monitor._scheduled_sources[info.mount_point] = 54321
+
+        # A free slot: the scan should now actually start.
+        monitor._start_background_scan(info)
+
+        # The stale requeue source must have been removed and popped.
+        mock_glib.source_remove.assert_called_once_with(54321)
+        assert info.mount_point not in monitor._scheduled_sources
+        # The scan started: a Scanner is now tracked as active.
+        assert info.mount_point in monitor._active_scans
+
+    @patch("src.core.device_monitor.Scanner")
+    @patch("src.core.device_monitor.GLib")
+    def test_duplicate_start_while_active_is_noop(self, mock_glib, mock_scanner):
+        """A start for a mount that is already scanning bails out without restarting."""
+        mock_glib.SOURCE_REMOVE = False
+
+        monitor = self._make_monitor()
+
+        info = MountInfo(
+            mount_point="/media/usb2",
+            device_name="USB2",
+            device_type=DeviceType.REMOVABLE,
+        )
+
+        # Mark the mount as already being scanned by an existing Scanner.
+        existing = MagicMock()
+        monitor._active_scans[info.mount_point] = existing
+
+        monitor._start_background_scan(info)
+
+        # No new Scanner created and the existing one is untouched.
+        mock_scanner.assert_not_called()
+        assert monitor._active_scans[info.mount_point] is existing

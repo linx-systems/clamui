@@ -37,12 +37,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: website/package-lock.json
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install dependencies
         working-directory: website
-        run: npm ci || npm install
+        run: bun install --frozen-lockfile
 
       - name: Build site
         working-directory: website
@@ -50,7 +52,7 @@ jobs:
           # Lifts the GitHub API rate limit for the build-time
           # latest-release fetch. Token has read-only repo scope.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build
+        run: bun run build
 
       - uses: actions/configure-pages@v5
 

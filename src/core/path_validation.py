@@ -88,6 +88,15 @@ def check_symlink_safety(path: Path) -> tuple[bool, str | None]:
                     return (True, f"Path is a symlink: {path} -> {resolved}")
                 return (True, None)
 
+            # Resolutions that land back inside a user-writable/temp dir are
+            # legitimate (e.g. /tmp, /var/tmp). Allow them before the protected_dirs
+            # check, since /var is protected and /tmp can resolve under /var on some
+            # systems. This does not weaken /var/lib, /var/cache, /etc, etc.
+            if any(is_path_under(resolved, user_dir) for user_dir in user_dirs):
+                if is_symlink:
+                    return (True, f"Path is a symlink: {path} -> {resolved}")
+                return (True, None)
+
             for protected in protected_dirs:
                 if is_path_under(resolved, protected):
                     return (

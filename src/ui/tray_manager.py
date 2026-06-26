@@ -84,6 +84,8 @@ class TrayManager:
 
         # Profile state
         self._current_profile_id: str | None = None
+        # Last-known menu state, re-pushed to a respawned subprocess on "ready".
+        self._current_profiles: list[dict] = []
 
         # Register for atexit cleanup
         global _atexit_registered
@@ -118,7 +120,7 @@ class TrayManager:
                 except Exception:
                     logger.debug("Failed to close tray subprocess pipe", exc_info=True)
 
-    def start(self) -> bool:
+    def start(self, respawn: bool = False) -> bool:
         """
         Start the tray service subprocess.
 
@@ -129,10 +131,17 @@ class TrayManager:
             logger.warning("Tray service already running")
             return True
 
-        # Re-arming after a previous stop() or respawn: clear shutdown state.
         with self._state_lock:
-            self._shutting_down = False
-            self._tray_down = False
+            if respawn:
+                # Respawn path: a deliberate stop() that raced ahead of
+                # crash-respawn must win. Do NOT clear _shutting_down here.
+                if self._shutting_down:
+                    logger.info("Tray respawn aborted: shutdown requested")
+                    return False
+            else:
+                # Re-arming after a previous stop() or respawn: clear state.
+                self._shutting_down = False
+                self._tray_down = False
 
         try:
             # Find the tray_service module path
@@ -240,8 +249,9 @@ class TrayManager:
                         continue
 
                     self._handle_message(message)
-                except json.JSONDecodeError as e:
+                except (json.JSONDecodeError, ValueError, RecursionError) as e:
                     logger.error(f"Invalid JSON from tray service: {e}")
+                    continue
 
         except Exception as e:
             logger.error(f"Error reading tray service stdout: {e}")
@@ -282,6 +292,15 @@ class TrayManager:
             except Exception:
                 logger.debug("Failed to poll tray subprocess for exit code", exc_info=True)
 
+        # poll() returning None means the child is still alive — the reader
+        # ended for another reason. Do NOT respawn, or we'd orphan a live child.
+        if exit_code is None:
+            logger.warning(
+                "Tray subprocess reader ended but child still alive "
+                "(poll()=None); not respawning to avoid orphaning it"
+            )
+            return
+
         # Sliding-window circuit breaker.
         now = time.monotonic()
         with self._state_lock:
@@ -312,7 +331,7 @@ class TrayManager:
             self.MAX_RESPAWNS,
         )
         try:
-            ok = self.start()
+            ok = self.start(respawn=True)
         except Exception:
             logger.exception("Tray subprocess respawn raised")
             ok = False
@@ -386,6 +405,12 @@ class TrayManager:
             with self._state_lock:
                 self._ready = True
             logger.info("Tray service is ready")
+            # Re-push cached state on the GTK main loop. Essential after a crash
+            # respawn (the new subprocess starts from defaults, so the icon would
+            # otherwise show the wrong badge and an empty profile submenu); a
+            # harmless no-op on the initial ready. Marshalled via idle_add so it
+            # does not race other main-thread _send_command writers.
+            GLib.idle_add(self._resync_tray_state)
 
         elif event == "pong":
             logger.debug("Received pong from tray service")
@@ -426,6 +451,28 @@ class TrayManager:
                 logger.warning("select_profile action missing profile_id")
         else:
             logger.warning(f"No handler for action: {action}")
+
+    def _resync_tray_state(self) -> bool:
+        """Re-push cached tray state to the (possibly just-respawned) subprocess.
+
+        Runs on the GTK main loop. After a crash respawn the new subprocess starts
+        from defaults (status "protected", empty submenu); without this the tray
+        would misreport state until the next change. Idempotent on first ready.
+        """
+        with self._state_lock:
+            status = self._current_status
+            profiles = list(self._current_profiles)
+            profile_id = self._current_profile_id
+        self._send_command({"action": "update_status", "status": status})
+        if profiles:
+            self._send_command(
+                {
+                    "action": "update_profiles",
+                    "profiles": profiles,
+                    "current_profile_id": profile_id,
+                }
+            )
+        return False  # GLib.idle_add: run once
 
     def _send_command(self, command: dict) -> bool:
         """Send a command to the tray service."""
@@ -530,6 +577,7 @@ class TrayManager:
             if current_profile_id is not None:
                 self._current_profile_id = current_profile_id
             profile_id_to_send = self._current_profile_id
+            self._current_profiles = list(profiles)
         self._send_command(
             {
                 "action": "update_profiles",

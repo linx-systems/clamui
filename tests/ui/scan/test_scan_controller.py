@@ -268,6 +268,21 @@ class TestCancelScan:
         result = on_complete.call_args[0][0]
         _assert_status(result, "cancelled")
 
+    def test_start_scan_ignored_while_already_scanning(self, controller, scanner):
+        """start_scan() while a scan is in progress must be ignored (no second
+        worker thread, no scanner invocation, no state re-notification)."""
+        from src.ui.scan.scan_controller import ScanState
+
+        controller._state = ScanState.SCANNING
+        on_state = MagicMock()
+        controller.set_callbacks(on_state_change=on_state)
+
+        controller.start_scan(["/tmp/second"])
+        time.sleep(0.1)
+
+        scanner.scan_sync.assert_not_called()
+        on_state.assert_not_called()
+
 
 # =============================================================================
 # Callbacks
@@ -631,3 +646,37 @@ class TestProgressCallback:
 
         # Only first call should have triggered idle_add
         assert mock_gi_for_controller.idle_add.call_count == 1
+
+
+# =============================================================================
+# Worker exception recovery
+# =============================================================================
+
+
+class TestWorkerExceptionRecovery:
+    """A crash inside the scan thread must not leave the UI stuck scanning."""
+
+    def test_scanner_exception_resets_state_and_completes(self, controller, scanner):
+        """If scan_sync raises, the worker must still reset state to IDLE and
+        deliver a completion callback so the spinner/buttons recover."""
+        from src.ui.scan.scan_controller import ScanState
+
+        scanner.scan_sync.side_effect = RuntimeError("backend exploded")
+
+        states = []
+        on_complete = MagicMock()
+        controller.set_callbacks(
+            on_state_change=lambda s: states.append(s),
+            on_complete=on_complete,
+        )
+
+        controller.start_scan(["/tmp/target"])
+        time.sleep(0.2)
+
+        # State must return to IDLE (not stuck in SCANNING forever).
+        assert controller.state == ScanState.IDLE
+        assert controller.is_scanning is False
+        assert states and states[-1] == ScanState.IDLE
+        # Completion must fire exactly once so the UI leaves the scanning state.
+        on_complete.assert_called_once()
+        _assert_status(on_complete.call_args[0][0], "error")

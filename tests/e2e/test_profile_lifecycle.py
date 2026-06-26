@@ -763,12 +763,19 @@ class TestE2EDefaultProfiles:
         # (e.g., /home/user/Downloads or localized equivalent)
         assert len(quick_scan.targets) > 0, "Quick Scan should have targets"
         downloads_target = quick_scan.targets[0]
-        # The XDG path should be an absolute path in the user's home directory
+        # The target is either an absolute XDG path (e.g. /home/user/Downloads or
+        # a localized equivalent) when an XDG Downloads dir is configured, or the
+        # tilde fallback (~/Downloads) when it is not. Both are valid; the logical
+        # requirement is that it resolves to a location inside the home directory.
         import os
 
         home_dir = os.path.expanduser("~")
-        assert downloads_target.startswith(home_dir), (
+        resolved_target = os.path.expanduser(downloads_target)
+        assert resolved_target.startswith(home_dir), (
             f"Quick Scan should target a folder in home directory, got: {downloads_target}"
+        )
+        assert "Downloads" in resolved_target or resolved_target != home_dir, (
+            f"Quick Scan must target a Downloads subfolder, not the home root: {downloads_target}"
         )
 
         # Step 5: Select Full Scan profile

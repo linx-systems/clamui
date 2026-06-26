@@ -342,6 +342,22 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
         ]
         assert result.warning_message == "2 file(s) could not be accessed"
 
+    def test_parse_results_exit_code_2_with_detection_is_infected(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """Detections must win over a co-occurring error: exit 2 + FOUND -> INFECTED."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+/home/user/eicar.txt: Eicar-Test-Signature FOUND
+/home/user/locked.bin: Can't open file or directory ERROR
+"""
+        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=2, dir_count=0)
+
+        assert result.status == scan_status_class.INFECTED
+        assert result.infected_count == 1
+        assert "/home/user/eicar.txt" in result.infected_files
+
 
 class TestDaemonScannerProgressParsing:
     """Tests for DaemonScanner._scan_with_progress parsing behavior."""
@@ -407,6 +423,46 @@ class TestDaemonScannerProgressParsing:
         assert infected_count == 1
         assert infected_files == ["/home/user/malware.exe"]
         assert len(progress_events) == 1
+
+    def test_scan_with_progress_emits_independent_snapshots(self, daemon_scanner_class):
+        """Each progress snapshot must keep len(infected_files) == infected_count.
+
+        ScanProgress objects are handed to progress_callback, which schedules a
+        GTK update via GLib.idle_add on the main thread. If the daemon scanner
+        passed the live infected_files list / infected_threats dict by reference,
+        the background thread would keep mutating them after the snapshot was
+        emitted, so an early snapshot's int infected_count would desync from the
+        ever-growing shared list (and the main thread could observe a partially
+        mutated structure). Snapshots must be independent copies.
+        """
+        scanner = daemon_scanner_class()
+        captured = []
+        lines = [
+            "/home/user/a.exe: Win.Trojan.A FOUND",
+            "/home/user/b.exe: Win.Trojan.B FOUND",
+            "/home/user/c.exe: Win.Trojan.C FOUND",
+        ]
+
+        def fake_stream(process, is_cancelled, on_line):
+            for line in lines:
+                on_line(line)
+            return ("\n".join(lines), "", False)
+
+        with patch("src.core.daemon_scanner.stream_process_output", side_effect=fake_stream):
+            scanner._scan_with_progress(
+                process=MagicMock(),
+                progress_callback=captured.append,
+                files_total=3,
+            )
+
+        assert len(captured) == 3
+        # First snapshot must reflect exactly one infection, not the final three.
+        assert captured[0].infected_files == ["/home/user/a.exe"]
+        assert len(captured[0].infected_threats) == 1
+        # Every snapshot stays internally consistent with its own count.
+        for progress in captured:
+            assert len(progress.infected_files) == progress.infected_count
+            assert len(progress.infected_threats) == progress.infected_count
 
 
 class TestDaemonScannerThreatClassification:
@@ -1089,6 +1145,74 @@ class TestDaemonScannerCountTargets:
         assert filtered.infected_count == 1
         assert len(filtered.threat_details) == 1
         assert filtered.threat_details[0].file_path == str(threat3)
+
+    def test_filter_preserves_skipped_files(self, daemon_scanner_class, scan_status_class):
+        """skipped_files/skipped_count must survive _filter_excluded_threats rebuilds."""
+        mock_settings = MagicMock()
+        mock_settings.get.return_value = [
+            {"pattern": "/home/user/eicar.txt", "type": "file", "enabled": True},
+        ]
+        scanner = daemon_scanner_class(settings_manager=mock_settings)
+
+        from src.core.scanner import ScanResult, ThreatDetail
+
+        threat = ThreatDetail(
+            file_path="/home/user/eicar.txt",
+            threat_name="Eicar-Test-Signature",
+            category="Test",
+            severity="low",
+        )
+        kept = ThreatDetail(
+            file_path="/home/user/virus.exe",
+            threat_name="Win.Trojan.Test",
+            category="Trojan",
+            severity="high",
+        )
+
+        skipped = ["/home/user/locked.bin", "/home/user/special.sock"]
+        result = ScanResult(
+            status=scan_status_class.INFECTED,
+            path="/home/user",
+            stdout="",
+            stderr="",
+            exit_code=1,
+            infected_files=["/home/user/eicar.txt", "/home/user/virus.exe"],
+            scanned_files=4,
+            scanned_dirs=0,
+            infected_count=2,
+            error_message=None,
+            threat_details=[threat, kept],
+            skipped_files=skipped,
+            skipped_count=len(skipped),
+        )
+
+        # Excluded threat removed -> still INFECTED (kept threat survives).
+        filtered = scanner._filter_excluded_threats(result)
+        assert filtered.status == scan_status_class.INFECTED
+        assert filtered.skipped_files == skipped
+        assert filtered.skipped_count == 2
+
+        # All threats excluded -> CLEAN rebuild still carries skipped info.
+        mock_settings.get.return_value = [
+            {"pattern": "/home/user/eicar.txt", "type": "file", "enabled": True},
+            {"pattern": "/home/user/virus.exe", "type": "file", "enabled": True},
+        ]
+        cleaned = scanner._filter_excluded_threats(result)
+        assert cleaned.status == scan_status_class.CLEAN
+        assert cleaned.skipped_files == skipped
+        assert cleaned.skipped_count == 2
+
+    def test_is_excluded_respects_path_separator_boundary(self, daemon_scanner_class):
+        """Sibling paths sharing a prefix must not be excluded (no under-scan)."""
+        scanner = daemon_scanner_class()
+        patterns = ["/data/safe"]
+
+        # Exact match and true subpaths are excluded.
+        assert scanner._is_excluded("/data/safe", "safe", patterns, True) is True
+        assert scanner._is_excluded("/data/safe/x", "x", patterns, False) is True
+
+        # Prefix-sibling must NOT be excluded.
+        assert scanner._is_excluded("/data/safe-malware", "safe-malware", patterns, False) is False
 
 
 class TestDaemonScannerProcessLockThreadSafety:

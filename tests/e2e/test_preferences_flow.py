@@ -325,14 +325,17 @@ PrivateMirror https://mirror.example.net
             assert valid is True
             assert errors == []
 
-    def test_e2e_config_loading_multivalue_and_inline_comments(self):
+    def test_e2e_config_loading_multivalue_and_hash_in_values(self):
         """
-        E2E Test: Parser keeps multi-value entries and inline comments metadata.
+        E2E Test: Parser keeps multi-value entries and treats '#' as part of the value.
+
+        ClamAV config files have no inline comments, so a '#' after a value is
+        preserved verbatim rather than split off as comment metadata.
 
         Steps:
-        1. Create config containing repeated options and inline comments
+        1. Create config containing repeated options and '#' characters in values
         2. Parse config and verify value list lengths
-        3. Verify inline comments are captured per value line
+        3. Verify the full value (including any '#') is captured per line
         """
         content = """# mirrors
 DatabaseMirror database.clamav.net # primary mirror
@@ -349,9 +352,11 @@ LogTime yes # timestamps enabled
 
             mirrors = config.get_values("DatabaseMirror")
             assert len(mirrors) == 2
-            assert config.values["DatabaseMirror"][0].comment == "primary mirror"
-            assert config.values["DatabaseMirror"][1].comment == "backup mirror"
-            assert config.values["LogTime"][0].comment == "timestamps enabled"
+            assert (
+                config.values["DatabaseMirror"][0].value == "database.clamav.net # primary mirror"
+            )
+            assert config.values["DatabaseMirror"][1].value == "db.local.clamav.net # backup mirror"
+            assert config.values["LogTime"][0].value == "yes # timestamps enabled"
 
 
 class TestE2EConfigModification:

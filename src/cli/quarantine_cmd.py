@@ -16,6 +16,7 @@ import argparse
 
 from ..core.i18n import _
 from ..core.quarantine import QuarantineManager
+from ..core.sanitize import sanitize_log_line
 from .output import format_size, format_timestamp, print_error, print_json, print_table
 
 
@@ -80,8 +81,8 @@ def run_list(args: argparse.Namespace) -> int:
         rows.append(
             [
                 str(entry.id),
-                entry.original_path,
-                entry.threat_name,
+                sanitize_log_line(entry.original_path),
+                sanitize_log_line(entry.threat_name),
                 format_timestamp(entry.detection_date),
                 format_size(entry.file_size),
             ]

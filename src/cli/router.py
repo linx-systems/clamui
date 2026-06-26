@@ -20,7 +20,17 @@ import sys
 from ..core.i18n import _
 
 # Set of recognized subcommand names for detection in main.py
-CLI_SUBCOMMANDS = frozenset({"scan", "quarantine", "profile", "status", "history", "help"})
+CLI_SUBCOMMANDS = frozenset(
+    {
+        "scan",
+        "quarantine",
+        "profile",
+        "status",
+        "history",
+        "help",
+        "install-privileged-helper",
+    }
+)
 
 
 def cli_main() -> int:
@@ -52,6 +62,7 @@ def cli_main() -> int:
     # Register all subcommands (lazy imports to avoid unnecessary loading)
     from .help_cmd import register as register_help
     from .history_cmd import register as register_history
+    from .install_helper import register as register_install_helper
     from .profile_cmd import register as register_profile
     from .quarantine_cmd import register as register_quarantine
     from .scan_cmd import register as register_scan
@@ -63,6 +74,7 @@ def cli_main() -> int:
     register_status(subparsers)
     register_history(subparsers)
     register_help(subparsers)
+    register_install_helper(subparsers)
 
     args = parser.parse_args(sys.argv[1:])
 

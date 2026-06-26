@@ -33,7 +33,7 @@ Uses the clamd background service exclusively. Database stays in memory for inst
 
 ## Clamscan Backend
 
-Uses the standalone `clamscan` command. Loads the database from disk for each scan (3-10 sec overhead). No background service needed.
+Uses the standalone `clamscan` command. Loads the database from disk for each scan (3-10 sec overhead). No background service needed. ClamUI forwards the relevant `clamd.conf` limits (`MaxFileSize`, `MaxScanSize`, `MaxRecursion`, `MaxFiles`) as `--max-filesize`/`--max-scansize`/`--max-recursion`/`--max-files` so scan limits stay consistent with the daemon backend.
 
 **Best for:** Occasional scans, minimal installations, troubleshooting.
 

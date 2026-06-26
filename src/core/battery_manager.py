@@ -79,10 +79,13 @@ class BatteryManager:
                 has_battery=False, is_plugged=True, percent=None, time_remaining=None
             )
 
-        # Battery detected (laptop or similar)
+        # Battery detected (laptop or similar). psutil reports power_plugged as
+        # None when AC status is undetermined; treat that as plugged-in so we do
+        # not wrongly skip scheduled scans.
+        is_plugged = bool(battery.power_plugged) if battery.power_plugged is not None else True
         return BatteryStatus(
             has_battery=True,
-            is_plugged=battery.power_plugged,
+            is_plugged=is_plugged,
             percent=battery.percent,
             time_remaining=battery.secsleft if battery.secsleft > 0 else None,
         )

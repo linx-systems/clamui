@@ -201,7 +201,7 @@ class ClamUIApp(Adw.Application):
         if self._quarantine_manager is None:
             from .core.quarantine import QuarantineManager
 
-            self._quarantine_manager = QuarantineManager()
+            self._quarantine_manager = QuarantineManager(settings_manager=self._settings_manager)
         return self._quarantine_manager
 
     @property
@@ -881,10 +881,15 @@ class ClamUIApp(Adw.Application):
         self._initial_use_virustotal = False
 
         if self._scan_view:
-            self._scan_view._set_selected_path(paths[0])
             if use_vt:
+                # VirusTotal scans a single file per request; only the first
+                # path is forwarded to the setup dialog and scan pipeline.
+                self._scan_view._set_selected_path(paths[0])
                 self._show_virustotal_setup_dialog(paths[0])
             else:
+                # ClamAV scans every CLI-provided target (files and folders),
+                # so populate the full selection before starting.
+                self._scan_view._replace_selected_paths(paths)
                 self._scan_view._start_scan()
 
     def _trigger_virustotal_scan(self, file_path: str, api_key: str) -> None:
@@ -893,13 +898,36 @@ class ClamUIApp(Adw.Application):
 
         def on_scan_complete(result):
             try:
-                from .core.log_manager import LogManager
+                from .core.log_manager import LogEntry, LogManager
 
                 log_manager = LogManager()
-                log_manager.add_virustotal_result(result)
-                self._show_virustotal_results_dialog(result)
+                log_entry = LogEntry.from_virustotal_result_data(
+                    vt_status=result.status.value,
+                    file_path=result.file_path,
+                    duration=result.duration,
+                    sha256=result.sha256,
+                    detections=result.detections,
+                    total_engines=result.total_engines,
+                    detection_details=[
+                        {
+                            "engine_name": d.engine_name,
+                            "category": d.category,
+                            "result": d.result,
+                        }
+                        for d in result.detection_details
+                    ],
+                    permalink=result.permalink,
+                    error_message=result.error_message,
+                )
+                log_manager.save_log(log_entry)
             except Exception as e:
-                logger.error(f"Error processing VirusTotal result: {e}")
+                logger.error(f"Failed to save VirusTotal log: {e}")
+
+            # Show the results dialog regardless of whether logging succeeded.
+            # (Previously this lived inside the try above and never ran, because
+            # the log call referenced a nonexistent LogManager.add_virustotal_result
+            # method that raised AttributeError.)
+            self._show_virustotal_results_dialog(result)
 
         def scan_thread():
             try:
@@ -931,7 +959,10 @@ class ClamUIApp(Adw.Application):
 
         win = self.props.active_window
         if win:
-            dialog = VirusTotalResultsDialog(win, result)
+            # VirusTotalResultsDialog.__init__ takes the result as its first
+            # argument; the parent is set separately (mirrors the scan coordinator).
+            dialog = VirusTotalResultsDialog(vt_result=result)
+            dialog.set_transient_for(win)
             dialog.present()
 
     def _open_virustotal_website(self, url: str):

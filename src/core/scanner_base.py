@@ -49,6 +49,20 @@ _NONFATAL_LIBCLAMAV_PATTERNS = (
     "Invalid offset arguments",  # ZIP parser malformed archive offsets
 )
 
+# LibClamAV Warning patterns emitted when ClamAV hits a configured scan limit
+# (max scan/file size, recursion depth) or a truncated container. ClamAV scans
+# what it can and CONTINUES — these are by-design protections (e.g. against
+# decompression bombs), not failures, so they must not turn the scan into an
+# error. Matched case-insensitively against the warning line. See GitHub issue:
+# full scan reported ERROR after hitting a large compressed file.
+_NONFATAL_WARNING_PATTERNS = (
+    "exceeds limits",  # cli_scanxz/cli_unzip/etc: size exceeds limits - only scanning N bytes
+    "file truncated",  # cli_tnef/cli_ole2/etc: file truncated, returning CLEAN
+    "size limit reached",  # generic scan/file size cap reached
+    "recursion limit",  # archive/container recursion depth cap
+    "max recursion level reached",  # cli_magic_scan recursion cap
+)
+
 
 def communicate_with_cancel_check(
     process: subprocess.Popen,
@@ -372,10 +386,25 @@ def _extract_skipped_path(line: str) -> str | None:
     return None
 
 
-def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[str]]:
-    """Collect non-fatal skipped paths and remaining hard-error lines."""
+def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[str], list[str]]:
+    """Classify ClamAV output lines into three buckets.
+
+    Returns a tuple of ``(skipped_files, nonfatal_warnings, hard_error_lines)``:
+
+    - ``skipped_files``: paths ClamAV could not open/process (permissions,
+      unsupported type) — the file was skipped entirely.
+    - ``nonfatal_warnings``: limit/truncation warnings where ClamAV partially
+      scanned a file and continued (e.g. a large compressed file exceeding the
+      scan-size cap). These are by-design and are NOT errors.
+    - ``hard_error_lines``: lines that look like genuine errors.
+
+    Both ``skipped_files`` and ``nonfatal_warnings`` are *positive* signals that
+    an exit code of 2 is benign; callers should require one of them (and an
+    empty ``hard_error_lines``) before downgrading an exit-2 scan to CLEAN.
+    """
     skipped_files: list[str] = []
     seen_skipped: set[str] = set()
+    nonfatal_warnings: list[str] = []
     hard_error_lines: list[str] = []
 
     for raw_line in [*stdout.splitlines(), *stderr.splitlines()]:
@@ -400,12 +429,22 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
         ):
             continue
 
+        # Non-fatal LibClamAV warnings emitted when a file exceeds a scan limit
+        # or is truncated. ClamAV partially scans the file and continues, so
+        # these must not be treated as hard errors. Recorded as a positive
+        # non-fatal signal so the scan can still complete as CLEAN.
+        if line.startswith("LibClamAV Warning:") and any(
+            pattern in line.lower() for pattern in _NONFATAL_WARNING_PATTERNS
+        ):
+            nonfatal_warnings.append(line)
+            continue
+
         if line.startswith(
             ("WARNING:", "ERROR:", "LibClamAV Error:", "LibClamAV Warning:")
         ) or line.endswith("ERROR"):
             hard_error_lines.append(line)
 
-    return skipped_files, hard_error_lines
+    return skipped_files, nonfatal_warnings, hard_error_lines
 
 
 def cleanup_process(process: subprocess.Popen | None) -> None:

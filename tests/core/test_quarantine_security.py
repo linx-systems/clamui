@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from src.core.quarantine.database import QuarantineDatabase, QuarantineEntry
-from src.core.quarantine.file_handler import SecureFileHandler, FileOperationStatus
+from src.core.quarantine.file_handler import FileOperationStatus, SecureFileHandler
 from src.core.quarantine.manager import QuarantineManager
 
 

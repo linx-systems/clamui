@@ -342,6 +342,25 @@ class TestProfileManagerCRUD:
         assert profile.is_default is False
         assert profile.id is not None
 
+    def test_create_profile_strips_surrounding_whitespace(self, manager):
+        """Test that surrounding whitespace is stripped before storing the name."""
+        profile = manager.create_profile(
+            name="  Quick  ",
+            targets=["/home/user"],
+            exclusions={},
+        )
+
+        # Stored, validated, and deduplicated name must be the stripped value.
+        assert profile.name == "Quick"
+        # The stripped name is what is retrievable and what blocks duplicates.
+        assert manager.get_profile_by_name("Quick") is not None
+        with pytest.raises(ValueError):
+            manager.create_profile(
+                name="Quick",
+                targets=["/home/user"],
+                exclusions={},
+            )
+
     def test_create_profile_with_all_fields(self, manager):
         """Test creating a profile with all fields."""
         profile = manager.create_profile(
@@ -1628,6 +1647,26 @@ class TestXdgMigration:
         assert "_migrations" in settings
         assert settings["_migrations"].get("xdg_migration_version") == 1
 
+    def test_migration_state_write_is_atomic(self, temp_config_dir, monkeypatch):
+        """Migration state is written atomically: valid JSON, no leftover temp files."""
+        monkeypatch.setattr(
+            "src.core.flatpak.get_xdg_user_dir",
+            lambda x: "/home/user/Downloads" if x == "DOWNLOAD" else None,
+        )
+
+        ProfileManager(config_dir=temp_config_dir)
+
+        settings_file = temp_config_dir / "settings.json"
+        assert settings_file.exists()
+        # File contains complete, valid JSON (not a half-written file).
+        with open(settings_file) as f:
+            settings = json.load(f)
+        assert settings["_migrations"]["xdg_migration_version"] == 1
+        # Owner-only permissions like the rest of the config files.
+        assert (settings_file.stat().st_mode & 0o777) == 0o600
+        # No temp files were left behind by the atomic rename.
+        assert not list(temp_config_dir.glob("settings_*.json"))
+
     def test_migration_preserves_existing_settings(self, temp_config_dir, monkeypatch):
         """Test that migration preserves existing settings in settings.json."""
         # Create settings with existing content
@@ -1781,3 +1820,57 @@ class TestRestoreDefaultProfiles:
         # Verify defaults were restored
         default_names = {p.name for p in profiles if p.is_default}
         assert default_names == {"Quick Scan", "Full Scan", "Home Folder"}
+
+
+class TestProfileManagerHardening:
+    """Regression tests for default-profile rename and import name validation."""
+
+    @pytest.fixture
+    def temp_config_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    @pytest.fixture
+    def manager(self, temp_config_dir):
+        return ProfileManager(config_dir=temp_config_dir)
+
+    def test_cannot_rename_default_profile(self, manager):
+        """Renaming a default profile must raise: defaults are recreated by name at
+        startup, so a rename would orphan it and spawn a duplicate default."""
+        default = next(p for p in manager.list_profiles() if p.is_default)
+
+        with pytest.raises(ValueError, match="Cannot rename a default profile"):
+            manager.update_profile(default.id, name=default.name + " Renamed")
+
+        # Non-name edits on a default remain allowed.
+        updated = manager.update_profile(default.id, description="changed")
+        assert updated is not None
+        assert updated.description == "changed"
+        assert updated.name == default.name
+
+    def test_update_default_with_same_name_is_allowed(self, manager):
+        """Editing other fields while passing the unchanged name must not raise."""
+        default = next(p for p in manager.list_profiles() if p.is_default)
+        updated = manager.update_profile(default.id, name=default.name, description="x")
+        assert updated is not None
+        assert updated.name == default.name
+
+    def test_default_rename_blocked_prevents_duplicate_on_reload(self, temp_config_dir):
+        """End-to-end: the guard keeps exactly one profile per default name across reloads."""
+        manager = ProfileManager(config_dir=temp_config_dir)
+        default = next(p for p in manager.list_profiles() if p.is_default)
+        with pytest.raises(ValueError):
+            manager.update_profile(default.id, name="Custom Renamed Default")
+
+        reloaded = ProfileManager(config_dir=temp_config_dir)
+        default_names = [p.name for p in reloaded.list_profiles() if p.is_default]
+        assert len(default_names) == len(set(default_names))
+
+    def test_import_profile_null_name_raises(self, manager, temp_config_dir):
+        """Importing a profile whose name is JSON null must raise rather than create
+        a profile literally named 'None'."""
+        import_path = Path(temp_config_dir) / "null_name.json"
+        import_path.write_text(json.dumps({"profile": {"name": None, "targets": ["/home"]}}))
+
+        with pytest.raises(ValueError, match="non-empty string"):
+            manager.import_profile(import_path)

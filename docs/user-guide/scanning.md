@@ -28,37 +28,36 @@ scanned automatically.
 
 #### Selecting Files to Scan
 
-**Using the File Picker (Browse Button)**
+**Using the Add Buttons**
 
-The Browse button opens a standard GTK file picker dialog:
+The **Scan Targets** group has two buttons in its header:
 
-1. Click **Browse** in the "Scan Target" section
-2. The dialog opens to your home directory by default
-3. Navigate using:
-    - **Folder list** (left sidebar): Jump to common locations
-    - **Path bar** (top): Click any folder in the current path
-    - **Search** (Ctrl+F): Find files/folders by name
-4. To select a file:
-    - Click on the file name
-    - Click **Select** in the bottom-right corner
-5. To select a folder:
-    - Navigate into the folder you want to scan
-    - Click **Select** in the bottom-right corner (folder itself is selected)
-    - Or click the folder once and then click **Select** to scan it
+1. **Add files** (document icon): opens a file chooser; select one or more files
+2. **Add folders** (folder icon): opens a folder chooser; select one or more folders
 
-**Tips for File Selection**:
+In the chooser:
 
-- You can only select one path at a time using the Browse button
-- To scan multiple locations, use scan profiles instead
-- The file picker respects hidden files based on your file manager settings
+- Navigate using the folder sidebar, the path bar, or search (Ctrl+F)
+- Select one or several items, then click **Open**/**Select**
 - You can type a path directly in the location bar (Ctrl+L)
+
+Each chosen item is added as its own row in the target list. A **Clear All** button appears once more than one
+target is listed, and every row has a remove (×) button.
+
+**Tips for selecting targets**:
+
+- You can add as many files and folders as you like; they are all scanned in one run
+- Duplicate paths are ignored automatically
+- The chooser respects hidden files based on your file manager settings
 
 #### Path Display and Validation
 
-Once you select a path, ClamUI displays it in the "Selected Path" row:
+Each selected target appears as a row in the **Scan Targets** list (the group title shows the count, e.g.
+"Scan Targets (3)"):
 
 ```
-Selected Path: /home/username/Downloads
+/home/username/Downloads
+/home/username/Documents/report.pdf
 ```
 
 The path is validated automatically:
@@ -93,7 +92,7 @@ When you drag files over the ClamUI window:
 4. **Background tint**: Light transparent overlay shows the drop is accepted
 5. **Drop the file**: Release your mouse button anywhere in the window
 6. **Border disappears**: Visual feedback clears immediately
-7. **Path updates**: The dropped path appears in "Selected Path"
+7. **Targets update**: Each dropped file/folder is added to the "Scan Targets" list
 
 This visual feedback confirms ClamUI is ready to accept your file.
 
@@ -103,7 +102,7 @@ This visual feedback confirms ClamUI is ready to accept your file.
 
 - ✅ Files from your local filesystem
 - ✅ Folders/directories
-- ✅ Multiple files (first valid file is used)
+- ✅ Multiple files and folders (every valid item is added to the target list)
 - ✅ Files from archive managers (if they provide local paths)
 
 **What won't work**:
@@ -113,8 +112,9 @@ This visual feedback confirms ClamUI is ready to accept your file.
 - ❌ Dropping during an active scan (rejected with error message)
 - ❌ Special URIs that don't resolve to local paths
 
-**Multi-file drops**: If you drop multiple files, ClamUI uses the first valid file path and ignores the rest. To scan
-multiple locations, use scan profiles instead.
+**Multi-file drops**: You can drop several files and folders at once — every valid path is added to the target list
+and included in the next scan. Invalid paths (nonexistent locations, or symlinks that point into protected system
+directories) are rejected by validation, and an error toast explains why if nothing valid was dropped.
 
 #### Drop Error Handling
 
@@ -201,6 +201,12 @@ ClamUI makes EICAR testing simple with a dedicated test button:
 **How often to test**: Testing once after installation is usually sufficient. You don't need to test regularly unless
 you suspect problems.
 
+### Automatic Device Scanning
+
+ClamUI can automatically scan removable and external drives (USB sticks, external disks) as soon as they are
+mounted. This is off by default; enable and tune it under **Preferences → Device Scan** (which device types to
+watch, a maximum size, an optional auto-quarantine, and whether to skip while on battery).
+
 ### Understanding Scan Progress
 
 When you click the Scan button, ClamUI performs several operations behind the scenes. Understanding what's happening
@@ -229,12 +235,16 @@ ClamUI chooses which scanning method to use:
 - **Daemon mode**: Use clamd only (error if unavailable)
 - **Clamscan mode**: Use standalone clamscan only
 
+ClamUI caches the daemon-availability check for 60 seconds, so repeated scans in auto mode don't re-probe the
+socket every time. Change the backend in **Preferences → Scanner Settings** (stored as `scan_backend` in
+`settings.json`, one of `auto`, `daemon`, or `clamscan`).
+
 **Backend performance**:
 
 - **clamd (daemon)**: Fast (10-50x faster), lower CPU usage, requires running daemon
 - **clamscan (standalone)**: Slower, higher CPU usage, always available
 
-💡 **Tip**: Check which backend is being used in Statistics → Components view
+💡 **Tip**: The scan view shows a "Backend: …" label under the buttons, and the Components view (in the sidebar) shows full daemon/clamscan status
 
 **3. Scanning Process**
 
@@ -324,23 +334,19 @@ How long a scan takes depends on several factors:
 | Home directory   | 15,000 files   | clamscan | 10-20 min |
 | Full system      | 500,000+ files | daemon   | 30-90 min |
 
-💡 **Tip**: For faster scans, enable the clamd daemon in Preferences → Scan Backend
+💡 **Tip**: For faster scans, run the clamd daemon and select the daemon (or auto) backend in Preferences → Scanner Settings
 
 #### Monitoring Scan Progress
 
 **What you can see during scanning**:
 
-- Status message: "Scanning..." appears at the bottom
-- UI state: All controls disabled while scanning
-- Window title: May show scanning indicator (depends on desktop environment)
+- A status message at the top of the progress area: "Scanning…", or "Target X of Y: <path>" when several targets are queued
+- A progress bar that pulses continuously; when file-count estimates are available it shows a percentage (e.g. "42%")
+- The file currently being scanned, with a spinner
+- Running counts (files scanned, and target N of M for multi-target runs)
+- A live threat list that fills in as infected files are found
 
-**What you can't see** (current limitation):
-
-- Real-time file count or progress percentage
-- Current file being scanned
-- Estimated time remaining
-
-**Progress indication**: ClamUI shows a progress bar that pulses during scanning. When the daemon backend or file count estimates are available, it displays a percentage (e.g., "Scanning... 42%"). The current file being scanned is shown in real time.
+Live progress details can be turned off with the `show_live_progress` setting (Preferences → Behavior); the pulsing progress bar still appears.
 
 **What you can do during scanning**:
 
@@ -361,33 +367,33 @@ understand every detail.
 **Clean Scan (No Threats)**:
 
 ```
-✓ Scan complete: No threats found (1,543 files scanned)
+✓ Scan complete - No threats found
 ```
 
 This green success message tells you:
 
 - ✅ All scanned files are safe
 - ✅ No viruses, trojans, or malware detected
-- ✅ The number in parentheses shows files examined
+- ✅ The number of files examined is shown in the View Results dialog and progress stats
 - ✅ You can use your files normally
 
 **Threats Detected**:
 
 ```
-⚠ Scan complete: 3 threat(s) found
+⚠ Scan complete - 3 threat(s) detected
 ```
 
 This orange/red warning message indicates:
 
 - ⚠️ ClamAV found infected or suspicious files
 - ⚠️ Number of distinct threats detected
-- ⚠️ Detailed threat cards appear below
+- ⚠️ A **View Results (N)** button appears; click it to open the Scan Results dialog with detailed threat cards
 - ⚠️ Action is recommended (quarantine or review)
 
 **Scan Error**:
 
 ```
-✗ Scan failed: [error details]
+✗ Scan error: [error details]
 ```
 
 This red error message means:
@@ -409,7 +415,7 @@ Each detected threat is displayed in its own card with complete information:
 │ /home/user/Downloads/suspicious-file.exe                │
 │ Category: Trojan                                        │
 │                                                         │
-│ [Quarantine]  [Copy Path]                              │
+│ [Quarantine]  [Exclude]  [Copy Path]                    │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -465,10 +471,15 @@ Each detected threat is displayed in its own card with complete information:
     - File can't execute or spread from quarantine
     - You can restore it later if it's a false positive
     - See [Quarantine Management](quarantine.md) for details
+- **Exclude**: Add this file's path to your exclusion patterns so future scans skip it (use only for confirmed false positives)
 - **Copy Path**: Copy file path to clipboard
     - Useful for reporting or manual investigation
     - You can paste the path into a terminal or file manager
     - Helps you locate the file without typing the full path
+
+A bulk **Quarantine All ({n})** button in the dialog header isolates every detected threat at once. Quarantined files
+are copied to secure storage, hashed with SHA-256, and verified against that hash before any later restore (see
+[Quarantine Management](quarantine.md)).
 
 #### Understanding File Counts
 
@@ -680,6 +691,25 @@ Here are real-world examples showing how ClamUI classifies different threat name
 
 **Always use your judgment**: Severity is a guide, not a definitive risk assessment. When in doubt, quarantine the file
 and research the threat name online.
+
+### Command-Line Scanning
+
+ClamUI also ships a headless scanner for scripts and terminals:
+
+```
+clamui scan PATH [PATH ...]
+```
+
+Useful options:
+
+- `--no-recursive` — do not descend into directories
+- `--profile NAME` / `-p NAME` — apply a saved profile's exclusion patterns
+- `--quarantine` / `-q` — automatically quarantine detected threats
+- `--json` — emit machine-readable JSON
+- `--verbose` / `-v` — print the ClamAV version and extra detail
+
+The command exits `0` when clean, `1` when threats are found, and `2` on error — the same codes ClamAV uses. Run
+`clamui help` for the full subcommand list.
 
 ---
 

@@ -317,12 +317,18 @@ class PaginatedListController:
         if not entries:
             return
 
-        # Display initial batch with pagination
-        initial_limit = min(self._initial_limit, len(entries))
+        # Display initial batch with pagination. Base decisions on the entries
+        # that will actually be displayed (entries_to_display), not the raw
+        # backing list: a subclass may override entries_to_display() to return
+        # a filtered subset. Using len(entries) here would add a bogus
+        # "Load More" button (e.g. "Show 0 More") and suppress the no-results
+        # placeholder whenever a filter narrows the list below the initial limit.
+        display_entries = self.entries_to_display
+        initial_limit = min(self._initial_limit, len(display_entries))
         self.display_batch(0, initial_limit)
 
-        # Add "Load More" button if there are more entries
-        if len(entries) > self._initial_limit:
+        # Add "Load More" button only if more displayable entries remain
+        if len(display_entries) > self._initial_limit:
             self.add_load_more_button(entries_label)
 
     def _on_load_more_clicked(self, button):

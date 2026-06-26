@@ -104,6 +104,22 @@ class TestBatteryManagerGetStatus:
         assert status.time_remaining == 7200
 
     @pytest.mark.skipif(not PSUTIL_AVAILABLE, reason="psutil not installed")
+    def test_get_status_power_plugged_undetermined(self):
+        """Test undetermined power_plugged (None) is treated as plugged-in."""
+        manager = BatteryManager()
+
+        mock_battery = mock.MagicMock()
+        mock_battery.percent = 50.0
+        mock_battery.power_plugged = None  # psutil reports None when AC is undetermined
+        mock_battery.secsleft = -1
+
+        with mock.patch("psutil.sensors_battery", return_value=mock_battery):
+            status = manager.get_status()
+            # Undetermined => plugged-in => do NOT skip scheduled scans
+            assert status.is_plugged is True
+            assert manager.is_on_battery() is False
+
+    @pytest.mark.skipif(not PSUTIL_AVAILABLE, reason="psutil not installed")
     def test_get_status_handles_psutil_exception(self):
         """Test get_status handles psutil exceptions gracefully."""
         manager = BatteryManager()

@@ -70,7 +70,7 @@ The Scheduled Scans page contains all configuration options:
 
 **What happens when you enable**:
 
-- ClamUI creates a system-level scheduled task (systemd timer or cron job)
+- ClamUI creates a user-level scheduled task (systemd user timer or cron job)
 - The schedule persists across system restarts
 - Scans run even when the ClamUI GUI is closed
 - You receive desktop notifications when scans complete
@@ -83,7 +83,7 @@ The Scheduled Scans page contains all configuration options:
 
 **What happens when you disable**:
 
-- The system-level scheduled task is removed
+- The user-level scheduled task is removed
 - No automatic scans will run
 - Existing scan history is preserved
 - You can still run manual scans anytime
@@ -340,6 +340,8 @@ Specify which files and folders to scan automatically.
 - **Best for**: Regular checks of external media
 - **Why**: USB drives are common malware vectors
 - ⚠️ **Note**: Drive must be connected at scan time
+
+💡 **Tip**: For drives that aren't connected at the scheduled time, ClamUI can also scan USB/removable media **automatically when they're plugged in** — a separate feature configured in **Preferences** → **Device Scan** (see the [Settings guide](settings.md)).
 
 #### Setting Scan Targets
 

@@ -5,14 +5,16 @@ This document provides comprehensive installation instructions for ClamUI on Lin
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Flatpak Installation](#flatpak-installation)
-3. [Debian Package Installation](#debian-package-installation)
-4. [File Manager Context Menu](#file-manager-context-menu)
-5. [System Tray Integration](#system-tray-integration)
-6. [Verification](#verification)
-7. [Verifying Package Signatures](#verifying-package-signatures)
-8. [Icon Troubleshooting](#icon-troubleshooting)
-9. [Uninstallation](#uninstallation)
+2. [ClamAV Requirement](#clamav-requirement)
+3. [Flatpak Installation](#flatpak-installation)
+4. [AppImage Installation](#appimage-installation)
+5. [Debian Package Installation](#debian-package-installation)
+6. [File Manager Context Menu](#file-manager-context-menu)
+7. [System Tray Integration](#system-tray-integration)
+8. [Verification](#verification)
+9. [Verifying Package Signatures](#verifying-package-signatures)
+10. [Icon Troubleshooting](#icon-troubleshooting)
+11. [Uninstallation](#uninstallation)
 
 ---
 
@@ -24,7 +26,40 @@ The recommended installation method depends on your Linux distribution:
 |----------------------------|----------------------------------------------|
 | Any (universal)            | [Flatpak](#flatpak-installation)             |
 | Debian, Ubuntu, Linux Mint | [.deb package](#debian-package-installation) |
-| Fedora, Arch, others       | [Flatpak](#flatpak-installation)             |
+| Fedora, Arch, others       | [Flatpak](#flatpak-installation) or [AppImage](#appimage-installation) |
+
+There are three distribution formats: a Debian `.deb` package, a portable AppImage, and a Flatpak.
+ClamUI is a GTK4/libadwaita GUI front-end for ClamAV; it requires Python 3.11 or newer (bundled in the
+Flatpak and AppImage) and **a host installation of ClamAV** regardless of which format you choose
+(see [ClamAV Requirement](#clamav-requirement)).
+
+---
+
+## ClamAV Requirement
+
+ClamUI drives the ClamAV command-line tools; **none of the distribution formats bundle ClamAV or its virus
+database**. You must install ClamAV on the host for every installation method (Debian `.deb`, AppImage, and
+Flatpak). The Flatpak and AppImage invoke the host's ClamAV (the Flatpak via `flatpak-spawn --host`).
+
+At minimum ClamUI needs `clamscan` and `freshclam` (the virus-database updater). Daemon mode additionally
+requires the ClamAV daemon (`clamd`) and `clamdscan` — see
+[SCAN_BACKENDS.md](./SCAN_BACKENDS.md) for daemon setup and the backend selection.
+
+```bash
+# Ubuntu/Debian (clamscan + freshclam; clamav-daemon for daemon mode)
+sudo apt install clamav clamav-freshclam
+sudo apt install clamav-daemon          # optional: daemon (clamd/clamdscan) backend
+
+# Fedora (clamav-update provides freshclam; clamd/clamav-update for daemon mode)
+sudo dnf install clamav clamav-update
+sudo dnf install clamd                   # optional: daemon backend
+
+# Arch Linux (the clamav package provides clamscan, freshclam, clamd, and clamdscan)
+sudo pacman -S clamav
+```
+
+After installing ClamAV, download the virus database with `freshclam` (or run a database update from inside
+ClamUI) before your first scan.
 
 ---
 
@@ -59,9 +94,8 @@ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.f
 flatpak install flathub io.github.linx_systems.ClamUI
 ```
 
-> **Note:** The Flatpak version does not bundle ClamAV. Install ClamAV on the host system first:
-> `sudo apt install clamav clamav-freshclam` on Ubuntu/Debian, `sudo dnf install clamav clamav-update` on Fedora,
-> or `sudo pacman -S clamav` on Arch Linux.
+> **Note:** The Flatpak does not bundle ClamAV; install ClamAV on the host first (it is invoked via
+> `flatpak-spawn --host`). See [ClamAV Requirement](#clamav-requirement).
 
 ### Update Virus Definitions
 
@@ -174,6 +208,50 @@ flatpak override --user --filesystem=/path/to/directory io.github.linx_systems.C
 
 ---
 
+## AppImage Installation
+
+ClamUI is also distributed as a portable AppImage that bundles Python, GTK4, and libadwaita. It runs on
+most modern Linux distributions without installation. **ClamAV is not bundled** — it must be installed on the
+host (see [ClamAV Requirement](#clamav-requirement)).
+
+### Download and Run
+
+Download `ClamUI-<version>-x86_64.AppImage` from the
+[releases page](https://github.com/linx-systems/clamui/releases), make it executable, and run it:
+
+```bash
+chmod +x ClamUI-*-x86_64.AppImage
+./ClamUI-*-x86_64.AppImage
+```
+
+Releases that embed update information also ship a `ClamUI-<version>-x86_64.AppImage.zsync` file, which lets
+[AppImageUpdate](https://github.com/AppImage/AppImageUpdate) perform delta updates.
+
+### Install via AppMan / AM (optional)
+
+The AppImage can be managed by [AppMan](https://github.com/ivan-hc/AppMan) (rootless) or
+[AM](https://github.com/ivan-hc/AM):
+
+```bash
+appman -i clamui   # rootless, per-user
+am -i clamui       # system-wide
+```
+
+### Building the AppImage
+
+To build the AppImage locally (requires `wget`, Python 3, and the GTK4/libadwaita system packages, Ubuntu
+24.04+ recommended):
+
+```bash
+git clone https://github.com/linx-systems/clamui.git
+cd clamui
+./appimage/build-appimage.sh
+```
+
+The resulting `ClamUI-<version>-x86_64.AppImage` is written to the project root.
+
+---
+
 ## Debian Package Installation
 
 For Debian, Ubuntu, and derivative distributions, ClamUI is available as a `.deb` package.
@@ -192,14 +270,17 @@ sudo apt install python3-dev libcairo2-dev libgirepository-2.0-dev pkg-config
 # Build dependencies for Pillow (tray icon support)
 sudo apt install libjpeg-dev zlib1g-dev
 
-# ClamAV antivirus
-sudo apt install clamav
+# ClamAV antivirus (clamscan + freshclam; see ClamAV Requirement above)
+sudo apt install clamav clamav-freshclam
 ```
 
 > **Note:** The build dependencies (`python3-dev`, `libcairo2-dev`, `libgirepository-2.0-dev`, `pkg-config`,
-`libjpeg-dev`, `zlib1g-dev`) are required when running from source with `uv run clamui`. The pre-built `.deb` package
-> includes compiled binaries and may not require all build dependencies. On older Ubuntu versions (22.04), use
-`libgirepository1.0-dev` instead.
+`libjpeg-dev`, `zlib1g-dev`) are only required when running from source with `uv run clamui`. The `.deb`
+> package is architecture-independent (`all`) — it installs the Python sources to
+`/usr/lib/python3/dist-packages/clamui/` and declares its runtime dependencies (`python3-gi`,
+`python3-gi-cairo`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`, …), which `apt` pulls in automatically, so no
+> compilation is needed. ClamUI requires Python 3.11 or newer. On older Ubuntu versions (22.04), use
+`libgirepository1.0-dev` instead of `libgirepository-2.0-dev`.
 
 **Quick Start (from source):** The `local-run.sh` script in the `scripts/` directory automatically installs all dependencies
 and runs ClamUI:
@@ -241,6 +322,18 @@ sudo apt install ./clamui_*.deb
 | `/usr/lib/python3/dist-packages/clamui/`                                   | Python application modules |
 | `/usr/share/applications/io.github.linx_systems.ClamUI.desktop`            | Desktop entry file         |
 | `/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.svg` | Application icon           |
+
+### Building the Package
+
+To build the `.deb` from source (requires `dpkg-deb` and `fakeroot`):
+
+```bash
+git clone https://github.com/linx-systems/clamui.git
+cd clamui
+./debian/build-deb.sh
+```
+
+This produces `clamui_<version>_all.deb` in the project root.
 
 ### Run ClamUI
 
@@ -437,10 +530,13 @@ After installation, verify that ClamUI is working correctly.
 ```bash
 # For native installation
 which clamui
-clamui --version
+clamui help               # prints CLI usage (confirms install)
 
 # For Flatpak
 flatpak info io.github.linx_systems.ClamUI
+
+# For AppImage
+./ClamUI-*-x86_64.AppImage help
 ```
 
 ### Check ClamAV

@@ -31,6 +31,9 @@ sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 libadwa
 sudo apt install libgirepository-2.0-dev libcairo2-dev pkg-config python3-dev
 # On Ubuntu < 24.04, use: libgirepository1.0-dev instead of libgirepository-2.0-dev
 
+# Build dependencies for Pillow (tray icon support)
+sudo apt install libjpeg-dev zlib1g-dev
+
 # ClamAV antivirus (for testing scan functionality)
 sudo apt install clamav
 
@@ -127,9 +130,10 @@ uv run clamui profile list             # List scan profiles
 uv run clamui status                   # ClamAV status
 uv run clamui history                  # Scan history
 uv run clamui help                     # Command overview
+uv run clamui install-privileged-helper # Install pkexec config helper (needs sudo)
 ```
 
-All subcommands support `--json` output for scripting integration.
+Most subcommands support `--json` output for scripting integration.
 
 ---
 
@@ -214,6 +218,7 @@ Tests are categorized using pytest markers:
 | `@pytest.mark.integration` | Integration tests (may require external dependencies) |
 | `@pytest.mark.ui`          | UI tests (require GTK/display environment)            |
 | `@pytest.mark.slow`        | Slow-running tests                                    |
+| `@pytest.mark.property`    | Property-based tests (Hypothesis)                     |
 
 Run specific categories:
 
@@ -273,7 +278,7 @@ uv run ruff format src/ tests/
 
 ### Configuration
 
-Ruff is configured in `pyproject.toml`. See `[tool.ruff.lint]` for the full rule set, which includes pycodestyle, Pyflakes, isort, bugbear, comprehensions, pyupgrade, gettext, bandit (security), print detection, pytest-style, and Ruff-native rules.
+Ruff is configured in `pyproject.toml`. See `[tool.ruff.lint]` for the full rule set, which includes pycodestyle, Pyflakes, isort, bugbear, comprehensions, pyupgrade, unused-arguments, simplify, gettext, bandit (security), print detection, pytest-style, and Ruff-native rules.
 
 ### Pre-commit Checks
 
@@ -392,7 +397,7 @@ class TestMyFeature:
 | UI Styling   | libadwaita (GNOME design) |
 | Testing      | pytest, pytest-cov        |
 | Linting      | Ruff                      |
-| Packaging    | Hatch, Flatpak, Debian    |
+| Packaging    | Hatchling, Flatpak, AppImage, Debian |
 
 ### Key Design Patterns
 
@@ -410,7 +415,7 @@ clamui-scheduled-scan     # Scheduled scan CLI (systemd/cron)
 clamui-apply-preferences  # Privileged config applier (via pkexec)
 ```
 
-For a detailed breakdown of all modules, see the [Repository Structure](../CLAUDE.md#repository-structure) section in CLAUDE.md.
+For a detailed breakdown of all modules, see the [Repository Structure](../AGENTS.md#repository-structure-top-level) section in AGENTS.md.
 
 ---
 
@@ -426,14 +431,16 @@ ClamUI uses GitHub Actions for CI with the following workflows:
 | `build-flatpak.yml`    | Manual/Release  | Build Flatpak packages               |
 | `build-appimage.yml`   | Push/Tag/PR     | Build AppImage                       |
 | `build-all.yml`        | Manual/Release  | Orchestrate all package builds       |
+| `release.yml`          | Tag `v*`        | Draft GitHub release from RELEASE_NOTES.md |
 | `codeql.yml`           | Push/PR/Schedule| CodeQL security analysis             |
 | `dependency-audit.yml` | Schedule        | Dependency vulnerability audit       |
 | `dependency-review.yml`| PR              | Review new dependency changes        |
 | `i18n.yml`             | Push/PR         | Translation validation               |
+| `deploy-website.yml`   | Push/Release/Schedule | Build and deploy website to GitHub Pages |
 
 ### CI Environment
 
-- **Runner**: Ubuntu 24.04 (test matrix), Ubuntu 22.04 (import compatibility check)
+- **Runner**: Ubuntu 24.04 (test matrix), Ubuntu 22.04 (libadwaita 1.1 compatibility check)
 - **Display**: xvfb for headless GTK testing
 - **Coverage**: Uploaded as artifact on Python 3.12
 

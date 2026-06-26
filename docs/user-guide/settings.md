@@ -38,6 +38,7 @@ The preferences window uses a sidebar with these pages:
 | **Database**   | `freshclam.conf` update settings                                                  | Save & Apply (admin)                                           |
 | **Scanner**    | Scan backend + `clamd.conf` scanner settings                                      | Backend auto-saved, `clamd.conf` settings require Save & Apply |
 | **Scheduled**  | Automatic scan schedule and targets                                               | Save & Apply                                                   |
+| **Device Scan** | Automatic scanning of newly connected USB, external, and network devices | Auto-saved |
 | **On-Access**  | Real-time on-access scanning settings (`clamd.conf`)                              | Save & Apply (admin)                                           |
 | **VirusTotal** | API key and missing-key behavior                                                  | Saved when changed                                             |
 | **Debug**      | Log level, log export/clear, system info                                          | Log level auto-saved; actions apply immediately                |
@@ -63,6 +64,7 @@ Use this quick guide when deciding where to make a change:
 - **Scanner**: Choose scan backend (`auto`, `daemon`, `clamscan`) and scanner limits.
 - **Database**: Control update frequency, mirrors, custom signatures, and proxy settings.
 - **Scheduled**: Configure automated scans and target paths.
+- **Device Scan**: Automatically scan USB/external/network devices when connected.
 - **On-Access**: Configure real-time filesystem monitoring behavior.
 - **Exclusions**: Exclude trusted paths/patterns from scans.
 - **VirusTotal**: Manage your API key and missing-key actions.
@@ -145,6 +147,22 @@ For raw JSON keys, defaults, and deployment-style examples, see `docs/CONFIGURAT
 | **Skip on Battery**        | Avoid running scheduled scans while on battery power.           |
 | **Auto-Quarantine**        | Automatically quarantine detected threats from scheduled scans. |
 
+#### Device Scan (auto-saved)
+
+Automatically scans newly connected storage devices (USB, external drives, network mounts).
+
+| Option                      | Simple explanation                                                |
+|-----------------------------|-------------------------------------------------------------------|
+| **Enable Device Auto-Scan** | Scan newly mounted devices in the background.                      |
+| **Removable Devices**       | Include USB flash drives, SD cards, and other removable media.     |
+| **External Drives**         | Include external HDDs/SSDs (ejectable but not removable media).    |
+| **Network Mounts**          | Include NFS, SMB/CIFS, and SSHFS mounts.                           |
+| **Max Device Size (GB)**    | Skip devices larger than this (`0` = no limit).                    |
+| **Scan Delay (seconds)**    | Wait this long after a device is mounted before scanning.          |
+| **Auto-Quarantine Threats** | Automatically move detected threats to quarantine.                |
+| **Notifications**           | Show desktop notifications for device scan start/complete events.  |
+| **Skip on Battery**         | Do not scan devices while running on battery power.                |
+
 #### On-Access (`clamd.conf`, Save & Apply, admin)
 
 | Option                     | Simple explanation                                                                                                                                                                     |
@@ -192,15 +210,12 @@ These are in `~/.config/clamui/settings.json`:
 - `daemon_socket_path` (default: `""`): Custom daemon socket path.
 - `clamd_conf_path` (default: `""`): Custom path to `clamd.conf`.
 - `freshclam_conf_path` (default: `""`): Custom path to `freshclam.conf`.
-- `debug_log_max_size_mb` (default: `10`): Max size per debug log file.
-- `debug_log_max_files` (default: `5`): Number of rotated debug log files to keep.
-- `device_auto_scan_enabled` (default: `false`): Auto-scan newly connected storage devices.
-- `device_auto_scan_types` (default: `["removable", "external"]`): Device types to auto-scan.
-- `device_auto_scan_notify` (default: `true`): Notification on device scan start/complete.
-- `device_auto_scan_max_size_gb` (default: `32`): Skip devices larger than this.
-- `device_auto_scan_delay_seconds` (default: `3`): Wait before scanning after mount.
-- `device_auto_scan_auto_quarantine` (default: `false`): Auto-quarantine threats on device scans.
-- `device_auto_scan_skip_on_battery` (default: `true`): Skip device scans on battery power.
+- `debug_log_max_size_mb` (default: `5`): Max size (MB) per debug log file before rotation.
+- `debug_log_max_files` (default: `3`): Number of rotated debug log files to keep.
+
+> **Note:** The `device_auto_scan_*` keys are configured through the **Device Scan** preferences page
+> (see [Device Scan Settings](#device-scan-settings)), and the `schedule_*` keys through the **Scheduled**
+> page, so they are not JSON-only.
 
 ---
 
@@ -868,13 +883,52 @@ coverage.
 
 ---
 
+### Device Scan Settings
+
+The **Device Scan** page configures automatic scanning of newly connected storage devices — USB flash drives,
+external drives, and network mounts. All settings on this page are **auto-saved** immediately; **Save & Apply** is
+not required.
+
+#### Opening Device Scan Settings
+
+1. Open Preferences (`Ctrl+,`)
+2. Click **Device Scan** in the sidebar
+
+#### General
+
+- **Enable Device Auto-Scan** (`device_auto_scan_enabled`, default off): Turns automatic device scanning on or off.
+  When on, ClamUI watches for newly mounted volumes and scans them in the background.
+
+#### Device Types
+
+Choose which kinds of devices are auto-scanned (`device_auto_scan_types`, default `["removable", "external"]`):
+
+- **Removable Devices** — USB flash drives, SD cards, and other removable media.
+- **External Drives** — external HDDs and SSDs (ejectable but not removable media).
+- **Network Mounts** — NFS, SMB/CIFS, and SSHFS mounts.
+
+#### Options
+
+| Option                      | Setting key                        | Default | Meaning                                          |
+|-----------------------------|------------------------------------|---------|--------------------------------------------------|
+| **Max Device Size (GB)**    | `device_auto_scan_max_size_gb`     | `32`    | Skip devices larger than this (`0` = no limit).  |
+| **Scan Delay (seconds)**    | `device_auto_scan_delay_seconds`   | `3`     | Wait before scanning after a device is mounted.  |
+| **Auto-Quarantine Threats** | `device_auto_scan_auto_quarantine` | off     | Automatically move detected threats to quarantine. |
+| **Notifications**           | `device_auto_scan_notify`          | on      | Show desktop notifications for device scan events. |
+| **Skip on Battery**         | `device_auto_scan_skip_on_battery` | on      | Do not scan devices while running on battery power. |
+
+💡 **Tip:** Device auto-scan automatically checks USB drives the moment you plug them in. Keep **Skip on Battery** on
+for laptops to avoid draining power during scans.
+
+---
+
 ### Managing Exclusion Patterns
 
 Exclusion patterns allow you to skip certain files or directories during scans, improving performance and reducing false
 positives.
 
 💡 **Note:** Exclusions configured here are **global exclusions** that apply to all scans. For profile-specific
-exclusions, use the Scan Profiles feature (see [Managing Exclusions](#managing-exclusions) section).
+exclusions, use the Scan Profiles feature (see the [Scan Profiles guide](profiles.md)).
 
 #### Opening Exclusions Settings
 
@@ -1059,8 +1113,11 @@ The **VirusTotal** page lets you connect an API key for cloud reputation checks.
 
 #### Notes
 
+- Your API key is stored securely in the system keyring (libsecret), **not** in `settings.json`. A plaintext fallback
+  in `settings.json` is used only if you explicitly opt in via `allow_plaintext_api_key_fallback`.
 - API key changes are applied immediately; **Save & Apply** is not required.
-- Free-tier limits shown in the app (rate and size limits) still apply.
+- Free-tier limits apply: **4 requests per minute** and **500 requests per day**. Files up to **650 MB** can be
+  scanned (uploads larger than 32 MB use VirusTotal's large-file upload flow automatically).
 
 ---
 
@@ -1075,15 +1132,28 @@ The **Debug** page helps with troubleshooting and support.
 
 #### Logging and Diagnostics Tools
 
-- **Log Level** (`DEBUG`, `INFO`, `WARNING`, `ERROR`) for ClamUI diagnostics.
-- **Open Log Folder** to inspect logs directly.
-- **Export Logs** to create a ZIP bundle for bug reports.
-- **Clear Logs** to remove old log files.
-- **System Information** panel with a **Copy** action for support tickets.
+- **Log Level** combo (`DEBUG`, `INFO`, `WARNING`, `ERROR`) controls ClamUI's own diagnostic verbosity. Default is
+  `WARNING`.
+- **Log File Location** shows the debug-log folder with an **Open** button to reveal it in your file manager.
+- **Export Logs** saves all debug log files to a **redacted ZIP archive** (file paths, hashes, and report URLs are
+  stripped) for sharing in bug reports.
+- **Clear Logs** deletes all debug log files to free disk space.
+- **System Information** panel (installation type, distribution, desktop environment, Python/GTK versions) with a
+  **Copy System Info** action for support tickets.
+
+These are ClamUI's own **debug/diagnostic** logs, which are stored separately from scan and update history logs:
+
+```text
+~/.local/share/clamui/debug/   ← ClamUI debug/diagnostic logs (this page)
+~/.local/share/clamui/logs/    ← scan and update history logs (shown in the Logs view)
+```
+
+Debug logs rotate automatically: each file is capped at `debug_log_max_size_mb` (default `5` MB), and up to
+`debug_log_max_files` (default `3`) rotated files are kept. These two rotation values live in `settings.json` only.
 
 #### Notes
 
-- Log-level changes are auto-saved.
+- Log-level changes are auto-saved and applied to the running logger immediately.
 - Export/Clear actions apply immediately.
 
 ---
@@ -1215,6 +1285,11 @@ Auto-saved settings include:
 3. Wait for confirmation: "Configuration Saved" dialog
 4. Click "OK" to dismiss confirmation
 
+> **Privileged helper (optional):** Saving `freshclam.conf`/`clamd.conf` uses `pkexec` to elevate just the
+> configuration write, so you are prompted for your administrator password each time. For a one-time setup that
+> registers a dedicated polkit action instead, run `clamui install-privileged-helper` (needs `sudo`). This installs
+> the `clamui-apply-preferences` helper and its polkit policy used for elevated config writes.
+
 **What Gets Saved:**
 
 | Settings Page                  | What Changes                                       | Requires Admin Password |
@@ -1327,6 +1402,7 @@ Contains:
 - Scheduled scan configuration
 - Global exclusion patterns
 - Minimize to tray settings
+- Device auto-scan preferences
 
 **ClamAV System Configuration:**
 

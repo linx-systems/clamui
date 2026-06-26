@@ -460,7 +460,7 @@ class TestLogsViewDaemonStatus:
         view._daemon_status_icon = mock.MagicMock()
         view._live_toggle = mock.MagicMock()
 
-        result = view._check_daemon_status()
+        result = view._apply_daemon_status(DaemonStatus.RUNNING, "Running")
 
         assert result is False
         view._daemon_status_row.set_subtitle.assert_called_with("Running")
@@ -481,7 +481,7 @@ class TestLogsViewDaemonStatus:
         view._daemon_status_icon = mock.MagicMock()
         view._live_toggle = mock.MagicMock()
 
-        view._check_daemon_status()
+        view._apply_daemon_status(DaemonStatus.STOPPED, "Stopped")
 
         view._daemon_status_row.set_subtitle.assert_called_with("Stopped")
         view._daemon_status_icon.set_from_icon_name.assert_called_with(
@@ -505,7 +505,7 @@ class TestLogsViewDaemonStatus:
         mock_buffer = mock.MagicMock()
         view._daemon_text.get_buffer.return_value = mock_buffer
 
-        view._check_daemon_status()
+        view._apply_daemon_status(DaemonStatus.NOT_INSTALLED, "")
 
         view._daemon_status_row.set_subtitle.assert_called_with("Not installed")
         view._live_toggle.set_sensitive.assert_called_with(False)
@@ -584,10 +584,11 @@ class TestLogsViewRefreshDaemonLogs:
         view._daemon_text.get_buffer.return_value = mock_buffer
         view._daemon_refresh_id = 123
 
-        result = view._refresh_daemon_logs()
+        view._daemon_refresh_in_flight = True
+        view._apply_daemon_logs(True, "log content here")
 
         mock_buffer.set_text.assert_called_with("log content here")
-        assert result is True
+        assert view._daemon_refresh_in_flight is False
 
     def test_refresh_daemon_logs_failure(self, logs_view_class, mock_log_manager):
         """Test failed daemon log refresh."""
@@ -599,10 +600,9 @@ class TestLogsViewRefreshDaemonLogs:
         view._daemon_text.get_buffer.return_value = mock_buffer
         view._daemon_refresh_id = None
 
-        result = view._refresh_daemon_logs()
+        view._apply_daemon_logs(False, "Permission denied")
 
         mock_buffer.set_text.assert_called_with("Error loading daemon logs:\n\nPermission denied")
-        assert result is False
 
 
 class TestLogsViewExportDaemonLogs:
@@ -669,7 +669,7 @@ class TestLogsViewExportDaemonLogs:
         view._daemon_refresh_id = 123
         view._export_daemon_button = mock.MagicMock()
 
-        view._refresh_daemon_logs()
+        view._apply_daemon_logs(True, "log content here")
 
         view._export_daemon_button.set_sensitive.assert_called_with(True)
 
@@ -684,7 +684,7 @@ class TestLogsViewExportDaemonLogs:
         view._daemon_refresh_id = None
         view._export_daemon_button = mock.MagicMock()
 
-        view._refresh_daemon_logs()
+        view._apply_daemon_logs(False, "Permission denied")
 
         view._export_daemon_button.set_sensitive.assert_called_with(False)
 
@@ -1487,3 +1487,70 @@ def test_logs_view_basic(mock_gi_modules):
     assert "2024-01-15T10:30:00" in csv_result
 
     # All tests passed
+
+
+class TestLogsViewDaemonOffThread:
+    """Daemon status/log reads must run off the GTK main loop, not block it."""
+
+    def test_refresh_daemon_logs_dispatches_to_worker_thread(
+        self, logs_view_class, mock_log_manager
+    ):
+        """_refresh_daemon_logs must defer the blocking read to a worker thread."""
+        view = object.__new__(logs_view_class)
+        view._log_manager = mock_log_manager
+        view._daemon_refresh_id = 123
+        view._daemon_refresh_in_flight = False
+
+        with mock.patch("src.ui.logs_view.threading") as mock_threading:
+            result = view._refresh_daemon_logs()
+
+        # The blocking read is NOT performed on the calling (main) loop.
+        mock_log_manager.read_daemon_logs.assert_not_called()
+        mock_threading.Thread.assert_called_once()
+        assert mock_threading.Thread.call_args.kwargs["target"] == view._refresh_daemon_logs_worker
+        mock_threading.Thread.return_value.start.assert_called_once()
+        # Timer keeps firing while live refresh is active; guard is armed.
+        assert result is True
+        assert view._daemon_refresh_in_flight is True
+
+    def test_refresh_daemon_logs_in_flight_guard_blocks_second_read(
+        self, logs_view_class, mock_log_manager
+    ):
+        """A second tick while a read is in flight must not spawn another worker."""
+        view = object.__new__(logs_view_class)
+        view._log_manager = mock_log_manager
+        view._daemon_refresh_id = 123
+        view._daemon_refresh_in_flight = True  # a read is already running
+
+        with mock.patch("src.ui.logs_view.threading") as mock_threading:
+            result = view._refresh_daemon_logs()
+
+        mock_threading.Thread.assert_not_called()
+        assert result is True
+
+    def test_refresh_worker_reads_and_schedules_apply(self, logs_view_class, mock_log_manager):
+        """The worker performs the read and marshals the result onto the main loop."""
+        view = object.__new__(logs_view_class)
+        view._log_manager = mock_log_manager
+        mock_log_manager.read_daemon_logs.return_value = (True, "content")
+
+        with mock.patch("src.ui.logs_view.GLib") as mock_glib:
+            view._refresh_daemon_logs_worker()
+
+        mock_log_manager.read_daemon_logs.assert_called_once()
+        mock_glib.idle_add.assert_called_once_with(view._apply_daemon_logs, True, "content")
+
+    def test_check_daemon_status_dispatches_to_worker_thread(
+        self, logs_view_class, mock_log_manager
+    ):
+        """_check_daemon_status must defer the blocking status probe to a worker thread."""
+        view = object.__new__(logs_view_class)
+        view._log_manager = mock_log_manager
+
+        with mock.patch("src.ui.logs_view.threading") as mock_threading:
+            result = view._check_daemon_status()
+
+        mock_log_manager.get_daemon_status.assert_not_called()
+        mock_threading.Thread.assert_called_once()
+        assert mock_threading.Thread.call_args.kwargs["target"] == view._check_daemon_status_worker
+        assert result is False

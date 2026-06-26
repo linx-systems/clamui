@@ -29,10 +29,15 @@ class AppLifecycleManager:
             db_dir.mkdir(parents=True, exist_ok=True)
             db_dir.chmod(0o700)
             logger.debug(f"ClamAV database directory ensured: {db_dir}")
-        except OSError:
+        except OSError as e:
+            logger.warning(f"Failed to create XDG database dir {db_dir}: {e}; trying fallback")
             fallback_db_dir = Path("/var/lib/clamav")
-            fallback_db_dir.mkdir(parents=True, exist_ok=True)
-            logger.warning("Failed to create XDG database dir, using fallback")
+            try:
+                fallback_db_dir.mkdir(parents=True, exist_ok=True)
+            except OSError as fallback_error:
+                logger.warning(
+                    f"Failed to create fallback database dir {fallback_db_dir}: {fallback_error}"
+                )
 
     def _get_database_dir(self) -> Path:
         """Get the ClamAV database directory path."""

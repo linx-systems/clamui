@@ -10,9 +10,11 @@ ClamUI is a user-friendly desktop application that brings the powerful ClamAV an
 
 Whether you're downloading files, managing USB drives, or just want peace of mind about your system's security, ClamUI makes virus scanning simple and accessible.
 
+Beyond on-demand scanning, ClamUI includes a **Security Audit** view that reviews your system's overall security posture — ClamAV health, firewall, mandatory access control, automatic updates, intrusion detection, SSH hardening, and Portmaster — with optional deeper checks via Lynis and chkrootkit. It can also **automatically scan USB and removable drives** the moment they are connected.
+
 ## Who is this guide for?
 
-This guide is written for Linux desktop users who want straightforward antivirus protection without dealing with terminal commands. If you've installed ClamUI via Flatpak, a .deb package, or any other method, you're in the right place!
+This guide is written for Linux desktop users who want straightforward antivirus protection without dealing with terminal commands. If you've installed ClamUI via Flatpak, a .deb package, an AppImage, or any other method, you're in the right place!
 
 You don't need to be a Linux expert or understand how ClamAV works under the hood. This guide focuses on **what you can do** with ClamUI, not how the code works.
 
@@ -52,7 +54,7 @@ Monitor your protection status at a glance. Understand the protection status ove
 
 ### ⚙️ [Settings and Preferences](user-guide/settings.md)
 
-Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
+Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, configure automatic scanning of USB and removable drives, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
 
 ### 🔔 [System Tray and Background Features](user-guide/tray.md)
 
@@ -62,9 +64,9 @@ Keep ClamUI accessible with system tray integration. Enable the system tray icon
 
 Solve common issues quickly with this reference guide. Fix "ClamAV not found" errors with installation verification, resolve daemon connection issues, diagnose scan errors and permission problems, troubleshoot quarantine issues (restore failures, database corruption), debug scheduled scans that won't run, and address performance issues (slow scans, high memory usage).
 
-### 🖥️ [Command-Line Interface](user-guide/cli.md)
+### 🖥️ Command-Line Interface
 
-Use ClamUI without a graphical interface for scripting, automation, and headless servers. Available subcommands: `scan` (one-shot scanning with profile and quarantine support), `quarantine` (list, restore, delete quarantined files), `profile` (list, show, export, import scan profiles), `status` (ClamAV version, backend, daemon info), `history` (scan log viewer with type filtering). All commands support `--json` output for integration with other tools.
+Use ClamUI without a graphical interface for scripting, automation, and headless servers. Available subcommands: `scan` (one-shot scanning with profile and quarantine support), `quarantine` (list, restore, delete quarantined files), `profile` (list, show, export, import scan profiles), `status` (ClamAV version, backend, daemon info), `history` (scan log viewer with type filtering), `help` (command overview and per-topic help), and `install-privileged-helper` (installs the privileged helper and polkit policy so ClamUI can write system ClamAV configuration; requires `sudo`). Most commands support `--json` output for integration with other tools. Run `clamui help` for full usage.
 
 
 ### ❓ [Frequently Asked Questions](user-guide/faq.md)

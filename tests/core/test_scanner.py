@@ -356,6 +356,63 @@ class TestScannerBuildCommand:
         assert "pycache" not in all_exclusion_args
         assert ".git" not in all_exclusion_args
 
+    def _settings_with_clamd_conf(self, conf_path: str):
+        """Build a mock settings manager that exposes a clamd.conf path."""
+        values = {"clamd_conf_path": conf_path, "exclusion_patterns": []}
+        mock_settings = mock.MagicMock()
+        mock_settings.get.side_effect = lambda key, default=None: values.get(key, default)
+        return mock_settings
+
+    def test_build_command_forwards_clamd_limits(self, tmp_path):
+        """clamscan must inherit MaxFileSize/MaxScanSize/MaxRecursion/MaxFiles from clamd.conf."""
+        conf = tmp_path / "clamd.conf"
+        conf.write_text("MaxFileSize 50M\nMaxScanSize 400M\nMaxRecursion 20\nMaxFiles 50000\n")
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("data")
+
+        scanner = Scanner(settings_manager=self._settings_with_clamd_conf(str(conf)))
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                with mock.patch("src.core.scanner.resolve_clamd_conf_path", return_value=str(conf)):
+                    cmd = scanner._build_command(str(test_file), recursive=False)
+
+        assert "--max-filesize=50M" in cmd
+        assert "--max-scansize=400M" in cmd
+        assert "--max-recursion=20" in cmd
+        assert "--max-files=50000" in cmd
+
+    def test_build_command_forwards_only_present_limits(self, tmp_path):
+        """Only the limit keys present in clamd.conf are forwarded."""
+        conf = tmp_path / "clamd.conf"
+        conf.write_text("MaxScanSize 200M\n")
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("data")
+
+        scanner = Scanner(settings_manager=self._settings_with_clamd_conf(str(conf)))
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                with mock.patch("src.core.scanner.resolve_clamd_conf_path", return_value=str(conf)):
+                    cmd = scanner._build_command(str(test_file), recursive=False)
+
+        assert "--max-scansize=200M" in cmd
+        assert not any(arg.startswith("--max-filesize") for arg in cmd)
+        assert not any(arg.startswith("--max-recursion") for arg in cmd)
+
+    def test_build_command_no_limits_without_settings_manager(self, tmp_path):
+        """No clamd.conf source → clamscan uses its own defaults (no limit flags)."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("data")
+
+        scanner = Scanner()  # no settings manager
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                cmd = scanner._build_command(str(test_file), recursive=False)
+
+        assert not any(arg.startswith("--max-") for arg in cmd)
+
 
 class TestScannerFlatpakIntegration:
     """Tests for Flatpak integration in Scanner."""
@@ -545,6 +602,44 @@ Time: 0.100 sec (0 m 0 s)
         assert result.status == ScanStatus.ERROR
         assert result.error_message is not None
 
+    def test_parse_results_large_file_warnings_are_clean(self):
+        """Exit code 2 caused only by scan-limit warnings should be CLEAN, not ERROR.
+
+        Regression for a full scan reporting an error after hitting a large
+        compressed file (cli_scanxz decompress-size-limit warning).
+        """
+        scanner = Scanner()
+        stdout = """
+----------- SCAN SUMMARY -----------
+Scanned files: 50000
+Infected files: 0
+"""
+        stderr = (
+            "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+        )
+
+        result = scanner._parse_results("/", stdout, stderr, 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.infected_count == 0
+        assert result.error_message is None
+
+    def test_parse_results_real_error_with_limit_warnings_still_error(self):
+        """A genuine error on exit code 2 must remain ERROR despite benign warnings."""
+        scanner = Scanner()
+        stderr = (
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+            "ERROR: Can't open file or directory\n"
+        )
+
+        result = scanner._parse_results("/", "", stderr, 2)
+
+        assert result.status == ScanStatus.ERROR
+        assert result.error_message is not None
+
     def test_parse_results_multiple_infected(self):
         """Test _parse_results with multiple infected files."""
         scanner = Scanner()
@@ -703,7 +798,11 @@ Infected files: 0
         assert result.warning_message == "2 file(s) could not be accessed"
 
     def test_parse_results_permission_denied_with_infection(self):
-        """Test _parse_results reports INFECTED when infections found with permission errors."""
+        """Exit code 2 with both an infection and an unreadable file must stay INFECTED.
+
+        clamscan returns exit code 2 when it detects a virus AND hits an error
+        (e.g. an unreadable file). A real detection must not be masked by ERROR.
+        """
         scanner = Scanner()
 
         stdout = """/home/user/test.txt: OK
@@ -714,16 +813,18 @@ Infected files: 0
 Scanned files: 2
 Infected files: 1
 """
-        result = scanner._parse_results("/home/user", stdout, "", 1)
+        result = scanner._parse_results("/home/user", stdout, "", 2)
 
-        # Should be INFECTED because of the virus
+        # Detections are authoritative even on exit code 2.
         assert result.status == ScanStatus.INFECTED
         assert result.infected_count == 1
+        # Threat details must survive being forced to INFECTED.
+        assert len(result.threat_details) == 1
+        assert result.threat_details[0].threat_name == "Eicar-Test-Signature"
+        assert "/home/user/virus.txt" in result.infected_files
         assert result.skipped_count == 1
         assert "/root/secret.txt" in result.skipped_files
         assert result.has_warnings is True
-        # warning_message is only set for CLEAN with skipped files
-        assert result.warning_message is None
 
     def test_parse_results_exit_code_2_with_no_skipped_files(self):
         """Test _parse_results reports ERROR when exit code 2 with no skipped files."""
@@ -1679,6 +1780,60 @@ class TestParseResultsEdgeCases:
         # This documents the current (imperfect) parsing behavior for paths with colons
         assert result.threat_details[0].file_path == "/home/user/file.exe: Win.Trojan.Generic"
 
+    def test_parse_results_scanning_line_not_parsed_as_threat(self):
+        """A verbose 'Scanning ' line for a clean file ending in FOUND is not a detection."""
+        scanner = Scanner()
+
+        # clamscan -v emits "Scanning <path>" lines; a clean file named with a
+        # trailing 'FOUND' must not be misparsed as a detection.
+        stdout = (
+            "Scanning /home/user/notes: about malware FOUND\n"
+            "/home/user/notes: about malware FOUND: OK\n"
+            "----------- SCAN SUMMARY -----------\n"
+            "Scanned files: 1\n"
+            "Infected files: 0\n"
+        )
+        result = scanner._parse_results("/home/user", stdout, "", 0)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.infected_count == 0
+        assert len(result.threat_details) == 0
+
+
+class TestScanProgressSnapshot:
+    """Tests that ScanProgress carries point-in-time snapshots of infections."""
+
+    def test_progress_infected_files_snapshot_is_stable(self):
+        """A progress snapshot must keep len(infected_files) == infected_count.
+
+        The on_line callback keeps appending to the live infected_files list; a
+        progress object captured mid-scan must not grow as later rows arrive.
+        """
+        scanner = Scanner()
+        captured: list = []
+
+        def fake_stream(process, cancel_check, on_line):
+            on_line("/home/user/a.exe: Eicar-Test-Signature FOUND")
+            on_line("/home/user/b.exe: Win.Trojan.Generic FOUND")
+            on_line("/home/user/c.exe: Win.Trojan.Other FOUND")
+            return "", "", False
+
+        with mock.patch("src.core.scanner.stream_process_output", side_effect=fake_stream):
+            scanner._scan_with_progress(mock.MagicMock(), captured.append, None)
+
+        # Three FOUND lines -> three progress updates.
+        assert len(captured) == 3
+        # The first snapshot must reflect only the first infection, even after
+        # the later appends mutated the live list.
+        assert captured[0].infected_count == 1
+        assert len(captured[0].infected_files) == 1
+        assert captured[0].infected_files == ["/home/user/a.exe"]
+        assert len(captured[0].infected_threats) == 1
+        # Each snapshot stays consistent with its own count.
+        for progress in captured:
+            assert len(progress.infected_files) == progress.infected_count
+        assert len(captured[-1].infected_files) == 3
+
 
 class TestPatternValidationEdgeCases:
     """Tests for pattern validation edge cases."""
@@ -2551,6 +2706,29 @@ class TestIsPathExcluded:
                 is_dir=False,
             )
             is True
+        )
+
+    def test_absolute_path_respects_separator_boundary(self):
+        """Sibling paths sharing a prefix must not be excluded (no under-count).
+
+        Excluding "/home/user/foo" must not also exclude "/home/user/foobar",
+        otherwise _count_files undercounts and the progress estimate is wrong.
+        """
+        scanner = Scanner()
+
+        # The excluded directory itself and files under it are excluded.
+        assert (
+            scanner._is_path_excluded(
+                "/home/user/foo/file.txt", "file.txt", ["/home/user/foo"], is_dir=False
+            )
+            is True
+        )
+        # A sibling directory that merely shares the prefix is NOT excluded.
+        assert (
+            scanner._is_path_excluded(
+                "/home/user/foobar/file.txt", "file.txt", ["/home/user/foo"], is_dir=False
+            )
+            is False
         )
 
 

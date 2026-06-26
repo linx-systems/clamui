@@ -12,14 +12,14 @@ const tabs = [
     label: "Debian / Ubuntu",
     sub: ".deb",
     desc: "Native packages for Debian 12+, Ubuntu 22.04+, Linux Mint, Pop!_OS.",
-    code: "# Download the latest .deb from GitHub Releases, then:\nsudo apt install ./clamui_0.2.0_amd64.deb",
+    code: "# Download the latest .deb from GitHub Releases, then:\nsudo apt install ./clamui_0.3.0_amd64.deb",
   },
   {
     id: "appimage",
     label: "AppImage",
     sub: "Portable",
     desc: "Single-file bundle with GTK4 + Python. Requires ClamAV on host.",
-    code: "chmod +x ClamUI-0.2.0-x86_64.AppImage\n./ClamUI-0.2.0-x86_64.AppImage",
+    code: "chmod +x ClamUI-0.3.0-x86_64.AppImage\n./ClamUI-0.3.0-x86_64.AppImage",
   },
   {
     id: "source",
@@ -225,7 +225,7 @@ chmod +x validate-x86_64.AppImage
         <p>
           <span class="text-white/85 font-medium">Flatpak</span> needs no manual step —
           Flathub verifies signatures automatically during install.
-          <span class="text-white/85 font-medium">Source builds</span> are verified by their Git commit; tagged releases are signed, so <span class="font-mono">git tag -v v0.2.0</span> confirms authorship.
+          <span class="text-white/85 font-medium">Source builds</span> are verified by their Git commit; tagged releases are signed, so <span class="font-mono">git tag -v v0.3.0</span> confirms authorship.
         </p>
       </div>
     </div>

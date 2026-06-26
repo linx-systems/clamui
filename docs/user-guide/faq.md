@@ -22,6 +22,8 @@ your data safe.
 - Quarantine management for detected threats
 - Scheduled scans that run automatically
 - Statistics and scan history tracking
+- Automatic scanning of USB and removable drives when they're connected
+- Security audit of your system's defenses (firewall, auto-updates, ClamAV health, and more)
 
 **ClamAV** is the underlying antivirus engine that does the actual virus scanning. It's a powerful command-line tool
 created by Cisco.
@@ -814,7 +816,7 @@ Best for: One-off scans, daemon unavailable
 **Enable in Preferences:**
 
 ```
-Preferences → Scan Backend → Auto (recommended)
+Preferences → Scanner Settings → Scan Backend → Auto
 ```
 
 **Verify daemon is running:**
@@ -896,7 +898,7 @@ MaxRecursion 17       # Default recursion depth
 **Edit in Preferences:**
 
 ```
-Preferences → Scanner Configuration → Performance and Limits
+Preferences → Scanner Settings → Performance and Limits
 ```
 
 **Strategy 6: Use Battery-Aware Scanning**
@@ -1405,8 +1407,8 @@ Total storage depends on detection frequency:
 
 - ✅ Quarantine directory is user-specific (`~/.local/share/clamui/`)
 - ✅ Only you (and root) can access quarantined files
-- ✅ File permissions: 700 (user-only access)
-- ✅ Files renamed to prevent identification
+- ✅ Permissions: quarantine directory `0o700`, quarantined files `0o400` (read-only, owner-only)
+- ✅ Files stored with a random-prefixed name and restrictive permissions
 
 **What's NOT private:**
 
@@ -1468,7 +1470,7 @@ but you can still access them if needed.
 **How often:**
 
 - Default: **24 times per day** (checks every hour)
-- Configurable in Preferences → Database Update Settings
+- Configurable in Preferences → Database Updates
 
 **To verify automatic updates are working:**
 
@@ -1507,7 +1509,7 @@ multiple times daily.
 
 **Step-by-step:**
 
-1. Click **Update** navigation button (in header bar)
+1. Click the **Database** entry in the sidebar
 2. Click **Check for Updates** button
 3. Watch progress:
     - "Checking for updates..."
@@ -1597,7 +1599,7 @@ Database updated (123456 signatures) from database.clamav.net
 **To change update frequency:**
 
 1. Open **Preferences** (Ctrl+,)
-2. Go to **Database Update Settings** tab
+2. Go to **Database Updates** tab
 3. Find **"Checks per day"** setting
 4. Adjust value:
    ```
@@ -1675,7 +1677,7 @@ Signatures: 123456
 
 2. **Try different mirror:**
    ```
-   Preferences → Database Update Settings → Database Mirror
+   Preferences → Database Updates → Database Mirror
    Change from default to specific mirror
    ```
 
@@ -1688,7 +1690,7 @@ Signatures: 123456
 
 4. **Configure proxy** (if behind corporate proxy):
    ```
-   Preferences → Database Update Settings → Proxy Settings
+   Preferences → Database Updates → Proxy Settings
    HTTPProxyServer: proxy.company.com
    HTTPProxyPort: 8080
    ```
@@ -1736,7 +1738,7 @@ sudo systemctl start clamav-daemon
 sudo systemctl restart clamav-daemon
 
 # Or configure auto-reload in Preferences:
-Preferences → Database Update Settings → NotifyClamd
+Preferences → Database Updates → Notify ClamD Config
 Set to: /var/run/clamav/clamd.ctl
 ```
 
@@ -2166,15 +2168,32 @@ Cons: ⚠️ Deletes everything
 
 **Recommendation:** Quarantine first (reversible), delete later if confirmed threats.
 
-#### Scheduled Scanning for External Drives
+#### Automatic Scanning When Devices Are Connected
 
-**Can I auto-scan USB drives?**
+**Can ClamUI auto-scan USB drives when I plug them in?**
 
-**Short answer:** Not automatically when plugged in.
+**Yes.** ClamUI includes an automatic **Device Scan** feature that scans newly
+connected storage devices in the background. It is **disabled by default** — turn it
+on in Preferences:
 
-**Workaround for regularly connected drives:**
+1. Open **Preferences** (Ctrl+,)
+2. Go to the **Device Scan** page
+3. Enable **"Enable Device Auto-Scan"**
+4. Under **Device Types**, choose which kinds to scan automatically (Removable
+   Devices and External Drives are selected by default; Network mounts are also
+   available)
+5. Tune the **Options** group as needed:
+    - **Maximum device size** to auto-scan (default 32 GB) — larger devices are skipped
+    - **Auto-Quarantine Threats** (off by default — review detections first)
+    - **Notifications** for device scan events (on by default)
+    - **Skip on Battery** (on by default — won't drain a laptop on battery)
 
-**If drive is always connected:**
+Once enabled, plugging in a matching device triggers a background scan after a short
+delay, and you're notified when it finishes.
+
+**Scheduled scanning for always-connected drives:**
+
+For drives that stay permanently attached, you can also use a scheduled scan:
 
 ```
 Scheduled Scans:
@@ -2185,19 +2204,15 @@ Works if: Drive is connected at scan time
 Skipped if: Drive is disconnected
 ```
 
-**If drive is occasionally connected:**
+**For a quick one-off manual scan:**
 
 ```
-Manual scanning required - no auto-scan on plug-in feature currently.
-
 Workflow:
 1. Plug in drive
 2. Open ClamUI
 3. Use "USB Drive Scanner" profile
 4. Click Scan
 ```
-
-💡 **Feature idea:** Auto-scan on USB plug-in could be added in future versions.
 
 #### Common External Drive Scenarios
 
@@ -2292,7 +2307,7 @@ Workflow:
 
 2. **Enable daemon backend:**
    ```
-   Preferences → Scan Backend → Auto
+   Preferences → Scanner Settings → Scan Backend → Auto
    10-50x faster than clamscan
    ```
 

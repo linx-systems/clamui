@@ -12,6 +12,7 @@ import tempfile
 import threading
 from pathlib import Path
 
+from ..core.sanitize import sanitize_log_line
 from .models import ScanProfile
 
 logger = logging.getLogger(__name__)
@@ -68,13 +69,21 @@ class ProfileStorage:
                         else:
                             profiles_data = []
 
-                        return [ScanProfile.from_dict(p) for p in profiles_data]
+                        profiles: list[ScanProfile] = []
+                        for entry in profiles_data:
+                            try:
+                                profiles.append(ScanProfile.from_dict(entry))
+                            except (KeyError, TypeError):
+                                # Skip a single malformed record but keep the rest;
+                                # only a top-level container failure is treated as corrupt.
+                                logger.warning(
+                                    "Skipping malformed profile record: %s",
+                                    sanitize_log_line(repr(entry)),
+                                )
+                        return profiles
             except (json.JSONDecodeError, OSError, PermissionError):
                 # Handle corrupted files or permission issues
                 # Backup corrupted file for debugging
-                self._backup_corrupted_file()
-            except (KeyError, TypeError):
-                # Handle invalid profile data structure
                 self._backup_corrupted_file()
             return []
 

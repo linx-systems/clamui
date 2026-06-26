@@ -100,6 +100,19 @@
     </keywords>
 
     <releases>
+        <release version="0.3.0" date="2026-06-26">
+            <description>
+                <p>Privileged configuration helper, Flatpak host-config fixes, CLI scan reliability, and security hardening</p>
+                <ul>
+                    <li>Add the `clamui install-privileged-helper` CLI path and skip unnecessary elevation prompts when ClamUI already runs as root</li>
+                    <li>Persist Flatpak ClamAV configuration preferences through the host helper and fix elevation decisions, audit database date handling, and benign size-limit scan warnings</li>
+                    <li>Fix CLI and scheduled scans so saved backend/exclusion settings are honored and every CLI-provided path is scanned</li>
+                    <li>Harden terminal output, profile import handling, scheduler quoting, sanitizer coverage, quarantine cleanup, and audit verdicts against malformed or misleading inputs</li>
+                    <li>Improve VirusTotal retries, large-upload handling, engine-result counting, tray resynchronization, and AppImage environment cleanup</li>
+                    <li>Refresh Python, Flatpak, website, and translation assets, and add a real-GTK construction smoke test for release validation</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.2.0" date="2026-05-28">
             <description>
                 <p>Portmaster privacy-filter audit, quarantine restore hardening, and scanner reliability fixes</p>

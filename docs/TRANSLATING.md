@@ -4,6 +4,17 @@ This guide explains how to contribute a new language translation to ClamUI or up
 
 ClamUI uses [GNU gettext](https://www.gnu.org/software/gettext/) for internationalization. Translatable strings are extracted from the source code into a POT template (`po/clamui.pot`), and each language gets its own PO file (e.g., `po/de.po` for German).
 
+ClamUI currently ships translations for the following languages (the authoritative list is `po/LINGUAS`):
+
+| Code | Language |
+|------|----------|
+| `de` | German |
+| `en` | English |
+| `es` | Spanish |
+| `fr` | French |
+| `it` | Italian |
+| `zh_CN` | Simplified Chinese |
+
 ## Prerequisites
 
 Install the gettext tools:
@@ -135,7 +146,7 @@ This merges new strings into your PO file, marks removed strings as obsolete, an
 | `po/<LANG>.po` | Translation file for a specific language |
 | `scripts/update-pot.sh` | Script to regenerate the POT template from source |
 | `scripts/check-potfiles.sh` | Verify POTFILES.in lists all files with translatable strings |
-| `scripts/check-translations.sh` | Validate PO files for completeness and errors |
+| `scripts/check-translations.sh` | Validate PO files: `msgfmt -c` syntax/format-string checks, LINGUAS ↔ `*.po` consistency, and no committed `.mo` files |
 | `src/core/i18n.py` | Runtime i18n module (`_`, `N_`, `ngettext`, `pgettext`, `apply_language_override`, `get_available_languages`) |
 
 ## In-App Language Override
@@ -146,12 +157,14 @@ The tray subprocess has its own i18n bootstrap path (uses `gettext` directly) to
 
 ## For Developers
 
-If you are adding new translatable strings to the source code, see the [i18n section in CLAUDE.md](../CLAUDE.md) for the string-marking conventions (`_()`, `N_()`, `ngettext()`, format string rules). After adding strings:
+If you are adding new translatable strings to the source code, see the [i18n section in AGENTS.md](../AGENTS.md) for the string-marking conventions (`_()`, `N_()`, `ngettext()`, format string rules). The import pattern is `from ..core.i18n import _, ngettext, N_`. After adding strings:
 
 ```bash
 ./scripts/update-pot.sh          # Regenerate POT template
 ./scripts/check-potfiles.sh      # Verify all source files are listed
 ./scripts/check-translations.sh  # Validate PO files
 ```
+
+These same checks run automatically in CI (`.github/workflows/i18n.yml`) on any change under `po/`.
 
 Existing PO files can then be updated with `msgmerge` as described above.

@@ -30,6 +30,12 @@ If you installed via .deb package or from source:
 clamui
 ```
 
+If you installed the AppImage:
+
+```bash
+./ClamUI-*.AppImage
+```
+
 **With Files to Scan:**
 
 You can also launch ClamUI with files or folders to scan immediately:
@@ -50,6 +56,7 @@ When you first launch ClamUI, the application will:
 
 1. **Check for ClamAV Installation**
     - ClamUI requires ClamAV (the antivirus engine) to be installed on your system
+    - All distributions (Flatpak, .deb, and AppImage) rely on ClamAV installed on the host system; none bundle the engine
     - If ClamAV is not found, you'll see a warning message with installation instructions
     - See the [Troubleshooting](troubleshooting.md#clamav-not-found) section if you encounter this issue
 
@@ -69,8 +76,8 @@ When you first launch ClamUI, the application will:
 
 Before your first scan, it's important to ensure your virus definitions are up to date:
 
-1. Click the **Update Database** button (cloud icon with arrow) in the header bar
-2. Click the "Update Now" button in the Update view
+1. Open the **Database** view from the sidebar (or press `Ctrl+2`)
+2. Click the **Update Database** button
 3. Wait for the update to complete (this may take a few minutes on first run)
 4. You'll see a success message when definitions are current
 
@@ -93,13 +100,13 @@ The header bar contains quick actions and controls:
 
 ClamUI uses a GNOME Settings-style sidebar for navigation between seven views:
 
-- **Scan Files**: Main scanning interface (default view)
-- **Update Database**: Update virus definitions
-- **View Logs**: Browse scan history
-- **ClamAV Components**: Check ClamAV installation status
+- **Scan**: Main scanning interface (default view)
+- **Database**: Update virus definitions
+- **Logs**: Browse scan history
+- **Components**: Check ClamAV installation status
 - **Quarantine**: Manage isolated threats
 - **Statistics**: View protection statistics and scan activity
-- **Security Audit**: System security posture assessment
+- **Audit**: System security posture assessment
 
 On narrow windows, the sidebar collapses and a back button appears in the header bar.
 
@@ -143,13 +150,13 @@ Shortcuts work from any view and automatically switch to the relevant view.
 
 Some views have additional navigation within them:
 
-- **Scan View**: Switch between "Quick Actions" using scan profiles
+- **Scan View**: Pick a scan profile or add files and folders as targets
 - **Logs View**: Filter and search through scan history
 - **Statistics View**: Change timeframe filters (Day, Week, Month, All Time)
 
 **Returning to the Scan View**
 
-Click the "Scan Files" item in the sidebar or press `Ctrl+1` to return to the main scanning interface.
+Click the "Scan" item in the sidebar or press `Ctrl+1` to return to the main scanning interface.
 
 ### Your First Scan
 
@@ -160,16 +167,16 @@ you how to select what to scan, understand what's happening during the scan, and
 
 ClamUI gives you several ways to choose what to scan. Pick the method that works best for you:
 
-**Method 1: Using the Browse Button**
+**Method 1: Adding Files and Folders**
 
 This is the most straightforward approach:
 
-1. Look for the **Scan Target** section in the main view
-2. Click the **Browse** button on the right side of the "Selected Path" row
-3. A file picker dialog will appear
-4. Navigate to the folder or file you want to scan
-5. Click **Select** to confirm your choice
-6. The selected path will appear in the "Selected Path" subtitle
+1. Look for the **Scan Targets** section in the main view
+2. Click the **Add files** button (document icon) or the **Add folders** button (folder icon) in the section's header
+3. A file picker dialog will appear ("Select Files" or "Select Folders")
+4. Navigate to the file(s) or folder(s) you want to scan and select them
+5. Confirm your choice; you can add several targets at once
+6. Selected targets appear in the list below — use **Clear All** to start over
 
 💡 **What should I scan first?** Start with your Downloads folder - it's where files from the internet arrive and is most
 likely to contain threats.
@@ -221,19 +228,19 @@ Once you've selected what to scan, you're ready to start. Here's what to expect:
 
 **Starting the Scan**
 
-1. Click the **Scan** button (the big blue button in the middle)
+1. Click the **Start Scan** button (the large blue button)
 2. You'll immediately see changes in the interface:
-    - The Scan button becomes disabled (grayed out)
-    - The Browse button and Profile dropdown are also disabled
-    - A "Scanning..." message appears at the bottom
-    - The entire interface becomes non-interactive to prevent conflicts
+    - The Start Scan and EICAR Test buttons become disabled (grayed out)
+    - The Scan Targets controls are disabled so the target list can't change mid-scan
+    - A **Cancel** button appears, and live progress is shown
+    - A scanning status message is displayed while the scan runs
 
 **During the Scan**
 
 While ClamUI is scanning:
 
 - **Be patient**: Scanning can take time, especially for large folders or if you have many files
-- **Don't close the window**: Closing ClamUI will stop the scan in progress
+- **Stopping early**: Click the **Cancel** button to stop a scan in progress; closing the window also stops it
 - **Watch the status**: The status message at the bottom will show "Scanning..." until complete
 - **System usage**: You may notice increased CPU usage - this is normal as ClamAV analyzes files
 
@@ -260,7 +267,7 @@ When the scan finishes:
 
 - All buttons become active again
 - The status message updates with results
-- If threats were found, they appear in the "Scan Results" section below
+- If threats were found, click **View Results (N)** to open the Scan Results dialog
 - If no threats were found, you'll see a success message
 
 #### Interpreting Scan Results
@@ -320,6 +327,7 @@ Each detected threat is displayed in a card showing:
 
 5. **Action Buttons** (bottom of each card)
     - **Quarantine**: Safely isolates the threat file
+    - **Exclude**: Adds the file's path to your exclusion patterns
     - **Copy Path**: Copies the file path to your clipboard
 
 **What Should I Do With Detected Threats?**
@@ -337,7 +345,7 @@ Here's your action plan:
 
 Not sure if ClamUI is working correctly? Use the built-in test feature:
 
-1. Click the **EICAR Test** button next to the Scan button
+1. Click the **EICAR Test** button next to the Start Scan button
 2. ClamUI creates a harmless test file that all antivirus software recognizes
 3. The scan runs automatically and should find the test "threat"
 4. You'll see a detection for "Eicar-Signature" or similar

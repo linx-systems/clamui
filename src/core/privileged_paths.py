@@ -38,6 +38,23 @@ ALLOWED_DEST_FILES: tuple[Path, ...] = (Path("/etc/freshclam.conf"),)
 PROTOCOL_VERSION = 2
 
 
+def is_running_as_root() -> bool:
+    """
+    Return whether the current process has an effective UID of 0 (root).
+
+    When ClamUI is launched as root every configuration path under ``/etc``
+    is directly writable, so the pkexec elevation flow is both unnecessary and
+    counter-productive (it would spawn a second authentication step for a user
+    who already holds the required privileges).  Callers use this to skip
+    elevation entirely and to suppress the "requires administrator privileges"
+    UI affordances in the preferences window.
+
+    Returns:
+        True if the effective UID is 0, False otherwise.
+    """
+    return os.geteuid() == 0
+
+
 def staging_root_for_uid(uid: int) -> Path:
     """
     Return the per-user staging directory under ``/run/user/<uid>``.

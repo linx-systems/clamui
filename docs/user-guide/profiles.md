@@ -140,12 +140,12 @@ drives, project folders, or specialized directories.
 **Step-by-Step**:
 
 1. **Open the Profile Manager**:
-    - Click the **hamburger menu** (three horizontal lines) in the header bar
-    - Select **Manage Profiles** from the menu
+    - In the **Scan** view, click the **Manage profiles** button (the gear / settings icon) next to the **Scan Profile** dropdown
+    - The **Manage Profiles** window opens
 
-2. **Click "New Profile"**:
-    - Look for the **+** button or **New Profile** button
-    - A dialog window will appear
+2. **Create a New Profile**:
+    - Click the **+** button (tooltip: "Create new profile") in the window's header bar
+    - The **New Profile** dialog appears
 
 3. **Fill in Basic Information**:
     - **Name** (required): Give your profile a descriptive name
@@ -156,9 +156,9 @@ drives, project folders, or specialized directories.
         - Helpful reminder of the profile's purpose
         - Example: "Scans all USB drives connected to /media"
 
-4. **Add Target Directories**:
-    - Click the **Add Target** button
-    - Browse to the folder you want to scan, or type the path
+4. **Add Scan Targets**:
+    - In the **Scan Targets** section, click the **Add folder** button (folder icon) to pick a directory, or the **Add file** button (document icon) to pick a single file
+    - A file/folder chooser opens; select the location to scan
     - Repeat to add multiple locations
     - **Tips**:
         - Use `~` to represent your home directory (e.g., `~/Projects`)
@@ -221,15 +221,14 @@ drives, project folders, or specialized directories.
 
 ### Editing Existing Profiles
 
-You can modify any profile you've created (default profiles cannot be edited, but you can duplicate them).
+You can modify any profile, including the built-in default profiles. If you change a default profile and later want it back, use **Restore default profiles** (see [Restoring Default Profiles](#restoring-default-profiles)).
 
 #### How to Edit a Profile
 
 **Step-by-Step**:
 
 1. **Open the Profile Manager**:
-    - Click the **hamburger menu** in the header bar
-    - Select **Manage Profiles**
+    - In the **Scan** view, click the **Manage profiles** button (gear icon) next to the **Scan Profile** dropdown
 
 2. **Select the Profile to Edit**:
     - Find the profile in the list
@@ -256,20 +255,13 @@ You can modify any profile you've created (default profiles cannot be edited, bu
 
 - ❌ Profile ID (internal identifier)
 - ❌ Creation date
-- ❌ Default profile flag (default profiles cannot be edited)
+- ❌ Default profile flag (`is_default`) — editing a built-in profile keeps it marked as a default
 
 **Editing Default Profiles**:
 
-Default profiles (Quick Scan, Full Scan, Home Folder) are **protected from editing** to ensure they remain available
-with their standard configurations.
+Default profiles (Quick Scan, Full Scan, Home Folder) **can** be edited directly — the **Edit** button is available for them just like custom profiles. Only **deletion** is blocked for defaults.
 
-**To customize a default profile**:
-
-1. **Export** the default profile (see [Importing and Exporting](#importing-and-exporting-profiles))
-2. **Import** it (this creates a copy with a new name like "Quick Scan (2)")
-3. **Edit** the imported copy with your customizations
-
-This way, you keep the original default profile and have your customized version.
+If you want to keep the originals untouched, you can instead duplicate a default by exporting and re-importing it (the import creates a copy with a new name like "Quick Scan (2)"), then edit the copy. Either way, you can always revert the built-in profiles to their shipped configuration with **Restore default profiles**.
 
 ### Managing Exclusions
 
@@ -295,7 +287,7 @@ Exclusions let you skip files and folders during scanning, improving performance
 
 #### Types of Exclusions
 
-**1. Path Exclusions** (Skip specific directories or files)
+**1. Path Exclusions** (Skip specific directories)
 
 Exclude by exact path:
 
@@ -307,7 +299,7 @@ Exclude by exact path:
 
 **How they work**:
 
-- Exact path matching
+- Each path is passed to ClamAV as `--exclude-dir`, so it excludes that directory
 - Recursive: Excluding a directory skips everything inside it
 - Supports `~` for home directory
 - Case-sensitive on Linux
@@ -334,7 +326,7 @@ node_modules
 - Glob pattern matching (like shell wildcards)
 - `*` matches any characters
 - `?` matches a single character
-- Applies to filenames, not full paths
+- Internally each glob is converted to a regular expression and passed to ClamAV (`--exclude`), so a pattern like `*.tmp` matches any file ending in `.tmp` regardless of directory
 
 **Common patterns**:
 
@@ -387,7 +379,7 @@ ClamUI validates exclusions when you save:
 
 - Apply to ALL scans, regardless of profile
 - Useful for system-wide exclusions you never want to scan
-- Configured in Preferences → Exclusion Patterns
+- Configured in Preferences → **Exclusions**
 - See [Managing Exclusion Patterns](settings.md#managing-exclusion-patterns)
 
 💡 **Tip**: Use global exclusions for system directories (`/proc`, `/sys`) and profile exclusions for profile-specific
@@ -431,7 +423,7 @@ Profiles can be exported to JSON files for backup, sharing, or transferring betw
 **Step-by-Step**:
 
 1. **Open the Profile Manager**:
-    - Hamburger menu → **Manage Profiles**
+    - Scan view → **Manage profiles** button (gear icon) next to the Scan Profile dropdown
 
 2. **Select the Profile**:
     - Find the profile you want to export
@@ -451,10 +443,13 @@ Profiles can be exported to JSON files for backup, sharing, or transferring betw
 
 The JSON file contains:
 
-- Profile name and description
-- Target directories list
-- Exclusion paths and patterns
-- Metadata (creation date, update date)
+- Profile `id`, `name`, and `description`
+- Target directories list (`targets`)
+- Exclusions (`exclusions` — `paths` and/or `patterns`)
+- Extra scan options (`options`)
+- Metadata: `is_default` flag and `created_at` / `updated_at` timestamps
+
+> Note: on import the `id` is regenerated and `is_default` is forced to `false`, regardless of what the file contains.
 
 **Example export file** (`Quick-Scan.json`):
 
@@ -462,14 +457,17 @@ The JSON file contains:
 {
   "export_version": 1,
   "profile": {
+    "id": "6f1c2e7a-...",
     "name": "Quick Scan",
-    "description": "Fast scan of the Downloads folder",
+    "description": "Fast scan of the Downloads folder for quick threat detection",
     "targets": [
       "~/Downloads"
     ],
     "exclusions": {},
     "created_at": "2024-01-15T10:30:00Z",
-    "updated_at": "2024-01-15T10:30:00Z"
+    "updated_at": "2024-01-15T10:30:00Z",
+    "is_default": true,
+    "options": {}
   }
 }
 ```
@@ -488,7 +486,7 @@ The JSON file contains:
 **Step-by-Step**:
 
 1. **Open the Profile Manager**:
-    - Hamburger menu → **Manage Profiles**
+    - Scan view → **Manage profiles** button (gear icon) next to the Scan Profile dropdown
 
 2. **Click "Import Profile"**:
     - Look for the **Import** button (usually with an upload icon)
@@ -515,7 +513,7 @@ The JSON file contains:
 ClamUI validates imported profiles:
 
 - ✅ Checks JSON syntax is valid
-- ✅ Ensures required fields are present (name, targets)
+- ✅ Ensures the required `name` field is present (`targets` and `exclusions` default to empty if absent)
 - ✅ Validates paths and exclusions
 - ❌ Rejects invalid files with error message
 
@@ -559,11 +557,24 @@ ClamUI validates imported profiles:
 **Privacy note**: Exported profiles contain paths from your system, which might reveal usernames or directory
 structures. Review the JSON file before sharing publicly.
 
+### Command-Line Profile Management
+
+You can also work with profiles from a terminal using the `clamui profile` subcommand (handy for scripting or headless machines):
+
+```
+clamui profile list                          # List all profiles
+clamui profile show "Quick Scan"             # Show one profile's targets and exclusions
+clamui profile export "Quick Scan" backup.json   # Export a profile to a JSON file
+clamui profile import backup.json            # Import a profile from a JSON file
+```
+
+`list` and `show` accept `--json` for machine-readable output. Import and export use the same JSON format described above, so files are interchangeable between the GUI and the CLI.
+
 ### Managing Profiles
 
 #### Viewing All Profiles
 
-**In the Profile Manager** (Hamburger menu → Manage Profiles):
+**In the Profile Manager** (Scan view → **Manage profiles** gear button):
 
 You'll see a list of all profiles with:
 
@@ -587,6 +598,16 @@ You'll see a list of all profiles with:
 - ✅ Custom profiles can be deleted freely
 - ⚠️ Deletion is permanent (export first if you want to keep a backup)
 
+#### Restoring Default Profiles
+
+If you've edited or deleted the built-in profiles and want them back, use the **Restore default profiles** button (the refresh / circular-arrow icon on the left of the Manage Profiles header bar):
+
+1. Open the Profile Manager
+2. Click the **Restore default profiles** button
+3. Confirm in the **Restore Default Profiles?** dialog
+
+This resets **Quick Scan**, **Full Scan**, and **Home Folder** to their original shipped configuration. Any custom profiles you created are left untouched.
+
 #### Using Profiles in Scans
 
 **From the Scan View**:
@@ -602,12 +623,12 @@ You'll see a list of all profiles with:
 
 3. **Switch back to manual**:
     - Select **No Profile (Manual)** from the dropdown
-    - You can now manually select paths with Browse button
+    - You can now add paths with the **Add files** / **Add folders** buttons
 
 **Profile indicator**:
 
 - When a profile is selected, the dropdown shows the profile name
-- The "Selected Path" row shows the first target (or "Multiple locations" if the profile has multiple targets)
+- The **Scan Targets (N)** group lists the profile's targets
 
 #### Profile Tips and Tricks
 

@@ -182,6 +182,44 @@ class TestSavePageCreation:
         # Should create Image widgets for icons (success and warning)
         assert gtk.Image.new_from_icon_name.call_count >= 2
 
+    @staticmethod
+    def _record_action_rows(adw):
+        """Make Adw.ActionRow() append every instance it builds to a list so
+        their set_subtitle() calls can be inspected afterwards (the fixture
+        otherwise returns a throwaway mock per call). Returns that list."""
+        rows: list = []
+
+        def _make(*_args, **_kwargs):
+            row = mock.MagicMock()
+            rows.append(row)
+            return row
+
+        adw.ActionRow.side_effect = _make
+        return rows
+
+    @staticmethod
+    def _subtitles(rows):
+        return [c.args[0] for row in rows for c in row.set_subtitle.call_args_list]
+
+    def test_create_page_mentions_admin_permission_when_not_root(self, mock_gi_modules, save_page):
+        """When not root, the manual-save row warns about the pkexec prompt."""
+        rows = self._record_action_rows(mock_gi_modules["adw"])
+
+        with mock.patch("src.core.privileged_paths.is_running_as_root", return_value=False):
+            save_page.create_page()
+
+        assert any("administrator permission" in s for s in self._subtitles(rows))
+
+    def test_create_page_omits_admin_permission_when_root(self, mock_gi_modules, save_page):
+        """Running as root, no config write needs pkexec, so the manual-save row
+        drops the 'you will be asked for administrator permission' wording."""
+        rows = self._record_action_rows(mock_gi_modules["adw"])
+
+        with mock.patch("src.core.privileged_paths.is_running_as_root", return_value=True):
+            save_page.create_page()
+
+        assert not any("administrator permission" in s for s in self._subtitles(rows))
+
 
 class TestSavePageSaveClicked:
     """Tests for SavePage._on_save_clicked() method."""
@@ -663,6 +701,52 @@ class TestSavePageSaveConfigsThread:
                     mock_backup.assert_any_call("/etc/clamav/freshclam.conf")
                     mock_backup.assert_any_call("/etc/clamav/clamd.conf")
 
+    def test_save_configs_thread_no_changes_reports_no_changes(self, mock_gi_modules, save_page):
+        """No updates collected -> honest 'No Changes' message, not a phantom
+        success (one way the Flatpak bug #136 surfaced)."""
+        mock_button = mock.MagicMock()
+
+        with mock.patch("src.ui.preferences.save_page.backup_config"):
+            with mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ) as mock_write:
+                with mock.patch("src.ui.preferences.save_page.GLib") as mock_glib:
+                    save_page._save_configs_thread({}, {}, {}, {}, mock_button)
+
+        # Nothing was written...
+        mock_write.assert_not_called()
+        # ...and the dialog reports "No Changes", not a phantom "Configuration Saved".
+        # (idle_add is also used to re-enable the button, so filter to dialog calls.)
+        dialog_calls = [
+            c
+            for c in mock_glib.idle_add.call_args_list
+            if c.args and c.args[0] == save_page._show_success_dialog
+        ]
+        assert len(dialog_calls) == 1
+        assert "No Changes" in dialog_calls[0].args[1]
+
+    def test_save_configs_thread_with_changes_reports_success(self, mock_gi_modules, save_page):
+        """When changes are actually applied, the success message is shown."""
+        mock_button = mock.MagicMock()
+        freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
+
+        with mock.patch("src.ui.preferences.save_page.backup_config"):
+            with mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ):
+                with mock.patch("src.ui.preferences.save_page.GLib") as mock_glib:
+                    save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
+
+        dialog_calls = [
+            c
+            for c in mock_glib.idle_add.call_args_list
+            if c.args and c.args[0] == save_page._show_success_dialog
+        ]
+        assert len(dialog_calls) == 1
+        assert "Configuration Saved" in dialog_calls[0].args[1]
+
     def test_save_configs_thread_saves_freshclam_config(self, mock_gi_modules, save_page):
         """Test _save_configs_thread saves freshclam.conf."""
         mock_button = mock.MagicMock()
@@ -857,16 +941,17 @@ class TestSavePageSaveConfigsThread:
                     save_page._scheduler.disable_schedule.assert_called_once()
 
     def test_save_configs_thread_shows_success_dialog(self, mock_gi_modules, save_page):
-        """Test _save_configs_thread shows success dialog on completion."""
+        """Test _save_configs_thread shows success dialog when changes are applied."""
         mock_button = mock.MagicMock()
         glib = mock_gi_modules["glib"]
+        freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
 
         with mock.patch("src.ui.preferences.save_page.backup_config"):
             with mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
             ):
-                save_page._save_configs_thread({}, {}, {}, {}, mock_button)
+                save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
 
                 # Should call GLib.idle_add with _show_success_dialog
                 glib.idle_add.assert_any_call(

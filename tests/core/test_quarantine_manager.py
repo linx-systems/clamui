@@ -1361,3 +1361,69 @@ class TestQuarantineManagerPeriodicCleanup:
         assert result2 is False  # Throttled
 
         mgr._database.close()
+
+
+class TestQuarantineManagerCleanupOldEntries:
+    """Regression: cleanup_old_entries must keep the DB row when its file cannot be
+    deleted, otherwise the file becomes an orphan that cleanup_orphaned_entries
+    (which only prunes rows whose files are MISSING) can never reclaim."""
+
+    @pytest.fixture
+    def temp_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield tmpdir
+
+    @pytest.fixture
+    def manager(self, temp_dir):
+        mgr = QuarantineManager(
+            quarantine_directory=os.path.join(temp_dir, "quarantine"),
+            database_path=os.path.join(temp_dir, "quarantine.db"),
+        )
+        yield mgr
+        mgr._database.close()
+
+    def _quarantine(self, manager, temp_dir, name):
+        path = os.path.join(temp_dir, name)
+        with open(path, "wb") as f:
+            f.write(b"data-" + name.encode())
+        result = manager.quarantine_file(path, "TestThreat")
+        assert result.is_success is True
+        return result.entry
+
+    def test_failed_file_deletion_keeps_db_row(self, manager, temp_dir):
+        from unittest.mock import patch
+
+        good = self._quarantine(manager, temp_dir, "good.exe")
+        bad = self._quarantine(manager, temp_dir, "bad.exe")
+
+        real_delete = manager._file_handler.delete_from_quarantine
+
+        def fake_delete(qpath):
+            if qpath == bad.quarantine_path:
+                raise OSError("simulated deletion failure")
+            return real_delete(qpath)
+
+        with (
+            patch.object(manager, "get_old_entries", return_value=[good, bad]),
+            patch.object(manager._file_handler, "delete_from_quarantine", side_effect=fake_delete),
+        ):
+            removed = manager.cleanup_old_entries(days=0)
+
+        # Only the entry whose file was actually removed is dropped from the DB.
+        assert removed == 1
+        assert manager.get_entry(good.id) is None
+        # The failed entry's row is retained so the file stays tracked (no orphan).
+        assert manager.get_entry(bad.id) is not None
+        assert Path(bad.quarantine_path).exists()
+
+    def test_already_missing_file_still_removes_row(self, manager, temp_dir):
+        from unittest.mock import patch
+
+        entry = self._quarantine(manager, temp_dir, "gone.exe")
+        os.remove(entry.quarantine_path)  # file vanished before cleanup ran
+
+        with patch.object(manager, "get_old_entries", return_value=[entry]):
+            removed = manager.cleanup_old_entries(days=0)
+
+        assert removed == 1
+        assert manager.get_entry(entry.id) is None

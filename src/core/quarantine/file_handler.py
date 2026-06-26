@@ -65,7 +65,6 @@ class FileOperationResult:
         return self.status == FileOperationStatus.SUCCESS
 
 
-
 def _unlinkat(path: Path) -> None:
     """Remove a file relative to its parent directory fd, without re-resolving the full path.
 
@@ -152,9 +151,7 @@ class SecureFileHandler:
             # O_NOFOLLOW rejects the quarantine dir being a symlink (ELOOP → error below).
             # fchmod via the resulting fd bypasses umask and avoids a path-based TOCTOU
             # window between mkdir and the permission set.
-            dir_fd = os.open(
-                self._quarantine_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-            )
+            dir_fd = os.open(self._quarantine_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
             try:
                 os.fchmod(dir_fd, self.QUARANTINE_DIR_PERMISSIONS)
             finally:

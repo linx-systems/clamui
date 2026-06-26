@@ -1637,3 +1637,32 @@ class TestValidateTargets:
         assert len(valid) == 1
         assert "~" not in valid[0]
         assert os.path.expanduser("~") in valid[0]
+
+
+class TestScanContextScannerWiring:
+    """Tests for ScanContext building the Scanner with saved settings."""
+
+    def test_scancontext_builds_scanner_with_settings_manager(self):
+        """ScanContext.__post_init__ must wire settings into the auto-built Scanner."""
+        from src.cli.scheduled_scan import ScanContext
+
+        mock_settings = MagicMock()
+        mock_log_manager = MagicMock()
+
+        with patch("src.cli.scheduled_scan.Scanner") as mock_scanner_cls:
+            ScanContext(
+                targets=["/home/user"],
+                skip_on_battery=False,
+                auto_quarantine=False,
+                dry_run=False,
+                verbose=False,
+                settings=mock_settings,
+                battery_manager=MagicMock(),
+                log_manager=mock_log_manager,
+                scanner=None,
+            )
+
+        mock_scanner_cls.assert_called_once()
+        kwargs = mock_scanner_cls.call_args.kwargs
+        assert kwargs["settings_manager"] is mock_settings
+        assert kwargs["log_manager"] is mock_log_manager

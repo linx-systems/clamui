@@ -3,6 +3,7 @@
 Components status view for ClamUI displaying ClamAV component availability and setup guides.
 """
 
+import logging
 import threading
 
 import gi
@@ -22,6 +23,8 @@ from ..core.utils import (
 from .compat import safe_add_suffix
 from .utils import add_row_icon, resolve_icon_name
 from .view_helpers import StatusLevel, clear_status_classes, set_status_class
+
+logger = logging.getLogger(__name__)
 
 # Setup guide content for each component
 # NOTE: "title" and "notes" use N_() for deferred translation (translated at display time).
@@ -457,21 +460,27 @@ class ComponentsView(Gtk.Box):
 
         results = {}
 
-        # Check clamscan
-        results["clamscan"] = check_clamav_installed()
+        try:
+            # Check clamscan
+            results["clamscan"] = check_clamav_installed()
 
-        # Check freshclam
-        results["freshclam"] = check_freshclam_installed()
+            # Check freshclam
+            results["freshclam"] = check_freshclam_installed()
 
-        # Check clamdscan (runs on host via flatpak-spawn in Flatpak mode)
-        results["clamdscan"] = check_clamdscan_installed()
+            # Check clamdscan (runs on host via flatpak-spawn in Flatpak mode)
+            results["clamdscan"] = check_clamdscan_installed()
 
-        # Check clamd daemon (runs on host via flatpak-spawn in Flatpak mode)
-        daemon_status, daemon_message = self._log_manager.get_daemon_status()
-        results["clamd"] = (daemon_status.value, daemon_message)
-
-        if not self._destroyed:
-            GLib.idle_add(self._update_components_ui, results)
+            # Check clamd daemon (runs on host via flatpak-spawn in Flatpak mode)
+            daemon_status, daemon_message = self._log_manager.get_daemon_status()
+            results["clamd"] = (daemon_status.value, daemon_message)
+        except Exception:
+            # A failing subprocess/daemon check must never strand the worker
+            # thread: the UI update (which resets the checking state and stops
+            # the spinner) is always scheduled, even with partial results.
+            logger.exception("Component status check failed")
+        finally:
+            if not self._destroyed:
+                GLib.idle_add(self._update_components_ui, results)
 
     def _update_components_ui(self, results):
         """Update component status UI on the main thread.

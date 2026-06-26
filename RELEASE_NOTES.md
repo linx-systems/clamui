@@ -1,30 +1,35 @@
-# ClamUI v0.2.0
+# ClamUI v0.3.0
 
-Portmaster privacy-filter audit integration, quarantine restore hardening, and scanner reliability fixes.
+Privileged ClamAV configuration improvements, Flatpak host-config fixes, CLI scan reliability, and security hardening.
 
 ## Highlights
 
-### Security Audit
+### Configuration & Flatpak
 
-- **Portmaster privacy-filter check** — a new optional section in the system security audit probes the local Portmaster API (`127.0.0.1:817`) to report whether Portmaster is running, installed-but-stopped, or not installed, and shows per-module health when an API token is available. It uses Portmaster's own in-app authorization flow (no manual token paste), stores tokens in the system keyring, and only ever produces `SKIPPED` — never `FAIL`/`WARNING` — so it never pollutes the audit summary on systems without Portmaster.
+- **Privileged helper installer** — `clamui install-privileged-helper` installs the `clamui-apply-preferences` wrapper and polkit policy needed for elevated ClamAV configuration writes. (#143)
+- **Flatpak host configuration persistence** — Flatpak preferences now persist host ClamAV configuration through the privileged helper instead of assuming sandbox-local ClamAV paths. (#136)
+- **Less unnecessary elevation** — ClamUI skips elevation prompts when it is already running as root and fixes elevation decision/reporting edge cases.
+
+### Scan & CLI Reliability
+
+- **CLI path handling fixed** — one-shot CLI scans now scan every path provided on the command line instead of only the first path.
+- **Saved scan settings honored** — scheduled and one-shot CLI scans now apply saved exclusions and backend settings consistently.
+- **Benign ClamAV warnings tolerated** — scans no longer fail solely because ClamAV reports expected size-limit warnings.
+- **Database age parsing fixed** — ClamUI now parses CVD/CLD database headers robustly even when compressed database payload bytes immediately follow the header.
 
 ### Security Hardening
 
-- **Quarantine restore hardening** (GHSA-xhhj-qvvr-vhwq) — reworked quarantine file handling to close path- and metadata-handling vulnerabilities in the restore flow.
+- Sanitized untrusted profile, scan, quarantine, audit, and terminal output paths to reduce log/terminal injection risk.
+- Hardened profile import/name normalization, scheduler quoting, Unicode sanitizer coverage, ClamAV config parsing, quarantine cleanup, and audit verdict handling.
+- Improved exclusion matching bounds in scanner and daemon scanner paths and preserved detections on ClamAV error exits.
 
-### Reliability & UX
+### VirusTotal, UI & Packaging
 
-- **Scanner hang fixed** — full scans could freeze mid-run (reported around ~72%) when ClamAV filled its stderr pipe buffer with permission warnings and LibClamAV notices, blocking the child process. The scanner now drains stderr concurrently with stdout, with regression tests covering the deadlock. (Fixes #146)
-- **Tray reliability under Flatpak** — StatusNotifierItem registration reworked for stricter tray hosts (Plasma 6, Ayatana indicator, xapp-sn-watcher) and Flatpak's D-Bus proxy: registers the SNI object path instead of owning a well-known bus name, exposes ARGB32 icon-pixmap fallbacks, and mirrors the attention-icon so the correct icon renders.
-
-### Documentation
-
-- **INSTALL.md** now documents installation via AppMan / AM.
-
-### Maintenance
-
-- Website migrated to **Astro 6 + Tailwind 4** (Node ≥22.12), with the toolchain switched to a bun lockfile.
-- Refreshed Python and Flatpak runtime dependencies — cryptography 48, urllib3 2.7.0, certifi, packaging 26.2, idna 3.15, numpy, fonttools, PyGObject 3.56.3, and more (pins + wheel hashes regenerated).
+- VirusTotal retries now resend the full request body, large uploads are supported, and all engine-result buckets are counted.
+- VirusTotal result flow, stuck spinners, tray resynchronization, and deliberate tray shutdown behavior were repaired.
+- AppImage execution now strips bundled Python/GI environment variables before launching host tools. (#155)
+- Debian packaging accepts `pkexec | policykit-1` for Debian 13 compatibility.
+- Python, Flatpak, website, and translation assets were refreshed, and a real-GTK construction smoke test now covers all views, preference pages, and dialogs.
 
 ## Install
 
@@ -33,9 +38,9 @@ Portmaster privacy-filter audit integration, quarantine restore hardening, and s
 flatpak install flathub io.github.linx_systems.ClamUI
 ```
 
-**AppImage**: Download `ClamUI-0.2.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.2.0). Existing AppImages can delta-update via zsync.
+**AppImage**: Download `ClamUI-0.3.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.3.0).
 
-**GitHub Release**: Download from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.2.0)
+**GitHub Release**: Download packages from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.3.0).
 
 **From source**:
 ```bash
@@ -45,4 +50,4 @@ cd clamui && uv sync && uv run clamui
 
 ## Contributors
 
-Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.1.8...v0.2.0) for details.
+Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.2.0...v0.3.0) for details.

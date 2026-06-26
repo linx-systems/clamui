@@ -28,7 +28,7 @@ The logs list shows all your past operations, with the newest entries at the top
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Historical Logs                    [spinner] [↻] [Clear All]   │
+│ Historical Logs                [↻] [⤓ CSV] [⤓ JSON] [Clear All] │
 │ Previous scan and update operations                             │
 ├─────────────────────────────────────────────────────────────────┤
 │  📁 Clean scan of /home/user/Downloads                      ✅  │
@@ -111,7 +111,7 @@ The logs list displays 25 entries initially to keep the interface responsive. If
 1. **"Show More" button** appears at the bottom
     - Click to load the next 25 entries
     - Shows current count: "Showing 25 of 150 logs"
-2. **"Show All" button** (appears if 50+ remaining logs)
+2. **"Show All" button** (appears when more than 25 logs remain)
     - Click to load all remaining logs at once
     - Useful for searching through history
 
@@ -341,11 +341,12 @@ ClamUI lets you export log entries for record-keeping, sharing with IT support, 
 
 #### Export Options
 
-When you select a log entry, three export actions become available:
+When you select a log entry, four export actions become available:
 
 1. **Copy to Clipboard** - Quick copy for pasting into emails or documents
 2. **Export to Text File** - Save as human-readable `.txt` file
 3. **Export to CSV File** - Save as spreadsheet-compatible `.csv` file
+4. **Export to JSON File** - Save as machine-readable `.json` file
 
 All export buttons are located in the **Log Details** section header.
 
@@ -469,19 +470,64 @@ The exported CSV file contains a header row and one data row:
 and then combine them. The CSV format makes this easy - just copy the data rows (excluding headers) and paste into a
 master spreadsheet.
 
+#### Exporting to JSON File
+
+To save a log entry as a JSON file:
+
+1. **Select a log entry** from the list
+2. Click the **Export to JSON** button (💾 icon)
+3. A file save dialog appears
+4. **Choose a location** and optionally rename the file
+    - Default name: `clamui_log_YYYYMMDD_HHMMSS.json`
+5. Click **Save**
+6. A toast notification confirms the export
+
+**JSON File Format:**
+
+The exported `.json` file wraps the log entry with export metadata plus the full
+structured fields (id, timestamp, type, status, path, summary, details, duration).
+Useful for scripting, archival, or importing into other tools.
+
 #### Exporting Multiple Logs
 
-**Current Limitation:**
+**Export All Logs at Once:**
 
-ClamUI currently exports one log entry at a time. There's no "Export All" button.
+The **Historical Logs** header (next to the Refresh and Clear All buttons) provides
+two bulk-export buttons that write every log entry currently loaded in the list:
 
-**Workaround for Bulk Export:**
+- **Export all logs to CSV** (📊 icon) - one `.csv` file with a header row and one
+  row per entry (default name `clamui_logs_YYYYMMDD_HHMMSS.csv`)
+- **Export all logs to JSON** (💾 icon) - one `.json` file containing all entries
+  with export metadata (default name `clamui_logs_YYYYMMDD_HHMMSS.json`)
+
+Both buttons activate once logs have loaded. They export only the entries currently
+displayed, so use **Show All** first if you want your entire history in one file.
+
+**Accessing Logs from the Command Line:**
+
+You can also list history headlessly with the `clamui history` command:
+
+```bash
+# Show the 20 most recent entries (default)
+clamui history
+
+# Show the 50 most recent entries
+clamui history --limit 50
+
+# Filter by type: scan, update, or virustotal
+clamui history --type scan
+
+# Machine-readable JSON output
+clamui history --type update --json
+```
+
+**Direct File Access (Advanced):**
 
 If you need all your scan history:
 
 1. Locate the log storage directory:
     - Default: `~/.local/share/clamui/logs/`
-    - Flatpak: `~/.var/app/com.github.davesteele.ClamUI/data/clamui/logs/` (if applicable)
+    - Flatpak: `~/.var/app/io.github.linx_systems.ClamUI/data/clamui/logs/` (if applicable)
 2. **Copy the entire directory** to your desired backup location
 3. Each log is stored as `<UUID>.json` (e.g., `7a3b9f12-4e56-7890-abcd-ef1234567890.json`)
 4. Use a script or JSON tools to process these files if needed
@@ -583,6 +629,11 @@ For easier reading of long daemon logs:
 
 💡 **Tip**: Use fullscreen mode when diagnosing daemon issues or copying large portions of logs for support tickets.
 
+#### Exporting Daemon Logs
+
+Click the **Export button** (💾 icon) in the Daemon Logs header to save the
+currently displayed daemon log output to a `.txt` file.
+
 #### Troubleshooting Daemon Log Access
 
 **"Permission denied" errors:**
@@ -671,7 +722,7 @@ Logs are stored as individual JSON files on your system:
 **Flatpak Installation** (if applicable):
 
 ```
-~/.var/app/com.github.davesteele.ClamUI/data/clamui/logs/
+~/.var/app/io.github.linx_systems.ClamUI/data/clamui/logs/
 ```
 
 **Storage Considerations:**

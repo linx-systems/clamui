@@ -9,11 +9,12 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 ```
 scan/
 ├── scan_view.py            # Composition root — assembles all components
-├── coordinator.py          # Scan orchestration (state machine, callbacks)
-├── scan_controller.py      # Scan execution + cancellation logic
+├── scan_controller.py      # ScanController — multi-target orchestration, threading, ScanState machine, cancellation
+├── coordinator.py          # ScanCoordinator — tray-driven callbacks (quick/full/profile/VirusTotal) + scan-state tracking
 ├── profile_selector.py     # Profile dropdown + management buttons
 ├── target_selector.py      # File/folder selection + drag-and-drop
 ├── scan_progress_widget.py # Progress bar + file counter + ETA
+├── scan_results_widget.py  # ScanResultsWidget — "View Results" button + threat count
 └── __init__.py
 ```
 
@@ -23,8 +24,9 @@ scan/
 ScanView (composition root — Gtk.Box)
 ├── ProfileSelector     ← profile dropdown, edit/create/import buttons
 ├── TargetSelector      ← file chooser, drag-and-drop, path validation
-├── ScanController      ← start/cancel, backend selection, threading
-└── ScanProgressWidget  ← progress bar, files scanned, current file
+├── ScanController      ← start/cancel, backend selection, threading, ScanState
+├── ScanProgressWidget  ← progress bar, files scanned, current file
+└── ScanResultsWidget   ← "View Results" button, threat count
 ```
 
 Each component is independently testable. `ScanView` wires them together.
@@ -32,7 +34,7 @@ Each component is independently testable. `ScanView` wires them together.
 ## Key Patterns
 
 ### State Flow
-`IDLE → SCANNING → COMPLETE/CANCELLED/ERROR → IDLE`
+States are `IDLE / SCANNING / CANCELLED` (the `ScanState` enum in `scan_controller.py`). Completion and errors are NOT enum members — they are delivered through `on_complete` / result callbacks.
 
 `ScanController` manages transitions. Progress updates via `GLib.idle_add()` from scan thread.
 
@@ -50,7 +52,7 @@ Each component is independently testable. `ScanView` wires them together.
 | Change scan state logic | `scan_controller.py` | State transitions + threading |
 | Modify file selection | `target_selector.py` | Drag-drop + file dialog |
 | Change progress display | `scan_progress_widget.py` | GLib.idle_add for updates |
-| Add scan orchestration | `coordinator.py` | High-level workflow coordination |
+| Add scan orchestration | `coordinator.py` | `ScanCoordinator` — tray-driven quick/full/profile/VirusTotal callbacks + scan-state tracking |
 
 ## Anti-Patterns
 

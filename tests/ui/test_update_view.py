@@ -776,20 +776,31 @@ class TestUpdateViewButtonHandlers:
                 # Verify force update was started
                 mock_start.assert_called_once_with(force=True)
 
-    def test_cancel_click_cancels_updater(self, update_view_module):
-        """Test cancel button click cancels updater."""
+    def test_cancel_click_cancels_updater_off_main_thread(self, update_view_module):
+        """Cancel must run the (blocking) updater.cancel() off the GTK main thread.
+        cancel() escalates SIGTERM -> SIGKILL and blocks on process.wait() for
+        several seconds; invoking it inline in the click handler would freeze
+        the UI. It must be dispatched to a background thread instead.
+        """
         UpdateView = update_view_module.UpdateView
 
         with mock.patch.object(UpdateView, "_setup_ui"):
             view = UpdateView()
             view._updater = mock.MagicMock()
+            view._cancel_button = mock.MagicMock()
 
-            # Mock _set_updating_state to avoid side effects
-            with mock.patch.object(view, "_set_updating_state"):
+            with mock.patch("src.ui.update_view.threading.Thread") as mock_thread:
+                mock_instance = mock.MagicMock()
+                mock_thread.return_value = mock_instance
                 view._on_cancel_clicked(mock.MagicMock())
 
-                # Verify updater was cancelled
-                view._updater.cancel.assert_called_once()
+                # cancel() is the thread target, NOT invoked on the main thread
+                view._updater.cancel.assert_not_called()
+                mock_thread.assert_called_once()
+                assert mock_thread.call_args.kwargs["target"] is view._updater.cancel
+                mock_instance.start.assert_called_once()
+                # Cancel button is disabled for immediate feedback
+                view._cancel_button.set_sensitive.assert_called_once_with(False)
 
     def test_handlers_do_nothing_when_freshclam_unavailable(self, update_view_module):
         """Test handlers do nothing when freshclam unavailable."""

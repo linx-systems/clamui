@@ -2,13 +2,13 @@
   "name": "python3-hatchling",
   "buildsystem": "simple",
   "build-commands": [
-    "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"hatchling>=1.29.0\" --no-build-isolation"
+    "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"hatchling>=1.30.1\" --no-build-isolation"
   ],
   "sources": [
     {
       "type": "file",
-      "url": "https://files.pythonhosted.org/packages/d3/8a/44032265776062a89171285ede55a0bdaadc8ac00f27f0512a71a9e3e1c8/hatchling-1.29.0-py3-none-any.whl",
-      "sha256": "50af9343281f34785fab12da82e445ed987a6efb34fd8c2fc0f6e6630dbcc1b0",
+      "url": "https://files.pythonhosted.org/packages/56/49/2797ec0ef88008a653a8867bb8d1e5c223cd2df8e40390dd5c6a0279cbc5/hatchling-1.30.1-py3-none-any.whl",
+      "sha256": "161eacafb3c6f91526e92116d21426369f2c36e98c36a864f11a96345ad4ee31",
       "x-checker-data": {
         "type": "pypi",
         "name": "hatchling",
@@ -37,8 +37,8 @@
     },
     {
       "type": "file",
-      "url": "https://files.pythonhosted.org/packages/15/96/9666c8ba2e7695e804b2b2129e45202320d2a8b5e2c9f6e5e837a61708f5/trove_classifiers-2026.5.20.19-py3-none-any.whl",
-      "sha256": "7a173916960d0635fcbf610550d2c27bcc9125164d6f397adf46fc1ef6455c7c"
+      "url": "https://files.pythonhosted.org/packages/7c/a4/81502f486f01db95bc8320646a8a12511f5e556cb63d5e224d91816605c4/trove_classifiers-2026.6.1.19-py3-none-any.whl",
+      "sha256": "ab4c4ec93cc4a4e7815fa759906e05e6bb3f2fbd92ea0f897288c6a43efd15b3"
     }
   ]
 }

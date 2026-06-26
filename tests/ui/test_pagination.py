@@ -638,6 +638,46 @@ class TestPaginationControllerSetEntries:
         # Should add load_more_button since there are more entries
         controller.add_load_more_button.assert_called_once_with("entries")
 
+    def test_set_entries_filtered_subset_below_limit_no_load_more(
+        self, pagination_controller_class, mock_listbox, mock_scrolled_window, mock_gi_modules
+    ):
+        """Regression: a filtered subset below the initial limit must not add a
+        'Load More' button even when the full backing list exceeds it.
+
+        A subclass may override entries_to_display() to return a filtered subset
+        (e.g. quarantine search). set_entries() must base its pagination
+        decisions on the entries actually displayed, not the raw backing list;
+        otherwise narrowing 30 entries down to 2 produces a bogus 'Show 0 More'
+        button and suppresses the no-results placeholder.
+        """
+
+        class FilteredController(pagination_controller_class):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self._filtered_entries = []
+
+            @property
+            def entries_to_display(self):
+                return self._filtered_entries
+
+        controller = FilteredController(
+            listbox=mock_listbox,
+            scrolled_window=mock_scrolled_window,
+            row_factory=mock.MagicMock(return_value=mock.MagicMock()),
+            initial_limit=25,
+        )
+        controller.add_load_more_button = mock.MagicMock()
+
+        # Filtered view has only 2 matching entries...
+        controller._filtered_entries = ["match1", "match2"]
+        # ...while the full backing list passed to set_entries has 30.
+        controller.set_entries([f"entry{i}" for i in range(30)])
+
+        # Only the 2 filtered entries should be displayed
+        assert controller._displayed_count == 2
+        # No load-more button: all filtered entries are already visible
+        controller.add_load_more_button.assert_not_called()
+
     def test_set_entries_displays_initial_batch(self, pagination_controller, mock_row_factory):
         """Test that set_entries displays the initial batch correctly."""
         # Create 30 entries, initial_limit is 25

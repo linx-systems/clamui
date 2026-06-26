@@ -35,22 +35,21 @@ protected based on your scanning activity and virus definition freshness.
 
 1. Click the **Statistics** button in the navigation bar
 2. The dashboard loads automatically with your current statistics
-3. All data is calculated from your scan history
+3. All data is calculated from your scan history logs (`~/.local/share/clamui/logs/`)
 
 #### Protection Status Levels
 
-ClamUI evaluates your protection status based on two factors:
-
-1. **Last Scan Age**: How recently you scanned your system
-2. **Definition Age**: How fresh your virus definitions are (if available)
+The Statistics Dashboard determines your protection status from how recently you last scanned your system (*scan
+recency*). It reads your scan history logs and compares your most recent scan against two age thresholds: 7 days and
+30 days. (Virus-definition freshness is *not* a factor in this dashboard's status.)
 
 **Protection Levels:**
 
 | Status             | Badge Color   | Icon        | What It Means                    | Criteria                                                       |
 |--------------------|---------------|-------------|----------------------------------|----------------------------------------------------------------|
-| 🟢 **Protected**   | Green         | ✅ Checkmark | System is actively protected     | Last scan within 7 days AND definitions current (if available) |
-| 🟡 **At Risk**     | Yellow/Orange | ⚠️ Warning  | Protection is degraded           | Last scan 7-30 days ago OR definitions outdated (7+ days old)  |
-| 🔴 **Unprotected** | Red           | ❌ Error     | System lacks adequate protection | No scans performed OR last scan over 30 days ago               |
+| 🟢 **Protected**   | Green         | ✅ Checkmark | System is actively protected     | Last scan within the past 7 days                               |
+| 🟡 **At Risk**     | Yellow/Orange | ⚠️ Warning  | Protection is degraded           | Last scan 7-30 days ago                                        |
+| 🔴 **Unprotected** | Red           | ❌ Error     | System lacks adequate protection | No scans performed, or last scan over 30 days ago              |
 | ⚪ **Unknown**      | Gray          | ❓ Question  | Cannot determine status          | Unable to access scan history or parse data                    |
 
 #### Protection Status Display
@@ -78,25 +77,23 @@ ClamUI evaluates your protection status based on two factors:
 
 #### Protection Status Messages
 
-**🟢 Protected Status Messages:**
+**🟢 Protected:**
 
-- `"System is protected"` - Everything is current (scan within 7 days, definitions fresh)
-- `"System protected, but definitions should be updated"` - Scan is recent but definitions are 1-7 days old
-- `"System protected (definition status unknown)"` - Recent scan but definition age cannot be determined
+- `"System is protected"` - Your last scan was within the past 7 days
 
-**🟡 At Risk Status Messages:**
+**🟡 At Risk:**
 
-- `"Last scan was over a week ago"` - Last scan was 7-30 days ago (time to scan again)
-- `"Virus definitions are outdated (over 7 days old)"` - Definitions haven't been updated in over a week
+- `"Last scan was over a week ago"` - Your last scan was 7-30 days ago (time to scan again)
 
-**🔴 Unprotected Status Messages:**
+**🔴 Unprotected:**
 
 - `"No scans performed yet"` - You haven't run any scans (run your first scan!)
 - `"Last scan was over 30 days ago"` - Your last scan is too old to provide meaningful protection
 
-**⚪ Unknown Status Messages:**
+**⚪ Unknown:**
 
-- `"Unable to determine protection status"` - Cannot access scan history or parse timestamps
+- `"Unable to determine status"` - ClamUI couldn't read or parse your scan history. Before you've ever scanned, the
+  badge instead reads **No Data** with the message `"No scan history available"`.
 
 #### Improving Your Protection Status
 
@@ -109,12 +106,10 @@ If your status is not **Protected**, here's what to do:
 3. Consider setting up [Scheduled Scans](scheduling.md) for automatic protection
 4. Refresh the Statistics view to see updated status
 
-**For definition age issues:**
+**Keeping virus definitions fresh:**
 
-1. Navigate to the **Update** view
-2. Click **Update Virus Definitions**
-3. Wait for the update to complete
-4. Return to Statistics view and refresh
+Updating virus definitions does **not** change the Statistics protection status (which is based on scan recency), but
+current definitions are essential for accurate detection. Open the **Database** view from the sidebar to update them.
 
 **For "Unknown" status:**
 
@@ -258,8 +253,8 @@ your [exclusion patterns](settings.md#managing-exclusion-patterns) - you might b
 💡 **Tip**: A sudden spike in Threats Detected (visible in the [activity chart](#understanding-scan-activity-charts))
 might indicate a new infection source like a USB drive or download.
 
-⚠️ **Note**: Not all detections are real threats - see [Threat Severity Levels](#threat-severity-levels) to understand
-the difference between CRITICAL ransomware and LOW-severity test files.
+⚠️ **Note**: Not all detections are equally serious. ClamAV assigns each threat a severity (CRITICAL, HIGH, MEDIUM, or
+LOW), but this count treats every detection equally - a LOW-severity test file counts the same as CRITICAL ransomware.
 
 **4. Clean Scans**
 
@@ -403,10 +398,10 @@ The number of data points in the [activity chart](#understanding-scan-activity-c
 
 | Timeframe    | Data Points | Interval          | Example                                                 |
 |--------------|-------------|-------------------|---------------------------------------------------------|
-| **Day**      | 6 points    | 4-hour blocks     | 00:00-04:00, 04:00-08:00, ..., 20:00-24:00              |
-| **Week**     | 7 points    | Daily intervals   | Mon, Tue, Wed, Thu, Fri, Sat, Sun                       |
-| **Month**    | 10 points   | 3-day intervals   | Days 1-3, 4-6, 7-9, ..., 28-30                          |
-| **All Time** | 12 points   | Monthly intervals | Jan, Feb, Mar, ..., Dec (or distributed across history) |
+| **Day**      | Up to 6     | Day-level (MM/DD) | 06/06, 06/07 (scans grouped by calendar day)            |
+| **Week**     | 7 points    | Daily intervals   | 06/01, 06/02, ..., 06/07 (one bar per day)              |
+| **Month**    | 10 points   | 3-day intervals   | 06/01, 06/04, ..., 06/28 (first day of each 3-day span) |
+| **All Time** | 12 points   | Monthly intervals | 01/01, 02/01, ..., 12/01 (distributed across history)   |
 
 This ensures the chart remains readable regardless of how much data you have.
 
@@ -477,6 +472,8 @@ itself to see individual scan details.
 The **Scan Activity** chart provides a visual representation of your scanning patterns and threat detection trends over
 the selected timeframe.
 
+(The activity chart is rendered with matplotlib, which ClamUI ships as a runtime dependency.)
+
 #### Chart Overview
 
 ```
@@ -540,12 +537,15 @@ Wednesday: 5 scans, 0 threats  (medium blue bar, no red bar)
 
 The X-axis shows different time units depending on your selected timeframe:
 
-**Daily View (6 data points - 4-hour blocks):**
+**Daily View (day-level intervals):**
 
 ```
-X-axis labels: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
-Example: "04:00" shows scans run between 4am-8am today
+X-axis labels: MM/DD (e.g. 06/06, 06/07)
+Example: "06/07" shows all scans on June 7
 ```
+
+Note: every timeframe labels the x-axis in MM/DD (month/day) format - the chart is always day-based, so the daily
+view shows recent calendar days rather than intra-day hours.
 
 **Weekly View (7 data points - daily):**
 
@@ -724,8 +724,8 @@ operations without navigating to other views.
 
 **What it does:**
 
-- Switches to the **Scan view** (navigates away from Statistics)
-- Automatically starts scanning your **home directory** (equivalent to "Home Folder" profile)
+- Switches to the **Scan view** and selects the **Quick Scan** profile (your `~/Downloads` folder)
+- Does **not** start the scan automatically — review the target, then click **Start Scan**. If the Quick Scan profile is missing, it falls back to your home directory
 - Uses your configured scan backend and settings
 
 **When to use it:**
@@ -739,18 +739,18 @@ operations without navigating to other views.
 
 1. Click the **Quick Scan** row (anywhere on the row is clickable)
 2. ClamUI **navigates to the Scan view**
-3. The scan **starts automatically** with your home directory as the target
+3. ClamUI selects the **Quick Scan** profile (`~/Downloads`); click **Start Scan** to begin
 4. **Monitor progress** in the Scan view
 5. **Return to Statistics** when done to see updated metrics
 
-⚠️ **Note**: Quick Scan uses the default scan settings. If you need custom targets or exclusions,
-use [Scan Profiles](profiles.md) instead.
+⚠️ **Note**: Quick Scan uses the **Quick Scan** profile (`~/Downloads`). For different targets or exclusions,
+pick another profile or manage them via [Scan Profiles](profiles.md).
 
 💡 **Tip**: Quick Scan is equivalent to:
 
-1. Clicking "Scan" in the navigation bar
-2. Clicking "Browse" and selecting your home folder
-3. Clicking "Start Scan"
+1. Opening the **Scan** view
+2. Selecting the **Quick Scan** profile
+3. Clicking **Start Scan**
 
 It just saves you 3 steps!
 
@@ -806,7 +806,7 @@ It just saves you 3 steps!
 2. See if scans ran today (blue bar in today's chart interval)
 3. If no scans visible, click **View Scan Logs**
 4. Check if scheduled scan failed or didn't run
-5. Review [Managing Scheduled Scans](#managing-scheduled-scans) to troubleshoot
+5. Review [Scheduled Scans](scheduling.md) to troubleshoot
 
 #### Quick Actions Notes
 

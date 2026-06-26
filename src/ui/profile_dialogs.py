@@ -281,6 +281,13 @@ class ProfileDialog(Adw.Window):
         self._name_row.set_text(self._profile.name)
         self._description_row.set_text(self._profile.description or "")
 
+        # Default profiles are recreated by name at startup, so renaming one would
+        # orphan it and create a duplicate default. Mirror the delete-button
+        # protection and lock the name field for defaults.
+        if self._profile.is_default:
+            self._name_row.set_sensitive(False)
+            self._name_row.set_tooltip_text(_("Default profiles cannot be renamed"))
+
         # Load targets
         for target in self._profile.targets:
             self._add_target_to_list(target)

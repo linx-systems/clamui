@@ -356,6 +356,12 @@ class DeviceMonitor:
     def _start_background_scan(self, info: MountInfo) -> None:
         """Create a Scanner instance and start a background scan."""
         with self._lock:
+            # If a scan for this mount is already running, bail out. A late-firing
+            # requeue timer can race here after a slot freed and the scan was
+            # restarted via _on_scan_complete; without this guard it would start a
+            # second concurrent scan of the same mount.
+            if info.mount_point in self._active_scans:
+                return
             # Enforce concurrent scan limit
             if len(self._active_scans) >= MAX_CONCURRENT_SCANS:
                 logger.info(
@@ -381,6 +387,16 @@ class DeviceMonitor:
                 return
 
             self._scan_queue.pop(info.mount_point, None)
+
+            # Cancel any pending requeue timer for this mount. When a slot frees,
+            # _on_scan_complete restarts the queued mount here directly; the
+            # requeue source stored under this mount must be removed so it cannot
+            # later fire and start a duplicate concurrent scan. The timer-callback
+            # paths already pop _scheduled_sources before calling, so this is a
+            # harmless no-op there.
+            sid = self._scheduled_sources.pop(info.mount_point, None)
+            if sid is not None:
+                GLib.source_remove(sid)
 
             # Create a dedicated scanner for this device scan
             scanner = Scanner(settings_manager=self._settings_manager)

@@ -18,6 +18,17 @@ from ..core.log_manager import LogManager
 from .output import format_timestamp, print_error, print_json, print_table
 
 
+def positive_int(value: str) -> int:
+    """Argparse type for a strictly positive integer (>= 1)."""
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(_("--limit must be a positive integer")) from None
+    if parsed < 1:
+        raise argparse.ArgumentTypeError(_("--limit must be a positive integer"))
+    return parsed
+
+
 def register(subparsers: argparse._SubParsersAction) -> None:
     """Register the history subcommand with the CLI router."""
     parser = subparsers.add_parser(
@@ -28,7 +39,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "--limit",
         "-n",
-        type=int,
+        type=positive_int,
         default=20,
         help=_("Number of entries to show (default: 20)"),
     )

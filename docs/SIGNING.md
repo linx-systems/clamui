@@ -19,6 +19,10 @@ chmod +x validate-x86_64.AppImage
 ./validate-x86_64.AppImage ./ClamUI-*.AppImage
 ```
 
+On tagged releases the AppImage is GPG-signed (the signature is embedded by `appimagetool --sign`), so `--appimage-signature`
+displays the signing key's fingerprint. Import the project's public signing key (see the Debian section below) to confirm it
+matches.
+
 ### Debian Package
 
 Debian packages are signed using `dpkg-sig`. To verify:
@@ -33,6 +37,11 @@ dpkg-sig --verify clamui_*.deb
 # Expected output for valid signature:
 # GOODSIG _gpgbuilder <key-fingerprint>
 ```
+
+> **Note:** The `.deb` is signed in CI with `dpkg-sig --sign builder` on Ubuntu 22.04. The `dpkg-sig --verify` command has a
+> known BADSIG bug on that toolchain version and may report a failure even for a valid signature. To confirm the signature
+> member is present without relying on `--verify`, run `ar t clamui_*.deb | grep _gpgbuilder` — a `_gpgbuilder` entry means
+> the package was signed.
 
 > **Security Note:** Before importing keys, verify you're downloading from the official repository. You can also
 > download `signing-key.asc` directly
@@ -113,7 +122,8 @@ git push origin :refs/tags/v0.2.0-test
 - **Private key storage**: The GPG private key is stored as an encrypted GitHub secret and is only accessible during
   workflow runs
 - **Passphrase protection**: The passphrase is stored as a separate secret, never exposed in logs
-- **Tag-only signing**: Packages are only signed on tag pushes (releases), not on PR or branch builds
+- **Release signing**: Packages are signed on tag pushes (releases), or on a manual `workflow_dispatch` with the `sign`
+  input set to `true`; never on PR or ordinary branch builds
 - **Key rotation**: Consider rotating the signing key every 2 years (matching the recommended expiration)
 - **Public key distribution**: The public key is committed to the repository for transparency and easy verification
 

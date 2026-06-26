@@ -1844,6 +1844,27 @@ class TestStartScanning:
         mock_scan_view._progress_section.set_visible.assert_called_with(True)
         mock_scan_view._start_progress_pulse.assert_called_once()
 
+    def test_start_scanning_reentrant_call_is_noop(self, mock_scan_view):
+        """A second _start_scanning() while a scan is already in flight must be
+        a no-op: no second worker thread scheduled, no pulse restart, no state
+        re-notification. Otherwise two workers share one Scanner and corrupt the
+        UI/cancellation state (reachable via the manage-profiles 'run' path and
+        the app-level start-scan action, neither of which disables the button).
+        """
+        self._setup_start_mocks(mock_scan_view)
+        mock_scan_view._selected_paths = ["/test/path"]
+        mock_scan_view._is_scanning = True  # a scan is already running
+        callback = mock.MagicMock()
+        mock_scan_view._on_scan_state_changed = callback
+
+        with mock.patch("src.ui.scan_view.GLib") as mock_glib:
+            with mock.patch("src.ui.scan_view.format_scan_path", return_value="/test/path"):
+                mock_scan_view._start_scanning()
+
+        mock_glib.idle_add.assert_not_called()
+        mock_scan_view._start_progress_pulse.assert_not_called()
+        callback.assert_not_called()
+
 
 class TestOnScanClicked:
     """Tests for the _on_scan_clicked handler."""

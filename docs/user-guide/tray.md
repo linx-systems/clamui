@@ -43,34 +43,40 @@ When you launch ClamUI, it automatically checks for system tray support:
 
 **Other Desktop Environments:**
 
-- KDE Plasma, XFCE, MATE, Cinnamon: Usually works out of the box
+- KDE Plasma, MATE, Cinnamon, Budgie: usually works out of the box
+- XFCE: enable the "Status Notifier" panel plugin
 - System tray is typically enabled by default
 
 **Flatpak Installation:**
 
-- May require additional permissions for tray access
-- Usually works automatically if system supports AppIndicator
+- Tray talk-name permissions ship with the Flatpak build
+- Works automatically wherever a StatusNotifierWatcher is present
 
-#### Required System Libraries
+#### How the Tray Icon Works
 
-ClamUI uses the AppIndicator library for tray integration:
+ClamUI does **not** depend on the older AppIndicator library. Instead it runs a small
+background helper that speaks the **StatusNotifierItem (SNI)** D-Bus protocol directly and
+exports its right-click menu via **DBusMenu** (`libdbusmenu`). The icon appears wherever a
+*StatusNotifierWatcher* is running:
 
-**Library Name:** `libayatana-appindicator3` (or `libappindicator3`)
+- **KDE Plasma, Cinnamon, MATE, Budgie:** watcher built in — works out of the box
+- **XFCE:** enable the "Status Notifier" panel plugin
+- **GNOME Shell:** install the "AppIndicator and KStatusNotifierItem Support" extension (it
+  provides the watcher GNOME otherwise lacks)
 
-**To Install (if missing):**
+**Supporting components:**
 
-```bash
-# Ubuntu/Debian
-sudo apt install libayatana-appindicator3-1
+- **libdbusmenu** (`gir1.2-dbusmenu-glib-0.4` on Debian/Ubuntu) — required for the
+  right-click menu. Without it the icon still appears, but the context menu does not.
+- **Pillow + cairosvg** — installed automatically with ClamUI; used to render the branded,
+  color-coded status icons. If unavailable, ClamUI falls back to your icon theme's symbolic
+  icons.
 
-# Fedora
-sudo dnf install libayatana-appindicator-gtk3
+Flatpak builds already ship the StatusNotifierWatcher talk-name permissions and bundle
+libdbusmenu, so the tray works wherever a watcher is present.
 
-# Arch Linux
-sudo pacman -S libayatana-appindicator
-```
-
-After installing the library, restart ClamUI to enable tray integration.
+For the full design (subprocess isolation, IPC protocol, threading), see
+[System Tray Subprocess Architecture](../architecture/tray-subprocess.md).
 
 #### Tray Icon Status Indicators
 
@@ -153,7 +159,7 @@ there is no UI toggle for this setting.
   "scan_backend": "auto",
   "minimize_to_tray": true,
   "start_minimized": false,
-  "show_notifications": true
+  "notifications_enabled": true
 }
 ```
 
@@ -189,7 +195,7 @@ Once enabled, the feature works automatically:
 **Window minimizes to taskbar instead of tray:**
 
 - System tray integration is not available
-- Check if AppIndicator library is installed (see [Enabling System Tray Integration](#enabling-system-tray-integration))
+- Check that a StatusNotifierWatcher is available (GNOME users: enable the AppIndicator extension; see [Enabling System Tray Integration](#enabling-system-tray-integration))
 - Verify `minimize_to_tray` is set to `true` in settings.json
 
 **Can't find the tray icon after minimizing:**
@@ -203,6 +209,38 @@ Once enabled, the feature works automatically:
 
 - Right-click tray icon and select "Show Window"
 - If still not working, quit from tray and relaunch ClamUI
+
+---
+
+### Close to Tray
+
+By default ClamUI asks what to do the first time you close the main window, then remembers
+your choice. This lets you keep ClamUI running in the tray after the window is closed.
+
+#### First-Time Close Prompt
+
+The first time you click the window's close button (with a system tray available), ClamUI
+shows a **"What would you like to do when closing the window?"** dialog with two options:
+
+- **Minimize to tray** — Hide the window but keep ClamUI running in the background
+- **Quit completely** — Close the window and exit ClamUI
+
+Enable **"Remember my choice"** to skip the prompt next time. Your selection is stored in
+the `close_behavior` setting.
+
+#### Changing Close Behavior Later
+
+Open **Preferences → Behavior → When closing window** and choose one of:
+
+- **Minimize to tray** — closing the window always hides it to the tray
+- **Quit completely** — closing the window always exits ClamUI
+- **Always ask** — show the prompt every time you close the window
+
+⚠️ **Note:** The Behavior page (and these options) only appear when a system tray is
+available. Without a tray, closing the window always quits ClamUI.
+
+💡 **Tip:** "Minimize to tray" close behavior pairs well with `start_minimized` so ClamUI
+stays available in the tray from login until you explicitly quit.
 
 ---
 
@@ -265,7 +303,7 @@ is no UI toggle for this setting.
   "scan_backend": "auto",
   "minimize_to_tray": true,
   "start_minimized": true,
-  "show_notifications": true
+  "notifications_enabled": true
 }
 ```
 
@@ -379,6 +417,7 @@ Right-click the ClamUI tray icon to open the context menu.
 ├─────────────────────────────┤
 │ Quick Scan                  │  ← Run Quick Scan profile
 │ Full Scan                   │  ← Run Full Scan profile
+│ Scan with profile         ▸ │  ← Submenu: one entry per saved profile
 ├─────────────────────────────┤
 │ Update Definitions          │  ← Update virus database
 ├─────────────────────────────┤
@@ -419,6 +458,15 @@ Right-click the ClamUI tray icon to open the context menu.
     - Automatically starts Full Scan
     - Displays results when complete
 - **Use case:** Thorough weekly or monthly system scan
+
+**Scan with Profile**
+
+- **Purpose:** Run one of your saved scan profiles directly from the tray
+- **Availability:** Shown as a "Scan with profile" submenu, only when you have saved profiles
+- **Behavior:**
+    - Lists each saved profile by name
+    - Selecting one shows the window, switches to the Scan view, loads that profile, and starts the scan
+- **Use case:** Launch a custom profile without opening the window first
 
 **Update Definitions**
 
@@ -474,7 +522,6 @@ Right-click the ClamUI tray icon to open the context menu.
 **What Quick Actions Cannot Do:**
 
 - ❌ Scan custom paths (only predefined profiles)
-- ❌ Use custom scan profiles (only Quick Scan / Full Scan)
 - ❌ Configure scan settings
 - ❌ Manage quarantine
 - ❌ View scan history
@@ -482,19 +529,14 @@ Right-click the ClamUI tray icon to open the context menu.
 
 **For these tasks, you need to open the main window.**
 
-**Why Only Quick Scan and Full Scan?**
+**To Use a Saved Profile:**
 
-- These are the most common use cases
-- Keeps tray menu simple and uncluttered
-- Custom profiles require showing window for proper UI
-- Tray menu is designed for quick, common actions only
+1. Right-click the tray icon
+2. Open the "Scan with profile" submenu
+3. Select the profile you want to run
 
-**To Use Custom Profiles:**
-
-1. Click tray icon to show window
-2. Navigate to Scan view
-3. Select your custom profile from dropdown
-4. Click "Run Scan"
+The window opens, switches to the Scan view, loads the profile, and starts the scan
+automatically. To create or edit profiles, open the window and use the Scan view.
 
 ---
 
@@ -694,7 +736,7 @@ invisibly.
 
 | Feature                 | Purpose                                | Requirement                   |
 |-------------------------|----------------------------------------|-------------------------------|
-| **System Tray Icon**    | At-a-glance protection status          | AppIndicator library          |
+| **System Tray Icon**    | At-a-glance protection status          | StatusNotifierWatcher present |
 | **Tray Menu**           | Quick access to common actions         | System tray enabled           |
 | **Minimize to Tray**    | Hide window to tray instead of taskbar | System tray + setting enabled |
 | **Start Minimized**     | Launch to tray without window          | System tray + setting enabled |

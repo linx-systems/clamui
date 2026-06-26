@@ -9,6 +9,7 @@ Single responsibility:
 - Result compilation
 """
 
+import logging
 import threading
 import time
 from collections.abc import Callable
@@ -19,6 +20,8 @@ from gi.repository import GLib
 
 from ...core.scanner import Scanner, ScanProgress, ScanResult, ScanStatus
 from ...core.settings_manager import SettingsManager
+
+logger = logging.getLogger(__name__)
 
 
 class ScanState(Enum):
@@ -131,6 +134,12 @@ class ScanController:
         if not paths:
             return
 
+        # Ignore re-entrant starts: a scan already running would otherwise spawn
+        # a second worker thread sharing this controller's Scanner, racing on
+        # cancellation state and delivering duplicate completion callbacks.
+        if self._state == ScanState.SCANNING:
+            return
+
         self._state = ScanState.SCANNING
         self._cancel_all = False
         self._cumulative_files = 0
@@ -155,53 +164,63 @@ class ScanController:
     def _scan_worker(self, paths: list[str], profile_exclusions: dict | None):
         """Background worker for multi-target scanning."""
         result = AggregatedResult()
-        total_targets = len(paths)
+        try:
+            total_targets = len(paths)
 
-        show_live = True
-        if self._settings:
-            show_live = self._settings.get("show_live_progress", True)
+            show_live = True
+            if self._settings:
+                show_live = self._settings.get("show_live_progress", True)
 
-        progress_callback = self._create_progress_callback() if show_live else None
+            progress_callback = self._create_progress_callback() if show_live else None
 
-        for idx, path in enumerate(paths, start=1):
-            if self._cancel_all:
-                result.status = ScanStatus.CANCELLED
-                break
+            for idx, path in enumerate(paths, start=1):
+                if self._cancel_all:
+                    result.status = ScanStatus.CANCELLED
+                    break
 
-            self._current_target_idx = idx
+                self._current_target_idx = idx
 
-            if self._on_target_progress:
-                GLib.idle_add(self._on_target_progress, idx, total_targets, path)
+                if self._on_target_progress:
+                    GLib.idle_add(self._on_target_progress, idx, total_targets, path)
 
-            scan_result = self._scanner.scan_sync(
-                path,
-                recursive=True,
-                profile_exclusions=profile_exclusions,
-                progress_callback=progress_callback,
-            )
+                scan_result = self._scanner.scan_sync(
+                    path,
+                    recursive=True,
+                    profile_exclusions=profile_exclusions,
+                    progress_callback=progress_callback,
+                )
 
-            if scan_result.status == ScanStatus.CANCELLED or self._cancel_all:
-                self._aggregate_partial(result, scan_result)
-                result.status = ScanStatus.CANCELLED
-                break
+                if scan_result.status == ScanStatus.CANCELLED or self._cancel_all:
+                    self._aggregate_partial(result, scan_result)
+                    result.status = ScanStatus.CANCELLED
+                    break
 
-            self._cumulative_files += scan_result.scanned_files
-            self._aggregate_result(result, scan_result)
+                self._cumulative_files += scan_result.scanned_files
+                self._aggregate_result(result, scan_result)
 
-        if result.status != ScanStatus.CANCELLED:
-            if result.total_infected > 0:
-                result.status = ScanStatus.INFECTED
-            elif result.error_messages:
-                result.status = ScanStatus.ERROR
-            else:
-                result.status = ScanStatus.CLEAN
+            if result.status != ScanStatus.CANCELLED:
+                if result.total_infected > 0:
+                    result.status = ScanStatus.INFECTED
+                elif result.error_messages:
+                    result.status = ScanStatus.ERROR
+                else:
+                    result.status = ScanStatus.CLEAN
+        except Exception as exc:
+            # A crash in the scan worker thread must never leave the UI stuck
+            # in the SCANNING state (spinner spinning, buttons disabled). Record
+            # the failure as an error result and fall through to finalization so
+            # on_state_change(IDLE) and on_complete still fire on the main loop.
+            logger.exception("Scan worker thread crashed")
+            result.status = ScanStatus.ERROR
+            if not result.error_messages:
+                result.error_messages.append(str(exc))
+        finally:
+            self._state = ScanState.IDLE
+            if self._on_state_change:
+                GLib.idle_add(self._on_state_change, self._state)
 
-        self._state = ScanState.IDLE
-        if self._on_state_change:
-            GLib.idle_add(self._on_state_change, self._state)
-
-        if self._on_complete:
-            GLib.idle_add(self._on_complete, result.to_scan_result(paths))
+            if self._on_complete:
+                GLib.idle_add(self._on_complete, result.to_scan_result(paths))
 
     def _aggregate_result(self, agg: AggregatedResult, scan: ScanResult):
         """Add scan result to aggregated total."""

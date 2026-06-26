@@ -226,6 +226,40 @@ class TestProfileStorageLoadProfiles:
         # Should return empty list and backup the file
         assert profiles == []
 
+    def test_load_skips_malformed_record_but_keeps_valid(self, temp_dir):
+        """A single malformed record is skipped without wiping valid profiles."""
+        storage_path = Path(temp_dir) / "profiles.json"
+        profile_data = {
+            "version": 1,
+            "profiles": [
+                {
+                    "id": "good-1",
+                    "name": "Good Profile",
+                    "targets": ["/home"],
+                    "exclusions": {},
+                    "created_at": "2024-01-01T00:00:00",
+                    "updated_at": "2024-01-01T00:00:00",
+                    "is_default": False,
+                    "description": "",
+                    "options": {},
+                },
+                # Malformed: missing required 'id' field -> KeyError in from_dict.
+                {"name": "Broken Profile"},
+            ],
+        }
+        storage_path.write_text(json.dumps(profile_data))
+
+        storage = ProfileStorage(storage_path)
+        profiles = storage.load_profiles()
+
+        # Valid profile survives; only the malformed record is dropped.
+        assert len(profiles) == 1
+        assert profiles[0].id == "good-1"
+        # The container was not treated as corrupt, so no backup was made.
+        backup_path = storage_path.with_suffix(".json.corrupted")
+        assert not backup_path.exists()
+        assert storage_path.exists()
+
     def test_load_handles_permission_error(self, temp_dir):
         """Test that load handles permission errors gracefully."""
         storage_path = Path(temp_dir) / "profiles.json"

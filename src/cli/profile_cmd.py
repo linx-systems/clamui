@@ -15,6 +15,7 @@ Usage:
 import argparse
 
 from ..core.i18n import _
+from ..core.sanitize import sanitize_log_line
 from ..profiles.profile_manager import ProfileManager
 from .output import format_timestamp, get_config_dir, print_error, print_json, print_table
 
@@ -87,12 +88,12 @@ def run_list(args: argparse.Namespace) -> int:
     headers = [_("Name"), _("Targets"), _("Default"), _("Updated")]
     rows = []
     for profile in profiles:
-        targets_display = ", ".join(profile.targets[:2])
+        targets_display = ", ".join(sanitize_log_line(t) for t in profile.targets[:2])
         if len(profile.targets) > 2:
             targets_display += _(" (+{n} more)").format(n=len(profile.targets) - 2)
         rows.append(
             [
-                profile.name,
+                sanitize_log_line(profile.name),
                 targets_display or _("(none)"),
                 _("yes") if profile.is_default else _("no"),
                 format_timestamp(profile.updated_at),
@@ -126,18 +127,18 @@ def run_show(args: argparse.Namespace) -> int:
         return 0
 
     # Text detail view
-    print(_("Name:        {name}").format(name=profile.name))
+    print(_("Name:        {name}").format(name=sanitize_log_line(profile.name)))
     print(_("ID:          {id}").format(id=profile.id))
     print(_("Default:     {value}").format(value=_("yes") if profile.is_default else _("no")))
     if profile.description:
-        print(_("Description: {desc}").format(desc=profile.description))
+        print(_("Description: {desc}").format(desc=sanitize_log_line(profile.description)))
     print(_("Created:     {date}").format(date=format_timestamp(profile.created_at)))
     print(_("Updated:     {date}").format(date=format_timestamp(profile.updated_at)))
 
     print(_("\nTargets:"))
     if profile.targets:
         for target in profile.targets:
-            print(f"  - {target}")
+            print(f"  - {sanitize_log_line(target)}")
     else:
         print(_("  (none)"))
 
@@ -146,14 +147,14 @@ def run_show(args: argparse.Namespace) -> int:
     if excl_paths or excl_patterns:
         print(_("\nExclusions:"))
         for path in excl_paths:
-            print(_("  path:    {path}").format(path=path))
+            print(_("  path:    {path}").format(path=sanitize_log_line(path)))
         for pattern in excl_patterns:
-            print(_("  pattern: {pattern}").format(pattern=pattern))
+            print(_("  pattern: {pattern}").format(pattern=sanitize_log_line(pattern)))
 
     if profile.options:
         print(_("\nOptions:"))
         for key, value in profile.options.items():
-            print(f"  {key}: {value}")
+            print(f"  {sanitize_log_line(key)}: {sanitize_log_line(str(value))}")
 
     return 0
 

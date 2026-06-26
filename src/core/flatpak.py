@@ -49,20 +49,39 @@ def is_flatpak() -> bool:
 
 
 def get_clean_env() -> dict[str, str]:
-    """Return a clean environment for subprocess calls to system binaries.
+    """Return a clean environment for subprocess calls to host system binaries.
 
-    When running inside an AppImage, LD_LIBRARY_PATH is set to prefer
-    bundled libraries (e.g. libssl, libpcre2). This causes version conflicts
-    when spawning system ClamAV binaries that link against different versions.
+    AppImage's AppRun injects bundled-runtime variables so ClamUI's own bundled
+    interpreter and libraries are used. Those must NOT leak into the host helpers
+    we spawn (clamscan, freshclam, systemctl, and host Python scripts such as
+    Fedora's ``firewall-cmd``), or they break:
 
-    This function strips AppImage-injected variables so that clamscan,
-    clamdscan, and freshclam use the system's native libraries.
+    - ``LD_LIBRARY_PATH``/``LD_PRELOAD``: force bundled shared libs, causing
+      ABI/version conflicts against host binaries.
+    - ``PYTHONHOME``/``PYTHONPATH``: point the interpreter at the AppImage tree,
+      so a host Python script's interpreter cannot bootstrap the host stdlib
+      ("No module named 'encodings'") or import host site-packages -> non-zero
+      exit. This made the Security Audit misreport firewalld as "not running"
+      (GitHub issue #155).
+    - ``GI_TYPELIB_PATH``: the GObject-introspection analog of LD_LIBRARY_PATH;
+      a host tool that ``import gi`` (firewall-cmd does) would otherwise load the
+      bundled typelibs against host GLib -> version mismatch.
 
-    Safe to call in all environments - stripping unset vars is a no-op.
+    Every caller spawns native HOST binaries, never ClamUI's bundled Python, so
+    stripping these is always safe. Popping an unset var is a no-op.
     """
     env = os.environ.copy()
-    # Remove library path overrides that cause version conflicts
-    for var in ("LD_LIBRARY_PATH", "LD_PRELOAD"):
+    # Strip AppImage-injected runtime overrides that break host helpers: library
+    # paths (ABI conflicts), Python home/path (host script bootstrap), and the
+    # introspection typelib path (gi version mismatch). See GitHub issue #155.
+    for var in (
+        "LD_LIBRARY_PATH",
+        "LD_PRELOAD",
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONDONTWRITEBYTECODE",
+        "GI_TYPELIB_PATH",
+    ):
         env.pop(var, None)
     # Remove AppImage-specific variables that may affect library resolution
     for var in list(env.keys()):
@@ -306,8 +325,16 @@ def get_xdg_user_dir(dir_type: str) -> str | None:
             text=True,
             timeout=5,
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+        resolved = result.stdout.strip()
+        if result.returncode == 0 and resolved:
+            # xdg-user-dir prints $HOME when the requested user dir is not
+            # configured. $HOME is never a valid user *subdirectory* (Downloads,
+            # Documents, etc. are always nested under home), so treat a bare
+            # $HOME result as a lookup miss. This stops callers such as the
+            # Quick Scan default from targeting the entire home directory.
+            home = os.path.expanduser("~")
+            if os.path.normpath(resolved) != os.path.normpath(home):
+                return resolved
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         logger.debug("Failed to resolve XDG user directory for %s", dir_type, exc_info=True)
 

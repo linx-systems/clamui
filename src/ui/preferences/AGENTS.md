@@ -1,6 +1,6 @@
 # preferences/ — Modular Preferences System
 
-13 modules. Static factory pattern with lazy page loading.
+13 modules (12 pages/helpers + `__init__`). Pages reach the stack via a **mixed** factory pattern: `create_page()` is an **instance method** on some pages and a `@staticmethod` on others, with per-page signatures (not uniform). `BehaviorPage` is built eagerly as the default visible page; every other page is lazy, created on first navigation via the `_page_factories` dict in `window.py`.
 
 Parent: [`../AGENTS.md`](../AGENTS.md)
 
@@ -25,7 +25,12 @@ preferences/
 ## Recipe: Adding a New Preferences Page
 
 ### 1. Create the page module
-Use `scanner_page.py` as template:
+
+**`create_page()` signatures are NOT uniform** — pick a template matching the page's data source:
+- **Config-backed pages** (read/write clamd.conf / freshclam.conf): `@staticmethod create_page(...)` taking a `widgets_dict`. Good templates: `scanner_page.py` (`ScannerPage`), `database_page.py` (`DatabasePage`). Exact params vary (e.g. `ScannerPage.create_page(config_path, widgets_dict, settings_manager, clamd_available, parent_window)`, `DatabasePage.create_page(config_path, widgets_dict, parent_window)`).
+- **Simple settings pages** (read/write `settings.json`): **instance method** `create_page(self)` with deps stored in `__init__`. Templates: `behavior_page.py`, `device_scan_page.py`, `exclusions_page.py`.
+
+Static `widgets_dict` form (config-backed; ScannerPage/DatabasePage style):
 
 ```python
 from ..compat import create_switch_row, create_entry_row
@@ -54,14 +59,22 @@ class MyPage(PreferencesPageMixin):
 
 ### 2. Register in window.py
 ```python
-# In NAVIGATION_ITEMS list:
+# 1. Add a (page_id, icon, N_(label)) tuple to NAVIGATION_ITEMS:
 ("my_page", "preferences-system-symbolic", N_("My Settings")),
 
-# Add factory method:
+# 2. Wire a factory into the lazy _page_factories dict (in __init__):
+self._page_factories = {
+    ...,
+    "my_page": self._create_my_page,
+}
+
+# 3. Implement the factory; build the page, then add via the stack helper:
 def _create_my_page(self):
-    page = MyPage.create_page(self._my_widgets, self._settings_manager, self)
-    self._stack.add_titled(page, "my_page", _("My Settings"))
+    # static form shown; instance pages do MyPage(...).create_page() instead
+    page = MyPage.create_page(self._my_widgets, parent_window=self)
+    self._add_page_to_stack("my_page", page)
 ```
+Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_factories` are created on first navigation via `_ensure_page_created()`. Current `NAVIGATION_ITEMS` order: behavior, exclusions, database, scanner, scheduled, device_scan, onaccess, virustotal, debug, save.
 
 ### 3. Write tests
 `tests/ui/preferences/test_my_page.py` — use `mock_gi_modules` fixture.
@@ -70,12 +83,12 @@ def _create_my_page(self):
 
 | Function | Purpose |
 |----------|---------|
-| `create_spin_row(title, subtitle, min, max, step)` | Returns `(row, spin_button)` tuple |
+| `create_spin_row(title, subtitle, min_val, max_val, step=1, page_step=10)` | Returns `(row, spin_button)` tuple |
 | `create_password_entry_row(title)` | Password entry with visibility toggle |
 | `populate_bool_field(config, widgets, key, default)` | Load bool into switch |
 | `populate_int_field(config, widgets, key)` | Load int into spin button |
 | `populate_text_field(config, widgets, key)` | Load text into entry |
-| `create_status_row(title, ok, ok_msg, err_msg)` | Returns `(row, icon)` for status display |
+| `create_status_row(title, status_ok, ok_message, error_message)` | Returns `(row, icon)` (icon is a `Gtk.Image`) for status display |
 | `styled_prefix_icon(icon_name)` | 12px-margin dim icon for row prefix |
 
 ## Anti-Patterns (preferences-specific)

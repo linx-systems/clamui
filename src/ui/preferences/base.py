@@ -504,9 +504,18 @@ class PreferencesPageMixin:
         - changes-allow-symbolic: Alternative shield/lock icon
 
         Returns:
-            A Gtk.Box containing the lock icon with tooltip
+            A Gtk.Box containing the lock icon with tooltip.  When the app is
+            already running as root the box is returned empty: no elevation is
+            required, so flagging the group as admin-only would be misleading.
         """
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+
+        # Running as root: every config path is directly writable and the save
+        # flow skips pkexec entirely, so omit the lock affordance.
+        from ...core.privileged_paths import is_running_as_root
+
+        if is_running_as_root():
+            return box
 
         # Create lock icon - using system-lock-screen-symbolic
         # Alternative: changes-allow-symbolic for a shield-style icon

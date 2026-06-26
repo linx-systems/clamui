@@ -1218,3 +1218,17 @@ class TestQuitExtended:
         tray_service._quit()
 
         mock_bus.unregister_object.assert_not_called()
+
+    def test_quit_unregister_is_idempotent(self, tray_service):
+        """Double _quit (quit command + stdin-EOF both schedule _quit) must
+        unregister the SNI object exactly once. A stale registration id would
+        otherwise be unregistered twice, emitting a GLib-CRITICAL warning."""
+        mock_bus = mock.MagicMock()
+        tray_service._bus = mock_bus
+        tray_service._sni_registration_id = 123
+
+        tray_service._quit()
+        tray_service._quit()
+
+        mock_bus.unregister_object.assert_called_once_with(123)
+        assert tray_service._sni_registration_id == 0

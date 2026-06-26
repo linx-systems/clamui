@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # VirusTotal API configuration
 VT_API_BASE = "https://www.virustotal.com/api/v3"
 VT_MAX_FILE_SIZE = 650 * 1024 * 1024  # 650MB limit
+VT_DIRECT_UPLOAD_MAX = 32 * 1024 * 1024  # POST /files only accepts files up to 32MB
 VT_RATE_LIMIT_REQUESTS = 4
 VT_RATE_LIMIT_WINDOW = 60  # seconds
 VT_REQUEST_TIMEOUT = 30  # seconds
@@ -252,7 +253,8 @@ class VirusTotalClient:
         Returns:
             Tuple of (response, error_message). On success, error_message is None.
         """
-        url = f"{VT_API_BASE}{endpoint}"
+        # ``endpoint`` may be an absolute URL (e.g. a one-time upload URL).
+        url = endpoint if endpoint.startswith("http") else f"{VT_API_BASE}{endpoint}"
         session = self._get_session()
 
         for attempt in range(VT_MAX_RETRIES):
@@ -393,12 +395,15 @@ class VirusTotalClient:
             stats = attrs.get("last_analysis_stats", {})
             results = attrs.get("last_analysis_results", {})
 
-            malicious = stats.get("malicious", 0)
-            suspicious = stats.get("suspicious", 0)
-            undetected = stats.get("undetected", 0)
-            harmless = stats.get("harmless", 0)
+            malicious = stats.get("malicious") or 0
+            suspicious = stats.get("suspicious") or 0
 
-            total = malicious + suspicious + undetected + harmless
+            # The "X / Y" denominator must include every verdict bucket VT
+            # reports (timeout, confirmed-timeout, failure, type-unsupported,
+            # undetected, harmless, …), not just the four common ones — engines
+            # that timed out or could not process the file still ran, and
+            # omitting them silently undercounts total_engines on real reports.
+            total = sum(v for v in stats.values() if isinstance(v, int) and not isinstance(v, bool))
             detections = malicious + suspicious
 
             # Parse individual engine detections
@@ -445,7 +450,7 @@ class VirusTotalClient:
                 permalink=permalink,
             )
 
-        except (KeyError, TypeError) as e:
+        except (KeyError, TypeError, AttributeError) as e:
             logger.error(f"Failed to parse VT response: {e}")
             return VTScanResult(
                 status=VTScanStatus.ERROR,
@@ -475,13 +480,11 @@ class VirusTotalClient:
 
         try:
             with open(file_path, "rb") as f:
-                files = {"file": (os.path.basename(file_path), f)}
-                response, error = self._make_request(
-                    "POST",
-                    "/files",
-                    files=files,
-                    timeout=VT_UPLOAD_TIMEOUT,
-                )
+                # Read the bytes up front: requests consumes a file handle via
+                # fp.read(), so reusing the same handle across _make_request's
+                # retry loop would send an empty body on every attempt after the
+                # first. Bytes re-encode correctly on each retry.
+                data = f.read()
         except FileNotFoundError:
             return VTScanResult(
                 status=VTScanStatus.ERROR,
@@ -495,6 +498,58 @@ class VirusTotalClient:
                 file_path=file_path,
                 sha256=sha256,
                 error_message=_("Permission denied"),
+            )
+
+        files = {"file": (os.path.basename(file_path), data)}
+
+        if len(data) <= VT_DIRECT_UPLOAD_MAX:
+            response, error = self._make_request(
+                "POST",
+                "/files",
+                files=files,
+                timeout=VT_UPLOAD_TIMEOUT,
+            )
+        else:
+            # Files larger than the direct-upload limit must first obtain a
+            # one-time upload URL, then POST the multipart body to it.
+            url_response, url_error = self._make_request(
+                "GET",
+                "/files/upload_url",
+                timeout=VT_REQUEST_TIMEOUT,
+            )
+            if url_error:
+                if url_response is not None and url_response.status_code == 429:
+                    return VTScanResult(
+                        status=VTScanStatus.RATE_LIMITED,
+                        file_path=file_path,
+                        sha256=sha256,
+                        error_message=url_error,
+                    )
+                return VTScanResult(
+                    status=VTScanStatus.ERROR,
+                    file_path=file_path,
+                    sha256=sha256,
+                    error_message=url_error,
+                )
+
+            try:
+                upload_url = url_response.json().get("data") if url_response else None
+            except (ValueError, AttributeError):
+                upload_url = None
+
+            if not isinstance(upload_url, str) or not upload_url:
+                return VTScanResult(
+                    status=VTScanStatus.ERROR,
+                    file_path=file_path,
+                    sha256=sha256,
+                    error_message=_("Failed to obtain upload URL for large file"),
+                )
+
+            response, error = self._make_request(
+                "POST",
+                upload_url,
+                files=files,
+                timeout=VT_UPLOAD_TIMEOUT,
             )
 
         if error:

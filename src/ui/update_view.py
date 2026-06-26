@@ -459,9 +459,16 @@ class UpdateView(Gtk.Box):
         self._start_update(force=True)
 
     def _on_cancel_clicked(self, button):
-        """Handle cancel button click."""
-        self._updater.cancel()
-        self._set_updating_state(False)
+        """Handle cancel button click.
+
+        FreshclamUpdater.cancel() escalates SIGTERM -> SIGKILL and blocks on
+        process.wait() for several seconds. Running it on the GTK main thread
+        would freeze the UI, so it runs in a background thread. The updating
+        state is reset by _on_update_complete once the worker thread observes
+        the cancelled update (update_async always invokes the callback).
+        """
+        self._cancel_button.set_sensitive(False)
+        threading.Thread(target=self._updater.cancel, daemon=True).start()
 
     def _start_update(self, force: bool = False):
         """
@@ -517,6 +524,8 @@ class UpdateView(Gtk.Box):
             self._force_update_button.set_sensitive(False)
             self._update_spinner.set_visible(True)
             self._update_spinner.start()
+            # Re-enable in case a previous cancel left it insensitive
+            self._cancel_button.set_sensitive(True)
             self._cancel_button.set_visible(True)
         else:
             # Restore normal state

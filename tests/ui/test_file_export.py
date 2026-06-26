@@ -505,6 +505,45 @@ class TestFileExportHelperErrorHandling:
         assert "Error writing file" in toast_msg
         assert "Disk full" in toast_msg
 
+    def test_content_generator_exception_shows_error_toast(
+        self, file_export_class, mock_gi_modules, tmp_path
+    ):
+        """A failing content_generator must surface an error toast, not propagate.
+
+        Regression: content generation (CSV/JSON formatting) runs inside the
+        async file-dialog callback. Before the fix only PermissionError/OSError
+        were caught, so any other exception escaped the GTK callback with no
+        user feedback (silent failure).
+        """
+        FileExportHelper = file_export_class["FileExportHelper"]
+        FileFilter = file_export_class["FileFilter"]
+
+        mock_parent = mock.MagicMock()
+        mock_parent.get_root.return_value = mock.MagicMock()
+        filter = FileFilter(name="JSON", extension="json")
+
+        def boom():
+            raise ValueError("not JSON serializable")
+
+        helper = FileExportHelper(
+            parent_widget=mock_parent,
+            dialog_title="Export",
+            filename_prefix="test",
+            file_filter=filter,
+            content_generator=boom,
+        )
+        helper._show_toast = mock.MagicMock()
+
+        test_file = tmp_path / "out.json"
+        # Must not raise even though content_generator raises a non-OSError.
+        helper._write_to_file(str(test_file))
+
+        # No file should be written, and the user must get an error toast.
+        assert not test_file.exists()
+        helper._show_toast.assert_called_once()
+        toast_msg = helper._show_toast.call_args[0][0]
+        assert "Error exporting file" in toast_msg
+
     def test_glib_error_handled_silently(self, file_export_class, mock_gi_modules):
         """Test that GLib.Error (dialog dismiss) is handled silently."""
         FileExportHelper = file_export_class["FileExportHelper"]
