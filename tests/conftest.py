@@ -197,13 +197,14 @@ def reset_flatpak_cache():
 
     os.path.exists = patched_exists
 
-    yield
-
-    # Restore on the CURRENT module (may differ from setup if modules were swapped)
-    current_flatpak = _sys.modules.get("src.core.flatpak")
-    if current_flatpak is not None:
-        current_flatpak._flatpak_detected = original_value
-    os.path.exists = original_exists
+    try:
+        yield
+    finally:
+        # Restore on the CURRENT module (may differ from setup if modules were swapped)
+        current_flatpak = _sys.modules.get("src.core.flatpak")
+        if current_flatpak is not None:
+            current_flatpak._flatpak_detected = original_value
+        os.path.exists = original_exists
 
 
 # =============================================================================
@@ -263,7 +264,7 @@ def mock_gi_modules():
 
     This fixture provides consistent mocking of GTK/GLib/Adw modules across
     all test files. It:
-    - Clears cached src.* modules before and after each test
+    - Temporarily clears cached src.* modules while preserving the Flatpak module
     - Sets up real base classes for widgets (required for object.__new__)
     - Provides access to mock objects via returned dict
 
@@ -280,6 +281,12 @@ def mock_gi_modules():
     Yields:
         dict: Dictionary containing mock objects for gtk, adw, gio, glib
     """
+    with preserve_displaced_modules(lambda name: name == "src.core.flatpak"):
+        yield from _mock_gi_modules()
+
+
+def _mock_gi_modules():
+    """Build and yield the temporary GI module mocks."""
     # Clear any cached src modules first
     _clear_src_modules()
 
@@ -389,7 +396,7 @@ def mock_gi_modules():
             "repository": mock_repository,
         }
 
-    # Cleanup after test
+    # Cleanup after test; the fixture wrapper restores the original Flatpak module.
     _clear_src_modules()
 
 
