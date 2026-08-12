@@ -4,6 +4,8 @@
 import subprocess
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.core.flatpak import get_clean_env
 from src.core.portmaster_client import (
     PortmasterModuleRow,
@@ -17,6 +19,7 @@ from src.core.system_audit import (
     AuditReport,
     AuditSectionResult,
     AuditStatus,
+    _check_firewall_gui,
     _check_open_ports,
     _check_systemd_service,
     _check_ufw_enabled,
@@ -875,3 +878,192 @@ class TestCheckPortmaster:
         section = check_portmaster()
         assert section.overall_status == AuditStatus.UNKNOWN
         assert not any(c.status == AuditStatus.FAIL for c in section.checks)
+
+
+# =============================================================================
+# Distro-Aware Install Recommendations (issue #184)
+# =============================================================================
+
+_RECOMMENDER = "src.core.system_audit.recommend_install_command"
+
+
+def _resolved(target):
+    """Resolver stand-in whose command encodes the InstallTarget it was asked for."""
+    return f"sudo distro-install {target.name.lower()}"
+
+
+def _unresolved(target):
+    """Resolver stand-in for a distro ClamUI has no package command for."""
+    return None
+
+
+def _single_check(section):
+    """Return the section's only check, failing loudly if the scenario drifted."""
+    assert len(section.checks) == 1, [c.name for c in section.checks]
+    return section.checks[0]
+
+
+def _missing_clamav(resolver):
+    with (
+        patch(
+            "src.core.system_audit.check_clamav_installed",
+            return_value=(False, "not installed"),
+        ),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = check_clamav_health()
+    return _single_check(section), mock_recommend
+
+
+def _missing_firewall(resolver):
+    with (
+        patch("src.core.system_audit._check_systemd_service", return_value=(False, "inactive")),
+        patch("src.core.system_audit._run_command", return_value=(-1, "", "command not found")),
+        patch("src.core.system_audit.is_binary_installed", return_value=False),
+        patch("src.core.system_audit._check_open_ports", return_value=None),
+        patch("src.core.system_audit._check_firewall_gui", return_value=None),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = check_firewall()
+    return _single_check(section), mock_recommend
+
+
+def _missing_firewall_gui(resolver):
+    section = AuditSectionResult(
+        category=AuditCategory.FIREWALL,
+        title="Firewall",
+        icon_name="security-medium-symbolic",
+    )
+    with (
+        patch("src.core.system_audit.is_binary_installed", return_value=False),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        _check_firewall_gui(section)
+    return _single_check(section), mock_recommend
+
+
+def _missing_auto_updates(resolver):
+    with (
+        patch("src.core.system_audit._run_command", return_value=(-1, "", "command not found")),
+        patch("src.core.system_audit.is_binary_installed", return_value=False),
+        patch("src.core.system_audit._check_pending_reboot", return_value=None),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = check_auto_updates()
+    return _single_check(section), mock_recommend
+
+
+def _missing_intrusion_prevention(resolver):
+    with (
+        patch("src.core.system_audit._check_systemd_service", return_value=(False, "inactive")),
+        patch("src.core.system_audit.is_binary_installed", return_value=False),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = check_intrusion_detection()
+    return _single_check(section), mock_recommend
+
+
+def _missing_lynis(resolver):
+    with (
+        patch("src.core.system_audit._run_command", return_value=(-1, "", "command not found")),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = run_lynis_audit()
+    return _single_check(section), mock_recommend
+
+
+def _missing_chkrootkit(resolver):
+    with (
+        patch("src.core.system_audit._run_command", return_value=(-1, "", "command not found")),
+        patch(_RECOMMENDER, side_effect=resolver) as mock_recommend,
+    ):
+        section = run_rootkit_check()
+    return _single_check(section), mock_recommend
+
+
+# scenario -> (runner producing the "not installed" check, expected InstallTarget name)
+_INSTALL_SCENARIOS = {
+    "auto_updates": (_missing_auto_updates, "AUTOMATIC_UPDATES"),
+    "chkrootkit": (_missing_chkrootkit, "CHKROOTKIT"),
+    "clamav": (_missing_clamav, "CLAMAV"),
+    "firewall": (_missing_firewall, "FIREWALL"),
+    "firewall_gui": (_missing_firewall_gui, "FIREWALL_GUI"),
+    "intrusion_prevention": (_missing_intrusion_prevention, "INTRUSION_PREVENTION"),
+    "lynis": (_missing_lynis, "LYNIS"),
+}
+
+
+class TestDistroAwareInstallCommands:
+    """Every audit "not installed" suggestion must come from the distro-aware
+    resolver (issue #184). Hardcoded `sudo apt install ...` literals and apt/dnf
+    binary probes hand Fedora and Arch users commands they cannot run."""
+
+    @pytest.mark.parametrize("scenario", sorted(_INSTALL_SCENARIOS))
+    def test_install_command_comes_from_resolver(self, scenario):
+        from src.core.install_commands import InstallTarget
+
+        runner, target_name = _INSTALL_SCENARIOS[scenario]
+        expected_target = getattr(InstallTarget, target_name)
+
+        check, mock_recommend = runner(_resolved)
+
+        # The stand-in encodes the requested target, so an equal command proves
+        # both that the resolver was used and that the right target was asked for.
+        assert check.install_command == _resolved(expected_target)
+        requested = [
+            call.args[0] if call.args else call.kwargs["target"]
+            for call in mock_recommend.call_args_list
+        ]
+        assert expected_target in requested
+
+    @pytest.mark.parametrize("scenario", sorted(_INSTALL_SCENARIOS))
+    def test_unsupported_distro_offers_no_command(self, scenario):
+        """On a distro with no known package command the advice stays useful but
+        must not fall back to a package manager the system does not have."""
+        runner, _target_name = _INSTALL_SCENARIOS[scenario]
+
+        check, mock_recommend = runner(_unresolved)
+
+        assert mock_recommend.call_count >= 1
+        assert check.install_command is None
+        assert check.detail
+        assert check.recommendation
+        for text in (check.detail, check.recommendation):
+            assert "apt" not in text
+            assert "dnf" not in text
+            assert "pacman" not in text
+
+    def test_auto_updates_does_not_probe_apt_to_pick_a_command(self):
+        """The `which apt` probe that selected the install command must be gone;
+        probing dnf is still legitimate for detecting dnf-automatic."""
+        from src.core.install_commands import InstallTarget
+
+        with (
+            patch("src.core.system_audit._run_command", return_value=(-1, "", "not found")),
+            patch("src.core.system_audit.is_binary_installed", return_value=False) as mock_binary,
+            patch("src.core.system_audit._check_pending_reboot", return_value=None),
+            patch(_RECOMMENDER, side_effect=_resolved),
+        ):
+            section = check_auto_updates()
+
+        probed = [call.args[0] for call in mock_binary.call_args_list if call.args]
+        assert "apt" not in probed
+        check = _single_check(section)
+        assert check.install_command == _resolved(InstallTarget.AUTOMATIC_UPDATES)
+
+    def test_intrusion_prevention_does_not_probe_package_managers(self):
+        """fail2ban advice must not depend on which of apt/dnf happens to exist."""
+        from src.core.install_commands import InstallTarget
+
+        with (
+            patch("src.core.system_audit._check_systemd_service", return_value=(False, "off")),
+            patch("src.core.system_audit.is_binary_installed", return_value=False) as mock_binary,
+            patch(_RECOMMENDER, side_effect=_resolved),
+        ):
+            section = check_intrusion_detection()
+
+        probed = [call.args[0] for call in mock_binary.call_args_list if call.args]
+        assert "apt" not in probed
+        assert "dnf" not in probed
+        check = _single_check(section)
+        assert check.install_command == _resolved(InstallTarget.INTRUSION_PREVENTION)
