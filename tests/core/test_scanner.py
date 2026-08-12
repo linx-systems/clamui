@@ -1496,6 +1496,17 @@ class TestPatternUtilities:
         assert compiled.fullmatch("backup$")
         assert not compiled.match("backup$2024.tar")
 
+    @pytest.mark.parametrize("suffix", [r"\Z", r"\z"])
+    def test_glob_to_regex_strips_python_end_anchors(self, suffix):
+        """Both fnmatch end-anchor variants must be converted to POSIX ERE."""
+        translated = rf"(?s:backup\$){suffix}"
+        with mock.patch("src.core.scanner.fnmatch.translate", return_value=translated):
+            regex = glob_to_regex("backup$")
+
+        assert regex == r"^backup\$$"
+        assert r"\Z" not in regex
+        assert r"\z" not in regex
+
     def test_glob_to_regex_multiple_wildcards(self):
         """Test glob_to_regex handles multiple wildcards."""
         regex = glob_to_regex("*.test.*")
