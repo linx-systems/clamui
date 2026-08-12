@@ -207,6 +207,7 @@ def create_spin_row(
     max_val: float,
     step: float = 1,
     page_step: float = 10,
+    initial_val: float | None = None,
 ) -> tuple[Adw.ActionRow, Gtk.SpinButton]:
     """
     Create a spin row compatible with libadwaita 1.0+.
@@ -220,6 +221,9 @@ def create_spin_row(
         max_val: Maximum value for the spin button
         step: Step increment for up/down buttons (default: 1)
         page_step: Page increment for larger jumps (default: 10)
+        initial_val: Value shown before the config is loaded. Defaults to
+            min_val, which only matches the setting's default when the
+            minimum is also the default (e.g. 0 = unlimited).
 
     Returns:
         Tuple of (row, spin_button) - use spin_button for get/set_value()
@@ -230,7 +234,7 @@ def create_spin_row(
         row.set_subtitle(subtitle)
 
     adjustment = Gtk.Adjustment(
-        value=min_val,
+        value=min_val if initial_val is None else initial_val,
         lower=min_val,
         upper=max_val,
         step_increment=step,

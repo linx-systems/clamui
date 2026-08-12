@@ -621,6 +621,15 @@ class TestSavePageSaveClicked:
 class TestSavePageSaveConfigsThread:
     """Tests for SavePage._save_configs_thread() method."""
 
+    @staticmethod
+    def _real_clamd_config():
+        """Return an empty real clamd config for persistence assertions."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig
+
+        return ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
+
     @pytest.fixture
     def mock_window(self):
         """Provide a mock PreferencesWindow."""
@@ -921,6 +930,7 @@ class TestSavePageSaveConfigsThread:
         """Test _save_configs_thread saves clamd.conf."""
         mock_button = mock.MagicMock()
         clamd_updates = {"MaxFileSize": "100M"}
+        save_page._window._clamd_config = self._real_clamd_config()
 
         with mock.patch("src.ui.preferences.save_page.backup_config"):
             with mock.patch(
@@ -930,13 +940,9 @@ class TestSavePageSaveConfigsThread:
                 with mock.patch("src.ui.preferences.save_page.GLib"):
                     save_page._save_configs_thread({}, clamd_updates, {}, {}, mock_button)
 
-                    # Should set values on window's clamd config
-                    save_page._window._clamd_config.set_value.assert_called_with(
-                        "MaxFileSize", "100M"
-                    )
-
-                    # Should write clamd config
-                    mock_write.assert_called()
+                    written_config = mock_write.call_args.args[0][0]
+                    assert written_config.get_value("MaxFileSize") == "100M"
+                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_writes_both_configs_in_single_call(
         self, mock_gi_modules, save_page
@@ -971,25 +977,26 @@ class TestSavePageSaveConfigsThread:
         """Test _save_configs_thread saves on-access settings to clamd.conf."""
         mock_button = mock.MagicMock()
         onaccess_updates = {"OnAccessIncludePath": ["/home"]}
+        save_page._window._clamd_config = self._real_clamd_config()
 
         with mock.patch("src.ui.preferences.save_page.backup_config"):
             with mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
-            ):
+            ) as mock_write:
                 with mock.patch("src.ui.preferences.save_page.GLib"):
                     save_page._save_configs_thread({}, {}, onaccess_updates, {}, mock_button)
 
-                    # List values use add_value (after clearing existing) instead of set_value
-                    save_page._window._clamd_config.add_value.assert_called_with(
-                        "OnAccessIncludePath", "/home"
-                    )
+                    written_config = mock_write.call_args.args[0][0]
+                    assert written_config.get_values("OnAccessIncludePath") == ["/home"]
+                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_combines_scanner_and_onaccess(self, mock_gi_modules, save_page):
         """Test _save_configs_thread combines scanner and on-access settings."""
         mock_button = mock.MagicMock()
         clamd_updates = {"MaxFileSize": "100M"}
         onaccess_updates = {"OnAccessIncludePath": ["/home"]}
+        save_page._window._clamd_config = self._real_clamd_config()
 
         with mock.patch("src.ui.preferences.save_page.backup_config"):
             with mock.patch(
@@ -1001,15 +1008,10 @@ class TestSavePageSaveConfigsThread:
                         {}, clamd_updates, onaccess_updates, {}, mock_button
                     )
 
-                    # Scalar values use set_value
-                    save_page._window._clamd_config.set_value.assert_any_call("MaxFileSize", "100M")
-                    # List values use add_value (after clearing existing)
-                    save_page._window._clamd_config.add_value.assert_any_call(
-                        "OnAccessIncludePath", "/home"
-                    )
-
-                    # Should write clamd config once
-                    mock_write.assert_called()
+                    written_config = mock_write.call_args.args[0][0]
+                    assert written_config.get_value("MaxFileSize") == "100M"
+                    assert written_config.get_values("OnAccessIncludePath") == ["/home"]
+                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_saves_scheduled_settings(self, mock_gi_modules, save_page):
         """Test _save_configs_thread saves scheduled scan settings."""
@@ -1432,3 +1434,244 @@ class TestSavePageWindowConfigAccess:
                     mock_window._freshclam_config.set_value.assert_called_with(
                         "DatabaseDirectory", "/var/lib/clamav"
                     )
+
+
+class _InlineSaveThread:
+    """``threading.Thread`` stand-in that runs the save worker inline.
+
+    ``_on_save_clicked`` hands the write off to a background thread; running
+    that worker inline keeps the hand-off deterministic while still exercising
+    the real ``_save_configs_thread`` body and the real writer boundary.
+    """
+
+    def __init__(self, target, args=(), kwargs=None):
+        self._target = target
+        self._args = args
+        self._kwargs = kwargs or {}
+        self.daemon = False
+
+    def start(self):
+        self._target(*self._args, **self._kwargs)
+
+
+class TestSavePageProspectiveConfigValidation:
+    """Save must validate the config it is about to write (issue #181).
+
+    Validating the stored clamd.conf before the collected updates are applied
+    has two user-visible failures: an out-of-range value already on disk blocks
+    the very edit that repairs it, and an out-of-range edit is written because
+    the pre-update config still looked valid.
+    """
+
+    @staticmethod
+    def _clamd_config(max_recursion):
+        """Real clamd config holding a single MaxRecursion line."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+
+        return ClamAVConfig(
+            file_path=Path("/etc/clamav/clamd.conf"),
+            values={"MaxRecursion": [ClamAVConfigValue(value=max_recursion, line_number=1)]},
+            raw_lines=[f"MaxRecursion {max_recursion}\n"],
+        )
+
+    @staticmethod
+    def _error_messages(glib, error_dialog):
+        """Error text surfaced directly or handed to the main loop."""
+        messages = [call.args[1] for call in error_dialog.call_args_list if len(call.args) > 1]
+        messages.extend(
+            call.args[2]
+            for call in glib.idle_add.call_args_list
+            if call.args and call.args[0] is error_dialog and len(call.args) > 2
+        )
+        return messages
+
+    @pytest.fixture
+    def save_page(self, mock_gi_modules):
+        """SavePage backed by a real clamd config so validation really runs."""
+        from src.ui.preferences.save_page import SavePage
+
+        window = mock.MagicMock()
+        window._freshclam_config = None
+        window._clamd_config = None
+        settings_manager = mock.MagicMock()
+        settings_manager.save.return_value = True
+
+        return SavePage(
+            window=window,
+            freshclam_config=None,
+            clamd_config=None,
+            freshclam_conf_path="/etc/clamav/freshclam.conf",
+            clamd_conf_path="/etc/clamav/clamd.conf",
+            clamd_available=True,
+            settings_manager=settings_manager,
+            scheduler=mock.MagicMock(),
+            freshclam_widgets={},
+            clamd_widgets={},
+            onaccess_widgets={},
+            scheduled_widgets={},
+        )
+
+    def test_stale_out_of_range_max_recursion_is_repaired_by_valid_edit(
+        self, mock_gi_modules, save_page
+    ):
+        """A stored MaxRecursion=255 must not block the edit that corrects it."""
+        glib = mock_gi_modules["glib"]
+        button = mock.MagicMock()
+        save_page._window._clamd_config = self._clamd_config("255")
+        written = []
+
+        def fake_write(configs):
+            written.extend(configs)
+            return (True, None)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.DatabasePage.collect_data", return_value={}),
+            mock.patch(
+                "src.ui.preferences.save_page.ScannerPage.collect_data",
+                return_value={"MaxRecursion": "100"},
+            ),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=False),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                side_effect=fake_write,
+            ),
+            mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+            mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+        ):
+            save_page._on_save_clicked(button)
+
+        # The correcting edit is accepted, not rejected because of the stale value.
+        assert self._error_messages(glib, error_dialog) == []
+
+        # ...and the corrected value reaches the writer.
+        assert len(written) == 1
+        assert str(written[0].file_path) == "/etc/clamav/clamd.conf"
+        assert written[0].get_value("MaxRecursion") == "100"
+        assert "MaxRecursion 100" in written[0].to_string()
+
+        success_calls = [
+            call
+            for call in glib.idle_add.call_args_list
+            if call.args and call.args[0] == save_page._show_success_dialog
+        ]
+        assert len(success_calls) == 1
+        assert "Configuration Saved" in success_calls[0].args[1]
+
+    def test_out_of_range_max_recursion_edit_is_rejected_before_any_write(
+        self, mock_gi_modules, save_page
+    ):
+        """A collected MaxRecursion=101 never reaches the config or the writer."""
+        glib = mock_gi_modules["glib"]
+        button = mock.MagicMock()
+        clamd_config = self._clamd_config("17")
+        save_page._window._clamd_config = clamd_config
+        before = clamd_config.to_string()
+
+        with (
+            mock.patch("src.ui.preferences.save_page.DatabasePage.collect_data", return_value={}),
+            mock.patch(
+                "src.ui.preferences.save_page.ScannerPage.collect_data",
+                return_value={"MaxRecursion": "101"},
+            ),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=False),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ) as mock_write,
+            mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+            mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+        ):
+            save_page._on_save_clicked(button)
+
+        # Nothing is persisted...
+        mock_write.assert_not_called()
+
+        # ...the live config is left exactly as it was...
+        assert clamd_config.get_value("MaxRecursion") == "17"
+        assert clamd_config.to_string() == before
+
+        # ...and the rejection names the offending option.
+        messages = self._error_messages(glib, error_dialog)
+        assert any("MaxRecursion" in message for message in messages)
+
+    def test_writer_failure_leaves_live_clamd_config_unchanged(self, mock_gi_modules, save_page):
+        """A failed write must not commit the validated proposal in memory."""
+        button = mock.MagicMock()
+        clamd_config = self._clamd_config("17")
+        save_page._window._clamd_config = clamd_config
+        before = clamd_config.to_string()
+
+        with (
+            mock.patch("src.ui.preferences.save_page.DatabasePage.collect_data", return_value={}),
+            mock.patch(
+                "src.ui.preferences.save_page.ScannerPage.collect_data",
+                return_value={"MaxRecursion": "100"},
+            ),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=False),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(False, "write failed"),
+            ),
+            mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+        ):
+            save_page._on_save_clicked(button)
+
+        assert save_page._window._clamd_config is clamd_config
+        assert clamd_config.get_value("MaxRecursion") == "17"
+        assert clamd_config.to_string() == before
+
+    def test_flatpak_write_commits_persisted_proposal_to_live_config(
+        self, mock_gi_modules, save_page
+    ):
+        """A successful Flatpak write makes its persisted path and values live."""
+        from pathlib import Path
+
+        button = mock.MagicMock()
+        live_config = self._clamd_config("17")
+        save_page._window._clamd_config = live_config
+        proposal = save_page._prospective_clamd_config({"MaxRecursion": "100"}, {})
+        target_path = Path("/home/test/.config/clamav/clamd.conf")
+        written = []
+
+        def fake_write(configs):
+            written.extend(configs)
+            return (True, None)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch.object(
+                save_page, "_should_use_flatpak_user_clamd_config", return_value=True
+            ),
+            mock.patch.object(
+                save_page, "_flatpak_user_clamd_config_path", return_value=target_path
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                side_effect=fake_write,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {},
+                {"MaxRecursion": "100"},
+                {},
+                {},
+                button,
+                proposal,
+            )
+
+        assert len(written) == 1
+        assert written[0].file_path == target_path
+        assert written[0].get_value("MaxRecursion") == "100"
+        assert save_page._window._clamd_config.file_path == target_path
+        assert save_page._window._clamd_config.get_value("MaxRecursion") == "100"

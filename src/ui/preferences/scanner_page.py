@@ -700,13 +700,14 @@ class ScannerPage(PreferencesPageMixin):
         widgets_dict["MaxScanSize"] = max_scan_size_spin
         group.add(max_scan_size_row)
 
-        # MaxRecursion spin row (0-255)
+        # MaxRecursion spin row (clamd accepts 1-100; default 17)
         max_recursion_row, max_recursion_spin = create_spin_row(
             title=_("Max Archive Recursion"),
             subtitle=_("Maximum recursion depth for archives"),
-            min_val=0,
-            max_val=255,
+            min_val=1,
+            max_val=100,
             step=1,
+            initial_val=17,
         )
         max_recursion_row.add_prefix(styled_prefix_icon("folder-symbolic"))
         widgets_dict["MaxRecursion"] = max_recursion_spin

@@ -83,7 +83,7 @@ Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_facto
 
 | Function | Purpose |
 |----------|---------|
-| `create_spin_row(title, subtitle, min_val, max_val, step=1, page_step=10)` | Returns `(row, spin_button)` tuple |
+| `create_spin_row(title, subtitle, min_val, max_val, step=1, page_step=10, initial_val=None)` | Returns `(row, spin_button)` tuple; use `initial_val` when the initial value should differ from `min_val` |
 | `create_password_entry_row(title)` | Password entry with visibility toggle |
 | `populate_bool_field(config, widgets, key, default)` | Load bool into switch |
 | `populate_int_field(config, widgets, key)` | Load int into spin button |

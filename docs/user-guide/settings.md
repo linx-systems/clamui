@@ -566,8 +566,8 @@ These settings control resource usage and prevent excessive scan times.
 
 **MaxRecursion** - Maximum recursion depth for archives
 
-- **Range:** 0-255 levels
-- **Default:** Usually 16
+- **Range:** 1-100 levels
+- **Default:** 17
 - **Purpose:** Prevent infinite recursion in maliciously crafted archives
 - **Recommendation:** 10-20 for most users
 - **Example:** ZIP containing ZIP containing ZIP (3 levels deep)
@@ -600,14 +600,14 @@ Total extracted: 800 MB          ← MaxScanSize applies
 | Use Case                       | MaxFileSize | MaxScanSize | MaxRecursion | MaxFiles |
 |--------------------------------|-------------|-------------|--------------|----------|
 | **Fast scans (less thorough)** | 50 MB       | 200 MB      | 10           | 5,000    |
-| **Balanced (recommended)**     | 100 MB      | 400 MB      | 16           | 10,000   |
+| **Balanced (recommended)**     | 100 MB      | 400 MB      | 17           | 10,000   |
 | **Thorough scans (slower)**    | 500 MB      | 1000 MB     | 20           | 50,000   |
 | **Maximum protection**         | 1000 MB     | 2000 MB     | 25           | 100,000  |
 
 💡 **Tip:** If scans are too slow, reduce MaxScanSize and MaxFiles first. These have the biggest performance impact.
 
-⚠️ **Warning:** Setting values to 0 (unlimited) can cause scans to hang on malicious archives designed to consume
-resources (zip bombs, recursive archives).
+⚠️ **Warning:** Setting MaxFileSize, MaxScanSize, or MaxFiles to 0 (unlimited) can cause scans to hang on
+malicious archives designed to consume resources (zip bombs, recursive archives).
 
 **To Configure Performance Limits:**
 

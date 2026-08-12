@@ -489,7 +489,7 @@ CONFIG_OPTION_TYPES = {
     # Integer options with ranges
     "Checks": {"type": "integer", "min": 0, "max": 50},
     "HTTPProxyPort": {"type": "integer", "min": 1, "max": 65535},
-    "MaxRecursion": {"type": "integer", "min": 0, "max": 100},
+    "MaxRecursion": {"type": "integer", "min": 1, "max": 100},
     "MaxFiles": {"type": "integer", "min": 0, "max": 100000},
     "MaxThreads": {"type": "integer", "min": 1, "max": 256},
     "MaxDirectoryRecursion": {"type": "integer", "min": 0, "max": 100},

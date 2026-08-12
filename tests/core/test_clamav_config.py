@@ -682,6 +682,46 @@ class TestValidateOption:
         assert error is None
 
 
+class TestValidateOptionMaxRecursion:
+    """Boundary tests for the MaxRecursion range (issue #181).
+
+    Current ClamAV accepts MaxRecursion between 1 and 100 inclusive; clamd
+    itself refuses 0 and anything above 100, so validation must match.
+    """
+
+    def test_validate_max_recursion_accepts_minimum(self):
+        """Test validate_option accepts MaxRecursion 1 (lowest value clamd allows)."""
+        from src.core.clamav_config import validate_option
+
+        is_valid, error = validate_option("MaxRecursion", "1")
+        assert is_valid is True
+        assert error is None
+
+    def test_validate_max_recursion_accepts_maximum(self):
+        """Test validate_option accepts MaxRecursion 100 (highest value clamd allows)."""
+        from src.core.clamav_config import validate_option
+
+        is_valid, error = validate_option("MaxRecursion", "100")
+        assert is_valid is True
+        assert error is None
+
+    def test_validate_max_recursion_rejects_zero(self):
+        """Test validate_option rejects MaxRecursion 0 (below clamd's minimum of 1)."""
+        from src.core.clamav_config import validate_option
+
+        is_valid, error = validate_option("MaxRecursion", "0")
+        assert is_valid is False
+        assert "below minimum" in error.lower()
+
+    def test_validate_max_recursion_rejects_above_maximum(self):
+        """Test validate_option rejects MaxRecursion 101 (above clamd's maximum of 100)."""
+        from src.core.clamav_config import validate_option
+
+        is_valid, error = validate_option("MaxRecursion", "101")
+        assert is_valid is False
+        assert "exceeds maximum" in error.lower()
+
+
 class TestWriteConfig:
     """Tests for the write_config function."""
 
