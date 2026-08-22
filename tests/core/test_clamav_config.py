@@ -18,6 +18,8 @@ from src.core.clamav_config import (
     write_configs_with_elevation,
 )
 
+PROTOCOL_TOKEN = f"--protocol={clamav_config_module.PROTOCOL_VERSION}"
+
 
 class TestClamAVConfigValue:
     """Tests for the ClamAVConfigValue dataclass."""
@@ -1080,7 +1082,7 @@ class TestWriteConfigsWithElevation:
         assert len(run_calls) == 1
 
         cmd, kwargs = run_calls[0]
-        assert cmd[0:3] == ["pkexec", "/usr/bin/clamui-apply-preferences", "--protocol=2"]
+        assert cmd[0:3] == ["pkexec", "/usr/bin/clamui-apply-preferences", PROTOCOL_TOKEN]
         # Two (staged-source, destination) pairs after the protocol token.
         assert len(cmd[3:]) == 4
         # Destinations are at odd offsets within the pair list, i.e. cmd[4::2].
@@ -1325,7 +1327,7 @@ class TestFlatpakElevationRouting:
         cmd = pkexec_calls[0]
         # Host-spawn prefix, then host helper path (NOT /app/bin/...).
         assert cmd[0:2] == ["flatpak-spawn", "--host"]
-        assert cmd[2:5] == ["pkexec", "/usr/bin/clamui-apply-preferences", "--protocol=2"]
+        assert cmd[2:5] == ["pkexec", "/usr/bin/clamui-apply-preferences", PROTOCOL_TOKEN]
         assert not any(str(arg).startswith("/app/bin") for arg in cmd)
 
         probe_calls = [c for c in run_calls if "test" in c and "-e" in c]
@@ -1692,7 +1694,7 @@ class TestWriteConfigsFlatpak:
         assert cmd[0:2] == ["flatpak-spawn", "--host"]
         assert cmd[2] == "pkexec"
         assert cmd[3] == "/usr/bin/clamui-apply-preferences"
-        assert cmd[4] == "--protocol=2"
+        assert cmd[4] == PROTOCOL_TOKEN
         # Inline shell is gone; the helper is the only writer.
         assert "sh" not in cmd
         assert "-c" not in cmd

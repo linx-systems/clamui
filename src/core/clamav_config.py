@@ -16,7 +16,11 @@ from datetime import datetime
 from pathlib import Path
 
 from .i18n import _
-from .privileged_paths import is_running_as_root, staging_root_for_uid
+from .privileged_paths import (
+    PROTOCOL_VERSION,
+    is_running_as_root,
+    staging_root_for_uid,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1217,7 +1221,7 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                         ),
                     )
 
-            argv = [*prefix, "pkexec", helper_path, "--protocol=2", *flat_pairs]
+            argv = [*prefix, "pkexec", helper_path, f"--protocol={PROTOCOL_VERSION}", *flat_pairs]
             result = subprocess.run(argv, capture_output=True, text=True, check=False)
 
             if result.returncode != 0:

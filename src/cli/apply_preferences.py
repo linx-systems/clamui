@@ -7,9 +7,9 @@ deliberately small, has no GTK dependency, and treats every input as
 adversarial.  See ``src/core/privileged_paths.py`` for the validators that
 form the actual security boundary; this module is the wiring around them.
 
-Protocol (version 2):
+Protocol (version 3):
 
-    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=2 \\
+    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=3 \
         <staged-src-1> <dest-1>  [<staged-src-2> <dest-2> ...]
 
 The helper:
@@ -18,7 +18,7 @@ The helper:
    or non-numeric (exit 3).  This pins source-file authentication to the
    user who actually authorised the elevation, not to the running root
    process.
-2. Requires ``--protocol=2`` as the first positional argument so an
+2. Requires ``--protocol=3`` as the first positional argument so an
    outdated caller paired with the hardened helper fails closed (exit 4)
    instead of being interpreted as ``src dest src dest ...``.
 3. Resolves the per-user staging root, opens it ``O_NOFOLLOW`` /
@@ -32,7 +32,7 @@ The helper:
      no group/world write, resolved path under the staging root.
    - Validates the destination against the allowlist (``.conf`` extension,
      no traversal, parent must be one of the allowed dirs after symlink
-     resolution).
+     resolution) and retains only its canonical allowed path.
    - Atomically installs via ``mkstemp`` in the destination directory,
      ``copyfileobj`` from the validated FD, ``fsync``, ``chmod 0o644``,
      ``os.replace`` onto the destination.  On any error the temp file is
@@ -80,7 +80,7 @@ _CLAMD_UNITS: tuple[str, ...] = (
 # 1  generic error (validation failure, IO error, restart failure)
 # 2  argument parsing error (odd number of pairs, no pairs)
 # 3  PKEXEC_UID missing/zero/non-numeric
-# 4  protocol mismatch (caller did not pass --protocol=2 first)
+# 4  protocol mismatch (caller did not pass --protocol=3 first)
 EXIT_OK = 0
 EXIT_GENERIC_ERROR = 1
 EXIT_BAD_ARGS = 2
@@ -94,7 +94,7 @@ def _parse_path_pairs(args: list[str]) -> list[tuple[Path, Path]]:
 
     Args:
         args: Flat list of alternating source and destination paths
-            (after the ``--protocol=2`` token has been consumed).
+            (after the ``--protocol=3`` token has been consumed).
 
     Returns:
         List of ``(source, destination)`` ``Path`` tuples.
@@ -273,11 +273,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: invalid staging root: {error}", file=sys.stderr)
         return EXIT_GENERIC_ERROR
 
-    # Preflight phase 1: validate every destination before opening any
-    # source.  A bad destination short-circuits with no descriptors held.
+    # Preflight phase 1: validate and canonicalize every destination before
+    # opening any source. A bad destination short-circuits with no descriptors
+    # held, and every later phase uses only the canonical allowed paths.
     try:
-        for _source, destination in pairs:
-            validate_destination(destination)
+        pairs = [(source, validate_destination(destination)) for source, destination in pairs]
     except ValueError as error:
         print(f"Error: {error}", file=sys.stderr)
         return EXIT_GENERIC_ERROR
