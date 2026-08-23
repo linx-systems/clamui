@@ -34,6 +34,7 @@ from .clamav_detection import (
 )
 from .flatpak import get_clean_env, is_flatpak, wrap_host_command
 from .i18n import _
+from .install_commands import InstallTarget, recommend_install_command
 from .keyring_manager import delete_portmaster_token, get_portmaster_token
 from .portmaster_client import PortmasterStatus, probe_portmaster
 from .sanitize import sanitize_log_line, sanitize_log_text
@@ -167,6 +168,15 @@ class AuditReport:
 # =============================================================================
 
 _SUBPROCESS_TIMEOUT = 10
+
+
+def _firewall_install_info_url(install_command: str | None) -> str | None:
+    """Return documentation matching the verified firewall package command."""
+    if install_command is None:
+        return None
+    if "firewalld" in install_command or "firewall-config" in install_command:
+        return _URLS["firewalld"]
+    return _URLS["ufw"]
 
 
 def _check_systemd_service(service_name: str) -> tuple[bool, str]:
@@ -453,7 +463,7 @@ def check_clamav_health() -> AuditSectionResult:
                 status=AuditStatus.FAIL,
                 detail=_("ClamAV is not installed"),
                 recommendation=_("Install ClamAV to enable virus scanning"),
-                install_command="sudo apt install clamav clamav-daemon",
+                install_command=recommend_install_command(InstallTarget.CLAMAV),
                 info_url=_URLS["clamav"],
             )
         )
@@ -683,14 +693,15 @@ def check_firewall() -> AuditSectionResult:
             firewall_found = True
 
     if not firewall_found:
+        install_command = recommend_install_command(InstallTarget.FIREWALL)
         section.checks.append(
             AuditCheckResult(
                 name=_("Firewall"),
                 status=AuditStatus.FAIL,
                 detail=_("No active firewall detected"),
                 recommendation=_("Install and enable a firewall for network protection"),
-                install_command="sudo apt install ufw && sudo ufw enable",
-                info_url=_URLS["ufw"],
+                install_command=install_command,
+                info_url=_firewall_install_info_url(install_command),
             )
         )
 
@@ -725,6 +736,7 @@ def _check_firewall_gui(section: AuditSectionResult) -> None:
             )
             return
 
+    install_command = recommend_install_command(InstallTarget.FIREWALL_GUI)
     # No GUI found — informational only, not a warning
     section.checks.append(
         AuditCheckResult(
@@ -732,8 +744,8 @@ def _check_firewall_gui(section: AuditSectionResult) -> None:
             status=AuditStatus.UNKNOWN,
             detail=_("No graphical firewall manager detected"),
             recommendation=_("Install a GUI for easier firewall management"),
-            install_command="sudo apt install gufw",
-            info_url=_URLS["ufw"],
+            install_command=install_command,
+            info_url=_firewall_install_info_url(install_command),
         )
     )
 
@@ -1015,20 +1027,13 @@ def check_auto_updates() -> AuditSectionResult:
             updates_found = True
 
     if not updates_found:
-        # Suggest the right package manager command
-        if is_binary_installed("apt"):
-            install_cmd = "sudo apt install unattended-upgrades"
-        elif is_binary_installed("dnf"):
-            install_cmd = "sudo dnf install dnf-automatic"
-        else:
-            install_cmd = None
         section.checks.append(
             AuditCheckResult(
                 name=_("Automatic Updates"),
                 status=AuditStatus.UNKNOWN,
                 detail=_("Could not determine automatic update status"),
                 recommendation=_("Configure automatic security updates"),
-                install_command=install_cmd,
+                install_command=recommend_install_command(InstallTarget.AUTOMATIC_UPDATES),
             )
         )
 
@@ -1121,19 +1126,13 @@ def check_intrusion_detection() -> AuditSectionResult:
         ids_found = True
 
     if not ids_found:
-        if is_binary_installed("apt"):
-            install_cmd = "sudo apt install fail2ban"
-        elif is_binary_installed("dnf"):
-            install_cmd = "sudo dnf install fail2ban"
-        else:
-            install_cmd = None
         section.checks.append(
             AuditCheckResult(
                 name=_("Intrusion Prevention"),
                 status=AuditStatus.UNKNOWN,
                 detail=_("No intrusion detection system found"),
                 recommendation=_("Install fail2ban or CrowdSec to protect against attacks"),
-                install_command=install_cmd,
+                install_command=recommend_install_command(InstallTarget.INTRUSION_PREVENTION),
                 info_url=_URLS["fail2ban"],
             )
         )
@@ -1341,7 +1340,7 @@ def run_lynis_audit() -> AuditSectionResult:
                 status=AuditStatus.UNKNOWN,
                 detail=_("Lynis is not installed"),
                 recommendation=_("Install Lynis for comprehensive security auditing"),
-                install_command="sudo apt install lynis",
+                install_command=recommend_install_command(InstallTarget.LYNIS),
                 info_url=_URLS["lynis"],
             )
         )
@@ -1478,7 +1477,7 @@ def run_rootkit_check() -> AuditSectionResult:
                 status=AuditStatus.UNKNOWN,
                 detail=_("chkrootkit is not installed"),
                 recommendation=_("Install chkrootkit for rootkit detection"),
-                install_command="sudo apt install chkrootkit",
+                install_command=recommend_install_command(InstallTarget.CHKROOTKIT),
                 info_url=_URLS["chkrootkit"],
             )
         )

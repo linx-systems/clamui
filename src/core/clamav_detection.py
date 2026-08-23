@@ -21,6 +21,7 @@ from .flatpak import (
     wrap_host_command,
 )
 from .i18n import _
+from .install_commands import InstallTarget, recommend_install_command
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,39 @@ def systemd_unit_exists(unit_name: str) -> bool:
     return result.returncode == 0 and result.stdout.strip() == "loaded"
 
 
+def _clamav_not_installed_message() -> str:
+    """Build the missing-clamscan message for the detected distribution."""
+    command = recommend_install_command(InstallTarget.CLAMAV)
+    if command is None:
+        return _("ClamAV is not installed. Install the ClamAV package for your distribution.")
+    return _("ClamAV is not installed. Please install it with: {command}").format(command=command)
+
+
+def _freshclam_not_installed_message() -> str:
+    """Build the missing-freshclam message for the detected distribution."""
+    command = recommend_install_command(InstallTarget.FRESHCLAM)
+    if command is None:
+        return _(
+            "freshclam is not installed. Install the ClamAV database updater package "
+            "for your distribution."
+        )
+    return _("freshclam is not installed. Please install it with: {command}").format(
+        command=command
+    )
+
+
+def _clamdscan_not_installed_message() -> str:
+    """Build the missing-clamdscan message for the detected distribution."""
+    command = recommend_install_command(InstallTarget.CLAMD)
+    if command is None:
+        return _(
+            "clamdscan is not installed. Install the ClamAV daemon package for your distribution."
+        )
+    return _("clamdscan is not installed. Please install it with: {command}").format(
+        command=command
+    )
+
+
 def check_clamav_installed() -> tuple[bool, str | None]:
     """
     Check if ClamAV (clamscan) is installed and accessible.
@@ -71,10 +105,7 @@ def check_clamav_installed() -> tuple[bool, str | None]:
     clamscan_path = which_host_command("clamscan")
 
     if clamscan_path is None:
-        return (
-            False,
-            _("ClamAV is not installed. Please install it with: sudo apt install clamav"),
-        )
+        return (False, _clamav_not_installed_message())
 
     # Try to get version to verify it's working
     try:
@@ -118,12 +149,7 @@ def check_freshclam_installed() -> tuple[bool, str | None]:
     freshclam_path = which_host_command("freshclam")
 
     if freshclam_path is None:
-        return (
-            False,
-            _(
-                "freshclam is not installed. Please install it with: sudo apt install clamav-freshclam"
-            ),
-        )
+        return (False, _freshclam_not_installed_message())
 
     cmd = ["freshclam", "--version"]
 
@@ -171,10 +197,7 @@ def check_clamdscan_installed() -> tuple[bool, str | None]:
     clamdscan_path = which_host_command("clamdscan")
 
     if clamdscan_path is None:
-        return (
-            False,
-            _("clamdscan is not installed. Please install it with: sudo apt install clamav-daemon"),
-        )
+        return (False, _clamdscan_not_installed_message())
 
     # Try to get version to verify it's working
     # Use force_host=True because clamdscan must communicate with the host clamd daemon.
@@ -200,10 +223,7 @@ def check_clamdscan_installed() -> tuple[bool, str | None]:
     except subprocess.TimeoutExpired:
         return (False, _("clamdscan check timed out"))
     except FileNotFoundError:
-        return (
-            False,
-            _("clamdscan is not installed. Please install it with: sudo apt install clamav-daemon"),
-        )
+        return (False, _clamdscan_not_installed_message())
     except PermissionError:
         return (False, _("Permission denied when accessing clamdscan"))
     except Exception as e:

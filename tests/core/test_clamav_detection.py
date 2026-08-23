@@ -1,6 +1,7 @@
 # ClamUI ClamAV Detection Tests
 """Unit tests for the clamav_detection module functions."""
 
+import re
 import subprocess
 from unittest import mock
 
@@ -1224,3 +1225,151 @@ class TestResolveFreshclamConfPath:
         with mock.patch.object(clamav_detection, "detect_freshclam_conf_path", return_value=None):
             result = clamav_detection.resolve_freshclam_conf_path(None)
             assert result is None
+
+
+_PACKAGE_MANAGER_PATTERN = re.compile(r"\b(?:apt|apt-get|dnf|yum|pacman|zypper)\b")
+
+
+def _assert_no_package_manager_command(message):
+    """Fail when a user-facing message advertises any package manager command."""
+    match = _PACKAGE_MANAGER_PATTERN.search(message.lower())
+    assert match is None, f"unexpected package manager hint {match.group(0)!r} in: {message}"
+
+
+def _assert_only_install_command(message, command):
+    """Fail unless the message quotes exactly `command` and no other package manager."""
+    assert command in message, f"expected {command!r} in: {message}"
+    _assert_no_package_manager_command(message.replace(command, ""))
+
+
+def _recommended_targets(mock_recommend):
+    """Return the install targets the detection code asked the resolver about."""
+    targets = []
+    for call_args, call_kwargs in mock_recommend.call_args_list:
+        targets.append(call_args[0] if call_args else call_kwargs["target"])
+    return targets
+
+
+class TestMissingToolInstallGuidance:
+    """Regression tests for distro-aware install hints (issue #184).
+
+    Missing-tool messages must quote the command that
+    recommend_install_command() produced for the detected distro instead of
+    hardcoding Debian's apt, and must stay useful - while naming no package
+    manager at all - when the distro cannot be identified.
+
+    The resolver is patched on clamav_detection itself, so the module is
+    expected to import recommend_install_command (and InstallTarget) from
+    src.core.install_commands.
+    """
+
+    def test_missing_clamscan_quotes_detected_arch_command(self):
+        """Missing clamscan on Arch should suggest pacman, never apt."""
+        from src.core.install_commands import InstallTarget
+
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection,
+                "recommend_install_command",
+                return_value="sudo pacman -S clamav",
+            ) as mock_recommend:
+                installed, message = clamav_detection.check_clamav_installed()
+
+        assert installed is False
+        assert "not installed" in message.lower()
+        _assert_only_install_command(message, "sudo pacman -S clamav")
+        assert _recommended_targets(mock_recommend) == [InstallTarget.CLAMAV]
+
+    def test_missing_clamscan_unknown_distro_omits_install_command(self):
+        """Unknown distros keep a useful clamscan message with no install command."""
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection, "recommend_install_command", return_value=None
+            ):
+                installed, message = clamav_detection.check_clamav_installed()
+
+        assert installed is False
+        assert "clamav" in message.lower()
+        assert "not installed" in message.lower()
+        _assert_no_package_manager_command(message)
+
+    def test_missing_freshclam_quotes_detected_arch_command(self):
+        """Missing freshclam on Arch should suggest pacman, never apt."""
+        from src.core.install_commands import InstallTarget
+
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection,
+                "recommend_install_command",
+                return_value="sudo pacman -S clamav",
+            ) as mock_recommend:
+                installed, message = clamav_detection.check_freshclam_installed()
+
+        assert installed is False
+        assert "not installed" in message.lower()
+        _assert_only_install_command(message, "sudo pacman -S clamav")
+        assert _recommended_targets(mock_recommend) == [InstallTarget.FRESHCLAM]
+
+    def test_missing_freshclam_unknown_distro_omits_install_command(self):
+        """Unknown distros keep a useful freshclam message with no install command."""
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection, "recommend_install_command", return_value=None
+            ):
+                installed, message = clamav_detection.check_freshclam_installed()
+
+        assert installed is False
+        assert "freshclam" in message.lower()
+        assert "not installed" in message.lower()
+        _assert_no_package_manager_command(message)
+
+    def test_missing_clamdscan_quotes_detected_arch_command(self):
+        """Missing clamdscan on Arch should suggest pacman, never apt."""
+        from src.core.install_commands import InstallTarget
+
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection,
+                "recommend_install_command",
+                return_value="sudo pacman -S clamav",
+            ) as mock_recommend:
+                installed, message = clamav_detection.check_clamdscan_installed()
+
+        assert installed is False
+        assert "not installed" in message.lower()
+        _assert_only_install_command(message, "sudo pacman -S clamav")
+        assert _recommended_targets(mock_recommend) == [InstallTarget.CLAMD]
+
+    def test_missing_clamdscan_after_which_quotes_detected_arch_command(self):
+        """The clamdscan FileNotFoundError fallback is distro aware too."""
+        from src.core.install_commands import InstallTarget
+
+        with mock.patch.object(
+            clamav_detection, "which_host_command", return_value="/usr/bin/clamdscan"
+        ):
+            with mock.patch("subprocess.run") as mock_run:
+                mock_run.side_effect = FileNotFoundError("File not found")
+                with mock.patch.object(
+                    clamav_detection,
+                    "recommend_install_command",
+                    return_value="sudo pacman -S clamav",
+                ) as mock_recommend:
+                    installed, message = clamav_detection.check_clamdscan_installed()
+
+        assert installed is False
+        assert "not installed" in message.lower()
+        _assert_only_install_command(message, "sudo pacman -S clamav")
+        assert _recommended_targets(mock_recommend) == [InstallTarget.CLAMD]
+
+    def test_missing_clamdscan_unknown_distro_omits_install_command(self):
+        """Unknown distros keep a useful clamdscan message with no install command."""
+        with mock.patch.object(clamav_detection, "which_host_command", return_value=None):
+            with mock.patch.object(
+                clamav_detection, "recommend_install_command", return_value=None
+            ):
+                installed, message = clamav_detection.check_clamdscan_installed()
+
+        assert installed is False
+        assert "clamdscan" in message.lower()
+        assert "not installed" in message.lower()
+        _assert_no_package_manager_command(message)
