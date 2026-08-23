@@ -11,7 +11,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Dependency review
         uses: actions/dependency-review-action@v5

@@ -320,7 +320,10 @@ class TrayManager:
                 self._respawn_count = 0
             self._respawn_count += 1
             self._last_respawn_time = now
-            # Clear stale process so start() will spawn a new one.
+            # Close the dead process's pipes before dropping the reference —
+            # a crash-looping subprocess would otherwise leak three fds per
+            # respawn. Then clear it so start() will spawn a new one.
+            self._close_pipes()
             self._process = None
             self._running = False
 

@@ -10,7 +10,7 @@ can be exercised end-to-end without needing root.
 Coverage focus:
 
 - ``PKEXEC_UID`` env var must be present and parse to a valid UID.
-- The first positional argument must be ``--protocol=2``; anything else
+- The first positional argument must be ``--protocol=3``; anything else
   is rejected so an outdated caller cannot silently invoke a hardened helper
   with the old src/dst-only positional layout.
 - A staged source outside the per-invocation staging root is rejected
@@ -32,6 +32,8 @@ import pytest
 
 from src.cli import apply_preferences
 from src.core import privileged_paths
+
+PROTOCOL_TOKEN = f"--protocol={privileged_paths.PROTOCOL_VERSION}"
 
 
 def _make_staging(tmp_path: Path) -> Path:
@@ -69,15 +71,15 @@ class TestPkexecUidEnv:
 
     def test_missing_pkexec_uid_returns_three(self, monkeypatch):
         monkeypatch.delenv("PKEXEC_UID", raising=False)
-        assert apply_preferences.main(["--protocol=2"]) == 3
+        assert apply_preferences.main([PROTOCOL_TOKEN]) == 3
 
     def test_zero_pkexec_uid_returns_three(self, monkeypatch):
         monkeypatch.setenv("PKEXEC_UID", "0")
-        assert apply_preferences.main(["--protocol=2"]) == 3
+        assert apply_preferences.main([PROTOCOL_TOKEN]) == 3
 
     def test_non_numeric_pkexec_uid_returns_three(self, monkeypatch):
         monkeypatch.setenv("PKEXEC_UID", "not-a-number")
-        assert apply_preferences.main(["--protocol=2"]) == 3
+        assert apply_preferences.main([PROTOCOL_TOKEN]) == 3
 
 
 class TestProtocolHandshake:
@@ -97,9 +99,9 @@ class TestProtocolHandshake:
 
         assert apply_preferences.main([str(src), str(dest_dir / "a.conf")]) == 4
 
-    def test_wrong_protocol_value_returns_four(self, monkeypatch):
+    def test_protocol_two_returns_four(self, monkeypatch):
         _set_pkexec_env(monkeypatch)
-        assert apply_preferences.main(["--protocol=1", "/dev/null", "/etc/clamav/a.conf"]) == 4
+        assert apply_preferences.main(["--protocol=2", "/dev/null", "/etc/clamav/a.conf"]) == 4
 
 
 class TestSourceMustBeUnderStagingRoot:
@@ -124,7 +126,7 @@ class TestSourceMustBeUnderStagingRoot:
             lambda _dests: None,
         )
 
-        exit_code = apply_preferences.main(["--protocol=2", str(src), str(dest)])
+        exit_code = apply_preferences.main([PROTOCOL_TOKEN, str(src), str(dest)])
 
         assert exit_code != 0
         assert not dest.exists()
@@ -154,7 +156,7 @@ class TestSourceMustNotBeSymlink:
             lambda _dests: None,
         )
 
-        exit_code = apply_preferences.main(["--protocol=2", str(link), str(dest)])
+        exit_code = apply_preferences.main([PROTOCOL_TOKEN, str(link), str(dest)])
 
         assert exit_code != 0
         assert not dest.exists()
@@ -178,11 +180,54 @@ class TestHappyPath:
             lambda _dests: None,
         )
 
-        exit_code = apply_preferences.main(["--protocol=2", str(src), str(dest)])
+        exit_code = apply_preferences.main([PROTOCOL_TOKEN, str(src), str(dest)])
 
         assert exit_code == 0
         assert dest.read_text(encoding="utf-8") == "LogVerbose yes\n"
         assert dest.stat().st_mode & 0o777 == 0o644
+
+    def test_parent_symlink_swap_uses_preflighted_canonical_destination(
+        self, monkeypatch, tmp_path
+    ):
+        _set_pkexec_env(monkeypatch)
+        staging = _make_staging(tmp_path)
+        source = _stage_file(staging, "clamd.conf", "LogVerbose yes\n")
+        allowed_dir = _make_allowed_dest_dir(tmp_path, "etc_clamav")
+        outside_dir = tmp_path / "outside"
+        outside_dir.mkdir()
+        argv_parent = tmp_path / "clamav-link"
+        argv_parent.symlink_to(allowed_dir, target_is_directory=True)
+        canonical_destination = allowed_dir / "clamd.conf"
+        outside_destination = outside_dir / "clamd.conf"
+
+        _patch_allowlist_to_tmp(monkeypatch, allowed_dir)
+        monkeypatch.setattr(apply_preferences, "_resolve_staging_root", lambda _uid: staging)
+        monkeypatch.setattr(
+            apply_preferences,
+            "_restart_units_for_destinations",
+            lambda _dests: None,
+        )
+        open_and_validate_source = apply_preferences._open_and_validate_source
+
+        def _swap_parent_after_source_preflight(source, expected_uid, staging_root):
+            source_fd = open_and_validate_source(source, expected_uid, staging_root)
+            argv_parent.unlink()
+            argv_parent.symlink_to(outside_dir, target_is_directory=True)
+            return source_fd
+
+        monkeypatch.setattr(
+            apply_preferences,
+            "_open_and_validate_source",
+            _swap_parent_after_source_preflight,
+        )
+
+        exit_code = apply_preferences.main(
+            [PROTOCOL_TOKEN, str(source), str(argv_parent / "clamd.conf")]
+        )
+
+        assert exit_code == 0
+        assert canonical_destination.read_text(encoding="utf-8") == "LogVerbose yes\n"
+        assert not outside_destination.exists()
 
 
 class TestAtomicityAcrossPairs:
@@ -208,7 +253,7 @@ class TestAtomicityAcrossPairs:
 
         exit_code = apply_preferences.main(
             [
-                "--protocol=2",
+                PROTOCOL_TOKEN,
                 str(src_a),
                 str(dest_a),
                 str(src_b),
@@ -218,6 +263,40 @@ class TestAtomicityAcrossPairs:
 
         # Whole invocation must fail; neither destination should exist.
         assert exit_code != 0
+        assert not dest_a.exists()
+        assert not dest_b.exists()
+
+    def test_second_pair_missing_source_is_rejected_before_first_write(
+        self, monkeypatch, tmp_path, capsys
+    ):
+        _set_pkexec_env(monkeypatch)
+        staging = _make_staging(tmp_path)
+        src_a = _stage_file(staging, "a.conf", "a-content\n")
+        missing_src = staging / "missing.conf"
+        dest_dir = _make_allowed_dest_dir(tmp_path, "etc_clamav")
+        dest_a = dest_dir / "a.conf"
+        dest_b = dest_dir / "b.conf"
+
+        _patch_allowlist_to_tmp(monkeypatch, dest_dir)
+        monkeypatch.setattr(apply_preferences, "_resolve_staging_root", lambda _uid: staging)
+        monkeypatch.setattr(
+            apply_preferences,
+            "_restart_units_for_destinations",
+            lambda _dests: None,
+        )
+
+        exit_code = apply_preferences.main(
+            [
+                PROTOCOL_TOKEN,
+                str(src_a),
+                str(dest_a),
+                str(missing_src),
+                str(dest_b),
+            ]
+        )
+
+        assert exit_code != 0
+        assert str(missing_src) in capsys.readouterr().err
         assert not dest_a.exists()
         assert not dest_b.exists()
 
@@ -250,7 +329,7 @@ class TestSourceUidMismatchRejected:
             lambda _dests: None,
         )
 
-        exit_code = apply_preferences.main(["--protocol=2", str(src), str(dest)])
+        exit_code = apply_preferences.main([PROTOCOL_TOKEN, str(src), str(dest)])
 
         assert exit_code != 0
         assert not dest.exists()
@@ -276,7 +355,7 @@ class TestStagingRootValidation:
             lambda _dests: None,
         )
 
-        exit_code = apply_preferences.main(["--protocol=2", str(src), str(dest)])
+        exit_code = apply_preferences.main([PROTOCOL_TOKEN, str(src), str(dest)])
 
         assert exit_code != 0
         assert not dest.exists()

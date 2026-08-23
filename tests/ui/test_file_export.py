@@ -12,10 +12,44 @@ Tests cover:
 - Pre-defined filters (TEXT_FILTER, CSV_FILTER, JSON_FILTER)
 """
 
+import contextlib
 import sys
 from unittest import mock
 
 import pytest
+
+
+@contextlib.contextmanager
+def _sync_thread_and_idle():
+    """Run the worker thread synchronously and dispatch GLib.idle_add inline.
+
+    `src/ui/file_export.py` offloads the blocking file write to a
+    ``threading.Thread`` and marshals the resulting toast back via
+    ``GLib.idle_add``. In tests both are no-ops (the mocked GLib never runs the
+    callback and a real daemon thread races the assertions), so this context
+    manager makes the flow deterministic: the patched ``Thread.start`` runs the
+    target inline, and the patched ``GLib.idle_add`` invokes its callback
+    immediately. This is the project's established pattern for threaded GTK
+    code (see tests/ui/test_scan_view.py and tests/integration/test_tray_integration.py).
+    """
+    import src.ui.file_export as fe
+
+    class _SyncThread:
+        def __init__(self, target, args=(), kwargs=None, daemon=False):
+            self._t, self._a, self._k = target, args, kwargs or {}
+
+        def start(self):
+            self._t(*self._a, **self._k)
+
+        def join(self):
+            pass
+
+    idle = mock.MagicMock(side_effect=lambda fn, *a: fn(*a))
+    with (
+        mock.patch.object(fe.threading, "Thread", _SyncThread),
+        mock.patch.object(fe.GLib, "idle_add", idle),
+    ):
+        yield
 
 
 @pytest.fixture
@@ -294,7 +328,8 @@ class TestFileExportHelperFileSelected:
             content_generator=lambda: "Test content here",
         )
 
-        helper._write_to_file(str(test_file))
+        with _sync_thread_and_idle():
+            helper._write_to_file(str(test_file))
 
         assert test_file.exists()
         assert test_file.read_text() == "Test content here"
@@ -326,7 +361,8 @@ class TestFileExportHelperFileSelected:
             content_generator=lambda: "CSV content",
         )
 
-        helper._write_to_file(str(test_file))
+        with _sync_thread_and_idle():
+            helper._write_to_file(str(test_file))
 
         # File should be created with .csv extension
         expected_file = tmp_path / "test.csv"
@@ -410,7 +446,8 @@ class TestFileExportHelperFileSelected:
         )
         helper._show_toast = mock.MagicMock()
 
-        helper._write_to_file(str(test_file))
+        with _sync_thread_and_idle():
+            helper._write_to_file(str(test_file))
 
         helper._show_toast.assert_called_once()
         assert "test.txt" in helper._show_toast.call_args[0][0]
@@ -444,7 +481,8 @@ class TestFileExportHelperFileSelected:
         )
         helper._show_toast = mock.MagicMock()
 
-        helper._write_to_file(str(test_file))
+        with _sync_thread_and_idle():
+            helper._write_to_file(str(test_file))
 
         helper._show_toast.assert_called_once_with("Exported 5 items successfully!")
 
@@ -470,8 +508,7 @@ class TestFileExportHelperErrorHandling:
         )
         helper._show_toast = mock.MagicMock()
 
-        # Mock open to raise PermissionError
-        with mock.patch("builtins.open", side_effect=PermissionError()):
+        with _sync_thread_and_idle(), mock.patch("builtins.open", side_effect=PermissionError()):
             helper._write_to_file("/root/protected.txt")
 
         helper._show_toast.assert_called_once()
@@ -497,7 +534,7 @@ class TestFileExportHelperErrorHandling:
         helper._show_toast = mock.MagicMock()
 
         # Mock open to raise OSError
-        with mock.patch("builtins.open", side_effect=OSError("Disk full")):
+        with _sync_thread_and_idle(), mock.patch("builtins.open", side_effect=OSError("Disk full")):
             helper._write_to_file("/some/path.txt")
 
         helper._show_toast.assert_called_once()

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from .utils import is_flatpak, which_host_command, wrap_host_command
+from .utils import get_clean_env, is_flatpak, which_host_command, wrap_host_command
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +155,7 @@ def _check_systemd_available() -> bool:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
             # systemctl --user status returns 0 even if no units
             # It returns non-zero if user session isn't available
@@ -334,6 +335,7 @@ class Scheduler:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode == 0:
@@ -351,6 +353,7 @@ class Scheduler:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=get_clean_env(),
                 )
 
                 if next_result.returncode == 0:
@@ -381,6 +384,7 @@ class Scheduler:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode == 0:
@@ -547,9 +551,9 @@ class Scheduler:
                 return False
         return path.exists()
 
-    def _get_cli_command_path(self) -> str | None:
+    def _get_cli_command_path(self) -> list[str] | None:
         """
-        Get the path to the clamui-scheduled-scan CLI command.
+        Get the command tokens to invoke the clamui-scheduled-scan CLI.
 
         Searches in order:
         0. Flatpak: use 'flatpak run <app-id>' command
@@ -558,36 +562,38 @@ class Scheduler:
         3. Fallback to module execution with venv's Python
 
         Returns:
-            Path to the CLI command, or None if not found
+            Command as a list of argv tokens, or None if not found. Tokens
+            are kept unsplit so an executable path containing spaces or
+            quotes survives intact (issue #150).
         """
         # 0. In Flatpak, use 'flatpak run --command=' to invoke the CLI from host systemd
         if is_flatpak():
             app_id = os.environ.get("FLATPAK_ID", "io.github.linx_systems.ClamUI")
-            return f"flatpak run --command=clamui-scheduled-scan {app_id}"
+            return ["flatpak", "run", "--command=clamui-scheduled-scan", app_id]
 
         # 1. First try to find it in PATH
         cli_path = which_host_command("clamui-scheduled-scan")
         if cli_path:
-            return cli_path
+            return [cli_path]
 
         # 2. Check well-known venv installation locations for the entry point
         for venv_path in self._get_venv_paths():
             cli_bin = venv_path / "bin" / "clamui-scheduled-scan"
             if self._check_path_exists(cli_bin):
-                return str(cli_bin)
+                return [str(cli_bin)]
 
         # 3. Check well-known venv locations for Python to run the module
         for venv_path in self._get_venv_paths():
             python_bin = venv_path / "bin" / "python"
             if self._check_path_exists(python_bin):
                 # Use the venv's Python with the correct module path
-                return f"{python_bin} -m src.cli.scheduled_scan"
+                return [str(python_bin), "-m", "src.cli.scheduled_scan"]
 
         # 4. Last resort: System Python with correct module path
         # (This likely won't work unless installed system-wide via pip)
         python_path = which_host_command("python3") or which_host_command("python")
         if python_path:
-            return f"{python_path} -m src.cli.scheduled_scan"
+            return [python_path, "-m", "src.cli.scheduled_scan"]
 
         return None
 
@@ -682,9 +688,9 @@ class Scheduler:
             # Ensure systemd user directory exists
             self._systemd_dir.mkdir(parents=True, exist_ok=True)
 
-            # Get CLI command path
-            cli_path = self._get_cli_command_path()
-            if not cli_path:
+            # Get CLI command tokens
+            cli_command = self._get_cli_command_path()
+            if not cli_command:
                 return (False, "Could not find clamui-scheduled-scan command")
 
             # Generate OnCalendar specification
@@ -692,7 +698,7 @@ class Scheduler:
 
             # Create service file
             service_content = self._generate_service_file(
-                cli_path, targets, skip_on_battery, auto_quarantine
+                cli_command, targets, skip_on_battery, auto_quarantine
             )
             service_path = self._systemd_dir / f"{self.SERVICE_NAME}.service"
             service_path.write_text(service_content, encoding="utf-8")
@@ -707,6 +713,7 @@ class Scheduler:
                 wrap_host_command(["systemctl", "--user", "daemon-reload"]),
                 capture_output=True,
                 timeout=10,
+                env=get_clean_env(),
             )
 
             # Enable and start timer
@@ -723,6 +730,7 @@ class Scheduler:
                 capture_output=True,
                 text=True,
                 timeout=10,
+                env=get_clean_env(),
             )
 
             if result.returncode != 0:
@@ -741,7 +749,7 @@ class Scheduler:
 
     def _generate_service_file(
         self,
-        cli_path: str,
+        cli_command: list[str],
         targets: list[str],
         skip_on_battery: bool,
         auto_quarantine: bool,
@@ -749,32 +757,44 @@ class Scheduler:
         """
         Generate systemd service file content.
 
+        Args:
+            cli_command: CLI invocation as a list of argv tokens (e.g.
+                ['flatpak', 'run', ...]).
+            targets: List of paths to scan
+            skip_on_battery: Skip scan when on battery power
+            auto_quarantine: Automatically quarantine threats
+
         Returns:
             Service file content as string
         """
-        # Build command with options
-        # cli_path may be a multi-token command (e.g. 'flatpak run ...' or
-        # '<python> -m src.cli.scheduled_scan'); quote each token separately
-        # so it stays an executable ExecStart rather than one quoted blob.
-        # shlex.quote() on each token still prevents injection via malicious paths.
-        exec_cmd = " ".join(shlex.quote(tok) for tok in shlex.split(cli_path))
-        if skip_on_battery:
-            exec_cmd += " --skip-on-battery"
-        if auto_quarantine:
-            exec_cmd += " --auto-quarantine"
-        for target in targets:
-            exec_cmd += f" --target {shlex.quote(target)}"
+        # Quote each argv token separately so multi-token commands (e.g.
+        # 'flatpak run ...') stay an executable ExecStart rather than one
+        # quoted blob, while shlex.quote() still prevents injection via
+        # malicious paths.
+        exec_cmd = " ".join(shlex.quote(tok) for tok in cli_command)
 
         # Neutralize systemd environment-variable expansion in user-supplied
         # paths.  Unlike a shell, systemd expands "${VAR}" (and a standalone
         # "$VAR" argument) even inside single quotes -- shlex.quote() does NOT
         # protect against this -- so a target such as "/data/${HOME}/x" would
         # be silently rewritten to a wrong/empty path at scan time.  The
-        # documented escape for a literal dollar sign is "$$".
-        exec_cmd = exec_cmd.replace("$", "$$")
+        # documented escape for a literal dollar sign is "$$".  systemd does
+        # NOT variable-expand the executable word, so only the argument
+        # portion is escaped; doubling '$' in argv[0] would corrupt an
+        # executable path containing a literal '$'.
+        arg_str = ""
+        if skip_on_battery:
+            arg_str += " --skip-on-battery"
+        if auto_quarantine:
+            arg_str += " --auto-quarantine"
+        for target in targets:
+            arg_str += f" --target {shlex.quote(target)}"
+        exec_cmd += arg_str.replace("$", "$$")
 
         # Escape literal '%' so systemd does not interpret it as a specifier
-        # (e.g. legitimate directory names may contain '%').
+        # (e.g. legitimate directory names may contain '%').  Specifier
+        # expansion covers the whole line including the executable word, so
+        # this stays whole-line.
         exec_cmd = exec_cmd.replace("%", "%%")
 
         return f"""[Unit]
@@ -830,20 +850,20 @@ WantedBy=timers.target
             Tuple of (success, error_message)
         """
         try:
-            # Get CLI command path
-            cli_path = self._get_cli_command_path()
-            if not cli_path:
+            # Get CLI command tokens
+            cli_command = self._get_cli_command_path()
+            if not cli_command:
                 return (False, "Could not find clamui-scheduled-scan command")
 
             # Generate cron time specification
             cron_time = self._generate_crontab_entry(frequency, time, day_of_week, day_of_month)
 
             # Build command
-            # cli_path may be a multi-token command (e.g. 'flatpak run ...' or
-            # '<python> -m src.cli.scheduled_scan'); quote each token separately
-            # so it stays an executable command rather than one quoted blob.
-            # shlex.quote() on each token still prevents injection via malicious paths.
-            cron_cmd = " ".join(shlex.quote(tok) for tok in shlex.split(cli_path))
+            # Quote each argv token separately so multi-token commands (e.g.
+            # 'flatpak run ...') stay an executable command rather than one
+            # quoted blob, while shlex.quote() still prevents injection via
+            # malicious paths.
+            cron_cmd = " ".join(shlex.quote(tok) for tok in cli_command)
             if skip_on_battery:
                 cron_cmd += " --skip-on-battery"
             if auto_quarantine:
@@ -864,6 +884,7 @@ WantedBy=timers.target
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode == 0:
@@ -910,6 +931,7 @@ WantedBy=timers.target
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode != 0:
@@ -964,6 +986,7 @@ WantedBy=timers.target
                 ),
                 capture_output=True,
                 timeout=10,
+                env=get_clean_env(),
             )
 
             # Remove files
@@ -980,6 +1003,7 @@ WantedBy=timers.target
                 wrap_host_command(["systemctl", "--user", "daemon-reload"]),
                 capture_output=True,
                 timeout=10,
+                env=get_clean_env(),
             )
 
             return (True, None)
@@ -1007,6 +1031,7 @@ WantedBy=timers.target
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode != 0:
@@ -1045,11 +1070,15 @@ WantedBy=timers.target
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=get_clean_env(),
                 )
             else:
                 # Remove crontab entirely if empty
                 result = subprocess.run(
-                    wrap_host_command(["crontab", "-r"]), capture_output=True, timeout=5
+                    wrap_host_command(["crontab", "-r"]),
+                    capture_output=True,
+                    timeout=5,
+                    env=get_clean_env(),
                 )
 
             if result.returncode != 0:

@@ -17,6 +17,8 @@ Supports GTK 4.6+ with automatic fallback:
 """
 
 import logging
+import os
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -186,8 +188,8 @@ class FileExportHelper:
             self._dialog_title,
             window,
             Gtk.FileChooserAction.SAVE,
-            "_Save",
-            "_Cancel",
+            _("_Save"),
+            _("_Cancel"),
         )
         dialog.set_current_name(default_name)
         dialog.add_filter(gtk_filter)
@@ -212,8 +214,10 @@ class FileExportHelper:
         """
         Write content to the selected file.
 
-        Handles extension enforcement, content generation, file writing,
-        and toast notifications.
+        Content generation runs on the GTK main thread (it may read GTK
+        widgets such as a ``Gtk.TextBuffer``). Only the blocking file
+        ``open``/``write`` is offloaded to a worker thread; the resulting
+        success/failure toast is marshalled back via ``GLib.idle_add``.
 
         Args:
             file_path: Path to write to, or None if invalid selection
@@ -223,34 +227,15 @@ class FileExportHelper:
             return
 
         try:
-            # Ensure correct extension
+            # Ensure correct extension (cheap, main-thread safe)
             extension = self._file_filter.extension
             if not file_path.endswith(f".{extension}"):
                 file_path += f".{extension}"
 
-            # Generate content
+            # Generate content on the main thread. Some callers pass a
+            # generator that reads a Gtk.TextBuffer (e.g. logs_view), which is
+            # only safe on the main loop, so this must NOT move to a worker.
             content = self._content_generator()
-
-            # Write to file
-            with open(file_path, "w", encoding="utf-8", newline="") as f:
-                f.write(content)
-
-            # Show success feedback
-            import os
-
-            filename = os.path.basename(file_path)
-            if self._success_message:
-                message = self._success_message
-            else:
-                message = _("Exported to {filename}").format(filename=filename)
-            self._show_toast(message)
-
-        except PermissionError:
-            self._show_toast(
-                _("Permission denied - cannot write to selected location"), is_error=True
-            )
-        except OSError as e:
-            self._show_toast(_("Error writing file: {error}").format(error=str(e)), is_error=True)
         except Exception as e:
             # Content generation (e.g. CSV/JSON formatting) or any other
             # unexpected failure must not propagate out of the async file
@@ -258,6 +243,37 @@ class FileExportHelper:
             # user via a toast instead of failing silently.
             logger.exception("Unexpected error during file export")
             self._show_toast(_("Error exporting file: {error}").format(error=str(e)), is_error=True)
+            return
+
+        # Build all user-facing strings on the main thread (gettext and
+        # os.path.basename belong on the main loop, not a worker thread).
+        # The nested worker captures these via closure and only applies pure
+        # string ``.format()`` to the pre-translated templates.
+        filename = os.path.basename(file_path)
+        if self._success_message:
+            success_message = self._success_message
+        else:
+            success_message = _("Exported to {filename}").format(filename=filename)
+        permission_message = _("Permission denied - cannot write to selected location")
+        write_error_template = _("Error writing file: {error}")
+        export_error_template = _("Error exporting file: {error}")
+
+        def _write_in_thread(path: str, data: str) -> None:
+            """Perform the blocking file write off the GTK main loop."""
+            try:
+                with open(path, "w", encoding="utf-8", newline="") as f:
+                    f.write(data)
+                GLib.idle_add(self._show_toast, success_message)
+            except PermissionError:
+                GLib.idle_add(self._show_toast, permission_message, True)
+            except OSError as e:
+                GLib.idle_add(self._show_toast, write_error_template.format(error=str(e)), True)
+            except Exception as e:
+                logger.exception("Unexpected error during file write")
+                GLib.idle_add(self._show_toast, export_error_template.format(error=str(e)), True)
+
+        thread = threading.Thread(target=_write_in_thread, args=(file_path, content), daemon=True)
+        thread.start()
 
     def _show_toast(self, message: str, is_error: bool = False) -> None:
         """

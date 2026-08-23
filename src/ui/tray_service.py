@@ -52,6 +52,11 @@ except (ValueError, ImportError) as e:
     logger.error(f"Failed to load GIO D-Bus: {e}")
     DBUS_AVAILABLE = False
 
+if not DBUS_AVAILABLE:
+    sys.stdout.write(json.dumps({"event": "error", "message": "GIO D-Bus not available"}) + "\n")
+    sys.stdout.flush()
+    sys.exit(1)
+
 # Try to load libdbusmenu for menu export
 DBUSMENU_AVAILABLE = False
 Dbusmenu = None
@@ -63,11 +68,6 @@ try:
     logger.info("libdbusmenu available for menu export")
 except (ValueError, ImportError) as e:
     logger.info(f"libdbusmenu not available, menu will not be shown: {e}")
-
-if not DBUS_AVAILABLE:
-    sys.stdout.write(json.dumps({"event": "error", "message": "GIO D-Bus not available"}) + "\n")
-    sys.stdout.flush()
-    sys.exit(1)
 
 # Initialize i18n for this subprocess
 # Uses the same dual-import strategy as tray_icons below:

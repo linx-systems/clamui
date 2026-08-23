@@ -19,6 +19,7 @@ from gi.repository import Adw, GLib, Gtk
 
 from ...core.i18n import _, ngettext
 from ...core.scanner import ScanProgress
+from ..compat import safe_set_subtitle_lines
 from ..utils import resolve_icon_name
 
 
@@ -70,7 +71,7 @@ class ScanProgressWidget(Gtk.Box):
         self._current_file_row = Adw.ActionRow()
         self._current_file_row.set_title(_("Currently scanning"))
         self._current_file_row.set_subtitle(_("Waiting for scan data..."))
-        self._current_file_row.set_subtitle_lines(1)
+        safe_set_subtitle_lines(self._current_file_row, 1)
         self._file_spinner = Gtk.Spinner()
         self._file_spinner.set_spinning(True)
         self._current_file_row.add_prefix(self._file_spinner)
@@ -203,11 +204,14 @@ class ScanProgressWidget(Gtk.Box):
             )
             self._stats_row.set_subtitle("")
 
-        # Append new threats
+        # Append new threats. Bump the counter per row so the group title
+        # counts correctly when several threats arrive in one update, then
+        # sync to the authoritative count (infected_files can lag it).
         if progress.infected_count > self._live_threat_count:
             threats = progress.infected_threats or {}
             for file_path in progress.infected_files[self._live_threat_count :]:
                 threat_name = threats.get(file_path, _("Unknown threat"))
+                self._live_threat_count += 1
                 self._append_threat_row(file_path, threat_name)
             self._live_threat_count = progress.infected_count
 
@@ -232,8 +236,8 @@ class ScanProgressWidget(Gtk.Box):
             ngettext(
                 "Threats Detected ({n})",
                 "Threats Detected ({n})",
-                self._live_threat_count + 1,
-            ).format(n=self._live_threat_count + 1)
+                self._live_threat_count,
+            ).format(n=self._live_threat_count)
         )
         self._threat_group.set_visible(True)
 

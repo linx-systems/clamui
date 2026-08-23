@@ -615,14 +615,16 @@ class TestLogsViewExportDaemonLogs:
 
     def test_export_daemon_logs_skips_placeholder(self, logs_view_class):
         """Test that export skips placeholder text."""
+        placeholder = (
+            "Daemon logs will appear here.\n\nClick the play button to start live updates."
+        )
         view = object.__new__(logs_view_class)
         view._daemon_text = mock.MagicMock()
+        view._daemon_placeholder_text = placeholder
         mock_buffer = mock.MagicMock()
         mock_buffer.get_start_iter.return_value = mock.MagicMock()
         mock_buffer.get_end_iter.return_value = mock.MagicMock()
-        mock_buffer.get_text.return_value = (
-            "Daemon logs will appear here.\n\nClick the play button to start live updates."
-        )
+        mock_buffer.get_text.return_value = placeholder
         view._daemon_text.get_buffer.return_value = mock_buffer
         view.get_root = mock.MagicMock(return_value=None)
 

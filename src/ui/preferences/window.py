@@ -8,12 +8,14 @@ GNOME Settings-style sidebar navigation using Adw.Leaflet.
 """
 
 import logging
+import threading
+from collections.abc import Callable
 
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, GLib, Gtk
 
 from ...core.clamav_config import parse_config
 from ...core.clamav_detection import (
@@ -25,7 +27,7 @@ from ...core.flatpak import is_flatpak
 from ...core.i18n import N_, _
 from ...core.scheduler import Scheduler
 from ..compat import create_toolbar_view
-from ..utils import resolve_icon_name
+from ..utils import enable_escape_to_close, resolve_icon_name
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +147,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         self.set_title(_("Preferences"))
         self.set_default_size(850, 600)
         self.set_modal(True)
+        enable_escape_to_close(self)
 
         # Store references to form widgets for later access
         self._freshclam_widgets = {}
@@ -152,7 +155,11 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         self._scheduled_widgets = {}
         self._onaccess_widgets = {}
 
-        # Track if clamd.conf exists
+        # Track if clamd.conf exists. Resolved asynchronously in
+        # _resolve_config_paths_background(); until that completes, pages
+        # created lazily must tolerate clamd being treated as unavailable
+        # (Scanner/OnAccess show a "not found" status, then the idle_add
+        # applier rebuilds them once availability is known).
         self._clamd_available = False
 
         # Initialize scheduler for scheduled scans
@@ -166,32 +173,24 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         self._freshclam_load_error = None
         self._clamd_load_error = None
 
-        # Default config file paths. In Flatpak, ClamAV runs on the host, so
-        # preferences always point at saved or detected host configuration.
-        if is_flatpak():
-            logger.info("Running in Flatpak, resolving host-aware config paths")
-            detected = resolve_freshclam_conf_path(self._settings_manager)
-            if detected:
-                logger.info("Using host freshclam config: %s", detected)
-                self._freshclam_conf_path = detected
-            else:
-                logger.info("No host freshclam config detected; using Debian/Ubuntu default path")
-                self._freshclam_conf_path = "/etc/clamav/freshclam.conf"
-            # Auto-detect the host clamd path for config editing.
-            self._clamd_conf_path = (
-                resolve_clamd_conf_path(self._settings_manager) or "/etc/clamav/clamd.conf"
-            )
-        else:
-            self._freshclam_conf_path = (
-                resolve_freshclam_conf_path(self._settings_manager) or "/etc/clamav/freshclam.conf"
-            )
-            self._clamd_conf_path = (
-                resolve_clamd_conf_path(self._settings_manager) or "/etc/clamav/clamd.conf"
-            )
+        # Default config file paths. The authoritative paths are resolved in
+        # _resolve_config_paths_background() (host I/O, moved off the GTK main
+        # loop — see U2). Seed with the distribution defaults so any page
+        # created before the background load finishes has a sane placeholder
+        # path to display; the applier corrects these after resolution.
+        self._freshclam_conf_path = "/etc/clamav/freshclam.conf"
+        self._clamd_conf_path = "/etc/clamav/clamd.conf"
 
-        # Check if clamd.conf exists
-        if config_file_exists(self._clamd_conf_path):
-            self._clamd_available = True
+        # Whether the background config resolution + load has finished and
+        # been applied on the main thread. Pages created after this is True
+        # build their config-backed groups immediately; pages created before
+        # are repopulated/rebuilt by _apply_loaded_configs().
+        self._configs_loaded = False
+
+        # Reference to the SavePage instance (created lazily). The applier
+        # syncs the path/availability snapshot it captured at construction
+        # once the background load resolves the real values.
+        self._save_page = None
 
         # Saving state (used by SavePage)
         self._is_saving = False
@@ -205,7 +204,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         self._sidebar_list = None
 
         # Lazy page creation: factories for deferred page construction
-        self._page_factories: dict[str, callable] = {
+        self._page_factories: dict[str, Callable[[], Adw.PreferencesPage]] = {
             "exclusions": self._create_exclusions_page,
             "database": self._create_database_page,
             "scanner": self._create_scanner_page,
@@ -224,8 +223,15 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         # Set up the UI
         self._setup_ui()
 
-        # Load configurations and populate form fields
-        self._load_configs()
+        # Resolve host config paths and load configs off the GTK main loop.
+        # Under Flatpak the resolution shells out via flatpak-spawn --host
+        # (config_file_exists timeout=5s, read_host_file timeout=10s) which
+        # would stall the UI before the window maps. The worker resolves
+        # paths, checks clamd availability, parses both configs, then marshals
+        # the results back here via GLib.idle_add so widget population happens
+        # on the main thread. Static widget construction above is synchronous.
+        thread = threading.Thread(target=self._resolve_config_paths_background, daemon=True)
+        thread.start()
 
         # Populate scheduled scan fields from saved settings
         self._populate_scheduled_fields()
@@ -459,6 +465,10 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
             self._onaccess_widgets,
             self._scheduled_widgets,
         )
+        # Keep a reference so _apply_loaded_configs() can sync the
+        # path/availability snapshot captured here after the background
+        # config resolution finishes.
+        self._save_page = save_page_instance
         page = save_page_instance.create_page()
         self._add_page_to_stack("save", page)
 
@@ -550,12 +560,62 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         """Handle back button click to return to sidebar."""
         self._leaflet.set_visible_child_name("sidebar")
 
-    def _load_configs(self):
+    def _resolve_config_paths_background(self):
         """
-        Load ClamAV configuration files and populate form fields.
+        Resolve host config paths and load configs on a worker thread.
 
-        Loads both freshclam.conf and clamd.conf (if available),
-        parses them, and updates the UI with current values.
+        Runs the blocking host I/O (path resolution via
+        resolve_*_conf_path/config_file_exists, and parse_config reads — both
+        of which shell out through ``flatpak-spawn --host`` under Flatpak) off
+        the GTK main loop, then marshals the results back to the main thread
+        via ``GLib.idle_add(self._apply_loaded_configs)`` so all widget
+        population happens on the main thread. Never touches GTK widgets
+        directly. See U2.
+        """
+        try:
+            # Resolve config paths. is_flatpak() is a cached, thread-safe
+            # filesystem check; resolve_*_conf_path may subprocess out to the
+            # host under Flatpak. Both are safe to call off the main thread.
+            if is_flatpak():
+                logger.info("Running in Flatpak, resolving host-aware config paths")
+                detected_fc = resolve_freshclam_conf_path(self._settings_manager)
+                if detected_fc:
+                    logger.info("Using host freshclam config: %s", detected_fc)
+                    self._freshclam_conf_path = detected_fc
+                else:
+                    logger.info(
+                        "No host freshclam config detected; using Debian/Ubuntu default path"
+                    )
+                    self._freshclam_conf_path = "/etc/clamav/freshclam.conf"
+                detected_clamd = resolve_clamd_conf_path(self._settings_manager)
+                self._clamd_conf_path = detected_clamd or "/etc/clamav/clamd.conf"
+            else:
+                self._freshclam_conf_path = (
+                    resolve_freshclam_conf_path(self._settings_manager)
+                    or "/etc/clamav/freshclam.conf"
+                )
+                self._clamd_conf_path = (
+                    resolve_clamd_conf_path(self._settings_manager) or "/etc/clamav/clamd.conf"
+                )
+
+            # Check if clamd.conf exists (subprocess under Flatpak).
+            self._clamd_available = config_file_exists(self._clamd_conf_path)
+
+            # Parse both configs (host file reads). Pure I/O — no widgets.
+            self._load_configs_io()
+        except Exception:
+            logger.exception("Background config resolution/load failed")
+        finally:
+            GLib.idle_add(self._apply_loaded_configs)
+
+    def _load_configs_io(self):
+        """
+        Parse ClamAV configuration files without touching widgets.
+
+        Worker-thread counterpart of the old synchronous ``_load_configs``:
+        performs only the ``parse_config`` reads and records load errors on
+        ``self``. Widget population is deferred to ``_apply_loaded_configs``
+        on the main thread. Safe to call off the GTK main loop.
         """
         # Load freshclam.conf
         logger.debug("Loading freshclam config from: %s", self._freshclam_conf_path)
@@ -574,7 +634,6 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
                 )
                 logger.info("Loaded freshclam.conf with %d options", num_options)
                 self._freshclam_load_error = None
-            self._populate_freshclam_fields()
         except Exception as e:
             logger.exception("Unexpected error loading freshclam.conf: %s", e)
             self._freshclam_load_error = str(e)
@@ -597,11 +656,108 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
                     )
                     logger.info("Loaded clamd.conf with %d options", num_options)
                     self._clamd_load_error = None
-                self._populate_clamd_fields()
-                self._populate_onaccess_fields()
             except Exception as e:
                 logger.exception("Unexpected error loading clamd.conf: %s", e)
                 self._clamd_load_error = str(e)
+
+    def _apply_loaded_configs(self):
+        """
+        Apply background-loaded config results to the UI on the main thread.
+
+        Called via ``GLib.idle_add`` from ``_resolve_config_paths_background``
+        after path resolution and ``_load_configs_io`` complete. Rebuilds any
+        config-backed page that was created before ``_clamd_available`` was
+        known (Scanner/OnAccess build their field groups only when clamd is
+        available), syncs the SavePage path/availability snapshot, populates
+        all config-backed fields, and surfaces load errors. See U2.
+        """
+        # Scanner & On-Access pages build their config field groups only when
+        # clamd_available is True. If the user navigated to either before the
+        # background load finished, the page was built with the False default
+        # (showing a "not found" status) and lacks the widgets populate_fields
+        # fills. Rebuild them now so the real config groups exist.
+        if self._clamd_available:
+            for page_id in ("scanner", "onaccess"):
+                if page_id in self._created_pages:
+                    self._rebuild_page(page_id)
+        # The Database (freshclam) page bakes its path-row subtitle at build
+        # time from the then-seeded path; rebuild it (independent of clamd) so a
+        # resolved non-default freshclam path is reflected. See U2 review.
+        if "database" in self._created_pages:
+            self._rebuild_page("database")
+
+        # Sync the SavePage snapshot of paths/availability it captured at
+        # construction with the now-resolved values.
+        if self._save_page is not None:
+            self._save_page._freshclam_conf_path = self._freshclam_conf_path
+            self._save_page._clamd_conf_path = self._clamd_conf_path
+            self._save_page._clamd_available = self._clamd_available
+
+        # Populate config-backed fields for any already-created pages. The
+        # _populate_*_fields() helpers guard on page_id in _created_pages and
+        # no-op when the config is absent, so they are safe unconditionally.
+        self._populate_freshclam_fields()
+        self._populate_clamd_fields()
+        self._populate_onaccess_fields()
+        self._notify_load_errors()
+
+        self._configs_loaded = True
+        return False  # Don't repeat (GLib.idle_add one-shot)
+
+    def _rebuild_page(self, page_id: str):
+        """
+        Rebuild a lazily-created preference page in the stack.
+
+        Removes the existing clamp child for ``page_id`` from the stack,
+        clears the page's widget dict, and re-runs its factory so the page is
+        reconstructed with the now-current config state (e.g. clamd becoming
+        available after the background load). Used by ``_apply_loaded_configs``.
+        """
+        # Removing the visible child from a Gtk.Stack unsets visible-child,
+        # and add_named() does not make the new child visible, so capture
+        # visibility here and restore it after the factory re-adds the page.
+        was_visible = self._stack.get_visible_child_name() == page_id
+        clamp = self._stack.get_child_by_name(page_id)
+        if clamp is not None:
+            self._stack.remove(clamp)
+        # Drop stale widget references so populate_fields doesn't touch
+        # widgets that no longer belong to the rebuilt page.
+        if page_id == "scanner":
+            self._clamd_widgets.clear()
+        elif page_id == "onaccess":
+            self._onaccess_widgets.clear()
+        elif page_id == "database":
+            self._freshclam_widgets.clear()
+        # Re-run the factory (it re-adds the page to the stack) and keep the
+        # page marked created so _ensure_page_created doesn't double-build.
+        factory = self._page_factories.get(page_id)
+        if factory is not None:
+            factory()
+        if was_visible:
+            self._stack.set_visible_child_name(page_id)
+
+    def _notify_load_errors(self):
+        """
+        Surface config load failures to the user.
+
+        _load_configs()/_reload_*_config() record parse errors in
+        _freshclam_load_error/_clamd_load_error; without a visible signal
+        the user silently edits an empty form and can save wrong values
+        over their real configuration.
+        """
+        if not hasattr(self, "_notified_load_errors"):
+            self._notified_load_errors = set()
+        for filename, error in (
+            ("freshclam.conf", self._freshclam_load_error),
+            ("clamd.conf", self._clamd_load_error),
+        ):
+            if error and (filename, error) not in self._notified_load_errors:
+                self._notified_load_errors.add((filename, error))
+                toast = Adw.Toast.new(
+                    _("Failed to load {file}: {error}").format(file=filename, error=error)
+                )
+                toast.set_timeout(0)  # persistent until dismissed
+                self.add_toast(toast)
 
     def _reload_clamd_config(self):
         """
@@ -623,6 +779,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         except Exception as e:
             logger.exception("Unexpected error reloading clamd.conf: %s", e)
             self._clamd_load_error = str(e)
+        self._notify_load_errors()
 
     def _reload_freshclam_config(self):
         """
@@ -643,6 +800,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         except Exception as e:
             logger.exception("Unexpected error reloading freshclam.conf: %s", e)
             self._freshclam_load_error = str(e)
+        self._notify_load_errors()
 
     def _populate_freshclam_fields(self):
         """

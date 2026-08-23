@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -29,9 +30,9 @@ from src.core.privileged_paths import (
 class TestProtocolVersion:
     """The protocol version is part of the security contract."""
 
-    def test_protocol_version_is_two(self):
-        """Helper rejects callers that don't pass --protocol=2."""
-        assert PROTOCOL_VERSION == 2
+    def test_protocol_version_is_three(self):
+        """Helper rejects callers that don't pass --protocol=3."""
+        assert PROTOCOL_VERSION == 3
 
 
 class TestAllowlistShape:
@@ -47,16 +48,32 @@ class TestAllowlistShape:
 
 
 class TestStagingRootForUid:
-    """staging_root_for_uid() returns the per-user runtime path."""
+    """staging_root_for_uid() returns the passwd-home-derived staging root.
 
-    def test_returns_per_user_runtime_path(self):
-        assert staging_root_for_uid(1000) == Path("/run/user/1000/clamui-staging")
+    The canonical root is ``<passwd-home>/.cache/clamui/privileged-staging``:
+    a host-visible path inside a Flatpak sandbox, derived from the passwd
+    database (``pwd.getpwuid``) and never from ``$HOME`` or ``/run/user``.
+    Native and Flatpak share this single root so the privileged helper can
+    read the staged files on the host.
+    """
 
-    def test_does_not_create_directory(self, tmp_path, monkeypatch):
-        """The function is pure; it must not have I/O side effects."""
-        # Implementation hard-codes /run/user/<uid>; just confirm no exception.
-        result = staging_root_for_uid(424242)
-        assert not result.exists()
+    def test_returns_passwd_home_cache_root(self, monkeypatch, tmp_path):
+        fake_home = tmp_path / "home"
+        monkeypatch.setattr("pwd.getpwuid", lambda _uid: mock.Mock(pw_dir=str(fake_home)))
+
+        assert staging_root_for_uid(1000) == (
+            fake_home / ".cache" / "clamui" / "privileged-staging"
+        )
+
+    def test_ignores_HOME_env_var(self, monkeypatch, tmp_path):
+        """The root must come from the passwd database, not ``$HOME``."""
+        fake_home = tmp_path / "home"
+        monkeypatch.setattr("pwd.getpwuid", lambda _uid: mock.Mock(pw_dir=str(fake_home)))
+        monkeypatch.setenv("HOME", str(tmp_path / "wrong-home"))
+
+        assert staging_root_for_uid(1000) == (
+            fake_home / ".cache" / "clamui" / "privileged-staging"
+        )
 
 
 class TestValidateDestination:
@@ -64,11 +81,12 @@ class TestValidateDestination:
 
     def test_accepts_each_allowed_file(self):
         for dest in ALLOWED_DEST_FILES:
-            validate_destination(dest)  # must not raise
+            assert validate_destination(dest) == dest
 
     def test_accepts_files_directly_under_each_allowed_dir(self):
         for parent in ALLOWED_DEST_DIRS:
-            validate_destination(parent / "foo.conf")
+            destination = parent / "foo.conf"
+            assert validate_destination(destination) == destination
 
     def test_rejects_etc_passwd(self):
         with pytest.raises(ValueError):
@@ -103,6 +121,16 @@ class TestValidateDestination:
     def test_rejects_home_directory(self):
         with pytest.raises(ValueError):
             validate_destination(Path("/home/user/.config/clamav/clamd.conf"))
+
+    def test_canonicalizes_parent_symlink_to_allowed_directory(self, tmp_path, monkeypatch):
+        allowed_dir = tmp_path / "etc_clamav"
+        allowed_dir.mkdir()
+        symlink_parent = tmp_path / "clamav-link"
+        symlink_parent.symlink_to(allowed_dir, target_is_directory=True)
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_DIRS", (allowed_dir,))
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_FILES", ())
+
+        assert validate_destination(symlink_parent / "foo.conf") == allowed_dir / "foo.conf"
 
     def test_rejects_symlinked_parent(self, tmp_path, monkeypatch):
         """A symlinked parent must not allow escape from the allowlist."""

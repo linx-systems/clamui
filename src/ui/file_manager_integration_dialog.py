@@ -28,7 +28,7 @@ from ..core.file_manager_integration import (
 )
 from ..core.i18n import _
 from .compat import create_switch_row, create_toolbar_view
-from .utils import resolve_icon_name
+from .utils import enable_escape_to_close, resolve_icon_name
 
 if TYPE_CHECKING:
     from ..core.settings_manager import SettingsManager
@@ -88,6 +88,7 @@ class FileManagerIntegrationDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):
@@ -324,9 +325,12 @@ class FileManagerIntegrationDialog(Adw.Window):
             # is_active + INSTALLED = no-op
             # not is_active + NOT_INSTALLED = no-op
 
-        # Show result summary
+        # Show result summary. On failure keep the dialog open — closing it
+        # immediately would destroy the toast before the user could see that
+        # anything failed (details are only in the log).
         self._show_result_toast(installed_count, removed_count, repaired_count, error_count)
-        self._save_preference_and_close()
+        if error_count == 0:
+            self._save_preference_and_close()
 
     def _show_result_toast(self, installed: int, removed: int, repaired: int, errors: int):
         """Show a summary toast of the apply results."""

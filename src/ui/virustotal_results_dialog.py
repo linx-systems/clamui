@@ -22,7 +22,7 @@ from ..core.clipboard import copy_to_clipboard
 from ..core.i18n import _
 from ..core.virustotal import VTScanResult, VTScanStatus
 from .compat import create_toolbar_view
-from .utils import resolve_icon_name
+from .utils import enable_escape_to_close, resolve_icon_name
 
 if TYPE_CHECKING:
     pass
@@ -90,6 +90,7 @@ class VirusTotalResultsDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):
@@ -103,10 +104,11 @@ class VirusTotalResultsDialog(Adw.Window):
         # Create header bar with actions
         header_bar = Adw.HeaderBar()
 
-        # Export button (left side)
+        # Copy-results button (left side). Copies JSON to clipboard; very
+        # large results are redirected to a file-export dialog.
         export_button = Gtk.Button()
-        export_button.set_icon_name(resolve_icon_name("document-save-symbolic"))
-        export_button.set_tooltip_text(_("Export results to JSON"))
+        export_button.set_icon_name(resolve_icon_name("edit-copy-symbolic"))
+        export_button.set_tooltip_text(_("Copy results as JSON"))
         export_button.add_css_class("flat")
         export_button.connect("clicked", self._on_export_clicked)
         header_bar.pack_start(export_button)
@@ -312,6 +314,13 @@ class VirusTotalResultsDialog(Adw.Window):
         if self._detections_list is None:
             return
 
+        # Remove the previous "Show more" row first so new rows keep list
+        # order and the button doesn't linger when the final batch exactly
+        # exhausts the list.
+        if self._load_more_row is not None:
+            self._detections_list.remove(self._load_more_row)
+            self._load_more_row = None
+
         start_idx = self._displayed_detection_count
         end_idx = min(start_idx + count, len(self._all_detections))
 
@@ -322,9 +331,6 @@ class VirusTotalResultsDialog(Adw.Window):
 
         # Add "Load More" button if there are more detections
         if self._displayed_detection_count < len(self._all_detections):
-            if self._load_more_row is not None:
-                self._detections_list.remove(self._load_more_row)
-
             load_more_row = Gtk.ListBoxRow()
             load_more_row.add_css_class("load-more-row")
             load_more_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)

@@ -18,6 +18,7 @@ boundary of the elevated helper.
 from __future__ import annotations
 
 import os
+import pwd
 import stat
 from pathlib import Path
 
@@ -31,11 +32,11 @@ ALLOWED_DEST_DIRS: tuple[Path, ...] = (
 )
 ALLOWED_DEST_FILES: tuple[Path, ...] = (Path("/etc/freshclam.conf"),)
 
-# Bumped to 2 to make every callsite explicitly opt into the new src/dst-pair
-# protocol that requires staging-root containment.  The helper rejects any
-# argv that does not lead with ``--protocol=2``; this lets a freshly-installed
-# helper coexist with an out-of-date caller and fail closed.
-PROTOCOL_VERSION = 2
+# Bumped to 3 so every callsite explicitly opts into canonical destination
+# binding. The helper rejects any argv that does not lead with
+# ``--protocol=3``; this lets a freshly-installed helper coexist with an
+# out-of-date caller and fail closed.
+PROTOCOL_VERSION = 3
 
 
 def is_running_as_root() -> bool:
@@ -57,12 +58,32 @@ def is_running_as_root() -> bool:
 
 def staging_root_for_uid(uid: int) -> Path:
     """
-    Return the per-user staging directory under ``/run/user/<uid>``.
+    Return the per-user staging root under the passwd-database home.
 
-    The directory is *not* created here -- the caller is responsible for
-    creating it with mode 0o700 before invoking the helper.  This function
-    is intentionally pure so it can be safely called from the privileged
-    helper before any other validation has run.
+    The canonical root is ``<passwd-home>/.cache/clamui/privileged-staging``::
+
+        pwd.getpwuid(uid).pw_dir / .cache / clamui / privileged-staging
+
+    Native and Flatpak share this single root so the privileged helper --
+    which runs on the host (via ``flatpak-spawn --host`` under Flatpak) and
+    independently recomputes it here -- always reads staged files from the
+    exact directory the caller wrote them to.  The path lives under the
+    host-visible home filesystem that the Flatpak manifest grants with
+    ``--filesystem=host``, so it is reachable from both sides of the
+    sandbox/host boundary.
+
+    The home directory is taken from the passwd database
+    (``pwd.getpwuid``), **never** from ``$HOME``: inside a Flatpak sandbox
+    ``$HOME`` points at ``~/.var/app/<id>`` rather than the real home, so a
+    ``$HOME``-derived root would not match what the host-visible helper
+    computes.  Native and Flatpak therefore agree because both consult the
+    same passwd entry for ``uid``.
+
+    The directory is *not* created here -- the caller (``_make_staging_dir``)
+    is responsible for creating it with mode 0o700 before invoking the
+    helper.  This function is intentionally pure (only a ``getpwuid``
+    lookup; no file I/O or other side effects) so it can be safely called
+    from the privileged helper before any other validation has run.
 
     Args:
         uid: The user ID whose staging root should be returned.
@@ -70,26 +91,31 @@ def staging_root_for_uid(uid: int) -> Path:
     Returns:
         Absolute path to the per-user staging root.
     """
-    return Path("/run/user") / str(uid) / "clamui-staging"
+    return Path(pwd.getpwuid(uid).pw_dir) / ".cache" / "clamui" / "privileged-staging"
 
 
-def validate_destination(destination: Path) -> None:
+def validate_destination(destination: Path) -> Path:
     """
-    Validate that ``destination`` is within the ClamAV configuration allowlist.
+    Validate ``destination`` against the ClamAV configuration allowlist.
 
     A destination is accepted iff at least one of the following holds:
 
-    1. ``destination`` exactly equals one of :data:`ALLOWED_DEST_FILES`
-       after path resolution of the parent directory.
-    2. ``destination`` lives directly under one of :data:`ALLOWED_DEST_DIRS`
-       (no nested subdirectories) and ends in ``.conf`` with a non-empty stem.
+    1. Its canonical path exactly equals one of :data:`ALLOWED_DEST_FILES`.
+    2. Its canonical path lives directly under one of
+       :data:`ALLOWED_DEST_DIRS` (no nested subdirectories) and ends in
+       ``.conf`` with a non-empty stem.
 
     The parent directory is resolved via ``Path.resolve(strict=False)`` so
     that symlinked parents cannot be used to escape the allowlist; the
     destination *file* itself is not resolved because it may not exist yet.
+    The canonical ``resolved_parent / destination.name`` is returned so
+    callers use the exact allowlisted destination after validation.
 
     Args:
         destination: Proposed destination file path.
+
+    Returns:
+        Canonical allowlisted destination path.
 
     Raises:
         ValueError: If the destination is outside the allowlist, has the
@@ -106,7 +132,7 @@ def validate_destination(destination: Path) -> None:
     candidate = resolved_parent / destination.name
 
     if candidate in ALLOWED_DEST_FILES:
-        return
+        return candidate
 
     if candidate.suffix != ".conf":
         raise ValueError(f"Destination must have a .conf extension: {destination}")
@@ -116,6 +142,7 @@ def validate_destination(destination: Path) -> None:
 
     if resolved_parent not in ALLOWED_DEST_DIRS:
         raise ValueError(f"Destination is not in allowed config directories: {destination}")
+    return candidate
 
 
 def _fstat_strict(fd: int) -> os.stat_result:

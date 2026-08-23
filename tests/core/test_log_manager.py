@@ -955,16 +955,37 @@ class TestLogManagerDaemonStatus:
     def test_get_daemon_status_stopped(self, log_manager):
         """Test daemon status when clamd service is installed but not active."""
         with mock.patch("src.core.log_manager.which_host_command", return_value="/usr/bin/clamd"):
-            with mock.patch("subprocess.run") as mock_run:
-                mock_run.side_effect = [
-                    mock.Mock(stdout="failed\n"),
-                    mock.Mock(stdout="unknown\n"),
-                    mock.Mock(stdout="unknown\n"),
-                    mock.Mock(returncode=1),
-                ]
-                status, message = log_manager.get_daemon_status()
-                assert status == DaemonStatus.STOPPED
-                assert "not active" in message.lower()
+            with mock.patch(
+                "src.core.clamav_detection.systemd_unit_exists", return_value=True
+            ) as mock_exists:
+                with mock.patch("subprocess.run") as mock_run:
+                    mock_run.side_effect = [
+                        mock.Mock(stdout="failed\n"),
+                        mock.Mock(stdout="unknown\n"),
+                        mock.Mock(stdout="unknown\n"),
+                        mock.Mock(returncode=1),
+                    ]
+                    status, message = log_manager.get_daemon_status()
+                    assert status == DaemonStatus.STOPPED
+                    assert "not active" in message.lower()
+                    mock_exists.assert_called_once_with("clamav-daemon.service")
+
+    def test_get_daemon_status_not_installed_when_units_unknown(self, log_manager):
+        """systemd reports 'inactive' even for unknown units; without a clamd
+        binary and with no real unit, the status must be NOT_INSTALLED rather
+        than 'installed but not active'."""
+        with mock.patch("src.core.log_manager.which_host_command", return_value=None):
+            with mock.patch("src.core.clamav_detection.systemd_unit_exists", return_value=False):
+                with mock.patch("subprocess.run") as mock_run:
+                    mock_run.side_effect = [
+                        mock.Mock(stdout="inactive\n"),
+                        mock.Mock(stdout="inactive\n"),
+                        mock.Mock(stdout="inactive\n"),
+                        mock.Mock(returncode=1),
+                    ]
+                    status, message = log_manager.get_daemon_status()
+                    assert status == DaemonStatus.NOT_INSTALLED
+                    assert "not installed" in message.lower()
 
     def test_get_daemon_status_falls_back_to_process_when_systemctl_fails(self, log_manager):
         """Test daemon status falls back to pgrep when systemctl calls fail."""
@@ -1068,6 +1089,43 @@ class TestLogManagerDaemonLogs:
                     assert "empty" in content.lower()
         finally:
             os.unlink(temp_log_path)
+
+    def test_read_daemon_logs_tail_passes_clean_env(self, log_manager):
+        """The tail host helper receives the sanitized environment."""
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        with (
+            mock.patch.object(
+                log_manager, "get_daemon_log_path", return_value="/var/log/clamd.log"
+            ),
+            mock.patch("src.core.log_manager.wrap_host_command", side_effect=lambda cmd: cmd),
+            mock.patch("src.core.log_manager.get_clean_env", return_value=clean_env),
+            mock.patch(
+                "subprocess.run",
+                return_value=mock.MagicMock(returncode=0, stdout="Line 1\n"),
+            ) as mock_run,
+        ):
+            success, content = log_manager.read_daemon_logs(num_lines=5)
+
+        assert success is True
+        assert mock_run.call_args.args[0][0] == "tail"
+        assert mock_run.call_args.kwargs["env"] is clean_env
+
+    def test_read_daemon_logs_journalctl_passes_clean_env(self, log_manager):
+        """The journalctl host helper receives the sanitized environment."""
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        with (
+            mock.patch("src.core.log_manager.wrap_host_command", side_effect=lambda cmd: cmd),
+            mock.patch("src.core.log_manager.get_clean_env", return_value=clean_env),
+            mock.patch(
+                "subprocess.run",
+                return_value=mock.MagicMock(returncode=0, stdout="journal line\n"),
+            ) as mock_run,
+        ):
+            success, content = log_manager._read_daemon_logs_journalctl(num_lines=5)
+
+        assert success is True
+        assert mock_run.call_args.args[0][0] == "journalctl"
+        assert mock_run.call_args.kwargs["env"] is clean_env
 
 
 class TestLogType:

@@ -16,7 +16,7 @@ from gi.repository import Adw, Gtk
 
 from ..core.i18n import _
 from .compat import create_toolbar_view
-from .utils import resolve_icon_name
+from .utils import enable_escape_to_close, resolve_icon_name
 
 
 class DatabaseMissingDialog(Adw.Window):
@@ -69,6 +69,7 @@ class DatabaseMissingDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
         # Connect to close-request signal for when user dismisses without choosing

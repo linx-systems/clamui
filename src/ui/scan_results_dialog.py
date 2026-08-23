@@ -22,7 +22,7 @@ from ..core.utils import format_flatpak_portal_path
 from .clipboard_helper import ClipboardHelper
 from .compat import create_toolbar_view, safe_add_suffix
 from .file_export import TEXT_FILTER, FileExportHelper
-from .utils import resolve_icon_name
+from .utils import enable_escape_to_close, resolve_icon_name
 
 if TYPE_CHECKING:
     from ..core.settings_manager import SettingsManager
@@ -103,6 +103,7 @@ class ScanResultsDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):
@@ -116,10 +117,11 @@ class ScanResultsDialog(Adw.Window):
         # Create header bar with actions
         header_bar = Adw.HeaderBar()
 
-        # Export button (left side)
+        # Copy-results button (left side). Copies to clipboard; very large
+        # results are redirected to a file-export dialog.
         export_button = Gtk.Button()
-        export_button.set_icon_name(resolve_icon_name("document-save-symbolic"))
-        export_button.set_tooltip_text(_("Export results"))
+        export_button.set_icon_name(resolve_icon_name("edit-copy-symbolic"))
+        export_button.set_tooltip_text(_("Copy results to clipboard"))
         export_button.add_css_class("flat")
         export_button.connect("clicked", self._on_export_clicked)
         header_bar.pack_start(export_button)
@@ -183,10 +185,18 @@ class ScanResultsDialog(Adw.Window):
         # Set title based on result status
         if self._scan_result.status == ScanStatus.CLEAN:
             expander.set_title(_("Scan Complete"))
-            if self._scan_result.has_warnings:
+            if self._scan_result.skipped_count > 0:
                 expander.set_subtitle(
                     _("No threats found ({count} file(s) not accessible)").format(
                         count=self._scan_result.skipped_count
+                    )
+                )
+            elif self._scan_result.warning_message:
+                # Warnings without a skipped-file count (e.g. non-fatal scanner
+                # warnings) — never render a bare "0 file(s)" subtitle.
+                expander.set_subtitle(
+                    _("No threats found ({warning})").format(
+                        warning=GLib.markup_escape_text(self._scan_result.warning_message)
                     )
                 )
             else:
@@ -369,6 +379,13 @@ class ScanResultsDialog(Adw.Window):
         if self._threats_list is None:
             return
 
+        # Remove the previous "Show more" row first so new rows keep list
+        # order and the button doesn't linger when the final batch exactly
+        # exhausts the list.
+        if self._load_more_row is not None:
+            self._threats_list.remove(self._load_more_row)
+            self._load_more_row = None
+
         start_idx = self._displayed_threat_count
         end_idx = min(start_idx + count, len(self._all_threat_details))
 
@@ -379,9 +396,6 @@ class ScanResultsDialog(Adw.Window):
 
         # Add "Load More" button if there are more threats
         if self._displayed_threat_count < len(self._all_threat_details):
-            if self._load_more_row is not None:
-                self._threats_list.remove(self._load_more_row)
-
             load_more_row = Gtk.ListBoxRow()
             load_more_row.add_css_class("load-more-row")
             load_more_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)

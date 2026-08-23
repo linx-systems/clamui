@@ -131,16 +131,21 @@ class TestPreferencesWindowInitialization:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that initialization calls _setup_ui."""
+        """Test that initialization calls _setup_ui.
+
+        The background config-load thread is stubbed so __init__ stays
+        synchronous and deterministic (GLib.idle_add is already a no-op
+        under mock_gi_modules, so the applier never runs automatically).
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui") as mock_setup:
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     PreferencesWindow()
                     mock_setup.assert_called_once()
 
-    def test_initialization_calls_load_configs(
+    def test_initialization_starts_config_load_thread(
         self,
         mock_gi_modules,
         mock_parse_config,
@@ -148,14 +153,26 @@ class TestPreferencesWindowInitialization:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that initialization calls _load_configs."""
+        """Test that __init__ spawns a daemon thread running the config resolver.
+
+        _load_configs was removed (U2): host I/O now runs on a daemon
+        thread whose target is _resolve_config_paths_background, with
+        results marshalled back via GLib.idle_add(_apply_loaded_configs).
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs") as mock_load:
+            with mock.patch("src.ui.preferences.window.threading.Thread") as mock_thread:
+                mock_thread_instance = mock.MagicMock()
+                mock_thread.return_value = mock_thread_instance
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     PreferencesWindow()
-                    mock_load.assert_called_once()
+
+                    mock_thread.assert_called_once()
+                    call_kwargs = mock_thread.call_args.kwargs
+                    assert call_kwargs.get("daemon") is True
+                    assert call_kwargs.get("target").__name__ == "_resolve_config_paths_background"
+                    mock_thread_instance.start.assert_called_once()
 
     def test_initialization_with_settings_manager(
         self,
@@ -170,7 +187,7 @@ class TestPreferencesWindowInitialization:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow(settings_manager=mock_settings_manager)
                     assert window._settings_manager == mock_settings_manager
@@ -408,7 +425,7 @@ class TestPreferencesWindowProperties:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow()
                     assert hasattr(window, "_freshclam_widgets")
@@ -430,7 +447,7 @@ class TestPreferencesWindowProperties:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow()
                     assert hasattr(window, "_sidebar_rows")
@@ -500,7 +517,12 @@ class TestConfigLoading:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that _load_configs parses freshclam.conf."""
+        """Test that _load_configs_io parses freshclam.conf.
+
+        Config parsing was split out of the removed sync _load_configs
+        into the worker-thread method _load_configs_io (U2). Drive it
+        directly with the thread suppressed so the parse is deterministic.
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         mock_config = mock.MagicMock()
@@ -508,9 +530,12 @@ class TestConfigLoading:
 
         with mock.patch("src.ui.preferences.window.parse_config", return_value=(mock_config, None)):
             with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
-                    window = PreferencesWindow()
-                    assert window._freshclam_config == mock_config
+                with mock.patch("src.ui.preferences.window.threading.Thread"):
+                    with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
+                        window = PreferencesWindow()
+                        # Simulate the worker thread completing its I/O step.
+                        window._load_configs_io()
+                        assert window._freshclam_config == mock_config
 
     def test_load_configs_handles_error(
         self,
@@ -519,7 +544,12 @@ class TestConfigLoading:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that _load_configs handles parse errors gracefully."""
+        """Test that _load_configs_io records parse errors without raising.
+
+        _load_configs_io stores the error in _freshclam_load_error for the
+        main-thread applier (_apply_loaded_configs) to surface via toast;
+        it must not raise on the worker thread.
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch(
@@ -527,10 +557,12 @@ class TestConfigLoading:
             return_value=(None, "Parse error"),
         ):
             with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
-                    # Should not raise
-                    window = PreferencesWindow()
-                    assert window._freshclam_load_error == "Parse error"
+                with mock.patch("src.ui.preferences.window.threading.Thread"):
+                    with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
+                        # Should not raise
+                        window = PreferencesWindow()
+                        window._load_configs_io()
+                        assert window._freshclam_load_error == "Parse error"
 
 
 class TestFlatpakSupport:
@@ -599,14 +631,20 @@ class TestFlatpakSupport:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that non-Flatpak installation uses system config paths."""
+        """Test that non-Flatpak installation uses system config paths.
+
+        Path resolution moved off __init__ into _resolve_config_paths_background
+        (U2). Drive it explicitly (thread suppressed) and assert the resolved
+        paths; parse_config/config_file_exists are mocked by the fixtures.
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch("src.ui.preferences.window.is_flatpak", return_value=False):
             with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                with mock.patch.object(PreferencesWindow, "_load_configs"):
+                with mock.patch("src.ui.preferences.window.threading.Thread"):
                     with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                         window = PreferencesWindow()
+                        window._resolve_config_paths_background()
                         assert window._freshclam_conf_path == "/etc/clamav/freshclam.conf"
                         assert window._clamd_conf_path == "/etc/clamav/clamd.conf"
 
@@ -627,9 +665,10 @@ class TestFlatpakSupport:
                 return_value="/etc/clamav/freshclam.conf",
             ):
                 with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                    with mock.patch.object(PreferencesWindow, "_load_configs"):
+                    with mock.patch("src.ui.preferences.window.threading.Thread"):
                         with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                             window = PreferencesWindow()
+                            window._resolve_config_paths_background()
                             assert window._freshclam_conf_path == "/etc/clamav/freshclam.conf"
 
     def test_flatpak_falls_back_to_host_freshclam_default(
@@ -648,9 +687,10 @@ class TestFlatpakSupport:
                 "src.ui.preferences.window.resolve_freshclam_conf_path", return_value=None
             ):
                 with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                    with mock.patch.object(PreferencesWindow, "_load_configs"):
+                    with mock.patch("src.ui.preferences.window.threading.Thread"):
                         with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                             window = PreferencesWindow()
+                            window._resolve_config_paths_background()
                             assert window._freshclam_conf_path == "/etc/clamav/freshclam.conf"
 
 
@@ -712,15 +752,20 @@ class TestClamdAvailability:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test clamd is marked available when clamd.conf exists."""
+        """Test clamd is marked available when clamd.conf exists.
+
+        Availability is now resolved in _resolve_config_paths_background (U2);
+        drive it explicitly (thread suppressed) and assert the flag flips.
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch("src.ui.preferences.window.is_flatpak", return_value=False):
             with mock.patch("src.ui.preferences.window.config_file_exists", return_value=True):
                 with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                    with mock.patch.object(PreferencesWindow, "_load_configs"):
+                    with mock.patch("src.ui.preferences.window.threading.Thread"):
                         with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                             window = PreferencesWindow()
+                            window._resolve_config_paths_background()
                             assert window._clamd_available is True
 
     def test_clamd_unavailable_when_file_missing(
@@ -736,9 +781,10 @@ class TestClamdAvailability:
         with mock.patch("src.ui.preferences.window.is_flatpak", return_value=False):
             with mock.patch("src.ui.preferences.window.config_file_exists", return_value=False):
                 with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                    with mock.patch.object(PreferencesWindow, "_load_configs"):
+                    with mock.patch("src.ui.preferences.window.threading.Thread"):
                         with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                             window = PreferencesWindow()
+                            window._resolve_config_paths_background()
                             assert window._clamd_available is False
 
     def test_flatpak_clamd_available_via_host_check(
@@ -753,7 +799,8 @@ class TestClamdAvailability:
         Regression test: Previously used Path.exists() which checked the
         Flatpak sandbox filesystem where /etc/clamd.d/scan.conf doesn't
         exist. Now uses config_file_exists() which checks the HOST via
-        flatpak-spawn.
+        flatpak-spawn. Path resolution + availability now run in
+        _resolve_config_paths_background (U2); drive it explicitly.
         """
         from src.ui.preferences.window import PreferencesWindow
 
@@ -770,11 +817,12 @@ class TestClamdAvailability:
                         return_value="/etc/freshclam.conf",
                     ):
                         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                            with mock.patch.object(PreferencesWindow, "_load_configs"):
+                            with mock.patch("src.ui.preferences.window.threading.Thread"):
                                 with mock.patch.object(
                                     PreferencesWindow, "_populate_scheduled_fields"
                                 ):
                                     window = PreferencesWindow()
+                                    window._resolve_config_paths_background()
                                     assert window._clamd_available is True
                                     assert window._clamd_conf_path == "/etc/clamd.d/scan.conf"
                                     # Verify host-aware check was used
@@ -798,11 +846,12 @@ class TestClamdAvailability:
                         return_value="/etc/freshclam.conf",
                     ):
                         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                            with mock.patch.object(PreferencesWindow, "_load_configs"):
+                            with mock.patch("src.ui.preferences.window.threading.Thread"):
                                 with mock.patch.object(
                                     PreferencesWindow, "_populate_scheduled_fields"
                                 ):
                                     window = PreferencesWindow()
+                                    window._resolve_config_paths_background()
                                     assert window._clamd_available is False
 
     def test_availability_uses_config_file_exists_not_path_exists(
@@ -816,7 +865,8 @@ class TestClamdAvailability:
 
         Core regression test: verifies Path.exists() is NOT used for the
         clamd availability check. config_file_exists() uses flatpak-spawn
-        in Flatpak mode to check the host filesystem.
+        in Flatpak mode to check the host filesystem. Resolution now runs
+        in _resolve_config_paths_background (U2); drive it explicitly.
         """
         from src.ui.preferences.window import PreferencesWindow
 
@@ -829,9 +879,10 @@ class TestClamdAvailability:
                     "src.ui.preferences.window.config_file_exists", return_value=True
                 ) as mock_cfe:
                     with mock.patch.object(PreferencesWindow, "_setup_ui"):
-                        with mock.patch.object(PreferencesWindow, "_load_configs"):
+                        with mock.patch("src.ui.preferences.window.threading.Thread"):
                             with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                                 window = PreferencesWindow()
+                                window._resolve_config_paths_background()
                                 assert window._clamd_available is True
                                 # config_file_exists must be called for the
                                 # availability check (not Path.exists)
@@ -935,7 +986,7 @@ class TestLazyPageCreation:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow()
         return window, mock_page_modules
@@ -952,7 +1003,7 @@ class TestLazyPageCreation:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow()
 
@@ -984,7 +1035,7 @@ class TestLazyPageCreation:
         from src.ui.preferences.window import PreferencesWindow
 
         with mock.patch.object(PreferencesWindow, "_setup_ui"):
-            with mock.patch.object(PreferencesWindow, "_load_configs"):
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
                 with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
                     window = PreferencesWindow()
 
@@ -1141,7 +1192,16 @@ class TestLazyPageCreation:
         mock_scheduler,
         mock_page_modules,
     ):
-        """Test that config fields are populated when lazy page is created."""
+        """Test that a lazily-created config page gets populated after the load applies.
+
+        After U2, config parsing runs on a worker thread and field population
+        is marshalled back through _apply_loaded_configs (GLib.idle_add, which
+        is a no-op under mock_gi_modules). Suppress the thread, create the
+        database page (no config yet, so populate_fields is NOT called), then
+        drive the I/O step + the main-thread applier explicitly: the applier
+        rebuilds the database page and runs _populate_freshclam_fields, which
+        calls DatabasePage.populate_fields with the freshly-parsed config.
+        """
         from src.ui.preferences.window import PreferencesWindow
 
         mock_config = mock.MagicMock()
@@ -1151,13 +1211,18 @@ class TestLazyPageCreation:
             "src.ui.preferences.window.parse_config",
             return_value=(mock_config, None),
         ):
-            window = PreferencesWindow()
+            with mock.patch("src.ui.preferences.window.threading.Thread"):
+                window = PreferencesWindow()
 
-        # Database page populate_fields should not have been called yet
-        # (page not created, so nothing to populate)
-        # After creating the page, it should populate
-        window._ensure_page_created("database")
-        mock_page_modules["database"].populate_fields.assert_called()
+            # Creating the page alone must NOT populate fields (config not loaded yet)
+            window._ensure_page_created("database")
+            mock_page_modules["database"].populate_fields.assert_not_called()
+
+            # Simulate the worker thread finishing its I/O, then the idle_add
+            # applier running on the main thread.
+            window._load_configs_io()
+            window._apply_loaded_configs()
+            mock_page_modules["database"].populate_fields.assert_called()
 
     def test_all_pages_can_be_lazily_created(
         self,

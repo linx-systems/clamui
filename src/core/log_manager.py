@@ -1952,7 +1952,14 @@ class LogManager:
                 if status_text == "active":
                     return (DaemonStatus.RUNNING, f"{service_name} is active")
                 if status_text in {"inactive", "failed", "activating", "deactivating"}:
-                    saw_installed_service = True
+                    # "inactive" alone doesn't prove the unit exists: systemd
+                    # prints it for units it has never heard of, which would
+                    # misreport a machine with no clamd at all as
+                    # "installed but not active". Confirm via LoadState.
+                    from .clamav_detection import systemd_unit_exists
+
+                    if systemd_unit_exists(service_name):
+                        saw_installed_service = True
             except (subprocess.SubprocessError, FileNotFoundError, OSError):
                 logger.debug("systemctl is-active failed for %s", service_name, exc_info=True)
 
@@ -2078,7 +2085,9 @@ class LogManager:
             try:
                 # Use tail command - wrapped for Flatpak host access
                 tail_cmd = wrap_host_command(["tail", "-n", str(num_lines), log_path])
-                result = subprocess.run(tail_cmd, capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    tail_cmd, capture_output=True, text=True, timeout=10, env=get_clean_env()
+                )
 
                 if result.returncode == 0:
                     content = result.stdout
@@ -2156,7 +2165,9 @@ class LogManager:
                         "-q",  # Quiet - suppress info messages
                     ]
                 )
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, timeout=10, env=get_clean_env()
+                )
 
                 if result.returncode == 0 and result.stdout.strip():
                     return (True, _sanitize_private_text(result.stdout))

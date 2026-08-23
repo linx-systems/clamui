@@ -1,0 +1,23 @@
+Package: clamui-privileged-helper
+Version: VERSION
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3, pkexec | policykit-1
+Replaces: clamui (<= VERSION)
+Maintainer: ClamUI Contributors <clamui@rooki.xyz>
+Homepage: https://github.com/linx-systems/clamui
+Description: Root-owned pkexec helper and polkit policy for ClamUI
+ Root-owned wrapper (/usr/bin/clamui-apply-preferences) and the two
+ self-contained Python helper modules under /usr/lib/clamui, plus the
+ polkit policy, that let ClamUI apply system ClamAV configuration via
+ pkexec.
+ .
+ This package coexists with clamui: it owns only the privileged helper,
+ its library directory, and the polkit policy. clamui depends on this
+ exact version.
+ .
+ Replaces clamui so dpkg can transfer ownership of these paths from an
+ older clamui (of at most the same version) during upgrade; it declares
+ no Conflicts or Breaks and remains co-installable with the full clamui
+ package.

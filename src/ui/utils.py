@@ -159,6 +159,33 @@ def add_row_icon(row: Adw.ActionRow | Adw.ExpanderRow, icon_name: str) -> Gtk.Im
     return icon
 
 
+def enable_escape_to_close(window: Gtk.Window) -> None:
+    """
+    Make Escape close a dialog window.
+
+    The project's dialogs are Adw.Window subclasses (for libadwaita 1.1
+    compatibility), which — unlike Gtk.Dialog/Adw.MessageDialog — do not
+    bind Escape by default. GNOME HIG expects every dialog to close on
+    Escape; call this from the dialog's __init__.
+
+    Closing goes through Gtk.Window.close(), so close-request handlers
+    (the same path as the titlebar close button) still run.
+    """
+
+    def _on_escape(widget, args):
+        window.close()
+        return True
+
+    controller = Gtk.ShortcutController()
+    controller.add_shortcut(
+        Gtk.Shortcut.new(
+            Gtk.ShortcutTrigger.parse_string("Escape"),
+            Gtk.CallbackAction.new(_on_escape),
+        )
+    )
+    window.add_controller(controller)
+
+
 def present_dialog(dialog: Adw.Window, parent: Gtk.Window) -> None:
     """
     Present a modal dialog window with proper parent relationship.

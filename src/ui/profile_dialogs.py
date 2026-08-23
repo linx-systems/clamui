@@ -20,9 +20,10 @@ from .compat import (
     create_entry_row,
     create_toolbar_view,
     open_paths_dialog,
+    remove_all_children,
     save_path_dialog,
 )
-from .utils import add_row_icon, resolve_icon_name
+from .utils import add_row_icon, enable_escape_to_close, resolve_icon_name
 
 if TYPE_CHECKING:
     from ..profiles.models import ScanProfile
@@ -106,6 +107,7 @@ class ProfileDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):
@@ -705,6 +707,7 @@ class PatternEntryDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
         self._setup_ui()
@@ -726,6 +729,8 @@ class PatternEntryDialog(Adw.Window):
         add_button.set_label(_("Add"))
         add_button.add_css_class("suggested-action")
         add_button.connect("clicked", self._on_add_clicked)
+        # Disabled until a pattern is entered (see _on_pattern_changed)
+        add_button.set_sensitive(False)
         self._add_button = add_button
         header_bar.pack_end(add_button)
 
@@ -823,6 +828,7 @@ class DeleteProfileDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
         self._setup_ui()
@@ -944,6 +950,7 @@ class RestoreDefaultsDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
         self._setup_ui()
@@ -1065,6 +1072,7 @@ class ProfileListDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):
@@ -1131,13 +1139,19 @@ class ProfileListDialog(Adw.Window):
         scrolled.set_child(preferences_page)
         toolbar_view.set_content(scrolled)
 
-        # Set the toolbar view as the dialog content
-        self.set_content(toolbar_view)
+        # Wrap in a toast overlay so import/export can report their outcome
+        self._toast_overlay = Adw.ToastOverlay()
+        self._toast_overlay.set_child(toolbar_view)
+        self.set_content(self._toast_overlay)
+
+    def _show_toast(self, message: str) -> None:
+        """Show a transient toast message in this dialog."""
+        self._toast_overlay.add_toast(Adw.Toast.new(message))
 
     def _refresh_profile_list(self):
         """Refresh the profile list from the profile manager."""
-        # Clear existing rows - use remove_all() for O(1) instead of O(n²) loop removal
-        self._profiles_listbox.remove_all()
+        # Clear existing rows (Gtk.ListBox.remove_all() requires GTK 4.12+)
+        remove_all_children(self._profiles_listbox)
 
         # Get profiles from manager
         if self._profile_manager is None:
@@ -1365,6 +1379,9 @@ class ProfileListDialog(Adw.Window):
             self._profile_manager.export_profile(profile_id, Path(file_path))
         except (ValueError, OSError) as e:
             logger.warning("Failed to export profile: %s", e)
+            self._show_toast(_("Failed to export profile: {error}").format(error=e))
+        else:
+            self._show_toast(_("Profile exported"))
 
     def _on_profile_saved(self, profile: "ScanProfile"):
         """
@@ -1413,3 +1430,6 @@ class ProfileListDialog(Adw.Window):
             self._refresh_profile_list()
         except (ValueError, OSError) as e:
             logger.warning("Failed to import profile: %s", e)
+            self._show_toast(_("Failed to import profile: {error}").format(error=e))
+        else:
+            self._show_toast(_("Profile imported"))

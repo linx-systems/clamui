@@ -349,6 +349,14 @@ class QuarantineManager:
                     entry_id,
                     entry.quarantine_path,
                 )
+                return QuarantineResult(
+                    status=QuarantineStatus.DATABASE_ERROR,
+                    entry=entry,
+                    error_message=_(
+                        "File restored successfully, but the database entry could not "
+                        "be removed. It may still appear in the list until cleaned up."
+                    ),
+                )
 
             return QuarantineResult(
                 status=QuarantineStatus.SUCCESS,
@@ -432,6 +440,14 @@ class QuarantineManager:
                     "Run cleanup_orphaned_entries() to resolve.",
                     entry_id,
                     entry.quarantine_path,
+                )
+                return QuarantineResult(
+                    status=QuarantineStatus.DATABASE_ERROR,
+                    entry=entry,
+                    error_message=_(
+                        "File deleted successfully, but the database entry could not "
+                        "be removed. It may still appear in the list until cleaned up."
+                    ),
                 )
 
             return QuarantineResult(

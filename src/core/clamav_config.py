@@ -8,20 +8,50 @@ import logging
 import math
 import os
 import shutil
+import stat
 import subprocess
-import sys
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
 from .i18n import _
-from .privileged_paths import is_running_as_root, staging_root_for_uid
+from .privileged_paths import (
+    PROTOCOL_VERSION,
+    is_running_as_root,
+    staging_root_for_uid,
+)
 
 logger = logging.getLogger(__name__)
 
 # System path prefixes that are inaccessible from inside a Flatpak sandbox
 _SYSTEM_PATH_PREFIXES = ("/etc/", "/usr/", "/var/", "/opt/")
+
+# Canonical, host-installed privileged helper executable handed to pkexec.
+# Only this absolute path is ever returned by ``_get_privileged_writer_path``:
+# a user-writable venv or ``~/.local`` wrapper that merely shares the helper
+# name must never reach pkexec, or an unprivileged user could run arbitrary
+# code as root.  Native mode checks this literal path only -- it never consults
+# ``sys.executable`` or ``PATH`` -- and the pip wheel deliberately declares no
+# ``clamui-apply-preferences`` console script, so a venv install cannot create
+# a colliding binary.  The canonical wrapper itself is provisioned by the
+# native ``clamui install-privileged-helper`` flow or the
+# ``clamui-privileged-helper`` Debian package.  This constant lives in the core
+# layer on purpose: the CLI layer is not imported into core.
+_PRIVILEGED_HELPER_PATH = "/usr/bin/clamui-apply-preferences"
+
+# Root-owned library directory and the two self-contained modules the wrapper
+# imports.  Native ``_get_privileged_writer_path`` requires the wrapper, this
+# directory, and both modules to be real, root-owned, not group/world-writable
+# entries, so pkexec can never execute or import mutable user-owned helper
+# code.  These mirror the paths provisioned by ``clamui
+# install-privileged-helper`` and the ``clamui-privileged-helper`` Debian
+# package; duplicated here because the core layer does not import the CLI layer.
+_PRIVILEGED_LIB_DIR = "/usr/lib/clamui"
+_PRIVILEGED_LIB_MODULES = (
+    "/usr/lib/clamui/clamui_apply_preferences.py",
+    "/usr/lib/clamui/clamui_privileged_paths.py",
+)
 
 
 @dataclass
@@ -463,7 +493,7 @@ CONFIG_OPTION_TYPES = {
     # Integer options with ranges
     "Checks": {"type": "integer", "min": 0, "max": 50},
     "HTTPProxyPort": {"type": "integer", "min": 1, "max": 65535},
-    "MaxRecursion": {"type": "integer", "min": 0, "max": 100},
+    "MaxRecursion": {"type": "integer", "min": 1, "max": 100},
     "MaxFiles": {"type": "integer", "min": 0, "max": 100000},
     "MaxThreads": {"type": "integer", "min": 1, "max": 256},
     "MaxDirectoryRecursion": {"type": "integer", "min": 0, "max": 100},
@@ -932,33 +962,98 @@ def _write_config_direct(file_path: Path, content: str) -> tuple[bool, str | Non
         return (False, f"Failed to write config: {e!s}")
 
 
+def _is_root_owned_regular(path: str, *, require_executable: bool) -> bool:
+    """Return whether ``path`` is a real, root-owned regular file that is not
+    group- or world-writable.
+
+    ``os.stat(..., follow_symlinks=False)`` inspects the directory entry
+    itself, so a symlink (or any non-regular file) is rejected outright rather
+    than followed -- a symlinked wrapper or module must never reach pkexec.
+    When ``require_executable`` is set the owner-execute bit must also be
+    present.  Existence is probed by :func:`Path.is_file` /
+    :func:`os.access` in the caller; this function is the *trust* gate, never
+    the sole existence test.
+    """
+    try:
+        st = os.stat(path, follow_symlinks=False)
+    except OSError:
+        return False
+    return (
+        stat.S_ISREG(st.st_mode)
+        and st.st_uid == 0
+        and not (st.st_mode & 0o022)
+        and (not require_executable or bool(st.st_mode & 0o100))
+    )
+
+
+def _is_root_owned_dir(path: str) -> bool:
+    """Return whether ``path`` is a real, root-owned directory that is not
+    group- or world-writable, rejecting symlinks outright."""
+    try:
+        st = os.stat(path, follow_symlinks=False)
+    except OSError:
+        return False
+    return stat.S_ISDIR(st.st_mode) and st.st_uid == 0 and not (st.st_mode & 0o022)
+
+
 def _get_privileged_writer_path() -> str | None:
     """
     Resolve the privileged helper command path for pkexec.
 
+    Only the host-installed canonical ``/usr/bin/clamui-apply-preferences`` is
+    ever returned, so a user-writable venv or ``~/.local`` wrapper that merely
+    shares the helper name can never be handed to pkexec -- otherwise an
+    unprivileged user could run arbitrary code as root.
+
+    Native mode inspects *only* the literal canonical path -- it never consults
+    ``sys.executable`` or ``PATH`` -- and accepts it only when the wrapper, the
+    root-owned ``/usr/lib/clamui`` library directory, and both self-contained
+    modules the wrapper imports are real, root-owned, not group/world-writable
+    entries (the wrapper owner-executable); a user-owned but runnable binary
+    would otherwise let an unprivileged user execute arbitrary code as root
+    through pkexec.  Existence is still probed with ``Path.is_file`` /
+    ``os.access`` so a venv-only environment fails closed, but those are never
+    the sole basis for acceptance.  Under Flatpak the existing host search
+    (``flatpak-spawn --host which``) is retained so the helper is resolved
+    against the host filesystem rather than the sandbox-internal ``/app/bin``
+    (issue #136), but the result is accepted only when it is exactly the
+    canonical path.  ``/app``, ``~/.local`` and venv paths, alternate/symlink
+    spellings, and absence all yield ``None``.
+
     Returns:
-        Executable path for clamui-apply-preferences, or None if not found
+        The canonical helper path when every native trust check passes (or the
+        Flatpak host search resolves the exact canonical path), else None.
     """
-    helper_name = "clamui-apply-preferences"
+    canonical = _PRIVILEGED_HELPER_PATH
 
-    # In Flatpak the helper is invoked via ``flatpak-spawn --host pkexec``, so
-    # it must be resolved against the HOST filesystem.  The sandbox-internal
-    # ``/app/bin/clamui-apply-preferences`` does not exist on the host and would
-    # make pkexec exit 127, surfacing a misleading "Authorization failed" error
-    # (issue #136).  Resolve via ``flatpak-spawn --host which`` instead; a None
-    # result here yields the clear "helper not installed" message.
-    from .flatpak import is_flatpak, which_host_command
+    if _running_in_flatpak():
+        from .flatpak import which_host_command
 
-    if is_flatpak():
-        return which_host_command(helper_name)
+        candidate = which_host_command(Path(canonical).name)
+        # Accept only the exact canonical path on the host; a user-writable
+        # venv/``~/.local`` wrapper or a non-canonical symlink spelling must
+        # never reach pkexec.
+        return canonical if candidate == canonical else None
 
-    # Native: prefer helper in the active Python environment (venv/system install).
-    python_bin_dir = Path(sys.executable).resolve().parent
-    helper_path = python_bin_dir / helper_name
-    if helper_path.is_file() and os.access(helper_path, os.X_OK):
-        return str(helper_path)
+    # Existence gate: a monkey-patched environment (e.g. a venv-only PATH) must
+    # fail closed here.  This is never the sole basis for acceptance -- the
+    # trust checks below also require root ownership, a real directory, and root
+    # owned modules, so a user-owned but executable binary cannot reach pkexec.
+    if not (Path(canonical).is_file() and os.access(canonical, os.X_OK)):
+        return None
+    if not _is_root_owned_regular(canonical, require_executable=True):
+        return None
+    if not _is_root_owned_dir(_PRIVILEGED_LIB_DIR):
+        return None
+    for module_path in _PRIVILEGED_LIB_MODULES:
+        if not _is_root_owned_regular(module_path, require_executable=False):
+            return None
+    return canonical
 
-    return shutil.which(helper_name)
+
+def privileged_writer_available() -> bool:
+    """Return whether the privileged configuration writer can be resolved."""
+    return _get_privileged_writer_path() is not None
 
 
 def _make_staging_dir() -> Path:
@@ -969,14 +1064,22 @@ def _make_staging_dir() -> Path:
     independently recomputes it via ``staging_root_for_uid`` and *rejects* any
     staged source that does not resolve under that exact directory
     (``validate_source_for_uid``).  We therefore use that single source of
-    truth -- ``/run/user/<uid>/clamui-staging`` -- as the only parent.
+    truth -- ``<passwd-home>/.cache/clamui/privileged-staging``, derived from
+    the passwd database (``pwd.getpwuid``) and never from ``$HOME`` -- as the
+    only parent.
 
-    The previous ``$XDG_RUNTIME_DIR`` / ``$XDG_CACHE_HOME`` fallbacks produced
-    staged paths the helper structurally refused (they are never equal to the
-    hard-coded ``/run/user/<uid>/clamui-staging`` it looks in), turning a
-    recoverable "no runtime dir" situation into an opaque "outside staging
-    root" failure.  If the canonical root cannot be created we now raise a
-    clear error instead.
+    Native and Flatpak share this one root: it lives on the host-visible home
+    filesystem that the Flatpak manifest grants with ``--filesystem=host``,
+    so the privileged helper (which runs on the host via
+    ``flatpak-spawn --host`` under Flatpak) reads staged files from the exact
+    directory the caller wrote them to.  There is no native/Flatpak branch
+    and no second allowed root.
+
+    Earlier ``$XDG_RUNTIME_DIR`` / ``$XDG_CACHE_HOME`` (and, before that,
+    ``/run/user/<uid>``) roots produced staged paths the helper structurally
+    refused -- they were never equal to the root it recomputes -- turning a
+    recoverable situation into an opaque "outside staging root" failure.  If
+    the canonical root cannot be created we now raise a clear error instead.
 
     Returns:
         Newly-created staging directory path with mode 0o700.
@@ -998,10 +1101,11 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
     """
     Write one or more configuration files, requesting elevation at most once.
 
-    User-writable paths are written directly.  System paths are staged into
-    a per-user, mode-``0o700`` directory under ``/run/user/<uid>`` (or an
-    ``XDG_RUNTIME_DIR`` / ``XDG_CACHE_HOME`` fallback) and handed to the
-    privileged helper via a single ``pkexec`` invocation.
+    User-writable paths are written directly. System paths are staged only in
+    the per-user, mode-``0o700`` directory returned by
+    ``staging_root_for_uid`` and handed to the privileged helper via one
+    ``pkexec`` invocation. If that canonical staging root cannot be created,
+    the operation fails before invoking pkexec.
 
     The helper is required: there is no inline-shell fallback.  If the
     helper is not installed on the host we surface a clear error rather
@@ -1045,11 +1149,30 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
 
         helper_path = _get_privileged_writer_path()
         if helper_path is None:
+            if _running_in_flatpak():
+                return (
+                    False,
+                    _(
+                        "ClamUI privileged helper not installed on the host. "
+                        "The Flatpak sandbox cannot write system ClamAV "
+                        "configuration files such as /etc/clamav/*.conf "
+                        "directly. Download the matching "
+                        "'clamui-privileged-helper_<version>_all.deb' from "
+                        "the ClamUI releases page and install it on the host "
+                        "with 'sudo apt install "
+                        "./clamui-privileged-helper_<version>_all.deb' (use "
+                        "the same version as the Flatpak). 'sudo flatpak run "
+                        "... install-privileged-helper' is not supported: the "
+                        "sandbox /usr is not the host /usr."
+                    ),
+                )
             return (
                 False,
                 _(
-                    "ClamUI privileged helper not installed. Install the 'clamui' "
-                    "package on your host system to apply settings."
+                    "ClamUI privileged helper not installed. Run "
+                    "'sudo clamui install-privileged-helper' on this host to "
+                    "install it and enable saving system ClamAV "
+                    "configuration."
                 ),
             )
 
@@ -1077,11 +1200,10 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
 
             if use_host_spawn:
                 # The helper runs on the HOST via flatpak-spawn and reads the
-                # staged files from /run/user/<uid>/clamui-staging.  If that
-                # directory is not shared across the sandbox/host boundary the
-                # helper would fail with an opaque "outside staging root" error
-                # (issue #136).  Probe host visibility first and surface a clear,
-                # actionable message instead.
+                # staged files from the passwd-home cache root computed by
+                # ``staging_root_for_uid``.  The Flatpak manifest exposes that
+                # home filesystem to both sides; probe host visibility before
+                # invoking pkexec so a permission mismatch fails clearly.
                 probe = subprocess.run(
                     ["flatpak-spawn", "--host", "test", "-e", str(staging_dir)],
                     capture_output=True,
@@ -1099,7 +1221,7 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                         ),
                     )
 
-            argv = [*prefix, "pkexec", helper_path, "--protocol=2", *flat_pairs]
+            argv = [*prefix, "pkexec", helper_path, f"--protocol={PROTOCOL_VERSION}", *flat_pairs]
             result = subprocess.run(argv, capture_output=True, text=True, check=False)
 
             if result.returncode != 0:
@@ -1115,9 +1237,10 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                             "Could not obtain administrator authorization to apply "
                             "these changes. If you were not shown a password prompt, "
                             "the ClamUI polkit policy or privileged helper is likely "
-                            "not installed on this system -- install the ClamUI system "
-                            "package (which provides clamui-apply-preferences and its "
-                            "polkit policy) to enable saving system configuration."
+                            "not installed on this system -- install the "
+                            "'clamui-privileged-helper' package (which provides "
+                            "clamui-apply-preferences and its polkit policy) to "
+                            "enable saving system configuration."
                         ),
                     )
                 if result.returncode == 3:
@@ -1133,12 +1256,24 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                         False,
                         _(
                             "Privileged helper rejected the request: protocol "
-                            "mismatch. Update the 'clamui' package on the host."
+                            "mismatch. Update the 'clamui-privileged-helper' "
+                            "package on the host."
                         ),
                     )
                 error_msg = result.stderr.strip() or result.stdout.strip() or "Unknown error"
                 return (False, f"Failed to write config: {error_msg}")
 
+            try:
+                shutil.rmtree(staging_dir)
+            except OSError as cleanup_error:
+                return (
+                    False,
+                    _(
+                        "Configuration was applied, but ClamUI could not remove the staged "
+                        "copy at {path}: {error}. Verify that this directory is removed."
+                    ).format(path=staging_dir, error=cleanup_error),
+                )
+            staging_dir = None
             return (True, None)
 
         finally:

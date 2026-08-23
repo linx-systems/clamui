@@ -1,7 +1,12 @@
 # ClamUI Result Formatters Tests
 """Unit tests for the result_formatters module functions."""
 
-from src.core.result_formatters import format_results_as_csv, format_results_as_text
+from src.core.result_formatters import (
+    clean_scan_status_message,
+    compose_scan_warning,
+    format_results_as_csv,
+    format_results_as_text,
+)
 from src.core.scanner import ScanResult, ScanStatus, ThreatDetail
 
 
@@ -638,3 +643,62 @@ class TestFormatResultsAsCsv:
         assert len(rows) == 2
         # The newline should be preserved in the parsed value
         assert "\n" in rows[1][0]
+
+
+class TestComposeScanWarning:
+    """Tests for the compose_scan_warning aggregation helper."""
+
+    def test_skipped_count_takes_precedence(self):
+        warning = compose_scan_warning(3, ["some warning"])
+        assert warning == "3 file(s) could not be accessed"
+
+    def test_warning_messages_joined_without_skips(self):
+        warning = compose_scan_warning(0, ["limit warning A", "limit warning B"])
+        assert warning == "limit warning A; limit warning B"
+
+    def test_no_warnings_returns_none(self):
+        assert compose_scan_warning(0, []) is None
+
+
+class TestCleanScanStatusMessage:
+    """Tests for the clean_scan_status_message banner helper."""
+
+    def _create_clean_result(self, skipped_count=0, warning_message=None) -> ScanResult:
+        return ScanResult(
+            status=ScanStatus.CLEAN,
+            path="/home/user/test",
+            stdout="",
+            stderr="",
+            exit_code=0,
+            infected_files=[],
+            scanned_files=10,
+            scanned_dirs=2,
+            infected_count=0,
+            error_message=None,
+            threat_details=[],
+            skipped_count=skipped_count,
+            warning_message=warning_message,
+        )
+
+    def test_plain_message_without_warnings(self):
+        result = self._create_clean_result()
+        assert clean_scan_status_message(result) == "Scan complete - No threats found"
+
+    def test_skipped_files_render_count(self):
+        result = self._create_clean_result(
+            skipped_count=3, warning_message="3 file(s) could not be accessed"
+        )
+        message = clean_scan_status_message(result)
+        assert message == "Scan complete - No threats found (3 file(s) not accessible)"
+
+    def test_nonfatal_warning_never_renders_zero_files(self):
+        """Regression: skipped_count == 0 with a warning must surface the
+        warning message instead of a bare '0 file(s)' phrase."""
+        result = self._create_clean_result(
+            warning_message="LibClamAV Warning: bytecode execution failed"
+        )
+        message = clean_scan_status_message(result)
+        assert "0 file(s)" not in message
+        assert message == (
+            "Scan complete - No threats found (LibClamAV Warning: bytecode execution failed)"
+        )

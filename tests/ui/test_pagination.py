@@ -636,7 +636,8 @@ class TestPaginationControllerSetEntries:
         assert controller._displayed_count == 25
 
         # Should add load_more_button since there are more entries
-        controller.add_load_more_button.assert_called_once_with("entries")
+        # (default label is None; translated to "entries" at render time)
+        controller.add_load_more_button.assert_called_once_with(None)
 
     def test_set_entries_filtered_subset_below_limit_no_load_more(
         self, pagination_controller_class, mock_listbox, mock_scrolled_window, mock_gi_modules
@@ -853,7 +854,8 @@ class TestPaginationControllerLoadMore:
         controller.load_more()
 
         # Should re-add load_more_button since 10 entries remain
-        controller.add_load_more_button.assert_called_once_with("entries")
+        # (default label is None; translated to "entries" at render time)
+        controller.add_load_more_button.assert_called_once_with(None)
 
     def test_load_more_does_not_readd_button_when_all_displayed(
         self, pagination_controller_class, mock_listbox, mock_scrolled_window, mock_row_factory

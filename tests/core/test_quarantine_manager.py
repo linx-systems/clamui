@@ -1062,10 +1062,11 @@ class TestQuarantineManagerDbFailureAfterRestore:
         ):
             result = manager.restore_file(quarantined_file.id)
 
-        # Restore should still succeed
-        assert result.is_success is True
+        # Restore: file op succeeded but DB removal failed -> DATABASE_ERROR (not success)
+        assert result.status == QuarantineStatus.DATABASE_ERROR
+        assert result.is_success is False
 
-        # File should be restored
+        # File should still be restored (the file operation itself succeeded)
         assert Path(quarantined_file.original_path).exists()
 
         # Warning should be logged
@@ -1089,10 +1090,11 @@ class TestQuarantineManagerDbFailureAfterRestore:
         ):
             result = manager.delete_file(quarantined_file.id)
 
-        # Delete should still succeed
-        assert result.is_success is True
+        # Delete: file op succeeded but DB removal failed -> DATABASE_ERROR (not success)
+        assert result.status == QuarantineStatus.DATABASE_ERROR
+        assert result.is_success is False
 
-        # File should be deleted
+        # File should still be deleted (the file operation itself succeeded)
         assert not quarantine_path.exists()
 
         # Warning should be logged
@@ -1110,7 +1112,9 @@ class TestQuarantineManagerDbFailureAfterRestore:
         with patch.object(manager._database, "remove_entry", return_value=False):
             result = manager.restore_file(quarantined_file.id)
 
-        assert result.is_success is True
+        # File op succeeded but DB removal failed -> DATABASE_ERROR (not success)
+        assert result.status == QuarantineStatus.DATABASE_ERROR
+        assert result.is_success is False
 
         # Entry still exists in DB (orphaned)
         assert manager.get_entry(quarantined_file.id) is not None
@@ -1133,7 +1137,9 @@ class TestQuarantineManagerDbFailureAfterRestore:
         with patch.object(manager._database, "remove_entry", return_value=False):
             result = manager.delete_file(quarantined_file.id)
 
-        assert result.is_success is True
+        # File op succeeded but DB removal failed -> DATABASE_ERROR (not success)
+        assert result.status == QuarantineStatus.DATABASE_ERROR
+        assert result.is_success is False
 
         # Entry still exists in DB (orphaned)
         assert manager.get_entry(quarantined_file.id) is not None

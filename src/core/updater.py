@@ -4,8 +4,11 @@ Updater module for ClamUI providing freshclam subprocess execution and async dat
 """
 
 import logging
+import os
 import re
+import shlex
 import shutil
+import signal
 import subprocess
 import tempfile
 import threading
@@ -28,6 +31,7 @@ from .utils import (
     check_freshclam_installed,
     get_clean_env,
     get_freshclam_path,
+    systemd_unit_exists,
     wrap_host_command,
 )
 
@@ -48,6 +52,181 @@ _RATE_LIMIT_PATTERNS = (
     "temporarily blocked",
     "blocked temporarily",
 )
+
+
+def _build_force_update_script(database_dir: str = "/var/lib/clamav") -> str:
+    """Build the shell transaction used by a forced freshclam update.
+
+    Freshclam downloads into a hidden staging directory first, so the live
+    database remains readable while mirrors are contacted.  Only a successful
+    download containing at least one database file is promoted.  The script
+    keeps freshclam as positional ``$1`` data rather than interpolating its
+    path into shell source.
+    """
+    quoted_database_dir = shlex.quote(database_dir)
+    return (
+        "d="
+        + quoted_database_dir
+        + r"""
+
+staging=
+staged_manifest=
+original_manifest=
+backup=
+promoting=0
+freshclam_pid=
+
+rollback() {
+    [ "$promoting" -eq 1 ] || return 0
+    [ -f "$staged_manifest" ] || return 1
+
+    rollback_status=0
+    # Remove every staged name currently in the live directory, then restore
+    # the complete original set from the transaction backup.
+    while IFS= read -r name; do
+        [ -n "$name" ] || continue
+        rm -f -- "$d/$name" || rollback_status=1
+    done < "$staged_manifest"
+    if [ -f "$original_manifest" ]; then
+        while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            if ! mv -f -- "$backup/$name" "$d/$name"; then
+                if ! cp -p -- "$backup/$name" "$d/$name"; then
+                    rollback_status=1
+                fi
+            fi
+        done < "$original_manifest"
+    fi
+    return "$rollback_status"
+}
+interrupt() {
+    rc=$1
+    if [ -n "$freshclam_pid" ]; then
+        kill "$freshclam_pid" 2>/dev/null || :
+    fi
+    exit "$rc"
+}
+
+
+cleanup() {
+    rc=$?
+    # Do not let a second signal interrupt rollback or staging cleanup.
+    trap '' HUP INT QUIT TERM
+    trap - 0
+    if [ "$promoting" -eq 1 ]; then
+        rollback || rc=1
+    fi
+    if [ -n "$staging" ] && [ -d "$staging" ]; then
+        rm -rf -- "$staging" || :
+    fi
+    exit "$rc"
+}
+trap cleanup 0
+trap 'interrupt 129' HUP
+trap 'interrupt 130' INT
+trap 'interrupt 131' QUIT
+trap 'interrupt 143' TERM
+
+if [ ! -d "$d" ]; then
+    exit 1
+fi
+
+# Match the live directory's access and ownership so root and non-root
+# freshclam installations use the same permissions without a distro owner
+# assumption.
+dir_mode=$(stat -c '%a' "$d") || exit 1
+dir_owner=$(stat -c '%u' "$d") || exit 1
+dir_group=$(stat -c '%g' "$d") || exit 1
+staging=$(mktemp -d "$d/.clamui-force-update.XXXXXX") || exit 1
+chmod "$dir_mode" "$staging" || exit 1
+chown "$dir_owner:$dir_group" "$staging" || exit 1
+
+# Keep every live database name in place while freshclam is blocked or
+# downloading.  Freshclam may notify clamd while staging according to its
+# configuration; the explicit reload after promotion below ensures daemon
+# scans observe the promoted generation.
+# Preserve the caller's stdin explicitly: POSIX shells otherwise connect
+# asynchronous commands to /dev/null.
+exec 3<&0
+"$1" --datadir="$staging" --verbose <&3 &
+freshclam_pid=$!
+exec 3<&-
+wait "$freshclam_pid"
+freshclam_status=$?
+freshclam_pid=
+[ "$freshclam_status" -eq 0 ] || exit "$freshclam_status"
+
+# A successful freshclam exit without a database file is not a usable force
+# update and must not alter the live definitions.
+staged_count=0
+for f in "$staging"/*.cvd "$staging"/*.cld "$staging"/*.cud; do
+    if [ -f "$f" ]; then
+        staged_count=$((staged_count + 1))
+    fi
+done
+[ "$staged_count" -gt 0 ] || exit 1
+
+# Build transaction metadata only after downloads are ready, so freshclam
+# sees an otherwise empty staging datadir.
+backup="$staging/.original"
+original_manifest="$staging/.originals"
+staged_manifest="$staging/.staged"
+mkdir -- "$backup" || exit 1
+
+# Back up the complete live database set.  Force semantics remove old-only
+# names after successful promotion; rollback restores every original name.
+for f in "$d"/*.cvd "$d"/*.cld "$d"/*.cud; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    cp -p -- "$f" "$backup/$name" || exit 1
+    printf '%s\n' "$name" >> "$original_manifest" || exit 1
+done
+
+# Record every staged name so rollback can remove newly introduced files.
+for f in "$staging"/*.cvd "$staging"/*.cld "$staging"/*.cud; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    printf '%s\n' "$name" >> "$staged_manifest" || exit 1
+done
+
+# rename(2) replaces each target atomically.  Existing live names therefore
+# never have a deletion gap; old-only names are removed only after at least
+# one staged name is live.  Rollback restores originals if this is
+# interrupted or a later move fails.
+promoting=1
+for f in "$staging"/*.cvd "$staging"/*.cld "$staging"/*.cud; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    mv -f -- "$f" "$d/$name" || exit 1
+done
+for f in "$d"/*.cvd "$d"/*.cld "$d"/*.cud; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    is_staged=0
+    while IFS= read -r staged_name; do
+        if [ "$staged_name" = "$name" ]; then
+            is_staged=1
+            break
+        fi
+    done < "$staged_manifest"
+    if [ "$is_staged" -eq 0 ]; then
+        rm -f -- "$f" || exit 1
+    fi
+done
+promoting=0
+# Notify a running clamd only after the complete promoted generation is live.
+# The daemon is optional, and an unavailable daemon must not undo a successful
+# database promotion.  Track the best-effort child so cancellation still
+# reaches it if a daemon command hangs.
+if command -v clamdscan >/dev/null 2>&1; then
+    clamdscan --reload </dev/null >/dev/null 2>&1 &
+    freshclam_pid=$!
+    wait "$freshclam_pid" || :
+    freshclam_pid=
+fi
+exit 0
+"""
+    )
 
 
 def get_pkexec_path() -> str | None:
@@ -177,9 +356,11 @@ class FreshclamUpdater:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=get_clean_env(),
                 )
 
-                if result.returncode == 0 and result.stdout.strip() == "active":
+                state = result.stdout.strip().lower()
+                if result.returncode == 0 and state == "active":
                     # Service is active, get the PID
                     try:
                         pid_result = subprocess.run(
@@ -187,6 +368,7 @@ class FreshclamUpdater:
                             capture_output=True,
                             text=True,
                             timeout=5,
+                            env=get_clean_env(),
                         )
                         if pid_result.returncode == 0:
                             pid = pid_result.stdout.strip().split()[0]  # Take first PID
@@ -198,13 +380,18 @@ class FreshclamUpdater:
                             return FreshclamServiceStatus.RUNNING, pid
                     except (subprocess.TimeoutExpired, OSError) as e:
                         logger.warning("Failed to get freshclam PID: %s", e)
-                        # Service is active but couldn't get PID
-                        return FreshclamServiceStatus.RUNNING, None
+                    # Service is active even if the PID lookup failed
+                    return FreshclamServiceStatus.RUNNING, None
 
-                elif result.returncode == 0 or "inactive" in result.stdout.strip().lower():
-                    # Service exists but is stopped
-                    logger.debug("Service %s exists but is not running", service_name)
-                    return FreshclamServiceStatus.STOPPED, None
+                elif state in ("inactive", "failed", "activating", "deactivating"):
+                    # systemd prints "inactive" even for units it has never
+                    # heard of, so confirm the unit actually exists before
+                    # concluding installed-but-stopped — otherwise a distro
+                    # using the other unit name (openSUSE's freshclam.service)
+                    # would short-circuit here and never be probed.
+                    if systemd_unit_exists(service_name):
+                        logger.debug("Service %s exists but is not running", service_name)
+                        return FreshclamServiceStatus.STOPPED, None
 
             except subprocess.TimeoutExpired:
                 logger.warning("Timeout checking service %s", service_name)
@@ -243,6 +430,7 @@ class FreshclamUpdater:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=get_clean_env(),
                 )
                 if pid_result.returncode == 0:
                     pid = pid_result.stdout.strip().split()[0]
@@ -259,6 +447,7 @@ class FreshclamUpdater:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
 
             if result.returncode == 0:
@@ -279,6 +468,7 @@ class FreshclamUpdater:
                         capture_output=True,
                         text=True,
                         timeout=30,
+                        env=get_clean_env(),
                     )
                     if elevated_result.returncode == 0:
                         logger.info("Sent SIGUSR1 to freshclam via pkexec (PID %s)", pid)
@@ -321,6 +511,7 @@ class FreshclamUpdater:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                env=get_clean_env(),
             )
             if pid_result.returncode == 0 and pid_result.stdout.strip():
                 pid = pid_result.stdout.strip().split()[0]
@@ -360,7 +551,18 @@ class FreshclamUpdater:
     ) -> UpdateResult:
         """Persist the update log, optionally restore backups, and return the result."""
         if restore_backup:
-            self._restore_databases_from_backup()
+            restore_success, restore_error = self._restore_databases_from_backup()
+            if not restore_success:
+                if restore_error:
+                    note = _("previous database could not be restored: {error}").format(
+                        error=restore_error
+                    )
+                else:
+                    note = _("previous database could not be restored")
+                if result.error_message:
+                    result.error_message = f"{result.error_message} ({note})"
+                else:
+                    result.error_message = note
 
         duration = time.monotonic() - start_time
         self._save_update_log(result, duration)
@@ -415,37 +617,12 @@ class FreshclamUpdater:
         )
 
     def _prepare_force_update_result(self, *, force: bool) -> UpdateResult | None:
-        """Handle backup/delete steps required before a forced manual update."""
-        if not force:
-            return None
+        """Keep the legacy hook side-effect free.
 
-        if is_flatpak():
-            # Host ClamAV owns the database. The Flatpak force-update command
-            # performs host-side deletion through pkexec instead of touching
-            # legacy sandbox database files.
-            return None
-
-        success, error, _backed_up = self._backup_local_databases()
-
-        if not success:
-            logger.warning(
-                "Could not backup host databases before force update "
-                "(expected for root-owned directories): %s",
-                error,
-            )
-            self._cleanup_backup()
-            return None
-
-        success, error, deleted_count = self._delete_local_databases()
-        if not success:
-            self._restore_databases_from_backup()
-            return self._create_result(
-                UpdateStatus.ERROR,
-                stderr=error or "",
-                error_message=error or _("Delete failed"),
-            )
-
-        logger.info("Deleted %d database file(s) before force update", deleted_count)
+        Force updates now stage and promote inside the privileged shell
+        transaction.  In particular, no Python-side backup or deletion may
+        run before freshclam has completed.
+        """
         return None
 
     def _get_running_instance_result(self) -> UpdateResult | None:
@@ -475,6 +652,79 @@ class FreshclamUpdater:
             return stream
         return stream.decode("utf-8", errors="replace")
 
+    @staticmethod
+    def _process_group_exists(pid: int | None) -> bool:
+        """Return whether a POSIX process group still has any members."""
+        if (
+            os.name != "posix"
+            or not isinstance(pid, int)
+            or isinstance(pid, bool)
+            or pid <= 0
+            or not callable(getattr(os, "killpg", None))
+        ):
+            return False
+
+        try:
+            os.killpg(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            # The group exists, but this process is not allowed to signal it.
+            return True
+        except OSError:
+            return False
+        return True
+
+    def _signal_process_group(
+        self,
+        process: subprocess.Popen,
+        signal_number: int | None,
+    ) -> bool | None:
+        """Signal an isolated process group, falling back to the process handle.
+
+        Returns ``True`` when a usable POSIX process-group target was found,
+        ``False`` when the process-level fallback succeeded, and ``None`` when
+        the fallback could not signal an already-gone process.
+        """
+        pid = getattr(process, "pid", None)
+        group_available = (
+            os.name == "posix"
+            and isinstance(pid, int)
+            and not isinstance(pid, bool)
+            and pid > 0
+            and signal_number is not None
+            and callable(getattr(os, "killpg", None))
+        )
+        fallback_method = (
+            process.terminate if signal_number == getattr(signal, "SIGTERM", None) else process.kill
+        )
+
+        if group_available:
+            try:
+                os.killpg(pid, signal_number)
+            except (OSError, ProcessLookupError):
+                logger.debug(
+                    "Failed to signal update process group (pgid=%s, signal=%s)",
+                    pid,
+                    signal_number,
+                    exc_info=True,
+                )
+                try:
+                    fallback_method()
+                except (OSError, ProcessLookupError):
+                    logger.debug(
+                        "Failed to signal update process after group signal failure",
+                        exc_info=True,
+                    )
+            return True
+
+        try:
+            fallback_method()
+        except (OSError, ProcessLookupError):
+            logger.debug("Failed to signal update process", exc_info=True)
+            return None
+        return False
+
     def _collect_timeout_output(
         self,
         process: subprocess.Popen,
@@ -501,7 +751,7 @@ class FreshclamUpdater:
             self._current_process = None
         try:
             if process.poll() is None:
-                process.kill()
+                self._signal_process_group(process, getattr(signal, "SIGKILL", None))
             process.wait(timeout=_KILL_WAIT_TIMEOUT)
         except (OSError, ProcessLookupError, subprocess.TimeoutExpired):
             logger.debug("Failed to forcefully terminate update process", exc_info=True)
@@ -510,13 +760,16 @@ class FreshclamUpdater:
         """Execute the freshclam subprocess and return its output and timeout state."""
         self._update_cancelled = False
         with self._process_lock:
-            self._current_process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                env=get_clean_env(),
-            )
+            popen_kwargs = {
+                "stdout": subprocess.PIPE,
+                "stderr": subprocess.PIPE,
+                "text": True,
+                "env": get_clean_env(),
+            }
+            if os.name == "posix":
+                popen_kwargs["start_new_session"] = True
+            process = subprocess.Popen(cmd, **popen_kwargs)
+            self._current_process = process
 
         timed_out = False
         stdout = ""
@@ -524,13 +777,50 @@ class FreshclamUpdater:
         exit_code = -1
 
         try:
-            stdout, stderr = self._current_process.communicate(timeout=_UPDATE_COMMUNICATE_TIMEOUT)
-            exit_code = self._current_process.returncode
+            stdout, stderr = process.communicate(timeout=_UPDATE_COMMUNICATE_TIMEOUT)
+            exit_code = process.returncode
         except subprocess.TimeoutExpired as e:
-            logger.warning("Update process timed out, killing")
+            logger.warning("Update process timed out, requesting graceful shutdown")
             timed_out = True
-            self._current_process.kill()
-            stdout, stderr = self._collect_timeout_output(self._current_process, e)
+            terminate_mode = self._signal_process_group(
+                process,
+                getattr(signal, "SIGTERM", None),
+            )
+            if terminate_mode:
+                try:
+                    process.wait(timeout=_TERMINATE_GRACE_TIMEOUT)
+                except subprocess.TimeoutExpired:
+                    logger.warning("Update process didn't terminate gracefully")
+                except (OSError, ProcessLookupError):
+                    logger.debug(
+                        "Update process disappeared during graceful timeout cleanup",
+                        exc_info=True,
+                    )
+
+                # The wrapper can exit after its EXIT trap removes staging while
+                # a stubborn descendant keeps the process group alive.
+                if self._process_group_exists(getattr(process, "pid", None)):
+                    self._signal_process_group(
+                        process,
+                        getattr(signal, "SIGKILL", None),
+                    )
+            elif terminate_mode is False:
+                # Preserve process-level fallback behavior for non-POSIX
+                # platforms and mocks without a usable process group.
+                try:
+                    process.wait(timeout=_TERMINATE_GRACE_TIMEOUT)
+                except subprocess.TimeoutExpired:
+                    logger.warning("Update process didn't terminate gracefully, killing")
+                    self._signal_process_group(
+                        process,
+                        getattr(signal, "SIGKILL", None),
+                    )
+                except (OSError, ProcessLookupError):
+                    logger.debug(
+                        "Update process disappeared during graceful timeout cleanup",
+                        exc_info=True,
+                    )
+            stdout, stderr = self._collect_timeout_output(process, e)
         finally:
             self._cleanup_current_process()
 
@@ -538,7 +828,6 @@ class FreshclamUpdater:
 
     def _run_manual_update(self, *, force: bool, start_time: float) -> UpdateResult:
         """Execute the manual freshclam path once preconditions have passed."""
-        restore_local_backup = force and self._force_update_backup_dir is not None
         running_result = self._get_running_instance_result()
         if running_result is not None:
             return self._finish_update(running_result, start_time)
@@ -555,7 +844,6 @@ class FreshclamUpdater:
                     error_message=_("freshclam executable not found"),
                 ),
                 start_time,
-                restore_backup=restore_local_backup,
             )
         except PermissionError as e:
             return self._finish_update(
@@ -565,7 +853,6 @@ class FreshclamUpdater:
                     error_message=_("Permission denied: {error}").format(error=e),
                 ),
                 start_time,
-                restore_backup=restore_local_backup,
             )
         except Exception as e:
             return self._finish_update(
@@ -575,7 +862,6 @@ class FreshclamUpdater:
                     error_message=_("Update failed: {error}").format(error=e),
                 ),
                 start_time,
-                restore_backup=restore_local_backup,
             )
 
         if timed_out and not self._update_cancelled:
@@ -587,7 +873,6 @@ class FreshclamUpdater:
                     error_message=_("Update timed out after 10 minutes"),
                 ),
                 start_time,
-                restore_backup=restore_local_backup,
             )
 
         if self._update_cancelled:
@@ -600,16 +885,11 @@ class FreshclamUpdater:
                     error_message=_("Update cancelled by user"),
                 ),
                 start_time,
-                restore_backup=restore_local_backup,
             )
 
         result = self._parse_results(stdout, stderr, exit_code)
 
-        return self._finish_update(
-            result,
-            start_time,
-            restore_backup=restore_local_backup and result.status == UpdateStatus.ERROR,
-        )
+        return self._finish_update(result, start_time)
 
     def update_sync(self, force: bool = False, prefer_service: bool = True) -> UpdateResult:
         """
@@ -619,9 +899,10 @@ class FreshclamUpdater:
         use update_async() instead.
 
         Args:
-            force: If True, backup existing databases, delete them, then download
-                   fresh copies from mirrors. Previous databases are restored if
-                   the update fails.
+            force: If True, download into a staging directory and promote
+                   fresh database files only after a successful freshclam
+                   run. Existing live definitions stay readable during the
+                   download and are preserved if it fails.
             prefer_service: If True (default), attempt to trigger update via
                            freshclam systemd service using SIGUSR1 when available.
                            Falls back to manual method if service not running.
@@ -640,10 +921,6 @@ class FreshclamUpdater:
         if service_result is not None:
             return self._finish_update(service_result, start_time)
 
-        force_result = self._prepare_force_update_result(force=force)
-        if force_result is not None:
-            return self._finish_update(force_result, start_time)
-
         return self._run_manual_update(force=force, start_time=start_time)
 
     def update_async(
@@ -660,11 +937,13 @@ class FreshclamUpdater:
 
         Args:
             callback: Function to call with UpdateResult when update completes
-            force: If True, backup existing databases, delete them, then download
-                   fresh copies from mirrors. Previous databases are restored if
-                   the update fails.
+            force: If True, download into a staging directory and promote
+                   fresh database files only after a successful freshclam
+                   run. Existing live definitions stay readable during the
+                   download and are preserved if it fails.
             prefer_service: If True (default), attempt to trigger update via
                            freshclam systemd service using SIGUSR1 when available.
+                           Force updates always use manual method.
         """
 
         def update_thread():
@@ -690,26 +969,54 @@ class FreshclamUpdater:
         if process is None:
             return
 
-        # Step 1: SIGTERM (graceful)
-        try:
-            process.terminate()
-        except (OSError, ProcessLookupError):
+        terminate_mode = self._signal_process_group(
+            process,
+            getattr(signal, "SIGTERM", None),
+        )
+        if terminate_mode is None:
             # Process already gone
             return
 
-        # Step 2: Wait for graceful termination
-        try:
-            process.wait(timeout=_TERMINATE_GRACE_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            # Step 3: SIGKILL (forceful)
-            logger.warning("Update process didn't terminate gracefully, killing")
+        if terminate_mode:
+            # The leader can exit while descendants keep the group alive. Always
+            # send SIGKILL to the group after the graceful wait.
             try:
-                process.kill()
+                process.wait(timeout=_TERMINATE_GRACE_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                logger.warning("Update process didn't terminate gracefully, killing")
+            except (OSError, ProcessLookupError):
+                logger.debug("Update process disappeared during graceful shutdown", exc_info=True)
+
+            self._signal_process_group(process, getattr(signal, "SIGKILL", None))
+            try:
                 process.wait(timeout=_KILL_WAIT_TIMEOUT)
             except (OSError, ProcessLookupError, subprocess.TimeoutExpired):
                 logger.debug(
-                    "Failed to kill update process after graceful shutdown timeout", exc_info=True
+                    "Failed to kill update process group after graceful shutdown timeout",
+                    exc_info=True,
                 )
+            return
+
+        # Preserve the process-level fallback's existing conditional escalation.
+        try:
+            process.wait(timeout=_TERMINATE_GRACE_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            logger.warning("Update process didn't terminate gracefully, killing")
+            kill_mode = self._signal_process_group(
+                process,
+                getattr(signal, "SIGKILL", None),
+            )
+            if kill_mode is None:
+                return
+            try:
+                process.wait(timeout=_KILL_WAIT_TIMEOUT)
+            except (OSError, ProcessLookupError, subprocess.TimeoutExpired):
+                logger.debug(
+                    "Failed to kill update process after graceful shutdown timeout",
+                    exc_info=True,
+                )
+        except (OSError, ProcessLookupError):
+            logger.debug("Update process disappeared during graceful shutdown", exc_info=True)
 
     def _build_command(self, force: bool = False) -> list[str]:
         """
@@ -719,34 +1026,47 @@ class FreshclamUpdater:
         root access to update the ClamAV database in /var/lib/clamav/.
 
         When running inside a Flatpak sandbox, the command is automatically
-        wrapped with 'flatpak-spawn --host' to execute freshclam on the host system.
+        wrapped with 'flatpak-spawn --host' to execute freshclam on the host
+        system.
 
         Args:
-            force: If True, delete host databases before running freshclam
-                   (via pkexec shell script).
+            force: If True, download into a staging directory and promote
+                   database files only after freshclam succeeds.  The live
+                   database remains available throughout the download.
 
         Returns:
             List of command arguments (wrapped with flatpak-spawn if in Flatpak)
         """
         freshclam = get_freshclam_path() or "freshclam"
-
         pkexec = get_pkexec_path()
-        if pkexec:
-            if force:
-                # Force update: Delete databases first, then run freshclam.
-                # This all happens via pkexec with root privileges.
-                # freshclam is passed as $1 (positional arg) to avoid
-                # shell injection — the script string is a constant.
+
+        if force:
+            script = _build_force_update_script()
+            if pkexec:
+                # Pass freshclam as $1 (positional data), never as shell source.
+                # This keeps paths containing shell metacharacters harmless.
                 cmd = [
                     pkexec,
                     "sh",
                     "-c",
-                    # Delete all ClamAV database files, then run freshclam
-                    'rm -f /var/lib/clamav/*.cvd /var/lib/clamav/*.cld /var/lib/clamav/*.cud 2>/dev/null; "$1" --verbose',
-                    "clamui-force-update",  # $0 (script name for error messages)
+                    script,
+                    "clamui-force-update",  # $0 (script name for diagnostics)
                     freshclam,  # $1 (safe — not interpreted as shell syntax)
                 ]
-                return wrap_host_command(cmd)
+            else:
+                # Without pkexec the same transaction is attempted directly;
+                # it may fail with a permission error for root-owned databases,
+                # but it never falls back to deleting live definitions.
+                cmd = [
+                    "sh",
+                    "-c",
+                    script,
+                    "clamui-force-update",
+                    freshclam,
+                ]
+            return wrap_host_command(cmd)
+
+        if pkexec:
             cmd = [pkexec, freshclam]
         else:
             # Fallback to running without elevation (may fail with permission error)

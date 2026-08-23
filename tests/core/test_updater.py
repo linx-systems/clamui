@@ -10,7 +10,10 @@ Tests cover:
 - Force update backup/restore methods
 """
 
+import os
+import signal
 import subprocess
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -323,7 +326,7 @@ class TestFreshclamUpdaterBuildCommand:
                         assert "--config-file" not in cmd
 
     def test_build_command_with_force_flag(self, updater_module):
-        """Test command with force flag does not include --no-dns (removed in new implementation)."""
+        """Test force command stages downloads and passes freshclam as positional data."""
         FreshclamUpdater = updater_module["FreshclamUpdater"]
         with patch("src.core.updater.is_flatpak", return_value=False):
             with patch("src.core.updater.get_freshclam_path", return_value="/usr/bin/freshclam"):
@@ -331,11 +334,17 @@ class TestFreshclamUpdaterBuildCommand:
                     with patch("src.core.updater.wrap_host_command", side_effect=lambda x: x):
                         updater = FreshclamUpdater(log_manager=MagicMock())
                         cmd = updater._build_command(force=True)
-                        assert cmd[0] == "/usr/bin/freshclam"
-                        assert "--verbose" in cmd
-                        # --no-dns was removed - force update is now implemented by
-                        # deleting local databases before running freshclam
-                        assert "--no-dns" not in cmd
+
+        assert cmd[0] == "sh"
+        assert cmd[1] == "-c"
+        shell_script = cmd[2]
+        assert 'staging=$(mktemp -d "$d/.clamui-force-update.XXXXXX")' in shell_script
+        assert '--datadir="$staging"' in shell_script
+        assert '"$1"' in shell_script
+        assert "/usr/bin/freshclam" not in shell_script
+        assert cmd[3] == "clamui-force-update"
+        assert cmd[4] == "/usr/bin/freshclam"
+        assert "--no-dns" not in shell_script
 
     def test_build_command_without_force_flag(self, updater_module):
         """Test command does not include --no-dns flag when force=False (default)."""
@@ -1056,8 +1065,219 @@ class TestFreshclamUpdaterCommunicateTimeout:
                             assert result.status == UpdateStatus.ERROR
                             assert "timed out" in result.error_message.lower()
 
+    @pytest.mark.skipif(
+        os.name != "posix" or not Path("/proc").is_dir(),
+        reason="requires POSIX process groups and /proc",
+    )
+    def test_timeout_terminates_descendant_process(
+        self,
+        tmp_path: Path,
+        updater_module,
+    ):
+        """A timed-out update must terminate descendants of the shell wrapper."""
+        FreshclamUpdater = updater_module["FreshclamUpdater"]
+        updater = FreshclamUpdater(log_manager=MagicMock())
+
+        child_script = tmp_path / "blocking-child.sh"
+        child_script.write_text(
+            """#!/bin/sh
+set -eu
+trap '' TERM
+printf '%s\n' "$$" > "$1"
+exec sleep 3600
+""",
+            encoding="utf-8",
+        )
+
+        wrapper_script = tmp_path / "blocking-wrapper.sh"
+        wrapper_script.write_text(
+            """#!/bin/sh
+set -eu
+/bin/sh "$1" "$2" &
+wait
+""",
+            encoding="utf-8",
+        )
+        marker = tmp_path / "child.pid"
+        child_pid: int | None = None
+
+        def read_child_pid() -> int | None:
+            try:
+                value = marker.read_text(encoding="utf-8").strip()
+            except (FileNotFoundError, OSError):
+                return None
+            try:
+                pid = int(value)
+            except ValueError:
+                return None
+            return pid if pid > 0 else None
+
+        def pid_exists(pid: int) -> bool:
+            proc_entry = Path("/proc") / str(pid)
+            if not proc_entry.exists():
+                return False
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return False
+            except PermissionError:
+                return True
+            return proc_entry.exists()
+
+        try:
+            with patch("src.core.updater._UPDATE_COMMUNICATE_TIMEOUT", 0.5):
+                _, _, _, timed_out = updater._run_update_process(
+                    ["/bin/sh", str(wrapper_script), str(child_script), str(marker)]
+                )
+
+            marker_deadline = time.monotonic() + 5.0
+            while child_pid is None:
+                child_pid = read_child_pid()
+                if child_pid is not None:
+                    break
+                if time.monotonic() >= marker_deadline:
+                    raise AssertionError(f"timed out waiting for child PID marker: {marker}")
+                time.sleep(0.01)
+
+            assert timed_out is True
+            assert child_pid != os.getpid()
+
+            cleanup_deadline = time.monotonic() + 5.0
+            while pid_exists(child_pid):
+                if time.monotonic() >= cleanup_deadline:
+                    break
+                time.sleep(0.01)
+            assert not pid_exists(child_pid), f"descendant process {child_pid} is still alive"
+        finally:
+            if child_pid is None:
+                cleanup_deadline = time.monotonic() + 1.0
+                while child_pid is None and time.monotonic() < cleanup_deadline:
+                    child_pid = read_child_pid()
+                    if child_pid is None:
+                        time.sleep(0.01)
+            if child_pid is not None:
+                if pid_exists(child_pid):
+                    try:
+                        os.kill(child_pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                cleanup_deadline = time.monotonic() + 2.0
+                while pid_exists(child_pid) and time.monotonic() < cleanup_deadline:
+                    time.sleep(0.01)
+            updater._cleanup_current_process()
+
+    @pytest.mark.skipif(
+        os.name != "posix" or not Path("/proc").is_dir(),
+        reason="requires POSIX process groups and /proc",
+    )
+    def test_force_update_timeout_cleans_staging_directory(
+        self,
+        tmp_path: Path,
+        updater_module,
+    ):
+        """A timed-out force update must remove staging without changing live data."""
+        FreshclamUpdater = updater_module["FreshclamUpdater"]
+        updater = FreshclamUpdater(log_manager=MagicMock())
+        from src.core.updater import _build_force_update_script
+
+        database_dir = tmp_path / "clamav"
+        database_dir.mkdir()
+        live_database = database_dir / "main.cvd"
+        original_bytes = b"live-database-before-timeout"
+        live_database.write_bytes(original_bytes)
+
+        datadir_marker = tmp_path / "staging.datadir"
+        pid_marker = tmp_path / "freshclam.pid"
+        fake_freshclam = tmp_path / "fake-freshclam"
+        fake_freshclam.write_text(
+            """#!/bin/sh
+set -eu
+
+datadir=
+while [ "$#" -gt 0 ]; do
+    arg=$1
+    shift
+    case "$arg" in
+        --datadir=*) datadir=${arg#--datadir=} ;;
+        --datadir)
+            [ "$#" -gt 0 ]
+            datadir=$1
+            shift
+            ;;
+    esac
+done
+[ -n "$datadir" ]
+trap '' TERM
+script_dir=$(dirname "$0")
+printf '%s\n' "$datadir" > "$script_dir/staging.datadir"
+printf '%s\n' "$$" > "$script_dir/freshclam.pid"
+exec sleep 3600
+""",
+            encoding="utf-8",
+        )
+        fake_freshclam.chmod(0o755)
+
+        def pid_exists(pid: int) -> bool:
+            proc_entry = Path("/proc") / str(pid)
+            if not proc_entry.exists():
+                return False
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return False
+            except PermissionError:
+                return True
+            return proc_entry.exists()
+
+        fake_pid: int | None = None
+        try:
+            script = _build_force_update_script(str(database_dir))
+            with patch("src.core.updater._UPDATE_COMMUNICATE_TIMEOUT", 0.5):
+                _, _, _, timed_out = updater._run_update_process(
+                    ["sh", "-c", script, "clamui-force-update", str(fake_freshclam)]
+                )
+
+            staging_dir: Path | None = None
+            marker_deadline = time.monotonic() + 5.0
+            while staging_dir is None:
+                try:
+                    marker_value = datadir_marker.read_text(encoding="utf-8").strip()
+                except (FileNotFoundError, OSError):
+                    marker_value = ""
+                if marker_value:
+                    staging_dir = Path(marker_value)
+                    break
+                if time.monotonic() >= marker_deadline:
+                    raise AssertionError(f"timed out waiting for staging marker: {datadir_marker}")
+                time.sleep(0.01)
+
+            assert timed_out is True
+            assert staging_dir != database_dir
+            assert not staging_dir.exists()
+            assert live_database.read_bytes() == original_bytes
+        finally:
+            pid_deadline = time.monotonic() + 1.0
+            while fake_pid is None and time.monotonic() < pid_deadline:
+                try:
+                    fake_pid = int(pid_marker.read_text(encoding="utf-8").strip())
+                except (FileNotFoundError, OSError, ValueError):
+                    fake_pid = None
+                if fake_pid is None:
+                    time.sleep(0.01)
+
+            if fake_pid is not None and fake_pid > 0 and fake_pid != os.getpid():
+                if pid_exists(fake_pid):
+                    try:
+                        os.kill(fake_pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    cleanup_deadline = time.monotonic() + 2.0
+                    while pid_exists(fake_pid) and time.monotonic() < cleanup_deadline:
+                        time.sleep(0.01)
+            updater._cleanup_current_process()
+
     def test_force_timeout_restores_backup_in_native_mode(self, updater_module):
-        """Force-update timeouts should restore backups even outside Flatpak."""
+        """Force-update timeouts should not invoke legacy Python backup helpers."""
         FreshclamUpdater = updater_module["FreshclamUpdater"]
         UpdateStatus = updater_module["UpdateStatus"]
         mock_log_manager = MagicMock()
@@ -1065,38 +1285,42 @@ class TestFreshclamUpdaterCommunicateTimeout:
         with patch("src.core.updater.is_flatpak", return_value=False):
             with patch("src.core.updater.check_freshclam_installed", return_value=(True, "1.0.0")):
                 updater = FreshclamUpdater(log_manager=mock_log_manager)
-                with patch.object(
-                    updater,
-                    "_backup_local_databases",
-                    return_value=(True, None, []),
-                ):
-                    with patch.object(
-                        updater,
-                        "_check_freshclam_running",
-                        return_value=(False, None),
-                    ):
+                with patch.object(updater, "_backup_local_databases") as mock_backup:
+                    with patch.object(updater, "_delete_local_databases") as mock_delete:
                         with patch.object(
                             updater,
-                            "_build_command",
-                            return_value=["freshclam"],
+                            "_check_freshclam_running",
+                            return_value=(False, None),
                         ):
                             with patch.object(
                                 updater,
-                                "_run_update_process",
-                                return_value=("partial output", "", -1, True),
+                                "_build_command",
+                                return_value=[
+                                    "sh",
+                                    "-c",
+                                    "staged force update",
+                                    "clamui-force-update",
+                                    "freshclam",
+                                ],
                             ):
                                 with patch.object(
                                     updater,
-                                    "_restore_databases_from_backup",
-                                    return_value=(True, "Restored"),
-                                ) as mock_restore:
-                                    result = updater.update_sync(
-                                        force=True,
-                                        prefer_service=False,
-                                    )
+                                    "_run_update_process",
+                                    return_value=("partial output", "", -1, True),
+                                ):
+                                    with patch.object(
+                                        updater, "_restore_databases_from_backup"
+                                    ) as mock_restore:
+                                        result = updater.update_sync(
+                                            force=True,
+                                            prefer_service=False,
+                                        )
 
         assert result.status == UpdateStatus.ERROR
-        mock_restore.assert_called_once()
+        assert "timed out" in result.error_message.lower()
+        mock_backup.assert_not_called()
+        mock_delete.assert_not_called()
+        mock_restore.assert_not_called()
 
     def test_force_cancel_does_not_touch_sandbox_backup_in_flatpak_mode(self, updater_module):
         """Flatpak force updates operate on the host and skip sandbox DB backup."""
@@ -1884,11 +2108,18 @@ class TestCheckFreshclamService:
 
         def mock_run(cmd, *args, **kwargs):
             calls.append(cmd)
+            if "show" in cmd:
+                # LoadState probe confirming the unit exists
+                return MagicMock(returncode=0, stdout="loaded\n")
             return MagicMock(returncode=3, stdout="inactive")
 
         with (
             patch(
                 "src.core.updater.wrap_host_command",
+                side_effect=lambda cmd: ["flatpak-spawn", "--host", *cmd],
+            ),
+            patch(
+                "src.core.clamav_detection.wrap_host_command",
                 side_effect=lambda cmd: ["flatpak-spawn", "--host", *cmd],
             ),
             patch("subprocess.run", side_effect=mock_run),
@@ -1939,18 +2170,49 @@ class TestCheckFreshclamService:
 
         mock_log_manager = MagicMock()
 
-        # Mock systemctl is-active returning inactive
-        mock_systemctl = MagicMock()
-        mock_systemctl.returncode = 0
-        mock_systemctl.stdout = "inactive"
+        # Mock systemctl is-active returning inactive for a unit that exists
+        def mock_run(cmd, *args, **kwargs):
+            if "show" in cmd:
+                # LoadState probe confirming the unit exists
+                return MagicMock(returncode=0, stdout="loaded\n")
+            return MagicMock(returncode=3, stdout="inactive")
 
         with patch("src.core.updater.is_flatpak", return_value=False):
-            with patch("subprocess.run", return_value=mock_systemctl):
+            with patch("subprocess.run", side_effect=mock_run):
                 with patch("src.core.updater.wrap_host_command", side_effect=lambda x: x):
-                    updater = FreshclamUpdater(log_manager=mock_log_manager)
-                    status, pid = updater.check_freshclam_service()
+                    with patch(
+                        "src.core.clamav_detection.wrap_host_command", side_effect=lambda x: x
+                    ):
+                        updater = FreshclamUpdater(log_manager=mock_log_manager)
+                        status, pid = updater.check_freshclam_service()
 
         assert status == FreshclamServiceStatus.STOPPED
+        assert pid is None
+
+    def test_returns_not_found_when_unit_unknown_but_reported_inactive(self, updater_module):
+        """systemd prints 'inactive' for units it has never heard of; that
+        must not be classified as installed-but-stopped, or the second
+        candidate unit name (openSUSE's freshclam.service) is never probed."""
+        from src.core.updater import FreshclamServiceStatus, FreshclamUpdater
+
+        mock_log_manager = MagicMock()
+
+        def mock_run(cmd, *args, **kwargs):
+            if "show" in cmd:
+                # LoadState probe: unit is unknown to systemd
+                return MagicMock(returncode=0, stdout="not-found\n")
+            return MagicMock(returncode=3, stdout="inactive")
+
+        with patch("src.core.updater.is_flatpak", return_value=False):
+            with patch("subprocess.run", side_effect=mock_run):
+                with patch("src.core.updater.wrap_host_command", side_effect=lambda x: x):
+                    with patch(
+                        "src.core.clamav_detection.wrap_host_command", side_effect=lambda x: x
+                    ):
+                        updater = FreshclamUpdater(log_manager=mock_log_manager)
+                        status, pid = updater.check_freshclam_service()
+
+        assert status == FreshclamServiceStatus.NOT_FOUND
         assert pid is None
 
     def test_returns_not_found_when_no_service_exists(self, updater_module):
@@ -2620,6 +2882,130 @@ class TestTriggerServiceUpdateAdditional:
 
 
 # =============================================================================
+# Clean-Env Wiring Tests (issue #155 residuals)
+# =============================================================================
+
+
+class TestProbeSubprocessCleanEnv:
+    """Host-state probes (systemctl is-active, pidof) must receive the
+    sanitized environment so leaked AppImage vars don't break them."""
+
+    def test_check_freshclam_service_passes_clean_env(self, updater_module):
+        """systemctl is-active and pidof both receive env=get_clean_env()."""
+        from src.core.updater import FreshclamServiceStatus, FreshclamUpdater
+
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        env_by_cmd = {}
+
+        def mock_run(cmd, *args, **kwargs):
+            env_by_cmd[cmd[0]] = kwargs.get("env")
+            if "is-active" in cmd:
+                return MagicMock(returncode=0, stdout="active")
+            if "pidof" in cmd:
+                return MagicMock(returncode=0, stdout="12345")
+            return MagicMock(returncode=1, stdout="")
+
+        with (
+            patch("src.core.updater.get_clean_env", return_value=clean_env),
+            patch("src.core.updater.wrap_host_command", side_effect=lambda x: x),
+            patch("subprocess.run", side_effect=mock_run),
+        ):
+            updater = FreshclamUpdater(log_manager=MagicMock())
+            status, pid = updater.check_freshclam_service()
+
+        assert status == FreshclamServiceStatus.RUNNING
+        assert pid == "12345"
+        assert env_by_cmd["systemctl"] is clean_env
+        assert env_by_cmd["pidof"] is clean_env
+
+    def test_trigger_service_update_pid_probe_passes_clean_env(self, updater_module):
+        """The pidof retry inside trigger_service_update() gets the clean env."""
+        from src.core.updater import FreshclamServiceStatus, FreshclamUpdater
+
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        env_by_cmd = {}
+
+        def mock_run(cmd, *args, **kwargs):
+            env_by_cmd[cmd[0]] = kwargs.get("env")
+            if "pidof" in cmd:
+                return MagicMock(returncode=0, stdout="54321")
+            if "kill" in cmd:
+                return MagicMock(returncode=0, stderr="")
+            return MagicMock(returncode=1, stdout="")
+
+        updater = FreshclamUpdater(log_manager=MagicMock())
+        with (
+            patch.object(
+                updater,
+                "check_freshclam_service",
+                return_value=(FreshclamServiceStatus.RUNNING, None),
+            ),
+            patch("src.core.updater.get_clean_env", return_value=clean_env),
+            patch("src.core.updater.wrap_host_command", side_effect=lambda x: x),
+            patch("subprocess.run", side_effect=mock_run),
+        ):
+            success, _message = updater.trigger_service_update()
+
+        assert success is True
+        assert env_by_cmd["pidof"] is clean_env
+
+    def test_check_freshclam_running_passes_clean_env(self, updater_module):
+        """_check_freshclam_running's pidof probe gets the clean env."""
+        from src.core.updater import FreshclamUpdater
+
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+
+        with (
+            patch("src.core.updater.get_clean_env", return_value=clean_env),
+            patch("src.core.updater.wrap_host_command", side_effect=lambda x: x),
+            patch(
+                "subprocess.run",
+                return_value=MagicMock(returncode=0, stdout="777"),
+            ) as mock_run,
+        ):
+            updater = FreshclamUpdater(log_manager=MagicMock())
+            is_running, pid = updater._check_freshclam_running()
+
+        assert is_running is True
+        assert pid == "777"
+        assert mock_run.call_args.kwargs["env"] is clean_env
+
+    def test_trigger_service_update_kill_passes_clean_env(self, updater_module):
+        """Both the kill and pkexec-kill signal commands get the clean env."""
+        from src.core.updater import FreshclamServiceStatus, FreshclamUpdater
+
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        env_by_cmd = {}
+
+        def mock_run(cmd, *args, **kwargs):
+            env_by_cmd[cmd[0]] = kwargs.get("env")
+            if cmd[0] == "kill":
+                # Regular kill fails so the pkexec fallback runs too
+                return MagicMock(returncode=1, stderr="Operation not permitted")
+            if cmd[0] == "/usr/bin/pkexec":
+                return MagicMock(returncode=0, stderr="")
+            return MagicMock(returncode=1, stdout="")
+
+        updater = FreshclamUpdater(log_manager=MagicMock())
+        with (
+            patch.object(
+                updater,
+                "check_freshclam_service",
+                return_value=(FreshclamServiceStatus.RUNNING, "123"),
+            ),
+            patch("src.core.updater.get_pkexec_path", return_value="/usr/bin/pkexec"),
+            patch("src.core.updater.get_clean_env", return_value=clean_env),
+            patch("src.core.updater.wrap_host_command", side_effect=lambda x: x),
+            patch("subprocess.run", side_effect=mock_run),
+        ):
+            success, _message = updater.trigger_service_update()
+
+        assert success is True
+        assert env_by_cmd["kill"] is clean_env
+        assert env_by_cmd["/usr/bin/pkexec"] is clean_env
+
+
+# =============================================================================
 # Additional UpdateResult Tests
 # =============================================================================
 
@@ -2912,3 +3298,192 @@ class TestUpdateMethodCompleteness:
         from src.core.updater import UpdateMethod
 
         assert len(UpdateMethod) == 2
+
+
+# =============================================================================
+# Force-update staging race regression tests
+# =============================================================================
+
+
+@pytest.fixture
+def force_update_script_builder():
+    """Return the force-update shell-script builder under test."""
+    from src.core.updater import _build_force_update_script
+
+    return _build_force_update_script
+
+
+def _write_blocking_fake_freshclam(tmp_path: Path, *, outcome: str) -> Path:
+    """Create a fake freshclam that blocks before completing its download."""
+    script_path = tmp_path / f"fake-freshclam-{outcome}"
+    script_path.write_text(
+        """#!/bin/sh
+set -eu
+
+datadir=
+while [ "$#" -gt 0 ]; do
+    arg=$1
+    shift
+    case "$arg" in
+        --datadir=*) datadir=${arg#--datadir=} ;;
+        --datadir)
+            [ "$#" -gt 0 ]
+            datadir=$1
+            shift
+            ;;
+    esac
+done
+
+[ -n "$datadir" ]
+printf '%s' "$datadir" > "$FAKE_DATADIR_MARKER"
+: > "$FAKE_STARTED_MARKER"
+IFS= read -r release_token
+if [ "$FAKE_OUTCOME" = success ]; then
+    printf '%s' "$FAKE_REPLACEMENT" > "$datadir/main.cvd"
+    exit 0
+fi
+printf '%s' "$FAKE_FAILURE_CANDIDATE" > "$datadir/main.cvd"
+exit 1
+""",
+        encoding="utf-8",
+    )
+    script_path.chmod(0o755)
+    return script_path
+
+
+def _wait_for_marker(marker: Path, process: subprocess.Popen, timeout: float = 5.0) -> None:
+    """Wait for a fake freshclam marker without an unbounded race-prone sleep."""
+    deadline = time.monotonic() + timeout
+    while not marker.exists():
+        if process.poll() is not None:
+            raise AssertionError(f"freshclam exited before creating marker: {marker}")
+        if time.monotonic() >= deadline:
+            raise AssertionError(f"timed out waiting for marker: {marker}")
+        time.sleep(0.01)
+
+
+def _finish_blocked_update(process: subprocess.Popen, *, expected_returncode: int) -> None:
+    """Release a blocked fake freshclam and reap the shell process."""
+    try:
+        stdout, stderr = process.communicate(input=b"release\n", timeout=5)
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.communicate()
+
+    assert process.returncode == expected_returncode, (
+        f"force-update script exited {process.returncode}, stdout={stdout!r}, stderr={stderr!r}"
+    )
+
+
+class TestForceUpdateStaging:
+    """Exercise force updates through the generated shell script."""
+
+    def test_success_preserves_live_database_until_staged_download_is_ready(
+        self,
+        tmp_path: Path,
+        force_update_script_builder,
+    ):
+        database_dir = tmp_path / "clamav"
+        database_dir.mkdir()
+        live_database = database_dir / "main.cvd"
+        original_bytes = b"live-database-before-update"
+        live_database.write_bytes(original_bytes)
+
+        started_marker = tmp_path / "success.started"
+        datadir_marker = tmp_path / "success.datadir"
+        fake_freshclam = _write_blocking_fake_freshclam(
+            tmp_path,
+            outcome="success",
+        )
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "FAKE_STARTED_MARKER": str(started_marker),
+                "FAKE_DATADIR_MARKER": str(datadir_marker),
+                "FAKE_OUTCOME": "success",
+                "FAKE_REPLACEMENT": "fresh-staged-database",
+                "FAKE_FAILURE_CANDIDATE": "unused-failure-candidate",
+            }
+        )
+
+        script = force_update_script_builder(str(database_dir))
+        process = subprocess.Popen(
+            ["sh", "-c", script, "clamui-force-update", str(fake_freshclam)],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=environment,
+        )
+        try:
+            _wait_for_marker(started_marker, process)
+
+            assert live_database.is_file()
+            assert live_database.read_bytes() == original_bytes
+            staging_dir = Path(datadir_marker.read_text(encoding="utf-8"))
+            assert staging_dir != database_dir
+            assert process.poll() is None
+
+            _finish_blocked_update(process, expected_returncode=0)
+        except BaseException:
+            if process.poll() is None:
+                process.kill()
+            process.communicate()
+            raise
+
+        assert live_database.read_bytes() == b"fresh-staged-database"
+
+    def test_failure_leaves_original_live_database_after_staged_download_fails(
+        self,
+        tmp_path: Path,
+        force_update_script_builder,
+    ):
+        database_dir = tmp_path / "clamav"
+        database_dir.mkdir()
+        live_database = database_dir / "main.cvd"
+        original_bytes = b"live-database-before-failed-update"
+        live_database.write_bytes(original_bytes)
+
+        started_marker = tmp_path / "failure.started"
+        datadir_marker = tmp_path / "failure.datadir"
+        fake_freshclam = _write_blocking_fake_freshclam(
+            tmp_path,
+            outcome="failure",
+        )
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "FAKE_STARTED_MARKER": str(started_marker),
+                "FAKE_DATADIR_MARKER": str(datadir_marker),
+                "FAKE_OUTCOME": "failure",
+                "FAKE_REPLACEMENT": "unused-success-candidate",
+                "FAKE_FAILURE_CANDIDATE": "partial-staged-database",
+            }
+        )
+
+        script = force_update_script_builder(str(database_dir))
+        process = subprocess.Popen(
+            ["sh", "-c", script, "clamui-force-update", str(fake_freshclam)],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=environment,
+        )
+        try:
+            _wait_for_marker(started_marker, process)
+
+            assert live_database.is_file()
+            assert live_database.read_bytes() == original_bytes
+            staging_dir = Path(datadir_marker.read_text(encoding="utf-8"))
+            assert staging_dir != database_dir
+            assert process.poll() is None
+
+            _finish_blocked_update(process, expected_returncode=1)
+        except BaseException:
+            if process.poll() is None:
+                process.kill()
+            process.communicate()
+            raise
+
+        assert live_database.is_file()
+        assert live_database.read_bytes() == original_bytes

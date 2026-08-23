@@ -66,14 +66,23 @@ def get_clean_env() -> dict[str, str]:
     - ``GI_TYPELIB_PATH``: the GObject-introspection analog of LD_LIBRARY_PATH;
       a host tool that ``import gi`` (firewall-cmd does) would otherwise load the
       bundled typelibs against host GLib -> version mismatch.
+    - ``GTK_PATH``/``GTK_EXE_PREFIX``/``GTK_DATA_PREFIX``/``GSETTINGS_SCHEMA_DIR``/
+      ``GDK_PIXBUF_MODULE_FILE``/``GDK_PIXBUF_MODULEDIR``: point host GTK apps
+      (gufw, firewall-config) at the AppImage's bundled GTK modules, compiled
+      GSettings schemas, and pixbuf loaders -> module ABI mismatches or
+      missing-schema aborts.
+
+    ``XDG_DATA_DIRS`` is intentionally NOT stripped: AppRun only prepends the
+    bundled share dir and host tools still need the host entries it contains.
 
     Every caller spawns native HOST binaries, never ClamUI's bundled Python, so
     stripping these is always safe. Popping an unset var is a no-op.
     """
     env = os.environ.copy()
     # Strip AppImage-injected runtime overrides that break host helpers: library
-    # paths (ABI conflicts), Python home/path (host script bootstrap), and the
-    # introspection typelib path (gi version mismatch). See GitHub issue #155.
+    # paths (ABI conflicts), Python home/path (host script bootstrap), the
+    # introspection typelib path (gi version mismatch), and GTK module/schema/
+    # pixbuf overrides (host GTK apps). See GitHub issue #155.
     for var in (
         "LD_LIBRARY_PATH",
         "LD_PRELOAD",
@@ -81,6 +90,12 @@ def get_clean_env() -> dict[str, str]:
         "PYTHONPATH",
         "PYTHONDONTWRITEBYTECODE",
         "GI_TYPELIB_PATH",
+        "GTK_PATH",
+        "GTK_EXE_PREFIX",
+        "GTK_DATA_PREFIX",
+        "GSETTINGS_SCHEMA_DIR",
+        "GDK_PIXBUF_MODULE_FILE",
+        "GDK_PIXBUF_MODULEDIR",
     ):
         env.pop(var, None)
     # Remove AppImage-specific variables that may affect library resolution
@@ -324,6 +339,7 @@ def get_xdg_user_dir(dir_type: str) -> str | None:
             capture_output=True,
             text=True,
             timeout=5,
+            env=get_clean_env(),
         )
         resolved = result.stdout.strip()
         if result.returncode == 0 and resolved:

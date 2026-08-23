@@ -8,11 +8,13 @@ from src.core.scanner_base import (
     KILL_WAIT_TIMEOUT,
     STREAM_POLL_TIMEOUT,
     TERMINATE_GRACE_TIMEOUT,
+    _extract_skipped_path,
     cleanup_process,
     collect_clamav_warnings,
     communicate_with_cancel_check,
     create_cancelled_result,
     create_error_result,
+    parse_total_errors,
     stream_process_output,
     terminate_process_gracefully,
 )
@@ -227,6 +229,82 @@ class TestStreamProcessOutput:
         assert "/path/file1.txt: OK" in lines
         assert "/path/file2.txt: OK" in lines
         assert "/path/file3.txt: FOUND" in lines
+
+    def test_stream_output_partial_line_not_duplicated_in_stdout(self):
+        """A trailing partial line must appear exactly once in accumulated stdout.
+
+        The streaming loop appends every raw chunk to the stdout buffer as it
+        arrives, while separately tracking the trailing partial line for the
+        line callback. The exit-drain path used to re-append that partial
+        line, corrupting the final output (e.g. 'Scanned files: 1' +
+        'Scanned files: 123') and breaking result parsing.
+        """
+        mock_process = MagicMock()
+        mock_stdout = MagicMock()
+        mock_stderr = MagicMock()
+
+        # First iteration: process running, chunk ends mid-line.
+        # Second iteration: process exited, drain returns the rest.
+        mock_process.poll.side_effect = [None, 0]
+        mock_process.stdout = mock_stdout
+        mock_process.stderr = mock_stderr
+        mock_stdout.fileno.return_value = 1
+        mock_stderr.fileno.return_value = 2
+
+        lines = []
+
+        with (
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch(
+                "src.core.scanner_base.os.read",
+                side_effect=[
+                    b"Infected files: 0\nScanned files: 1",  # streaming read (partial line)
+                    b"23\n",  # drain stdout after poll
+                    b"",  # stdout EOF
+                    b"",  # stderr EOF
+                ],
+            ),
+        ):
+            stdout, _stderr, cancelled = stream_process_output(
+                mock_process, lambda: False, lines.append
+            )
+
+        assert cancelled is False
+        assert stdout == "Infected files: 0\nScanned files: 123\n"
+        assert lines == ["Infected files: 0", "Scanned files: 123"]
+
+    def test_stream_output_final_incomplete_line_flushed_once(self):
+        """A final line without trailing newline reaches the callback once and
+        is not duplicated in the accumulated stdout buffer."""
+        mock_process = MagicMock()
+        mock_stdout = MagicMock()
+        mock_stderr = MagicMock()
+
+        mock_process.poll.side_effect = [None, 0]
+        mock_process.stdout = mock_stdout
+        mock_process.stderr = mock_stderr
+        mock_stdout.fileno.return_value = 1
+        mock_stderr.fileno.return_value = 2
+
+        lines = []
+
+        with (
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch(
+                "src.core.scanner_base.os.read",
+                side_effect=[
+                    b"line1\nno newline at end",  # streaming read
+                    b"",  # drain stdout after poll (EOF, nothing new)
+                    b"",  # stderr EOF
+                ],
+            ),
+        ):
+            stdout, _stderr, _cancelled = stream_process_output(
+                mock_process, lambda: False, lines.append
+            )
+
+        assert stdout == "line1\nno newline at end"
+        assert lines == ["line1", "no newline at end"]
 
     def test_stream_output_does_not_deadlock_on_large_stderr(self):
         """Regression test for issue #146: full scan hanging at ~72%.
@@ -621,3 +699,127 @@ class TestCollectClamavWarnings:
         skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
         assert len(hard_errors) == 1
         assert "Can't allocate memory" in hard_errors[0]
+
+    def test_cant_access_file_warning_classified_as_skipped(self):
+        """clamscan lstat() failure (e.g. file deleted mid-scan) is a skipped file."""
+        stderr = "WARNING: /home/user/tmp/ephemeral.dat: Can't access file\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert skipped == ["/home/user/tmp/ephemeral.dat"]
+        assert nonfatal == []
+        assert hard_errors == []
+
+    def test_cant_open_file_warning_classified_as_skipped(self):
+        """clamscan open() failure names the path AFTER the marker."""
+        stderr = "WARNING: Can't open file /home/user/locked.bin: Permission denied\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert skipped == ["/home/user/locked.bin"]
+        assert nonfatal == []
+        assert hard_errors == []
+
+    def test_unrar_dlopen_warning_is_nonfatal(self):
+        """Missing optional unrar module is informational, not an error."""
+        stderr = (
+            "LibClamAV Warning: Cannot dlopen libclamunrar_iface: file not found, "
+            "unrar support unavailable\n"
+        )
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert skipped == []
+        assert len(nonfatal) == 1
+        assert "libclamunrar_iface" in nonfatal[0]
+        assert hard_errors == []
+
+    def test_bytecode_timeout_warning_is_nonfatal(self):
+        """Bytecode signature timeouts are by-design protections, not errors."""
+        stderr = "LibClamAV Warning: Bytecode run timed out, timeout flag set\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert skipped == []
+        assert len(nonfatal) == 1
+        assert hard_errors == []
+
+    def test_per_file_time_limit_reached_classified_as_nonfatal(self):
+        """Per-file CL_ETIMEOUT lines are partial scans: nonfatal, not skipped files."""
+        stdout = "/home/user/huge.tar: Time limit reached ERROR\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == []
+        assert nonfatal == ["/home/user/huge.tar: Time limit reached ERROR"]
+        assert hard_errors == []
+
+    def test_marker_first_cant_access_file_extracts_trailing_path(self):
+        """clamdscan's 'ERROR: Can't access file <path>' names the path AFTER the marker."""
+        assert _extract_skipped_path("ERROR: Can't access file /root/gone.bin") == "/root/gone.bin"
+
+    def test_marker_first_cant_access_file_lines_yield_distinct_paths(self):
+        """Two marker-first access errors must produce two distinct skipped paths."""
+        stdout = (
+            "ERROR: Can't access file /root/gone.bin\nERROR: Can't access file /root/gone2.bin\n"
+        )
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == ["/root/gone.bin", "/root/gone2.bin"]
+        assert hard_errors == []
+
+    def test_novel_marker_first_line_does_not_yield_garbage_path(self):
+        """Unknown marker-first wordings must stay hard errors, not become path 'ERROR'."""
+        stdout = "ERROR: Access denied\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == []
+        assert hard_errors == ["ERROR: Access denied"]
+
+    def test_per_file_access_denied_classified_as_skipped(self):
+        """Plain 'Access denied' lines from clamscan -v are skipped files."""
+        stdout = "/root/secret.txt: Access denied\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == ["/root/secret.txt"]
+        assert hard_errors == []
+
+    def test_clamdscan_access_denied_error_line_classified_as_skipped(self):
+        """clamdscan's 'Access denied. ERROR' replies are skipped files."""
+        stdout = "/root/secret.txt: Access denied. ERROR\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == ["/root/secret.txt"]
+        assert hard_errors == []
+
+    def test_unknown_libclamav_warning_stays_hard_error(self):
+        """Unrecognized LibClamAV warnings must keep vetoing the benign downgrade."""
+        stderr = "LibClamAV Warning: something novel happened\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings("", stderr)
+        assert skipped == []
+        assert nonfatal == []
+        assert hard_errors == ["LibClamAV Warning: something novel happened"]
+
+    def test_unknown_per_file_error_line_stays_hard_error(self):
+        """Unknown per-file '... ERROR' replies must stay hard errors."""
+        stdout = "/home/user/file.bin: SomeThing ERROR\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == []
+        assert hard_errors == ["/home/user/file.bin: SomeThing ERROR"]
+
+    def test_file_list_cant_open_error_stays_hard_error(self):
+        """clamdscan's own 'ERROR: ... Can't open file' must not be swallowed."""
+        stdout = "ERROR: --file-list: Can't open file /run/user/1000/clamui_filelist.txt\n"
+        skipped, nonfatal, hard_errors = collect_clamav_warnings(stdout, "")
+        assert skipped == []
+        assert len(hard_errors) == 1
+
+
+class TestParseTotalErrors:
+    """Tests for parse_total_errors summary parsing."""
+
+    def test_parses_total_errors_from_summary(self):
+        """The 'Total errors: N' summary line yields its numeric count."""
+        stdout = (
+            "----------- SCAN SUMMARY -----------\n"
+            "Scanned files: 340\n"
+            "Infected files: 0\n"
+            "Total errors: 3\n"
+            "Time: 10.000 sec (0 m 10 s)\n"
+        )
+        assert parse_total_errors(stdout) == 3
+
+    def test_returns_zero_when_summary_line_absent(self):
+        """A summary without a 'Total errors' line parses as zero errors."""
+        stdout = "----------- SCAN SUMMARY -----------\nScanned files: 5\n"
+        assert parse_total_errors(stdout) == 0
+
+    def test_returns_zero_for_empty_output(self):
+        """Empty scanner output parses as zero errors."""
+        assert parse_total_errors("") == 0

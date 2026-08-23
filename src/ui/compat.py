@@ -559,3 +559,30 @@ def safe_set_subtitle_lines(row, value: int) -> None:
     """Call set_subtitle_lines if available (libadwaita 1.2+)."""
     if hasattr(row, "set_subtitle_lines"):
         row.set_subtitle_lines(value)
+
+
+def remove_all_children(listbox) -> None:
+    """Remove every row from a Gtk.ListBox.
+
+    Gtk.ListBox.remove_all() only exists on GTK 4.12+; iterate manually so
+    the code works on the GTK 4.6 baseline (Ubuntu 22.04).
+    """
+    if hasattr(listbox, "remove_all"):
+        listbox.remove_all()
+        return
+    while True:
+        child = listbox.get_first_child()
+        if child is None:
+            break
+        listbox.remove(child)
+
+
+def safe_set_placeholder_text(entry, text: str) -> None:
+    """Set placeholder text on a Gtk.SearchEntry if supported.
+
+    Gtk.SearchEntry gained the placeholder-text property (and its
+    set_placeholder_text accessor) in GTK 4.10; on older versions setting
+    the property raises TypeError, so skip it entirely.
+    """
+    if hasattr(entry, "set_placeholder_text"):
+        entry.set_placeholder_text(text)

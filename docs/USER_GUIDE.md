@@ -66,7 +66,7 @@ Solve common issues quickly with this reference guide. Fix "ClamAV not found" er
 
 ### 🖥️ Command-Line Interface
 
-Use ClamUI without a graphical interface for scripting, automation, and headless servers. Available subcommands: `scan` (one-shot scanning with profile and quarantine support), `quarantine` (list, restore, delete quarantined files), `profile` (list, show, export, import scan profiles), `status` (ClamAV version, backend, daemon info), `history` (scan log viewer with type filtering), `help` (command overview and per-topic help), and `install-privileged-helper` (installs the privileged helper and polkit policy so ClamUI can write system ClamAV configuration; requires `sudo`). Most commands support `--json` output for integration with other tools. Run `clamui help` for full usage.
+Use ClamUI without a graphical interface for scripting, automation, and headless servers. Available subcommands: `scan` (one-shot scanning with profile and quarantine support), `quarantine` (list, restore, delete quarantined files), `profile` (list, show, export, import scan profiles), `status` (ClamAV version, backend, daemon info), `history` (scan log viewer with type filtering), `help` (command overview and per-topic help), and `install-privileged-helper` (native host only; installs the privileged helper and polkit policy with `sudo`). Flatpak users install the matching `clamui-privileged-helper` package on the host instead. Most commands support `--json` output for integration with other tools. Run `clamui help` for full usage.
 
 
 ### ❓ [Frequently Asked Questions](user-guide/faq.md)

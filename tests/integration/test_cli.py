@@ -100,24 +100,18 @@ def parse_file_arguments(request):
     # Mock the matplotlib GTK backend
     mock_backend = mock.MagicMock()
 
-    # Store original modules
-    original_modules = {}
-    modules_to_mock = [
-        "gi",
-        "gi.repository",
-        "gi.repository.Adw",
-        "gi.repository.Gtk",
-        "gi.repository.Gio",
-        "gi.repository.GLib",
-        "gi.repository.Gdk",
-        "gi.repository.GObject",
-        "gi.repository.Pango",
-        "matplotlib.backends.backend_gtk4",
-        "matplotlib.backends.backend_gtk4agg",
-    ]
+    def _is_displaced_module(name: str) -> bool:
+        """Match every module this fixture clears or replaces with a mock."""
+        return name == "gi" or name.startswith(("gi.", "src.", "matplotlib.backends.backend_gtk4"))
 
-    for mod in modules_to_mock:
-        original_modules[mod] = sys.modules.get(mod)
+    # Snapshot every module the fixture displaces so teardown can restore the
+    # exact objects other test modules captured at import/collection time.
+    # (Previously the cleared src.* modules were dropped for good, so e.g.
+    # tests/cli/test_scan_cmd.py patched a re-imported src.cli.scan_cmd while
+    # calling a stale `run` bound to the original module's globals.)
+    original_modules = {
+        name: module for name, module in sys.modules.items() if _is_displaced_module(name)
+    }
 
     # Set up mocks
     sys.modules["gi"] = mock_gi
@@ -145,12 +139,11 @@ def parse_file_arguments(request):
         def cleanup():
             global _cached_parse_file_arguments
             _cached_parse_file_arguments = None
-            for mod, original in original_modules.items():
-                if original is not None:
-                    sys.modules[mod] = original
-                elif mod in sys.modules:
-                    del sys.modules[mod]
-            _clear_src_modules()
+            # Drop the mocks plus everything imported under them, then put
+            # back the previously loaded module objects.
+            for name in [mod for mod in sys.modules if _is_displaced_module(mod)]:
+                del sys.modules[name]
+            sys.modules.update(original_modules)
 
         request.addfinalizer(cleanup)
 
@@ -343,42 +336,76 @@ class TestSymlinks:
         assert not os.path.exists(result[0])
 
 
+@pytest.fixture
+def clamui_app(parse_file_arguments):
+    """Create a real ClamUIApp instance under the module's GTK mocks."""
+    with mock.patch.dict(
+        sys.modules,
+        {
+            "src.ui.window": mock.MagicMock(),
+            "src.ui.scan_view": mock.MagicMock(),
+            "src.ui.update_view": mock.MagicMock(),
+            "src.ui.logs_view": mock.MagicMock(),
+            "src.ui.components_view": mock.MagicMock(),
+            "src.ui.statistics_view": mock.MagicMock(),
+            "src.ui.preferences": mock.MagicMock(),
+            "src.ui.preferences.window": mock.MagicMock(),
+        },
+    ):
+        if "src.app" in sys.modules:
+            del sys.modules["src.app"]
+
+        from src.app import ClamUIApp
+
+        yield ClamUIApp()
+
+
 class TestPathValidationInApp:
-    """Tests for path validation in ClamUIApp.set_initial_scan_paths."""
+    """Tests for the real ClamUIApp.set_initial_scan_paths contract.
 
-    def test_set_initial_scan_paths_filters_nonexistent(self, tmp_path):
-        """Test that set_initial_scan_paths filters out non-existent paths.
+    set_initial_scan_paths performs NO existence filtering: every parsed
+    path is stored and forwarded as-is (validation happens later, during
+    the scan itself).
+    """
 
-        Note: This test verifies the filtering logic without importing the actual
-        ClamUIApp class, which requires GTK dependencies.
-        """
+    def test_set_initial_scan_paths_forwards_paths_unfiltered(self, clamui_app, tmp_path):
+        """Existing and non-existent paths are both forwarded to the scan view."""
         existing_file = tmp_path / "exists.txt"
         existing_file.write_text("content")
         nonexistent = "/nonexistent/path.txt"
-
-        # Replicate the path filtering logic from ClamUIApp.set_initial_scan_paths
         paths = [str(existing_file), nonexistent]
-        valid_paths = []
-        for path in paths:
-            if os.path.exists(path):
-                valid_paths.append(path)
 
-        # Verify filtering logic
-        assert len(valid_paths) == 1
-        assert str(existing_file) in valid_paths
-        assert nonexistent not in valid_paths
+        scan_view = mock.MagicMock()
+        scan_view.is_scanning = False
+        clamui_app._scan_view = scan_view
 
-    def test_set_initial_scan_paths_all_nonexistent(self):
-        """Test set_initial_scan_paths with all non-existent paths."""
+        clamui_app.set_initial_scan_paths(paths)
+
+        scan_view._replace_selected_paths.assert_called_once_with(paths)
+        scan_view._start_scan.assert_called_once_with()
+        # Consumed once forwarded.
+        assert clamui_app._initial_scan_paths == []
+
+    def test_set_initial_scan_paths_keeps_paths_pending_without_scan_view(self, clamui_app):
+        """Before the scan view exists the paths must stay pending, not be dropped."""
         paths = ["/nonexistent/path1.txt", "/nonexistent/path2.txt"]
-        valid_paths = [p for p in paths if os.path.exists(p)]
-        assert len(valid_paths) == 0
+        clamui_app._scan_view = None
 
-    def test_set_initial_scan_paths_empty_list(self):
-        """Test set_initial_scan_paths with empty list."""
-        paths = []
-        valid_paths = [p for p in paths if os.path.exists(p)]
-        assert valid_paths == []
+        clamui_app.set_initial_scan_paths(paths, use_virustotal=True)
+
+        assert clamui_app._initial_scan_paths == paths
+        assert clamui_app._initial_use_virustotal is True
+
+    def test_set_initial_scan_paths_empty_list_is_noop(self, clamui_app):
+        """An empty path list is stored but never forwarded."""
+        scan_view = mock.MagicMock()
+        scan_view.is_scanning = False
+        clamui_app._scan_view = scan_view
+
+        clamui_app.set_initial_scan_paths([])
+
+        scan_view._replace_selected_paths.assert_not_called()
+        scan_view._start_scan.assert_not_called()
 
 
 class TestQueueFilesForScan:

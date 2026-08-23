@@ -1,35 +1,31 @@
-# ClamUI v0.3.0
+# ClamUI v0.4.0
 
-Privileged ClamAV configuration improvements, Flatpak host-config fixes, CLI scan reliability, and security hardening.
+Safer configuration writes, scan-result reliability, GTK baseline compatibility, and host-integration hardening.
 
 ## Highlights
 
-### Configuration & Flatpak
+### Configuration, Compatibility & Installation
 
-- **Privileged helper installer** — `clamui install-privileged-helper` installs the `clamui-apply-preferences` wrapper and polkit policy needed for elevated ClamAV configuration writes. (#143)
-- **Flatpak host configuration persistence** — Flatpak preferences now persist host ClamAV configuration through the privileged helper instead of assuming sandbox-local ClamAV paths. (#136)
-- **Less unnecessary elevation** — ClamUI skips elevation prompts when it is already running as root and fixes elevation decision/reporting edge cases.
+- **Safer preferences** — preference saves now enforce ClamAV recursion limits, report configuration-load failures clearly, and retain standalone scanner settings when a Flatpak host helper is unavailable.
+- **GTK 4.6 / libadwaita 1.1 support restored** — ClamUI no longer relies on newer GTK APIs, preserving compatibility with the supported baseline.
+- **Flatpak and Python compatibility** — the release includes a version-matched `clamui-privileged-helper_0.4.0_all.deb` host companion for applying system ClamAV preferences from Flatpak; helper builds support Python 3.10 and glob conversion supports Python 3.14. (#170)
+- **Distro-aware install advice** — security-audit install commands now use `/etc/os-release` to select Debian-, Fedora-, or Arch-family commands, and safely omit a command for unknown distributions.
 
-### Scan & CLI Reliability
+### Scan, Update & Quarantine Reliability
 
-- **CLI path handling fixed** — one-shot CLI scans now scan every path provided on the command line instead of only the first path.
-- **Saved scan settings honored** — scheduled and one-shot CLI scans now apply saved exclusions and backend settings consistently.
-- **Benign ClamAV warnings tolerated** — scans no longer fail solely because ClamAV reports expected size-limit warnings.
-- **Database age parsing fixed** — ClamUI now parses CVD/CLD database headers robustly even when compressed database payload bytes immediately follow the header.
+- **More trustworthy scan results** — multi-target scans are safe under concurrent invocation, accumulated output no longer duplicates trailing partial lines, all-failed scans report errors, and recognized nonfatal ClamAV warnings are presented consistently.
+- **Safer database updates** — forced database updates are staged before they replace the active database.
+- **Safer quarantine actions** — restore and permanent-delete actions require confirmation; dialogs close with Escape; and quarantine copies reject short writes to protect file integrity.
 
-### Security Hardening
+### Security & Host Integration
 
-- Sanitized untrusted profile, scan, quarantine, audit, and terminal output paths to reduce log/terminal injection risk.
-- Hardened profile import/name normalization, scheduler quoting, Unicode sanitizer coverage, ClamAV config parsing, quarantine cleanup, and audit verdict handling.
-- Improved exclusion matching bounds in scanner and daemon scanner paths and preserved detections on ClamAV error exits.
+- **Canonical privileged writes** — elevated configuration writes fail closed unless the trusted helper and destination resolve to canonical paths.
+- **Token-safe scheduled commands** — scheduled scan commands are built from tokens rather than re-splitting shell strings.
+- **Sanitized AppImage host helpers** — all host helpers launched by AppImage builds run with a cleaned environment.
 
-### VirusTotal, UI & Packaging
+### Translations & Dependencies
 
-- VirusTotal retries now resend the full request body, large uploads are supported, and all engine-result buckets are counted.
-- VirusTotal result flow, stuck spinners, tray resynchronization, and deliberate tray shutdown behavior were repaired.
-- AppImage execution now strips bundled Python/GI environment variables before launching host tools. (#155)
-- Debian packaging accepts `pkexec | policykit-1` for Debian 13 compatibility.
-- Python, Flatpak, website, and translation assets were refreshed, and a real-GTK construction smoke test now covers all views, preference pages, and dialogs.
+- Refreshed French and Simplified Chinese translations, added translatable UI strings, and updated Python, Flatpak, CI, and runtime dependencies including cryptography 50.0.0.
 
 ## Install
 
@@ -38,9 +34,9 @@ Privileged ClamAV configuration improvements, Flatpak host-config fixes, CLI sca
 flatpak install flathub io.github.linx_systems.ClamUI
 ```
 
-**AppImage**: Download `ClamUI-0.3.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.3.0).
+**AppImage**: Download `ClamUI-0.4.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.0).
 
-**GitHub Release**: Download packages from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.3.0).
+**GitHub Release**: Download `clamui_0.4.0_all.deb` or the `clamui-x86_64.flatpak` / `clamui-aarch64.flatpak` bundle from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.0). Flatpak users who need to apply system-wide ClamAV preferences can install the matching `clamui-privileged-helper_0.4.0_all.deb` host companion.
 
 **From source**:
 ```bash
@@ -50,4 +46,4 @@ cd clamui && uv sync && uv run clamui
 
 ## Contributors
 
-Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.2.0...v0.3.0) for details.
+Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0) for details.

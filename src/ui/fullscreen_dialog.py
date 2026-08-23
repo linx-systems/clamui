@@ -11,6 +11,7 @@ from gi.repository import Adw, Gtk
 
 from ..core.i18n import N_, _
 from .compat import create_toolbar_view
+from .utils import enable_escape_to_close
 
 
 class FullscreenLogDialog(Adw.Window):
@@ -68,6 +69,7 @@ class FullscreenLogDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
 
         # Allow the dialog to be closed
         self.set_deletable(True)

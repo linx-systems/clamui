@@ -98,7 +98,10 @@ def run(args: argparse.Namespace) -> int:
     """
     settings = SettingsManager()
     log_manager = LogManager()
-    scanner = Scanner(log_manager=log_manager)
+    # Pass the settings manager so the reported backend honors the user's
+    # scan_backend / clamd_conf_path settings instead of always showing
+    # the "auto" default.
+    scanner = Scanner(log_manager=log_manager, settings_manager=settings)
 
     clamav_info = _collect_clamav_info(scanner, log_manager)
     quarantine_stats = _collect_quarantine_stats()

@@ -5,7 +5,10 @@ import argparse
 import os
 import stat
 import sys
+from importlib.resources import files
 from pathlib import Path
+
+import pytest
 
 from src.cli import install_helper
 
@@ -38,6 +41,25 @@ class TestInstallPrivilegedHelper:
         assert _mode(priv) == 0o644
         assert _mode(apply) == 0o644
         assert _mode(policy) == 0o644
+
+    def test_created_directory_chain_has_safe_modes_with_permissive_umask(self, tmp_path):
+        old_umask = os.umask(0)
+        try:
+            success, _message = install_helper.install_privileged_helper(prefix=str(tmp_path))
+        finally:
+            os.umask(old_umask)
+
+        assert success is True
+        for relative in (
+            "usr",
+            "usr/bin",
+            "usr/lib",
+            "usr/lib/clamui",
+            "usr/share",
+            "usr/share/polkit-1",
+            "usr/share/polkit-1/actions",
+        ):
+            assert _mode(tmp_path / relative) == 0o755
 
     def test_apply_helper_import_is_rewritten(self, tmp_path):
         install_helper.install_privileged_helper(prefix=str(tmp_path))
@@ -72,9 +94,9 @@ class TestInstallPrivilegedHelper:
         copied = (tmp_path / "usr/share/polkit-1/actions" / install_helper.POLICY_NAME).read_text(
             "utf-8"
         )
-        original = (
-            Path(install_helper.__file__).resolve().parents[2] / "data" / install_helper.POLICY_NAME
-        ).read_text("utf-8")
+        original = (files("src.cli.resources") / install_helper.POLICY_NAME).read_text(
+            encoding="utf-8"
+        )
         assert copied == original
         # The polkit exec.path must match where the wrapper is installed.
         assert "/usr/bin/clamui-apply-preferences" in copied
@@ -109,6 +131,32 @@ class TestInstallPrivilegedHelper:
         assert success is False
         assert "not found" in message.lower()
 
+    def test_replaces_final_symlink_at_canonical_bin_without_following_it(self, tmp_path):
+        """A pre-existing symlink at the canonical bin destination must be
+        *replaced* by a fresh regular file, never written through.  If the
+        installer followed the symlink, an attacker who pre-creates one at the
+        install path would redirect the root-owned wrapper write into an
+        arbitrary victim file -- a symlink-following privilege escalation."""
+        victim = tmp_path / "victim"
+        sentinel = b"untouched-victim-bytes\n"
+        victim.write_bytes(sentinel)
+
+        bin_path = tmp_path / "usr/bin/clamui-apply-preferences"
+        bin_path.parent.mkdir(parents=True, exist_ok=True)
+        bin_path.symlink_to(victim)
+
+        success, _message = install_helper.install_privileged_helper(prefix=str(tmp_path))
+
+        assert success is True
+        # The destination is now a regular file, not a symlink that still redirects.
+        assert not bin_path.is_symlink()
+        assert bin_path.is_file()
+        # The pre-existing symlink target must be byte-for-byte untouched.
+        assert victim.read_bytes() == sentinel
+        # The installed file is the real executable wrapper, not the victim file.
+        assert _mode(bin_path) == 0o755
+        assert bin_path.read_text(encoding="utf-8").startswith("#!/usr/bin/python3")
+
 
 class TestRunCommand:
     """Tests for the install_helper.run() CLI entry point."""
@@ -134,3 +182,32 @@ class TestRouterRegistration:
         from src.cli.router import CLI_SUBCOMMANDS
 
         assert "install-privileged-helper" in CLI_SUBCOMMANDS
+
+
+class TestFlatpakBoundary:
+    """Flatpak must delegate real helper installation to the host."""
+
+    @pytest.mark.parametrize("effective_uid", [1000, 0])
+    def test_real_install_in_flatpak_aborts_without_sudo_or_install(
+        self, effective_uid, monkeypatch, capsys
+    ):
+        monkeypatch.setattr(install_helper.os, "geteuid", lambda: effective_uid)
+        monkeypatch.setattr(install_helper, "is_flatpak", lambda: True)
+
+        installer_calls = 0
+
+        def _must_not_run(prefix="/"):
+            nonlocal installer_calls
+            installer_calls += 1
+            return True, "unreachable"
+
+        monkeypatch.setattr(install_helper, "install_privileged_helper", _must_not_run)
+
+        rc = install_helper.run(argparse.Namespace(prefix="/"))
+        err = capsys.readouterr().err.lower()
+
+        assert rc != 0
+        assert installer_calls == 0
+        assert "flatpak" in err
+        assert "host" in err
+        assert "sudo" not in err

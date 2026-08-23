@@ -4,6 +4,7 @@ Statistics dashboard component for ClamUI displaying scan metrics and protection
 """
 
 import logging
+import threading
 from datetime import datetime
 
 import gi
@@ -650,6 +651,11 @@ class StatisticsView(Gtk.Box):
         """
         Load statistics asynchronously.
 
+        The re-entrancy guard and loading UI are set on the main thread; the
+        heavy calculator/disk I/O runs on a background worker thread and the
+        results are applied to GTK widgets back on the main thread via
+        ``GLib.idle_add`` (mirrors ``components_view._check_components_background``).
+
         Returns:
             False to prevent GLib.idle_add from repeating
         """
@@ -658,64 +664,117 @@ class StatisticsView(Gtk.Box):
 
         self._set_loading_state(True)
 
-        # Load statistics in idle callback to not block UI
-        GLib.idle_add(self._perform_load)
+        # Run the calculator/disk I/O off the main loop; the worker schedules
+        # the main-thread applier via GLib.idle_add (no GTK calls in worker).
+        thread = threading.Thread(target=self._perform_load, daemon=True)
+        thread.start()
 
         return False
 
-    def _perform_load(self) -> bool:
+    def _perform_load(self) -> None:
         """
-        Perform the actual statistics loading.
+        Background worker: perform the statistics calculator/disk I/O.
 
-        Wraps all loading operations in try/finally to ensure the loading
-        state is always reset, even if errors occur during data retrieval.
+        Runs on a daemon thread and MUST NOT touch GTK widgets. Computes the
+        three calculator results (statistics, protection status, trend data)
+        and packages them so the main-thread applier
+        (``_apply_statistics_results``) can update the UI. Any exception is
+        captured and marshaled back as an error result so the thread never
+        dies silently and the loading state is always reset.
+        """
+        timeframe = self._current_timeframe
+        stats: ScanStatistics | None = None
+        protection: ProtectionStatus | None = None
+        trend_data: list[dict] = []
+        worker_error = False
+
+        try:
+            # Get statistics for current timeframe
+            try:
+                stats = self._calculator.get_statistics(timeframe)
+            except Exception:
+                logger.exception("Failed to compute scan statistics")
+                stats = None
+
+            # Get protection status
+            try:
+                protection = self._calculator.get_protection_status()
+            except Exception:
+                logger.exception("Failed to compute protection status")
+                protection = None
+
+            # Get trend data for chart
+            # Use appropriate number of data points based on timeframe
+            try:
+                data_points = self._get_data_points_for_timeframe(timeframe)
+                trend_data = self._calculator.get_scan_trend_data(timeframe, data_points)
+            except Exception:
+                logger.exception("Failed to compute scan trend data")
+                trend_data = []
+        except Exception:
+            # Catch-all for any unexpected errors during data retrieval
+            logger.exception("Unexpected error loading statistics")
+            worker_error = True
+        finally:
+            # Always marshal results back to the main thread so the loading
+            # state is reset and the UI reflects whatever we managed to load.
+            GLib.idle_add(
+                self._apply_statistics_results, stats, protection, trend_data, worker_error
+            )
+
+    def _apply_statistics_results(
+        self,
+        stats: ScanStatistics | None,
+        protection: ProtectionStatus | None,
+        trend_data: list[dict],
+        worker_error: bool,
+    ) -> bool:
+        """
+        Apply computed statistics to the UI on the main thread.
+
+        Called via ``GLib.idle_add`` from the background worker. Assigns the
+        computed results to instance state and updates the display widgets.
+        The loading state is always reset in a ``finally`` block.
+
+        Args:
+            stats: Computed scan statistics (or None on failure)
+            protection: Computed protection status (or None on failure)
+            trend_data: Computed chart trend data (or [] on failure)
+            worker_error: True if the worker hit an unexpected error
 
         Returns:
             False to prevent GLib.idle_add from repeating
         """
         try:
-            # Get statistics for current timeframe
-            try:
-                self._current_stats = self._calculator.get_statistics(self._current_timeframe)
-            except Exception:
-                self._current_stats = None
+            # Store results on the main thread (read by _update_* methods)
+            self._current_stats = stats
+            self._current_protection = protection
 
-            # Get protection status
-            try:
-                self._current_protection = self._calculator.get_protection_status()
-            except Exception:
-                self._current_protection = None
-
-            # Get trend data for chart
-            # Use appropriate number of data points based on timeframe
-            try:
-                data_points = self._get_data_points_for_timeframe(self._current_timeframe)
-                trend_data = self._calculator.get_scan_trend_data(
-                    self._current_timeframe, data_points
-                )
-            except Exception:
-                trend_data = []
-
-            # Check if we have any valid data
-            has_data = self._current_stats is not None and self._current_stats.total_scans > 0
-
-            if has_data:
-                # Update UI with loaded data
-                self._update_statistics_display()
-                self._update_protection_display()
-                self._update_chart(trend_data)
-            elif self._current_stats is None and self._current_protection is None:
-                # Complete failure to load any data - show error state
-                self._show_error_state(_("Failed to load statistics data"))
+            if worker_error:
+                # Unexpected error during data retrieval - show error state
+                self._show_error_state(_("An unexpected error occurred"))
                 self._update_chart([])
             else:
-                # No scan history but loading succeeded - show empty state
-                self._show_empty_state()
-                self._update_protection_display()
-                self._update_chart([])
+                # Check if we have any valid data
+                has_data = stats is not None and stats.total_scans > 0
 
+                if has_data:
+                    # Update UI with loaded data
+                    self._update_statistics_display()
+                    self._update_protection_display()
+                    self._update_chart(trend_data)
+                elif stats is None and protection is None:
+                    # Complete failure to load any data - show error state
+                    self._show_error_state(_("Failed to load statistics data"))
+                    self._update_chart([])
+                else:
+                    # No scan history but loading succeeded - show empty state
+                    self._show_empty_state()
+                    self._update_protection_display()
+                    self._update_chart([])
         except Exception:
-            # Catch-all for any unexpected errors
+            # Catch-all for any unexpected errors during UI update
+            logger.exception("Failed to apply statistics to UI")
             self._show_error_state(_("An unexpected error occurred"))
             self._update_chart([])
         finally:
@@ -1084,12 +1143,22 @@ class StatisticsView(Gtk.Box):
             timeframe: The timeframe value associated with the button
         """
         if not button.get_active():
+            # Clicking the already-active toggle deactivates it, which would
+            # leave no timeframe selected; re-activate to behave like a radio
+            # group.
+            if timeframe == self._current_timeframe:
+                button.set_active(True)
             return
 
         # Deactivate other buttons
         for tf, btn in self._timeframe_buttons.items():
             if tf != timeframe:
                 btn.set_active(False)
+
+        if timeframe == self._current_timeframe:
+            # Re-activation of the current selection (initial setup or the
+            # radio-guard above) — nothing new to load.
+            return
 
         # Update current timeframe and reload
         self._current_timeframe = timeframe

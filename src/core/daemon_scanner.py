@@ -26,6 +26,8 @@ from .scanner_base import (
     communicate_with_cancel_check,
     create_cancelled_result,
     create_error_result,
+    is_genuine_error_line,
+    resolve_exit2_status,
     save_scan_log,
     stream_process_output,
     terminate_process_gracefully,
@@ -840,6 +842,7 @@ class DaemonScanner:
 
         # Determine overall status based on exit code
         warning_message = None
+        exit2_error_message = None
         if infected_count > 0:
             # Detections are authoritative: clamdscan returns exit code 2 when it
             # both finds a virus and hits an error (e.g. an unreadable file), so
@@ -848,29 +851,33 @@ class DaemonScanner:
             if exit_code == 2 and skipped_files:
                 warning_message = f"{len(skipped_files)} file(s) could not be accessed"
         elif exit_code == 0:
-            status = ScanStatus.ERROR if hard_error_lines else ScanStatus.CLEAN
+            # Exit 0 is the daemon's authoritative success signal. Only genuine
+            # error replies (per-file "... ERROR" or clamdscan's own "ERROR:" /
+            # "LibClamAV Error:" lines) may override it — stray unrecognized
+            # warning lines must not flip a successful scan to ERROR.
+            genuine_error_lines = [line for line in hard_error_lines if is_genuine_error_line(line)]
+            status = ScanStatus.ERROR if genuine_error_lines else ScanStatus.CLEAN
         elif exit_code == 1:
             status = ScanStatus.INFECTED
         elif exit_code == 2:
-            # Exit code 2 = warnings/errors. clamscan/clamdscan report 2 even for
-            # benign, by-design situations (unreadable files, files exceeding scan
-            # limits, truncated archives). Treat as CLEAN only when we positively
-            # identified the cause as non-fatal (a skipped file or a limit/truncation
-            # warning) and nothing looked like a hard error. Unrecognized stderr
-            # stays ERROR.
-            if not hard_error_lines and (skipped_files or nonfatal_warnings):
-                status = ScanStatus.CLEAN
-                if skipped_files:
-                    warning_message = f"{len(skipped_files)} file(s) could not be accessed"
-            else:
-                status = ScanStatus.ERROR
+            # scanned_files here is ClamUI's own pre-count of scan targets
+            # (clamdscan reports no summary counts), so the helper compares
+            # failure signals against it instead of requiring it to be > 0.
+            status, warning_message, exit2_error_message = resolve_exit2_status(
+                stdout,
+                file_count,
+                hard_error_lines,
+                skipped_files,
+                nonfatal_warnings,
+                scanned_is_precount=True,
+            )
         else:
             status = ScanStatus.ERROR
 
         # Prefer stderr for hard errors, but fall back to a concise stdout line when stderr is empty.
         error_message: str | None = None
         if status == ScanStatus.ERROR:
-            error_message = stderr.strip() or None
+            error_message = exit2_error_message or stderr.strip() or None
             if error_message is None:
                 if hard_error_lines:
                     error_message = hard_error_lines[0]
@@ -896,6 +903,7 @@ class DaemonScanner:
             skipped_files=skipped_files,
             skipped_count=len(skipped_files),
             warning_message=warning_message,
+            nonfatal_warnings=nonfatal_warnings,
         )
 
     def _collect_exclusion_patterns(self, profile_exclusions: dict | None = None) -> list[str]:
@@ -1053,6 +1061,8 @@ class DaemonScanner:
                 threat_details=[],
                 skipped_files=result.skipped_files,
                 skipped_count=result.skipped_count,
+                warning_message=result.warning_message,
+                nonfatal_warnings=result.nonfatal_warnings,
             )
 
         return ScanResult(
@@ -1069,6 +1079,8 @@ class DaemonScanner:
             threat_details=filtered_threats,
             skipped_files=result.skipped_files,
             skipped_count=result.skipped_count,
+            warning_message=result.warning_message,
+            nonfatal_warnings=result.nonfatal_warnings,
         )
 
     def _save_scan_log(self, result: ScanResult, duration: float) -> None:

@@ -8,7 +8,7 @@ This module defines the shared data types used by scanner implementations:
 - ScanResult: Dataclass for complete scan results
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -94,6 +94,7 @@ class ScanResult:
     skipped_files: list[str] | None = None  # Files that couldn't be scanned (permissions)
     skipped_count: int = 0  # Count of skipped files
     warning_message: str | None = None  # User-friendly warning about skipped files
+    nonfatal_warnings: list[str] = field(default_factory=list)  # Non-fatal ClamAV warning lines
 
     @property
     def is_clean(self) -> bool:
@@ -108,4 +109,4 @@ class ScanResult:
     @property
     def has_warnings(self) -> bool:
         """Check if scan completed with warnings (e.g., skipped files)."""
-        return self.skipped_count > 0
+        return self.skipped_count > 0 or bool(self.nonfatal_warnings)

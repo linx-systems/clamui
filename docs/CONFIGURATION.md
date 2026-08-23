@@ -1318,6 +1318,8 @@ Monitor quarantine: `sqlite3 ~/.local/share/clamui/quarantine.db "SELECT origina
 
 **Preferences UI**: Open Preferences (`Ctrl+,`), change settings. Most are auto-saved; ClamAV config changes require Save & Apply.
 
+Saving system configs (`/etc/clamav/*.conf`) requires the `clamui-apply-preferences` privileged helper and its polkit policy, which the separate `clamui-privileged-helper` package owns. Native (non-package) and source installs run `sudo clamui install-privileged-helper` on the host (native-host-only). Debian installs receive the helper automatically through the paired `clamui` + `clamui-privileged-helper` packages — see [INSTALL.md](INSTALL.md#debian-package-installation) for both flows. Flatpak cannot run `install-privileged-helper` from the sandbox (the sandbox `/usr` is not the host `/usr`); instead install the matching `clamui-privileged-helper_<version>_all.deb` asset on the host.
+
 **Validation**:
 
 ```bash

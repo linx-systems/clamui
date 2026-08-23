@@ -9,6 +9,7 @@ This file provides:
 - Locale forcing (LANGUAGE=C) to ensure English gettext output
 """
 
+import contextlib
 import gettext
 import os
 import sys
@@ -196,13 +197,14 @@ def reset_flatpak_cache():
 
     os.path.exists = patched_exists
 
-    yield
-
-    # Restore on the CURRENT module (may differ from setup if modules were swapped)
-    current_flatpak = _sys.modules.get("src.core.flatpak")
-    if current_flatpak is not None:
-        current_flatpak._flatpak_detected = original_value
-    os.path.exists = original_exists
+    try:
+        yield
+    finally:
+        # Restore on the CURRENT module (may differ from setup if modules were swapped)
+        current_flatpak = _sys.modules.get("src.core.flatpak")
+        if current_flatpak is not None:
+            current_flatpak._flatpak_detected = original_value
+        os.path.exists = original_exists
 
 
 # =============================================================================
@@ -222,6 +224,34 @@ def _clear_src_modules():
         del sys.modules[mod]
 
 
+@contextlib.contextmanager
+def preserve_displaced_modules(match=None):
+    """Snapshot matching sys.modules entries and restore them on exit.
+
+    Test modules that clear or mock src.* (or gi/matplotlib) modules must put
+    the ORIGINAL module objects back afterwards: other test modules bind src
+    symbols at collection time, and patching a re-imported module while
+    calling a stale reference makes assertions silently miss (see the
+    tests/cli/test_scan_cmd.py pollution this pattern fixed). Use this instead
+    of hand-rolling the snapshot/restore idiom.
+
+    Args:
+        match: Predicate on the module name; defaults to src.* modules.
+    """
+    if match is None:
+
+        def match(name):
+            return name.startswith("src.")
+
+    snapshot = {name: module for name, module in sys.modules.items() if match(name)}
+    try:
+        yield
+    finally:
+        for name in [mod for mod in sys.modules if match(mod)]:
+            del sys.modules[name]
+        sys.modules.update(snapshot)
+
+
 # =============================================================================
 # Centralized GTK/GI Mocking
 # =============================================================================
@@ -234,7 +264,7 @@ def mock_gi_modules():
 
     This fixture provides consistent mocking of GTK/GLib/Adw modules across
     all test files. It:
-    - Clears cached src.* modules before and after each test
+    - Temporarily clears cached src.* modules while preserving the Flatpak module
     - Sets up real base classes for widgets (required for object.__new__)
     - Provides access to mock objects via returned dict
 
@@ -251,6 +281,12 @@ def mock_gi_modules():
     Yields:
         dict: Dictionary containing mock objects for gtk, adw, gio, glib
     """
+    with preserve_displaced_modules(lambda name: name == "src.core.flatpak"):
+        yield from _mock_gi_modules()
+
+
+def _mock_gi_modules():
+    """Build and yield the temporary GI module mocks."""
     # Clear any cached src modules first
     _clear_src_modules()
 
@@ -360,7 +396,7 @@ def mock_gi_modules():
             "repository": mock_repository,
         }
 
-    # Cleanup after test
+    # Cleanup after test; the fixture wrapper restores the original Flatpak module.
     _clear_src_modules()
 
 

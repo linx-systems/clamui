@@ -7,6 +7,8 @@ import threading
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 from src.core import flatpak
 
 
@@ -573,6 +575,7 @@ class TestGetXdgUserDir:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=mock.ANY,
                 )
 
     def test_get_xdg_user_dir_documents(self):
@@ -645,6 +648,7 @@ class TestGetXdgUserDir:
                     capture_output=True,
                     text=True,
                     timeout=5,
+                    env=mock.ANY,
                 )
 
     def test_get_xdg_user_dir_all_valid_types(self):
@@ -1078,27 +1082,70 @@ class TestGetCleanEnv:
             env = flatpak.get_clean_env()
             assert "GI_TYPELIB_PATH" not in env
 
-    def test_strips_full_appimage_python_env(self):
-        """Regression for issue #155: the full AppImage AppRun environment is
-        sanitized of every var that breaks a host Python helper, while
-        host-essential vars survive."""
+    @pytest.mark.parametrize(
+        ("var", "value"),
+        [
+            ("GTK_PATH", "/tmp/mount/usr/lib/gtk-4.0"),
+            ("GTK_EXE_PREFIX", "/tmp/mount/usr"),
+            ("GTK_DATA_PREFIX", "/tmp/mount/usr"),
+            ("GSETTINGS_SCHEMA_DIR", "/tmp/mount/usr/share/glib-2.0/schemas:"),
+            (
+                "GDK_PIXBUF_MODULE_FILE",
+                "/tmp/mount/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache",
+            ),
+            ("GDK_PIXBUF_MODULEDIR", "/tmp/mount/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders"),
+        ],
+    )
+    def test_strips_apprun_gui_vars(self, var, value):
+        """AppRun-exported GTK/GDK/GSettings vars must be stripped so host GTK
+        apps (gufw, firewall-config) don't load the AppImage's bundled GTK
+        modules, schemas, or pixbuf loaders (issue #155 residual)."""
         with mock.patch.dict(
             os.environ,
-            {
-                # AppImage-injected (must be stripped)
-                "PYTHONHOME": "/tmp/mount/usr",
-                "PYTHONPATH": "/tmp/mount/usr/lib/python3.12/site-packages",
-                "PYTHONDONTWRITEBYTECODE": "1",
-                "GI_TYPELIB_PATH": "/tmp/mount/usr/lib/girepository-1.0",
-                "LD_LIBRARY_PATH": "/tmp/mount/usr/lib",
-                "APPDIR": "/tmp/mount",
-                # Host-essential (must survive)
-                "PATH": "/usr/bin:/bin",
-                "HOME": "/home/user",
-                "LANG": "en_US.UTF-8",
-            },
+            {var: value, "HOME": "/home/user"},
             clear=True,
         ):
+            env = flatpak.get_clean_env()
+            assert var not in env
+
+    def test_strips_full_appimage_python_env(self):
+        """Regression for issue #155: the full AppImage AppRun environment is
+        sanitized of every var that breaks a host Python/GTK helper, while
+        host-essential vars survive. Values mirror appimage/build-appimage.sh's
+        AppRun exports plus the APPIMAGE var set by the AppImage runtime."""
+        apprun_env = {
+            # AppImage-injected (must be stripped)
+            "PYTHONHOME": "/tmp/.mount_ClamUI/usr",
+            "PYTHONPATH": (
+                "/tmp/.mount_ClamUI/usr/lib/python3.12/site-packages:"
+                "/tmp/.mount_ClamUI/usr/lib/python3.12"
+            ),
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "GI_TYPELIB_PATH": "/tmp/.mount_ClamUI/usr/lib/girepository-1.0",
+            "LD_LIBRARY_PATH": (
+                "/tmp/.mount_ClamUI/usr/lib:/tmp/.mount_ClamUI/usr/lib/x86_64-linux-gnu"
+            ),
+            "GTK_PATH": "/tmp/.mount_ClamUI/usr/lib/gtk-4.0",
+            "GTK_EXE_PREFIX": "/tmp/.mount_ClamUI/usr",
+            "GTK_DATA_PREFIX": "/tmp/.mount_ClamUI/usr",
+            "GSETTINGS_SCHEMA_DIR": "/tmp/.mount_ClamUI/usr/share/glib-2.0/schemas:",
+            "GDK_PIXBUF_MODULE_FILE": (
+                "/tmp/.mount_ClamUI/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+            ),
+            "GDK_PIXBUF_MODULEDIR": "/tmp/.mount_ClamUI/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders",
+            "APPDIR": "/tmp/.mount_ClamUI",
+            "APPIMAGE": "/home/user/Applications/ClamUI.AppImage",
+            # AppRun prepends the bundled share dir but host tools still need
+            # the host entries, so XDG_DATA_DIRS must survive untouched.
+            "XDG_DATA_DIRS": "/tmp/.mount_ClamUI/usr/share:/usr/local/share:/usr/share",
+        }
+        host_env = {
+            # Host-essential (must survive)
+            "PATH": "/usr/bin:/bin",
+            "HOME": "/home/user",
+            "LANG": "en_US.UTF-8",
+        }
+        with mock.patch.dict(os.environ, {**apprun_env, **host_env}, clear=True):
             env = flatpak.get_clean_env()
             for stripped in (
                 "PYTHONHOME",
@@ -1106,12 +1153,62 @@ class TestGetCleanEnv:
                 "PYTHONDONTWRITEBYTECODE",
                 "GI_TYPELIB_PATH",
                 "LD_LIBRARY_PATH",
+                "GTK_PATH",
+                "GTK_EXE_PREFIX",
+                "GTK_DATA_PREFIX",
+                "GSETTINGS_SCHEMA_DIR",
+                "GDK_PIXBUF_MODULE_FILE",
+                "GDK_PIXBUF_MODULEDIR",
                 "APPDIR",
+                "APPIMAGE",
             ):
                 assert stripped not in env, f"{stripped} should be stripped"
+            assert env["XDG_DATA_DIRS"] == apprun_env["XDG_DATA_DIRS"]
             assert env["PATH"] == "/usr/bin:/bin"
             assert env["HOME"] == "/home/user"
             assert env["LANG"] == "en_US.UTF-8"
+
+
+class TestCleanEnvWiring:
+    """Wiring tests: get_clean_env() consumers must pass it to subprocess."""
+
+    def test_kde_cache_refresh_passes_clean_env(self):
+        """kbuildsycoca6/5 is a host KDE tool; issue #155 residual requires the
+        sanitized env so leaked AppImage vars don't break it."""
+        from src.core import file_manager_integration as fmi
+
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        with (
+            mock.patch.object(fmi, "get_clean_env", return_value=clean_env) as mock_clean,
+            mock.patch.object(
+                fmi,
+                "wrap_host_command",
+                side_effect=lambda cmd, force_host=False: cmd,
+            ),
+            mock.patch("subprocess.run") as mock_run,
+        ):
+            fmi._refresh_dolphin_service_menu_cache()
+
+        mock_clean.assert_called_once()
+        assert mock_run.call_args.args[0] == ["kbuildsycoca6", "--noincremental"]
+        assert mock_run.call_args.kwargs["env"] is clean_env
+
+    def test_get_xdg_user_dir_passes_clean_env(self):
+        """xdg-user-dir is a host helper and must get the sanitized env."""
+        clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
+        with (
+            mock.patch.object(flatpak, "get_clean_env", return_value=clean_env),
+            mock.patch.object(flatpak, "wrap_host_command", side_effect=lambda cmd: cmd),
+            mock.patch(
+                "subprocess.run",
+                return_value=mock.MagicMock(returncode=0, stdout="/home/user/Downloads\n"),
+            ) as mock_run,
+        ):
+            result = flatpak.get_xdg_user_dir("DOWNLOAD")
+
+        assert result == "/home/user/Downloads"
+        assert mock_run.call_args.args[0] == ["xdg-user-dir", "DOWNLOAD"]
+        assert mock_run.call_args.kwargs["env"] is clean_env
 
 
 class TestGetClamavDatabaseDir:

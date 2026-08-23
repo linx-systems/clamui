@@ -1272,6 +1272,12 @@ class TestClamUIAppVirusTotalScan:
 class TestClamUIAppInitialScanPaths:
     """Regression tests for forwarding CLI-provided scan targets to the UI."""
 
+    def _make_idle_scan_view(self):
+        """Create a scan view mock that reports no scan in progress."""
+        mock_scan_view = mock.MagicMock()
+        mock_scan_view.is_scanning = False
+        return mock_scan_view
+
     def test_multiple_clamav_paths_populate_all_targets(self, app):
         """All CLI paths must be forwarded to the scan view, not just the first.
 
@@ -1279,7 +1285,7 @@ class TestClamUIAppInitialScanPaths:
         so launching ClamUI from a file manager with N selected files only scanned
         the first one ("Scan Target (1)" despite "Received N path(s)").
         """
-        mock_scan_view = mock.MagicMock()
+        mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
         app._initial_use_virustotal = False
@@ -1295,7 +1301,7 @@ class TestClamUIAppInitialScanPaths:
 
     def test_single_clamav_path_uses_multi_target_api(self, app):
         """A single CLI path still goes through the multi-target replace API."""
-        mock_scan_view = mock.MagicMock()
+        mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
         app._initial_scan_paths = ["/tmp/only.pdf"]
         app._initial_use_virustotal = False
@@ -1308,7 +1314,7 @@ class TestClamUIAppInitialScanPaths:
     def test_virustotal_path_uses_first_only(self, app):
         """VirusTotal scans a single file per request, so only the first path is
         forwarded to the setup dialog and the ClamAV auto-scan is not started."""
-        mock_scan_view = mock.MagicMock()
+        mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
         app._initial_use_virustotal = True
@@ -1323,7 +1329,7 @@ class TestClamUIAppInitialScanPaths:
 
     def test_no_paths_is_noop(self, app):
         """With no pending paths nothing is forwarded to the scan view."""
-        mock_scan_view = mock.MagicMock()
+        mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
         app._initial_scan_paths = []
 
@@ -1332,3 +1338,98 @@ class TestClamUIAppInitialScanPaths:
         mock_scan_view._replace_selected_paths.assert_not_called()
         mock_scan_view._set_selected_path.assert_not_called()
         mock_scan_view._start_scan.assert_not_called()
+
+    def test_second_invocation_while_scanning_is_ignored_with_toast(self, app, mock_gtk_modules):
+        """A second CLI/file-manager invocation during an active scan must not
+        touch the selection (the worker thread iterates it) — the request is
+        dropped and the user is told via a toast.
+
+        Regression: _replace_selected_paths() cleared and repopulated the same
+        list object the scan worker was iterating, while the new request was
+        silently swallowed by the _is_scanning guard.
+        """
+        mock_scan_view = mock.MagicMock()
+        mock_scan_view.is_scanning = True
+        app._scan_view = mock_scan_view
+        app._initial_scan_paths = ["/tmp/second-invocation.pdf"]
+        app._initial_use_virustotal = False
+
+        app._process_initial_scan_paths()
+
+        # The running scan's selection must remain untouched.
+        mock_scan_view._replace_selected_paths.assert_not_called()
+        mock_scan_view._set_selected_path.assert_not_called()
+        mock_scan_view._start_scan.assert_not_called()
+        # The dropped request is consumed so it cannot fire later.
+        assert app._initial_scan_paths == []
+        assert app._initial_use_virustotal is False
+        # The user is informed via the window's toast mechanism.
+        app.props.active_window.add_toast.assert_called_once()
+        toast_message = mock_gtk_modules["Adw"].Toast.new.call_args[0][0]
+        assert "already running" in toast_message
+        assert "ignored" in toast_message
+
+    def test_pre_activation_paths_stay_pending(self, app):
+        """Paths received before the scan view exists must stay pending.
+
+        Regression: the paths were popped BEFORE the scan-view guard, so a
+        pre-activation call consumed and silently dropped them.
+        """
+        app._scan_view = None
+        app._initial_scan_paths = ["/tmp/early.pdf", "/tmp/early2.pdf"]
+        app._initial_use_virustotal = True
+
+        app._process_initial_scan_paths()
+
+        assert app._initial_scan_paths == ["/tmp/early.pdf", "/tmp/early2.pdf"]
+        assert app._initial_use_virustotal is True
+
+    def test_processing_switches_to_scan_view(self, app):
+        """Starting a CLI-requested scan surfaces the scan view so a second
+        invocation does not scan invisibly under another view."""
+        mock_scan_view = self._make_idle_scan_view()
+        app._scan_view = mock_scan_view
+        app._current_view = "logs"
+        app._initial_scan_paths = ["/tmp/a.pdf"]
+        app._initial_use_virustotal = False
+
+        app._process_initial_scan_paths()
+
+        win = app.props.active_window
+        win.set_content_view.assert_called_once_with(mock_scan_view)
+        win.set_active_view.assert_called_once_with("scan")
+        assert app._current_view == "scan"
+        mock_scan_view._start_scan.assert_called_once_with()
+        # The reflective switch_to_view helper was removed; the coordinator
+        # is called directly instead.
+        assert not hasattr(app, "switch_to_view")
+
+    def test_virustotal_multi_select_shows_ignored_toast(self, app, mock_gtk_modules):
+        """Selecting several files for a VirusTotal scan (KDE desktop file uses
+        %F) must tell the user that only the first file is scanned."""
+        mock_scan_view = self._make_idle_scan_view()
+        app._scan_view = mock_scan_view
+        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf", "/tmp/c.pdf"]
+        app._initial_use_virustotal = True
+
+        app._process_initial_scan_paths()
+
+        mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
+        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        app.props.active_window.add_toast.assert_called_once()
+        toast_message = mock_gtk_modules["Adw"].Toast.new.call_args[0][0]
+        assert "VirusTotal" in toast_message
+        assert "2" in toast_message
+
+    def test_virustotal_single_path_shows_no_toast(self, app):
+        """A single-file VirusTotal request needs no 'selections ignored' toast."""
+        mock_scan_view = self._make_idle_scan_view()
+        app._scan_view = mock_scan_view
+        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._initial_scan_paths = ["/tmp/a.pdf"]
+        app._initial_use_virustotal = True
+
+        app._process_initial_scan_paths()
+
+        app.props.active_window.add_toast.assert_not_called()

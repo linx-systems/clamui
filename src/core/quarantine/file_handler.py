@@ -82,6 +82,20 @@ def _unlinkat(path: Path) -> None:
             os.close(parent_fd)
 
 
+def _write_all(fd: int, block: bytes) -> None:
+    """Write the whole block to fd, retrying on short writes.
+
+    os.write() may write fewer bytes than requested (e.g. when the disk
+    fills mid-write). Silently accepting a short write would produce a
+    truncated file whose recorded SHA-256 never verifies — after the source
+    is unlinked, the content would be unrecoverable.
+    """
+    view = memoryview(block)
+    while view:
+        written = os.write(fd, view)
+        view = view[written:]
+
+
 class SecureFileHandler:
     """
     Handler for secure file operations with permission management.
@@ -642,7 +656,7 @@ class SecureFileHandler:
                         if not block:
                             break
                         sha256_hash.update(block)
-                        os.write(dst_fd, block)
+                        _write_all(dst_fd, block)
                     os.fsync(dst_fd)
                     # fchmod via fd before close — no path-based TOCTOU window, and
                     # bypasses umask so permissions are applied exactly as specified.
@@ -907,7 +921,7 @@ class SecureFileHandler:
                         if not block:
                             break
                         sha256_hash.update(block)
-                        os.write(dst_fd, block)
+                        _write_all(dst_fd, block)
                     os.fsync(dst_fd)
                     # fchmod via fd — no path-based window, bypasses umask.
                     os.fchmod(dst_fd, masked_permissions)

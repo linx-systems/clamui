@@ -3,21 +3,25 @@ name: Build Debian Package
 on:
   push:
     branches: [master]
-    tags: ["v*"]
   pull_request:
     branches: [master]
   workflow_dispatch:
     inputs:
       sign:
-        description: "Sign the Debian package with GPG"
+        description: "Sign the Debian package(s) with GPG"
         type: boolean
         default: false
   workflow_call:
     inputs:
       sign:
-        description: "Sign the Debian package with GPG"
+        description: "Sign the Debian package(s) with GPG"
         type: boolean
         default: false
+    secrets:
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
 
 jobs:
   build-deb:
@@ -26,7 +30,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -35,10 +39,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dpkg-dev fakeroot dpkg-sig
 
-      - name: Build .deb package
+      - name: Build .deb packages
+        # build-deb.sh also builds the matching privileged-helper package so the
+        # full package's exact-version dependency is always satisfiable.
         run: ./debian/build-deb.sh
 
-      # Import GPG key for tag builds or when sign input is true
+      # Import GPG key for tag builds (invoked by release.yml via workflow_call)
+      # or when the sign input is true.
       - name: Import GPG key
         if: startsWith(github.ref, 'refs/tags/') || inputs.sign == true
         uses: crazy-max/ghaction-import-gpg@v7
@@ -47,20 +54,41 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
         id: gpg
 
-      # Sign .deb on tag builds or when sign input is true
-      - name: Sign Debian package
+      # Sign both .deb artifacts (full clamui + privileged-helper) on tag builds
+      # or when the sign input is true.
+      - name: Sign Debian packages
         if: startsWith(github.ref, 'refs/tags/') || inputs.sign == true
         run: |
-          dpkg-sig --sign builder -k ${{ steps.gpg.outputs.fingerprint }} clamui_*.deb
+          set -e
+          # nullglob: a no-match pattern expands to nothing so the count check
+          # below catches a missing artifact instead of matching its literal.
+          shopt -s nullglob
+          # Explicitly scope the two expected artifacts; never sign an
+          # unrelated stray .deb that happens to be in the workspace.
+          debs=()
+          for pat in 'clamui_*_all.deb' 'clamui-privileged-helper_*_all.deb'; do
+            matches=( $pat )
+            if [ "${#matches[@]}" -ne 1 ]; then
+              echo "Expected exactly one match for $pat, found ${#matches[@]}" >&2
+              exit 1
+            fi
+            debs+=( "${matches[0]}" )
+          done
 
-          # Verify signature member exists in the .deb archive
-          # (dpkg-sig --verify has a known BADSIG bug on Ubuntu 22.04)
-          ar t clamui_*.deb | grep -q _gpgbuilder
-          echo "Signature member verified in .deb archive"
+          dpkg-sig --sign builder -k ${{ steps.gpg.outputs.fingerprint }} "${debs[@]}"
 
-      - name: Upload Debian package artifact
-        uses: actions/upload-artifact@v6
+          # Verify the signature member exists inside every signed .deb archive.
+          # (dpkg-sig --verify has a known BADSIG bug on Ubuntu 22.04.)
+          for deb in "${debs[@]}"; do
+            ar t "$deb" | grep -q _gpgbuilder
+            echo "Signature member verified in $deb"
+          done
+
+      - name: Upload Debian package artifacts
+        uses: actions/upload-artifact@v7
         with:
-          name: debian-package
-          path: clamui_*.deb
+          name: debian-packages
+          path: |
+            clamui_*_all.deb
+            clamui-privileged-helper_*_all.deb
           retention-days: 7

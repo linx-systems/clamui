@@ -885,6 +885,178 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
         ]
         assert result.warning_message == "2 file(s) could not be accessed"
 
+    def test_parse_results_nonfatal_plus_unknown_warning_stays_error(self):
+        """A recognized non-fatal warning must not excuse an unrecognized one (veto)."""
+        scanner = Scanner()
+        stderr = (
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+            "LibClamAV Warning: something novel happened\n"
+        )
+
+        result = scanner._parse_results("/", "", stderr, 2)
+
+        assert result.status == ScanStatus.ERROR
+        assert result.error_message is not None
+
+    def test_parse_results_exit_code_2_empty_output_is_error(self):
+        """Exit code 2 with no output at all has no positive signal and stays ERROR."""
+        scanner = Scanner()
+
+        result = scanner._parse_results("/home/user", "", "", 2)
+
+        assert result.status == ScanStatus.ERROR
+        assert result.skipped_count == 0
+        assert result.nonfatal_warnings == []
+        assert result.error_message is None
+
+    def test_parse_results_total_errors_summary_downgrades_to_clean(self):
+        """Regression for the -i mode hole: 'clamui scan' and scheduled scans run
+        clamscan with -i, which suppresses per-file 'Access denied' lines, so exit 2
+        arrives with only the summary's 'Total errors: N' as a positive signal.
+        """
+        scanner = Scanner()
+        stdout = """
+----------- SCAN SUMMARY -----------
+Known viruses: 8000000
+Engine version: 1.2.3
+Scanned directories: 12
+Scanned files: 340
+Infected files: 0
+Total errors: 3
+Data scanned: 120.00 MB
+Time: 10.000 sec (0 m 10 s)
+"""
+        result = scanner._parse_results("/home/user", stdout, "", 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.warning_message == "3 file(s) could not be read"
+        assert result.error_message is None
+        assert result.scanned_files == 340
+
+    def test_parse_results_verbose_access_denied_line_is_skipped(self):
+        """In -v mode the plain '<path>: Access denied' line marks a skipped file."""
+        scanner = Scanner()
+        stdout = """/home/user/test.txt: OK
+/root/secret.txt: Access denied
+
+----------- SCAN SUMMARY -----------
+Scanned files: 1
+Infected files: 0
+Total errors: 1
+"""
+        result = scanner._parse_results("/home/user", stdout, "", 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.skipped_files == ["/root/secret.txt"]
+        assert result.warning_message == "1 file(s) could not be accessed"
+
+    def test_parse_results_cant_access_file_warning_is_skipped(self):
+        """'WARNING: <path>: Can't access file' (file deleted mid-scan) is a skip."""
+        scanner = Scanner()
+        stdout = """----------- SCAN SUMMARY -----------
+Scanned files: 1
+Infected files: 0
+"""
+        stderr = "WARNING: /home/user/tmp/ephemeral.dat: Can't access file\n"
+
+        result = scanner._parse_results("/home/user", stdout, stderr, 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.skipped_files == ["/home/user/tmp/ephemeral.dat"]
+
+    def test_parse_results_time_limit_reached_is_nonfatal(self):
+        """Per-file 'Time limit reached ERROR' lines are partial scans, not skipped files."""
+        scanner = Scanner()
+        stdout = """/home/user/huge.tar: Time limit reached ERROR
+
+----------- SCAN SUMMARY -----------
+Scanned files: 10
+Infected files: 0
+"""
+        result = scanner._parse_results("/home/user", stdout, "", 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.skipped_files == []
+        assert result.nonfatal_warnings == ["/home/user/huge.tar: Time limit reached ERROR"]
+        assert result.warning_message == (
+            "1 non-fatal warning(s) during scan; some files may have been only partially scanned"
+        )
+
+    def test_parse_results_total_errors_with_zero_scanned_is_error(self):
+        """Exit 2 where every file failed ('Scanned files: 0') must not report CLEAN."""
+        scanner = Scanner()
+        stdout = """----------- SCAN SUMMARY -----------
+Scanned directories: 1
+Scanned files: 0
+Infected files: 0
+Total errors: 3
+"""
+        result = scanner._parse_results("/root", stdout, "", 2)
+
+        assert result.status == ScanStatus.ERROR
+        assert result.error_message == "No files could be scanned"
+
+    def test_parse_results_skipped_files_with_zero_scanned_is_error(self):
+        """Exit 2 with only skip warnings and no scanned files is an all-failed ERROR."""
+        scanner = Scanner()
+        stdout = """----------- SCAN SUMMARY -----------
+Scanned files: 0
+Infected files: 0
+"""
+        stderr = "WARNING: /gone: Can't access file\n"
+
+        result = scanner._parse_results("/gone", stdout, stderr, 2)
+
+        assert result.status == ScanStatus.ERROR
+        assert result.error_message == "No files could be scanned"
+
+    def test_parse_results_nonfatal_only_downgrade_sets_warning_fields(self):
+        """A nonfatal-only downgrade must surface the warnings to the caller."""
+        scanner = Scanner()
+        stdout = """
+----------- SCAN SUMMARY -----------
+Scanned files: 50000
+Infected files: 0
+"""
+        stderr = (
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+        )
+
+        result = scanner._parse_results("/", stdout, stderr, 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.nonfatal_warnings == [
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes"
+        ]
+        assert result.has_warnings is True
+        assert result.warning_message == (
+            "1 non-fatal warning(s) during scan; some files may have been only partially scanned"
+        )
+
+    def test_parse_results_infected_with_warnings_never_masked(self):
+        """Detections stay INFECTED on exit 1 and 2 despite non-fatal warnings."""
+        scanner = Scanner()
+        stdout = """/home/user/virus.txt: Eicar-Test-Signature FOUND
+
+----------- SCAN SUMMARY -----------
+Scanned files: 5
+Infected files: 1
+"""
+        stderr = "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+
+        for exit_code in (1, 2):
+            result = scanner._parse_results("/home/user", stdout, stderr, exit_code)
+
+            assert result.status == ScanStatus.INFECTED
+            assert result.infected_count == 1
+            assert "/home/user/virus.txt" in result.infected_files
+            assert result.nonfatal_warnings == [
+                "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN"
+            ]
+
     def test_scan_result_has_warnings_property(self):
         """Test ScanResult.has_warnings property works correctly."""
         # No warnings
@@ -924,6 +1096,26 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
             warning_message="1 file(s) could not be accessed",
         )
         assert result_with_warnings.has_warnings is True
+
+        # Non-fatal warnings alone (no skipped files) also count as warnings
+        result_nonfatal_only = ScanResult(
+            status=ScanStatus.CLEAN,
+            path="/test",
+            stdout="",
+            stderr="",
+            exit_code=2,
+            infected_files=[],
+            scanned_files=10,
+            scanned_dirs=1,
+            infected_count=0,
+            error_message=None,
+            threat_details=[],
+            skipped_files=[],
+            skipped_count=0,
+            warning_message=None,
+            nonfatal_warnings=["LibClamAV Warning: cli_tnef: file truncated, returning CLEAN"],
+        )
+        assert result_nonfatal_only.has_warnings is True
 
 
 class TestScannerThreatDetailsIntegration:
@@ -1288,6 +1480,32 @@ class TestPatternUtilities:
         assert compiled.match("/tmp/file.txt")
         assert compiled.match("/tmp/subdir")
         assert not compiled.match("/var/tmp/file")
+
+    def test_glob_to_regex_literal_trailing_dollar_is_anchored(self):
+        """A glob ending in a literal '$' must still get the end anchor.
+
+        'backup$' translates to r'backup\\$'; treating that escaped dollar
+        as the anchor left the pattern end-unanchored, silently excluding
+        every path that merely starts with 'backup$'.
+        """
+        import re
+
+        regex = glob_to_regex("backup$")
+        assert regex.endswith("\\$$")
+        compiled = re.compile(regex)
+        assert compiled.fullmatch("backup$")
+        assert not compiled.match("backup$2024.tar")
+
+    @pytest.mark.parametrize("suffix", [r"\Z", r"\z"])
+    def test_glob_to_regex_strips_python_end_anchors(self, suffix):
+        """Both fnmatch end-anchor variants must be converted to POSIX ERE."""
+        translated = rf"(?s:backup\$){suffix}"
+        with mock.patch("src.core.scanner.fnmatch.translate", return_value=translated):
+            regex = glob_to_regex("backup$")
+
+        assert regex == r"^backup\$$"
+        assert r"\Z" not in regex
+        assert r"\z" not in regex
 
     def test_glob_to_regex_multiple_wildcards(self):
         """Test glob_to_regex handles multiple wildcards."""

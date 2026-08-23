@@ -1,17 +1,21 @@
 #!/bin/bash
 # ClamUI Debian Package Build Script
-# Builds a .deb package for ClamUI using dpkg-deb
+# Builds the clamui and matching clamui-privileged-helper .deb packages.
 #
-# Usage: ./debian/build-deb.sh [OPTIONS]
+# Usage: ./debian/build-deb.sh [OUTPUT_DIR]
+#
+# Arguments:
+#   OUTPUT_DIR  Optional directory to write both .deb artifacts into.
+#               Defaults to the project root.
 #
 # Options:
 #   --help      Show this help message
 #
 # Prerequisites: dpkg-deb, fakeroot
-# Output: clamui_VERSION_all.deb in the project root
+# Output: clamui_VERSION_all.deb and
+#         clamui-privileged-helper_VERSION_all.deb in OUTPUT_DIR
 
-pu
-set -e
+set -euo pipefail
 
 # Colors for output (only if terminal supports it)
 if [ -t 1 ]; then
@@ -45,17 +49,21 @@ log_error() {
 	printf "${RED}[ERROR]${NC} %s\n" "$1" >&2
 }
 
-# Show usage information
 show_help() {
 	cat <<'EOF'
 ClamUI Debian Package Build Script
 
-Usage: ./debian/build-deb.sh [OPTIONS]
+Usage: ./debian/build-deb.sh [OUTPUT_DIR]
+
+Arguments:
+    OUTPUT_DIR  Optional directory to write both .deb artifacts into.
+                Defaults to the project root.
 
 Options:
     --help      Show this help message
 
-This script builds a Debian .deb package for ClamUI.
+This script builds the clamui .deb package plus the matching
+clamui-privileged-helper .deb package the full package depends on.
 
 Prerequisites:
     - dpkg-deb (from dpkg-dev package)
@@ -68,27 +76,39 @@ The script will:
     4. Create launcher script
     5. Copy desktop entry, icon, and metainfo files
     6. Generate DEBIAN control files
-    7. Build the .deb package
+    7. Build the clamui .deb package
+    8. Build the matching clamui-privileged-helper .deb package
 
-Output: clamui_VERSION_all.deb in the project root directory.
+Output: clamui_VERSION_all.deb and
+        clamui-privileged-helper_VERSION_all.deb in OUTPUT_DIR.
 
-Install the generated package with:
-    sudo dpkg -i clamui_*.deb
+Install the generated packages with:
+    sudo dpkg -i clamui_*.deb clamui-privileged-helper_*.deb
     sudo apt install -f  # if there are missing dependencies
 EOF
 }
 
-# Parse command line arguments
+# Parse command line arguments.  An optional positional OUTPUT_DIR (default
+# the repository root) selects where both .deb artifacts are written.
+RAW_OUTPUT_DIR=""
 for arg in "$@"; do
 	case "$arg" in
 	--help | -h)
 		show_help
 		exit 0
 		;;
-	*)
+	-*)
 		log_error "Unknown option: $arg"
 		show_help
 		exit 1
+		;;
+	*)
+		if [ -n "$RAW_OUTPUT_DIR" ]; then
+			log_error "Unexpected extra argument: $arg"
+			show_help
+			exit 1
+		fi
+		RAW_OUTPUT_DIR="$arg"
 		;;
 	esac
 done
@@ -101,6 +121,15 @@ done
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Optional positional OUTPUT_DIR defaults to the project root; resolve to an
+# absolute path after creating it so a relative directory stays reliable.
+RAW_OUTPUT_DIR="${RAW_OUTPUT_DIR:-$PROJECT_ROOT}"
+if [ ! -d "$RAW_OUTPUT_DIR" ]; then
+	mkdir -p "$RAW_OUTPUT_DIR"
+fi
+OUTPUT_DIR="$(cd "$RAW_OUTPUT_DIR" && pwd)"
+export OUTPUT_DIR
+
 # Package configuration
 PACKAGE_NAME="clamui"
 ARCHITECTURE="all"
@@ -108,7 +137,6 @@ ARCHITECTURE="all"
 #
 # Version Extraction Function
 #
-
 # Extract version from pyproject.toml
 extract_version() {
 	log_info "Extracting version from pyproject.toml..."
@@ -296,9 +324,6 @@ create_package_structure() {
 	log_info "Creating usr/share/metainfo/ for AppStream data..."
 	mkdir -p "$BUILD_DIR/usr/share/metainfo"
 
-	# Create /usr/share/polkit-1/actions/ for Polkit policy files
-	log_info "Creating usr/share/polkit-1/actions/ for Polkit policy..."
-	mkdir -p "$BUILD_DIR/usr/share/polkit-1/actions"
 
 	# Create /usr/share/icons/hicolor/128x128/apps/ for PNG icon
 	log_info "Creating usr/share/icons/hicolor/128x128/apps/ for PNG icon..."
@@ -331,7 +356,6 @@ create_package_structure() {
 	log_info "  - usr/share/icons/hicolor/scalable/apps/"
 	log_info "  - usr/share/icons/hicolor/128x128/apps/"
 	log_info "  - usr/share/metainfo/"
-	log_info "  - usr/share/polkit-1/actions/"
 	log_info "  - usr/share/nemo/actions/"
 	log_info "  - usr/share/clamui/integrations/"
 	log_info "  - usr/share/kio/servicemenus/"
@@ -432,39 +456,6 @@ LAUNCHER
 	return 0
 }
 
-# Create the privileged helper script in /usr/bin/
-create_privileged_helper_script() {
-	log_info "=== Creating Privileged Helper Script ==="
-	echo
-
-	HELPER_PATH="$BUILD_DIR/usr/bin/clamui-apply-preferences"
-
-	log_info "Creating privileged helper script: $HELPER_PATH"
-
-	cat >"$HELPER_PATH" <<'HELPER'
-#!/usr/bin/env python3
-"""ClamUI privileged helper for applying configuration files."""
-import sys
-
-from clamui.cli.apply_preferences import main
-
-sys.exit(main())
-HELPER
-
-	# Make executable (755)
-	chmod 755 "$HELPER_PATH"
-
-	# Verify helper was created
-	if [ ! -x "$HELPER_PATH" ]; then
-		log_error "Failed to create privileged helper script"
-		return 1
-	fi
-
-	log_success "Privileged helper script created successfully"
-	log_info "Installed to: /usr/bin/clamui-apply-preferences"
-
-	return 0
-}
 
 # Compile and install locale files for i18n
 compile_locales() {
@@ -553,17 +544,6 @@ copy_desktop_files() {
 		log_warning "Package may not appear in software centers"
 	fi
 
-	# Copy Polkit policy for friendlier authentication prompts
-	POLICY_FILE="$PROJECT_ROOT/data/io.github.linx_systems.ClamUI.policy"
-	if [ -f "$POLICY_FILE" ]; then
-		log_info "Copying Polkit policy..."
-		cp "$POLICY_FILE" "$BUILD_DIR/usr/share/polkit-1/actions/"
-		chmod 644 "$BUILD_DIR/usr/share/polkit-1/actions/io.github.linx_systems.ClamUI.policy"
-		log_success "Polkit policy installed"
-	else
-		log_warning "Polkit policy not found: $POLICY_FILE"
-		log_warning "Authentication dialogs may show technical command details"
-	fi
 
 	# Copy Nemo file manager actions
 	NEMO_ACTION="$PROJECT_ROOT/data/io.github.linx_systems.ClamUI.nemo_action"
@@ -658,7 +638,7 @@ copy_control_files() {
 	# Copy control file with version substitution
 	if [ -f "$DEBIAN_SRC_DIR/control" ]; then
 		log_info "Processing control file (substituting version)..."
-		sed "s/^Version: VERSION$/Version: $VERSION/" "$DEBIAN_SRC_DIR/control" >"$DEBIAN_DEST_DIR/control"
+	sed "s/VERSION/$VERSION/g" "$DEBIAN_SRC_DIR/control" >"$DEBIAN_DEST_DIR/control"
 		chmod 644 "$DEBIAN_DEST_DIR/control"
 		log_success "Control file installed (version: $VERSION)"
 	else
@@ -692,7 +672,7 @@ build_package() {
 	log_info "=== Building Debian Package ==="
 	echo
 
-	DEB_OUTPUT="$PROJECT_ROOT/$DEB_FILENAME"
+	DEB_OUTPUT="$OUTPUT_DIR/$DEB_FILENAME"
 
 	# Remove any existing package with the same name
 	if [ -f "$DEB_OUTPUT" ]; then
@@ -740,7 +720,7 @@ print_summary() {
 	log_info "========================================"
 	echo
 	log_info "Package created: $DEB_FILENAME"
-	log_info "Location: $PROJECT_ROOT/$DEB_FILENAME"
+	log_info "Location: $OUTPUT_DIR/$DEB_FILENAME"
 	echo
 	log_info "To install the package:"
 	log_info "  sudo dpkg -i $DEB_FILENAME"
@@ -808,15 +788,6 @@ main() {
 
 	echo
 
-	# Create privileged helper script used by pkexec save flow
-	if ! create_privileged_helper_script; then
-		log_error "Failed to create privileged helper script."
-		cleanup_build_dir
-		exit 1
-	fi
-
-	echo
-
 	# Compile locale files for i18n
 	if ! compile_locales; then
 		log_warning "Failed to compile locale files (non-fatal)"
@@ -852,6 +823,16 @@ main() {
 	# Clean up the build directory (success case)
 	echo
 	cleanup_build_dir
+
+	# Build the matching privileged-helper package so the full package's
+	# `clamui-privileged-helper (= VERSION)` dependency is always available.
+	# Done after cleanup_build_dir so it operates on its own staging tree.
+	echo
+	log_info "=== Building Matching Privileged Helper Package ==="
+	if ! "$SCRIPT_DIR/build-privileged-helper-deb.sh" "$OUTPUT_DIR"; then
+		log_error "Failed to build privileged-helper package."
+		exit 1
+	fi
 
 	# Print final summary
 	print_summary

@@ -40,6 +40,8 @@ clamui/
 ├── icons/                  Application icons
 ├── website/                Astro marketing site
 ├── planning/, thoughts/    Internal planning / AI-tooling context snapshots
+├── CODE_OF_CONDUCT.md      Community behavior and enforcement standards
+├── CONTRIBUTING.md         Contributor workflow and pull-request guidance
 └── pyproject.toml          Project config + dependencies
 ```
 
@@ -68,6 +70,12 @@ For detailed technical documentation on specific architectural patterns, see the
 | [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)                           | Common issues and solutions                         |
 | [`docs/TRANSLATING.md`](docs/TRANSLATING.md)                                   | Translation contributing guide                      |
 | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)                                     | End-user documentation                              |
+
+### Community Documentation
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) is the contributor-facing entry point for issue reporting, development setup, validation, project-specific rules, and pull-request expectations.
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) defines community behavior and the private process for reporting conduct incidents.
+- [`SECURITY.md`](SECURITY.md) defines the private vulnerability-reporting process; security issues must not be reported through public GitHub issues.
 
 ### System Tray Subprocess Architecture
 
@@ -777,10 +785,9 @@ VirusTotal is configured via **Preferences → VirusTotal** (the API key lives i
 [project.scripts]
 clamui = "src.main:main"
 clamui-scheduled-scan = "src.cli.scheduled_scan:main"
-clamui-apply-preferences = "src.cli.apply_preferences:main"
 ```
 
-The `src/cli/` package uses a command router (`router.py`) whose `CLI_SUBCOMMANDS` dispatches 7 subcommands: `scan`, `quarantine`, `profile`, `status`, `history`, `help`, and `install-privileged-helper`. These map to `scan_cmd.py`, `quarantine_cmd.py`, `profile_cmd.py`, `status_cmd.py`, `history_cmd.py`, `help_cmd.py`, and `install_helper.py` (plus `output.py` helpers). `install_helper.py` registers `clamui install-privileged-helper`, which installs the `clamui-apply-preferences` wrapper plus the polkit policy (`io.github.linx_systems.ClamUI.policy`) so system ClamAV config writes can elevate via `pkexec`. To add a subcommand, create a `*_cmd.py` module and register it in `router.py`.
+The `src/cli/` package uses a command router (`router.py`) whose `CLI_SUBCOMMANDS` dispatches 7 subcommands: `scan`, `quarantine`, `profile`, `status`, `history`, `help`, and `install-privileged-helper`. These map to `scan_cmd.py`, `quarantine_cmd.py`, `profile_cmd.py`, `status_cmd.py`, `history_cmd.py`, `help_cmd.py`, and `install_helper.py` (plus `output.py` helpers). `install_helper.py` registers `clamui install-privileged-helper`, which installs the root-owned `/usr/bin/clamui-apply-preferences` wrapper plus the polkit policy (`io.github.linx_systems.ClamUI.policy`) so system ClamAV config writes can elevate via `pkexec`; the privileged wrapper is deliberately not a Python project entry point. To add a subcommand, create a `*_cmd.py` module and register it in `router.py`.
 
 ## Dependencies
 

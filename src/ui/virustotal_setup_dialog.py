@@ -23,7 +23,7 @@ from gi.repository import Adw, Gtk
 from ..core.i18n import _
 from ..core.keyring_manager import set_api_key, validate_api_key_format
 from .compat import create_switch_row, create_toolbar_view
-from .utils import resolve_icon_name
+from .utils import enable_escape_to_close, resolve_icon_name
 
 if TYPE_CHECKING:
     from ..core.settings_manager import SettingsManager
@@ -89,6 +89,7 @@ class VirusTotalSetupDialog(Adw.Window):
 
         # Configure as modal dialog
         self.set_modal(True)
+        enable_escape_to_close(self)
         self.set_deletable(True)
 
     def _setup_ui(self):

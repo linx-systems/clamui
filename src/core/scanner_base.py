@@ -13,6 +13,7 @@ DaemonScanner (clamdscan) to avoid code duplication:
 
 import logging
 import os
+import re
 import select
 import subprocess
 from collections.abc import Callable
@@ -38,7 +39,15 @@ _NONFATAL_SKIP_MARKERS = (
     ": Failed to open file",
     ": File path check failure:",
     ": Not supported file type",
+    ": Can't access file",  # clamscan lstat() failure (e.g. file deleted mid-scan)
+    ": Access denied",  # per-file EACCES line (clamscan -v / clamdscan "Access denied. ERROR")
 )
+# Lines where the marker comes FIRST and the remainder of the line IS the path:
+# "ERROR: Can't access file <path>" (clamdscan stat() failure, proto.c error_stat).
+_NONFATAL_SKIP_MARKER_FIRST_PREFIXES = ("ERROR: Can't access file ",)
+# Warnings where the skipped path FOLLOWS the marker instead of preceding it:
+# "WARNING: Can't open file <path>: <strerror text>" (clamscan open() failure).
+_NONFATAL_SKIP_PATH_PREFIXES = ("WARNING: Can't open file ",)
 _IGNORABLE_WARNING_LINES = ("LibClamAV Warning: cli_realpath: Invalid arguments.",)
 
 # LibClamAV Error patterns from non-fatal file parsing (CL_EPARSE/CL_EFORMAT).
@@ -61,7 +70,34 @@ _NONFATAL_WARNING_PATTERNS = (
     "size limit reached",  # generic scan/file size cap reached
     "recursion limit",  # archive/container recursion depth cap
     "max recursion level reached",  # cli_magic_scan recursion cap
+    "cannot dlopen libclamunrar",  # optional unrar module missing; scan continues without it
+    "bytecode run timed out",  # bytecode signature timeout; file scan continues
 )
+
+# Per-file CL_ETIMEOUT reply: "<path>: Time limit reached ERROR". The file was
+# PARTIALLY scanned before the per-file time limit hit and the scan continued,
+# so it belongs in nonfatal_warnings — reporting it as "not accessible" would
+# be wrong.
+_NONFATAL_TIME_LIMIT_MARKER = ": Time limit reached"
+
+# Matches the "Total errors: N" line from the clamscan/clamdscan scan summary.
+_TOTAL_ERRORS_RE = re.compile(r"^Total errors:\s*(\d+)$")
+
+
+def parse_total_errors(stdout: str) -> int:
+    """Extract the error count from the ClamAV scan-summary block.
+
+    Both clamscan and clamdscan print "Total errors: N" in their summary when
+    at least one file could not be read. In -i mode the per-file "Access
+    denied" lines are suppressed, so this summary line can be the only
+    positive signal that an exit code of 2 was caused by unreadable files
+    rather than a scan failure. Returns 0 when the line is absent.
+    """
+    for raw_line in stdout.splitlines():
+        match = _TOTAL_ERRORS_RE.match(raw_line.strip())
+        if match:
+            return int(match.group(1))
+    return 0
 
 
 def communicate_with_cancel_check(
@@ -277,17 +313,21 @@ def stream_process_output(
                 remaining_stderr = "".join(remaining_stderr_chunks)
 
                 if remaining_stdout:
-                    # Process remaining data including incomplete line
+                    # Line callbacks get the buffered partial line rejoined with
+                    # the drained data; the accumulated buffer must only receive
+                    # the newly drained bytes — incomplete_line was already
+                    # appended as part of the chunk it arrived in, and appending
+                    # it again would corrupt the final output parsed for results.
                     data = incomplete_line + remaining_stdout
                     lines = data.split("\n")
                     for line in lines:
                         if line:  # Skip empty lines from split
                             on_line(line)
-                    stdout_total = _append(stdout_parts, stdout_total, data, "stdout")
+                    stdout_total = _append(stdout_parts, stdout_total, remaining_stdout, "stdout")
                 elif incomplete_line:
-                    # Process the final incomplete line
+                    # Flush the final incomplete line to the callback only; its
+                    # bytes are already in stdout_parts.
                     on_line(incomplete_line)
-                    stdout_total = _append(stdout_parts, stdout_total, incomplete_line, "stdout")
                 if remaining_stderr:
                     stderr_total = _append(stderr_parts, stderr_total, remaining_stderr, "stderr")
                 break
@@ -375,6 +415,9 @@ def stream_process_output(
 
 def _extract_skipped_path(line: str) -> str | None:
     """Extract a skipped-file path from a known non-fatal ClamAV warning line."""
+    for prefix in _NONFATAL_SKIP_MARKER_FIRST_PREFIXES:
+        if line.startswith(prefix):
+            return line[len(prefix) :].strip() or None
     for marker in _NONFATAL_SKIP_MARKERS:
         if marker in line:
             file_path = line.split(marker, 1)[0].strip()
@@ -382,6 +425,18 @@ def _extract_skipped_path(line: str) -> str | None:
                 file_path = file_path[len("WARNING:") :].strip()
             if file_path.startswith("ERROR:"):
                 file_path = file_path[len("ERROR:") :].strip()
+            if file_path in ("WARNING", "ERROR"):
+                # Marker-first wording we don't recognize ("ERROR: Can't access
+                # <something> ..."): the text before the marker is a severity
+                # token, not a path. Leave it to hard-error classification.
+                return None
+            return file_path or None
+    for prefix in _NONFATAL_SKIP_PATH_PREFIXES:
+        if line.startswith(prefix):
+            rest = line[len(prefix) :]
+            # "<path>: <strerror text>" — strerror messages contain no colon,
+            # so splitting on the last colon keeps colons inside the path.
+            file_path = rest.rsplit(":", 1)[0].strip() if ":" in rest else rest.strip()
             return file_path or None
     return None
 
@@ -439,12 +494,107 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
             nonfatal_warnings.append(line)
             continue
 
+        # Per-file CL_ETIMEOUT ("<path>: Time limit reached ERROR"): the file
+        # was partially scanned and the scan continued, so classify it as a
+        # non-fatal warning rather than a skipped (inaccessible) file.
+        if _NONFATAL_TIME_LIMIT_MARKER in line:
+            nonfatal_warnings.append(line)
+            continue
+
         if line.startswith(
             ("WARNING:", "ERROR:", "LibClamAV Error:", "LibClamAV Warning:")
         ) or line.endswith("ERROR"):
             hard_error_lines.append(line)
 
     return skipped_files, nonfatal_warnings, hard_error_lines
+
+
+def is_genuine_error_line(line: str) -> bool:
+    """Return True for lines that are unambiguous ClamAV error replies.
+
+    Matches per-file "... ERROR" replies and clamscan/clamdscan's own
+    "ERROR:" / "LibClamAV Error:" lines. Stray unrecognized warning lines do
+    NOT qualify, so a successful (exit 0) scan is not flipped to ERROR by them.
+    """
+    return line.endswith(" ERROR") or line.startswith(("ERROR:", "LibClamAV Error:"))
+
+
+def resolve_exit2_status(
+    stdout: str,
+    scanned_files: int,
+    hard_error_lines: list[str],
+    skipped_files: list[str],
+    nonfatal_warnings: list[str],
+    scanned_is_precount: bool = False,
+) -> tuple[ScanStatus, str | None, str | None]:
+    """Classify an exit-2 scan with no detections as benign CLEAN or real ERROR.
+
+    clamscan/clamdscan report exit code 2 even for benign, by-design situations
+    (unreadable files, files exceeding scan limits, truncated archives). The
+    scan is downgraded to CLEAN only when the cause was positively identified
+    as non-fatal (a skipped file, a limit/truncation warning, or the summary's
+    "Total errors: N" line in -i mode), nothing looked like a hard error, AND
+    at least one file was actually scanned. A scan where every file failed is
+    a real ERROR, not a clean result.
+
+    Args:
+        stdout: Full stdout, used to lazily parse "Total errors: N".
+        scanned_files: For clamscan, the summary's "Scanned files" count. For
+            clamdscan (``scanned_is_precount=True``), ClamUI's own pre-count of
+            scan targets, since clamdscan reports no such summary line.
+        hard_error_lines: Genuine-looking error lines from the output.
+        skipped_files: Paths ClamAV could not open/process.
+        nonfatal_warnings: Limit/truncation warnings (partial scans).
+        scanned_is_precount: True when ``scanned_files`` is a pre-count. A
+            pre-count of 0 means counting was skipped, not that nothing was
+            scanned, so the all-failed guard compares failure signals against
+            the pre-count instead of requiring it to be positive.
+
+    Returns:
+        Tuple of ``(status, warning_message, error_message)``.
+    """
+    total_errors: int | None = None
+
+    def get_total_errors() -> int:
+        nonlocal total_errors
+        if total_errors is None:
+            total_errors = parse_total_errors(stdout)
+        return total_errors
+
+    def all_files_failed() -> bool:
+        if not scanned_is_precount:
+            return scanned_files == 0
+        if scanned_files <= 0:
+            return False
+        return len(skipped_files) >= scanned_files or get_total_errors() >= scanned_files
+
+    if not hard_error_lines and (skipped_files or nonfatal_warnings):
+        if all_files_failed():
+            return (ScanStatus.ERROR, None, _("No files could be scanned"))
+        if skipped_files:
+            warning_message = _("{count} file(s) could not be accessed").format(
+                count=len(skipped_files)
+            )
+        else:
+            warning_message = _(
+                "{count} non-fatal warning(s) during scan; some files may "
+                "have been only partially scanned"
+            ).format(count=len(nonfatal_warnings))
+        return (ScanStatus.CLEAN, warning_message, None)
+
+    if not hard_error_lines and get_total_errors() > 0:
+        # -i mode suppresses per-file "Access denied" lines, so the summary's
+        # "Total errors: N" is the only positive signal that exit 2 was caused
+        # by unreadable files, not a scan failure.
+        if all_files_failed():
+            return (ScanStatus.ERROR, None, _("No files could be scanned"))
+        return (
+            ScanStatus.CLEAN,
+            _("{count} file(s) could not be read").format(count=get_total_errors()),
+            None,
+        )
+
+    return (ScanStatus.ERROR, None, None)
 
 
 def cleanup_process(process: subprocess.Popen | None) -> None:

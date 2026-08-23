@@ -167,11 +167,11 @@ class MainWindow(Adw.ApplicationWindow):
 
         logger.debug("Window minimized to tray")
 
-        # Update tray menu label if tray is available
+        # Update tray menu label if tray is available (window is now hidden)
         if hasattr(self._application, "tray_indicator"):
             tray = self._application.tray_indicator
             if tray is not None and hasattr(tray, "update_window_menu_label"):
-                tray.update_window_menu_label()
+                tray.update_window_menu_label(visible=False)
 
         return False  # Remove from idle queue
 

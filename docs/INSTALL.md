@@ -110,6 +110,24 @@ flatpak run io.github.linx_systems.ClamUI
 
 Or find "ClamUI" in your application menu.
 
+### Saving System Settings (Privileged Helper)
+
+ClamUI writes `freshclam.conf` and `clamd.conf` through a `pkexec`-elevated helper that must live at
+`/usr/bin/clamui-apply-preferences` on the **host**, alongside its polkit policy. The sandbox cannot install files
+there, so `sudo flatpak run ... install-privileged-helper` is **not supported** — the sandbox `/usr` is not the
+host `/usr`. The `clamui install-privileged-helper` command is native-host-only.
+
+To enable saving system ClamAV settings from the Flatpak, download the matching
+`clamui-privileged-helper_<version>_all.deb` from the
+[releases page](https://github.com/linx-systems/clamui/releases) (use the **same version** as your Flatpak) and
+install it on the host:
+
+```bash
+sudo apt install ./clamui-privileged-helper_<version>_all.deb
+```
+
+This installs only the helper, its Python modules, and the polkit policy — not the full native app.
+
 > **Troubleshooting**: If you encounter issues with the Flatpak installation,
 > see [Flatpak-Specific Issues](./TROUBLESHOOTING.md#flatpak-specific-issues) in the troubleshooting guide.
 
@@ -297,31 +315,40 @@ PyGObject releases require GLib 2.80+, while 22.04 ships GLib 2.72 and
 
 ### Download and Install
 
-Download the latest `.deb` package from the [releases page](https://github.com/linx-systems/clamui/releases), then
-install:
+The `clamui` package now depends on the matching `clamui-privileged-helper`
+package, which owns the `pkexec` helper and polkit policy used to save system
+ClamAV configuration. Download **both** release assets for your version
+(`clamui_<version>_all.deb` and `clamui-privileged-helper_<version>_all.deb`)
+and install them together so `apt` resolves the dependency and configures the
+helper:
 
 ```bash
-# Install the package
-sudo dpkg -i clamui_*.deb
-
-# Resolve any missing dependencies
-sudo apt install -f
+sudo apt install ./clamui_<version>_all.deb \
+  ./clamui-privileged-helper_<version>_all.deb
 ```
 
-Or install directly with apt:
-
-```bash
-sudo apt install ./clamui_*.deb
-```
+This installs ClamUI and its polkit helper in one step. The privileged helper
+is packaged separately so Flatpak users can install it on the host without the
+full native app — see "Saving System Settings (Privileged Helper)" under
+Flatpak Installation above.
 
 ### What Gets Installed
 
-| Path                                                                       | Description                |
-|----------------------------------------------------------------------------|----------------------------|
-| `/usr/bin/clamui`                                                          | Launcher script            |
-| `/usr/lib/python3/dist-packages/clamui/`                                   | Python application modules |
-| `/usr/share/applications/io.github.linx_systems.ClamUI.desktop`            | Desktop entry file         |
-| `/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.svg` | Application icon           |
+| Path                                                                       | Description                               |
+|----------------------------------------------------------------------------|-------------------------------------------|
+| `/usr/bin/clamui`                                                          | Launcher script                          |
+| `/usr/lib/python3/dist-packages/clamui/`                                   | Python application modules              |
+| `/usr/share/applications/io.github.linx_systems.ClamUI.desktop`            | Desktop entry file                       |
+| `/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.svg` | Application icon                        |
+| `/usr/bin/clamui-apply-preferences`                                       | Privileged config helper |
+| `/usr/lib/clamui/clamui_apply_preferences.py`                             | Helper library           |
+| `/usr/lib/clamui/clamui_privileged_paths.py`                              | Helper library           |
+| `/usr/share/polkit-1/actions/io.github.linx_systems.ClamUI.policy`         | polkit policy            |
+
+The last four paths are owned by the separate `clamui-privileged-helper`
+package, which the `clamui` package declares as a dependency (`Depends:
+clamui-privileged-helper (= VERSION)`); the main `clamui` package itself does
+not install those files.
 
 ### Building the Package
 
@@ -586,7 +613,7 @@ details, see [SIGNING.md](./SIGNING.md).
 curl -fsSL https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc | gpg --import
 
 # Verify the package
-dpkg-sig --verify clamui_*.deb
+dpkg-sig --verify clamui_*.deb clamui-privileged-helper_*.deb
 # Expected output: GOODSIG _gpgbuilder ...
 ```
 

@@ -7,9 +7,9 @@ deliberately small, has no GTK dependency, and treats every input as
 adversarial.  See ``src/core/privileged_paths.py`` for the validators that
 form the actual security boundary; this module is the wiring around them.
 
-Protocol (version 2):
+Protocol (version 3):
 
-    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=2 \\
+    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=3 \
         <staged-src-1> <dest-1>  [<staged-src-2> <dest-2> ...]
 
 The helper:
@@ -18,7 +18,7 @@ The helper:
    or non-numeric (exit 3).  This pins source-file authentication to the
    user who actually authorised the elevation, not to the running root
    process.
-2. Requires ``--protocol=2`` as the first positional argument so an
+2. Requires ``--protocol=3`` as the first positional argument so an
    outdated caller paired with the hardened helper fails closed (exit 4)
    instead of being interpreted as ``src dest src dest ...``.
 3. Resolves the per-user staging root, opens it ``O_NOFOLLOW`` /
@@ -32,7 +32,7 @@ The helper:
      no group/world write, resolved path under the staging root.
    - Validates the destination against the allowlist (``.conf`` extension,
      no traversal, parent must be one of the allowed dirs after symlink
-     resolution).
+     resolution) and retains only its canonical allowed path.
    - Atomically installs via ``mkstemp`` in the destination directory,
      ``copyfileobj`` from the validated FD, ``fsync``, ``chmod 0o644``,
      ``os.replace`` onto the destination.  On any error the temp file is
@@ -80,7 +80,7 @@ _CLAMD_UNITS: tuple[str, ...] = (
 # 1  generic error (validation failure, IO error, restart failure)
 # 2  argument parsing error (odd number of pairs, no pairs)
 # 3  PKEXEC_UID missing/zero/non-numeric
-# 4  protocol mismatch (caller did not pass --protocol=2 first)
+# 4  protocol mismatch (caller did not pass --protocol=3 first)
 EXIT_OK = 0
 EXIT_GENERIC_ERROR = 1
 EXIT_BAD_ARGS = 2
@@ -94,7 +94,7 @@ def _parse_path_pairs(args: list[str]) -> list[tuple[Path, Path]]:
 
     Args:
         args: Flat list of alternating source and destination paths
-            (after the ``--protocol=2`` token has been consumed).
+            (after the ``--protocol=3`` token has been consumed).
 
     Returns:
         List of ``(source, destination)`` ``Path`` tuples.
@@ -136,80 +136,52 @@ def _atomic_install(source_fd: int, destination: Path) -> None:
     """
     Atomically install ``source_fd``'s content into ``destination`` (mode 0o644).
 
-    The temp file is created in the *destination* directory so ``os.replace``
-    is a same-filesystem rename and therefore atomic.  Any failure unlinks
-    the temp file before re-raising; the destination is never left in a
-    partially-written state.
-
-    Args:
-        source_fd: Validated, ``O_NOFOLLOW``-opened source descriptor.  This
-            function takes ownership and closes it via ``os.fdopen``.
-        destination: Final destination path.  The parent must already exist.
+    The temp file is created in the destination directory so ``os.replace`` is
+    atomic for this one file. This function takes ownership of ``source_fd`` and
+    closes it even if destination preparation fails.
     """
-    dst_dir = destination.parent
-    dst_dir.mkdir(parents=True, exist_ok=True)
-
-    tmp_fd, tmp_name = tempfile.mkstemp(
-        dir=str(dst_dir),
-        prefix=f".{destination.name}.",
-        suffix=".tmp",
-    )
-    try:
-        with (
-            os.fdopen(source_fd, "rb", closefd=True) as src_f,
-            os.fdopen(tmp_fd, "wb", closefd=True) as tmp_f,
-        ):
-            shutil.copyfileobj(src_f, tmp_f)
-            tmp_f.flush()
-            os.fsync(tmp_f.fileno())
-        os.chmod(tmp_name, 0o644)
-        os.replace(tmp_name, destination)
-    except BaseException:
-        # If anything went wrong, make sure no half-written file lingers.
+    with os.fdopen(source_fd, "rb", closefd=True) as source_file:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        tmp_fd, tmp_name = tempfile.mkstemp(
+            dir=str(destination.parent),
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+        )
+        tmp_file = None
         try:
-            os.unlink(tmp_name)
-        except FileNotFoundError:
-            pass
-        raise
+            tmp_file = os.fdopen(tmp_fd, "wb", closefd=True)
+            with tmp_file:
+                shutil.copyfileobj(source_file, tmp_file)
+                tmp_file.flush()
+                os.fsync(tmp_file.fileno())
+            os.chmod(tmp_name, 0o644)
+            os.replace(tmp_name, destination)
+        except BaseException:
+            if tmp_file is None:
+                os.close(tmp_fd)
+            try:
+                os.unlink(tmp_name)
+            except FileNotFoundError:
+                pass
+            raise
 
 
-def _apply_pair(
+def _open_and_validate_source(
     source: Path,
-    destination: Path,
     expected_uid: int,
     staging_root: Path,
-) -> None:
-    """
-    Validate one ``(source, destination)`` pair and install it atomically.
-
-    Args:
-        source: Staged file path (must live under ``staging_root``).
-        destination: Final destination path (must satisfy the allowlist).
-        expected_uid: UID that must own ``source`` (typically ``PKEXEC_UID``).
-        staging_root: Per-invocation staging directory.
-
-    Raises:
-        ValueError: On any validation failure.
-        OSError: From ``os.open`` (e.g. ``ELOOP`` for a symlink source).
-    """
-    # Validate destination FIRST so a bad destination short-circuits before
-    # we even open the source file.  Fail-fast ordering also matters for
-    # multi-pair atomicity: see ``main`` where every pair is validated
-    # before any pair is installed.
-    validate_destination(destination)
-
-    src_fd = os.open(
+) -> int:
+    """Open and validate a staged source, returning the retained descriptor."""
+    source_fd = os.open(
         str(source),
         os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK,
     )
     try:
-        validate_source_for_uid(src_fd, source, expected_uid, staging_root)
+        validate_source_for_uid(source_fd, source, expected_uid, staging_root)
     except BaseException:
-        os.close(src_fd)
+        os.close(source_fd)
         raise
-
-    # _atomic_install takes ownership of src_fd and closes it.
-    _atomic_install(src_fd, destination)
+    return source_fd
 
 
 def _restart_units_for_destinations(destinations: list[Path]) -> None:
@@ -301,22 +273,55 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: invalid staging root: {error}", file=sys.stderr)
         return EXIT_GENERIC_ERROR
 
-    # Two-phase: validate every pair before installing any pair.  If pair #2
-    # has a bad destination we must NOT have installed pair #1 yet.
+    # Preflight phase 1: validate and canonicalize every destination before
+    # opening any source. A bad destination short-circuits with no descriptors
+    # held, and every later phase uses only the canonical allowed paths.
     try:
-        for _source, destination in pairs:
-            validate_destination(destination)
+        pairs = [(source, validate_destination(destination)) for source, destination in pairs]
     except ValueError as error:
         print(f"Error: {error}", file=sys.stderr)
         return EXIT_GENERIC_ERROR
 
+    # Preflight phase 2: open and authenticate every staged source, holding
+    # the validated descriptors open.  No destination is written until *every*
+    # source has cleared the uid/mode/staging-root checks, so a failure on
+    # pair #2 leaves pair #1's destination untouched -- no write begins
+    # before every input validates.  This is input preflight, not
+    # all-or-nothing I/O: it does not roll back an install once one starts.
+    validated: list[tuple[int, Path]] = []  # (source_fd, destination)
     try:
-        destinations: list[Path] = []
         for source, destination in pairs:
-            _apply_pair(source, destination, uid, staging_root)
+            src_fd = _open_and_validate_source(source, uid, staging_root)
+            validated.append((src_fd, destination))
+    except Exception as error:
+        # Nothing has been installed yet; close every source preflight opened.
+        for src_fd, _destination in validated:
+            try:
+                os.close(src_fd)
+            except OSError:
+                pass
+        print(f"Error: {error}", file=sys.stderr)
+        return EXIT_GENERIC_ERROR
+
+    # Install phase: copy each preflighted descriptor into its destination.
+    # _atomic_install reuses the preflight-opened descriptor (no reopen, so
+    # no source TOCTOU) and owns/closes it on every exit path.
+    destinations: list[Path] = []
+    try:
+        for src_fd, destination in validated:
+            _atomic_install(src_fd, destination)
             destinations.append(destination)
         _restart_units_for_destinations(destinations)
     except Exception as error:
+        # _atomic_install has consumed (and closed) the descriptors it was
+        # handed -- the first len(destinations) pairs plus the one that
+        # failed.  Close only the descriptors for the pairs we never reached,
+        # never the consumed ones, so a descriptor is never closed twice.
+        for src_fd, _destination in validated[len(destinations) + 1 :]:
+            try:
+                os.close(src_fd)
+            except OSError:
+                pass
         print(f"Error: {error}", file=sys.stderr)
         return EXIT_GENERIC_ERROR
 

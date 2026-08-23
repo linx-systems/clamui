@@ -51,8 +51,9 @@ SETUP_GUIDES = {
         ],
         "notes": N_(
             "freshclam updates the virus database. Enable the service for automatic updates:"
-        )
-        + "\nsudo systemctl enable clamav-freshclam\nsudo systemctl start clamav-freshclam",
+        ),
+        # Shell commands appended verbatim after the translated notes
+        "notes_commands": "sudo systemctl enable clamav-freshclam\nsudo systemctl start clamav-freshclam",
     },
     "clamdscan": {
         "title": N_("clamdscan Installation"),
@@ -81,12 +82,15 @@ SETUP_GUIDES = {
                 "sudo pacman -S clamav\nsudo systemctl enable clamav-daemon\nsudo systemctl start clamav-daemon",
             ),
         ],
-        "notes": N_("clamd is the ClamAV daemon for faster scanning.")
-        + " "
-        + N_("Configuration file location is auto-detected in Preferences.")
-        + " "
-        + N_(
-            "On Fedora, ClamUI uses /etc/clamd.d/scan.conf. If the daemon is running but still unavailable, verify socket permissions and test with: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+        # A tuple of sentences: each is translated separately at display
+        # time, then joined — concatenating N_() results at module level
+        # would produce msgids that never match the catalog.
+        "notes": (
+            N_("clamd is the ClamAV daemon for faster scanning."),
+            N_("Configuration file location is auto-detected in Preferences."),
+            N_(
+                "On Fedora, ClamUI uses /etc/clamd.d/scan.conf. If the daemon is running but still unavailable, verify socket permissions and test with: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+            ),
         ),
     },
 }
@@ -287,8 +291,17 @@ class ComponentsView(Gtk.Box):
             command_row = self._create_command_row(distro, command)
             content_box.append(command_row)
 
-        # Add notes if present
+        # Add notes if present. "notes" is one N_()-marked string or a tuple
+        # of them; translate each at display time. Any "notes_commands" shell
+        # text is appended verbatim (never translated).
         notes = guide.get("notes", "")
+        if isinstance(notes, tuple):
+            notes = " ".join(_(part) for part in notes)
+        elif notes:
+            notes = _(notes)
+        notes_commands = guide.get("notes_commands", "")
+        if notes_commands:
+            notes = f"{notes}\n{notes_commands}" if notes else notes_commands
         if notes:
             notes_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
             notes_box.set_margin_top(6)

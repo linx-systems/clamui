@@ -30,6 +30,7 @@ from .clamav_detection import (
     get_freshclam_path,
     resolve_clamd_conf_path,
     resolve_freshclam_conf_path,
+    systemd_unit_exists,
 )
 from .clipboard import copy_to_clipboard
 from .flatpak import (
@@ -89,6 +90,7 @@ __all__ = [
     "is_flatpak",
     "resolve_clamd_conf_path",
     "resolve_freshclam_conf_path",
+    "systemd_unit_exists",
     "validate_dropped_files",
     "validate_path",
     "which_host_command",

@@ -6,7 +6,9 @@ This module provides the SavePage class which handles saving all
 preference changes to ClamAV configuration files and ClamUI settings.
 """
 
+import copy
 import threading
+from pathlib import Path
 
 import gi
 
@@ -15,10 +17,13 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk
 
 from ...core.clamav_config import (
+    ClamAVConfig,
     backup_config,
+    privileged_writer_available,
     validate_config,
     write_configs_with_elevation,
 )
+from ...core.flatpak import is_flatpak
 from ...core.i18n import _
 from ..compat import create_toolbar_view, safe_set_subtitle_lines, safe_set_title_lines
 from ..utils import resolve_icon_name
@@ -316,7 +321,8 @@ class SavePage(PreferencesPageMixin):
                 button.set_sensitive(True)
                 return
 
-        if clamd_updates and self._clamd_available:
+        prospective_clamd_config: ClamAVConfig | None = None
+        if (clamd_updates or onaccess_updates) and self._clamd_available:
             if not self._window._clamd_config:
                 self._show_error_dialog(
                     _("Configuration Error"),
@@ -329,7 +335,14 @@ class SavePage(PreferencesPageMixin):
                 button.set_sensitive(True)
                 return
 
-            is_valid, errors = validate_config(self._window._clamd_config)
+            # Validate the configuration that will actually be written, not the
+            # one that was loaded (#181).  A stale out-of-range value on disk
+            # must not block the edit that repairs it, and an out-of-range edit
+            # must not slip through because the pre-update config looked valid.
+            prospective_clamd_config = self._prospective_clamd_config(
+                clamd_updates, onaccess_updates
+            )
+            is_valid, errors = validate_config(prospective_clamd_config)
             if not is_valid:
                 self._show_error_dialog(_("Validation Error"), "\n".join(errors))
                 self._is_saving = False
@@ -345,10 +358,67 @@ class SavePage(PreferencesPageMixin):
                 onaccess_updates,
                 scheduled_updates,
                 button,
+                prospective_clamd_config,
             ),
         )
         save_thread.daemon = True
         save_thread.start()
+
+    @staticmethod
+    def _apply_updates_to_config(config: ClamAVConfig, updates: dict) -> None:
+        """Apply collected widget updates to a parsed ClamAV config."""
+        for key, value in updates.items():
+            if isinstance(value, list):
+                config.remove_key(key)
+                for item in value:
+                    config.add_value(key, item)
+            else:
+                config.set_value(key, value)
+
+    @staticmethod
+    def _copy_config_for_path(config: ClamAVConfig, file_path: Path) -> ClamAVConfig:
+        """Return a writable copy of ``config`` targeting ``file_path``."""
+        return ClamAVConfig(
+            file_path=file_path,
+            values=copy.deepcopy(config.values),
+            raw_lines=list(config.raw_lines),
+        )
+
+    def _prospective_clamd_config(
+        self, clamd_updates: dict, onaccess_updates: dict
+    ) -> ClamAVConfig:
+        """Return the loaded clamd config with the collected updates applied.
+
+        Validation has to run against this proposal rather than against the
+        loaded config: the loaded config may still hold the stale out-of-range
+        value the pending edit repairs, and a bad edit only becomes visible
+        once it has been applied.
+        """
+        clamd_config = self._window._clamd_config
+        prospective = self._copy_config_for_path(clamd_config, clamd_config.file_path)
+        self._apply_updates_to_config(prospective, clamd_updates)
+        self._apply_updates_to_config(prospective, onaccess_updates)
+        return prospective
+
+    def _flatpak_user_clamd_config_path(self) -> Path:
+        """Host-home clamd.conf path used for Flatpak clamscan-only settings."""
+        return Path.home() / ".config" / "clamav" / "clamd.conf"
+
+    def _should_use_flatpak_user_clamd_config(
+        self, clamd_updates: dict, onaccess_updates: dict
+    ) -> bool:
+        """Return whether clamd.conf can be saved as a Flatpak user config."""
+        if not clamd_updates or onaccess_updates or not is_flatpak():
+            return False
+        if privileged_writer_available():
+            return False
+
+        try:
+            backend = self._settings_manager.get("scan_backend", "auto")
+        except Exception:
+            backend = "auto"
+
+        return backend == "clamscan" or (backend == "auto" and not self._clamd_available)
 
     def _save_configs_thread(
         self,
@@ -357,6 +427,7 @@ class SavePage(PreferencesPageMixin):
         onaccess_updates: dict,
         scheduled_updates: dict,
         button: Gtk.Button,
+        prospective_clamd_config: ClamAVConfig | None = None,
     ):
         """
         Save configuration files in a background thread.
@@ -370,6 +441,11 @@ class SavePage(PreferencesPageMixin):
             onaccess_updates: Dictionary of On-Access scanning settings (clamd.conf)
             scheduled_updates: Dictionary of scheduled scan settings
             button: The save button to re-enable after completion
+            prospective_clamd_config: Validated clamd.conf proposal built by
+                :meth:`_on_save_clicked`, persisted as-is so the configuration
+                that was validated is the configuration that gets written.
+                ``None`` when no clamd changes were collected for validation,
+                in which case the updates are applied to the loaded config.
         """
         try:
             # Backup configurations
@@ -378,46 +454,64 @@ class SavePage(PreferencesPageMixin):
                 backup_config(self._clamd_conf_path)
 
             configs_to_write = []
+            pending_clamd_conf_path: Path | None = None
+            pending_clamd_config: ClamAVConfig | None = None
+            config_changes_applied = False
+            system_clamd_config: ClamAVConfig | None = None
 
-            # Save freshclam.conf
+            # Save freshclam.conf.  User-local freshclam.conf would be ignored by
+            # the current update paths, so freshclam changes intentionally stay
+            # on the system/elevated path.
             if freshclam_updates and self._window._freshclam_config:
-                # Apply updates to config using set_value (or add_value for lists)
-                for key, value in freshclam_updates.items():
-                    if isinstance(value, list):
-                        # Multi-value option: blank old lines, then add each value
-                        self._window._freshclam_config.remove_key(key)
-                        for v in value:
-                            self._window._freshclam_config.add_value(key, v)
-                    else:
-                        self._window._freshclam_config.set_value(key, value)
-                configs_to_write.append(self._window._freshclam_config)
+                freshclam_config = self._window._freshclam_config
+                before = freshclam_config.to_string()
+                self._apply_updates_to_config(freshclam_config, freshclam_updates)
+                after = freshclam_config.to_string()
+                if not isinstance(before, str) or not isinstance(after, str) or before != after:
+                    configs_to_write.append(freshclam_config)
 
-            # Save clamd.conf (includes both scanner settings and On-Access settings)
+            # Save clamd.conf (scanner settings plus on-access settings).
             if (clamd_updates or onaccess_updates) and self._window._clamd_config:
-                # Apply scanner updates to config using set_value (or add_value for lists)
-                for key, value in clamd_updates.items():
-                    if isinstance(value, list):
-                        # Multi-value option: blank old lines, then add each value
-                        self._window._clamd_config.remove_key(key)
-                        for v in value:
-                            self._window._clamd_config.add_value(key, v)
+                clamd_config = self._window._clamd_config
+                before = clamd_config.to_string()
+                if prospective_clamd_config is None:
+                    proposed_config = self._copy_config_for_path(
+                        clamd_config, clamd_config.file_path
+                    )
+                    self._apply_updates_to_config(proposed_config, clamd_updates)
+                    self._apply_updates_to_config(proposed_config, onaccess_updates)
+                else:
+                    proposed_config = prospective_clamd_config
+                after = proposed_config.to_string()
+                if not isinstance(before, str) or not isinstance(after, str) or before != after:
+                    if self._should_use_flatpak_user_clamd_config(clamd_updates, onaccess_updates):
+                        pending_clamd_conf_path = self._flatpak_user_clamd_config_path()
+                        pending_clamd_config = self._copy_config_for_path(
+                            proposed_config, pending_clamd_conf_path
+                        )
                     else:
-                        self._window._clamd_config.set_value(key, value)
-                # Apply On-Access updates to config using set_value (or add_value for lists)
-                for key, value in onaccess_updates.items():
-                    if isinstance(value, list):
-                        # Multi-value option: blank old lines, then add each value
-                        self._window._clamd_config.remove_key(key)
-                        for v in value:
-                            self._window._clamd_config.add_value(key, v)
-                    else:
-                        self._window._clamd_config.set_value(key, value)
-                configs_to_write.append(self._window._clamd_config)
+                        configs_to_write.append(proposed_config)
+                        system_clamd_config = proposed_config
+
+            if pending_clamd_config is not None and pending_clamd_conf_path is not None:
+                success, error = write_configs_with_elevation([pending_clamd_config])
+                if not success:
+                    raise Exception(f"Failed to save configuration files: {error}")
+                self._settings_manager.set("clamd_conf_path", str(pending_clamd_conf_path))
+                if not self._settings_manager.save():
+                    raise Exception("Failed to save ClamUI settings")
+                self._clamd_conf_path = str(pending_clamd_conf_path)
+                self._window._clamd_conf_path = str(pending_clamd_conf_path)
+                self._window._clamd_config = pending_clamd_config
+                config_changes_applied = True
 
             if configs_to_write:
                 success, error = write_configs_with_elevation(configs_to_write)
                 if not success:
                     raise Exception(f"Failed to save configuration files: {error}")
+                if system_clamd_config is not None:
+                    self._window._clamd_config = system_clamd_config
+                config_changes_applied = True
 
             # Save scheduled scan settings
             if scheduled_updates:
@@ -449,7 +543,7 @@ class SavePage(PreferencesPageMixin):
             # claiming "Configuration saved" in that case is misleading and was
             # one way the Flatpak persistence bug (#136) surfaced as a phantom
             # success.
-            if configs_to_write or scheduled_updates:
+            if config_changes_applied or scheduled_updates:
                 GLib.idle_add(
                     self._show_success_dialog,
                     _("Configuration Saved"),

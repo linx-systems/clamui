@@ -346,10 +346,14 @@ class UpdateView(Gtk.Box):
         Returns:
             False to remove from idle (GLib.SOURCE_REMOVE)
         """
-        # Guard against widget being destroyed before callback fires
+        # Guard against widget being destroyed before callback fires. Do NOT
+        # bail out merely because the view is unmapped: it is cached for the
+        # app's lifetime and this check runs only once, so dropping the
+        # result while the user is on another view would leave the buttons
+        # stuck on "Checking freshclam..." forever. Updating an unmapped
+        # (but alive) widget is safe; a destroyed one raises and is caught.
         try:
-            if not self.get_mapped():
-                return False
+            self.get_mapped()
         except Exception:
             logger.debug(
                 "Skipping freshclam status update because the widget is unavailable",

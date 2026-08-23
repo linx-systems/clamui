@@ -13,7 +13,9 @@ These tests prevent build regressions that would only surface in production.
 """
 
 import re
+import shutil
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -266,3 +268,104 @@ class TestExcludesPycache:
 
         # Should exclude .pyc files
         assert ".pyc" in content, "Build script should handle .pyc file exclusion"
+
+
+class TestHelperDependencyAndNoOverlap:
+    """Behavioral tests for the split clamui / clamui-privileged-helper packages.
+
+    Builds both artifacts end-to-end and inspects the built .debs (no source-text
+    inspection) to assert:
+    - the full package declares ``clamui-privileged-helper (= VERSION)``;
+    - no host payload path is owned by both packages (no file overlap);
+    - the two artifacts are produced together from the normal Debian build;
+    - helper artifact metadata/path/mode assertions live in test_privileged_helper_deb.py.
+    """
+
+    BUILDER = PROJECT_ROOT / "debian" / "build-deb.sh"
+    HELPER_BUILDER = PROJECT_ROOT / "debian" / "build-privileged-helper-deb.sh"
+    PYPROJECT = PROJECT_ROOT / "pyproject.toml"
+
+    def _project_version(self) -> str:
+        with self.PYPROJECT.open("rb") as handle:
+            return tomllib.load(handle)["project"]["version"]
+
+    def _fields(self, deb: Path) -> dict[str, str]:
+        out = subprocess.run(
+            ["dpkg-deb", "--field", str(deb)],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        return {
+            key.strip(): value.strip()
+            for line in out.splitlines()
+            for key, sep, value in [line.partition(":")]
+            if sep
+        }
+
+    def _payload(self, deb: Path, dest: Path) -> set[str]:
+        subprocess.run(
+            ["dpkg-deb", "--extract", str(deb), str(dest)],
+            check=True,
+            capture_output=True,
+        )
+        return {str(p.relative_to(dest)) for p in dest.rglob("*") if p.is_file()}
+
+    def test_full_package_declares_exact_helper_dependency(self, tmp_path: Path) -> None:
+        """Full clamui .deb Depends on clamui-privileged-helper (= VERSION)."""
+        if shutil.which("dpkg-deb") is None:
+            pytest.skip("dpkg-deb required to inspect the .deb artifacts")
+        if not self.BUILDER.exists():
+            pytest.skip("debian build script not present")
+
+        version = self._project_version()
+        subprocess.run([str(self.BUILDER), str(tmp_path)], check=True, capture_output=True)
+
+        full = tmp_path / f"clamui_{version}_all.deb"
+        helper = tmp_path / f"clamui-privileged-helper_{version}_all.deb"
+        assert full.is_file(), f"full package not built: {full}"
+        assert helper.is_file(), f"helper package not built by normal build: {helper}"
+
+        fields = self._fields(full)
+        depends = fields.get("Depends", "")
+        assert f"clamui-privileged-helper (= {version})" in depends.split(", "), (
+            f"full package must depend on exact-version helper {version!r}: {depends!r}"
+        )
+
+    def test_no_payload_path_owned_by_both_packages(self, tmp_path: Path) -> None:
+        """No host path (file) appears in both the full and helper .deb payloads."""
+        if shutil.which("dpkg-deb") is None:
+            pytest.skip("dpkg-deb required to extract the .deb artifacts")
+        if not self.BUILDER.exists() or not self.HELPER_BUILDER.exists():
+            pytest.skip("debian build scripts not present")
+
+        out = tmp_path / "out"
+        out.mkdir()
+        subprocess.run([str(self.BUILDER), str(out)], check=True, capture_output=True)
+
+        version = self._project_version()
+        full = out / f"clamui_{version}_all.deb"
+        helper = out / f"clamui-privileged-helper_{version}_all.deb"
+
+        full_files = self._payload(full, tmp_path / "full")
+        helper_files = self._payload(helper, tmp_path / "helper")
+
+        overlap = full_files & helper_files
+        assert not overlap, f"payload paths owned by both packages: {sorted(overlap)}"
+
+    def test_helper_built_alongside_full_package(self, tmp_path: Path) -> None:
+        """The normal Debian build emits both matching-version artifacts."""
+        if shutil.which("dpkg-deb") is None:
+            pytest.skip("dpkg-deb required to inspect the .deb artifacts")
+        if not self.BUILDER.exists() or not self.HELPER_BUILDER.exists():
+            pytest.skip("debian build scripts not present")
+
+        out = tmp_path / "both"
+        out.mkdir()
+        subprocess.run([str(self.BUILDER), str(out)], check=True, capture_output=True)
+
+        version = self._project_version()
+        full = out / f"clamui_{version}_all.deb"
+        helper = out / f"clamui-privileged-helper_{version}_all.deb"
+        assert full.is_file(), f"full package not built: {full}"
+        assert helper.is_file(), f"helper package not built alongside full: {helper}"

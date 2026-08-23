@@ -130,7 +130,7 @@ uv run clamui profile list             # List scan profiles
 uv run clamui status                   # ClamAV status
 uv run clamui history                  # Scan history
 uv run clamui help                     # Command overview
-uv run clamui install-privileged-helper # Install pkexec config helper (needs sudo)
+sudo clamui install-privileged-helper  # Install pkexec config helper (native host, needs sudo)
 ```
 
 Most subcommands support `--json` output for scripting integration.
@@ -412,8 +412,13 @@ class TestMyFeature:
 ```toml
 clamui                    # GUI application (or CLI subcommands)
 clamui-scheduled-scan     # Scheduled scan CLI (systemd/cron)
-clamui-apply-preferences  # Privileged config applier (via pkexec)
 ```
+
+The root-owned `/usr/bin/clamui-apply-preferences` wrapper is not a Python project entry point. The `clamui install-privileged-helper` subcommand installs the wrapper and
+its policy; it is native-host-only and must not be run from a Flatpak sandbox
+(the sandbox `/usr` is not the host `/usr`). In a Flatpak, the matching
+`clamui-privileged-helper_<version>_all.deb` release asset is installed on the
+host instead.
 
 For a detailed breakdown of all modules, see the [Repository Structure](../AGENTS.md#repository-structure-top-level) section in AGENTS.md.
 

@@ -289,6 +289,63 @@ class TestScannerPageCreation:
         # (using create_spin_row helper which uses Gtk.SpinButton)
         assert gtk.SpinButton.call_count >= 4
 
+    def test_max_recursion_spin_row_uses_current_clamav_range(
+        self,
+        mock_gi_modules,
+        mock_config_path,
+        widgets_dict,
+        mock_settings_manager,
+        mock_parent_window,
+    ):
+        """Test MaxRecursion offers ClamAV's accepted 1-100 range (issue #181)."""
+        gtk = mock_gi_modules["gtk"]
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        with mock.patch("src.core.utils.check_clamd_connection", return_value=(True, "Connected")):
+            ScannerPage.create_page(
+                mock_config_path,
+                widgets_dict,
+                mock_settings_manager,
+                True,
+                mock_parent_window,
+            )
+
+        # create_spin_row builds one Gtk.Adjustment per spin row
+        bounds = [
+            (call.kwargs.get("lower"), call.kwargs.get("upper"))
+            for call in gtk.Adjustment.call_args_list
+        ]
+        assert (1, 100) in bounds, f"No spin row with MaxRecursion range 1-100; got {bounds}"
+
+    def test_max_recursion_spin_row_starts_at_clamav_default(
+        self,
+        mock_gi_modules,
+        mock_config_path,
+        widgets_dict,
+        mock_settings_manager,
+        mock_parent_window,
+    ):
+        """Test MaxRecursion spin row starts at ClamAV's default of 17 (issue #181)."""
+        gtk = mock_gi_modules["gtk"]
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        with mock.patch("src.core.utils.check_clamd_connection", return_value=(True, "Connected")):
+            ScannerPage.create_page(
+                mock_config_path,
+                widgets_dict,
+                mock_settings_manager,
+                True,
+                mock_parent_window,
+            )
+
+        initial_states = [
+            (call.kwargs.get("value"), call.kwargs.get("lower"), call.kwargs.get("upper"))
+            for call in gtk.Adjustment.call_args_list
+        ]
+        assert (17, 1, 100) in initial_states, (
+            f"MaxRecursion spin row must start at 17 within 1-100; got {initial_states}"
+        )
+
     def test_create_page_creates_entry_rows(
         self,
         mock_gi_modules,
@@ -922,9 +979,10 @@ class TestScannerPagePopulateFields:
 
         ScannerPage.populate_fields(mock_config, mock_widgets)
 
-        # Should call set_active with default value (False) for missing boolean keys
-        # This is the new behavior - populate_bool_field now sets default values
-        mock_widgets["ScanPE"].set_active.assert_called_with(False)
+        # Missing file-type keys must default to ON: ClamAV enables ScanPE etc.
+        # by default when absent from clamd.conf, so showing them off would
+        # write "ScanPE no" on the next save and disable scanning features.
+        mock_widgets["ScanPE"].set_active.assert_called_with(True)
         # set_value should not be called for missing numeric keys (different helper)
         mock_widgets["MaxFileSize"].set_value.assert_not_called()
 

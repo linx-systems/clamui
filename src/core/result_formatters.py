@@ -6,6 +6,7 @@ This module provides functions for:
 - Formatting ScanResult objects as human-readable text reports
 - Formatting ScanResult objects as CSV for spreadsheet export
 - Generating exportable scan reports with timestamps and threat details
+- Composing aggregated warning and status messages for scan results
 """
 
 import csv
@@ -17,6 +18,48 @@ from .i18n import _
 
 if TYPE_CHECKING:
     from .scanner import ScanResult
+
+
+def compose_scan_warning(skipped_count: int, warning_messages: list[str]) -> str | None:
+    """
+    Compose the aggregated warning message for a (multi-target) scan.
+
+    Args:
+        skipped_count: Number of files that could not be accessed
+        warning_messages: Distinct per-target warning messages
+
+    Returns:
+        The skipped-file count phrase when files were skipped, otherwise the
+        joined distinct per-target messages (e.g. non-fatal scanner warnings),
+        or None when there is nothing to warn about.
+    """
+    if skipped_count > 0:
+        return _("{count} file(s) could not be accessed").format(count=skipped_count)
+    if warning_messages:
+        return "; ".join(warning_messages)
+    return None
+
+
+def clean_scan_status_message(result: "ScanResult") -> str:
+    """
+    Build the status banner message for a clean scan result.
+
+    Args:
+        result: A clean ScanResult
+
+    Returns:
+        The banner message, including the skipped-file count or the warning
+        message when present. Never renders a bare "0 file(s)" phrase.
+    """
+    if result.skipped_count > 0:
+        return _("Scan complete - No threats found ({count} file(s) not accessible)").format(
+            count=result.skipped_count
+        )
+    if result.warning_message:
+        return _("Scan complete - No threats found ({warning})").format(
+            warning=result.warning_message
+        )
+    return _("Scan complete - No threats found")
 
 
 def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -> str:

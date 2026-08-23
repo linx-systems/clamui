@@ -28,6 +28,7 @@ from ...core.clamav_config import megabytes_to_size_value, size_value_to_megabyt
 from ...core.clamav_detection import detect_clamd_conf_path
 from ...core.flatpak import (
     format_flatpak_portal_path,
+    get_clean_env,
     is_flatpak,
     is_portal_path,
     resolve_portal_path,
@@ -524,6 +525,7 @@ class ScannerPage(PreferencesPageMixin):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True,
+                env=get_clean_env(),
             )
         except Exception as e:
             # Show error dialog if opening fails
@@ -698,13 +700,14 @@ class ScannerPage(PreferencesPageMixin):
         widgets_dict["MaxScanSize"] = max_scan_size_spin
         group.add(max_scan_size_row)
 
-        # MaxRecursion spin row (0-255)
+        # MaxRecursion spin row (clamd accepts 1-100; default 17)
         max_recursion_row, max_recursion_spin = create_spin_row(
             title=_("Max Archive Recursion"),
             subtitle=_("Maximum recursion depth for archives"),
-            min_val=0,
-            max_val=255,
+            min_val=1,
+            max_val=100,
             step=1,
+            initial_val=17,
         )
         max_recursion_row.add_prefix(styled_prefix_icon("folder-symbolic"))
         widgets_dict["MaxRecursion"] = max_recursion_spin
@@ -783,7 +786,10 @@ class ScannerPage(PreferencesPageMixin):
         if not config:
             return
 
-        # Populate file type scanning switches
+        # Populate file type scanning switches. ClamAV enables all of these
+        # by default when the key is absent from clamd.conf, so a missing key
+        # must show as ON — defaulting to off would write "ScanPE no" etc. on
+        # the next save and silently disable executable/document scanning.
         for key in (
             "ScanPE",
             "ScanELF",
@@ -792,7 +798,7 @@ class ScannerPage(PreferencesPageMixin):
             "ScanHTML",
             "ScanArchive",
         ):
-            populate_bool_field(config, widgets_dict, key)
+            populate_bool_field(config, widgets_dict, key, default=True)
 
         # Populate performance settings
         for key in ("MaxFileSize", "MaxScanSize"):

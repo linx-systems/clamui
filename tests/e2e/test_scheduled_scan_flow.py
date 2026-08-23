@@ -131,7 +131,7 @@ class TestE2EScheduleConfiguration:
 
         # Mock the CLI path to avoid needing the actual executable
         with mock.patch.object(
-            scheduler, "_get_cli_command_path", return_value="/usr/bin/clamui-scheduled-scan"
+            scheduler, "_get_cli_command_path", return_value=["/usr/bin/clamui-scheduled-scan"]
         ):
             if scheduler.backend == SchedulerBackend.SYSTEMD:
                 # Test systemd timer creation

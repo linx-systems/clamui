@@ -450,6 +450,18 @@ class TestDatabasePageCollectData:
         assert "Checks" not in result
         assert "DatabaseDirectory" not in result
 
+    def test_collect_data_returns_empty_when_page_never_created(self, mock_gi_modules):
+        """collect_data must return {} for an empty widgets dict.
+
+        Collecting from an empty dict would include an empty
+        DatabaseCustomURL list, which Save & Apply translates into
+        remove_key("DatabaseCustomURL") — stripping the user's custom
+        signature URLs even though the Database page was never opened.
+        """
+        from src.ui.preferences.database_page import DatabasePage
+
+        assert DatabasePage.collect_data({}) == {}
+
     def test_collect_data_skips_invalid_numeric_values(self, mock_gi_modules, mock_widgets):
         """Test collect_data ignores invalid numeric values instead of raising."""
         from src.ui.preferences.database_page import DatabasePage

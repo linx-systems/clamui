@@ -939,6 +939,54 @@ class TestQuarantineViewSearchIntegration:
         view._count_label.set_text.assert_called_with("1 of 2 items")
 
 
+class TestQuarantineViewConfirmations:
+    """Tests for the delete/restore confirmation flow."""
+
+    def test_delete_confirm_response_triggers_delete(
+        self, mock_quarantine_view, mock_quarantine_manager, mock_quarantine_entry
+    ):
+        """Confirming the dialog starts the async delete."""
+        mock_quarantine_view._on_delete_confirm_response(
+            mock.MagicMock(), "confirm", mock_quarantine_entry
+        )
+
+        mock_quarantine_manager.delete_file_async.assert_called_once()
+        assert mock_quarantine_manager.delete_file_async.call_args[0][0] == mock_quarantine_entry.id
+
+    def test_delete_cancel_response_does_not_delete(
+        self, mock_quarantine_view, mock_quarantine_manager, mock_quarantine_entry
+    ):
+        """Cancelling the dialog must not delete anything."""
+        mock_quarantine_view._on_delete_confirm_response(
+            mock.MagicMock(), "cancel", mock_quarantine_entry
+        )
+
+        mock_quarantine_manager.delete_file_async.assert_not_called()
+
+    def test_restore_confirm_response_triggers_restore(
+        self, mock_quarantine_view, mock_quarantine_manager, mock_quarantine_entry
+    ):
+        """Confirming the dialog starts the async restore."""
+        mock_quarantine_view._on_restore_confirm_response(
+            mock.MagicMock(), "confirm", mock_quarantine_entry
+        )
+
+        mock_quarantine_manager.restore_file_async.assert_called_once()
+        assert (
+            mock_quarantine_manager.restore_file_async.call_args[0][0] == mock_quarantine_entry.id
+        )
+
+    def test_restore_cancel_response_does_not_restore(
+        self, mock_quarantine_view, mock_quarantine_manager, mock_quarantine_entry
+    ):
+        """Cancelling the dialog must not restore anything."""
+        mock_quarantine_view._on_restore_confirm_response(
+            mock.MagicMock(), "cancel", mock_quarantine_entry
+        )
+
+        mock_quarantine_manager.restore_file_async.assert_not_called()
+
+
 class TestQuarantineViewStorageInfoExtended:
     """Extended tests for storage info with additional edge cases."""
 

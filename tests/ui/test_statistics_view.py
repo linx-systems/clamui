@@ -1083,9 +1083,15 @@ class TestStatisticsViewPerformLoad:
         view._show_empty_state = mock.MagicMock()
         view._show_error_state = mock.MagicMock()
 
-        result = view._perform_load()
+        with mock.patch(
+            "src.ui.statistics_view.GLib.idle_add",
+            side_effect=lambda fn, *a: fn(*a),
+        ):
+            view._perform_load()
 
-        assert result is False  # GLib.idle_add expects False to not repeat
+        # _perform_load now runs on a worker thread and delegates all UI work
+        # to _apply_statistics_results via idle_add; the patched idle_add runs
+        # that applier synchronously so the observable outcomes are testable.
         view._update_statistics_display.assert_called_once()
         view._update_protection_display.assert_called_once()
         view._update_chart.assert_called_once()
@@ -1111,7 +1117,11 @@ class TestStatisticsViewPerformLoad:
         view._show_empty_state = mock.MagicMock()
         view._show_error_state = mock.MagicMock()
 
-        view._perform_load()
+        with mock.patch(
+            "src.ui.statistics_view.GLib.idle_add",
+            side_effect=lambda fn, *a: fn(*a),
+        ):
+            view._perform_load()
 
         view._show_empty_state.assert_called_once()
         view._update_protection_display.assert_called_once()
@@ -1135,7 +1145,11 @@ class TestStatisticsViewPerformLoad:
         view._show_empty_state = mock.MagicMock()
         view._show_error_state = mock.MagicMock()
 
-        view._perform_load()
+        with mock.patch(
+            "src.ui.statistics_view.GLib.idle_add",
+            side_effect=lambda fn, *a: fn(*a),
+        ):
+            view._perform_load()
 
         view._show_error_state.assert_called_once()
         view._update_chart.assert_called_with([])
@@ -1159,7 +1173,11 @@ class TestStatisticsViewPerformLoad:
         view._show_empty_state = mock.MagicMock()
         view._show_error_state = mock.MagicMock()
 
-        view._perform_load()
+        with mock.patch(
+            "src.ui.statistics_view.GLib.idle_add",
+            side_effect=lambda fn, *a: fn(*a),
+        ):
+            view._perform_load()
 
         # Loading state should ALWAYS be reset
         view._set_loading_state.assert_called_with(False)

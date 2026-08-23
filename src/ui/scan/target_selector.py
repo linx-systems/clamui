@@ -16,7 +16,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, GObject, Gtk
+from gi.repository import Adw, Gdk, GObject, Gtk, Pango
 
 from ...core.i18n import _
 from ...core.utils import format_scan_path, validate_dropped_files
@@ -43,19 +43,19 @@ class PathRow(Gtk.ListBoxRow):
         icon = Gtk.Image.new_from_icon_name(resolve_icon_name(icon_name))
         box.append(icon)
 
-        display = format_scan_path(path)
-        if len(display) > 50:
-            display = "..." + display[-47:]
-        label = Gtk.Label(label=display)
+        label = Gtk.Label(label=format_scan_path(path))
         label.set_hexpand(True)
         label.set_xalign(0)
-        label.set_ellipsize(True)
+        label.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+        label.set_tooltip_text(path)
         box.append(label)
 
         remove_btn = Gtk.Button()
         remove_btn.set_icon_name(resolve_icon_name("window-close-symbolic"))
         remove_btn.add_css_class("flat")
         remove_btn.set_valign(Gtk.Align.CENTER)
+        remove_btn.set_tooltip_text(_("Remove target"))
+        remove_btn.update_property([Gtk.AccessibleProperty.LABEL], [_("Remove target")])
         remove_btn.connect("clicked", self._on_remove_clicked)
         box.append(remove_btn)
 

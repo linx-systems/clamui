@@ -24,6 +24,7 @@ gi.require_version("Gdk", "4.0")
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..core.i18n import _
+from ..core.install_commands import InstallTarget, recommend_install_command
 from ..core.system_audit import (
     TIER1_CHECKS,
     AuditCategory,
@@ -324,7 +325,7 @@ class AuditView(Gtk.Box):
         tool_name: str,
         description: str,
         info_url: str,
-        install_command: str,
+        install_command: str | None,
         on_run_clicked,
     ):
         """Configure a deep scan row based on whether the tool is installed."""
@@ -369,10 +370,12 @@ class AuditView(Gtk.Box):
             suffix_box.append(not_installed_icon)
             safe_add_suffix(row, suffix_box)
 
-            # Add install command row to the group
-            cmd_row = self._create_command_row(install_command)
-            self._deep_scan_group.add(cmd_row)
-            self._deep_scan_install_rows[tool_name] = cmd_row
+            # Add install command row to the group. Distros we cannot identify
+            # (or that ship no package) leave the row without a command.
+            if install_command:
+                cmd_row = self._create_command_row(install_command)
+                self._deep_scan_group.add(cmd_row)
+                self._deep_scan_install_rows[tool_name] = cmd_row
 
             # Disable button references
             if tool_name == "lynis":
@@ -451,16 +454,10 @@ class AuditView(Gtk.Box):
         # duplicate install command entries.
         self._reset_deep_scan_rows()
 
-        # Determine install command based on package manager
-        if is_binary_installed("apt"):
-            lynis_cmd = "sudo apt install lynis"
-            chkrootkit_cmd = "sudo apt install chkrootkit"
-        elif is_binary_installed("dnf"):
-            lynis_cmd = "sudo dnf install lynis"
-            chkrootkit_cmd = "sudo dnf install chkrootkit"
-        else:
-            lynis_cmd = "sudo apt install lynis"
-            chkrootkit_cmd = "sudo apt install chkrootkit"
+        # Each tool is resolved separately: a distro may package one and not
+        # the other, and an unidentified distro yields no command at all.
+        lynis_cmd = recommend_install_command(InstallTarget.LYNIS)
+        chkrootkit_cmd = recommend_install_command(InstallTarget.CHKROOTKIT)
 
         self._setup_deep_scan_row(
             self._lynis_row,
@@ -819,7 +816,7 @@ class AuditView(Gtk.Box):
         """
         import subprocess
 
-        from ..core.flatpak import is_flatpak
+        from ..core.flatpak import get_clean_env, is_flatpak
 
         # Sentinel: instead of spawning a subprocess, kick off Portmaster's
         # third-party authorization flow. Handled here (rather than in a
@@ -830,11 +827,15 @@ class AuditView(Gtk.Box):
 
         try:
             cmd = ["flatpak-spawn", "--host", command] if is_flatpak() else [command]
+            # env: gufw/firewall-config are host Python/GTK scripts; a leaked
+            # AppImage PYTHONHOME kills them instantly and stderr is DEVNULL
+            # (issue #155 residual).
             subprocess.Popen(
                 cmd,
                 start_new_session=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                env=get_clean_env(),
             )
         except FileNotFoundError:
             logger.warning("Could not launch: %s (not found)", command)

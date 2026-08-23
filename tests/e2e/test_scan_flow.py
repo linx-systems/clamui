@@ -609,9 +609,36 @@ class TestE2EScanResultParsing:
         E2E Test: Parse permission warnings and treat exit code 2 as clean when appropriate.
 
         Steps:
-        1. Feed stdout containing only failed-to-open warnings and no infections.
+        1. Feed stdout containing failed-to-open warnings, no infections, and
+           at least one successfully scanned file.
         2. Parse with exit code 2.
         3. Verify CLEAN status with skipped file warnings populated.
+        """
+        scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
+        warning_output = """/root/secret1: Failed to open file ERROR
+/root/secret2: Failed to open file ERROR
+
+----------- SCAN SUMMARY -----------
+Scanned directories: 1
+Scanned files: 1
+Infected files: 0
+"""
+
+        result = scanner._parse_results(str(e2e_env["scan_dir"]), warning_output, "", 2)
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.skipped_count == 2
+        assert len(result.skipped_files or []) == 2
+        assert "could not be accessed" in (result.warning_message or "")
+
+    def test_e2e_parse_all_files_failed_is_error(self, e2e_env):
+        """
+        E2E Test: Exit code 2 with zero scanned files is an error, not a clean scan.
+
+        Steps:
+        1. Feed stdout where every file failed to open (Scanned files: 0).
+        2. Parse with exit code 2.
+        3. Verify ERROR status with a specific message instead of a green result.
         """
         scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
         warning_output = """/root/secret1: Failed to open file ERROR
@@ -625,10 +652,8 @@ Infected files: 0
 
         result = scanner._parse_results(str(e2e_env["scan_dir"]), warning_output, "", 2)
 
-        assert result.status == ScanStatus.CLEAN
-        assert result.skipped_count == 2
-        assert len(result.skipped_files or []) == 2
-        assert "could not be accessed" in (result.warning_message or "")
+        assert result.status == ScanStatus.ERROR
+        assert "No files could be scanned" in (result.error_message or "")
 
 
 class TestE2EScanLogging:

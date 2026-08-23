@@ -296,7 +296,7 @@ Infected files: 1
 /home/user/a.txt: File path check failure: Permission denied. ERROR
 /home/user/b.txt: File path check failure: Permission denied. ERROR
 """
-        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=2, dir_count=0)
+        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=3, dir_count=0)
 
         assert result.status == scan_status_class.CLEAN
         assert result.infected_count == 0
@@ -313,7 +313,7 @@ Infected files: 1
 /home/user/a.txt: File path check failure: Permission denied. ERROR
 /home/user/a.txt: File path check failure: Permission denied. ERROR
 """
-        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=1, dir_count=0)
+        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=2, dir_count=0)
 
         assert result.status == scan_status_class.CLEAN
         assert result.skipped_count == 1
@@ -331,7 +331,7 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
 WARNING: /home/user/.cache/steam_pipe: Not supported file type
 LibClamAV Warning: cli_realpath: Invalid arguments.
 """
-        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=2, dir_count=0)
+        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=3, dir_count=0)
 
         assert result.status == scan_status_class.CLEAN
         assert result.infected_count == 0
@@ -341,6 +341,48 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
             "/home/user/.cache/steam_pipe",
         ]
         assert result.warning_message == "2 file(s) could not be accessed"
+
+    def test_parse_results_all_files_skipped_is_error(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """Exit 2 where every pre-counted file was inaccessible must not report CLEAN."""
+        scanner = daemon_scanner_class()
+
+        stdout = "".join(f"/root/secret{i}.txt: Access denied. ERROR\n" for i in range(1, 6))
+        result = scanner._parse_results("/root", stdout, "", 2, file_count=5, dir_count=1)
+
+        assert result.status == scan_status_class.ERROR
+        assert result.error_message == "No files could be scanned"
+        assert result.skipped_count == 5
+
+    def test_parse_results_all_skipped_without_precount_still_downgrades(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """With counting disabled (file_count=0) skip warnings still downgrade to CLEAN."""
+        scanner = daemon_scanner_class()
+
+        stdout = "/root/secret.txt: Access denied. ERROR\n"
+        result = scanner._parse_results("/root", stdout, "", 2, file_count=0, dir_count=0)
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.skipped_files == ["/root/secret.txt"]
+        assert result.warning_message == "1 file(s) could not be accessed"
+
+    def test_parse_results_total_errors_covering_precount_is_error(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """'Total errors' matching the pre-count means every file failed -> ERROR."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+----------- SCAN SUMMARY -----------
+Infected files: 0
+Total errors: 4
+"""
+        result = scanner._parse_results("/root", stdout, "", 2, file_count=4, dir_count=1)
+
+        assert result.status == scan_status_class.ERROR
+        assert result.error_message == "No files could be scanned"
 
     def test_parse_results_exit_code_2_with_detection_is_infected(
         self, daemon_scanner_class, scan_status_class
@@ -357,6 +399,129 @@ LibClamAV Warning: cli_realpath: Invalid arguments.
         assert result.status == scan_status_class.INFECTED
         assert result.infected_count == 1
         assert "/home/user/eicar.txt" in result.infected_files
+
+    def test_parse_results_issue_149_warning_lines_exit_2_clean(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """Regression for issue #149: the exact benign LibClamAV warnings from the
+        report must not flip an exit-2 daemon scan to ERROR."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+----------- SCAN SUMMARY -----------
+Infected files: 0
+"""
+        stderr = (
+            "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes\n"
+        )
+
+        result = scanner._parse_results(
+            "/home/user", stdout, stderr, 2, file_count=100, dir_count=3
+        )
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.error_message is None
+        assert result.nonfatal_warnings == [
+            "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN",
+            "LibClamAV Warning: cli_scanxz: decompress file size exceeds limits - "
+            "only scanning 105906176 bytes",
+        ]
+        assert result.has_warnings is True
+        assert result.warning_message == (
+            "2 non-fatal warning(s) during scan; some files may have been only partially scanned"
+        )
+
+    def test_parse_results_exit_0_with_stray_warning_stays_clean(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """A stray unrecognized warning line must not override the daemon's exit 0."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+/home/user/test.txt: OK
+
+----------- SCAN SUMMARY -----------
+Infected files: 0
+"""
+        stderr = "LibClamAV Warning: something novel happened\n"
+
+        result = scanner._parse_results("/home/user", stdout, stderr, 0, file_count=1, dir_count=0)
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.error_message is None
+
+    def test_parse_results_exit_0_unrar_dlopen_warning_is_clean(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """The verified 'Cannot dlopen libclamunrar_iface' warning at exit 0 -> CLEAN."""
+        scanner = daemon_scanner_class()
+
+        stderr = (
+            "LibClamAV Warning: Cannot dlopen libclamunrar_iface: file not found, "
+            "unrar support unavailable\n"
+        )
+
+        result = scanner._parse_results("/home/user", "", stderr, 0, file_count=1, dir_count=0)
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.error_message is None
+        assert result.nonfatal_warnings == [
+            "LibClamAV Warning: Cannot dlopen libclamunrar_iface: file not found, "
+            "unrar support unavailable"
+        ]
+        assert result.has_warnings is True
+
+    def test_parse_results_exit_0_with_per_file_error_reply_is_error(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """Genuine per-file '... ERROR' replies still override exit 0."""
+        scanner = daemon_scanner_class()
+
+        stdout = "/home/user/locked.bin: Can't open file or directory ERROR\n"
+
+        result = scanner._parse_results("/home/user", stdout, "", 0, file_count=1, dir_count=0)
+
+        assert result.status == scan_status_class.ERROR
+        assert result.error_message is not None
+
+    def test_parse_results_total_errors_summary_downgrades_to_clean(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """With -i suppressing per-file lines, 'Total errors: N' downgrades exit 2."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+----------- SCAN SUMMARY -----------
+Infected files: 0
+Total errors: 2
+Time: 1.000 sec (0 m 1 s)
+"""
+        result = scanner._parse_results("/home/user", stdout, "", 2, file_count=10, dir_count=1)
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.warning_message == "2 file(s) could not be read"
+        assert result.error_message is None
+
+    def test_parse_results_infected_with_nonfatal_warnings_never_masked(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """Exit 2 with a FOUND line plus benign warnings must stay INFECTED."""
+        scanner = daemon_scanner_class()
+
+        stdout = """
+/home/user/eicar.txt: Eicar-Test-Signature FOUND
+"""
+        stderr = "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN\n"
+
+        result = scanner._parse_results("/home/user", stdout, stderr, 2, file_count=2, dir_count=0)
+
+        assert result.status == scan_status_class.INFECTED
+        assert result.infected_count == 1
+        assert result.nonfatal_warnings == [
+            "LibClamAV Warning: cli_tnef: file truncated, returning CLEAN"
+        ]
 
 
 class TestDaemonScannerProgressParsing:

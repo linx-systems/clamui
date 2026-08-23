@@ -251,8 +251,14 @@ class ScheduledPage(PreferencesPageMixin):
             widgets_dict: Dictionary of widget references
 
         Returns:
-            Dictionary of scheduled scan settings to save
+            Dictionary of scheduled scan settings to save, or an empty dict
+            when the page was never created (no widgets to read). Returning
+            defaults in that case would silently overwrite the user's saved
+            schedule and disable the scheduler.
         """
+        if not widgets_dict:
+            return {}
+
         frequency_map = ["hourly", "daily", "weekly", "monthly"]
         selected_frequency = get_widget_selected(widgets_dict, "frequency")
         if selected_frequency is None or selected_frequency >= len(frequency_map):

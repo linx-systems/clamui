@@ -239,6 +239,61 @@ class TestStatsSection:
         parent.append.assert_called_once()
         _clear_src_modules()
 
+    def test_clean_scan_skipped_count_subtitle(self, mock_gi_modules):
+        """Skipped files render the not-accessible count in the subtitle."""
+        result = _make_scan_result(
+            status_name="CLEAN",
+            has_warnings=True,
+            skipped_count=5,
+            warning_message="5 file(s) could not be accessed",
+        )
+        dialog = self._setup(mock_gi_modules, result)
+        expander = MagicMock()
+        mock_gi_modules["adw"].ExpanderRow = MagicMock(return_value=expander)
+        parent = MagicMock()
+
+        dialog._create_stats_section(parent)
+
+        subtitle = expander.set_subtitle.call_args[0][0]
+        assert "5 file(s) not accessible" in subtitle
+        _clear_src_modules()
+
+    def test_clean_scan_nonfatal_warning_never_shows_zero_files(self, mock_gi_modules):
+        """Regression: with skipped_count == 0 but nonfatal warnings present,
+        the CLEAN subtitle said "0 file(s) not accessible" instead of the
+        actual warning message."""
+        result = _make_scan_result(
+            status_name="CLEAN",
+            has_warnings=True,
+            skipped_count=0,
+            warning_message="LibClamAV Warning: bytecode execution failed",
+        )
+        dialog = self._setup(mock_gi_modules, result)
+        expander = MagicMock()
+        mock_gi_modules["adw"].ExpanderRow = MagicMock(return_value=expander)
+        parent = MagicMock()
+
+        dialog._create_stats_section(parent)
+
+        subtitle = expander.set_subtitle.call_args[0][0]
+        assert "0 file(s)" not in subtitle
+        assert "No threats found" in subtitle
+        assert "LibClamAV Warning: bytecode execution failed" in subtitle
+        _clear_src_modules()
+
+    def test_clean_scan_no_warnings_plain_subtitle(self, mock_gi_modules):
+        result = _make_scan_result(status_name="CLEAN")
+        dialog = self._setup(mock_gi_modules, result)
+        expander = MagicMock()
+        mock_gi_modules["adw"].ExpanderRow = MagicMock(return_value=expander)
+        parent = MagicMock()
+
+        dialog._create_stats_section(parent)
+
+        subtitle = expander.set_subtitle.call_args[0][0]
+        assert subtitle == "No threats found"
+        _clear_src_modules()
+
 
 class TestStatRow:
     """Test _create_stat_row helper."""

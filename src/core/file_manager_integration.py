@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
-from .flatpak import is_flatpak, wrap_host_command
+from .flatpak import get_clean_env, is_flatpak, wrap_host_command
 from .i18n import N_, _
 from .path_validation import validate_path
 
@@ -313,6 +313,7 @@ def _refresh_dolphin_service_menu_cache() -> None:
                 check=True,
                 text=True,
                 timeout=10,
+                env=get_clean_env(),
             )
             logger.info("Refreshed KDE service menu cache via %s", binary)
             return

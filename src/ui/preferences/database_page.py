@@ -793,7 +793,16 @@ class DatabasePage(PreferencesPageMixin):
         for key in ("Checks", "HTTPProxyPort"):
             populate_int_field(config, widgets_dict, key)
 
-        # Load existing DatabaseCustomURL entries
+        # Load existing DatabaseCustomURL entries. Clear rows from any prior
+        # populate first — reloading the config (e.g. after Detect/Browse)
+        # would otherwise duplicate every URL row and write duplicated
+        # DatabaseCustomURL lines on the next save.
+        group = widgets_dict.get("_custom_url_group")
+        for row, _url in widgets_dict.get("_custom_url_rows", []):
+            if group:
+                group.remove(row)
+        if "_custom_url_rows" in widgets_dict:
+            widgets_dict["_custom_url_rows"] = []
         if config.has_key("DatabaseCustomURL"):
             for url in config.get_values("DatabaseCustomURL"):
                 if url:  # Skip empty values
@@ -808,8 +817,14 @@ class DatabasePage(PreferencesPageMixin):
             widgets_dict: Dictionary containing widget references
 
         Returns:
-            Dictionary of configuration key-value pairs to save
+            Dictionary of configuration key-value pairs to save, or an empty
+            dict when the page was never created (no widgets to read).
+            Collecting from an empty widgets dict would report an empty
+            DatabaseCustomURL list and strip the user's custom URLs on save.
         """
+        if not widgets_dict:
+            return {}
+
         updates = {}
 
         # Collect DatabaseDirectory

@@ -610,22 +610,16 @@ class TestScheduledPageCollectData:
         for key in required_keys:
             assert key in result, f"Required key {key} not in result"
 
-    def test_collect_data_handles_missing_widgets_with_defaults(self, mock_gi_modules):
-        """Test collect_data returns safe defaults when widgets are missing."""
+    def test_collect_data_returns_empty_when_page_never_created(self, mock_gi_modules):
+        """collect_data must not fabricate defaults when the page has no widgets.
+
+        Returning defaults for an empty widgets dict would overwrite the
+        user's saved schedule (and disable the scheduler) whenever Save &
+        Apply runs without the Scheduled page ever being opened.
+        """
         from src.ui.preferences.scheduled_page import ScheduledPage
 
-        result = ScheduledPage.collect_data({})
-
-        assert result == {
-            "scheduled_scans_enabled": False,
-            "schedule_frequency": "daily",
-            "schedule_time": "02:00",
-            "schedule_targets": [],
-            "schedule_day_of_week": 0,
-            "schedule_day_of_month": 1,
-            "schedule_skip_on_battery": True,
-            "schedule_auto_quarantine": False,
-        }
+        assert ScheduledPage.collect_data({}) == {}
 
     def test_collect_data_handles_invalid_numeric_values(self, mock_gi_modules, widgets_dict):
         """Test collect_data falls back to defaults on invalid numeric values."""
