@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+from .. import __version__
 from .i18n import _
 from .privileged_paths import (
     PROTOCOL_VERSION,
@@ -1116,9 +1117,11 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
         configs: Configuration objects to write.
 
     Returns:
-        Tuple of ``(success, error_message)``:
+        Tuple of ``(success, error_or_message)``:
 
         - ``(True, None)`` on success.
+        - ``(True, warning_message)`` if configuration was applied but staging
+          cleanup failed.
         - ``(False, error_message)`` on failure.
     """
     if not configs:
@@ -1150,21 +1153,21 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
         helper_path = _get_privileged_writer_path()
         if helper_path is None:
             if _running_in_flatpak():
+                package_name = f"clamui-privileged-helper_{__version__}_all.deb"
                 return (
                     False,
                     _(
                         "ClamUI privileged helper not installed on the host. "
                         "The Flatpak sandbox cannot write system ClamAV "
-                        "configuration files such as /etc/clamav/*.conf "
-                        "directly. Download the matching "
-                        "'clamui-privileged-helper_<version>_all.deb' from "
-                        "the ClamUI releases page and install it on the host "
-                        "with 'sudo apt install "
-                        "./clamui-privileged-helper_<version>_all.deb' (use "
-                        "the same version as the Flatpak). 'sudo flatpak run "
-                        "... install-privileged-helper' is not supported: the "
-                        "sandbox /usr is not the host /usr."
-                    ),
+                        "configuration files such as /etc/clamav/*.conf directly. "
+                        "Download the matching '{package_name}' from the ClamUI "
+                        "releases page. On Debian/Ubuntu, install it on the host with "
+                        "'sudo apt install ./{package_name}'. Other distributions do not "
+                        "currently have a supported ClamUI privileged-helper "
+                        "package, so Flatpak system configuration saving is "
+                        "unavailable there. Do not install it with 'sudo flatpak "
+                        "run': Flatpak cannot install this helper on the host."
+                    ).format(package_name=package_name),
                 )
             return (
                 False,
@@ -1266,14 +1269,18 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
             try:
                 shutil.rmtree(staging_dir)
             except OSError as cleanup_error:
-                return (
-                    False,
-                    _(
-                        "Configuration was applied, but ClamUI could not remove the staged "
-                        "copy at {path}: {error}. Verify that this directory is removed."
-                    ).format(path=staging_dir, error=cleanup_error),
+                logger.warning(
+                    "Configuration applied but staging cleanup failed for %s: %s",
+                    staging_dir,
+                    cleanup_error,
                 )
-            staging_dir = None
+                warning = _(
+                    "Configuration was applied, but staging cleanup failed for "
+                    "{staging_dir}: {cleanup_error}"
+                ).format(staging_dir=staging_dir, cleanup_error=cleanup_error)
+                return (True, warning)
+            else:
+                staging_dir = None
             return (True, None)
 
         finally:

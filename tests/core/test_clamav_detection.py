@@ -1151,6 +1151,76 @@ class TestResolveClamdConfPath:
             # Should have persisted the detected path
             mock_sm.set.assert_any_call("clamd_conf_path", "/etc/clamav/clamd.conf")
 
+    def test_flatpak_migrates_legacy_sandbox_path_to_detected_host_path(self):
+        """Test Flatpak replaces the old sandbox-local path with a host path."""
+        mock_sm = mock.Mock()
+        mock_sm.get.return_value = clamav_detection._LEGACY_FLATPAK_CLAMD_CONF_PATH
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=True),
+            mock.patch.object(
+                clamav_detection,
+                "detect_clamd_conf_path",
+                return_value="/etc/clamd.d/scan.conf",
+            ) as detect,
+            mock.patch.object(clamav_detection, "config_file_exists") as exists,
+        ):
+            result = clamav_detection.resolve_clamd_conf_path(mock_sm)
+
+        assert result == "/etc/clamd.d/scan.conf"
+        exists.assert_not_called()
+        detect.assert_called_once_with()
+        assert mock_sm.set.call_args_list == [
+            mock.call("clamd_conf_path", ""),
+            mock.call("clamd_conf_path", "/etc/clamd.d/scan.conf"),
+        ]
+
+    def test_flatpak_clears_legacy_sandbox_path_when_host_config_is_unknown(self):
+        """Test Flatpak never returns the legacy path when host detection fails."""
+        mock_sm = mock.Mock()
+        mock_sm.get.return_value = clamav_detection._LEGACY_FLATPAK_CLAMD_CONF_PATH
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=True),
+            mock.patch.object(clamav_detection, "detect_clamd_conf_path", return_value=None),
+            mock.patch.object(clamav_detection, "config_file_exists") as exists,
+        ):
+            result = clamav_detection.resolve_clamd_conf_path(mock_sm)
+
+        assert result is None
+        exists.assert_not_called()
+        mock_sm.set.assert_called_once_with("clamd_conf_path", "")
+
+    def test_flatpak_uses_valid_custom_host_path(self):
+        """Test Flatpak still honors an existing explicit custom host path."""
+        mock_sm = mock.Mock()
+        mock_sm.get.return_value = "/opt/clamav/custom-clamd.conf"
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=True),
+            mock.patch.object(clamav_detection, "config_file_exists", return_value=True) as exists,
+        ):
+            result = clamav_detection.resolve_clamd_conf_path(mock_sm)
+
+        assert result == "/opt/clamav/custom-clamd.conf"
+        exists.assert_called_once_with("/opt/clamav/custom-clamd.conf")
+        mock_sm.set.assert_not_called()
+
+    def test_native_uses_existing_legacy_path(self):
+        """Test the legacy path remains valid when it is a native user config."""
+        mock_sm = mock.Mock()
+        mock_sm.get.return_value = clamav_detection._LEGACY_FLATPAK_CLAMD_CONF_PATH
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=False),
+            mock.patch.object(clamav_detection, "config_file_exists", return_value=True) as exists,
+        ):
+            result = clamav_detection.resolve_clamd_conf_path(mock_sm)
+
+        assert result == clamav_detection._LEGACY_FLATPAK_CLAMD_CONF_PATH
+        exists.assert_called_once_with(clamav_detection._LEGACY_FLATPAK_CLAMD_CONF_PATH)
+        mock_sm.set.assert_not_called()
+
     def test_persists_detected_path(self):
         """Test newly detected path is persisted to settings."""
         mock_sm = mock.Mock()

@@ -525,6 +525,11 @@ _CLAMD_CONF_PATHS = [
     "/etc/clamd.conf",  # Generic/older
 ]
 
+# Older Flatpak releases persisted this sandbox-local path. It must not be
+# treated as a host configuration path when resolving settings in Flatpak.
+_LEGACY_FLATPAK_CLAMD_CONF_PATH = os.path.expanduser("~/.config/clamav/clamd.conf")
+
+
 _FRESHCLAM_CONF_PATHS = [
     "/etc/clamav/freshclam.conf",  # Debian/Ubuntu
     "/etc/freshclam.conf",  # Fedora/RHEL
@@ -602,8 +607,9 @@ def resolve_clamd_conf_path(settings_manager=None) -> str | None:
     Resolve the clamd config path: check saved setting, then auto-detect.
 
     Resolution order:
-    1. Saved path from settings (if non-empty and file exists)
-    2. Auto-detect by probing known paths
+    1. Saved path from settings (if non-empty and file exists; excluding the
+       legacy Flatpak sandbox-local path)
+    2. Auto-detect by probing known host paths
     3. None if nothing found
 
     Persists newly detected paths to settings for future use.
@@ -616,10 +622,14 @@ def resolve_clamd_conf_path(settings_manager=None) -> str | None:
     """
     if settings_manager:
         saved = settings_manager.get("clamd_conf_path", "")
-        if saved and config_file_exists(saved):
+        is_legacy_flatpak_path = is_flatpak() and saved == _LEGACY_FLATPAK_CLAMD_CONF_PATH
+        if saved and not is_legacy_flatpak_path and config_file_exists(saved):
             return saved
         if saved:
-            logger.info("Saved clamd config path invalid (%s), re-detecting", saved)
+            if is_legacy_flatpak_path:
+                logger.info("Ignoring legacy Flatpak clamd config path (%s)", saved)
+            else:
+                logger.info("Saved clamd config path invalid (%s), re-detecting", saved)
             settings_manager.set("clamd_conf_path", "")
 
     detected = detect_clamd_conf_path()
