@@ -982,9 +982,9 @@ class ClamUIApp(Adw.Application):
 
         win = self.props.active_window
         if win:
-            dialog = VirusTotalSetupDialog(win)
-            dialog.connect(
-                "scan-requested", lambda d, key: self._trigger_virustotal_scan(file_path, key)
+            dialog = VirusTotalSetupDialog(
+                win,
+                on_key_saved=lambda key: self._trigger_virustotal_scan(file_path, key),
             )
             dialog.present()
 
