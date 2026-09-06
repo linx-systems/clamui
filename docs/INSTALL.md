@@ -50,8 +50,8 @@ requires the ClamAV daemon (`clamd`) and `clamdscan` — see
 sudo apt install clamav clamav-freshclam
 sudo apt install clamav-daemon          # optional: daemon (clamd/clamdscan) backend
 
-# Fedora (clamav-update provides freshclam; clamd/clamav-update for daemon mode)
-sudo dnf install clamav clamav-update
+# Fedora (clamav-freshclam provides freshclam; clamd for daemon mode)
+sudo dnf install clamav clamav-freshclam
 sudo dnf install clamd                   # optional: daemon backend
 
 # Arch Linux (the clamav package provides clamscan, freshclam, clamd, and clamdscan)

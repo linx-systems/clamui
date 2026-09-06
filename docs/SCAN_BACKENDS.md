@@ -51,7 +51,7 @@ clamdscan --version  # Verify
 ### Fedora
 
 ```bash
-sudo dnf install clamd clamav-update
+sudo dnf install clamd clamav-freshclam
 sudo freshclam
 sudo systemctl enable clamd@scan
 sudo systemctl start clamd@scan

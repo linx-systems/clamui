@@ -35,7 +35,7 @@ sudo apt install clamav clamav-daemon clamav-freshclam
 **Fedora:**
 
 ```bash
-sudo dnf install clamav clamd clamav-update
+sudo dnf install clamav clamd clamav-freshclam
 ```
 
 **Arch Linux:**
@@ -85,7 +85,7 @@ If you installed ClamUI via Flatpak, install ClamAV on the host system. The Flat
 1. **Install host ClamAV**:
    ```bash
    sudo apt install clamav clamav-freshclam      # Ubuntu/Debian
-   sudo dnf install clamav clamav-update        # Fedora
+   sudo dnf install clamav clamav-freshclam     # Fedora
    sudo pacman -S clamav                        # Arch Linux
    ```
 

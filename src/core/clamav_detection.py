@@ -151,9 +151,9 @@ def check_freshclam_installed() -> tuple[bool, str | None]:
     if freshclam_path is None:
         return (False, _freshclam_not_installed_message())
 
-    cmd = ["freshclam", "--version"]
+    cmd = [freshclam_path, "--version", "--config-file=/dev/null"]
 
-    # Try to get version to verify it's working
+    # Avoid Fedora's root-only default config while verifying the executable.
     try:
         result = subprocess.run(
             wrap_host_command(cmd),

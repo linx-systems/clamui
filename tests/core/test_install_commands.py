@@ -52,7 +52,7 @@ COMMAND_MATRIX: list[tuple[str, str, str | None]] = [
     ("CHKROOTKIT", "DEBIAN", "sudo apt install chkrootkit"),
     # -- Fedora family -----------------------------------------------------
     ("CLAMAV", "FEDORA", "sudo dnf install clamav clamd"),
-    ("FRESHCLAM", "FEDORA", "sudo dnf install clamav-update"),
+    ("FRESHCLAM", "FEDORA", "sudo dnf install clamav-freshclam"),
     ("CLAMD", "FEDORA", "sudo dnf install clamd"),
     ("FIREWALL", "FEDORA", "sudo dnf install firewalld && sudo systemctl enable --now firewalld"),
     ("FIREWALL_GUI", "FEDORA", "sudo dnf install firewall-config"),

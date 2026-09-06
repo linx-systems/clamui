@@ -196,15 +196,16 @@ class TestCheckFreshclamInstalled:
                 assert installed is False
                 assert "error" in message.lower()
 
-    def test_check_freshclam_uses_wrap_host_command(self):
-        """Test check_freshclam_installed uses wrap_host_command for Flatpak support."""
+    def test_check_freshclam_uses_config_neutral_host_command(self):
+        """The version probe must not read Fedora's root-only freshclam.conf."""
+        native_command = ["/usr/bin/freshclam", "--version", "--config-file=/dev/null"]
         with mock.patch.object(
             clamav_detection, "which_host_command", return_value="/usr/bin/freshclam"
         ):
             with mock.patch.object(
                 clamav_detection,
                 "wrap_host_command",
-                return_value=["freshclam", "--version"],
+                return_value=native_command,
             ) as mock_wrap:
                 with mock.patch("subprocess.run") as mock_run:
                     mock_run.return_value = mock.Mock(
@@ -213,35 +214,44 @@ class TestCheckFreshclamInstalled:
                         stderr="",
                     )
                     clamav_detection.check_freshclam_installed()
-                    mock_wrap.assert_called_once_with(["freshclam", "--version"])
 
-    def test_check_freshclam_flatpak_uses_host_version_command(self):
-        """Flatpak freshclam check should not generate sandbox config."""
+        mock_wrap.assert_called_once_with(native_command)
+
+    def test_check_freshclam_flatpak_uses_config_neutral_host_probe_for_fedora(self):
+        """Fedora's root-only config must not make the Flatpak host probe fail."""
+        native_command = ["/usr/bin/freshclam", "--version", "--config-file=/dev/null"]
+        host_command = ["flatpak-spawn", "--host", *native_command]
+        clean_env = {"PATH": "/usr/bin"}
         with mock.patch.object(
             clamav_detection, "which_host_command", return_value="/usr/bin/freshclam"
         ):
-            with mock.patch.object(clamav_detection, "is_flatpak", return_value=True):
+            with mock.patch("src.core.flatpak.is_flatpak", return_value=True):
                 with mock.patch.object(
                     clamav_detection,
                     "wrap_host_command",
-                    return_value=[
-                        "flatpak-spawn",
-                        "--host",
-                        "freshclam",
-                        "--version",
-                    ],
+                    wraps=clamav_detection.wrap_host_command,
                 ) as mock_wrap:
-                    with mock.patch("subprocess.run") as mock_run:
-                        mock_run.return_value = mock.Mock(
-                            returncode=0,
-                            stdout="ClamAV 1.2.3\n",
-                            stderr="",
-                        )
-                        installed, version = clamav_detection.check_freshclam_installed()
+                    with mock.patch.object(
+                        clamav_detection, "get_clean_env", return_value=clean_env
+                    ):
+                        with mock.patch("subprocess.run") as mock_run:
+                            mock_run.return_value = mock.Mock(
+                                returncode=0,
+                                stdout="ClamAV 1.2.3\n",
+                                stderr="",
+                            )
+                            installed, version = clamav_detection.check_freshclam_installed()
 
         assert installed is True
-        assert "ClamAV" in version
-        mock_wrap.assert_called_once_with(["freshclam", "--version"])
+        assert version == "ClamAV 1.2.3"
+        mock_wrap.assert_called_once_with(native_command)
+        mock_run.assert_called_once_with(
+            host_command,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=clean_env,
+        )
 
 
 class TestCheckClamdscanInstalled:

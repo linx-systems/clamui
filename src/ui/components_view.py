@@ -46,7 +46,7 @@ SETUP_GUIDES = {
         "title": N_("freshclam Installation"),
         "commands": [
             ("Ubuntu/Debian", "sudo apt install clamav-freshclam"),
-            ("Fedora", "sudo dnf install clamav-update"),
+            ("Fedora", "sudo dnf install clamav-freshclam"),
             ("Arch Linux", "sudo pacman -S clamav"),
         ],
         "notes": N_(
@@ -75,7 +75,7 @@ SETUP_GUIDES = {
             ),
             (
                 "Fedora",
-                "sudo dnf install clamd clamav-update\nsudo freshclam\nsudo systemctl enable clamd@scan\nsudo systemctl start clamd@scan",
+                "sudo dnf install clamd clamav-freshclam\nsudo freshclam\nsudo systemctl enable clamd@scan\nsudo systemctl start clamd@scan",
             ),
             (
                 "Arch Linux",

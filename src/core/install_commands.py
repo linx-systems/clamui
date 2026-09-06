@@ -62,7 +62,7 @@ _COMMANDS = MappingProxyType(
         DistroFamily.FEDORA: MappingProxyType(
             {
                 InstallTarget.CLAMAV: "sudo dnf install clamav clamd",
-                InstallTarget.FRESHCLAM: "sudo dnf install clamav-update",
+                InstallTarget.FRESHCLAM: "sudo dnf install clamav-freshclam",
                 InstallTarget.CLAMD: "sudo dnf install clamd",
                 InstallTarget.FIREWALL: (
                     "sudo dnf install firewalld && sudo systemctl enable --now firewalld"
