@@ -1,14 +1,22 @@
 # ClamUI SettingsManager Tests
 """Unit tests for the SettingsManager class."""
 
+import copy
 import json
+import logging
+import os
 import tempfile
 from pathlib import Path
 from unittest import mock
 
 import pytest
 
-from src.core.settings_manager import SettingsManager
+from src.core.settings_manager import PRESET_EXCLUSION_PATTERNS, SettingsManager
+
+
+def expected_exclusion_patterns(*custom_patterns):
+    """Return custom exclusions followed by independent canonical presets."""
+    return [copy.deepcopy(pattern) for pattern in (*custom_patterns, *PRESET_EXCLUSION_PATTERNS)]
 
 
 class TestSettingsManagerInit:
@@ -336,6 +344,94 @@ class TestSettingsManagerListeners:
 
         callback.assert_called_once_with("auto")
 
+    def test_failed_set_restores_previous_value_without_notifying_listeners(
+        self, settings_manager, temp_config_dir
+    ):
+        """A failed atomic replacement leaves memory, disk, and listeners unchanged."""
+        settings_manager.set("scan_backend", "auto")
+        callback = mock.MagicMock()
+        settings_manager.add_listener("scan_backend", callback)
+
+        with mock.patch.object(Path, "replace", side_effect=OSError("Rename failed")):
+            result = settings_manager.set("scan_backend", "daemon")
+
+        assert result is False
+        assert settings_manager.get("scan_backend") == "auto"
+        assert SettingsManager(config_dir=temp_config_dir).get("scan_backend") == "auto"
+        callback.assert_not_called()
+
+    def test_set_many_persists_scheduled_updates_in_one_save(
+        self, settings_manager, temp_config_dir
+    ):
+        """A scheduled-settings proposal is stored as one durable group."""
+        updates = {
+            "scheduled_scans_enabled": True,
+            "schedule_frequency": "monthly",
+            "schedule_time": "03:30",
+            "schedule_day_of_month": 14,
+        }
+
+        with mock.patch.object(settings_manager, "save", wraps=settings_manager.save) as save:
+            assert settings_manager.set_many(updates) is True
+
+        save.assert_called_once_with()
+        reloaded = SettingsManager(config_dir=temp_config_dir)
+        assert {key: reloaded.get(key) for key in updates} == updates
+
+    def test_set_many_failure_restores_all_values_without_notifying_listeners(
+        self, settings_manager, temp_config_dir
+    ):
+        """A failed group save restores every key, disk state, and listener state."""
+        before = settings_manager.get_all()
+        enabled_listener = mock.MagicMock()
+        frequency_listener = mock.MagicMock()
+        settings_manager.add_listener("scheduled_scans_enabled", enabled_listener)
+        settings_manager.add_listener("schedule_frequency", frequency_listener)
+        updates = {"scheduled_scans_enabled": True, "schedule_frequency": "monthly"}
+
+        with mock.patch.object(settings_manager, "save", return_value=False):
+            assert settings_manager.set_many(updates) is False
+
+        assert settings_manager.get_all() == before
+        assert SettingsManager(config_dir=temp_config_dir).get_all() == before
+        enabled_listener.assert_not_called()
+        frequency_listener.assert_not_called()
+
+    def test_set_many_notifies_only_changed_keys_after_persistence(
+        self, settings_manager, temp_config_dir
+    ):
+        """Listeners see only durable changes, never unchanged proposal values."""
+
+        def assert_enabled_change_is_persisted(value):
+            assert value is True
+            reloaded = SettingsManager(config_dir=temp_config_dir)
+            assert reloaded.get("scheduled_scans_enabled") is True
+            assert reloaded.get("schedule_time") == "04:15"
+
+        enabled_listener = mock.MagicMock(side_effect=assert_enabled_change_is_persisted)
+        time_listener = mock.MagicMock()
+        unchanged_listener = mock.MagicMock()
+        settings_manager.add_listener("scheduled_scans_enabled", enabled_listener)
+        settings_manager.add_listener("schedule_time", time_listener)
+        settings_manager.add_listener("schedule_frequency", unchanged_listener)
+
+        with mock.patch.object(settings_manager, "save", wraps=settings_manager.save) as save:
+            assert (
+                settings_manager.set_many(
+                    {
+                        "scheduled_scans_enabled": True,
+                        "schedule_time": "04:15",
+                        "schedule_frequency": "weekly",
+                    }
+                )
+                is True
+            )
+
+        save.assert_called_once_with()
+        enabled_listener.assert_called_once_with(True)
+        time_listener.assert_called_once_with("04:15")
+        unchanged_listener.assert_not_called()
+
 
 class TestSettingsManagerErrorHandling:
     """Tests for SettingsManager error handling."""
@@ -534,23 +630,28 @@ class TestSettingsManagerDefaults:
             assert original_defaults == SettingsManager.DEFAULT_SETTINGS
 
     def test_mutable_default_not_shared_between_instances(self):
-        """Mutating a mutable default on one instance must not pollute the class default."""
+        """Each manager receives independent copies of the canonical exclusions."""
+        canonical_patterns = expected_exclusion_patterns()
         with tempfile.TemporaryDirectory() as tmpdir:
             manager1 = SettingsManager(config_dir=tmpdir)
-            # exclusion_patterns is absent on disk -> served from defaults.
             patterns = manager1.get("exclusion_patterns")
+            assert patterns == canonical_patterns
+            assert all(
+                pattern is not preset
+                for pattern, preset in zip(patterns, PRESET_EXCLUSION_PATTERNS, strict=True)
+            )
+
+            patterns[0]["enabled"] = False
             patterns.append({"pattern": "/tmp/evil"})
 
-            # Class-level default must remain unpolluted.
-            assert SettingsManager.DEFAULT_SETTINGS["exclusion_patterns"] == []
-
-            # A second manager and reset must both yield the clean default.
+            # Class-level defaults and other managers remain unpolluted.
+            assert SettingsManager.DEFAULT_SETTINGS["exclusion_patterns"] == canonical_patterns
             with tempfile.TemporaryDirectory() as tmpdir2:
                 manager2 = SettingsManager(config_dir=tmpdir2)
-                assert manager2.get("exclusion_patterns") == []
+                assert manager2.get("exclusion_patterns") == canonical_patterns
 
             manager1.reset_to_defaults()
-            assert manager1.get("exclusion_patterns") == []
+            assert manager1.get("exclusion_patterns") == canonical_patterns
 
 
 class TestSettingsCloseBehavior:
@@ -622,16 +723,19 @@ class TestSettingsExclusions:
         """Create a SettingsManager with a temporary directory."""
         return SettingsManager(config_dir=temp_config_dir)
 
-    def test_default_exclusion_patterns_is_empty_list(self, settings_manager):
-        """Test that default exclusion_patterns is an empty list."""
+    def test_default_exclusion_patterns_are_canonical_presets(self, settings_manager):
+        """Test that default exclusions are the six canonical preset records."""
         patterns = settings_manager.get("exclusion_patterns")
-        assert patterns == []
+        assert patterns == expected_exclusion_patterns()
         assert isinstance(patterns, list)
+        assert len(patterns) == 6
 
-    def test_default_settings_has_exclusion_patterns(self):
-        """Test that DEFAULT_SETTINGS contains exclusion_patterns."""
+    def test_default_settings_has_canonical_exclusion_patterns(self):
+        """Test that DEFAULT_SETTINGS contains the canonical exclusion presets."""
         assert "exclusion_patterns" in SettingsManager.DEFAULT_SETTINGS
-        assert SettingsManager.DEFAULT_SETTINGS["exclusion_patterns"] == []
+        assert (
+            SettingsManager.DEFAULT_SETTINGS["exclusion_patterns"] == expected_exclusion_patterns()
+        )
 
     def test_set_exclusion_patterns_single_pattern(self, settings_manager):
         """Test setting a single exclusion pattern."""
@@ -679,41 +783,79 @@ class TestSettingsExclusions:
         assert data["exclusion_patterns"][1]["pattern"] == "__pycache__"
 
     def test_exclusion_patterns_persist_across_instances(self, temp_config_dir):
-        """Test that exclusion patterns persist across manager instances."""
-        patterns = [
-            {"pattern": ".venv", "type": "directory", "enabled": True},
-            {"pattern": "build", "type": "directory", "enabled": False},
+        """Custom exclusions and canonical presets persist across manager instances."""
+        custom_patterns = [
+            {"pattern": ".venv-custom", "type": "directory", "enabled": True},
+            {"pattern": "build-custom", "type": "directory", "enabled": False},
         ]
 
         manager1 = SettingsManager(config_dir=temp_config_dir)
-        manager1.set("exclusion_patterns", patterns)
+        manager1.set("exclusion_patterns", custom_patterns)
 
         manager2 = SettingsManager(config_dir=temp_config_dir)
         retrieved = manager2.get("exclusion_patterns")
 
-        assert len(retrieved) == 2
-        assert retrieved[0]["pattern"] == ".venv"
-        assert retrieved[0]["enabled"] is True
-        assert retrieved[1]["pattern"] == "build"
-        assert retrieved[1]["enabled"] is False
+        assert retrieved == expected_exclusion_patterns(*custom_patterns)
+        assert retrieved[: len(custom_patterns)] == custom_patterns
+        assert retrieved[len(custom_patterns) :] == list(PRESET_EXCLUSION_PATTERNS)
 
-    def test_exclusion_patterns_load_from_existing_file(self, temp_config_dir):
-        """Test loading exclusion patterns from an existing settings file."""
+    def test_exclusion_migration_save_failure_logs_and_retains_normalized_state(
+        self, temp_config_dir, caplog
+    ):
+        """A failed migration save remains visible and retryable in memory."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
+        settings_file.write_text(json.dumps({"exclusion_patterns": ["*.legacy"]}))
 
+        with (
+            mock.patch.object(SettingsManager, "save", return_value=False),
+            caplog.at_level(logging.WARNING, logger="src.core.settings_manager"),
+        ):
+            manager = SettingsManager(config_dir=config_dir)
+
+        assert manager.get("exclusion_patterns") == expected_exclusion_patterns(
+            {"pattern": "*.legacy", "type": "pattern", "enabled": True}
+        )
+        assert manager._exclusion_patterns_need_migration is True
+        assert any(
+            "Failed to persist normalized exclusion patterns" in record.message
+            and str(settings_file) in record.message
+            for record in caplog.records
+        )
+
+    def test_exclusion_patterns_load_from_existing_file(self, temp_config_dir):
+        """Loading preserves custom records and existing preset state."""
+        config_dir = Path(temp_config_dir)
+        config_dir.mkdir(parents=True, exist_ok=True)
+        settings_file = config_dir / "settings.json"
+        custom_pattern = {"pattern": "dist-custom", "type": "directory", "enabled": True}
+        disabled_preset = {
+            "pattern": "node_modules",
+            "type": "directory",
+            "enabled": False,
+        }
         existing_data = {
             "notifications_enabled": True,
-            "exclusion_patterns": [{"pattern": "dist", "type": "directory", "enabled": True}],
+            "exclusion_patterns": [custom_pattern, disabled_preset],
         }
         settings_file.write_text(json.dumps(existing_data))
+        expected_patterns = [
+            custom_pattern,
+            disabled_preset,
+            *[
+                copy.deepcopy(preset)
+                for preset in PRESET_EXCLUSION_PATTERNS
+                if preset["pattern"] != disabled_preset["pattern"]
+            ],
+        ]
 
         manager = SettingsManager(config_dir=config_dir)
-        patterns = manager.get("exclusion_patterns")
+        assert manager.get("exclusion_patterns") == expected_patterns
 
-        assert len(patterns) == 1
-        assert patterns[0]["pattern"] == "dist"
+        # Migration is persisted and reloading remains idempotent.
+        reloaded = SettingsManager(config_dir=config_dir)
+        assert reloaded.get("exclusion_patterns") == expected_patterns
 
     def test_exclusion_patterns_empty_list_after_clear(self, settings_manager):
         """Test clearing exclusion patterns to an empty list."""
@@ -760,14 +902,14 @@ class TestSettingsExclusions:
         assert retrieved[0]["enabled"] is True
 
     def test_exclusion_patterns_reset_to_defaults(self, settings_manager):
-        """Test that reset_to_defaults clears exclusion patterns."""
+        """Test that reset_to_defaults restores canonical exclusion presets."""
         patterns = [{"pattern": "*.log", "type": "pattern", "enabled": True}]
         settings_manager.set("exclusion_patterns", patterns)
 
         settings_manager.reset_to_defaults()
 
         retrieved = settings_manager.get("exclusion_patterns")
-        assert retrieved == []
+        assert retrieved == expected_exclusion_patterns()
 
     def test_exclusion_patterns_in_get_all(self, settings_manager):
         """Test that exclusion_patterns appears in get_all output."""
@@ -781,19 +923,16 @@ class TestSettingsExclusions:
         assert all_settings["exclusion_patterns"][0]["pattern"] == "*.tmp"
 
     def test_exclusion_patterns_merge_with_defaults(self, temp_config_dir):
-        """Test that exclusion_patterns merges correctly when file has partial settings."""
+        """Missing exclusions recover to canonical presets while retaining other settings."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
 
-        # Write settings without exclusion_patterns
         settings_file.write_text(json.dumps({"notifications_enabled": False}))
 
         manager = SettingsManager(config_dir=config_dir)
 
-        # Should get default empty list
-        assert manager.get("exclusion_patterns") == []
-        # Other settings should be from file
+        assert manager.get("exclusion_patterns") == expected_exclusion_patterns()
         assert manager.get("notifications_enabled") is False
 
     def test_exclusion_patterns_special_characters(self, settings_manager):
@@ -833,6 +972,41 @@ class TestSettingsExclusions:
 
 class TestSettingsManagerLoadEdgeCases:
     """Edge case tests for SettingsManager load operations."""
+
+    def test_load_migrates_documented_legacy_strings_and_discards_invalid_records(
+        self, temp_config_dir
+    ):
+        """Legacy string arrays become durable, safe canonical exclusion records."""
+        config_dir = Path(temp_config_dir)
+        config_dir.mkdir(parents=True, exist_ok=True)
+        settings_file = config_dir / "settings.json"
+        settings_file.write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "/home/username/.cache",
+                        "*.iso",
+                        42,
+                        None,
+                        False,
+                        {"pattern": ""},
+                        {"pattern": 99, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+
+        expected = expected_exclusion_patterns(
+            {"pattern": "/home/username/.cache", "type": "file", "enabled": True},
+            {"pattern": "*.iso", "type": "pattern", "enabled": True},
+        )
+        manager = SettingsManager(config_dir=config_dir)
+
+        assert manager.get("exclusion_patterns") == expected
+        assert json.loads(settings_file.read_text())["exclusion_patterns"] == expected
+
+        reloaded = SettingsManager(config_dir=config_dir)
+        assert reloaded.get("exclusion_patterns") == expected
 
     @pytest.fixture
     def temp_config_dir(self):
@@ -1102,90 +1276,92 @@ class TestSettingsManagerMalformedExclusionEdgeCases:
             yield tmpdir
 
     def test_load_exclusions_with_missing_keys(self, temp_config_dir):
-        """Test loading exclusion patterns with missing required keys."""
+        """Missing optional fields normalize valid patterns into safe records."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
-
-        # Write exclusions with various missing keys
-        settings_file.write_text(
-            json.dumps(
-                {
-                    "exclusion_patterns": [
-                        {"pattern": "*.log"},  # Missing type and enabled
-                        {"type": "file", "enabled": True},  # Missing pattern
-                        {
-                            "pattern": "",
-                            "type": "file",
-                            "enabled": True,
-                        },  # Empty pattern
-                    ]
-                }
-            )
-        )
+        custom_patterns = [
+            {"pattern": "*.log"},  # Missing type and enabled
+            {"type": "file", "enabled": True},  # Missing pattern
+            {
+                "pattern": "",
+                "type": "file",
+                "enabled": True,
+            },  # Empty pattern
+        ]
+        settings_file.write_text(json.dumps({"exclusion_patterns": custom_patterns}))
 
         manager = SettingsManager(config_dir=config_dir)
         patterns = manager.get("exclusion_patterns")
-
-        # Should load all patterns (validation is done elsewhere)
-        assert len(patterns) == 3
+        assert patterns == expected_exclusion_patterns(
+            {"pattern": "*.log", "type": "pattern", "enabled": True}
+        )
+        assert [pattern["pattern"] for pattern in patterns] == [
+            "*.log",
+            *(preset["pattern"] for preset in PRESET_EXCLUSION_PATTERNS),
+        ]
+        assert all(set(pattern) == {"pattern", "type", "enabled"} for pattern in patterns)
+        assert all(
+            isinstance(pattern["pattern"], str) and pattern["pattern"] for pattern in patterns
+        )
 
     def test_load_exclusions_with_wrong_types(self, temp_config_dir):
-        """Test loading exclusion patterns with wrong value types."""
+        """Wrong field types normalize valid patterns and discard unsafe records."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
-
-        # Write exclusions with wrong types
-        settings_file.write_text(
-            json.dumps(
-                {
-                    "exclusion_patterns": [
-                        {
-                            "pattern": 123,
-                            "type": "file",
-                            "enabled": True,
-                        },  # pattern should be string
-                        {
-                            "pattern": "*.log",
-                            "type": 456,
-                            "enabled": True,
-                        },  # type should be string
-                        {
-                            "pattern": "*.tmp",
-                            "type": "file",
-                            "enabled": "yes",
-                        },  # enabled should be bool
-                    ]
-                }
-            )
-        )
+        custom_patterns = [
+            {
+                "pattern": 123,
+                "type": "file",
+                "enabled": True,
+            },
+            {
+                "pattern": "*.log",
+                "type": 456,
+                "enabled": True,
+            },
+            {
+                "pattern": "*.tmp",
+                "type": "file",
+                "enabled": "yes",
+            },
+        ]
+        settings_file.write_text(json.dumps({"exclusion_patterns": custom_patterns}))
 
         manager = SettingsManager(config_dir=config_dir)
         patterns = manager.get("exclusion_patterns")
-
-        # Should load all patterns (type checking is not done in SettingsManager)
-        assert len(patterns) == 3
+        assert patterns == expected_exclusion_patterns(
+            {"pattern": "*.log", "type": "pattern", "enabled": True},
+            {"pattern": "*.tmp", "type": "file", "enabled": True},
+        )
+        assert [pattern["pattern"] for pattern in patterns] == [
+            "*.log",
+            "*.tmp",
+            *(preset["pattern"] for preset in PRESET_EXCLUSION_PATTERNS),
+        ]
+        assert all(set(pattern) == {"pattern", "type", "enabled"} for pattern in patterns)
+        assert all(
+            isinstance(pattern["pattern"], str) and pattern["pattern"] for pattern in patterns
+        )
 
     def test_exclusion_patterns_not_a_list(self, temp_config_dir):
-        """Test loading when exclusion_patterns is not a list."""
+        """A non-list legacy value safely recovers to canonical presets."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
 
-        # Write exclusion_patterns as a dict instead of list
         settings_file.write_text(
             json.dumps({"exclusion_patterns": {"pattern": "*.log", "enabled": True}})
         )
 
         manager = SettingsManager(config_dir=config_dir)
         patterns = manager.get("exclusion_patterns")
-
-        # Should load the value as-is (validation happens elsewhere)
-        assert isinstance(patterns, dict)
+        assert patterns == expected_exclusion_patterns()
+        assert isinstance(patterns, list)
 
     def test_exclusion_patterns_null_value(self, temp_config_dir):
-        """Test loading when exclusion_patterns is null."""
+        """A null legacy value safely recovers to canonical presets."""
         config_dir = Path(temp_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         settings_file = config_dir / "settings.json"
@@ -1195,10 +1371,7 @@ class TestSettingsManagerMalformedExclusionEdgeCases:
         )
 
         manager = SettingsManager(config_dir=config_dir)
-        patterns = manager.get("exclusion_patterns")
-
-        # Should return None (the stored value)
-        assert patterns is None
+        assert manager.get("exclusion_patterns") == expected_exclusion_patterns()
 
 
 class TestSettingsManagerAtomicWrite:
@@ -1219,9 +1392,9 @@ class TestSettingsManagerAtomicWrite:
         """Test that save uses atomic write pattern (temp file + rename)."""
         with (
             mock.patch("tempfile.mkstemp") as mock_mkstemp,
+            mock.patch("os.fchmod") as mock_fchmod,
             mock.patch("os.fdopen") as mock_fdopen,
             mock.patch.object(Path, "replace") as mock_replace,
-            mock.patch.object(Path, "chmod") as mock_chmod,
             mock.patch.object(Path, "mkdir"),
         ):
             # Setup mocks
@@ -1239,8 +1412,33 @@ class TestSettingsManagerAtomicWrite:
             mock_mkstemp.assert_called_once()
             mock_fdopen.assert_called_once()
             mock_replace.assert_called_once()
-            # Verify file permissions are hardened (owner read/write only)
-            mock_chmod.assert_called_once_with(0o600)
+            # Verify file permissions are hardened before replacement.
+            mock_fchmod.assert_called_once_with(1, 0o600)
+
+    def test_save_hardens_replaced_file_permissions(self, settings_manager):
+        """A successful save atomically installs an owner-only settings file."""
+        assert settings_manager.set("test_key", "value") is True
+
+        assert settings_manager._settings_file.stat().st_mode & 0o777 == 0o600
+
+    def test_save_preserves_destination_when_permission_hardening_fails(self, temp_config_dir):
+        """Permission hardening failures leave the prior settings file untouched."""
+        settings_manager = SettingsManager(config_dir=temp_config_dir)
+        assert settings_manager.set("test_key", "original_value") is True
+
+        settings_file = Path(temp_config_dir) / "settings.json"
+        original_content = settings_file.read_text()
+
+        with (
+            mock.patch("os.fchmod", side_effect=PermissionError("Cannot harden file")),
+            mock.patch("os.close", wraps=os.close) as mock_close,
+        ):
+            assert settings_manager.set("test_key", "new_value") is False
+
+        mock_close.assert_called_once()
+
+        assert settings_file.read_text() == original_content
+        assert settings_manager.get("test_key") == "original_value"
 
     def test_save_cleans_up_temp_file_on_failure(self, temp_config_dir):
         """Test that save cleans up temp file if write fails."""
@@ -1273,6 +1471,8 @@ class TestSettingsManagerAtomicWrite:
 
         # Verify save failed
         assert result is False
+        # The same manager must retain its previous in-memory value as well.
+        assert settings_manager.get("test_key") == "original_value"
 
         # Verify original file is preserved and not corrupted
         assert settings_file.exists()

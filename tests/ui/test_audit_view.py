@@ -148,6 +148,53 @@ def _make_report(AuditReport, sections=None):
     return report
 
 
+# Package managers the deep scan rows must never probe for: install hints come
+# from the distro resolver, not from a local package-manager lookup (issue #184).
+_PACKAGE_MANAGER_BINARIES = frozenset(
+    {"apt", "apt-get", "aptitude", "dnf", "yum", "pacman", "zypper", "apk"}
+)
+
+
+def _probed_binaries(installed_mock):
+    """Binary names passed to is_binary_installed, in call order."""
+    return [args[0] for args, _kwargs in installed_mock.call_args_list if args]
+
+
+def _package_manager_probes(installed_mock):
+    """Package-manager binaries probed via is_binary_installed, in call order."""
+    return [name for name in _probed_binaries(installed_mock) if name in _PACKAGE_MANAGER_BINARIES]
+
+
+def _resolved_targets(resolver_mock):
+    """InstallTarget values passed to recommend_install_command, in call order."""
+    return [
+        kwargs["target"] if "target" in kwargs else args[0]
+        for args, kwargs in resolver_mock.call_args_list
+    ]
+
+
+def _install_commands_by_tool(setup_mock):
+    """Map tool_name -> install_command as handed to _setup_deep_scan_row.
+
+    Reads positional or keyword arguments so the resolver-to-renderer contract
+    is asserted independently of the call style the view happens to use. A call
+    that carries no install command at all is a contract break, not a None.
+    """
+    commands = {}
+    for args, kwargs in setup_mock.call_args_list:
+        tool = kwargs["tool_name"] if "tool_name" in kwargs else args[2]
+        if "install_command" in kwargs:
+            commands[tool] = kwargs["install_command"]
+        elif len(args) > 5:
+            commands[tool] = args[5]
+        else:
+            raise AssertionError(
+                f"_setup_deep_scan_row got no install command for {tool!r}: "
+                f"args={args!r} kwargs={kwargs!r}"
+            )
+    return commands
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Test Classes
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1322,9 +1369,10 @@ class TestDeepScanAvailability:
         view._setup_deep_scan_row.assert_not_called()
         _clear_src_modules()
 
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
     @patch("src.ui.audit_view.is_binary_installed")
     def test_update_deep_scan_replaces_old_install_rows_on_refresh(
-        self, mock_installed, mock_gi_modules
+        self, mock_installed, mock_recommend, mock_gi_modules
     ):
         AuditView, *_ = _import_all(mock_gi_modules)
         view = _create_view(AuditView)
@@ -1333,6 +1381,9 @@ class TestDeepScanAvailability:
             side_effect=[MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         )
         mock_installed.return_value = True
+        # Resolver stub keeps both command rows independent of the host distro;
+        # create=True tolerates audit_view before the resolver is wired in.
+        mock_recommend.return_value = "sudo apt install lynis"
 
         view._update_deep_scan_availability(False, False)
 
@@ -1364,4 +1415,139 @@ class TestDeepScanAvailability:
         rootkit_call = view._setup_deep_scan_row.call_args_list[1][0]
         assert lynis_call[4] == "https://cisofy.com/lynis/"
         assert rootkit_call[4] == "https://www.chkrootkit.org/"
+        _clear_src_modules()
+
+
+class TestDeepScanInstallCommandResolution:
+    """Deep scan install hints must come from the distro resolver (issue #184).
+
+    Before the fix, _update_deep_scan_availability probed for the apt or dnf
+    binary itself, derived both tools' commands from that single prefix, and
+    fell back to apt on every other distro -- so Arch users were told to run
+    apt, and chkrootkit was advertised where no package exists. The view must
+    instead ask recommend_install_command once per tool and forward whatever
+    comes back, including None.
+    """
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    @patch("src.ui.audit_view.is_binary_installed")
+    def test_resolver_consulted_once_per_tool(
+        self, mock_installed, mock_recommend, mock_gi_modules
+    ):
+        """Lynis and chkrootkit are resolved separately, not from one prefix."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        from src.core.install_commands import InstallTarget
+
+        view = _create_view(AuditView)
+        view._setup_deep_scan_row = MagicMock()
+        resolved = {
+            InstallTarget.LYNIS: "sudo dnf install lynis",
+            InstallTarget.CHKROOTKIT: "sudo dnf install chkrootkit",
+        }
+        mock_recommend.side_effect = lambda target: resolved[target]
+
+        view._update_deep_scan_availability(False, False)
+
+        assert _resolved_targets(mock_recommend) == [
+            InstallTarget.LYNIS,
+            InstallTarget.CHKROOTKIT,
+        ]
+        assert _install_commands_by_tool(view._setup_deep_scan_row) == {
+            "lynis": "sudo dnf install lynis",
+            "chkrootkit": "sudo dnf install chkrootkit",
+        }
+        _clear_src_modules()
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    @patch("src.ui.audit_view.is_binary_installed")
+    def test_unpackaged_tool_resolves_to_none_without_affecting_the_other(
+        self, mock_installed, mock_recommend, mock_gi_modules
+    ):
+        """Arch packages lynis but not chkrootkit: only chkrootkit loses its command."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        from src.core.install_commands import InstallTarget
+
+        view = _create_view(AuditView)
+        view._setup_deep_scan_row = MagicMock()
+        mock_recommend.side_effect = lambda target: (
+            "sudo pacman -S lynis" if target is InstallTarget.LYNIS else None
+        )
+
+        view._update_deep_scan_availability(False, False)
+
+        assert _install_commands_by_tool(view._setup_deep_scan_row) == {
+            "lynis": "sudo pacman -S lynis",
+            "chkrootkit": None,
+        }
+        _clear_src_modules()
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    @patch("src.ui.audit_view.is_binary_installed")
+    def test_unresolvable_distro_passes_no_command(
+        self, mock_installed, mock_recommend, mock_gi_modules
+    ):
+        """Unknown distro: rows receive None, never a fabricated apt fallback."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        view = _create_view(AuditView)
+        view._setup_deep_scan_row = MagicMock()
+        mock_installed.return_value = True  # an apt/dnf probe would succeed here
+        mock_recommend.return_value = None
+
+        view._update_deep_scan_availability(False, False)
+
+        assert _install_commands_by_tool(view._setup_deep_scan_row) == {
+            "lynis": None,
+            "chkrootkit": None,
+        }
+        _clear_src_modules()
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    @patch("src.ui.audit_view.is_binary_installed")
+    def test_row_update_does_not_probe_package_managers(
+        self, mock_installed, mock_recommend, mock_gi_modules
+    ):
+        """Command selection is the resolver's job, not a package-manager probe."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        view = _create_view(AuditView)
+        view._setup_deep_scan_row = MagicMock()
+        mock_installed.return_value = True  # every probe would succeed
+        mock_recommend.return_value = "sudo pacman -S lynis"
+
+        view._update_deep_scan_availability(True, False)
+
+        assert _package_manager_probes(mock_installed) == []
+        _clear_src_modules()
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    @patch("src.ui.audit_view.GLib")
+    @patch("src.ui.audit_view.TIER1_CHECKS")
+    @patch("src.ui.audit_view.is_binary_installed")
+    def test_availability_flow_probes_only_the_two_tools(
+        self, mock_installed, mock_tier1, mock_glib, mock_recommend, mock_gi_modules
+    ):
+        """Binary probes exist for lynis/chkrootkit availability and nothing else."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        view = _create_view(AuditView)
+        view._setup_deep_scan_row = MagicMock()
+        view._finalize_audit = MagicMock()
+        mock_tier1.__iter__ = MagicMock(return_value=iter([]))
+        mock_installed.return_value = False
+        mock_recommend.return_value = "sudo dnf install lynis"
+        mock_glib.idle_add.side_effect = lambda callback, *args: callback(*args)
+
+        view._run_checks_background()
+
+        assert _probed_binaries(mock_installed) == ["lynis", "chkrootkit"]
+        _clear_src_modules()
+
+    @patch("src.ui.audit_view.recommend_install_command", create=True)
+    def test_destroyed_view_skips_resolver(self, mock_recommend, mock_gi_modules):
+        """A destroyed view must not run distro detection on the host."""
+        AuditView, *_ = _import_all(mock_gi_modules)
+        view = _create_view(AuditView)
+        view._destroyed = True
+        view._setup_deep_scan_row = MagicMock()
+
+        assert view._update_deep_scan_availability(True, True) is False
+        mock_recommend.assert_not_called()
         _clear_src_modules()

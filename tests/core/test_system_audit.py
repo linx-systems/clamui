@@ -1067,3 +1067,23 @@ class TestDistroAwareInstallCommands:
         assert "dnf" not in probed
         check = _single_check(section)
         assert check.install_command == _resolved(InstallTarget.INTRUSION_PREVENTION)
+
+    @pytest.mark.parametrize(
+        ("runner", "command"),
+        [
+            (_missing_firewall, "sudo dnf install firewalld"),
+            (_missing_firewall_gui, "sudo dnf install firewall-config"),
+        ],
+    )
+    def test_firewalld_command_links_to_firewalld_docs(self, runner, command):
+        """Fedora and Arch commands must not be paired with UFW documentation."""
+        check, _mock_recommend = runner(lambda _target: command)
+
+        assert check.info_url == "https://firewalld.org/documentation/"
+
+    @pytest.mark.parametrize("runner", [_missing_firewall, _missing_firewall_gui])
+    def test_unknown_distro_omits_firewall_specific_docs(self, runner):
+        """Without a verified recommendation, no distro-specific link is safe."""
+        check, _mock_recommend = runner(_unresolved)
+
+        assert check.info_url is None

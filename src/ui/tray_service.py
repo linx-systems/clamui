@@ -403,9 +403,9 @@ class TrayService:
         self._send_action("quit")
 
     def _get_icon_name(self) -> str:
-        """Get the current icon name based on status."""
+        """Get the current themed icon name when no custom pixmap is active."""
         if self._using_custom_icons and self._icon_generator:
-            return self._icon_generator.get_icon_name(self._current_status)
+            return ""
         return self.ICON_MAP.get(self._current_status, "object-select-symbolic")
 
     def _get_attention_status(self) -> str:
@@ -418,14 +418,12 @@ class TrayService:
         return "threat"
 
     def _get_attention_icon_name(self) -> str:
-        # Mirror _get_icon_name so the AttentionIcon stays branded. Hosts
-        # (Plasma 6, xapp-sn-watcher, ayatana) that prefer AttentionIcon over
-        # Icon in NeedsAttention state otherwise render a generic theme icon
-        # — which is the wrong icon in Flatpak where the host theme may not
-        # even contain "dialog-error-symbolic".
+        # Custom attention icons are published through AttentionIconPixmap.
+        # Leaving the name empty prevents SNI hosts from preferring an
+        # unresolvable sandbox-local themed name over that generated pixmap.
         status = self._get_attention_status()
         if self._using_custom_icons and self._icon_generator:
-            return self._icon_generator.get_icon_name(status)
+            return ""
         return self.ICON_MAP.get(status, "dialog-error-symbolic")
 
     def _get_icon_theme_path(self) -> str:
@@ -444,11 +442,10 @@ class TrayService:
 
     def _get_icon_pixmap(self, status: str | None = None) -> GLib.Variant:
         """
-        Return a StatusNotifierItem IconPixmap fallback.
+        Return the generated StatusNotifierItem IconPixmap.
 
-        Some tray hosts do not honor IconThemePath reliably, especially when
-        the app is sandboxed. Keep IconName as the preferred path, but expose a
-        real pixmap so those hosts can still render the icon.
+        Generated custom icons are transported through the pixmap so SNI hosts
+        can render them without resolving a sandbox-local themed icon name.
         """
         if not (self._using_custom_icons and self._icon_generator):
             return self._empty_icon_pixmap()

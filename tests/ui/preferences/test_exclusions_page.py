@@ -1,9 +1,30 @@
 # ClamUI Exclusions Page Tests
 """Unit tests for the ExclusionsPage class."""
 
+import copy
 from unittest import mock
 
 import pytest
+
+
+class _PersistentExclusionSettings:
+    """In-memory settings double that models durable save success or failure."""
+
+    def __init__(self, exclusions, save_succeeds=True):
+        self.exclusions = copy.deepcopy(exclusions)
+        self.save_succeeds = save_succeeds
+        self.set_calls = []
+
+    def get(self, key, default=None):
+        if key == "exclusion_patterns":
+            return copy.deepcopy(self.exclusions)
+        return default
+
+    def set(self, key, value):
+        self.set_calls.append((key, copy.deepcopy(value)))
+        if self.save_succeeds:
+            self.exclusions = copy.deepcopy(value)
+        return self.save_succeeds
 
 
 class TestExclusionsPageImport:
@@ -439,13 +460,12 @@ class TestExclusionsPageAddCustomExclusion:
         with mock.patch.object(page, "_add_custom_exclusion_row"):
             page._on_add_custom_exclusion(None)
 
-        # Should add pattern with type "file"
+        # The custom record is appended alongside the canonical presets.
         call_args = mock_settings_manager.set.call_args[0]
         assert call_args[0] == "exclusion_patterns"
-        assert len(call_args[1]) == 1
-        assert call_args[1][0]["pattern"] == "/test/path"
-        assert call_args[1][0]["type"] == "file"
-        assert call_args[1][0]["enabled"] is True
+        custom = next(record for record in call_args[1] if record["pattern"] == "/test/path")
+        assert custom["type"] == "file"
+        assert custom["enabled"] is True
 
     def test_on_add_custom_exclusion_adds_generic_pattern(
         self, mock_gi_modules, mock_settings_manager
@@ -461,9 +481,10 @@ class TestExclusionsPageAddCustomExclusion:
         with mock.patch.object(page, "_add_custom_exclusion_row"):
             page._on_add_custom_exclusion(None)
 
-        # Should add pattern with type "pattern"
+        # The custom record retains its generic pattern type.
         call_args = mock_settings_manager.set.call_args[0]
-        assert call_args[1][0]["type"] == "pattern"
+        custom = next(record for record in call_args[1] if record["pattern"] == "*.tmp")
+        assert custom["type"] == "pattern"
 
     def test_on_add_custom_exclusion_strips_whitespace(
         self, mock_gi_modules, mock_settings_manager
@@ -479,9 +500,9 @@ class TestExclusionsPageAddCustomExclusion:
         with mock.patch.object(page, "_add_custom_exclusion_row"):
             page._on_add_custom_exclusion(None)
 
-        # Should strip whitespace
+        # The saved custom record uses the stripped pattern.
         call_args = mock_settings_manager.set.call_args[0]
-        assert call_args[1][0]["pattern"] == "*.tmp"
+        assert any(record["pattern"] == "*.tmp" for record in call_args[1])
 
     def test_on_add_custom_exclusion_avoids_duplicates(
         self, mock_gi_modules, mock_settings_manager
@@ -549,9 +570,9 @@ class TestExclusionsPageAddCustomExclusion:
         with mock.patch.object(page, "_add_custom_exclusion_row"):
             page._on_add_custom_exclusion(None)
 
-        # Should convert to empty list and add pattern
+        # Invalid legacy data is replaced by canonical presets plus the custom record.
         call_args = mock_settings_manager.set.call_args[0]
-        assert len(call_args[1]) == 1
+        assert any(record["pattern"] == "/test/path" for record in call_args[1])
 
 
 class TestExclusionsPageRemoveCustomExclusion:
@@ -591,11 +612,10 @@ class TestExclusionsPageRemoveCustomExclusion:
 
         page._on_remove_custom_exclusion(None, mock_row, "/test/path")
 
-        # Should save updated list without the removed pattern
+        # The custom record is removed while any canonical presets remain.
         call_args = mock_settings_manager.set.call_args[0]
         assert call_args[0] == "exclusion_patterns"
-        assert len(call_args[1]) == 1
-        assert call_args[1][0]["pattern"] == "*.tmp"
+        assert any(record["pattern"] == "*.tmp" for record in call_args[1])
 
     def test_on_remove_custom_exclusion_removes_from_ui(
         self, mock_gi_modules, mock_settings_manager
@@ -695,9 +715,9 @@ class TestExclusionsPageToggleExclusion:
 
         page._on_exclusion_toggled(mock_row, None, "/test/path")
 
-        # Should preserve other patterns
+        # The custom records both remain, together with canonical presets.
         call_args = mock_settings_manager.set.call_args[0]
-        assert len(call_args[1]) == 2
+        assert {"/test/path", "*.tmp"} <= {record["pattern"] for record in call_args[1]}
 
     def test_on_exclusion_toggled_handles_non_list_settings(
         self, mock_gi_modules, mock_settings_manager
@@ -730,3 +750,232 @@ class TestExclusionsPageToggleExclusion:
 
         # Should not raise exception
         page._on_exclusion_toggled(mock_row, None, "/test/path")
+
+
+class TestExclusionsPagePresetPersistence:
+    """Regression tests for presets persisted with custom exclusions."""
+
+    def test_empty_legacy_records_are_normalized_with_all_presets(self, mock_gi_modules):
+        """Opening the page materializes the canonical preset records once."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        settings = _PersistentExclusionSettings([])
+
+        ExclusionsPage(settings).create_page()
+
+        assert len(settings.set_calls) == 1
+        assert settings.exclusions == [
+            {
+                "pattern": preset["pattern"],
+                "type": preset["type"],
+                "enabled": preset["enabled"],
+            }
+            for preset in PRESET_EXCLUSIONS
+        ]
+
+    def test_legacy_custom_records_are_normalized_with_all_presets(self, mock_gi_modules):
+        """Opening the page stores all presets without losing custom records."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        custom_records = [
+            {"pattern": "*.tmp", "type": "pattern", "enabled": False},
+            {"pattern": "/work/cache", "type": "file", "enabled": True},
+        ]
+        settings = _PersistentExclusionSettings(custom_records)
+
+        ExclusionsPage(settings).create_page()
+
+        persisted_patterns = [record["pattern"] for record in settings.exclusions]
+        assert len(settings.set_calls) == 1
+        assert all(persisted_patterns.count(preset["pattern"]) == 1 for preset in PRESET_EXCLUSIONS)
+        assert all(record in settings.exclusions for record in custom_records)
+
+    def test_repeated_page_load_does_not_duplicate_or_resave_presets(self, mock_gi_modules):
+        """A normalized settings list remains unchanged on later page loads."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        settings = _PersistentExclusionSettings(
+            [{"pattern": "*.tmp", "type": "pattern", "enabled": True}]
+        )
+        page = ExclusionsPage(settings)
+
+        page.create_page()
+        first_persisted = copy.deepcopy(settings.exclusions)
+        page.create_page()
+
+        assert settings.exclusions == first_persisted
+        assert len(settings.set_calls) == 1
+        assert all(
+            sum(record["pattern"] == preset["pattern"] for record in settings.exclusions) == 1
+            for preset in PRESET_EXCLUSIONS
+        )
+
+    def test_matching_persisted_preset_keeps_its_enabled_state(self, mock_gi_modules):
+        """A saved preset record supplies the state rendered by its preset row."""
+        adw = mock_gi_modules["adw"]
+        from src.ui.preferences.exclusions_page import ExclusionsPage
+
+        created_rows = []
+
+        def create_row(*args, **kwargs):
+            row = mock.MagicMock()
+            created_rows.append(row)
+            return row
+
+        adw.ActionRow.side_effect = create_row
+        settings = _PersistentExclusionSettings(
+            [
+                {"pattern": "node_modules", "type": "directory", "enabled": False},
+                {"pattern": "*.tmp", "type": "pattern", "enabled": True},
+            ]
+        )
+
+        ExclusionsPage(settings).create_page()
+
+        assert created_rows[0]._compat_switch.set_active.call_args == mock.call(False)
+        matching_records = [
+            record for record in settings.exclusions if record["pattern"] == "node_modules"
+        ]
+        assert matching_records == [
+            {"pattern": "node_modules", "type": "directory", "enabled": False}
+        ]
+
+    def test_preset_records_are_not_rendered_as_custom_rows(self, mock_gi_modules):
+        """Stored presets render only in the preset group."""
+        from src.ui.preferences.exclusions_page import ExclusionsPage
+
+        settings = _PersistentExclusionSettings(
+            [
+                {"pattern": "node_modules", "type": "directory", "enabled": False},
+                {"pattern": "*.tmp", "type": "pattern", "enabled": True},
+            ]
+        )
+        page = ExclusionsPage(settings)
+        page._custom_exclusions_group = mock.MagicMock()
+
+        with mock.patch.object(page, "_add_custom_exclusion_row") as add_row:
+            page._load_custom_exclusions()
+
+        add_row.assert_called_once_with("*.tmp", True)
+
+    def test_toggling_a_preset_persists_one_updated_canonical_record(self, mock_gi_modules):
+        """Toggling a preset updates it once while retaining custom records."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        custom_record = {"pattern": "*.tmp", "type": "pattern", "enabled": True}
+        settings = _PersistentExclusionSettings([custom_record])
+        page = ExclusionsPage(settings)
+        page.create_page()
+        row = mock.MagicMock()
+        row.get_active.return_value = False
+
+        page._on_exclusion_toggled(row, None, ".git")
+
+        git_records = [record for record in settings.exclusions if record["pattern"] == ".git"]
+        assert git_records == [{"pattern": ".git", "type": "directory", "enabled": False}]
+        assert all(
+            sum(record["pattern"] == preset["pattern"] for record in settings.exclusions) == 1
+            for preset in PRESET_EXCLUSIONS
+        )
+        assert custom_record in settings.exclusions
+
+    def test_adding_custom_exclusion_retains_preset_records(self, mock_gi_modules):
+        """Adding a custom pattern does not remove persisted presets."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        presets = [
+            {"pattern": preset["pattern"], "type": "directory", "enabled": True}
+            for preset in PRESET_EXCLUSIONS
+        ]
+        settings = _PersistentExclusionSettings(presets)
+        page = ExclusionsPage(settings)
+        page._custom_entry_row = mock.MagicMock()
+        page._custom_entry_row.get_text.return_value = "*.tmp"
+        page._custom_exclusions_group = mock.MagicMock()
+
+        with mock.patch.object(page, "_add_custom_exclusion_row"):
+            page._on_add_custom_exclusion(None)
+
+        assert {preset["pattern"] for preset in PRESET_EXCLUSIONS} <= {
+            record["pattern"] for record in settings.exclusions
+        }
+        assert {"pattern": "*.tmp", "type": "pattern", "enabled": True} in settings.exclusions
+
+    def test_removing_custom_exclusion_retains_preset_records(self, mock_gi_modules):
+        """Removing a custom pattern does not remove persisted presets."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        presets = [
+            {"pattern": preset["pattern"], "type": "directory", "enabled": True}
+            for preset in PRESET_EXCLUSIONS
+        ]
+        settings = _PersistentExclusionSettings(
+            presets + [{"pattern": "*.tmp", "type": "pattern", "enabled": True}]
+        )
+        page = ExclusionsPage(settings)
+        page._custom_exclusions_group = mock.MagicMock()
+
+        page._on_remove_custom_exclusion(None, mock.MagicMock(), "*.tmp")
+
+        assert {preset["pattern"] for preset in PRESET_EXCLUSIONS} == {
+            record["pattern"] for record in settings.exclusions
+        }
+
+    def test_toggling_custom_exclusion_retains_preset_records(self, mock_gi_modules):
+        """Toggling a custom pattern does not remove persisted presets."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        presets = [
+            {"pattern": preset["pattern"], "type": "directory", "enabled": True}
+            for preset in PRESET_EXCLUSIONS
+        ]
+        settings = _PersistentExclusionSettings(
+            presets + [{"pattern": "*.tmp", "type": "pattern", "enabled": True}]
+        )
+        page = ExclusionsPage(settings)
+        row = mock.MagicMock()
+        row.get_active.return_value = False
+
+        page._on_exclusion_toggled(row, None, "*.tmp")
+
+        assert {preset["pattern"] for preset in PRESET_EXCLUSIONS} <= {
+            record["pattern"] for record in settings.exclusions
+        }
+        custom = next(record for record in settings.exclusions if record["pattern"] == "*.tmp")
+        assert custom["enabled"] is False
+
+    def test_failed_preset_save_restores_the_persisted_switch_state(self, mock_gi_modules):
+        """A failed preset save reverses the control instead of claiming success."""
+        from src.ui.preferences.exclusions_page import ExclusionsPage
+
+        persisted = [{"pattern": "node_modules", "type": "directory", "enabled": True}]
+        settings = _PersistentExclusionSettings(persisted, save_succeeds=False)
+        page = ExclusionsPage(settings)
+        row = mock.MagicMock()
+        row.get_active.return_value = False
+
+        page._on_exclusion_toggled(row, None, "node_modules")
+
+        assert settings.exclusions == persisted
+        row.set_active.assert_called_once_with(True)
+
+    def test_failed_custom_save_keeps_the_entry_and_does_not_add_a_row(self, mock_gi_modules):
+        """A failed custom save leaves the UI at its durable pre-save state."""
+        from src.ui.preferences.exclusions_page import PRESET_EXCLUSIONS, ExclusionsPage
+
+        presets = [
+            {"pattern": preset["pattern"], "type": "directory", "enabled": True}
+            for preset in PRESET_EXCLUSIONS
+        ]
+        settings = _PersistentExclusionSettings(presets, save_succeeds=False)
+        page = ExclusionsPage(settings)
+        page._custom_entry_row = mock.MagicMock()
+        page._custom_entry_row.get_text.return_value = "*.tmp"
+        page._custom_exclusions_group = mock.MagicMock()
+
+        with mock.patch.object(page, "_add_custom_exclusion_row") as add_row:
+            page._on_add_custom_exclusion(None)
+
+        assert settings.exclusions == presets
+        add_row.assert_not_called()
+        page._custom_entry_row.set_text.assert_not_called()

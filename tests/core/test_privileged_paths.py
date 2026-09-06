@@ -30,9 +30,9 @@ from src.core.privileged_paths import (
 class TestProtocolVersion:
     """The protocol version is part of the security contract."""
 
-    def test_protocol_version_is_two(self):
-        """Helper rejects callers that don't pass --protocol=2."""
-        assert PROTOCOL_VERSION == 2
+    def test_protocol_version_is_three(self):
+        """Helper rejects callers that don't pass --protocol=3."""
+        assert PROTOCOL_VERSION == 3
 
 
 class TestAllowlistShape:
@@ -81,11 +81,12 @@ class TestValidateDestination:
 
     def test_accepts_each_allowed_file(self):
         for dest in ALLOWED_DEST_FILES:
-            validate_destination(dest)  # must not raise
+            assert validate_destination(dest) == dest
 
     def test_accepts_files_directly_under_each_allowed_dir(self):
         for parent in ALLOWED_DEST_DIRS:
-            validate_destination(parent / "foo.conf")
+            destination = parent / "foo.conf"
+            assert validate_destination(destination) == destination
 
     def test_rejects_etc_passwd(self):
         with pytest.raises(ValueError):
@@ -120,6 +121,16 @@ class TestValidateDestination:
     def test_rejects_home_directory(self):
         with pytest.raises(ValueError):
             validate_destination(Path("/home/user/.config/clamav/clamd.conf"))
+
+    def test_canonicalizes_parent_symlink_to_allowed_directory(self, tmp_path, monkeypatch):
+        allowed_dir = tmp_path / "etc_clamav"
+        allowed_dir.mkdir()
+        symlink_parent = tmp_path / "clamav-link"
+        symlink_parent.symlink_to(allowed_dir, target_is_directory=True)
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_DIRS", (allowed_dir,))
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_FILES", ())
+
+        assert validate_destination(symlink_parent / "foo.conf") == allowed_dir / "foo.conf"
 
     def test_rejects_symlinked_parent(self, tmp_path, monkeypatch):
         """A symlinked parent must not allow escape from the allowlist."""

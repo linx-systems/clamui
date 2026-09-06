@@ -875,9 +875,99 @@ class TestDaemonScannerFilterExcludedThreats:
         assert filtered.status == scan_status_class.INFECTED
         assert filtered.infected_count == 1
 
+    def test_filter_migrates_legacy_strings_before_post_scan_filtering(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Malformed legacy values cannot stop a migrated pattern from filtering a threat."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.infected",
+                        42,
+                        None,
+                        {"pattern": ""},
+                        {"pattern": 99, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = daemon_scanner_class(settings_manager=SettingsManager(config_dir=config_dir))
+
+        from src.core.scanner import ScanResult, ThreatDetail
+
+        threat = ThreatDetail(
+            file_path="/home/user/excluded.infected",
+            threat_name="Eicar-Test-Signature",
+            category="Test",
+            severity="low",
+        )
+        result = ScanResult(
+            status=scan_status_class.INFECTED,
+            path="/home/user",
+            stdout="",
+            stderr="",
+            exit_code=1,
+            infected_files=[threat.file_path],
+            scanned_files=1,
+            scanned_dirs=0,
+            infected_count=1,
+            error_message=None,
+            threat_details=[threat],
+        )
+
+        filtered = scanner._filter_excluded_threats(result)
+
+        assert filtered.status == scan_status_class.CLEAN
+        assert filtered.infected_count == 0
+
 
 class TestDaemonScannerCountTargets:
     """Tests for DaemonScanner count_targets parameter."""
+
+    def test_count_targets_migrates_legacy_strings_before_filtering(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Migrated legacy strings filter daemon counts despite malformed adjacent values."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        included = scan_dir / "included.txt"
+        excluded = scan_dir / "excluded.log"
+        included.write_text("included")
+        excluded.write_text("excluded")
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.log",
+                        False,
+                        {"pattern": None},
+                        {"pattern": 42, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = daemon_scanner_class(settings_manager=SettingsManager(config_dir=config_dir))
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+
+        assert file_count == 1
+        assert directory_count == 1
+        assert file_paths == [str(included)]
 
     def test_scan_sync_with_count_targets_true_counts_files(
         self, tmp_path, daemon_scanner_class, scan_status_class

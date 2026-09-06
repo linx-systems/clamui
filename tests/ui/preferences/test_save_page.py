@@ -654,7 +654,7 @@ class TestSavePageSaveConfigsThread:
         """Provide a mock scheduler."""
         scheduler = mock.MagicMock()
         scheduler.enable_schedule.return_value = (True, None)
-        scheduler.disable_schedule.return_value = None
+        scheduler.disable_schedule.return_value = (True, None)
         return scheduler
 
     @pytest.fixture
@@ -774,157 +774,239 @@ class TestSavePageSaveConfigsThread:
         assert len(dialog_calls) == 1
         assert "No Changes" in dialog_calls[0].args[1]
 
-    def test_flatpak_clamscan_clamd_change_uses_user_config_without_host_helper(
-        self, mock_gi_modules, save_page, mock_settings_manager, tmp_path
+    def test_flatpak_clamscan_missing_helper_fails_without_retargeting_clamd_config(
+        self, mock_gi_modules, save_page, mock_settings_manager
     ):
-        """Flatpak clamscan mode can save clamd.conf changes without a host helper."""
+        """Clamscan mode must fail closed when the host writer is unavailable."""
         from pathlib import Path
 
         from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
 
         mock_button = mock.MagicMock()
-        clamd_config = ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
+        host_path = Path("/etc/clamav/clamd.conf")
+        clamd_config = ClamAVConfig(file_path=host_path)
         clamd_config.raw_lines = ["MaxFileSize 50M\n"]
         clamd_config.values = {"MaxFileSize": [ClamAVConfigValue(value="50M", line_number=1)]}
         save_page._window._clamd_config = clamd_config
+        save_page._window._clamd_conf_path = str(host_path)
         mock_settings_manager.get.side_effect = lambda key, default=None: (
             "clamscan" if key == "scan_backend" else default
         )
-
-        home = tmp_path / "home"
-        expected_path = home / ".config" / "clamav" / "clamd.conf"
-        written_configs = []
-
-        def fake_write(configs):
-            written_configs.extend(configs)
-            return (True, None)
-
-        with (
-            mock.patch("src.ui.preferences.save_page.backup_config"),
-            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=True, create=True),
-            mock.patch(
-                "src.ui.preferences.save_page.privileged_writer_available",
-                return_value=False,
-                create=True,
-            ),
-            mock.patch("src.ui.preferences.save_page.Path.home", return_value=home, create=True),
-            mock.patch(
-                "src.ui.preferences.save_page.write_configs_with_elevation",
-                side_effect=fake_write,
-            ),
-            mock.patch("src.ui.preferences.save_page.GLib"),
-        ):
-            save_page._save_configs_thread({}, {"MaxFileSize": "100M"}, {}, {}, mock_button)
-
-        assert len(written_configs) == 1
-        assert written_configs[0].file_path == expected_path
-        assert written_configs[0].get_value("MaxFileSize") == "100M"
-        mock_settings_manager.set.assert_any_call("clamd_conf_path", str(expected_path))
-        mock_settings_manager.save.assert_called()
-
-    def test_flatpak_clamd_fallback_persists_even_when_system_write_fails(
-        self, mock_gi_modules, save_page, mock_settings_manager, tmp_path
-    ):
-        """A freshclam helper failure must not orphan a saved user-local clamd.conf."""
-        from pathlib import Path
-
-        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
-
-        mock_button = mock.MagicMock()
-
-        freshclam_config = ClamAVConfig(file_path=Path("/etc/clamav/freshclam.conf"))
-        freshclam_config.raw_lines = ["DatabaseMirror database.clamav.net\n"]
-        freshclam_config.values = {
-            "DatabaseMirror": [ClamAVConfigValue(value="database.clamav.net", line_number=1)]
-        }
-        clamd_config = ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
-        clamd_config.raw_lines = ["MaxFileSize 50M\n"]
-        clamd_config.values = {"MaxFileSize": [ClamAVConfigValue(value="50M", line_number=1)]}
-        save_page._window._freshclam_config = freshclam_config
-        save_page._window._clamd_config = clamd_config
-        mock_settings_manager.get.side_effect = lambda key, default=None: (
-            "clamscan" if key == "scan_backend" else default
-        )
-
-        home = tmp_path / "home"
-        expected_path = home / ".config" / "clamav" / "clamd.conf"
-        write_calls = []
-
-        def fake_write(configs):
-            write_calls.append([config.file_path for config in configs])
-            if any(str(path).startswith("/etc/") for path in write_calls[-1]):
-                return (False, "helper not installed")
-            return (True, None)
+        glib = mock_gi_modules["glib"]
 
         with (
             mock.patch("src.ui.preferences.save_page.backup_config"),
             mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=True),
             mock.patch(
-                "src.ui.preferences.save_page.privileged_writer_available",
-                return_value=False,
-            ),
-            mock.patch("src.ui.preferences.save_page.Path.home", return_value=home),
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(False, "host helper not installed"),
+            ) as mock_write,
+        ):
+            save_page._save_configs_thread({}, {"MaxFileSize": "100M"}, {}, {}, mock_button)
+
+        mock_write.assert_called_once()
+        written_config = mock_write.call_args.args[0][0]
+        assert written_config.file_path == host_path
+        assert written_config.get_value("MaxFileSize") == "100M"
+        mock_settings_manager.set.assert_not_called()
+        mock_settings_manager.save.assert_not_called()
+        assert save_page._clamd_conf_path == str(host_path)
+        assert save_page._window._clamd_conf_path == str(host_path)
+        assert save_page._window._clamd_config is clamd_config
+        glib.idle_add.assert_any_call(save_page._show_error_dialog, "Save Failed", mock.ANY)
+        assert not any(
+            call.args and call.args[0] == save_page._show_success_dialog
+            for call in glib.idle_add.call_args_list
+        )
+
+    def test_flatpak_auto_without_clamd_missing_helper_fails_without_retargeting_config(
+        self, mock_gi_modules, save_page, mock_settings_manager
+    ):
+        """Auto mode without clamd must retain the host config destination on failure."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+
+        mock_button = mock.MagicMock()
+        host_path = Path("/etc/clamav/clamd.conf")
+        clamd_config = ClamAVConfig(file_path=host_path)
+        clamd_config.raw_lines = ["MaxFileSize 50M\n"]
+        clamd_config.values = {"MaxFileSize": [ClamAVConfigValue(value="50M", line_number=1)]}
+        save_page._clamd_available = False
+        save_page._window._clamd_config = clamd_config
+        save_page._window._clamd_conf_path = str(host_path)
+        mock_settings_manager.get.side_effect = lambda key, default=None: (
+            "auto" if key == "scan_backend" else default
+        )
+        glib = mock_gi_modules["glib"]
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=True),
             mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
-                side_effect=fake_write,
-            ),
-            mock.patch("src.ui.preferences.save_page.GLib"),
+                return_value=(False, "host helper not installed"),
+            ) as mock_write,
         ):
-            save_page._save_configs_thread(
-                {"DatabaseMirror": "mirror.example.test"},
-                {"MaxFileSize": "100M"},
-                {},
-                {},
-                mock_button,
-            )
+            save_page._save_configs_thread({}, {"MaxFileSize": "100M"}, {}, {}, mock_button)
 
-        assert [expected_path] in write_calls
-        assert [Path("/etc/clamav/freshclam.conf")] in write_calls
-        mock_settings_manager.set.assert_any_call("clamd_conf_path", str(expected_path))
-        mock_settings_manager.save.assert_called()
-        assert "helper not installed" in save_page._scheduler_error
+        mock_write.assert_called_once()
+        written_config = mock_write.call_args.args[0][0]
+        assert written_config.file_path == host_path
+        assert written_config.get_value("MaxFileSize") == "100M"
+        mock_settings_manager.set.assert_not_called()
+        mock_settings_manager.save.assert_not_called()
+        assert save_page._clamd_conf_path == str(host_path)
+        assert save_page._window._clamd_conf_path == str(host_path)
+        assert save_page._window._clamd_config is clamd_config
+        glib.idle_add.assert_any_call(save_page._show_error_dialog, "Save Failed", mock.ANY)
+        assert not any(
+            call.args and call.args[0] == save_page._show_success_dialog
+            for call in glib.idle_add.call_args_list
+        )
 
     def test_save_configs_thread_with_changes_reports_success(self, mock_gi_modules, save_page):
-        """When changes are actually applied, the success message is shown."""
+        """A main-thread callback reports success after a successful config write."""
         mock_button = mock.MagicMock()
         freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
+        show_success = mock.MagicMock()
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
-            ):
-                with mock.patch("src.ui.preferences.save_page.GLib") as mock_glib:
-                    save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
 
-        dialog_calls = [
-            c
-            for c in mock_glib.idle_add.call_args_list
-            if c.args and c.args[0] == save_page._show_success_dialog
-        ]
-        assert len(dialog_calls) == 1
-        assert "Configuration Saved" in dialog_calls[0].args[1]
+        show_success.assert_not_called()
+        commit_callback, commit_args = idle_callbacks[0]
+        commit_callback(*commit_args)
+        show_success.assert_not_called()
+        success_callback, success_args = idle_callbacks[1]
+        success_callback(*success_args)
+        show_success.assert_called_once()
+
+    def test_save_configs_thread_warning_commits_configs_and_reports_warning(
+        self, mock_gi_modules, save_page
+    ):
+        """A successful write warning commits candidates and replaces normal success."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+
+        mock_button = mock.MagicMock()
+        live_config = ClamAVConfig(
+            file_path=Path("/etc/clamav/freshclam.conf"),
+            values={
+                "DatabaseDirectory": [ClamAVConfigValue(value="/var/lib/clamav-old", line_number=1)]
+            },
+            raw_lines=["DatabaseDirectory /var/lib/clamav-old\n"],
+        )
+        save_page._window._freshclam_config = live_config
+        show_success = mock.MagicMock()
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
+        warning = "Configuration was applied, but staging cleanup failed for /tmp/staging: denied"
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, warning),
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"}, {}, {}, {}, mock_button
+            )
+
+        assert save_page._window._freshclam_config is live_config
+        commit_callback, commit_args = idle_callbacks[0]
+        commit_callback(*commit_args)
+        assert (
+            save_page._window._freshclam_config.get_value("DatabaseDirectory") == "/var/lib/clamav"
+        )
+
+        warning_callback, warning_args = idle_callbacks[1]
+        warning_callback(*warning_args)
+        show_success.assert_called_once_with(
+            "Configuration Saved with Warning",
+            f"Configuration saved with a warning:\n\n{warning}",
+        )
+        assert show_success.call_args.args[0] != "Configuration Saved"
 
     def test_save_configs_thread_saves_freshclam_config(self, mock_gi_modules, save_page):
-        """Test _save_configs_thread saves freshclam.conf."""
+        """A successful write commits the freshclam proposal, not the live config."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+
         mock_button = mock.MagicMock()
-        freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
+        live_config = ClamAVConfig(
+            file_path=Path("/etc/clamav/freshclam.conf"),
+            values={
+                "DatabaseDirectory": [ClamAVConfigValue(value="/var/lib/clamav-old", line_number=1)]
+            },
+            raw_lines=["DatabaseDirectory /var/lib/clamav-old\n"],
+        )
+        save_page._window._freshclam_config = live_config
+        written_proposals = []
+        idle_callbacks = []
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
+        def assert_uncommitted_before_write(configs):
+            assert len(configs) == 1
+            proposal = configs[0]
+            written_proposals.append(proposal)
+            assert proposal is not live_config
+            assert proposal.file_path == Path("/etc/clamav/freshclam.conf")
+            assert proposal.get_value("DatabaseDirectory") == "/var/lib/clamav"
+            assert live_config.get_value("DatabaseDirectory") == "/var/lib/clamav-old"
+            assert save_page._window._freshclam_config is live_config
+            return (True, None)
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return 1
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
-                return_value=(True, None),
-            ) as mock_write:
-                with mock.patch("src.ui.preferences.save_page.GLib"):
-                    save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
+                side_effect=assert_uncommitted_before_write,
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"}, {}, {}, {}, mock_button
+            )
 
-                    # Should set values on window's freshclam config
-                    save_page._window._freshclam_config.set_value.assert_called_with(
-                        "DatabaseDirectory", "/var/lib/clamav"
-                    )
-
-                    # Should write freshclam config
-                    mock_write.assert_called()
+        assert save_page._window._freshclam_config is live_config
+        commit_callback, commit_args = idle_callbacks[0]
+        assert commit_args == ()
+        commit_callback()
+        assert save_page._window._freshclam_config is written_proposals[0]
 
     def test_save_configs_thread_saves_clamd_config(self, mock_gi_modules, save_page):
         """Test _save_configs_thread saves clamd.conf."""
@@ -942,36 +1024,109 @@ class TestSavePageSaveConfigsThread:
 
                     written_config = mock_write.call_args.args[0][0]
                     assert written_config.get_value("MaxFileSize") == "100M"
-                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_writes_both_configs_in_single_call(
         self, mock_gi_modules, save_page
     ):
-        """Test _save_configs_thread batches freshclam and clamd writes into one call."""
-        mock_button = mock.MagicMock()
-        freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
-        clamd_updates = {"MaxFileSize": "100M"}
+        """The writer receives both changed config proposals in one batch."""
+        from pathlib import Path
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
+        from src.core.clamav_config import ClamAVConfig
+
+        mock_button = mock.MagicMock()
+        live_freshclam_config = ClamAVConfig(file_path=Path("/etc/clamav/freshclam.conf"))
+        live_clamd_config = ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
+        save_page._window._freshclam_config = live_freshclam_config
+        save_page._window._clamd_config = live_clamd_config
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
-            ) as mock_write:
-                with mock.patch("src.ui.preferences.save_page.GLib"):
-                    save_page._save_configs_thread(
-                        freshclam_updates,
-                        clamd_updates,
-                        {},
-                        {},
-                        mock_button,
-                    )
+            ) as mock_write,
+            mock.patch("src.ui.preferences.save_page.GLib"),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"},
+                {"MaxFileSize": "100M"},
+                {},
+                {},
+                mock_button,
+            )
 
-                    mock_write.assert_called_once()
-                    written_configs = mock_write.call_args.args[0]
-                    assert written_configs == [
-                        save_page._window._freshclam_config,
-                        save_page._window._clamd_config,
-                    ]
+        mock_write.assert_called_once()
+        written_by_path = {config.file_path: config for config in mock_write.call_args.args[0]}
+        assert set(written_by_path) == {
+            Path("/etc/clamav/freshclam.conf"),
+            Path("/etc/clamav/clamd.conf"),
+        }
+        freshclam_proposal = written_by_path[Path("/etc/clamav/freshclam.conf")]
+        clamd_proposal = written_by_path[Path("/etc/clamav/clamd.conf")]
+        assert freshclam_proposal is not live_freshclam_config
+        assert clamd_proposal is not live_clamd_config
+        assert freshclam_proposal.get_value("DatabaseDirectory") == "/var/lib/clamav"
+        assert clamd_proposal.get_value("MaxFileSize") == "100M"
+
+    def test_save_configs_thread_commits_configs_once_before_success_on_main_thread(
+        self, mock_gi_modules, save_page
+    ):
+        """Config proposals commit once before the main-thread success callback."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig
+
+        mock_button = mock.MagicMock()
+        live_freshclam_config = ClamAVConfig(file_path=Path("/etc/clamav/freshclam.conf"))
+        live_clamd_config = ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
+        save_page._window._freshclam_config = live_freshclam_config
+        save_page._window._clamd_config = live_clamd_config
+        show_success = mock.MagicMock()
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ) as mock_write,
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"},
+                {"MaxFileSize": "100M"},
+                {},
+                {},
+                mock_button,
+            )
+
+        written_freshclam_config, written_clamd_config = mock_write.call_args.args[0]
+        assert save_page._window._freshclam_config is live_freshclam_config
+        assert save_page._window._clamd_config is live_clamd_config
+        show_success.assert_not_called()
+
+        assert len(idle_callbacks) == 3
+        commit_callback, commit_args = idle_callbacks[0]
+        commit_callback(*commit_args)
+
+        assert save_page._window._freshclam_config is written_freshclam_config
+        assert save_page._window._clamd_config is written_clamd_config
+        show_success.assert_not_called()
+
+        success_callback, success_args = idle_callbacks[1]
+        success_callback(*success_args)
+        show_success.assert_called_once()
+
+        # Re-enabling the button is a separate UI operation.
+        assert idle_callbacks[2] == (mock_button.set_sensitive, (True,))
 
     def test_save_configs_thread_saves_onaccess_settings(self, mock_gi_modules, save_page):
         """Test _save_configs_thread saves on-access settings to clamd.conf."""
@@ -989,7 +1144,6 @@ class TestSavePageSaveConfigsThread:
 
                     written_config = mock_write.call_args.args[0][0]
                     assert written_config.get_values("OnAccessIncludePath") == ["/home"]
-                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_combines_scanner_and_onaccess(self, mock_gi_modules, save_page):
         """Test _save_configs_thread combines scanner and on-access settings."""
@@ -1011,7 +1165,6 @@ class TestSavePageSaveConfigsThread:
                     written_config = mock_write.call_args.args[0][0]
                     assert written_config.get_value("MaxFileSize") == "100M"
                     assert written_config.get_values("OnAccessIncludePath") == ["/home"]
-                    assert save_page._window._clamd_config is written_config
 
     def test_save_configs_thread_saves_scheduled_settings(self, mock_gi_modules, save_page):
         """Test _save_configs_thread saves scheduled scan settings."""
@@ -1035,11 +1188,80 @@ class TestSavePageSaveConfigsThread:
                 with mock.patch("src.ui.preferences.save_page.GLib"):
                     save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
 
-                    # Should set values on settings manager
-                    assert save_page._settings_manager.set.call_count == len(scheduled_updates)
+                    save_page._settings_manager.set_many.assert_called_once_with(scheduled_updates)
+                    save_page._settings_manager.set.assert_not_called()
+                    save_page._settings_manager.save.assert_not_called()
 
-                    # Should save settings
-                    save_page._settings_manager.save.assert_called_once()
+    def test_save_configs_thread_does_not_apply_schedule_after_batch_persistence_failure(
+        self, mock_gi_modules, save_page
+    ):
+        """A failed batch leaves every durable schedule value and scheduler state unchanged."""
+
+        class OneKeyFailingSettingsManager:
+            def __init__(self, durable_values, failing_key):
+                self._durable_values = durable_values.copy()
+                self._failing_key = failing_key
+                self.set = mock.MagicMock(side_effect=self._set)
+                self.set_many = mock.MagicMock(side_effect=self._set_many)
+                self.save = mock.MagicMock(return_value=True)
+
+            def _set(self, key, value):
+                self._durable_values[key] = value
+                return key != self._failing_key
+
+            def _set_many(self, updates):
+                if self._failing_key in updates:
+                    return False
+                self._durable_values.update(updates)
+                return True
+
+            def get(self, key, default=None):
+                return self._durable_values.get(key, default)
+
+        mock_button = mock.MagicMock()
+        scheduled_updates = {
+            "scheduled_scans_enabled": True,
+            "schedule_frequency": "daily",
+            "schedule_time": "03:30",
+            "schedule_targets": ["/home"],
+            "schedule_day_of_week": 2,
+            "schedule_day_of_month": 15,
+            "schedule_skip_on_battery": False,
+            "schedule_auto_quarantine": True,
+        }
+        original_values = {
+            "scheduled_scans_enabled": False,
+            "schedule_frequency": "weekly",
+            "schedule_time": "02:00",
+            "schedule_targets": ["/original"],
+            "schedule_day_of_week": 0,
+            "schedule_day_of_month": 1,
+            "schedule_skip_on_battery": True,
+            "schedule_auto_quarantine": False,
+        }
+        settings_manager = OneKeyFailingSettingsManager(original_values, "schedule_targets")
+        save_page._settings_manager = settings_manager
+        show_success = mock.MagicMock()
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with mock.patch(
+            "src.ui.preferences.save_page.GLib.idle_add",
+            side_effect=capture_idle_callback,
+        ):
+            save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
+
+        settings_manager.set_many.assert_called_once_with(scheduled_updates)
+        settings_manager.set.assert_not_called()
+        settings_manager.save.assert_not_called()
+        assert {key: settings_manager.get(key) for key in original_values} == original_values
+        save_page._scheduler.enable_schedule.assert_not_called()
+        save_page._scheduler.disable_schedule.assert_not_called()
+        assert not any(callback is show_success for callback, _args in idle_callbacks)
 
     def test_save_configs_thread_enables_scheduler(self, mock_gi_modules, save_page):
         """Test _save_configs_thread enables scheduler when enabled."""
@@ -1080,36 +1302,52 @@ class TestSavePageSaveConfigsThread:
             "schedule_auto_quarantine": False,
         }
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
-            ):
-                with mock.patch("src.ui.preferences.save_page.GLib"):
-                    save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
+            ),
+            mock.patch("src.ui.preferences.save_page.GLib"),
+        ):
+            save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
 
-                    # Should disable scheduler
-                    save_page._scheduler.disable_schedule.assert_called_once()
+        save_page._scheduler.disable_schedule.assert_called_once()
 
     def test_save_configs_thread_shows_success_dialog(self, mock_gi_modules, save_page):
-        """Test _save_configs_thread shows success dialog when changes are applied."""
+        """The main-thread callback reports the success message for config changes."""
         mock_button = mock.MagicMock()
-        glib = mock_gi_modules["glib"]
         freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
+        show_success = mock.MagicMock()
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 return_value=(True, None),
-            ):
-                save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
 
-                # Should call GLib.idle_add with _show_success_dialog
-                glib.idle_add.assert_any_call(
-                    save_page._show_success_dialog,
-                    "Configuration Saved",
-                    "Configuration saved. Active ClamAV services were restarted where needed.",
-                )
+        commit_callback, commit_args = idle_callbacks[0]
+        commit_callback(*commit_args)
+        show_success.assert_not_called()
+        success_callback, success_args = idle_callbacks[1]
+        success_callback(*success_args)
+        show_success.assert_called_once_with(
+            "Configuration Saved",
+            "Configuration saved. Active ClamAV services were restarted where needed.",
+        )
 
     def test_save_configs_thread_shows_error_on_write_failure(self, mock_gi_modules, save_page):
         """Test _save_configs_thread shows error on write failure."""
@@ -1124,17 +1362,20 @@ class TestSavePageSaveConfigsThread:
             ):
                 save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
 
-                # Should call GLib.idle_add with _show_error_dialog
                 glib.idle_add.assert_any_call(
                     save_page._show_error_dialog,
                     "Save Failed",
                     mock.ANY,
                 )
+                assert not any(
+                    call.args and call.args[0] == save_page._show_success_dialog
+                    for call in glib.idle_add.call_args_list
+                )
 
-    def test_save_configs_thread_shows_error_on_settings_save_failure(
+    def test_save_configs_thread_shows_error_on_batch_settings_persistence_failure(
         self, mock_gi_modules, save_page
     ):
-        """Test _save_configs_thread shows error on settings save failure."""
+        """Test _save_configs_thread shows an error when the settings batch fails."""
         mock_button = mock.MagicMock()
         scheduled_updates = {
             "scheduled_scans_enabled": False,
@@ -1147,8 +1388,7 @@ class TestSavePageSaveConfigsThread:
             "schedule_auto_quarantine": False,
         }
         glib = mock_gi_modules["glib"]
-
-        save_page._settings_manager.save.return_value = False
+        save_page._settings_manager.set_many.return_value = False
 
         with mock.patch("src.ui.preferences.save_page.backup_config"):
             with mock.patch(
@@ -1157,11 +1397,14 @@ class TestSavePageSaveConfigsThread:
             ):
                 save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
 
-                # Should call GLib.idle_add with _show_error_dialog
                 glib.idle_add.assert_any_call(
                     save_page._show_error_dialog,
                     "Save Failed",
                     mock.ANY,
+                )
+                assert not any(
+                    call.args and call.args[0] == save_page._show_success_dialog
+                    for call in glib.idle_add.call_args_list
                 )
 
     def test_save_configs_thread_shows_error_on_scheduler_enable_failure(
@@ -1190,12 +1433,84 @@ class TestSavePageSaveConfigsThread:
             ):
                 save_page._save_configs_thread({}, {}, {}, scheduled_updates, mock_button)
 
-                # Should call GLib.idle_add with _show_error_dialog
                 glib.idle_add.assert_any_call(
                     save_page._show_error_dialog,
-                    "Save Failed",
+                    "Changes Partially Applied",
                     mock.ANY,
                 )
+                error_call = next(
+                    call
+                    for call in glib.idle_add.call_args_list
+                    if call.args and call.args[0] == save_page._show_error_dialog
+                )
+                assert "Scheduled scan preferences" in error_call.args[2]
+                assert "Scheduler error" in error_call.args[2]
+                assert "Review your settings and save again." in error_call.args[2]
+                assert not any(
+                    call.args and call.args[0] == save_page._show_success_dialog
+                    for call in glib.idle_add.call_args_list
+                )
+
+    def test_save_configs_thread_commits_written_config_when_scheduler_disable_fails(
+        self, mock_gi_modules, save_page
+    ):
+        """A later scheduler failure cannot leave durable config changes stale in memory."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig
+
+        mock_button = mock.MagicMock()
+        live_config = ClamAVConfig(file_path=Path("/etc/clamav/freshclam.conf"))
+        save_page._window._freshclam_config = live_config
+        save_page._settings_manager.set_many.return_value = True
+        save_page._scheduler.disable_schedule.return_value = (False, "Scheduler error")
+        show_error = mock.MagicMock()
+        show_success = mock.MagicMock()
+        save_page._show_error_dialog = show_error
+        save_page._show_success_dialog = show_success
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ) as mock_write,
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"},
+                {},
+                {},
+                {"scheduled_scans_enabled": False},
+                mock_button,
+            )
+
+        written_config = mock_write.call_args.args[0][0]
+        assert save_page._window._freshclam_config is live_config
+        assert len(idle_callbacks) == 3
+
+        commit_callback, commit_args = idle_callbacks[0]
+        commit_callback(*commit_args)
+        assert save_page._window._freshclam_config is written_config
+
+        error_callback, error_args = idle_callbacks[1]
+        error_callback(*error_args)
+        show_error.assert_called_once_with(
+            "Changes Partially Applied",
+            "The following changes were saved before another change failed:\n"
+            "ClamAV configuration files, Scheduled scan preferences\n\n"
+            "Error: Failed to disable scheduled scans: Scheduler error\n\n"
+            "Review your settings and save again.",
+        )
+        show_success.assert_not_called()
 
     def test_save_configs_thread_re_enables_button_on_success(self, mock_gi_modules, save_page):
         """Test _save_configs_thread re-enables button on success."""
@@ -1342,68 +1657,22 @@ class TestSavePageWindowConfigAccess:
         assert save_page._window._clamd_config == mock_window._clamd_config
 
     def test_save_page_validation_uses_window_config(self, mock_gi_modules):
-        """SavePage validation should check window's config, not stored copy."""
+        """Validation receives a proposal based on the window's freshclam config."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
         from src.ui.preferences.save_page import SavePage
 
-        # Create mock window with valid config
         mock_window = mock.MagicMock()
-        mock_freshclam_config = mock.MagicMock()
-        mock_window._freshclam_config = mock_freshclam_config
-
-        # Create SavePage with None config (simulating bug)
-        save_page = SavePage(
-            window=mock_window,
-            freshclam_config=None,  # Bug: None at init
-            clamd_config=None,
-            freshclam_conf_path="/etc/clamav/freshclam.conf",
-            clamd_conf_path="/etc/clamav/clamd.conf",
-            clamd_available=False,
-            settings_manager=mock.MagicMock(),
-            scheduler=mock.MagicMock(),
-            freshclam_widgets={},
-            clamd_widgets={},
-            onaccess_widgets={},
-            scheduled_widgets={},
+        live_config = ClamAVConfig(
+            file_path=Path("/etc/clamav/freshclam.conf"),
+            values={
+                "DatabaseDirectory": [ClamAVConfigValue(value="/var/lib/clamav-old", line_number=1)]
+            },
+            raw_lines=["DatabaseDirectory /var/lib/clamav-old\n"],
         )
+        mock_window._freshclam_config = live_config
 
-        mock_button = mock.MagicMock()
-
-        # Simulate save with freshclam updates
-        with mock.patch(
-            "src.ui.preferences.save_page.DatabasePage.collect_data",
-            return_value={"DatabaseDirectory": "/var/lib/clamav"},
-        ):
-            with mock.patch(
-                "src.ui.preferences.save_page.ScannerPage.collect_data", return_value={}
-            ):
-                with mock.patch(
-                    "src.ui.preferences.save_page.OnAccessPage.collect_data",
-                    return_value={},
-                ):
-                    with mock.patch(
-                        "src.ui.preferences.save_page.ScheduledPage.collect_data",
-                        return_value={},
-                    ):
-                        with mock.patch(
-                            "src.ui.preferences.save_page.validate_config",
-                            return_value=(True, None),
-                        ) as mock_validate:
-                            with mock.patch("src.ui.preferences.save_page.threading.Thread"):
-                                save_page._on_save_clicked(mock_button)
-
-                                # Validation should use window's config (not None)
-                                mock_validate.assert_called_with(mock_window._freshclam_config)
-
-    def test_save_page_save_thread_uses_window_config(self, mock_gi_modules):
-        """SavePage save thread should use window's config for set_value calls."""
-        from src.ui.preferences.save_page import SavePage
-
-        # Create mock window with configs
-        mock_window = mock.MagicMock()
-        mock_freshclam_config = mock.MagicMock()
-        mock_window._freshclam_config = mock_freshclam_config
-
-        # Create SavePage with None config
         save_page = SavePage(
             window=mock_window,
             freshclam_config=None,
@@ -1420,20 +1689,100 @@ class TestSavePageWindowConfigAccess:
         )
 
         mock_button = mock.MagicMock()
-        freshclam_updates = {"DatabaseDirectory": "/var/lib/clamav"}
 
-        with mock.patch("src.ui.preferences.save_page.backup_config"):
-            with mock.patch(
-                "src.ui.preferences.save_page.write_configs_with_elevation",
+        with (
+            mock.patch(
+                "src.ui.preferences.save_page.DatabasePage.collect_data",
+                return_value={"DatabaseDirectory": "/var/lib/clamav"},
+            ),
+            mock.patch("src.ui.preferences.save_page.ScannerPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch(
+                "src.ui.preferences.save_page.validate_config",
                 return_value=(True, None),
-            ):
-                with mock.patch("src.ui.preferences.save_page.GLib"):
-                    save_page._save_configs_thread(freshclam_updates, {}, {}, {}, mock_button)
+            ) as mock_validate,
+            mock.patch("src.ui.preferences.save_page.threading.Thread"),
+        ):
+            save_page._on_save_clicked(mock_button)
 
-                    # Should call set_value on window's config (not None)
-                    mock_window._freshclam_config.set_value.assert_called_with(
-                        "DatabaseDirectory", "/var/lib/clamav"
-                    )
+        validated_proposal = mock_validate.call_args.args[0]
+        assert validated_proposal is not live_config
+        assert validated_proposal.file_path == Path("/etc/clamav/freshclam.conf")
+        assert validated_proposal.get_value("DatabaseDirectory") == "/var/lib/clamav"
+        assert mock_window._freshclam_config is live_config
+        assert live_config.get_value("DatabaseDirectory") == "/var/lib/clamav-old"
+
+    def test_save_page_save_thread_uses_window_config(self, mock_gi_modules):
+        """The save worker writes then commits a proposal based on the window config."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+        from src.ui.preferences.save_page import SavePage
+
+        mock_window = mock.MagicMock()
+        live_config = ClamAVConfig(
+            file_path=Path("/etc/clamav/freshclam.conf"),
+            values={
+                "DatabaseDirectory": [ClamAVConfigValue(value="/var/lib/clamav-old", line_number=1)]
+            },
+            raw_lines=["DatabaseDirectory /var/lib/clamav-old\n"],
+        )
+        mock_window._freshclam_config = live_config
+
+        save_page = SavePage(
+            window=mock_window,
+            freshclam_config=None,
+            clamd_config=None,
+            freshclam_conf_path="/etc/clamav/freshclam.conf",
+            clamd_conf_path="/etc/clamav/clamd.conf",
+            clamd_available=False,
+            settings_manager=mock.MagicMock(),
+            scheduler=mock.MagicMock(),
+            freshclam_widgets={},
+            clamd_widgets={},
+            onaccess_widgets={},
+            scheduled_widgets={},
+        )
+
+        written_proposals = []
+        idle_callbacks = []
+
+        def assert_uncommitted_before_write(configs):
+            assert len(configs) == 1
+            proposal = configs[0]
+            written_proposals.append(proposal)
+            assert proposal is not live_config
+            assert proposal.file_path == Path("/etc/clamav/freshclam.conf")
+            assert proposal.get_value("DatabaseDirectory") == "/var/lib/clamav"
+            assert mock_window._freshclam_config is live_config
+            assert live_config.get_value("DatabaseDirectory") == "/var/lib/clamav-old"
+            return (True, None)
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return 1
+
+        with (
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                side_effect=assert_uncommitted_before_write,
+            ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+        ):
+            save_page._save_configs_thread(
+                {"DatabaseDirectory": "/var/lib/clamav"}, {}, {}, {}, mock.MagicMock()
+            )
+
+        assert mock_window._freshclam_config is live_config
+        commit_callback, commit_args = idle_callbacks[0]
+        assert commit_args == ()
+        commit_callback()
+        assert mock_window._freshclam_config is written_proposals[0]
 
 
 class _InlineSaveThread:
@@ -1519,8 +1868,14 @@ class TestSavePageProspectiveConfigValidation:
         """A stored MaxRecursion=255 must not block the edit that corrects it."""
         glib = mock_gi_modules["glib"]
         button = mock.MagicMock()
-        save_page._window._clamd_config = self._clamd_config("255")
+        live_config = self._clamd_config("255")
+        save_page._window._clamd_config = live_config
         written = []
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
 
         def fake_write(configs):
             written.extend(configs)
@@ -1541,26 +1896,34 @@ class TestSavePageProspectiveConfigValidation:
                 side_effect=fake_write,
             ),
             mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
             mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+            mock.patch.object(save_page, "_show_success_dialog") as success_dialog,
         ):
             save_page._on_save_clicked(button)
 
-        # The correcting edit is accepted, not rejected because of the stale value.
-        assert self._error_messages(glib, error_dialog) == []
+            # The correcting edit is accepted, not rejected because of the stale value.
+            assert self._error_messages(glib, error_dialog) == []
 
-        # ...and the corrected value reaches the writer.
-        assert len(written) == 1
-        assert str(written[0].file_path) == "/etc/clamav/clamd.conf"
-        assert written[0].get_value("MaxRecursion") == "100"
-        assert "MaxRecursion 100" in written[0].to_string()
+            # ...and the corrected value reaches the writer.
+            assert len(written) == 1
+            assert str(written[0].file_path) == "/etc/clamav/clamd.conf"
+            assert written[0].get_value("MaxRecursion") == "100"
+            assert "MaxRecursion 100" in written[0].to_string()
+            assert save_page._window._clamd_config is live_config
 
-        success_calls = [
-            call
-            for call in glib.idle_add.call_args_list
-            if call.args and call.args[0] == save_page._show_success_dialog
-        ]
-        assert len(success_calls) == 1
-        assert "Configuration Saved" in success_calls[0].args[1]
+            commit_callback, commit_args = idle_callbacks[0]
+            commit_callback(*commit_args)
+
+            assert save_page._window._clamd_config is written[0]
+            success_dialog.assert_not_called()
+            success_callback, success_args = idle_callbacks[1]
+            success_callback(*success_args)
+            success_dialog.assert_called_once()
+            assert "Configuration Saved" in success_dialog.call_args.args[0]
 
     def test_out_of_range_max_recursion_edit_is_rejected_before_any_write(
         self, mock_gi_modules, save_page
@@ -1631,18 +1994,221 @@ class TestSavePageProspectiveConfigValidation:
         assert clamd_config.get_value("MaxRecursion") == "17"
         assert clamd_config.to_string() == before
 
-    def test_flatpak_write_commits_persisted_proposal_to_live_config(
+    @staticmethod
+    def _freshclam_config(value, key="DatabaseDirectory"):
+        """Real freshclam config holding a single option line."""
+        from pathlib import Path
+
+        from src.core.clamav_config import ClamAVConfig, ClamAVConfigValue
+
+        return ClamAVConfig(
+            file_path=Path("/etc/clamav/freshclam.conf"),
+            values={key: [ClamAVConfigValue(value=value, line_number=1)]},
+            raw_lines=[f"{key} {value}\n"],
+        )
+
+    def test_invalid_freshclam_edit_is_rejected_before_writer_or_thread(
         self, mock_gi_modules, save_page
     ):
-        """A successful Flatpak write makes its persisted path and values live."""
+        """A collected Checks=51 is rejected without changing the loaded config."""
+        glib = mock_gi_modules["glib"]
+        button = mock.MagicMock()
+        freshclam_config = self._freshclam_config("12", key="Checks")
+        save_page._window._freshclam_config = freshclam_config
+        before = freshclam_config.to_string()
+
+        with (
+            mock.patch(
+                "src.ui.preferences.save_page.DatabasePage.collect_data",
+                return_value={"Checks": "51"},
+            ),
+            mock.patch("src.ui.preferences.save_page.ScannerPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                return_value=(True, None),
+            ) as mock_write,
+            mock.patch("src.ui.preferences.save_page.threading.Thread") as mock_thread,
+            mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+        ):
+            save_page._on_save_clicked(button)
+
+        mock_thread.assert_not_called()
+        mock_write.assert_not_called()
+        assert save_page._window._freshclam_config is freshclam_config
+        assert freshclam_config.get_value("Checks") == "12"
+        assert freshclam_config.to_string() == before
+        assert any("Checks" in message for message in self._error_messages(glib, error_dialog))
+
+    def test_stale_invalid_freshclam_value_is_repaired_in_written_proposal(
+        self, mock_gi_modules, save_page
+    ):
+        """A valid Checks repair validates and persists the repaired proposal."""
+        glib = mock_gi_modules["glib"]
+        button = mock.MagicMock()
+        freshclam_config = self._freshclam_config("51", key="Checks")
+        save_page._window._freshclam_config = freshclam_config
+        written = []
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        def fake_write(configs):
+            written.extend(configs)
+            return (True, None)
+
+        with (
+            mock.patch(
+                "src.ui.preferences.save_page.DatabasePage.collect_data",
+                return_value={"Checks": "12"},
+            ),
+            mock.patch("src.ui.preferences.save_page.ScannerPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=False),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                side_effect=fake_write,
+            ),
+            mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+            mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+            mock.patch.object(save_page, "_show_success_dialog") as success_dialog,
+        ):
+            save_page._on_save_clicked(button)
+
+            assert self._error_messages(glib, error_dialog) == []
+            assert len(written) == 1
+            proposal = written[0]
+            assert proposal is not freshclam_config
+            assert str(proposal.file_path) == "/etc/clamav/freshclam.conf"
+            assert proposal.get_value("Checks") == "12"
+            assert proposal.to_string() == "Checks 12\n"
+            assert save_page._window._freshclam_config is freshclam_config
+            assert freshclam_config.get_value("Checks") == "51"
+
+            commit_callback, commit_args = idle_callbacks[0]
+            commit_callback(*commit_args)
+
+            assert save_page._window._freshclam_config is proposal
+            success_dialog.assert_not_called()
+            success_callback, success_args = idle_callbacks[1]
+            success_callback(*success_args)
+            success_dialog.assert_called_once()
+            assert "Configuration Saved" in success_dialog.call_args.args[0]
+
+    def test_failed_freshclam_write_retries_without_mutating_live_config(
+        self, mock_gi_modules, save_page
+    ):
+        """A helper recovery retries the original freshclam proposal."""
+        from pathlib import Path
+
+        glib = mock_gi_modules["glib"]
+        button = mock.MagicMock()
+        host_path = Path("/etc/clamav/freshclam.conf")
+        freshclam_config = self._freshclam_config("/var/lib/clamav")
+        save_page._window._freshclam_config = freshclam_config
+        before = freshclam_config.to_string()
+        writes = []
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
+
+        def fake_write(configs):
+            writes.append(configs)
+            if len(writes) == 1:
+                return (False, "host helper not installed")
+            return (True, None)
+
+        with (
+            mock.patch(
+                "src.ui.preferences.save_page.DatabasePage.collect_data",
+                return_value={"DatabaseDirectory": "/srv/clamav"},
+            ),
+            mock.patch("src.ui.preferences.save_page.ScannerPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.OnAccessPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.ScheduledPage.collect_data", return_value={}),
+            mock.patch("src.ui.preferences.save_page.backup_config"),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=True),
+            mock.patch(
+                "src.ui.preferences.save_page.write_configs_with_elevation",
+                side_effect=fake_write,
+            ),
+            mock.patch("src.ui.preferences.save_page.threading.Thread", _InlineSaveThread),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+            mock.patch.object(save_page, "_show_error_dialog") as error_dialog,
+            mock.patch.object(save_page, "_show_success_dialog") as success_dialog,
+        ):
+            save_page._on_save_clicked(button)
+
+            assert save_page._window._freshclam_config is freshclam_config
+            assert freshclam_config.get_value("DatabaseDirectory") == "/var/lib/clamav"
+            assert freshclam_config.to_string() == before
+            assert len(writes) == 1
+            assert any(
+                "host helper not installed" in message
+                for message in self._error_messages(glib, error_dialog)
+            )
+
+            callbacks_before_retry = len(idle_callbacks)
+            save_page._on_save_clicked(button)
+
+            assert len(writes) == 2
+            retry_proposal = writes[1][0]
+            assert retry_proposal is not freshclam_config
+            assert retry_proposal.file_path == host_path
+            assert retry_proposal.get_value("DatabaseDirectory") == "/srv/clamav"
+            assert save_page._window._freshclam_config is freshclam_config
+            assert freshclam_config.get_value("DatabaseDirectory") == "/var/lib/clamav"
+            assert freshclam_config.to_string() == before
+
+            retry_commit_callback, retry_commit_args = idle_callbacks[callbacks_before_retry]
+            retry_commit_callback(*retry_commit_args)
+
+            assert save_page._window._freshclam_config is retry_proposal
+            assert (
+                save_page._window._freshclam_config.get_value("DatabaseDirectory") == "/srv/clamav"
+            )
+            assert (
+                save_page._window._freshclam_config.to_string() == "DatabaseDirectory /srv/clamav\n"
+            )
+            success_dialog.assert_not_called()
+            retry_success_callback, retry_success_args = idle_callbacks[callbacks_before_retry + 1]
+            retry_success_callback(*retry_success_args)
+            success_dialog.assert_called_once()
+            assert "Configuration Saved" in success_dialog.call_args.args[0]
+
+    def test_flatpak_host_write_commits_proposal_without_retargeting_config(
+        self, mock_gi_modules, save_page
+    ):
+        """A successful Flatpak host write keeps the real clamd.conf path live."""
         from pathlib import Path
 
         button = mock.MagicMock()
+        host_path = Path("/etc/clamav/clamd.conf")
         live_config = self._clamd_config("17")
         save_page._window._clamd_config = live_config
+        save_page._window._clamd_conf_path = str(host_path)
+        save_page._settings_manager.get.return_value = "clamscan"
         proposal = save_page._prospective_clamd_config({"MaxRecursion": "100"}, {})
-        target_path = Path("/home/test/.config/clamav/clamd.conf")
         written = []
+        idle_callbacks = []
+
+        def capture_idle_callback(callback, *args):
+            idle_callbacks.append((callback, args))
+            return len(idle_callbacks)
 
         def fake_write(configs):
             written.extend(configs)
@@ -1650,16 +2216,16 @@ class TestSavePageProspectiveConfigValidation:
 
         with (
             mock.patch("src.ui.preferences.save_page.backup_config"),
-            mock.patch.object(
-                save_page, "_should_use_flatpak_user_clamd_config", return_value=True
-            ),
-            mock.patch.object(
-                save_page, "_flatpak_user_clamd_config_path", return_value=target_path
-            ),
+            mock.patch("src.ui.preferences.save_page.is_flatpak", return_value=True),
             mock.patch(
                 "src.ui.preferences.save_page.write_configs_with_elevation",
                 side_effect=fake_write,
             ),
+            mock.patch(
+                "src.ui.preferences.save_page.GLib.idle_add",
+                side_effect=capture_idle_callback,
+            ),
+            mock.patch.object(save_page, "_show_success_dialog") as success_dialog,
         ):
             save_page._save_configs_thread(
                 {},
@@ -1670,8 +2236,20 @@ class TestSavePageProspectiveConfigValidation:
                 proposal,
             )
 
-        assert len(written) == 1
-        assert written[0].file_path == target_path
-        assert written[0].get_value("MaxRecursion") == "100"
-        assert save_page._window._clamd_config.file_path == target_path
-        assert save_page._window._clamd_config.get_value("MaxRecursion") == "100"
+            assert len(written) == 1
+            assert written[0].file_path == host_path
+            assert written[0].get_value("MaxRecursion") == "100"
+            save_page._settings_manager.set.assert_not_called()
+            save_page._settings_manager.save.assert_not_called()
+            assert save_page._window._clamd_config is live_config
+
+            commit_callback, commit_args = idle_callbacks[0]
+            commit_callback(*commit_args)
+            success_dialog.assert_not_called()
+            success_callback, success_args = idle_callbacks[1]
+            success_callback(*success_args)
+            success_dialog.assert_called_once()
+            assert save_page._clamd_conf_path == str(host_path)
+            assert save_page._window._clamd_conf_path == str(host_path)
+            assert save_page._window._clamd_config.file_path == host_path
+            assert save_page._window._clamd_config.get_value("MaxRecursion") == "100"

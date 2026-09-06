@@ -6,6 +6,8 @@ This module provides the ExclusionsPage class which handles the UI and logic
 for managing scan exclusion patterns, including preset and custom exclusions.
 """
 
+import copy
+
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -13,50 +15,26 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk
 
 from ...core.i18n import N_, _
+from ...core.settings_manager import PRESET_EXCLUSION_PATTERNS, normalize_exclusion_patterns
 from ..compat import create_entry_row, create_switch_row
 from ..utils import resolve_icon_name
 from .base import PreferencesPageMixin
 
-# Preset exclusion templates for common development directories
-# These are directory patterns commonly excluded from scans for performance
+# Localized metadata for the canonical records defined in the settings layer.
+_PRESET_DESCRIPTIONS = (
+    N_("Node.js dependencies"),
+    N_("Git repository data"),
+    N_("Python virtual environment"),
+    N_("Build output directory"),
+    N_("Distribution output directory"),
+    N_("Python bytecode cache"),
+)
+
 PRESET_EXCLUSIONS = [
-    {
-        "pattern": "node_modules",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Node.js dependencies"),
-    },
-    {
-        "pattern": ".git",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Git repository data"),
-    },
-    {
-        "pattern": ".venv",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Python virtual environment"),
-    },
-    {
-        "pattern": "build",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Build output directory"),
-    },
-    {
-        "pattern": "dist",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Distribution output directory"),
-    },
-    {
-        "pattern": "__pycache__",
-        "type": "directory",
-        "enabled": True,
-        "description": N_("Python bytecode cache"),
-    },
+    {**preset, "description": description}
+    for preset, description in zip(PRESET_EXCLUSION_PATTERNS, _PRESET_DESCRIPTIONS, strict=True)
 ]
+_PRESET_PATTERNS = frozenset(preset["pattern"] for preset in PRESET_EXCLUSION_PATTERNS)
 
 
 class ExclusionsPage(PreferencesPageMixin):
@@ -87,6 +65,37 @@ class ExclusionsPage(PreferencesPageMixin):
         self._settings_manager = settings_manager
         self._custom_exclusions_group = None
         self._custom_entry_row = None
+        self._restoring_patterns: set[str] = set()
+
+    def _canonical_exclusions(self) -> list:
+        """Return an independent, canonical exclusion record list."""
+        if self._settings_manager is None:
+            return normalize_exclusion_patterns([])
+        exclusions = self._settings_manager.get("exclusion_patterns", [])
+        return normalize_exclusion_patterns(copy.deepcopy(exclusions))
+
+    def _save_exclusions(self, exclusions: list) -> bool:
+        """Persist exclusions and show a compatible error dialog on failure."""
+        if self._settings_manager is None:
+            return False
+        if self._settings_manager.set("exclusion_patterns", exclusions):
+            return True
+        self._show_error_dialog(
+            _("Unable to Save Exclusions"),
+            _("Your exclusion changes could not be saved."),
+        )
+        return False
+
+    def _ensure_canonical_exclusions(self) -> list:
+        """Persist legacy exclusions in canonical form before building the UI."""
+        if self._settings_manager is None:
+            return normalize_exclusion_patterns([])
+
+        original = self._settings_manager.get("exclusion_patterns", [])
+        exclusions = normalize_exclusion_patterns(copy.deepcopy(original))
+        if exclusions != original and not self._save_exclusions(exclusions):
+            return exclusions
+        return exclusions
 
     def create_page(self) -> Adw.PreferencesPage:
         """
@@ -99,6 +108,12 @@ class ExclusionsPage(PreferencesPageMixin):
             title=_("Exclusions"),
             icon_name=resolve_icon_name("action-unavailable-symbolic"),
         )
+        exclusions = self._ensure_canonical_exclusions()
+        preset_states = {
+            exclusion["pattern"]: exclusion.get("enabled", True)
+            for exclusion in exclusions
+            if isinstance(exclusion, dict) and exclusion.get("pattern") in _PRESET_PATTERNS
+        }
 
         # Preset exclusions group
         preset_group = Adw.PreferencesGroup()
@@ -106,11 +121,12 @@ class ExclusionsPage(PreferencesPageMixin):
         preset_group.set_description(_("Common patterns to exclude. Auto-saved."))
 
         for preset in PRESET_EXCLUSIONS:
-            # Create a row for each preset with folder icon
+            # Create a row for each preset with folder icon.
             row = create_switch_row("folder-symbolic")
             row.set_title(_(preset["description"]))
             row.set_subtitle(GLib.markup_escape_text(preset["pattern"]))
-            row.set_active(preset["enabled"])
+            row.set_active(preset_states.get(preset["pattern"], preset["enabled"]))
+            row.connect("notify::active", self._on_exclusion_toggled, preset["pattern"])
             preset_group.add(row)
 
         page.add(preset_group)
@@ -152,8 +168,10 @@ class ExclusionsPage(PreferencesPageMixin):
             return
 
         for exclusion in exclusions:
+            if not isinstance(exclusion, dict):
+                continue
             pattern = exclusion.get("pattern", "")
-            if pattern:
+            if pattern and pattern not in _PRESET_PATTERNS:
                 self._add_custom_exclusion_row(pattern, exclusion.get("enabled", True))
 
     def _add_custom_exclusion_row(self, pattern: str, enabled: bool = True):
@@ -180,8 +198,9 @@ class ExclusionsPage(PreferencesPageMixin):
         remove_button.connect("clicked", self._on_remove_custom_exclusion, row, pattern)
         row.add_suffix(remove_button)
 
-        # Insert before the entry row (which is always last)
-        self._custom_exclusions_group.add(row)
+        # Insert before the entry row (which is always last).
+        if self._custom_exclusions_group is not None:
+            self._custom_exclusions_group.add(row)
 
     def _on_exclusion_toggled(self, row, param_spec, pattern: str):
         """
@@ -192,17 +211,35 @@ class ExclusionsPage(PreferencesPageMixin):
             param_spec: Parameter specification (unused)
             pattern: The pattern that was toggled
         """
-        if self._settings_manager is None:
+        if self._settings_manager is None or pattern in self._restoring_patterns:
             return
 
+        exclusions = self._canonical_exclusions()
+        matching_exclusion = next(
+            (
+                exclusion
+                for exclusion in exclusions
+                if isinstance(exclusion, dict) and exclusion.get("pattern") == pattern
+            ),
+            None,
+        )
+        if matching_exclusion is None:
+            return
+
+        previous_enabled = matching_exclusion.get("enabled", True)
         enabled = row.get_active()
-        exclusions = self._settings_manager.get("exclusion_patterns", [])
-        if isinstance(exclusions, list):
-            for excl in exclusions:
-                if excl.get("pattern") == pattern:
-                    excl["enabled"] = enabled
-                    break
-            self._settings_manager.set("exclusion_patterns", exclusions)
+        if previous_enabled == enabled:
+            return
+
+        matching_exclusion["enabled"] = enabled
+        if self._save_exclusions(exclusions):
+            return
+
+        self._restoring_patterns.add(pattern)
+        try:
+            row.set_active(previous_enabled)
+        finally:
+            self._restoring_patterns.discard(pattern)
 
     def _on_add_custom_exclusion(self, button):
         """
@@ -211,36 +248,31 @@ class ExclusionsPage(PreferencesPageMixin):
         Args:
             button: The button that was clicked (unused)
         """
+        if self._custom_entry_row is None or self._settings_manager is None:
+            return
+
         pattern = self._custom_entry_row.get_text().strip()
         if not pattern:
             return
 
-        if self._settings_manager is None:
+        exclusions = self._canonical_exclusions()
+        if any(
+            isinstance(exclusion, dict) and exclusion.get("pattern") == pattern
+            for exclusion in exclusions
+        ):
             return
 
-        # Get current exclusions
-        exclusions = self._settings_manager.get("exclusion_patterns", [])
-        if not isinstance(exclusions, list):
-            exclusions = []
+        exclusions.append(
+            {
+                "pattern": pattern,
+                "type": "file" if pattern.startswith("/") else "pattern",
+                "enabled": True,
+            }
+        )
+        if not self._save_exclusions(exclusions):
+            return
 
-        # Check if already exists
-        for excl in exclusions:
-            if excl.get("pattern") == pattern:
-                return  # Already exists
-
-        # Add new exclusion
-        new_exclusion = {
-            "pattern": pattern,
-            "type": "file" if pattern.startswith("/") else "pattern",
-            "enabled": True,
-        }
-        exclusions.append(new_exclusion)
-        self._settings_manager.set("exclusion_patterns", exclusions)
-
-        # Add row to UI
         self._add_custom_exclusion_row(pattern, True)
-
-        # Clear entry
         self._custom_entry_row.set_text("")
 
     def _on_remove_custom_exclusion(self, button, row, pattern: str):
@@ -252,14 +284,16 @@ class ExclusionsPage(PreferencesPageMixin):
             row: The row to remove
             pattern: The pattern to remove
         """
-        if self._settings_manager is None:
+        if self._settings_manager is None or pattern in _PRESET_PATTERNS:
             return
 
-        # Remove from settings
-        exclusions = self._settings_manager.get("exclusion_patterns", [])
-        if isinstance(exclusions, list):
-            exclusions = [e for e in exclusions if e.get("pattern") != pattern]
-            self._settings_manager.set("exclusion_patterns", exclusions)
-
-        # Remove row from UI
-        self._custom_exclusions_group.remove(row)
+        exclusions = self._canonical_exclusions()
+        updated_exclusions = [
+            exclusion
+            for exclusion in exclusions
+            if not isinstance(exclusion, dict) or exclusion.get("pattern") != pattern
+        ]
+        if updated_exclusions == exclusions or not self._save_exclusions(updated_exclusions):
+            return
+        if self._custom_exclusions_group is not None:
+            self._custom_exclusions_group.remove(row)
