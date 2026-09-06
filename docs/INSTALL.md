@@ -112,21 +112,15 @@ Or find "ClamUI" in your application menu.
 
 ### Saving System Settings (Privileged Helper)
 
-ClamUI writes `freshclam.conf` and `clamd.conf` through a `pkexec`-elevated helper that must live at
-`/usr/bin/clamui-apply-preferences` on the **host**, alongside its polkit policy. The sandbox cannot install files
-there, so `sudo flatpak run ... install-privileged-helper` is **not supported** — the sandbox `/usr` is not the
-host `/usr`. The `clamui install-privileged-helper` command is native-host-only.
+Database, Scanner, and On-Access settings always target the real host `/etc/clamav` configuration, never a sandbox surrogate. Saving them requires the matching trusted host `clamui-apply-preferences` helper at `/usr/bin/clamui-apply-preferences` and its polkit policy.
 
-To enable saving system ClamAV settings from the Flatpak, download the matching
-`clamui-privileged-helper_<version>_all.deb` from the
-[releases page](https://github.com/linx-systems/clamui/releases) (use the **same version** as your Flatpak) and
-install it on the host:
+`sudo flatpak run ... install-privileged-helper` cannot install host files: the sandbox `/usr` is not the host `/usr`. Debian and Ubuntu users must install the version-matched `clamui-privileged-helper_<version>_all.deb` release asset (the same version as the Flatpak) on the host:
 
 ```bash
 sudo apt install ./clamui-privileged-helper_<version>_all.deb
 ```
 
-This installs only the helper, its Python modules, and the polkit policy — not the full native app.
+This installs only the helper, its Python modules, and the polkit policy — not the full native app. Other distributions need a matching distribution-provided helper; the project currently provides no RPM or pacman artifact. If the helper is missing, these saves fail without changing host configuration. Exclusions remain sandbox-local ClamUI application settings.
 
 > **Troubleshooting**: If you encounter issues with the Flatpak installation,
 > see [Flatpak-Specific Issues](./TROUBLESHOOTING.md#flatpak-specific-issues) in the troubleshooting guide.

@@ -95,6 +95,20 @@ def glob_to_regex(pattern: str) -> str:
     return regex
 
 
+def directory_glob_to_regex(pattern: str) -> str:
+    """Convert a directory exclusion glob to a ClamAV-compatible POSIX ERE.
+
+    A bare directory name is a path component, not an entire scan path. Match
+    it at the scan root or after any parent component, and require the next
+    character to be a separator or the end of the path. Path-like patterns
+    retain their existing whole-path glob semantics.
+    """
+    regex = glob_to_regex(pattern)
+    if "/" in pattern or "\\" in pattern:
+        return regex
+    return rf"(^|.*/){regex[1:-1]}(/|$)"
+
+
 def validate_pattern(pattern: str) -> bool:
     """
     Validate that a pattern can be converted and compiled as regex.
@@ -822,8 +836,12 @@ class Scanner:
                 if not pattern:
                     continue
 
-                regex = glob_to_regex(pattern)
                 exclusion_type = exclusion.get("type", "pattern")
+                regex = (
+                    directory_glob_to_regex(pattern)
+                    if exclusion_type == "directory"
+                    else glob_to_regex(pattern)
+                )
 
                 if exclusion_type == "directory":
                     cmd.extend(["--exclude-dir", regex])

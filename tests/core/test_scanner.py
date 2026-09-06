@@ -1,6 +1,7 @@
 # ClamUI Scanner Tests
 """Unit tests for the scanner module, including Flatpak integration."""
 
+import re
 import subprocess
 import sys
 from unittest import mock
@@ -273,6 +274,96 @@ class TestScannerBuildCommand:
         # Verify disabled patterns are NOT included
         all_args = " ".join(cmd)
         assert "disabled" not in all_args
+
+    def test_build_command_directory_exclusions_match_path_components(self, tmp_path):
+        """Bare directory globs match exact root or nested path components."""
+        test_dir = tmp_path / "test_dir"
+        test_dir.mkdir()
+        exclusions = [
+            {"pattern": "node_modules", "type": "directory", "enabled": True},
+            {"pattern": ".git", "type": "directory", "enabled": True},
+            {"pattern": "build", "type": "directory", "enabled": True},
+            {"pattern": "build-*", "type": "directory", "enabled": True},
+            {"pattern": "third_party/cache", "type": "directory", "enabled": True},
+            {"pattern": "*.log", "type": "file", "enabled": True},
+        ]
+        mock_settings = mock.MagicMock()
+        mock_settings.get.side_effect = lambda key, default=None: (
+            exclusions if key == "exclusion_patterns" else default
+        )
+        scanner = Scanner(settings_manager=mock_settings)
+        profile_exclusions = {"paths": ["/profile/cache"], "patterns": ["*.profile"]}
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                cmd = scanner._build_command(
+                    str(test_dir), recursive=True, profile_exclusions=profile_exclusions
+                )
+
+        exclude_dir_indices = [
+            index for index, argument in enumerate(cmd) if argument == "--exclude-dir"
+        ]
+        directory_patterns = [cmd[index + 1] for index in exclude_dir_indices]
+        directory_exclusions = exclusions[:5]
+        directory_regexes = dict(
+            zip(
+                (item["pattern"] for item in directory_exclusions),
+                directory_patterns[: len(directory_exclusions)],
+                strict=True,
+            )
+        )
+
+        for pattern in ("node_modules", ".git", "build"):
+            regex = directory_regexes[pattern]
+            assert re.search(regex, pattern)
+            assert re.search(regex, f"/scan/src/vendor/{pattern}/")
+            assert not re.search(regex, f"/scan/src/{pattern}_backup")
+
+        wildcard_regex = directory_regexes["build-*"]
+        assert re.search(wildcard_regex, "/scan/build-cache")
+        assert re.search(wildcard_regex, "/scan/src/build-artifacts/")
+
+        # Path-like directory exclusions retain their original whole-path glob.
+        assert directory_regexes["third_party/cache"] == glob_to_regex("third_party/cache")
+        assert re.fullmatch(directory_regexes["third_party/cache"], "third_party/cache")
+
+        # File and profile exclusions retain their existing command forms.
+        exclude_indices = [index for index, argument in enumerate(cmd) if argument == "--exclude"]
+        assert [cmd[index + 1] for index in exclude_indices] == [
+            glob_to_regex("*.log"),
+            glob_to_regex("*.profile"),
+        ]
+        assert directory_patterns[-1] == "/profile/cache"
+
+    def test_build_command_migrates_legacy_strings_before_applying_exclusions(self, tmp_path):
+        """Documented legacy strings survive migration while malformed values cannot crash scans."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.legacy",
+                        42,
+                        None,
+                        {"pattern": ""},
+                        {"pattern": 99, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = Scanner(settings_manager=SettingsManager(config_dir=config_dir))
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                cmd = scanner._build_command(str(tmp_path), recursive=True)
+
+        exclude_indices = [index for index, argument in enumerate(cmd) if argument == "--exclude"]
+        assert [cmd[index + 1] for index in exclude_indices] == [glob_to_regex("*.legacy")]
 
     def test_build_command_without_settings_manager(self, tmp_path):
         """Test _build_command works without settings manager (no exclusions)."""
@@ -2805,6 +2896,34 @@ class TestCountFiles:
         scanner = Scanner(settings_manager=mock_settings)
         count = scanner._count_files(str(tmp_path))
         assert count == 1  # file2.log excluded by settings
+
+    def test_count_files_migrates_legacy_strings_before_filtering_counts(self, tmp_path):
+        """Migrated legacy strings filter counts even when adjacent stored values are malformed."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "included.txt").write_text("included")
+        (scan_dir / "excluded.log").write_text("excluded")
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.log",
+                        False,
+                        {"pattern": None},
+                        {"pattern": 42, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = Scanner(settings_manager=SettingsManager(config_dir=config_dir))
+
+        assert scanner._count_files(str(scan_dir)) == 1
 
 
 class TestIsPathExcluded:

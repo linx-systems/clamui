@@ -21,6 +21,8 @@ from src.cli.apply_preferences import (
 )
 from src.core import privileged_paths
 
+PROTOCOL_TOKEN = f"--protocol={privileged_paths.PROTOCOL_VERSION}"
+
 
 def _bootstrap(monkeypatch, tmp_path):
     """Set up a working PKEXEC_UID + staging root + allowlist override."""
@@ -53,7 +55,7 @@ class TestApplyPreferencesCli:
         source.write_text("LogVerbose yes\n", encoding="utf-8")
         os.chmod(source, 0o600)
 
-        exit_code = main(["--protocol=2", str(source), str(destination)])
+        exit_code = main([PROTOCOL_TOKEN, str(source), str(destination)])
 
         assert exit_code == 0
         assert destination.read_text(encoding="utf-8") == "LogVerbose yes\n"
@@ -62,13 +64,13 @@ class TestApplyPreferencesCli:
     def test_main_rejects_odd_argument_count(self, tmp_path, monkeypatch):
         """Helper should fail when source/destination args are not paired."""
         _bootstrap(monkeypatch, tmp_path)
-        exit_code = main(["--protocol=2", "/tmp/source.conf"])
+        exit_code = main([PROTOCOL_TOKEN, "/tmp/source.conf"])
         assert exit_code == 2
 
     def test_main_rejects_no_pairs(self, tmp_path, monkeypatch):
         """Helper should fail when no src/dst pairs are provided."""
         _bootstrap(monkeypatch, tmp_path)
-        exit_code = main(["--protocol=2"])
+        exit_code = main([PROTOCOL_TOKEN])
         assert exit_code == 2
 
     def test_main_fails_for_missing_source(self, tmp_path, monkeypatch):
@@ -82,7 +84,7 @@ class TestApplyPreferencesCli:
         missing_source = staging / "missing.conf"
         destination = dest_dir / "dest.conf"
 
-        exit_code = main(["--protocol=2", str(missing_source), str(destination)])
+        exit_code = main([PROTOCOL_TOKEN, str(missing_source), str(destination)])
 
         assert exit_code != 0
         assert not destination.exists()
@@ -102,7 +104,7 @@ class TestApplyPreferencesCli:
         source.write_text("DatabaseDirectory /var/lib/clamav\n", encoding="utf-8")
         os.chmod(source, 0o600)
 
-        exit_code = main(["--protocol=2", str(source), str(destination)])
+        exit_code = main([PROTOCOL_TOKEN, str(source), str(destination)])
 
         assert exit_code == 0
         assert destination.exists()
@@ -143,7 +145,7 @@ class TestApplyPreferencesCli:
             patch("src.cli.apply_preferences.shutil.which", return_value="/usr/bin/systemctl"),
             patch("src.cli.apply_preferences.subprocess.run", side_effect=_fake_run),
         ):
-            exit_code = main(["--protocol=2", str(source), str(destination)])
+            exit_code = main([PROTOCOL_TOKEN, str(source), str(destination)])
 
         assert exit_code == 0
         assert ["systemctl", "is-active", "--quiet", "clamav-freshclam.service"] in run_calls

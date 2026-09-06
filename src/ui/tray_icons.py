@@ -217,20 +217,6 @@ class TrayIconGenerator:
         self._generate_icon(status, cache_path)
         return str(cache_path)
 
-    def get_icon_name(self, status: str) -> str:
-        """
-        Get the icon name (without path/extension) for AppIndicator.
-
-        Args:
-            status: Protection status
-
-        Returns:
-            Icon name suitable for AppIndicator (e.g., 'clamui-tray-protected')
-        """
-        if status not in self.OVERLAY_COLORS:
-            status = "protected"
-        return f"clamui-tray-{status}"
-
     def pregenerate_all(self) -> None:
         """Pre-generate icons for all statuses to improve responsiveness."""
         for status in self.OVERLAY_COLORS:
