@@ -57,6 +57,10 @@ jobs:
           # Test 1: Python interpreter works
           ./squashfs-root/usr/bin/python3 --version
 
+          # Test 2: GIO desktop launcher helper is bundled and executable
+          test -x ./squashfs-root/usr/libexec/gio-launch-desktop
+          ./squashfs-root/usr/libexec/gio-launch-desktop /usr/bin/true
+
           # Set up bundled Python environment (mirrors AppRun)
           HERE="$(pwd)/squashfs-root"
           export PYTHONHOME="$HERE/usr"
@@ -65,20 +69,20 @@ jobs:
           export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0"
           export LD_LIBRARY_PATH="$HERE/usr/lib:$HERE/usr/lib/x86_64-linux-gnu"
 
-          # Test 2: ClamUI module imports successfully
+          # Test 3: ClamUI module imports successfully
           ./squashfs-root/usr/bin/python3 -c "
           from src.main import main
           print('src.main: OK')
           "
 
-          # Test 3: GTK4/Adwaita bindings load
+          # Test 4: GTK4/Adwaita bindings load
           ./squashfs-root/usr/bin/python3 -c "
           from gi.repository import Gtk, Adw
           print('GTK:', Gtk._version)
           print('Adwaita: OK')
           "
 
-          # Test 4: Core modules import (validates bundling)
+          # Test 5: Core modules import (validates bundling)
           ./squashfs-root/usr/bin/python3 -c "
           from src.core.scanner import Scanner
           from src.core.settings_manager import SettingsManager

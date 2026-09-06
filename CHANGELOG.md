@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Bundled GLib's desktop-launch helper in the AppImage so audit documentation links open on KDE and other non-Ubuntu host layouts. (#194)
+
 ## [0.4.0] - 2026-08-23
 
 ### Added
@@ -23,6 +29,8 @@
 
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
+
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.4.0...HEAD
 
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
 

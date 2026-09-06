@@ -739,6 +739,61 @@ bundle_gi_libraries() {
 	echo
 	return 0
 }
+#
+# Bundle GIO Desktop Launcher
+#
+# GIO spawns this helper to launch desktop applications. It is not linked
+# directly by the application, so linuxdeploy does not bundle it.
+#
+
+bundle_gio_launch_desktop() {
+	log_info "=== Bundling GIO Desktop Launcher ==="
+	echo
+
+	local gio_libdir
+	local gio_launch_desktop_src=""
+	local gio_launch_desktop_dest="$APPDIR/usr/libexec/gio-launch-desktop"
+	local -a gio_launch_desktop_candidates=()
+
+	if gio_libdir=$(pkg-config --variable=libdir gio-2.0 2>/dev/null); then
+		gio_launch_desktop_candidates+=(
+			"$gio_libdir/glib-2.0/gio-launch-desktop"
+		)
+	fi
+	gio_launch_desktop_candidates+=(
+		"/usr/lib/x86_64-linux-gnu/glib-2.0/gio-launch-desktop"
+		"/usr/lib64/glib-2.0/gio-launch-desktop"
+		"/usr/lib/glib-2.0/gio-launch-desktop"
+	)
+
+	for candidate in "${gio_launch_desktop_candidates[@]}"; do
+		if [ -x "$candidate" ]; then
+			gio_launch_desktop_src="$candidate"
+			break
+		fi
+	done
+
+	if [ -z "$gio_launch_desktop_src" ]; then
+		log_error "Could not find an executable gio-launch-desktop helper"
+		return 1
+	fi
+
+	mkdir -p "$(dirname "$gio_launch_desktop_dest")"
+	log_info "Copying: $gio_launch_desktop_src -> $gio_launch_desktop_dest"
+	cp "$gio_launch_desktop_src" "$gio_launch_desktop_dest"
+	chmod 755 "$gio_launch_desktop_dest"
+
+	if [ ! -x "$gio_launch_desktop_dest" ]; then
+		log_error "Bundled gio-launch-desktop is not executable: $gio_launch_desktop_dest"
+		return 1
+	fi
+
+	echo
+	log_success "GIO desktop launcher bundled"
+	echo
+	return 0
+}
+
 
 #
 # Bundle Adwaita Icon Theme
@@ -979,6 +1034,9 @@ create_apprun() {
 # Determine the AppImage mount directory
 HERE="\$(dirname "\$(readlink -f "\$0")")"
 export APPDIR="\$HERE"
+
+# GIO desktop launcher
+export GIO_LAUNCH_DESKTOP="\$HERE/usr/libexec/gio-launch-desktop"
 
 # Python environment
 export PYTHONHOME="\$HERE/usr"
@@ -1264,6 +1322,13 @@ main() {
 	# so linuxdeploy can't discover them by tracing the python3 binary)
 	if ! bundle_gi_libraries; then
 		log_error "Failed to bundle GI-loaded libraries."
+		cleanup
+		exit 1
+	fi
+
+	# Bundle the GIO helper that Gtk.show_uri() launches out of process
+	if ! bundle_gio_launch_desktop; then
+		log_error "Failed to bundle GIO desktop launcher."
 		cleanup
 		exit 1
 	fi
