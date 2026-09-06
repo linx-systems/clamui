@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.4.0] - 2026-08-23
+
+### Added
+
+- Added distro-aware security-audit install advice for Debian, Fedora, and Arch families; unknown distributions show no guessed command. (#184)
+- Added French and Simplified Chinese translation updates and additional translatable UI strings.
+
+### Changed
+
+- Restored the GTK 4.6 / libadwaita 1.1 compatibility baseline.
+- Made preference saves safer, retained standalone Flatpak scanner settings without a host helper, shipped the version-matched Flatpak host-helper companion package, and added Python 3.10 / 3.14 compatibility. (#170)
+- Refreshed Python, Flatpak, CI, and runtime dependencies, including cryptography 50.0.0.
+
+### Fixed
+
+- Improved scan result handling for concurrent multi-target scans, partial output, nonfatal warnings, and all-failed scans.
+- Staged forced database updates before activation.
+- Added quarantine restore/delete confirmations, Escape-to-close dialogs, and short-write detection for quarantine copies.
+
+### Security
+
+- Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
+- Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
+
+[0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
+
 ## [0.3.0] - 2026-06-26
 
 ### Added

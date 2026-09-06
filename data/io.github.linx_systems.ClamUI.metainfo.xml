@@ -100,6 +100,19 @@
     </keywords>
 
     <releases>
+        <release version="0.4.0" date="2026-08-23">
+            <description>
+                <p>Configuration safety, scan reliability, GTK baseline compatibility, and privileged-write hardening</p>
+                <ul>
+                    <li>Make preference saves safer; restore GTK 4.6 / libadwaita 1.1 compatibility; support Python 3.10 helper builds and Python 3.14 glob conversion</li>
+                    <li>Ship a trusted Flatpak host configuration helper, retain standalone Flatpak scanner settings without one, and give Debian, Fedora, and Arch families appropriate install advice while omitting unknown-distro commands</li>
+                    <li>Improve concurrent multi-target scan results, partial output and nonfatal-warning handling, all-failed error reporting, and staged forced database updates</li>
+                    <li>Confirm quarantine restores and permanent deletions, close dialogs with Escape, and reject short quarantine writes</li>
+                    <li>Fail closed for noncanonical privileged configuration writes, build scheduled commands from tokens, and sanitize AppImage environments for every host helper</li>
+                    <li>Refresh French and Simplified Chinese translations, translatable strings, and Python, Flatpak, CI, and runtime dependencies including cryptography 50.0.0</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.3.0" date="2026-06-26">
             <description>
                 <p>Privileged configuration helper, Flatpak host-config fixes, CLI scan reliability, and security hardening</p>

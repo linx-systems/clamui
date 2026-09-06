@@ -98,6 +98,9 @@ All XDG paths are relative to this sandbox directory:
 - The daemon scan backend (`"scan_backend": "daemon"`) requires host `clamd`/`clamdscan`
 - Virus definitions are managed by host ClamAV, normally under `/var/lib/clamav`
 - `flatpak-spawn --host` is used for host ClamAV tools, systemctl commands, and configuration helpers
+- Database, Scanner, and On-Access preferences always target the host `/etc/clamav` configuration, never a sandbox copy.
+- Saving those preferences requires the matching trusted host `clamui-apply-preferences` helper and polkit policy; without them, the save fails without changing the host configuration.
+- Exclusions are sandbox-local ClamUI application settings and do not modify host ClamAV configuration.
 
 **Accessing Flatpak Files:**
 To access ClamUI configuration or logs when using Flatpak:
@@ -500,35 +503,31 @@ This setting only applies when `schedule_frequency` is set to `"monthly"`. It is
 
 #### `exclusion_patterns`
 
-**Type:** Array of Strings
-**Default:** `[]` (empty array)
-**Valid Values:** List of glob patterns or absolute paths
+**Type:** Array of exclusion records
+**Default:**
 
-Defines files and directories to exclude from all scans (manual and scheduled).
+```json
+[
+  {"pattern": "node_modules", "type": "directory", "enabled": true},
+  {"pattern": ".git", "type": "directory", "enabled": true},
+  {"pattern": ".venv", "type": "directory", "enabled": true},
+  {"pattern": "build", "type": "directory", "enabled": true},
+  {"pattern": "dist", "type": "directory", "enabled": true},
+  {"pattern": "__pycache__", "type": "directory", "enabled": true}
+]
+```
 
-**Description:**
-Each element can be:
+Each record must contain a non-empty string `pattern`, a `type` of `"directory"`, `"file"`, or `"pattern"`, and a boolean `enabled`. Only enabled records exclude matching files or directories from manual and scheduled scans.
 
-- **Absolute path:** `/home/username/.cache` - Exact directory/file to exclude
-- **Glob pattern:** `*.log` - Exclude all files matching pattern
-- **Path with wildcard:** `/var/log/*.log` - Exclude logs in specific directory
-
-Exclusions apply globally to all scan operations. This is useful for excluding:
-
-- Cache directories
-- Virtual environments
-- Build artifacts
-- Large archive files
+Legacy string entries are migrated automatically to records. Malformed entries are discarded, so do not use strings, incomplete objects, or other JSON values.
 
 **Example:**
 
 ```json
 {
   "exclusion_patterns": [
-    "/home/username/.cache",
-    "/home/username/.venv",
-    "*.iso",
-    "*.log"
+    {"pattern": "/home/username/.cache", "type": "directory", "enabled": true},
+    {"pattern": "*.iso", "type": "pattern", "enabled": true}
   ]
 }
 ```
@@ -1260,7 +1259,11 @@ No notifications, no tray, close-to-quit. Scans are run manually via the GUI.
   "scan_backend": "daemon",
   "minimize_to_tray": true,
   "start_minimized": true,
-  "exclusion_patterns": ["~/.cache", "~/.local/share/Trash", "*.iso"]
+  "exclusion_patterns": [
+    {"pattern": "~/.cache", "type": "directory", "enabled": true},
+    {"pattern": "~/.local/share/Trash", "type": "directory", "enabled": true},
+    {"pattern": "*.iso", "type": "pattern", "enabled": true}
+  ]
 }
 ```
 
@@ -1285,7 +1288,12 @@ Find your socket path: `grep "LocalSocket" /etc/clamav/clamd.conf`
   "schedule_targets": ["~/Documents", "~/Projects", "~/Downloads"],
   "schedule_skip_on_battery": true,
   "schedule_auto_quarantine": false,
-  "exclusion_patterns": ["~/.cache", "node_modules", ".venv", "*.iso"]
+  "exclusion_patterns": [
+    {"pattern": "~/.cache", "type": "directory", "enabled": true},
+    {"pattern": "node_modules", "type": "directory", "enabled": true},
+    {"pattern": ".venv", "type": "directory", "enabled": true},
+    {"pattern": "*.iso", "type": "pattern", "enabled": true}
+  ]
 }
 ```
 
@@ -1304,7 +1312,12 @@ Find your socket path: `grep "LocalSocket" /etc/clamav/clamd.conf`
   "scan_backend": "daemon",
   "minimize_to_tray": true,
   "start_minimized": true,
-  "exclusion_patterns": ["/home/*/.cache", "/var/log", "*.bak", "*.tmp"]
+  "exclusion_patterns": [
+    {"pattern": "/home/*/.cache", "type": "directory", "enabled": true},
+    {"pattern": "/var/log", "type": "directory", "enabled": true},
+    {"pattern": "*.bak", "type": "pattern", "enabled": true},
+    {"pattern": "*.tmp", "type": "pattern", "enabled": true}
+  ]
 }
 ```
 
@@ -1316,9 +1329,9 @@ Monitor quarantine: `sqlite3 ~/.local/share/clamui/quarantine.db "SELECT origina
 
 **Direct edit**: Stop ClamUI, edit `~/.config/clamui/settings.json`, verify with `python3 -m json.tool ~/.config/clamui/settings.json`, restart ClamUI.
 
-**Preferences UI**: Open Preferences (`Ctrl+,`), change settings. Most are auto-saved; ClamAV config changes require Save & Apply.
+**Preferences UI**: Open Preferences (`Ctrl+,`), change settings. Most are auto-saved; ClamAV config changes require Save & Apply. Database, Scanner, and On-Access pages always save the real host `/etc/clamav` configuration, never a sandbox surrogate.
 
-Saving system configs (`/etc/clamav/*.conf`) requires the `clamui-apply-preferences` privileged helper and its polkit policy, which the separate `clamui-privileged-helper` package owns. Native (non-package) and source installs run `sudo clamui install-privileged-helper` on the host (native-host-only). Debian installs receive the helper automatically through the paired `clamui` + `clamui-privileged-helper` packages — see [INSTALL.md](INSTALL.md#debian-package-installation) for both flows. Flatpak cannot run `install-privileged-helper` from the sandbox (the sandbox `/usr` is not the host `/usr`); instead install the matching `clamui-privileged-helper_<version>_all.deb` asset on the host.
+Saving host configuration requires the matching trusted `clamui-apply-preferences` helper and its polkit policy. Without them, Save & Apply fails without changing the host; exclusions remain sandbox-local app settings. Debian and Ubuntu users install the version-matched `clamui-privileged-helper_<version>_all.deb` release asset. Other distributions need a matching distribution-provided helper; the project currently provides no RPM or pacman artifact. `sudo flatpak run ... install-privileged-helper` cannot install host files because the Flatpak sandbox `/usr` is not the host `/usr`; see [INSTALL.md](INSTALL.md#saving-system-settings-privileged-helper).
 
 **Validation**:
 

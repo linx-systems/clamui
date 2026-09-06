@@ -19,6 +19,76 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+PRESET_EXCLUSION_PATTERNS = (
+    {"pattern": "node_modules", "type": "directory", "enabled": True},
+    {"pattern": ".git", "type": "directory", "enabled": True},
+    {"pattern": ".venv", "type": "directory", "enabled": True},
+    {"pattern": "build", "type": "directory", "enabled": True},
+    {"pattern": "dist", "type": "directory", "enabled": True},
+    {"pattern": "__pycache__", "type": "directory", "enabled": True},
+)
+
+
+def default_exclusion_patterns() -> list[dict[str, Any]]:
+    """Return independent copies of the canonical preset exclusions."""
+    return [copy.deepcopy(preset) for preset in PRESET_EXCLUSION_PATTERNS]
+
+
+def normalize_exclusion_patterns(exclusions: Any) -> list[dict[str, Any]]:
+    """
+    Return safe canonical exclusion records with every preset represented once.
+
+    Legacy strings become enabled custom records. Custom records retain their
+    order, while duplicate patterns collapse to their first valid occurrence.
+    Presets retain a valid stored enabled state and otherwise use their
+    canonical definition.
+    """
+    if not isinstance(exclusions, list):
+        return default_exclusion_patterns()
+
+    preset_by_pattern = {preset["pattern"]: preset for preset in PRESET_EXCLUSION_PATTERNS}
+    valid_types = {"directory", "file", "pattern"}
+    normalized: list[dict[str, Any]] = []
+    seen_patterns: set[str] = set()
+
+    for exclusion in exclusions:
+        if isinstance(exclusion, str):
+            pattern = exclusion
+            exclusion_type = "file" if os.path.isabs(pattern) else "pattern"
+            enabled = True
+        elif isinstance(exclusion, dict):
+            pattern = exclusion.get("pattern")
+            if not isinstance(pattern, str) or not pattern:
+                continue
+
+            stored_type = exclusion.get("type")
+            exclusion_type = (
+                stored_type
+                if isinstance(stored_type, str) and stored_type in valid_types
+                else ("file" if os.path.isabs(pattern) else "pattern")
+            )
+            stored_enabled = exclusion.get("enabled")
+            enabled = stored_enabled if isinstance(stored_enabled, bool) else True
+        else:
+            continue
+
+        if not pattern or pattern in seen_patterns:
+            continue
+        seen_patterns.add(pattern)
+
+        preset = preset_by_pattern.get(pattern)
+        if preset is not None:
+            normalized.append({**preset, "enabled": enabled})
+        else:
+            normalized.append({"pattern": pattern, "type": exclusion_type, "enabled": enabled})
+
+    for preset in PRESET_EXCLUSION_PATTERNS:
+        if preset["pattern"] not in seen_patterns:
+            normalized.append(copy.deepcopy(preset))
+
+    return normalized
+
+
 class _ListenerRef:
     """Track a settings listener without unnecessarily retaining bound methods."""
 
@@ -75,7 +145,7 @@ class SettingsManager:
         "schedule_auto_quarantine": False,
         "schedule_day_of_week": 0,  # 0=Monday, 6=Sunday (for weekly scans)
         "schedule_day_of_month": 1,  # 1-28 (for monthly scans)
-        "exclusion_patterns": [],
+        "exclusion_patterns": default_exclusion_patterns(),
         # Scan backend settings
         "scan_backend": "auto",  # "auto", "daemon", "clamscan"
         "daemon_socket_path": "",  # Empty = auto-detect
@@ -120,12 +190,19 @@ class SettingsManager:
 
         self._settings_file = self._config_dir / "settings.json"
 
-        # Thread lock for safe concurrent access
-        self._lock = threading.Lock()
+        # A reentrant lock lets a transaction retain exclusive ownership while
+        # save() serializes its candidate state.
+        self._lock = threading.RLock()
         self._listeners: dict[str, list[_ListenerRef]] = {}
+        self._exclusion_patterns_need_migration = False
 
-        # Load settings on initialization
+        # Load settings on initialization.
         self._settings = self._load()
+        if self._exclusion_patterns_need_migration and not self.save():
+            logger.warning(
+                "Failed to persist normalized exclusion patterns to %s; will retry on next startup",
+                self._settings_file,
+            )
 
     def _load(self) -> dict:
         """
@@ -144,8 +221,18 @@ class SettingsManager:
                             # Non-dict JSON (arrays, null, primitives) is invalid
                             self._backup_corrupted_file()
                             return copy.deepcopy(self.DEFAULT_SETTINGS)
-                        # Merge with defaults to ensure all keys exist
-                        return {**copy.deepcopy(self.DEFAULT_SETTINGS), **loaded}
+
+                        # Merge with defaults, then migrate legacy exclusions
+                        # into the single canonical exclusion_patterns setting.
+                        settings = {**copy.deepcopy(self.DEFAULT_SETTINGS), **loaded}
+                        loaded_exclusions = loaded.get("exclusion_patterns")
+                        normalized_exclusions = normalize_exclusion_patterns(loaded_exclusions)
+                        self._exclusion_patterns_need_migration = (
+                            "exclusion_patterns" not in loaded
+                            or normalized_exclusions != loaded_exclusions
+                        )
+                        settings["exclusion_patterns"] = normalized_exclusions
+                        return settings
             except json.JSONDecodeError:
                 # Handle corrupted files - backup for debugging
                 self._backup_corrupted_file()
@@ -177,7 +264,10 @@ class SettingsManager:
                     dir=self._config_dir,
                 )
                 try:
+                    # Harden the temporary file while its descriptor is still owned.
+                    # Settings may contain sensitive data like API keys in fallback storage.
                     try:
+                        os.fchmod(fd, 0o600)
                         f = os.fdopen(fd, "w", encoding="utf-8")
                     except Exception:
                         with contextlib.suppress(OSError):
@@ -190,10 +280,6 @@ class SettingsManager:
                     # Atomic rename
                     temp_path_obj = Path(temp_path)
                     temp_path_obj.replace(self._settings_file)
-
-                    # Harden file permissions (owner read/write only)
-                    # Settings may contain sensitive data like API keys in fallback storage
-                    self._settings_file.chmod(0o600)
                     return True
                 except Exception:
                     # Clean up temp file on failure
@@ -261,15 +347,31 @@ class SettingsManager:
         Returns:
             True if saved successfully, False otherwise
         """
-        should_notify = False
-        with self._lock:
-            previous = self._settings.get(key)
-            self._settings[key] = value
-            should_notify = previous != value
+        return self.set_many({key: value})
 
-        saved = self.save()
-        if should_notify:
-            self._notify_listeners(key, value)
+    def set_many(self, updates: dict[str, Any]) -> bool:
+        """
+        Atomically apply setting updates with one durable save.
+
+        Listeners are notified only for changed values after the candidate is
+        safely persisted. A failed save restores the complete prior state.
+        """
+        with self._lock:
+            previous_settings = copy.deepcopy(self._settings)
+            candidates = copy.deepcopy(updates)
+            self._settings.update(candidates)
+            changed_values = {
+                key: self._settings[key]
+                for key in candidates
+                if key not in previous_settings or previous_settings[key] != self._settings[key]
+            }
+            saved = self.save()
+            if not saved:
+                self._settings = previous_settings
+
+        if saved:
+            for key, value in changed_values.items():
+                self._notify_listeners(key, value)
         return saved
 
     def reset_to_defaults(self) -> bool:
@@ -281,7 +383,7 @@ class SettingsManager:
         """
         changed_values: dict[str, Any] = {}
         with self._lock:
-            previous_settings = dict(self._settings)
+            previous_settings = copy.deepcopy(self._settings)
             self._settings = copy.deepcopy(self.DEFAULT_SETTINGS)
             changed_keys = set(previous_settings) | set(self._settings)
             for key in changed_keys:
@@ -289,9 +391,13 @@ class SettingsManager:
                 if previous_settings.get(key) != new_value:
                     changed_values[key] = new_value
 
-        saved = self.save()
-        for key, value in changed_values.items():
-            self._notify_listeners(key, value)
+            saved = self.save()
+            if not saved:
+                self._settings = previous_settings
+
+        if saved:
+            for key, value in changed_values.items():
+                self._notify_listeners(key, value)
         return saved
 
     def get_all(self) -> dict:
