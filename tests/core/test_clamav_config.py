@@ -1267,9 +1267,10 @@ class TestFlatpakElevationRouting:
 
         assert clamav_config_module._get_privileged_writer_path() is None
 
-    def test_missing_host_helper_in_flatpak_gives_clear_error(self, monkeypatch):
-        """When the host helper is absent, the save fails with an actionable message
-        rather than silently resetting or showing 'Authorization failed'."""
+    def test_missing_host_helper_in_flatpak_gives_actionable_versioned_guidance(self, monkeypatch):
+        """Missing host helper guidance names this Flatpak's package and supported host."""
+        import src
+
         config = ClamAVConfig(file_path=Path("/etc/clamav/freshclam.conf"))
         config.set_value("DatabaseDirectory", "/var/lib/clamav")
 
@@ -1284,6 +1285,12 @@ class TestFlatpakElevationRouting:
         assert "helper not installed" in error.lower()
         assert "flatpak sandbox" in error.lower()
         assert "/etc/clamav" in error
+        package_name = f"clamui-privileged-helper_{src.__version__}_all.deb"
+        deb_command = f"'sudo apt install ./{package_name}'"
+        assert error.count(package_name) == 2
+        assert deb_command in error
+        assert error.index("Debian/Ubuntu") < error.index(deb_command)
+        assert "Do not install it with 'sudo flatpak run'" in error
 
     def test_flatpak_system_write_uses_host_helper_via_flatpak_spawn(self, monkeypatch, tmp_path):
         """End-to-end: a Flatpak /etc write invokes the HOST helper through
@@ -1782,7 +1789,7 @@ class TestWriteConfigsFlatpak:
         # returns; the staged file should already be removed by now.
         assert not staged.exists()
 
-    def test_success_reports_staging_cleanup_failure(self, monkeypatch, tmp_path):
+    def test_success_survives_staging_cleanup_failure(self, monkeypatch, tmp_path):
         config = ClamAVConfig(file_path=Path("/etc/clamav/clamd.conf"))
         staging_dir = tmp_path / "staging"
         staging_dir.mkdir()
@@ -1801,17 +1808,22 @@ class TestWriteConfigsFlatpak:
             lambda *_args, **_kwargs: mock.Mock(returncode=0, stderr="", stdout=""),
         )
 
+        cleanup_calls = []
+
         def _fail_explicit_cleanup(path, ignore_errors=False):
+            cleanup_calls.append((path, ignore_errors))
             if not ignore_errors:
                 raise OSError("cleanup failed")
 
         monkeypatch.setattr(clamav_config_module.shutil, "rmtree", _fail_explicit_cleanup)
 
-        success, error = write_configs_with_elevation([config])
+        success, warning = write_configs_with_elevation([config])
 
-        assert success is False
-        assert "configuration was applied" in error.lower()
-        assert str(staging_dir) in error
+        assert success is True
+        assert warning is not None
+        assert str(staging_dir) in warning
+        assert "cleanup failed" in warning
+        assert cleanup_calls == [(staging_dir, False), (staging_dir, True)]
 
 
 class TestMakeStagingDirSingleRoot:
