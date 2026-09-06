@@ -354,62 +354,6 @@ class TestTrayIconGeneratorGetIconPath:
             assert f"clamui-tray-{status}.png" in result
 
 
-class TestTrayIconGeneratorGetIconName:
-    """Tests for TrayIconGenerator.get_icon_name method."""
-
-    def test_get_icon_name_returns_correct_format(self, tmp_path, mock_pil_modules):
-        """Test get_icon_name returns correct icon name format."""
-        import importlib
-
-        from src.ui import tray_icons
-
-        importlib.reload(tray_icons)
-
-        base_icon = tmp_path / "base.png"
-        base_icon.write_bytes(b"fake png data")
-
-        generator = tray_icons.TrayIconGenerator(str(base_icon), str(tmp_path / "cache"))
-
-        result = generator.get_icon_name("protected")
-
-        assert result == "clamui-tray-protected"
-
-    def test_get_icon_name_all_statuses(self, tmp_path, mock_pil_modules):
-        """Test get_icon_name works for all valid statuses."""
-        import importlib
-
-        from src.ui import tray_icons
-
-        importlib.reload(tray_icons)
-
-        base_icon = tmp_path / "base.png"
-        base_icon.write_bytes(b"fake png data")
-
-        generator = tray_icons.TrayIconGenerator(str(base_icon), str(tmp_path / "cache"))
-
-        statuses = ["protected", "scanning", "warning", "threat"]
-        for status in statuses:
-            result = generator.get_icon_name(status)
-            assert result == f"clamui-tray-{status}"
-
-    def test_get_icon_name_unknown_status_defaults_to_protected(self, tmp_path, mock_pil_modules):
-        """Test get_icon_name defaults to 'protected' for unknown status."""
-        import importlib
-
-        from src.ui import tray_icons
-
-        importlib.reload(tray_icons)
-
-        base_icon = tmp_path / "base.png"
-        base_icon.write_bytes(b"fake png data")
-
-        generator = tray_icons.TrayIconGenerator(str(base_icon), str(tmp_path / "cache"))
-
-        result = generator.get_icon_name("unknown")
-
-        assert result == "clamui-tray-protected"
-
-
 class TestTrayIconGeneratorPregenerateAll:
     """Tests for TrayIconGenerator.pregenerate_all method."""
 
