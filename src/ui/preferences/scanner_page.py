@@ -27,7 +27,6 @@ except (TypeError, AttributeError):
 from ...core.clamav_config import megabytes_to_size_value, size_value_to_megabytes
 from ...core.clamav_detection import detect_clamd_conf_path
 from ...core.flatpak import (
-    format_flatpak_portal_path,
     get_clean_env,
     is_flatpak,
     is_portal_path,
@@ -107,6 +106,7 @@ class ScannerPage(PreferencesPageMixin):
             widgets_dict,
             settings_manager,
             temp_instance,
+            parent_window,
             config_path=config_path,
         )
 
@@ -114,15 +114,15 @@ class ScannerPage(PreferencesPageMixin):
         def _on_detect_clamd():
             detected = detect_clamd_conf_path()
             if detected:
-                path_row.set_subtitle(detected)
-                parent_window._clamd_conf_path = detected
-                parent_window._clamd_available = True
-                sm = getattr(parent_window, "_settings_manager", None)
-                if sm:
-                    sm.set("clamd_conf_path", detected)
-                parent_window._reload_clamd_config()
-                toast = Adw.Toast.new(_("Detected: {path}").format(path=detected))
-                parent_window.add_toast(toast)
+                ScannerPage._apply_config_selection(
+                    parent_window,
+                    path_row,
+                    "clamd_conf_path",
+                    "_clamd_conf_path",
+                    detected,
+                    detected,
+                    _("Detected: {path}").format(path=detected),
+                )
             else:
                 toast = Adw.Toast.new(_("No clamd.conf found in known locations"))
                 parent_window.add_toast(toast)
@@ -186,23 +186,25 @@ class ScannerPage(PreferencesPageMixin):
                 display_path = file_path
                 if is_flatpak() and is_portal_path(file_path):
                     resolved = resolve_portal_path(file_path)
-                    if resolved:
-                        stored_path = resolved
-                        display_path = resolved
-                    else:
-                        display_path = format_flatpak_portal_path(file_path)
+                    if not resolved:
+                        parent_window.add_toast(
+                            Adw.Toast.new(
+                                _("Selected configuration file is not accessible from the host")
+                            )
+                        )
+                        return
+                    stored_path = resolved
+                    display_path = resolved
 
-                path_row.set_subtitle(display_path)
-                setattr(parent_window, attr_name, stored_path)
-                if attr_name == "_clamd_conf_path":
-                    parent_window._clamd_available = True
-                sm = getattr(parent_window, "_settings_manager", None)
-                if sm:
-                    sm.set(settings_key, stored_path)
-                if attr_name == "_clamd_conf_path":
-                    parent_window._reload_clamd_config()
-                toast = Adw.Toast.new(_("Selected: {path}").format(path=display_path))
-                parent_window.add_toast(toast)
+                ScannerPage._apply_config_selection(
+                    parent_window,
+                    path_row,
+                    settings_key,
+                    attr_name,
+                    stored_path,
+                    display_path,
+                    _("Selected: {path}").format(path=display_path),
+                )
 
         # In Flatpak, /etc doesn't exist inside the sandbox.
         # The file chooser portal presents the host filesystem, but
@@ -251,11 +253,37 @@ class ScannerPage(PreferencesPageMixin):
             dialog.show()
 
     @staticmethod
+    def _apply_config_selection(
+        parent_window,
+        path_row,
+        settings_key,
+        attr_name,
+        stored_path,
+        display_path,
+        success_message,
+    ):
+        """Persist a configuration path before exposing it in the UI."""
+        settings_manager = getattr(parent_window, "_settings_manager", None)
+        if settings_manager and not settings_manager.set(settings_key, stored_path):
+            toast = Adw.Toast.new(_("Failed to save configuration file selection"))
+            parent_window.add_toast(toast)
+            return False
+
+        path_row.set_subtitle(display_path)
+        setattr(parent_window, attr_name, stored_path)
+        if attr_name == "_clamd_conf_path":
+            parent_window._clamd_available = True
+            parent_window._reload_clamd_config()
+        parent_window.add_toast(Adw.Toast.new(success_message))
+        return True
+
+    @staticmethod
     def _create_scan_backend_group(
         page: Adw.PreferencesPage,
         widgets_dict: dict,
         settings_manager,
         helper,
+        parent_window,
         config_path: str | None = None,
     ):
         """
@@ -277,6 +305,7 @@ class ScannerPage(PreferencesPageMixin):
             widgets_dict: Dictionary to store widget references
             settings_manager: SettingsManager for auto-saving backend selection
             helper: Helper instance with _create_permission_indicator method
+            parent_window: Preferences window that displays save-failure toasts
             config_path: Resolved clamd.conf path for daemon reachability checks
         """
         group = Adw.PreferencesGroup()
@@ -309,10 +338,12 @@ class ScannerPage(PreferencesPageMixin):
         # Set initial subtitle based on current selection
         ScannerPage._update_backend_subtitle(backend_row, backend_map.get(current_backend, 0))
 
-        # Connect to selection changes - pass settings_manager in lambda
+        # Connect to selection changes - pass persistence context in lambda
         backend_row.connect(
             "notify::selected",
-            lambda row, pspec: ScannerPage._on_backend_changed(row, settings_manager),
+            lambda row, pspec: ScannerPage._on_backend_changed(
+                row, settings_manager, parent_window
+            ),
         )
 
         widgets_dict["backend_row"] = backend_row
@@ -389,7 +420,7 @@ class ScannerPage(PreferencesPageMixin):
         row.set_subtitle(subtitles.get(selected, subtitles[0]))
 
     @staticmethod
-    def _on_backend_changed(row: Adw.ComboRow, settings_manager):
+    def _on_backend_changed(row: Adw.ComboRow, settings_manager, parent_window):
         """
         Handle scan backend selection change.
 
@@ -398,14 +429,28 @@ class ScannerPage(PreferencesPageMixin):
         Args:
             row: The ComboRow that changed
             settings_manager: SettingsManager to save the selection
+            parent_window: Preferences window that displays save-failure toasts
         """
+        if getattr(row, "_scanner_backend_restoring", False) is True:
+            return
+
         backend_reverse_map = {0: "auto", 1: "daemon", 2: "clamscan"}
+        backend_map = {"auto": 0, "daemon": 1, "clamscan": 2}
         selected = row.get_selected()
         backend = backend_reverse_map.get(selected, "auto")
-        settings_manager.set("scan_backend", backend)
+        if settings_manager.set("scan_backend", backend):
+            ScannerPage._update_backend_subtitle(row, selected)
+            return
 
-        # Update subtitle to reflect the selected backend's characteristics
-        ScannerPage._update_backend_subtitle(row, selected)
+        persisted_backend = settings_manager.get("scan_backend", "auto")
+        persisted_selection = backend_map.get(persisted_backend, 0)
+        row._scanner_backend_restoring = True
+        try:
+            row.set_selected(persisted_selection)
+        finally:
+            row._scanner_backend_restoring = False
+        ScannerPage._update_backend_subtitle(row, persisted_selection)
+        parent_window.add_toast(Adw.Toast.new(_("Failed to save scan backend selection")))
 
     @staticmethod
     def _check_daemon_status_background(

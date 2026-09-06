@@ -183,7 +183,7 @@ graph TB
 - Standalone Python script that runs in separate process
 - Implements StatusNotifierItem (SNI) D-Bus protocol using GIO's D-Bus API
 - Creates context menu using `Dbusmenu.Server` (libdbusmenu-glib)
-- Exposes both icon names and IconPixmap fallback data for stricter tray hosts
+- Publishes generated custom status icons pixmap-first: when generated PNGs are available, `IconName` and `AttentionIconName` are empty while `IconPixmap` and `AttentionIconPixmap` carry the images. This avoids host-side icon lookup failures across sandbox boundaries (issue #205); themed names remain the fallback when custom generation is unavailable.
 - Runs background thread to read stdin for commands
 - Uses `GLib.idle_add()` to schedule updates on GLib main loop
 - Sends JSON events to stdout
@@ -199,8 +199,8 @@ graph TB
 #### Tray Icon States (`src/ui/tray_icons.py`)
 
 `TrayIconGenerator` composites the ClamUI base logo (22×22) with a small (10 px) colored status badge in the
-bottom-right corner, caching PNGs under `$XDG_CACHE_HOME/clamui/tray-icons/`. There are four states (`OVERLAY_COLORS`),
-matching the `status` values accepted by `update_status`:
+bottom-right corner, caching PNGs under `$XDG_DATA_HOME/icons/hicolor/22x22/apps/`. There are four states
+(`OVERLAY_COLORS`), matching the `status` values accepted by `update_status`:
 
 | Status      | Badge color    | Theme-icon fallback (`ICON_MAP`) | SNI status       |
 |-------------|----------------|----------------------------------|------------------|
@@ -209,8 +209,10 @@ matching the `status` values accepted by `update_status`:
 | `warning`   | yellow/amber   | `dialog-warning-symbolic`        | `NeedsAttention` |
 | `threat`    | red            | `dialog-error-symbolic`          | `NeedsAttention` |
 
-`get_icon_name(status)` returns `clamui-tray-<status>`; when Pillow (and the base icon) are unavailable the service
-falls back to the themed `ICON_MAP` names (defined in `tray_service.py`). There is no "paused" state.
+When custom generation is active, generated PNGs are published through `IconPixmap` and `AttentionIconPixmap`, and
+the corresponding SNI icon-name properties are empty. This pixmap-first boundary prevents sandboxed hosts from trying
+and failing to resolve generated names (issue #205). When custom generation is unavailable, ClamUI instead publishes
+the standard themed `ICON_MAP` names. There is no "paused" state.
 
 ## Threading Model
 
@@ -540,6 +542,11 @@ def handle_command(self, command: dict) -> None:
     - GNOME: Requires extension (e.g., AppIndicator support)
 3. Check subprocess logs in application output with `CLAMUI_DEBUG=1`
 4. Verify D-Bus session bus is running
+
+### GNOME/AppIndicator Placeholder Icon
+
+Current ClamUI automatically uses `IconPixmap` for generated custom icons, avoiding the AppIndicator placeholder caused
+by host-side name lookup across sandbox boundaries (issue #205). No user override is required.
 
 ### Commands Not Working
 

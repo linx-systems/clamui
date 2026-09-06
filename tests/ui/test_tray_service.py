@@ -398,18 +398,6 @@ class TestHelperMethods:
         result = tray_service._get_icon_name()
         assert result == tray_service_class.ICON_MAP["protected"]
 
-    def test_get_icon_name_with_custom_icons(self, tray_service):
-        """Test _get_icon_name with custom icon generator."""
-        mock_generator = mock.MagicMock()
-        mock_generator.get_icon_name.return_value = "clamui-tray-protected"
-
-        tray_service._using_custom_icons = True
-        tray_service._icon_generator = mock_generator
-        tray_service._current_status = "protected"
-
-        result = tray_service._get_icon_name()
-        assert result == "clamui-tray-protected"
-
     def test_get_tooltip_shows_status(self, tray_service):
         """Test _get_tooltip includes status information."""
         tray_service._current_status = "protected"
@@ -535,6 +523,51 @@ class TestSNIProtocol:
         """Test IconPixmap property returns a non-None result."""
         result = self._get_prop(tray_service, "IconPixmap")
         assert result is not None
+
+    def test_custom_protected_icon_name_is_empty_while_generated_pixmap_is_published(
+        self, tray_service
+    ):
+        """Custom protected icons use IconPixmap instead of a theme icon name."""
+        generated_pixmap = ("a(iiay)", [(1, 1, b"\xff\x01\x02\x03")])
+        tray_service._using_custom_icons = True
+        tray_service._icon_generator = mock.MagicMock()
+        tray_service._icon_generator.get_icon_path.return_value = "/tmp/clamui-tray-protected.png"
+        tray_service._load_icon_pixmap = mock.MagicMock(return_value=generated_pixmap)
+
+        with mock.patch(
+            "src.ui.tray_service.GLib.Variant",
+            side_effect=lambda signature, value: (signature, value),
+        ):
+            icon_name = self._get_prop(tray_service, "IconName")
+            icon_pixmap = self._get_prop(tray_service, "IconPixmap")
+
+        assert icon_name == ("s", "")
+        assert icon_pixmap == generated_pixmap
+        tray_service._icon_generator.get_icon_path.assert_called_once_with("protected")
+        tray_service._load_icon_pixmap.assert_called_once_with("/tmp/clamui-tray-protected.png")
+
+    def test_custom_threat_attention_name_is_empty_while_generated_pixmap_is_published(
+        self, tray_service
+    ):
+        """Custom threat icons use AttentionIconPixmap instead of a theme icon name."""
+        generated_pixmap = ("a(iiay)", [(1, 1, b"\xff\x01\x02\x03")])
+        tray_service._current_status = "threat"
+        tray_service._using_custom_icons = True
+        tray_service._icon_generator = mock.MagicMock()
+        tray_service._icon_generator.get_icon_path.return_value = "/tmp/clamui-tray-threat.png"
+        tray_service._load_icon_pixmap = mock.MagicMock(return_value=generated_pixmap)
+
+        with mock.patch(
+            "src.ui.tray_service.GLib.Variant",
+            side_effect=lambda signature, value: (signature, value),
+        ):
+            attention_icon_name = self._get_prop(tray_service, "AttentionIconName")
+            attention_icon_pixmap = self._get_prop(tray_service, "AttentionIconPixmap")
+
+        assert attention_icon_name == ("s", "")
+        assert attention_icon_pixmap == generated_pixmap
+        tray_service._icon_generator.get_icon_path.assert_called_once_with("threat")
+        tray_service._load_icon_pixmap.assert_called_once_with("/tmp/clamui-tray-threat.png")
 
     def test_get_property_window_id_returns_variant(self, tray_service):
         """Test WindowId property returns a non-None result."""
@@ -1143,26 +1176,6 @@ class TestIconPixmap:
 
 class TestAttentionIcon:
     """Tests for the AttentionIcon mirroring the branded status icon."""
-
-    def test_attention_icon_name_uses_custom_icon_for_threat(self, tray_service):
-        """When status=threat with custom icons, AttentionIconName mirrors the custom name."""
-        tray_service._current_status = "threat"
-        tray_service._using_custom_icons = True
-        tray_service._icon_generator = mock.MagicMock()
-        tray_service._icon_generator.get_icon_name.return_value = "clamui-tray-threat"
-
-        assert tray_service._get_attention_icon_name() == "clamui-tray-threat"
-        tray_service._icon_generator.get_icon_name.assert_called_with("threat")
-
-    def test_attention_icon_name_uses_custom_icon_for_warning(self, tray_service):
-        """When status=warning with custom icons, AttentionIconName uses warning icon, not threat."""
-        tray_service._current_status = "warning"
-        tray_service._using_custom_icons = True
-        tray_service._icon_generator = mock.MagicMock()
-        tray_service._icon_generator.get_icon_name.return_value = "clamui-tray-warning"
-
-        assert tray_service._get_attention_icon_name() == "clamui-tray-warning"
-        tray_service._icon_generator.get_icon_name.assert_called_with("warning")
 
     def test_attention_icon_name_falls_back_to_threat_theme_icon(self, tray_service):
         """Without custom icons, AttentionIconName uses the threat theme icon."""

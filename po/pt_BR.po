@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-08-05 12:49+0200\n"
+"POT-Creation-Date: 2026-08-12 13:12+0200\n"
 "PO-Revision-Date: 2026-08-09 00:00-0300\n"
 "Last-Translator: ClamUI Contributors\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
@@ -34,7 +34,9 @@ msgstr "Selecione arquivo ou pasta"
 
 #: src/app.py:894
 msgid "A scan is already running — the new scan request was ignored"
-msgstr "Uma verificação já está em execução — a nova solicitação de verificação foi ignorada"
+msgstr ""
+"Uma verificação já está em execução — a nova solicitação de verificação foi "
+"ignorada"
 
 #: src/app.py:915
 #, python-brace-format
@@ -44,8 +46,12 @@ msgid ""
 msgid_plural ""
 "VirusTotal scans one file per request — {count} additional selections were "
 "ignored"
-msgstr[0] "O VirusTotal verifica um arquivo por solicitação — {count} seleção adicional foi ignorada"
-msgstr[1] "O VirusTotal verifica um arquivo por solicitação — {count} seleções adicionais foram ignoradas"
+msgstr[0] ""
+"O VirusTotal verifica um arquivo por solicitação — {count} seleção adicional "
+"foi ignorada"
+msgstr[1] ""
+"O VirusTotal verifica um arquivo por solicitação — {count} seleções "
+"adicionais foram ignoradas"
 
 #: src/cli/help_cmd.py:23 src/cli/scan_cmd.py:34
 msgid "Scan files or directories for threats"
@@ -70,7 +76,9 @@ msgstr "Ver histórico de verificação"
 #: src/cli/help_cmd.py:66
 msgid ""
 "Install the polkit helper for saving system ClamAV configs (native host only)"
-msgstr "Instale o auxiliar polkit para salvar as configurações do ClamAV do sistema (somente host nativo)"
+msgstr ""
+"Instale o auxiliar polkit para salvar as configurações do ClamAV do sistema "
+"(somente host nativo)"
 
 #: src/cli/help_cmd.py:73
 msgid "Show this help message"
@@ -83,7 +91,9 @@ msgstr "Mostrar ajuda detalhada e exemplos de uso"
 #: src/cli/help_cmd.py:87
 msgid ""
 "Display an overview of all commands or detailed help for a specific one."
-msgstr "Exiba uma visão geral de todos os comandos ou ajuda detalhada para um comando específico."
+msgstr ""
+"Exiba uma visão geral de todos os comandos ou ajuda detalhada para um "
+"comando específico."
 
 #: src/cli/help_cmd.py:93
 msgid "Command to show help for"
@@ -113,7 +123,9 @@ msgstr "Comandos:"
 msgid ""
 "\n"
 "Global options:"
-msgstr "\nOpções globais:"
+msgstr ""
+"\n"
+"Opções globais:"
 
 #: src/cli/help_cmd.py:113
 msgid "  --json                   Machine-readable JSON output"
@@ -154,65 +166,82 @@ msgstr "Exemplos:"
 msgid ""
 "\n"
 "Run 'clamui {name} --help' for full option reference."
-msgstr "\nExecute 'clamui {name} --help' para referência completa das opções."
+msgstr ""
+"\n"
+"Execute 'clamui {name} --help' para referência completa das opções."
 
-#: src/cli/install_helper.py:174 src/cli/install_helper.py:176
+#: src/cli/install_helper.py:177 src/cli/install_helper.py:179
 #, python-brace-format
 msgid "Refusing to install into an unsafe directory: {path}"
 msgstr "Recusando-se a instalar em um diretório inseguro: {path}"
 
-#: src/cli/install_helper.py:195
+#: src/cli/install_helper.py:198
 #, python-brace-format
 msgid "Required source file not found: {path}"
 msgstr "Arquivo de origem necessário não encontrado: {path}"
 
-#: src/cli/install_helper.py:205
+#: src/cli/install_helper.py:208
 msgid "Unexpected relative import remains in the helper source; aborting."
-msgstr "A importação relativa inesperada permanece na origem auxiliar; abortando."
+msgstr ""
+"A importação relativa inesperada permanece na origem auxiliar; abortando."
 
-#: src/cli/install_helper.py:241
+#: src/cli/install_helper.py:244
 #, python-brace-format
 msgid "Failed to install privileged helper: {error}"
 msgstr "Falha ao instalar o auxiliar privilegiado: {error}"
 
-#: src/cli/install_helper.py:246
+#: src/cli/install_helper.py:249
 #, python-brace-format
 msgid ""
 "Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
 "system ClamAV configuration from ClamUI should now work."
-msgstr "Auxiliar privilegiado instalado em {bin} e política polkit em {policy}. Salvar a configuração do sistema ClamAV do ClamUI agora deve funcionar."
+msgstr ""
+"Auxiliar privilegiado instalado em {bin} e política polkit em {policy}. "
+"Salvar a configuração do sistema ClamAV do ClamUI agora deve funcionar."
 
-#: src/cli/install_helper.py:262
+#: src/cli/install_helper.py:265
 msgid ""
 "ClamUI is running inside a Flatpak sandbox, which cannot install files on "
 "the host. Install the matching clamui-privileged-helper package on the host "
 "system instead."
-msgstr "ClamUI está sendo executado dentro de uma sandbox Flatpak, que não pode instalar arquivos no host. Em vez disso, instale o pacote clamui-privileged-helper correspondente no sistema host."
+msgstr ""
+"ClamUI está sendo executado dentro de uma sandbox Flatpak, que não pode "
+"instalar arquivos no host. Em vez disso, instale o pacote clamui-privileged-"
+"helper correspondente no sistema host."
 
-#: src/cli/install_helper.py:274
+#: src/cli/install_helper.py:277
 msgid ""
 "This command installs files under /usr and /usr/share and must be run as "
 "root. Try: sudo clamui install-privileged-helper"
-msgstr "Este comando instala arquivos em /usr e /usr/share e deve ser executado como root. Experimente: sudo clamui install-privileged-helper"
+msgstr ""
+"Este comando instala arquivos em /usr e /usr/share e deve ser executado como "
+"root. Experimente: sudo clamui install-privileged-helper"
 
-#: src/cli/install_helper.py:286 src/core/result_formatters.py:167
+#: src/cli/install_helper.py:289 src/core/result_formatters.py:167
 #: src/ui/update_view.py:682
 #, python-brace-format
 msgid "Error: {message}"
 msgstr "Erro: {message}"
 
-#: src/cli/install_helper.py:294
+#: src/cli/install_helper.py:297
 msgid "Install the privileged config helper and polkit policy (run with sudo)"
-msgstr "Instale o auxiliar de configuração privilegiado e a política polkit (execute com sudo)"
+msgstr ""
+"Instale o auxiliar de configuração privilegiado e a política polkit (execute "
+"com sudo)"
 
-#: src/cli/install_helper.py:296
+#: src/cli/install_helper.py:299
 msgid ""
 "Install /usr/bin/clamui-apply-preferences and its polkit policy so ClamUI "
 "can save system ClamAV configuration. Run as root (sudo). Needed for "
 "AppImage and pip installs; the Debian package installs these automatically. "
 "Under Flatpak, the matching clamui-privileged-helper package must be "
 "installed on the host instead."
-msgstr "Instale /usr/bin/clamui-apply-preferences e sua política polkit para que o ClamUI possa salvar a configuração do sistema ClamAV. Execute como root (sudo). Necessário para instalações de AppImage e pip; o pacote Debian os instala automaticamente. No Flatpak, o pacote clamui-privileged-helper correspondente deve ser instalado no host."
+msgstr ""
+"Instale /usr/bin/clamui-apply-preferences e sua política polkit para que o "
+"ClamUI possa salvar a configuração do sistema ClamAV. Execute como root "
+"(sudo). Necessário para instalações de AppImage e pip; o pacote Debian os "
+"instala automaticamente. No Flatpak, o pacote clamui-privileged-helper "
+"correspondente deve ser instalado no host."
 
 #: src/cli/history_cmd.py:26 src/cli/history_cmd.py:28
 msgid "--limit must be a positive integer"
@@ -267,7 +296,9 @@ msgstr "Resumo"
 msgid ""
 "\n"
 "Showing {shown} of {total} entries. Use --limit to see more."
-msgstr "\nMostrando {shown} de {total} entradas. Use --limit para ver mais."
+msgstr ""
+"\n"
+"Mostrando {shown} de {total} entradas. Use --limit para ver mais."
 
 #: src/cli/profile_cmd.py:28
 msgid "List, view, export, or import scan profiles."
@@ -343,7 +374,9 @@ msgstr "não"
 msgid ""
 "\n"
 "{count} profile(s)"
-msgstr "\n{count} perfis"
+msgstr ""
+"\n"
+"{count} perfis"
 
 #: src/cli/profile_cmd.py:122 src/cli/profile_cmd.py:176
 #: src/cli/scan_cmd.py:114
@@ -385,7 +418,9 @@ msgstr "Atualizado:     {date}"
 msgid ""
 "\n"
 "Targets:"
-msgstr "\nAlvos:"
+msgstr ""
+"\n"
+"Alvos:"
 
 #: src/cli/profile_cmd.py:143
 msgid "  (none)"
@@ -395,7 +430,9 @@ msgstr "  (nenhum)"
 msgid ""
 "\n"
 "Exclusions:"
-msgstr "\nExclusões:"
+msgstr ""
+"\n"
+"Exclusões:"
 
 #: src/cli/profile_cmd.py:150
 #, python-brace-format
@@ -411,7 +448,9 @@ msgstr "  padrão: {pattern}"
 msgid ""
 "\n"
 "Options:"
-msgstr "\nOpções:"
+msgstr ""
+"\n"
+"Opções:"
 
 #: src/cli/profile_cmd.py:181
 #, python-brace-format
@@ -468,7 +507,9 @@ msgstr "Tamanho"
 msgid ""
 "\n"
 "{count} entry/entries ({size} total)"
-msgstr "\n{count} entrada/entradas ({size} total)"
+msgstr ""
+"\n"
+"{count} entrada/entradas ({size} total)"
 
 #: src/cli/quarantine_cmd.py:115 src/cli/quarantine_cmd.py:141
 #: src/core/quarantine/manager.py:306 src/core/quarantine/manager.py:419
@@ -505,7 +546,10 @@ msgstr "ClamUI — gerenciamento de antivírus ClamAV"
 msgid ""
 "Run 'clamui <command> --help' for details on a specific command.\n"
 "Run 'clamui' without arguments to launch the graphical interface."
-msgstr "Execute 'clamui <command> --help' para obter detalhes sobre um comando específico.\nExecute 'clamui' sem argumentos para iniciar a interface gráfica."
+msgstr ""
+"Execute 'clamui <command> --help' para obter detalhes sobre um comando "
+"específico.\n"
+"Execute 'clamui' sem argumentos para iniciar a interface gráfica."
 
 #: src/cli/router.py:58
 msgid "commands"
@@ -515,7 +559,9 @@ msgstr "comandos"
 msgid ""
 "Scan one or more files or directories with ClamAV.\n"
 "Exit codes: 0 = clean, 1 = threats found, 2 = error."
-msgstr "Digitalize um ou mais arquivos ou diretórios com ClamAV.\nCódigos de saída: 0 = limpo, 1 = ameaças encontradas, 2 = erro."
+msgstr ""
+"Digitalize um ou mais arquivos ou diretórios com ClamAV.\n"
+"Códigos de saída: 0 = limpo, 1 = ameaças encontradas, 2 = erro."
 
 #: src/cli/scan_cmd.py:45
 msgid "Files or directories to scan"
@@ -567,26 +613,34 @@ msgstr "Digitalizado {count} arquivos em {duration:.1f}é"
 msgid ""
 "\n"
 "Threats found: {count}"
-msgstr "\nAmeaças encontradas: {count}"
+msgstr ""
+"\n"
+"Ameaças encontradas: {count}"
 
 #: src/cli/scan_cmd.py:239
 #, python-brace-format
 msgid ""
 "\n"
 "Quarantined: {count} file(s)"
-msgstr "\nQuarentena: {count} arquivo(s)"
+msgstr ""
+"\n"
+"Quarentena: {count} arquivo(s)"
 
 #: src/cli/scan_cmd.py:241
 msgid ""
 "\n"
 "Failed to quarantine:"
-msgstr "\nFalha na quarentena:"
+msgstr ""
+"\n"
+"Falha na quarentena:"
 
 #: src/cli/scan_cmd.py:245
 msgid ""
 "\n"
 "Scan completed with errors:"
-msgstr "\nVerificação concluída com erros:"
+msgstr ""
+"\n"
+"Verificação concluída com erros:"
 
 #: src/cli/scan_cmd.py:250
 msgid "No threats found."
@@ -619,7 +673,14 @@ msgid ""
 "  %(prog)s --target /home/user/Documents      # Scan specific directory\n"
 "  %(prog)s --skip-on-battery --auto-quarantine # Skip on battery, quarantine "
 "threats\n"
-msgstr "\nExemplos:\n  %(prog)s                                    #Use as configurações do config\n  %(prog)s --target /home/user/Documents # Verifica o diretório específico\n  %(prog)s --skip-on-battery --auto-quarantine # Pular bateria, ameaças de quarentena\n"
+msgstr ""
+"\n"
+"Exemplos:\n"
+"  %(prog)s                                    #Use as configurações do "
+"config\n"
+"  %(prog)s --target /home/user/Documents # Verifica o diretório específico\n"
+"  %(prog)s --skip-on-battery --auto-quarantine # Pular bateria, ameaças de "
+"quarentena\n"
 
 #: src/cli/scheduled_scan.py:120
 msgid "Skip scan if running on battery power"
@@ -640,7 +701,8 @@ msgstr "Verificando o status da bateria..."
 #: src/cli/scheduled_scan.py:236
 #, python-brace-format
 msgid "Skipping scan: running on battery power ({percent:.0f}%)"
-msgstr "Ignorando a verificação: funcionando com energia da bateria ({percent:.0f}%)"
+msgstr ""
+"Ignorando a verificação: funcionando com energia da bateria ({percent:.0f}%)"
 
 #: src/cli/scheduled_scan.py:243
 msgid "Scheduled scan skipped (on battery power)"
@@ -651,7 +713,10 @@ msgstr "Verificação agendada ignorada (com bateria)"
 msgid ""
 "Battery level: {percent:.0f}%\n"
 "Scan skipped due to battery-aware settings."
-msgstr "Nível da bateria: {percent:.0f}%\nA verificação foi ignorada devido a configurações de reconhecimento de bateria."
+msgstr ""
+"Nível da bateria: {percent:.0f}%\n"
+"A verificação foi ignorada devido a configurações de reconhecimento de "
+"bateria."
 
 #: src/cli/scheduled_scan.py:267
 msgid "Error: No scan targets specified"
@@ -749,7 +814,9 @@ msgstr "  Falha na quarentena: {count} arquivo(s)"
 #: src/cli/scheduled_scan.py:467
 #, python-brace-format
 msgid "Scheduled scan found {infected} threat(s), {quarantined} quarantined"
-msgstr "Verificação agendada encontrada {infected} ameaça(s), {quarantined} em quarentena"
+msgstr ""
+"Verificação agendada encontrada {infected} ameaça(s), {quarantined} em "
+"quarentena"
 
 #: src/cli/scheduled_scan.py:473
 #, python-brace-format
@@ -763,7 +830,8 @@ msgstr "Verificação agendada concluída com erros"
 #: src/cli/scheduled_scan.py:479
 #, python-brace-format
 msgid "Scheduled scan completed - {count} files scanned, no threats"
-msgstr "Verificação agendada concluída - {count} arquivos verificados, sem ameaças"
+msgstr ""
+"Verificação agendada concluída - {count} arquivos verificados, sem ameaças"
 
 #: src/cli/scheduled_scan.py:502
 #, python-brace-format
@@ -812,7 +880,8 @@ msgstr "Erros ({target})"
 #: src/cli/scheduled_scan.py:584 src/core/notification_manager.py:180
 #, python-brace-format
 msgid "{infected} infected file(s) found, {quarantined} quarantined"
-msgstr "{infected} arquivo(s) infectado(s) encontrado(s), {quarantined} em quarentena"
+msgstr ""
+"{infected} arquivo(s) infectado(s) encontrado(s), {quarantined} em quarentena"
 
 #: src/cli/scheduled_scan.py:589
 #, python-brace-format
@@ -829,7 +898,9 @@ msgstr "Verificação agendada concluída"
 
 #: src/cli/scheduled_scan.py:594
 msgid "Scan completed with some errors. Check logs for details."
-msgstr "Verificação concluída com alguns erros. Verifique os registros para obter detalhes."
+msgstr ""
+"Verificação concluída com alguns erros. Verifique os registros para obter "
+"detalhes."
 
 #: src/cli/scheduled_scan.py:599 src/core/notification_manager.py:167
 msgid "Scheduled Scan Complete"
@@ -885,7 +956,9 @@ msgstr "  Demônio:   {status}"
 msgid ""
 "\n"
 "Quarantine"
-msgstr "\nQuarentena"
+msgstr ""
+"\n"
+"Quarentena"
 
 #: src/cli/status_cmd.py:134 src/cli/status_cmd.py:138
 #, python-brace-format
@@ -901,7 +974,9 @@ msgstr "  Tamanho:     {size}"
 msgid ""
 "\n"
 "Scan History"
-msgstr "\nHistórico de verificação"
+msgstr ""
+"\n"
+"Histórico de verificação"
 
 #: src/notification_dispatcher.py:29
 #, python-brace-format
@@ -949,7 +1024,9 @@ msgstr "Ameaça em quarentena"
 msgid ""
 "Removed and quarantined: {threat}\n"
 "Location: {path}"
-msgstr "Removido e colocado em quarentena: {threat}\nLocalização: {path}"
+msgstr ""
+"Removido e colocado em quarentena: {threat}\n"
+"Localização: {path}"
 
 #: src/notification_dispatcher.py:66
 #, python-brace-format
@@ -987,25 +1064,41 @@ msgid ""
 "install ./clamui-privileged-helper_<version>_all.deb' (use the same version "
 "as the Flatpak). 'sudo flatpak run ... install-privileged-helper' is not "
 "supported: the sandbox /usr is not the host /usr."
-msgstr "Auxiliar privilegiado ClamUI não instalado no host. A sandbox Flatpak não pode gravar arquivos de configuração do sistema ClamAV, como /etc/clamav/*.conf diretamente. Baixe o 'clamui-privileged-helper_<version>_all.deb' correspondente na página de lançamentos do ClamUI e instale-o no host com 'sudo apt install ./clamui-privileged-helper_<version>_all.deb' (use a mesma versão do Flatpak). 'sudo flatpak run ... install-privileged-helper' não é suportado: o sandbox /usr não é o host /usr."
+msgstr ""
+"Auxiliar privilegiado ClamUI não instalado no host. A sandbox Flatpak não "
+"pode gravar arquivos de configuração do sistema ClamAV, como /etc/clamav/*."
+"conf diretamente. Baixe o 'clamui-privileged-helper_<version>_all.deb' "
+"correspondente na página de lançamentos do ClamUI e instale-o no host com "
+"'sudo apt install ./clamui-privileged-helper_<version>_all.deb' (use a mesma "
+"versão do Flatpak). 'sudo flatpak run ... install-privileged-helper' não é "
+"suportado: o sandbox /usr não é o host /usr."
 
 #: src/core/clamav_config.py:1168
 msgid ""
 "ClamUI privileged helper not installed. Run 'sudo clamui install-privileged-"
 "helper' on this host to install it and enable saving system ClamAV "
 "configuration."
-msgstr "Auxiliar privilegiado ClamUI não instalado. Execute 'sudo clamui install-privileged-helper' neste host para instalá-lo e permitir o salvamento da configuração do sistema ClamAV."
+msgstr ""
+"Auxiliar privilegiado ClamUI não instalado. Execute 'sudo clamui install-"
+"privileged-helper' neste host para instalá-lo e permitir o salvamento da "
+"configuração do sistema ClamAV."
 
 #: src/core/clamav_config.py:1213
 msgid ""
 "The staging directory is not reachable by the privileged helper running on "
 "the host, so preferences cannot be applied from the Flatpak sandbox. A host-"
 "side ClamUI install is required to change system configuration."
-msgstr "O diretório temporário não pode ser acessado pelo auxiliar privilegiado em execução no host, portanto, as preferências não podem ser aplicadas na sandbox Flatpak. Uma instalação do ClamUI no host é necessária para alterar a configuração do sistema."
+msgstr ""
+"O diretório temporário não pode ser acessado pelo auxiliar privilegiado em "
+"execução no host, portanto, as preferências não podem ser aplicadas na "
+"sandbox Flatpak. Uma instalação do ClamUI no host é necessária para alterar "
+"a configuração do sistema."
 
 #: src/core/clamav_config.py:1227
 msgid "Authentication was canceled. Configuration changes were not applied."
-msgstr "A autenticação foi cancelada. As alterações de configuração não foram aplicadas."
+msgstr ""
+"A autenticação foi cancelada. As alterações de configuração não foram "
+"aplicadas."
 
 #: src/core/clamav_config.py:1233
 msgid ""
@@ -1014,792 +1107,831 @@ msgid ""
 "helper is likely not installed on this system -- install the 'clamui-"
 "privileged-helper' package (which provides clamui-apply-preferences and its "
 "polkit policy) to enable saving system configuration."
-msgstr "Não foi possível obter autorização do administrador para aplicar essas alterações. Se não lhe foi mostrado um prompt de senha, a política de polkit ClamUI ou o auxiliar privilegiado provavelmente não está instalado neste sistema - instale o pacote 'clamui-privileged-helper' (que fornece preferências clamui-apply e sua política polkit) para permitir o salvamento da configuração do sistema."
+msgstr ""
+"Não foi possível obter autorização do administrador para aplicar essas "
+"alterações. Se não lhe foi mostrado um prompt de senha, a política de polkit "
+"ClamUI ou o auxiliar privilegiado provavelmente não está instalado neste "
+"sistema - instale o pacote 'clamui-privileged-helper' (que fornece "
+"preferências clamui-apply e sua política polkit) para permitir o salvamento "
+"da configuração do sistema."
 
 #: src/core/clamav_config.py:1246
 msgid ""
 "Privileged helper rejected the request: missing PKEXEC_UID. The polkit "
 "policy may be misconfigured."
-msgstr "O ajudante privilegiado rejeitou a solicitação: falta PKEXEC_UID. A política do polkit pode estar configurada incorretamente."
+msgstr ""
+"O ajudante privilegiado rejeitou a solicitação: falta PKEXEC_UID. A política "
+"do polkit pode estar configurada incorretamente."
 
 #: src/core/clamav_config.py:1254
 msgid ""
 "Privileged helper rejected the request: protocol mismatch. Update the "
 "'clamui-privileged-helper' package on the host."
-msgstr "Ajudante privilegiado rejeitou a solicitação: incompatibilidade de protocolo. Atualize o pacote 'clamui-privileged-helper' no host."
+msgstr ""
+"Ajudante privilegiado rejeitou a solicitação: incompatibilidade de "
+"protocolo. Atualize o pacote 'clamui-privileged-helper' no host."
 
 #: src/core/clamav_config.py:1268
 #, python-brace-format
 msgid ""
 "Configuration was applied, but ClamUI could not remove the staged copy at "
 "{path}: {error}. Verify that this directory is removed."
-msgstr "A configuração foi aplicada, mas o ClamUI não conseguiu remover a cópia preparada em {path}: {error}. Verifique se este diretório foi removido."
+msgstr ""
+"A configuração foi aplicada, mas o ClamUI não conseguiu remover a cópia "
+"preparada em {path}: {error}. Verifique se este diretório foi removido."
 
-#: src/core/clamav_detection.py:76
+#: src/core/clamav_detection.py:66
 msgid ""
-"ClamAV is not installed. Please install it with: sudo apt install clamav"
-msgstr "O ClamAV não está instalado. Instale-o com: sudo apt install clamav"
+"ClamAV is not installed. Install the ClamAV package for your distribution."
+msgstr ""
 
-#: src/core/clamav_detection.py:95
+#: src/core/clamav_detection.py:67
+#, python-brace-format
+msgid "ClamAV is not installed. Please install it with: {command}"
+msgstr ""
+
+#: src/core/clamav_detection.py:75
+msgid ""
+"freshclam is not installed. Install the ClamAV database updater package for "
+"your distribution."
+msgstr ""
+
+#: src/core/clamav_detection.py:78
+#, python-brace-format
+msgid "freshclam is not installed. Please install it with: {command}"
+msgstr ""
+
+#: src/core/clamav_detection.py:88
+msgid ""
+"clamdscan is not installed. Install the ClamAV daemon package for your "
+"distribution."
+msgstr ""
+
+#: src/core/clamav_detection.py:90
+#, python-brace-format
+msgid "clamdscan is not installed. Please install it with: {command}"
+msgstr ""
+
+#: src/core/clamav_detection.py:126
 #, python-brace-format
 msgid "ClamAV found but returned error: {error}"
 msgstr "ClamAV encontrado, mas retornou erro: {error}"
 
-#: src/core/clamav_detection.py:99
+#: src/core/clamav_detection.py:130
 msgid "ClamAV check timed out"
 msgstr "A verificação do ClamAV expirou"
 
-#: src/core/clamav_detection.py:101
+#: src/core/clamav_detection.py:132
 msgid "ClamAV executable not found"
 msgstr "Executável do ClamAV não encontrado"
 
-#: src/core/clamav_detection.py:103
+#: src/core/clamav_detection.py:134
 msgid "Permission denied when accessing ClamAV"
 msgstr "Permissão negada ao acessar o ClamAV"
 
-#: src/core/clamav_detection.py:105
+#: src/core/clamav_detection.py:136
 #, python-brace-format
 msgid "Error checking ClamAV: {error}"
 msgstr "Erro ao verificar o ClamAV: {error}"
 
-#: src/core/clamav_detection.py:124
-msgid ""
-"freshclam is not installed. Please install it with: sudo apt install clamav-"
-"freshclam"
-msgstr "Freshclam não está instalado. Instale-o com: sudo apt install clamav-freshclam"
-
-#: src/core/clamav_detection.py:146
+#: src/core/clamav_detection.py:172
 #, python-brace-format
 msgid "freshclam found but returned error: {error}"
 msgstr "Freshclam encontrado, mas retornou erro: {error}"
 
-#: src/core/clamav_detection.py:152
+#: src/core/clamav_detection.py:178
 msgid "freshclam check timed out"
 msgstr "A verificação do Freshclam expirou"
 
-#: src/core/clamav_detection.py:154 src/core/updater.py:844
+#: src/core/clamav_detection.py:180 src/core/updater.py:844
 msgid "freshclam executable not found"
 msgstr "Executável do Freshclam não encontrado"
 
-#: src/core/clamav_detection.py:156
+#: src/core/clamav_detection.py:182
 msgid "Permission denied when accessing freshclam"
 msgstr "Permissão negada ao acessar o Freshclam"
 
-#: src/core/clamav_detection.py:158
+#: src/core/clamav_detection.py:184
 #, python-brace-format
 msgid "Error checking freshclam: {error}"
 msgstr "Erro ao verificar o Freshclam: {error}"
 
-#: src/core/clamav_detection.py:176 src/core/clamav_detection.py:205
-msgid ""
-"clamdscan is not installed. Please install it with: sudo apt install clamav-"
-"daemon"
-msgstr "clamdscan não está instalado. Instale-o com: sudo apt install clamav-daemon"
-
-#: src/core/clamav_detection.py:197
+#: src/core/clamav_detection.py:220
 #, python-brace-format
 msgid "clamdscan returned error: {error}"
 msgstr "clamdscan retornou erro: {error}"
 
-#: src/core/clamav_detection.py:201
+#: src/core/clamav_detection.py:224
 msgid "clamdscan check timed out"
 msgstr "A verificação do clamdscan expirou"
 
-#: src/core/clamav_detection.py:208
+#: src/core/clamav_detection.py:228
 msgid "Permission denied when accessing clamdscan"
 msgstr "Permissão negada ao acessar o clamdscan"
 
-#: src/core/clamav_detection.py:210
+#: src/core/clamav_detection.py:230
 #, python-brace-format
 msgid "Error checking clamdscan: {error}"
 msgstr "Erro ao verificar o clamdscan: {error}"
 
-#: src/core/clamav_detection.py:298
+#: src/core/clamav_detection.py:318
 msgid "Could not find clamd socket. Is clamav-daemon installed?"
-msgstr "Não foi possível encontrar o soquete clamd. O clamav-daemon está instalado?"
+msgstr ""
+"Não foi possível encontrar o soquete clamd. O clamav-daemon está instalado?"
 
-#: src/core/clamav_detection.py:330
+#: src/core/clamav_detection.py:350
 #, python-brace-format
 msgid ""
 "Daemon socket permission denied. Check LocalSocketMode or LocalSocketGroup "
 "in {path}: {error}"
-msgstr "Permissão de soquete do daemon negada. Verifique LocalSocketMode ou LocalSocketGroup em {path}: {error}"
+msgstr ""
+"Permissão de soquete do daemon negada. Verifique LocalSocketMode ou "
+"LocalSocketGroup em {path}: {error}"
 
-#: src/core/clamav_detection.py:335
+#: src/core/clamav_detection.py:355
 #, python-brace-format
 msgid "Daemon socket permission denied: {error}"
 msgstr "Permissão de soquete do daemon negada: {error}"
 
-#: src/core/clamav_detection.py:337
+#: src/core/clamav_detection.py:357
 #, python-brace-format
 msgid "Daemon not responding: {error}"
 msgstr "Daemon não responde: {error}"
 
-#: src/core/clamav_detection.py:340
+#: src/core/clamav_detection.py:360
 msgid "Connection to clamd timed out"
 msgstr "A conexão com o clamd expirou"
 
-#: src/core/clamav_detection.py:342
+#: src/core/clamav_detection.py:362
 msgid "clamdscan executable not found"
 msgstr "Executável clamdscan não encontrado"
 
-#: src/core/clamav_detection.py:344
+#: src/core/clamav_detection.py:364
 #, python-brace-format
 msgid "Error connecting to clamd: {error}"
 msgstr "Erro ao conectar ao clamd: {error}"
 
-#: src/core/clamav_detection.py:370
+#: src/core/clamav_detection.py:390
 #, python-brace-format
 msgid "Database directory does not exist: {path}"
 msgstr "O diretório do banco de dados não existe: {path}"
 
-#: src/core/clamav_detection.py:377
+#: src/core/clamav_detection.py:397
 #, python-brace-format
 msgid "Permission denied accessing: {path}"
 msgstr "Permissão de acesso negada: {path}"
 
-#: src/core/clamav_detection.py:379
+#: src/core/clamav_detection.py:399
 #, python-brace-format
 msgid "Error accessing database: {error}"
 msgstr "Erro ao acessar o banco de dados: {error}"
 
-#: src/core/clamav_detection.py:381
+#: src/core/clamav_detection.py:401
 msgid "No virus database files found. Please download the database first."
-msgstr "Nenhum arquivo de banco de dados de vírus encontrado. Faça download do banco de dados primeiro."
+msgstr ""
+"Nenhum arquivo de banco de dados de vírus encontrado. Faça download do banco "
+"de dados primeiro."
 
-#: src/core/clamav_detection.py:415
+#: src/core/clamav_detection.py:435
 #, python-brace-format
 msgid "Timed out checking host database directory: {path}"
-msgstr "Tempo limite de verificação do diretório do banco de dados host: {path}"
+msgstr ""
+"Tempo limite de verificação do diretório do banco de dados host: {path}"
 
-#: src/core/clamav_detection.py:417 src/core/system_audit.py:265
+#: src/core/clamav_detection.py:437 src/core/system_audit.py:266
 msgid "flatpak-spawn not available"
 msgstr "flatpak-spawn não disponível"
 
-#: src/core/clamav_detection.py:419
+#: src/core/clamav_detection.py:439
 #, python-brace-format
 msgid "Error checking host database directory: {error}"
 msgstr "Erro ao verificar o diretório do banco de dados host: {error}"
 
-#: src/core/clamav_detection.py:425
+#: src/core/clamav_detection.py:445
 #, python-brace-format
 msgid "Error accessing host database directory {path}: {error}"
 msgstr "Erro ao acessar o diretório do banco de dados host {path}: {error}"
 
-#: src/core/clamav_detection.py:433
+#: src/core/clamav_detection.py:453
 #, python-brace-format
 msgid "No virus database files found in host directory: {path}"
-msgstr "Nenhum arquivo de banco de dados de vírus encontrado no diretório host: {path}"
+msgstr ""
+"Nenhum arquivo de banco de dados de vírus encontrado no diretório host: "
+"{path}"
 
-#: src/core/clamav_detection.py:489
+#: src/core/clamav_detection.py:509
 msgid "No host database directories were found"
 msgstr "Nenhum diretório de banco de dados host foi encontrado"
 
-#: src/core/clamav_detection.py:493
+#: src/core/clamav_detection.py:513
 #, python-brace-format
 msgid ""
 "No host ClamAV virus database files found. Update the host database with "
 "freshclam. Details: {detail}"
-msgstr "Nenhum arquivo de banco de dados de vírus Host ClamAV encontrado. Atualize o banco de dados host com Freshclam. Detalhes: {detail}"
+msgstr ""
+"Nenhum arquivo de banco de dados de vírus Host ClamAV encontrado. Atualize o "
+"banco de dados host com Freshclam. Detalhes: {detail}"
 
-#: src/core/system_audit.py:263
+#: src/core/system_audit.py:264
 msgid "Timed out reading database"
 msgstr "Tempo limite de leitura do banco de dados"
 
-#: src/core/system_audit.py:269 src/core/system_audit.py:278
+#: src/core/system_audit.py:270 src/core/system_audit.py:279
 msgid "Permission denied reading database"
 msgstr "Permissão negada para leitura do banco de dados"
 
-#: src/core/system_audit.py:276
+#: src/core/system_audit.py:277
 msgid "Database file not found"
 msgstr "Arquivo de banco de dados não encontrado"
 
-#: src/core/system_audit.py:298
+#: src/core/system_audit.py:299
 msgid "Invalid database file format"
 msgstr "Formato de arquivo de banco de dados inválido"
 
-#: src/core/system_audit.py:314
+#: src/core/system_audit.py:315
 msgid "Could not parse database timestamp"
 msgstr "Não foi possível analisar o carimbo de data/hora do banco de dados"
 
-#: src/core/system_audit.py:434 src/ui/audit_view.py:194
+#: src/core/system_audit.py:435 src/ui/audit_view.py:195
 msgid "ClamAV Health"
 msgstr "Saúde ClamAV"
 
-#: src/core/system_audit.py:443 src/core/system_audit.py:452
+#: src/core/system_audit.py:444 src/core/system_audit.py:453
 msgid "ClamAV Installation"
 msgstr "Instalação do ClamAV"
 
-#: src/core/system_audit.py:445
+#: src/core/system_audit.py:446
 #, python-brace-format
 msgid "Installed: {version}"
 msgstr "Instalado: {version}"
 
-#: src/core/system_audit.py:454
+#: src/core/system_audit.py:455
 msgid "ClamAV is not installed"
 msgstr "ClamAV não está instalado"
 
-#: src/core/system_audit.py:455
+#: src/core/system_audit.py:456
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Instale o ClamAV para ativar a verificação de vírus"
 
-#: src/core/system_audit.py:471 src/core/system_audit.py:482
-#: src/core/system_audit.py:495 src/core/system_audit.py:510
-#: src/core/system_audit.py:523 src/core/system_audit.py:534
+#: src/core/system_audit.py:472 src/core/system_audit.py:483
+#: src/core/system_audit.py:496 src/core/system_audit.py:511
+#: src/core/system_audit.py:524 src/core/system_audit.py:535
 msgid "Virus Database"
 msgstr "Banco de dados de vírus"
 
-#: src/core/system_audit.py:473
+#: src/core/system_audit.py:474
 #, python-brace-format
 msgid "Up to date ({days} days old, built {date})"
 msgstr "Atualizado ({days} dias de idade, construído {date})"
 
-#: src/core/system_audit.py:484 src/core/system_audit.py:497
+#: src/core/system_audit.py:485 src/core/system_audit.py:498
 #, python-brace-format
 msgid "Database is {days} days old (built {date})"
 msgstr "Banco de dados é {days} dias de idade (construído {date})"
 
-#: src/core/system_audit.py:487
+#: src/core/system_audit.py:488
 msgid "Update virus database to ensure protection"
 msgstr "Atualize o banco de dados de vírus para garantir proteção"
 
-#: src/core/system_audit.py:500
+#: src/core/system_audit.py:501
 msgid "Database is critically outdated. Update immediately."
-msgstr "O banco de dados está criticamente desatualizado. Atualize imediatamente."
+msgstr ""
+"O banco de dados está criticamente desatualizado. Atualize imediatamente."
 
-#: src/core/system_audit.py:512
+#: src/core/system_audit.py:513
 #, python-brace-format
 msgid "Database built {date} (age could not be determined)"
 msgstr "Banco de dados construído {date} (a idade não pôde ser determinada)"
 
-#: src/core/system_audit.py:525
+#: src/core/system_audit.py:526
 msgid "No virus database found"
 msgstr "Nenhum banco de dados de vírus encontrado"
 
-#: src/core/system_audit.py:526
+#: src/core/system_audit.py:527
 msgid "Download virus database"
 msgstr "Baixar banco de dados de vírus"
 
-#: src/core/system_audit.py:536
+#: src/core/system_audit.py:537
 msgid "Database files exist but age could not be determined"
-msgstr "Existem arquivos de banco de dados, mas a idade não pôde ser determinada"
+msgstr ""
+"Existem arquivos de banco de dados, mas a idade não pôde ser determinada"
 
-#: src/core/system_audit.py:547 src/core/system_audit.py:560
-#: src/core/system_audit.py:569 src/ui/logs_view.py:278
+#: src/core/system_audit.py:548 src/core/system_audit.py:561
+#: src/core/system_audit.py:570 src/ui/logs_view.py:278
 msgid "ClamAV Daemon"
 msgstr "Daemon ClamAV"
 
-#: src/core/system_audit.py:549
+#: src/core/system_audit.py:550
 #, python-brace-format
 msgid "Service {name} is running"
 msgstr "Serviço {name} está correndo"
 
-#: src/core/system_audit.py:562
+#: src/core/system_audit.py:563
 msgid "Daemon is responding"
 msgstr "Daemon está respondendo"
 
-#: src/core/system_audit.py:571
+#: src/core/system_audit.py:572
 msgid "ClamAV daemon is not running"
 msgstr "O daemon ClamAV não está em execução"
 
-#: src/core/system_audit.py:572
+#: src/core/system_audit.py:573
 msgid "Start the daemon for faster scanning"
 msgstr "Inicie o daemon para uma verificação mais rápida"
 
-#: src/core/system_audit.py:584 src/core/system_audit.py:594
-#: src/core/system_audit.py:957 src/core/system_audit.py:1027
-#: src/ui/audit_view.py:203
+#: src/core/system_audit.py:585 src/core/system_audit.py:595
+#: src/core/system_audit.py:958 src/core/system_audit.py:1021
+#: src/ui/audit_view.py:204
 msgid "Automatic Updates"
 msgstr "Atualizações Automáticas"
 
-#: src/core/system_audit.py:586
+#: src/core/system_audit.py:587
 msgid "Freshclam service is active"
 msgstr "O serviço Freshclam está ativo"
 
-#: src/core/system_audit.py:596
+#: src/core/system_audit.py:597
 msgid "Freshclam automatic update service is not running"
 msgstr "O serviço de atualização automática Freshclam não está em execução"
 
-#: src/core/system_audit.py:597
+#: src/core/system_audit.py:598
 msgid "Enable automatic database updates"
 msgstr "Habilite atualizações automáticas do banco de dados"
 
-#: src/core/system_audit.py:610 src/core/system_audit.py:688
-#: src/ui/audit_view.py:195
+#: src/core/system_audit.py:611 src/core/system_audit.py:689
+#: src/ui/audit_view.py:196
 msgid "Firewall"
 msgstr "Firewall"
 
-#: src/core/system_audit.py:625 src/core/system_audit.py:635
+#: src/core/system_audit.py:626 src/core/system_audit.py:636
 msgid "UFW Firewall"
 msgstr "Firewall UFW"
 
-#: src/core/system_audit.py:627
+#: src/core/system_audit.py:628
 msgid "UFW is active and enabled"
 msgstr "UFW está ativo e habilitado"
 
-#: src/core/system_audit.py:637
+#: src/core/system_audit.py:638
 msgid "UFW service is running but firewall may be disabled"
 msgstr "O serviço UFW está em execução, mas o firewall pode estar desativado"
 
-#: src/core/system_audit.py:638
+#: src/core/system_audit.py:639
 msgid "Enable the firewall"
 msgstr "Habilite o firewall"
 
-#: src/core/system_audit.py:651 src/core/system_audit.py:661
+#: src/core/system_audit.py:652 src/core/system_audit.py:662
 msgid "Firewalld"
 msgstr "Firewalld"
 
-#: src/core/system_audit.py:653
+#: src/core/system_audit.py:654
 msgid "Firewalld is running"
 msgstr "Firewalld está em execução"
 
-#: src/core/system_audit.py:663
+#: src/core/system_audit.py:664
 msgid "Firewalld is installed but not running"
 msgstr "Firewalld está instalado, mas não está em execução"
 
-#: src/core/system_audit.py:664
+#: src/core/system_audit.py:665
 msgid "Start the firewall"
 msgstr "Inicie o firewall"
 
-#: src/core/system_audit.py:677
+#: src/core/system_audit.py:678
 msgid "nftables"
 msgstr "nftáveis"
 
-#: src/core/system_audit.py:679
+#: src/core/system_audit.py:680
 msgid "nftables service is active"
 msgstr "O serviço nftables está ativo"
 
-#: src/core/system_audit.py:690
+#: src/core/system_audit.py:691
 msgid "No active firewall detected"
 msgstr "Nenhum firewall ativo detectado"
 
-#: src/core/system_audit.py:691
+#: src/core/system_audit.py:692
 msgid "Install and enable a firewall for network protection"
 msgstr "Instale e habilite um firewall para proteção de rede"
 
-#: src/core/system_audit.py:719 src/core/system_audit.py:731
+#: src/core/system_audit.py:720 src/core/system_audit.py:732
 msgid "Firewall Manager"
 msgstr "Gerenciador de firewall"
 
-#: src/core/system_audit.py:721
+#: src/core/system_audit.py:722
 #, python-brace-format
 msgid "{name} is available"
 msgstr "{name} está disponível"
 
-#: src/core/system_audit.py:723
+#: src/core/system_audit.py:724
 #, python-brace-format
 msgid "Open {name}"
 msgstr "Abrir {name}"
 
-#: src/core/system_audit.py:733
+#: src/core/system_audit.py:734
 msgid "No graphical firewall manager detected"
 msgstr "Nenhum gerenciador de firewall gráfico detectado"
 
-#: src/core/system_audit.py:734
+#: src/core/system_audit.py:735
 msgid "Install a GUI for easier firewall management"
 msgstr "Instale uma GUI para facilitar o gerenciamento do firewall"
 
-#: src/core/system_audit.py:821 src/core/system_audit.py:833
-#: src/core/system_audit.py:843
+#: src/core/system_audit.py:822 src/core/system_audit.py:834
+#: src/core/system_audit.py:844
 msgid "Open Ports"
 msgstr "Portas abertas"
 
-#: src/core/system_audit.py:823
+#: src/core/system_audit.py:824
 #, python-brace-format
 msgid "{count} ports listening, risky ports: {ports}"
 msgstr "{count} portas escutando, portas arriscadas: {ports}"
 
-#: src/core/system_audit.py:826
+#: src/core/system_audit.py:827
 msgid "Review if these services need to be exposed"
 msgstr "Revise se esses serviços precisam ser expostos"
 
-#: src/core/system_audit.py:835
+#: src/core/system_audit.py:836
 #, python-brace-format
 msgid "{count} ports listening"
 msgstr "{count} portas escutando"
 
-#: src/core/system_audit.py:836
+#: src/core/system_audit.py:837
 msgid "Review open ports and close unnecessary services"
 msgstr "Revise as portas abertas e feche serviços desnecessários"
 
-#: src/core/system_audit.py:845
+#: src/core/system_audit.py:846
 msgid "No open ports detected"
 msgstr "Nenhuma porta aberta detectada"
 
-#: src/core/system_audit.py:855 src/ui/audit_view.py:198
+#: src/core/system_audit.py:856 src/ui/audit_view.py:199
 msgid "Access Control"
 msgstr "Controle de acesso"
 
-#: src/core/system_audit.py:876
+#: src/core/system_audit.py:877
 msgid "MAC Framework"
 msgstr "Estrutura MAC"
 
-#: src/core/system_audit.py:878
+#: src/core/system_audit.py:879
 msgid "No mandatory access control framework detected"
 msgstr "Nenhuma estrutura de controle de acesso obrigatória detectada"
 
-#: src/core/system_audit.py:879
+#: src/core/system_audit.py:880
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Considere ativar o AppArmor ou SELinux"
 
-#: src/core/system_audit.py:903 src/core/system_audit.py:910
+#: src/core/system_audit.py:904 src/core/system_audit.py:911
 msgid "AppArmor"
 msgstr "AppArmor"
 
-#: src/core/system_audit.py:905
+#: src/core/system_audit.py:906
 msgid "AppArmor is enabled"
 msgstr "AppArmor está ativado"
 
-#: src/core/system_audit.py:912
+#: src/core/system_audit.py:913
 msgid "AppArmor module is loaded but not enabled"
 msgstr "O módulo AppArmor está carregado, mas não ativado"
 
-#: src/core/system_audit.py:913
+#: src/core/system_audit.py:914
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Habilite o AppArmor para sandbox de aplicativos"
 
-#: src/core/system_audit.py:929 src/core/system_audit.py:936
-#: src/core/system_audit.py:944
+#: src/core/system_audit.py:930 src/core/system_audit.py:937
+#: src/core/system_audit.py:945
 msgid "SELinux"
 msgstr "SELinux"
 
-#: src/core/system_audit.py:931
+#: src/core/system_audit.py:932
 msgid "SELinux is enforcing"
 msgstr "SELinux está aplicando"
 
-#: src/core/system_audit.py:938
+#: src/core/system_audit.py:939
 msgid "SELinux is in permissive mode"
 msgstr "SELinux está em modo permissivo"
 
-#: src/core/system_audit.py:939
+#: src/core/system_audit.py:940
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Considere mudar para o modo de aplicação para uma proteção mais forte"
 
-#: src/core/system_audit.py:946
+#: src/core/system_audit.py:947
 msgid "SELinux is disabled"
 msgstr "SELinux está desabilitado"
 
-#: src/core/system_audit.py:947
+#: src/core/system_audit.py:948
 msgid "Enable SELinux for mandatory access control"
 msgstr "Habilite o SELinux para controle de acesso obrigatório"
 
-#: src/core/system_audit.py:970 src/core/system_audit.py:980
+#: src/core/system_audit.py:971 src/core/system_audit.py:981
 msgid "Unattended Upgrades"
 msgstr "Atualizações autônomas"
 
-#: src/core/system_audit.py:972
+#: src/core/system_audit.py:973
 msgid "Automatic security updates are enabled"
 msgstr "As atualizações automáticas de segurança estão habilitadas"
 
-#: src/core/system_audit.py:982
+#: src/core/system_audit.py:983
 msgid "Unattended upgrades is installed but disabled"
 msgstr "As atualizações autônomas estão instaladas, mas desabilitadas"
 
-#: src/core/system_audit.py:983
+#: src/core/system_audit.py:984
 msgid "Enable automatic security updates"
 msgstr "Habilite atualizações automáticas de segurança"
 
-#: src/core/system_audit.py:996 src/core/system_audit.py:1007
+#: src/core/system_audit.py:997 src/core/system_audit.py:1008
 msgid "DNF Automatic"
 msgstr "DNF Automático"
 
-#: src/core/system_audit.py:998
+#: src/core/system_audit.py:999
 msgid "DNF automatic updates are enabled"
 msgstr "As atualizações automáticas DNF estão ativadas"
 
-#: src/core/system_audit.py:1009
+#: src/core/system_audit.py:1010
 msgid "DNF automatic is installed but timer is not active"
 msgstr "O DNF automático está instalado, mas o temporizador não está ativo"
 
-#: src/core/system_audit.py:1010
+#: src/core/system_audit.py:1011
 msgid "Enable automatic updates"
 msgstr "Habilite atualizações automáticas"
 
-#: src/core/system_audit.py:1029
+#: src/core/system_audit.py:1023
 msgid "Could not determine automatic update status"
 msgstr "Não foi possível determinar o status da atualização automática"
 
-#: src/core/system_audit.py:1030
+#: src/core/system_audit.py:1024
 msgid "Configure automatic security updates"
 msgstr "Configurar atualizações automáticas de segurança"
 
-#: src/core/system_audit.py:1053
+#: src/core/system_audit.py:1047
 msgid "Pending Reboot"
 msgstr "Reinicialização pendente"
 
-#: src/core/system_audit.py:1055
+#: src/core/system_audit.py:1049
 msgid "System reboot required to apply updates"
 msgstr "Reinicialização do sistema necessária para aplicar atualizações"
 
-#: src/core/system_audit.py:1056
+#: src/core/system_audit.py:1050
 msgid "Reboot the system to apply pending security updates"
 msgstr "Reinicie o sistema para aplicar atualizações de segurança pendentes"
 
-#: src/core/system_audit.py:1065 src/ui/audit_view.py:208
+#: src/core/system_audit.py:1059 src/ui/audit_view.py:209
 msgid "Intrusion Detection"
 msgstr "Detecção de intrusão"
 
-#: src/core/system_audit.py:1076 src/core/system_audit.py:1087
+#: src/core/system_audit.py:1070 src/core/system_audit.py:1081
 msgid "fail2ban"
 msgstr "fail2ban"
 
-#: src/core/system_audit.py:1078
+#: src/core/system_audit.py:1072
 msgid "fail2ban is active and protecting services"
 msgstr "fail2ban está ativo e protegendo serviços"
 
-#: src/core/system_audit.py:1089
+#: src/core/system_audit.py:1083
 msgid "fail2ban is installed but not running"
 msgstr "fail2ban está instalado, mas não está em execução"
 
-#: src/core/system_audit.py:1090
+#: src/core/system_audit.py:1084
 msgid "Start fail2ban to protect against brute force attacks"
 msgstr "Inicie o fail2ban para se proteger contra ataques de força bruta"
 
-#: src/core/system_audit.py:1102 src/core/system_audit.py:1113
+#: src/core/system_audit.py:1096 src/core/system_audit.py:1107
 msgid "CrowdSec"
 msgstr "CrowdSec"
 
-#: src/core/system_audit.py:1104
+#: src/core/system_audit.py:1098
 msgid "CrowdSec is active with community threat intelligence"
 msgstr "CrowdSec está ativo com inteligência de ameaças da comunidade"
 
-#: src/core/system_audit.py:1115
+#: src/core/system_audit.py:1109
 msgid "CrowdSec is installed but not running"
 msgstr "CrowdSec está instalado, mas não está em execução"
 
-#: src/core/system_audit.py:1116
+#: src/core/system_audit.py:1110
 msgid "Start CrowdSec for collaborative intrusion prevention"
 msgstr "Inicie o CrowdSec para prevenção colaborativa de invasões"
 
-#: src/core/system_audit.py:1132
+#: src/core/system_audit.py:1120
 msgid "Intrusion Prevention"
 msgstr "Prevenção de intrusões"
 
-#: src/core/system_audit.py:1134
+#: src/core/system_audit.py:1122
 msgid "No intrusion detection system found"
 msgstr "Nenhum sistema de detecção de intrusão encontrado"
 
-#: src/core/system_audit.py:1135
+#: src/core/system_audit.py:1123
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "Instale fail2ban ou CrowdSec para proteção contra ataques"
 
-#: src/core/system_audit.py:1148 src/ui/audit_view.py:211
+#: src/core/system_audit.py:1136 src/ui/audit_view.py:212
 msgid "SSH Security"
 msgstr "Segurança SSH"
 
-#: src/core/system_audit.py:1163 src/core/system_audit.py:1173
+#: src/core/system_audit.py:1151 src/core/system_audit.py:1161
 msgid "SSH Server"
 msgstr "Servidor SSH"
 
-#: src/core/system_audit.py:1165
+#: src/core/system_audit.py:1153
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "O servidor SSH não está em execução (sem superfície de ataque remoto)"
 
-#: src/core/system_audit.py:1175
+#: src/core/system_audit.py:1163
 msgid "SSH server is running"
 msgstr "O servidor SSH está em execução"
 
-#: src/core/system_audit.py:1185
+#: src/core/system_audit.py:1173
 msgid "SSH Configuration"
 msgstr "Configuração SSH"
 
-#: src/core/system_audit.py:1187
+#: src/core/system_audit.py:1175
 msgid "Could not read SSH configuration"
 msgstr "Não foi possível ler a configuração SSH"
 
-#: src/core/system_audit.py:1198 src/core/system_audit.py:1207
+#: src/core/system_audit.py:1186 src/core/system_audit.py:1195
 msgid "Root Login"
 msgstr "Login raiz"
 
-#: src/core/system_audit.py:1200
+#: src/core/system_audit.py:1188
 #, python-brace-format
 msgid "Root login: {value}"
 msgstr "Login raiz: {value}"
 
-#: src/core/system_audit.py:1209
+#: src/core/system_audit.py:1197
 #, python-brace-format
 msgid "Root login is allowed ({value})"
 msgstr "O login root é permitido ({value})"
 
-#: src/core/system_audit.py:1210
+#: src/core/system_audit.py:1198
 msgid "Disable root SSH login for security"
 msgstr "Desative o login SSH root para segurança"
 
-#: src/core/system_audit.py:1220 src/core/system_audit.py:1229
+#: src/core/system_audit.py:1208 src/core/system_audit.py:1217
 msgid "Password Auth"
 msgstr "Autenticação de senha"
 
-#: src/core/system_audit.py:1222
+#: src/core/system_audit.py:1210
 msgid "Password authentication is disabled (key-only)"
 msgstr "A autenticação por senha está desativada (somente chave)"
 
-#: src/core/system_audit.py:1231
+#: src/core/system_audit.py:1219
 msgid "Password authentication is enabled"
 msgstr "A autenticação por senha está habilitada"
 
-#: src/core/system_audit.py:1232
+#: src/core/system_audit.py:1220
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Considere desabilitar a autenticação por senha em favor de chaves SSH"
 
-#: src/core/system_audit.py:1242 src/core/system_audit.py:1251
+#: src/core/system_audit.py:1230 src/core/system_audit.py:1239
 msgid "X11 Forwarding"
 msgstr "Encaminhamento X11"
 
-#: src/core/system_audit.py:1244
+#: src/core/system_audit.py:1232
 msgid "X11 forwarding is disabled"
 msgstr "O encaminhamento X11 está desabilitado"
 
-#: src/core/system_audit.py:1253
+#: src/core/system_audit.py:1241
 msgid "X11 forwarding is enabled"
 msgstr "O encaminhamento X11 está ativado"
 
-#: src/core/system_audit.py:1254
+#: src/core/system_audit.py:1242
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Desative o encaminhamento X11 para reduzir a superfície de ataque"
 
-#: src/core/system_audit.py:1331 src/ui/audit_view.py:272
-#: src/ui/audit_view.py:307
+#: src/core/system_audit.py:1319 src/ui/audit_view.py:273
+#: src/ui/audit_view.py:308
 msgid "Lynis Security Audit"
 msgstr "Auditoria de Segurança Lynis"
 
-#: src/core/system_audit.py:1340
+#: src/core/system_audit.py:1328
 msgid "Lynis"
 msgstr "Lynis"
 
-#: src/core/system_audit.py:1342
+#: src/core/system_audit.py:1330
 msgid "Lynis is not installed"
 msgstr "Lynis não está instalado"
 
-#: src/core/system_audit.py:1343
+#: src/core/system_audit.py:1331
 msgid "Install Lynis for comprehensive security auditing"
 msgstr "Instale o Lynis para auditoria de segurança abrangente"
 
-#: src/core/system_audit.py:1371 src/core/system_audit.py:1381
-#: src/core/system_audit.py:1393 src/core/system_audit.py:1425
+#: src/core/system_audit.py:1359 src/core/system_audit.py:1369
+#: src/core/system_audit.py:1381 src/core/system_audit.py:1413
 msgid "Lynis Audit"
 msgstr "Auditoria Lynis"
 
-#: src/core/system_audit.py:1373
+#: src/core/system_audit.py:1361
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "A auditoria do Lynis expirou após 5 minutos"
 
-#: src/core/system_audit.py:1383
+#: src/core/system_audit.py:1371
 #, python-brace-format
 msgid "Failed to run Lynis: {error}"
 msgstr "Falha ao executar o Lynis: {error}"
 
-#: src/core/system_audit.py:1395 src/core/system_audit.py:1523
+#: src/core/system_audit.py:1383 src/core/system_audit.py:1511
 msgid "Authentication was cancelled"
 msgstr "A autenticação foi cancelada"
 
-#: src/core/system_audit.py:1413
+#: src/core/system_audit.py:1401
 msgid "Hardening Index"
 msgstr "Índice de endurecimento"
 
-#: src/core/system_audit.py:1415
+#: src/core/system_audit.py:1403
 #, python-brace-format
 msgid "Score: {score}/100"
 msgstr "Pontuação: {score}/100"
 
-#: src/core/system_audit.py:1416
+#: src/core/system_audit.py:1404
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "Execute 'sudo lynis audit system' para recomendações detalhadas"
 
-#: src/core/system_audit.py:1427
+#: src/core/system_audit.py:1415
 #, python-brace-format
 msgid "Audit completed (exit code {code})"
 msgstr "Auditoria concluída (código de saída {code})"
 
-#: src/core/system_audit.py:1468 src/ui/audit_view.py:278
-#: src/ui/audit_view.py:310
+#: src/core/system_audit.py:1456 src/ui/audit_view.py:279
+#: src/ui/audit_view.py:311
 msgid "Rootkit Detection"
 msgstr "Detecção de rootkit"
 
-#: src/core/system_audit.py:1477
+#: src/core/system_audit.py:1465
 msgid "chkrootkit"
 msgstr "chkrootkit"
 
-#: src/core/system_audit.py:1479
+#: src/core/system_audit.py:1467
 msgid "chkrootkit is not installed"
 msgstr "chkrootkit não está instalado"
 
-#: src/core/system_audit.py:1480
+#: src/core/system_audit.py:1468
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Instale o chkrootkit para detecção de rootkit"
 
-#: src/core/system_audit.py:1499 src/core/system_audit.py:1509
-#: src/core/system_audit.py:1521 src/core/system_audit.py:1541
-#: src/core/system_audit.py:1561 src/core/system_audit.py:1581
+#: src/core/system_audit.py:1487 src/core/system_audit.py:1497
+#: src/core/system_audit.py:1509 src/core/system_audit.py:1529
+#: src/core/system_audit.py:1549 src/core/system_audit.py:1569
 msgid "Rootkit Scan"
 msgstr "Verificação de rootkit"
 
-#: src/core/system_audit.py:1501
+#: src/core/system_audit.py:1489
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "A verificação do rootkit expirou após 5 minutos"
 
-#: src/core/system_audit.py:1511
+#: src/core/system_audit.py:1499
 #, python-brace-format
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Falha ao executar o chkrootkit: {error}"
 
-#: src/core/system_audit.py:1534
+#: src/core/system_audit.py:1522
 #, python-brace-format
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "A verificação de rootkit não pôde ser concluída (sair {code})"
 
-#: src/core/system_audit.py:1563
+#: src/core/system_audit.py:1551
 #, python-brace-format
 msgid "{count} potential rootkit(s) detected"
 msgstr "{count} possíveis rootkits detectados"
 
-#: src/core/system_audit.py:1564
+#: src/core/system_audit.py:1552
 msgid "Investigate the detected threats immediately"
 msgstr "Investigue as ameaças detectadas imediatamente"
 
-#: src/core/system_audit.py:1572
+#: src/core/system_audit.py:1560
 msgid "Finding"
 msgstr "Encontrando"
 
-#: src/core/system_audit.py:1583
+#: src/core/system_audit.py:1571
 msgid "No rootkits detected"
 msgstr "Nenhum rootkit detectado"
 
-#: src/core/system_audit.py:1618 src/core/system_audit.py:1635
-#: src/core/system_audit.py:1670 src/core/system_audit.py:1681
-#: src/core/system_audit.py:1690 src/ui/audit_view.py:212
-#: src/ui/audit_view.py:561
+#: src/core/system_audit.py:1606 src/core/system_audit.py:1623
+#: src/core/system_audit.py:1658 src/core/system_audit.py:1669
+#: src/core/system_audit.py:1678 src/ui/audit_view.py:213
+#: src/ui/audit_view.py:558
 msgid "Portmaster"
 msgstr "Mestre do Porto"
 
-#: src/core/system_audit.py:1637
+#: src/core/system_audit.py:1625
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster está executando e protegendo conexões"
 
-#: src/core/system_audit.py:1659
+#: src/core/system_audit.py:1647
 msgid "Module Status"
 msgstr "Status do módulo"
 
-#: src/core/system_audit.py:1661
+#: src/core/system_audit.py:1649
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr "Autorize ClamUI no Portmaster para integridade por módulo"
 
-#: src/core/system_audit.py:1663
+#: src/core/system_audit.py:1651
 msgid "Authorize"
 msgstr "Autorizar"
 
-#: src/core/system_audit.py:1672
+#: src/core/system_audit.py:1660
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster está instalado, mas não está funcionando"
 
-#: src/core/system_audit.py:1673
+#: src/core/system_audit.py:1661
 msgid "Start the Portmaster service to enable network protection"
 msgstr "Inicie o serviço Portmaster para ativar a proteção de rede"
 
-#: src/core/system_audit.py:1683
+#: src/core/system_audit.py:1671
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Não detectado — monitor de rede opcional e firewall de aplicativo"
 
-#: src/core/system_audit.py:1692
+#: src/core/system_audit.py:1680
 #, python-brace-format
 msgid "Could not probe Portmaster: {error}"
 msgstr "Não foi possível sondar o Portmaster: {error}"
@@ -1869,17 +2001,22 @@ msgstr "A chave de API não pode ficar vazia"
 
 #: src/core/keyring_manager.py:107
 msgid "Invalid API key format (expected 64 hexadecimal characters)"
-msgstr "Formato de chave de API inválido (64 caracteres hexadecimais esperados)"
+msgstr ""
+"Formato de chave de API inválido (64 caracteres hexadecimais esperados)"
 
 #: src/core/keyring_manager.py:132
 msgid ""
 "System keyring is unavailable. To store the API key without a keyring, "
 "enable the plaintext fallback in preferences (less secure)."
-msgstr "O chaveiro do sistema não está disponível. Para armazenar a chave de API sem um chaveiro, habilite o substituto de texto simples nas preferências (menos seguro)."
+msgstr ""
+"O chaveiro do sistema não está disponível. Para armazenar a chave de API sem "
+"um chaveiro, habilite o substituto de texto simples nas preferências (menos "
+"seguro)."
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
 msgid "Stored in settings file (keyring unavailable — less secure)"
-msgstr "Armazenado no arquivo de configurações (chaveiro indisponível – menos seguro)"
+msgstr ""
+"Armazenado no arquivo de configurações (chaveiro indisponível – menos seguro)"
 
 #: src/core/keyring_manager.py:140
 msgid "Failed to save API key to settings"
@@ -1906,7 +2043,10 @@ msgstr "O token não pode estar vazio"
 msgid ""
 "System keyring is unavailable. To store the Portmaster token without a "
 "keyring, enable the plaintext fallback in preferences (less secure)."
-msgstr "O chaveiro do sistema não está disponível. Para armazenar o token Portmaster sem um chaveiro, habilite o fallback de texto simples nas preferências (menos seguro)."
+msgstr ""
+"O chaveiro do sistema não está disponível. Para armazenar o token Portmaster "
+"sem um chaveiro, habilite o fallback de texto simples nas preferências "
+"(menos seguro)."
 
 #: src/core/keyring_manager.py:297
 msgid "Failed to save Portmaster token to settings"
@@ -2008,7 +2148,9 @@ msgstr "VirusTotal não configurado"
 
 #: src/core/notification_manager.py:283
 msgid "Add your API key in Preferences to scan with VirusTotal."
-msgstr "Adicione sua chave API em Preferências para fazer a varredura com o VirusTotal."
+msgstr ""
+"Adicione sua chave API em Preferências para fazer a varredura com o "
+"VirusTotal."
 
 #: src/core/notification_manager.py:307
 msgid "Scanning Device"
@@ -2042,7 +2184,8 @@ msgstr "Verificação de dispositivos: ameaças detectadas!"
 #: src/core/notification_manager.py:354
 #, python-brace-format
 msgid "{device}: {infected} threat(s) found, {quarantined} quarantined"
-msgstr "{device}: {infected} ameaça(s) encontrada(s), {quarantined} em quarentena"
+msgstr ""
+"{device}: {infected} ameaça(s) encontrada(s), {quarantined} em quarentena"
 
 #: src/core/notification_manager.py:361
 #, python-brace-format
@@ -2078,14 +2221,18 @@ msgstr "Encontrado {details}"
 msgid ""
 "Failed to record quarantine entry in database. File has been restored to "
 "original location."
-msgstr "Falha ao registrar a entrada de quarentena no banco de dados. O arquivo foi restaurado para o local original."
+msgstr ""
+"Falha ao registrar a entrada de quarentena no banco de dados. O arquivo foi "
+"restaurado para o local original."
 
 #: src/core/quarantine/manager.py:234
 #, python-brace-format
 msgid ""
 "Failed to record quarantine entry in database. Rollback also failed: "
 "{error}. File may be orphaned at: {path}"
-msgstr "Falha ao registrar a entrada de quarentena no banco de dados. A reversão também falhou: {error}. O arquivo pode ficar órfão em: {path}"
+msgstr ""
+"Falha ao registrar a entrada de quarentena no banco de dados. A reversão "
+"também falhou: {error}. O arquivo pode ficar órfão em: {path}"
 
 #: src/core/quarantine/manager.py:318
 #, python-brace-format
@@ -2096,13 +2243,17 @@ msgstr "Falha na verificação da integridade do arquivo: {error}"
 msgid ""
 "File restored successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
-msgstr "Arquivo restaurado com êxito, mas não foi possível remover a entrada do banco de dados. Ele ainda pode aparecer na lista até ser limpo."
+msgstr ""
+"Arquivo restaurado com êxito, mas não foi possível remover a entrada do "
+"banco de dados. Ele ainda pode aparecer na lista até ser limpo."
 
 #: src/core/quarantine/manager.py:448
 msgid ""
 "File deleted successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
-msgstr "Arquivo excluído com êxito, mas não foi possível remover a entrada do banco de dados. Ele ainda pode aparecer na lista até ser limpo."
+msgstr ""
+"Arquivo excluído com êxito, mas não foi possível remover a entrada do banco "
+"de dados. Ele ainda pode aparecer na lista até ser limpo."
 
 #: src/core/result_formatters.py:37 src/core/scanner_base.py:575
 #, python-brace-format
@@ -2112,7 +2263,9 @@ msgstr "{count} não foi possível acessar o(s) arquivo(s)"
 #: src/core/result_formatters.py:55
 #, python-brace-format
 msgid "Scan complete - No threats found ({count} file(s) not accessible)"
-msgstr "Verificação concluída - Nenhuma ameaça encontrada ({count} arquivo(s) não acessível(s))"
+msgstr ""
+"Verificação concluída - Nenhuma ameaça encontrada ({count} arquivo(s) não "
+"acessível(s))"
 
 #: src/core/result_formatters.py:59
 #, python-brace-format
@@ -2207,7 +2360,9 @@ msgstr "Nenhum arquivo pôde ser verificado"
 msgid ""
 "{count} non-fatal warning(s) during scan; some files may have been only "
 "partially scanned"
-msgstr "{count} aviso(s) não fatal(is) durante a varredura; alguns arquivos podem ter sido verificados apenas parcialmente"
+msgstr ""
+"{count} aviso(s) não fatal(is) durante a varredura; alguns arquivos podem "
+"ter sido verificados apenas parcialmente"
 
 #: src/core/scanner_base.py:593
 #, python-brace-format
@@ -2268,14 +2423,18 @@ msgstr "banco de dados anterior não pôde ser restaurado"
 msgid ""
 "Could not trigger freshclam service update. Try restarting the service: sudo "
 "systemctl restart clamav-freshclam"
-msgstr "Não foi possível acionar a atualização do serviço Freshclam. Tente reiniciar o serviço: sudo systemctl restart clamav-freshclam"
+msgstr ""
+"Não foi possível acionar a atualização do serviço Freshclam. Tente reiniciar "
+"o serviço: sudo systemctl restart clamav-freshclam"
 
 #: src/core/updater.py:641
 #, python-brace-format
 msgid ""
 "Another freshclam instance is running (PID {pid}). Stop it first: sudo "
 "systemctl stop clamav-freshclam"
-msgstr "Outra instância do Freshclam está em execução (PID {pid}). Pare primeiro: sudo systemctl stop clamav-freshclam"
+msgstr ""
+"Outra instância do Freshclam está em execução (PID {pid}). Pare primeiro: "
+"sudo systemctl stop clamav-freshclam"
 
 #: src/core/updater.py:862
 #, python-brace-format
@@ -2298,11 +2457,14 @@ msgstr "{database} até {cooldown}"
 #: src/core/updater.py:1277
 msgid ""
 "Authentication cancelled. Database update requires administrator privileges."
-msgstr "Autenticação cancelada. A atualização do banco de dados requer privilégios de administrador."
+msgstr ""
+"Autenticação cancelada. A atualização do banco de dados requer privilégios "
+"de administrador."
 
 #: src/core/updater.py:1279
 msgid "Authorization failed. You are not authorized to update the database."
-msgstr "Falha na autorização. Você não está autorizado a atualizar o banco de dados."
+msgstr ""
+"Falha na autorização. Você não está autorizado a atualizar o banco de dados."
 
 #: src/core/updater.py:1286
 #, python-brace-format
@@ -2318,7 +2480,9 @@ msgstr "Já atual: {databases}"
 #, python-brace-format
 msgid ""
 "Database update partially completed. {progress}. Rate limited: {details}."
-msgstr "Atualização do banco de dados parcialmente concluída. {progress}. Taxa limitada: {details}."
+msgstr ""
+"Atualização do banco de dados parcialmente concluída. {progress}. Taxa "
+"limitada: {details}."
 
 #: src/core/updater.py:1302
 #, python-brace-format
@@ -2327,21 +2491,28 @@ msgstr "Taxa de atualização limitada para: {details}."
 
 #: src/core/updater.py:1306
 msgid "Update rate limited by mirror. Please wait a few minutes and try again."
-msgstr "Taxa de atualização limitada pelo espelho. Aguarde alguns minutos e tente novamente."
+msgstr ""
+"Taxa de atualização limitada pelo espelho. Aguarde alguns minutos e tente "
+"novamente."
 
 #: src/core/updater.py:1311
 msgid ""
 "Update blocked by CDN. This may be due to rate limiting. Please wait and try "
 "again later."
-msgstr "Atualização bloqueada pelo CDN. Isso pode ser devido à limitação de taxa. Aguarde e tente novamente mais tarde."
+msgstr ""
+"Atualização bloqueada pelo CDN. Isso pode ser devido à limitação de taxa. "
+"Aguarde e tente novamente mais tarde."
 
 #: src/core/updater.py:1317
 msgid "ClamAV mirror is currently unavailable. Please try again later."
-msgstr "O espelho ClamAV não está disponível no momento. Por favor, tente novamente mais tarde."
+msgstr ""
+"O espelho ClamAV não está disponível no momento. Por favor, tente novamente "
+"mais tarde."
 
 #: src/core/updater.py:1323
 msgid "SSL/TLS certificate error. The mirror may have configuration issues."
-msgstr "Erro de certificado SSL/TLS. O espelho pode ter problemas de configuração."
+msgstr ""
+"Erro de certificado SSL/TLS. O espelho pode ter problemas de configuração."
 
 #: src/core/updater.py:1327
 msgid "Connection timed out. Please check your network connection."
@@ -2353,12 +2524,16 @@ msgstr "Falha na autorização. Por favor, tente novamente e digite sua senha."
 
 #: src/core/updater.py:1335
 msgid "Database is locked. Another freshclam instance may be running."
-msgstr "O banco de dados está bloqueado. Outra instância do Freshclam pode estar em execução."
+msgstr ""
+"O banco de dados está bloqueado. Outra instância do Freshclam pode estar em "
+"execução."
 
 #: src/core/updater.py:1339
 msgid ""
 "Permission denied. You may need elevated privileges to update the database."
-msgstr "Permissão negada. Talvez você precise de privilégios elevados para atualizar o banco de dados."
+msgstr ""
+"Permissão negada. Talvez você precise de privilégios elevados para atualizar "
+"o banco de dados."
 
 #: src/core/updater.py:1343
 msgid "Connection error. Please check your network connection."
@@ -2370,12 +2545,16 @@ msgstr "A resolução de DNS falhou. Verifique suas configurações de rede."
 
 #: src/core/updater.py:1353
 msgid "Update failed with an unknown error. Check the logs for details."
-msgstr "A atualização falhou com um erro desconhecido. Verifique os registros para obter detalhes."
+msgstr ""
+"A atualização falhou com um erro desconhecido. Verifique os registros para "
+"obter detalhes."
 
 #: src/core/updater.py:1365
 #, python-brace-format
 msgid "Database update completed - {count} database(s) updated"
-msgstr "Atualização do banco de dados concluída - {count} banco de dados atualizado(s)"
+msgstr ""
+"Atualização do banco de dados concluída - {count} banco de dados "
+"atualizado(s)"
 
 #: src/core/updater.py:1369
 msgid "Database update completed - Already up to date"
@@ -2577,99 +2756,100 @@ msgstr "_Cancelar"
 msgid "_Save"
 msgstr "_Salvar"
 
-#: src/ui/audit_view.py:167
+#: src/ui/audit_view.py:168
 msgid "System Security Audit"
 msgstr "Auditoria de segurança do sistema"
 
-#: src/ui/audit_view.py:169
+#: src/ui/audit_view.py:170
 msgid "Check your system security posture and get recommendations"
-msgstr "Verifique a postura de segurança do seu sistema e obtenha recomendações"
+msgstr ""
+"Verifique a postura de segurança do seu sistema e obtenha recomendações"
 
-#: src/ui/audit_view.py:182
+#: src/ui/audit_view.py:183
 msgid "Refresh Audit"
 msgstr "Atualizar auditoria"
 
-#: src/ui/audit_view.py:236 src/ui/audit_view.py:789
+#: src/ui/audit_view.py:237 src/ui/audit_view.py:786
 #: src/ui/components_view.py:243 src/ui/logs_view.py:521
 #: src/ui/statistics_view.py:186
 msgid "Checking..."
 msgstr "Verificando..."
 
-#: src/ui/audit_view.py:237 src/ui/audit_view.py:790
+#: src/ui/audit_view.py:238 src/ui/audit_view.py:787
 msgid "Running security check"
 msgstr "Executando verificação de segurança"
 
-#: src/ui/audit_view.py:254
+#: src/ui/audit_view.py:255
 msgid "Portmaster — checking…"
 msgstr "Portmaster – verificando…"
 
-#: src/ui/audit_view.py:265
+#: src/ui/audit_view.py:266
 msgid "Deep Scans"
 msgstr "Verificações profundas"
 
-#: src/ui/audit_view.py:267
+#: src/ui/audit_view.py:268
 msgid "Require administrator privileges and may take several minutes"
 msgstr "Requer privilégios de administrador e pode levar vários minutos"
 
-#: src/ui/audit_view.py:272 src/ui/audit_view.py:278 src/ui/audit_view.py:307
-#: src/ui/audit_view.py:310
+#: src/ui/audit_view.py:273 src/ui/audit_view.py:279 src/ui/audit_view.py:308
+#: src/ui/audit_view.py:311
 msgid "Checking availability..."
 msgstr "Verificando disponibilidade..."
 
-#: src/ui/audit_view.py:337 src/ui/audit_view.py:593
+#: src/ui/audit_view.py:338 src/ui/audit_view.py:590
 msgid "Learn more"
 msgstr "Saber mais"
 
-#: src/ui/audit_view.py:349
+#: src/ui/audit_view.py:350
 msgid "Run"
 msgstr "Correr"
 
-#: src/ui/audit_view.py:365
+#: src/ui/audit_view.py:366
 #, python-brace-format
 msgid "{tool} is not installed"
 msgstr "{tool} não está instalado"
 
-#: src/ui/audit_view.py:469
+#: src/ui/audit_view.py:466
 msgid "Comprehensive system hardening analysis with scoring"
 msgstr "Análise abrangente de fortalecimento do sistema com pontuação"
 
-#: src/ui/audit_view.py:478
+#: src/ui/audit_view.py:475
 msgid "Scan for known rootkits using chkrootkit"
 msgstr "Procure rootkits conhecidos usando chkrootkit"
 
-#: src/ui/audit_view.py:555
+#: src/ui/audit_view.py:552
 msgid "Portmaster — not detected (optional)"
 msgstr "Portmaster — não detectado (opcional)"
 
-#: src/ui/audit_view.py:558
+#: src/ui/audit_view.py:555
 msgid "Portmaster — could not probe"
 msgstr "Portmaster - não foi possível investigar"
 
-#: src/ui/audit_view.py:584 src/ui/preferences/debug_page.py:152
+#: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
 msgid "Open"
 msgstr "Abrir"
 
-#: src/ui/audit_view.py:657 src/ui/components_view.py:370
+#: src/ui/audit_view.py:654 src/ui/components_view.py:370
 #: src/ui/logs_view.py:401
 msgid "Copy to clipboard"
 msgstr "Copiar para a área de transferência"
 
-#: src/ui/audit_view.py:741
+#: src/ui/audit_view.py:738
 #, python-brace-format
 msgid "{count} security issues need attention"
 msgstr "{count} questões de segurança precisam de atenção"
 
-#: src/ui/audit_view.py:743
+#: src/ui/audit_view.py:740
 #, python-brace-format
 msgid "{count} checks need review"
 msgstr "{count} cheques precisam de revisão"
 
-#: src/ui/audit_view.py:745
+#: src/ui/audit_view.py:742
 #, python-brace-format
 msgid "{review} · {passed} passed"
 msgstr "{review} · {passed} passou"
 
-#: src/ui/audit_view.py:747
+#: src/ui/audit_view.py:744
 msgid "Audit complete"
 msgstr "Auditoria concluída"
 
@@ -2681,7 +2861,9 @@ msgstr "Instalação do clamscan"
 msgid ""
 "clamscan is the on-demand virus scanner. After installation, update the "
 "virus database with freshclam."
-msgstr "clamscan é o antivírus sob demanda. Após a instalação, atualize o banco de dados de vírus com Freshclam."
+msgstr ""
+"clamscan é o antivírus sob demanda. Após a instalação, atualize o banco de "
+"dados de vírus com Freshclam."
 
 #: src/ui/components_view.py:46
 msgid "freshclam Installation"
@@ -2691,7 +2873,9 @@ msgstr "Instalação do Freshclam"
 msgid ""
 "freshclam updates the virus database. Enable the service for automatic "
 "updates:"
-msgstr "Freshclam atualiza o banco de dados de vírus. Habilite o serviço para atualizações automáticas:"
+msgstr ""
+"Freshclam atualiza o banco de dados de vírus. Habilite o serviço para "
+"atualizações automáticas:"
 
 #: src/ui/components_view.py:59
 msgid "clamdscan Installation"
@@ -2701,7 +2885,9 @@ msgstr "Instalação do clamdscan"
 msgid ""
 "clamdscan is a client for the clamd daemon, providing faster scanning. "
 "Requires clamd daemon to be running."
-msgstr "clamdscan é um cliente para o daemon clamd, proporcionando uma verificação mais rápida. Requer que o daemon clamd esteja em execução."
+msgstr ""
+"clamdscan é um cliente para o daemon clamd, proporcionando uma verificação "
+"mais rápida. Requer que o daemon clamd esteja em execução."
 
 #: src/ui/components_view.py:70
 msgid "clamd Daemon Setup"
@@ -2713,14 +2899,19 @@ msgstr "clamd é o daemon ClamAV para digitalização mais rápida."
 
 #: src/ui/components_view.py:90
 msgid "Configuration file location is auto-detected in Preferences."
-msgstr "A localização do arquivo de configuração é detectada automaticamente em Preferências."
+msgstr ""
+"A localização do arquivo de configuração é detectada automaticamente em "
+"Preferências."
 
 #: src/ui/components_view.py:92
 msgid ""
 "On Fedora, ClamUI uses /etc/clamd.d/scan.conf. If the daemon is running but "
 "still unavailable, verify socket permissions and test with: clamdscan --"
 "config-file=/etc/clamd.d/scan.conf --ping 3"
-msgstr "No Fedora, ClamUI usa /etc/clamd.d/scan.conf. Se o daemon estiver em execução, mas ainda indisponível, verifique as permissões do soquete e teste com: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+msgstr ""
+"No Fedora, ClamUI usa /etc/clamd.d/scan.conf. Se o daemon estiver em "
+"execução, mas ainda indisponível, verifique as permissões do soquete e teste "
+"com: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
 
 #: src/ui/components_view.py:161
 msgid "ClamAV Components"
@@ -2728,7 +2919,9 @@ msgstr "Componentes ClamAV"
 
 #: src/ui/components_view.py:163
 msgid "Check the status of ClamAV components and get setup instructions"
-msgstr "Verifique o status dos componentes do ClamAV e obtenha instruções de configuração"
+msgstr ""
+"Verifique o status dos componentes do ClamAV e obtenha instruções de "
+"configuração"
 
 #: src/ui/components_view.py:168
 msgid "Component Status"
@@ -2736,7 +2929,8 @@ msgstr "Status do Componente"
 
 #: src/ui/components_view.py:169
 msgid "View installation status and setup guides for ClamAV tools"
-msgstr "Veja o status de instalação e guias de configuração das ferramentas ClamAV"
+msgstr ""
+"Veja o status de instalação e guias de configuração das ferramentas ClamAV"
 
 #: src/ui/components_view.py:184
 msgid "Components Status"
@@ -2746,7 +2940,9 @@ msgstr "Status dos Componentes"
 msgid ""
 "ClamAV tools must be installed on the host system. Flatpak runs them through "
 "flatpak-spawn."
-msgstr "As ferramentas ClamAV devem ser instaladas no sistema host. Flatpak os executa através do flatpak-spawn."
+msgstr ""
+"As ferramentas ClamAV devem ser instaladas no sistema host. Flatpak os "
+"executa através do flatpak-spawn."
 
 #: src/ui/components_view.py:195
 msgid "Expand each component for installation instructions"
@@ -2828,7 +3024,9 @@ msgstr "<b>Banco de dados de vírus não encontrado</b>"
 msgid ""
 "ClamAV requires a virus database to scan files. The database needs to be "
 "downloaded before you can perform scans."
-msgstr "O ClamAV requer um banco de dados de vírus para verificar os arquivos. O banco de dados precisa ser baixado antes que você possa realizar varreduras."
+msgstr ""
+"O ClamAV requer um banco de dados de vírus para verificar os arquivos. O "
+"banco de dados precisa ser baixado antes que você possa realizar varreduras."
 
 #: src/ui/database_missing_dialog.py:138
 msgid "Download Now"
@@ -2884,7 +3082,10 @@ msgid ""
 "ClamUI can add 'Scan with ClamUI' options to your file manager's right-click "
 "menu. This makes it easy to scan files and folders directly from your file "
 "browser."
-msgstr "ClamUI pode adicionar opções ‘Scan with ClamUI’ ao menu do botão direito do gerenciador de arquivos. Isso facilita a verificação de arquivos e pastas diretamente do navegador de arquivos."
+msgstr ""
+"ClamUI pode adicionar opções ‘Scan with ClamUI’ ao menu do botão direito do "
+"gerenciador de arquivos. Isso facilita a verificação de arquivos e pastas "
+"diretamente do navegador de arquivos."
 
 #: src/ui/file_manager_integration_dialog.py:144
 msgid "What gets installed?"
@@ -2894,7 +3095,9 @@ msgstr "O que é instalado?"
 msgid ""
 "Small configuration files are added to your user profile. No system files "
 "are modified."
-msgstr "Pequenos arquivos de configuração são adicionados ao seu perfil de usuário. Nenhum arquivo do sistema é modificado."
+msgstr ""
+"Pequenos arquivos de configuração são adicionados ao seu perfil de usuário. "
+"Nenhum arquivo do sistema é modificado."
 
 #: src/ui/file_manager_integration_dialog.py:162
 msgid "Available File Managers"
@@ -2910,7 +3113,9 @@ msgstr "Nenhum gerenciador de arquivos compatível detectado"
 
 #: src/ui/file_manager_integration_dialog.py:181
 msgid "ClamUI supports Nemo, Nautilus, and Dolphin file managers."
-msgstr "ClamUI oferece suporte aos gerenciadores de arquivos Nemo, Nautilus e Dolphin."
+msgstr ""
+"ClamUI oferece suporte aos gerenciadores de arquivos Nemo, Nautilus e "
+"Dolphin."
 
 #: src/ui/file_manager_integration_dialog.py:211
 #, python-brace-format
@@ -2963,7 +3168,9 @@ msgstr "Limpar todos os registros?"
 msgid ""
 "This will permanently delete all historical logs. This action cannot be "
 "undone."
-msgstr "Isso excluirá permanentemente todos os registros históricos. Esta ação não pode ser desfeita."
+msgstr ""
+"Isso excluirá permanentemente todos os registros históricos. Esta ação não "
+"pode ser desfeita."
 
 #: src/ui/logs_view.py:113 src/ui/logs_view.py:300
 #: src/ui/scan/target_selector.py:107
@@ -3186,7 +3393,11 @@ msgid ""
 "\n"
 "The daemon is optional and provides faster scanning.\n"
 "You can still use ClamUI for on-demand scanning without it."
-msgstr "O daemon ClamAV (clamd) não está instalado.\n\nO daemon é opcional e fornece verificação mais rápida.\nVocê ainda pode usar o ClamUI para verificação sob demanda sem ele."
+msgstr ""
+"O daemon ClamAV (clamd) não está instalado.\n"
+"\n"
+"O daemon é opcional e fornece verificação mais rápida.\n"
+"Você ainda pode usar o ClamUI para verificação sob demanda sem ele."
 
 #: src/ui/logs_view.py:1310
 msgid "Stop live log updates"
@@ -3308,7 +3519,9 @@ msgstr "Comportamento da janela"
 msgid ""
 "System tray is not available. Window behavior settings require a system tray "
 "to be active."
-msgstr "A bandeja do sistema não está disponível. As configurações de comportamento da janela exigem que uma bandeja do sistema esteja ativa."
+msgstr ""
+"A bandeja do sistema não está disponível. As configurações de comportamento "
+"da janela exigem que uma bandeja do sistema esteja ativa."
 
 #: src/ui/preferences/behavior_page.py:122
 msgid "Configure what happens when closing the window"
@@ -3336,7 +3549,9 @@ msgstr "Mostrar progresso da verificação ao vivo"
 
 #: src/ui/preferences/behavior_page.py:165
 msgid "Display files being scanned in real-time with detailed progress"
-msgstr "Exiba arquivos que estão sendo verificados em tempo real com progresso detalhado"
+msgstr ""
+"Exiba arquivos que estão sendo verificados em tempo real com progresso "
+"detalhado"
 
 #: src/ui/preferences/behavior_page.py:183
 #: src/ui/preferences/behavior_page.py:187
@@ -3361,7 +3576,9 @@ msgstr "Reinicie o ClamUI para aplicar o novo idioma"
 
 #: src/ui/preferences/behavior_page.py:284
 msgid "Add context menu actions to scan files directly from your file manager"
-msgstr "Adicione ações de menu de contexto para verificar arquivos diretamente do seu gerenciador de arquivos"
+msgstr ""
+"Adicione ações de menu de contexto para verificar arquivos diretamente do "
+"seu gerenciador de arquivos"
 
 #: src/ui/preferences/behavior_page.py:288
 msgid "Configure Integration"
@@ -3373,7 +3590,9 @@ msgstr "Instalar ou gerenciar ações do menu 'Scan with ClamUI'"
 
 #: src/ui/preferences/database_page.py:73
 msgid "Free malware URL blocklist by abuse.ch, updated every minute"
-msgstr "Lista de bloqueio de URLs de malware gratuita por abuse.ch, atualizada a cada minuto"
+msgstr ""
+"Lista de bloqueio de URLs de malware gratuita por abuse.ch, atualizada a "
+"cada minuto"
 
 #: src/ui/preferences/database_page.py:74
 #: src/ui/preferences/database_page.py:106
@@ -3388,17 +3607,23 @@ msgstr "Milhões de assinaturas para malware, phishing e spam de dia zero"
 msgid ""
 "Free registration required at securiteinfo.com. URLs contain your personal "
 "API key."
-msgstr "É necessário registro gratuito em secureiteinfo.com. Os URLs contêm sua chave de API pessoal."
+msgstr ""
+"É necessário registro gratuito em secureiteinfo.com. Os URLs contêm sua "
+"chave de API pessoal."
 
 #: src/ui/preferences/database_page.py:93
 msgid "Macro malware, phishing, scam, and spam signatures (hourly updates)"
-msgstr "Assinaturas de macro malware, phishing, fraude e spam (atualizações de hora em hora)"
+msgstr ""
+"Assinaturas de macro malware, phishing, fraude e spam (atualizações de hora "
+"em hora)"
 
 #: src/ui/preferences/database_page.py:95
 msgid ""
 "Requires 'fangfrisch' or 'clamav-unofficial-sigs' tool. Cannot be added as "
 "custom URL directly."
-msgstr "Requer a ferramenta 'fangfrisch' ou 'clamav-unofficial-sigs'. Não pode ser adicionado diretamente como URL personalizado."
+msgstr ""
+"Requer a ferramenta 'fangfrisch' ou 'clamav-unofficial-sigs'. Não pode ser "
+"adicionado diretamente como URL personalizado."
 
 #: src/ui/preferences/database_page.py:105
 msgid "Hash-based signatures, web shell detection, and general malware"
@@ -3517,7 +3742,10 @@ msgstr "Bancos de dados de assinatura personalizados"
 msgid ""
 "Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
 "- 'DatabaseCustomURL' prefix auto-stripped."
-msgstr "URLs de assinatura de terceiros (por exemplo, SecuriteInfo). Cole URLs ou linhas de configuração - prefixo 'DatabaseCustomURL' removido automaticamente."
+msgstr ""
+"URLs de assinatura de terceiros (por exemplo, SecuriteInfo). Cole URLs ou "
+"linhas de configuração - prefixo 'DatabaseCustomURL' removido "
+"automaticamente."
 
 #: src/ui/preferences/database_page.py:496
 msgid "Add URL(s)"
@@ -3542,7 +3770,9 @@ msgstr "Sugerido"
 
 #: src/ui/preferences/database_page.py:518
 msgid "Add free community signature databases (URLhaus, InterServer)"
-msgstr "Adicione bancos de dados gratuitos de assinaturas comunitárias (URLhaus, InterServer)"
+msgstr ""
+"Adicione bancos de dados gratuitos de assinaturas comunitárias (URLhaus, "
+"InterServer)"
 
 #: src/ui/preferences/database_page.py:573
 msgid "Remove this URL"
@@ -3556,7 +3786,10 @@ msgstr "Provedores de assinatura populares"
 msgid ""
 "Third-party databases can significantly improve detection rates. Providers "
 "marked with a key icon require free registration."
-msgstr "Bancos de dados de terceiros podem melhorar significativamente as taxas de detecção. Os provedores marcados com um ícone de chave exigem registro gratuito."
+msgstr ""
+"Bancos de dados de terceiros podem melhorar significativamente as taxas de "
+"detecção. Os provedores marcados com um ícone de chave exigem registro "
+"gratuito."
 
 #: src/ui/preferences/database_page.py:653
 msgid "Registration required"
@@ -3574,7 +3807,10 @@ msgstr "Dica: fangfrisch"
 msgid ""
 "For SaneSecurity and other rsync-based providers, install the 'fangfrisch' "
 "tool which handles downloading and updating signatures automatically."
-msgstr "Para SaneSecurity e outros provedores baseados em rsync, instale a ferramenta 'fangfrisch' que faz download e atualização de assinaturas automaticamente."
+msgstr ""
+"Para SaneSecurity e outros provedores baseados em rsync, instale a "
+"ferramenta 'fangfrisch' que faz download e atualização de assinaturas "
+"automaticamente."
 
 #: src/ui/preferences/database_page.py:712
 msgid "Proxy Settings"
@@ -3632,7 +3868,9 @@ msgstr "Configurações de registro"
 msgid ""
 "Configure debug logging for troubleshooting. Higher levels produce more "
 "detailed logs but use more disk space."
-msgstr "Configure o log de depuração para solução de problemas. Níveis mais altos produzem logs mais detalhados, mas utilizam mais espaço em disco."
+msgstr ""
+"Configure o log de depuração para solução de problemas. Níveis mais altos "
+"produzem logs mais detalhados, mas utilizam mais espaço em disco."
 
 #: src/ui/preferences/debug_page.py:119
 msgid "Log Level"
@@ -3656,7 +3894,8 @@ msgstr "Gerenciamento de registros"
 
 #: src/ui/preferences/debug_page.py:172
 msgid "Export logs for sharing or clear them to free disk space."
-msgstr "Exporte logs para compartilhamento ou limpe-os para liberar espaço em disco."
+msgstr ""
+"Exporte logs para compartilhamento ou limpe-os para liberar espaço em disco."
 
 #: src/ui/preferences/debug_page.py:176
 msgid "Current Log Size"
@@ -3824,7 +4063,9 @@ msgstr "Nenhum registro para exportar"
 msgid ""
 "There are no log files to export. Logs will be created when debug logging is "
 "enabled and the application runs."
-msgstr "Não há arquivos de log para exportar. Os logs serão criados quando o log de depuração estiver habilitado e o aplicativo for executado."
+msgstr ""
+"Não há arquivos de log para exportar. Os logs serão criados quando o log de "
+"depuração estiver habilitado e o aplicativo for executado."
 
 #: src/ui/preferences/debug_page.py:641
 msgid "Logs exported successfully"
@@ -3861,7 +4102,8 @@ msgstr "Excluir todos os arquivos de log?"
 #: src/ui/preferences/debug_page.py:733
 #, python-brace-format
 msgid "This will permanently delete {count} log file(s) totaling {size}."
-msgstr "Isso excluirá permanentemente {count} arquivo(s) de log totalizando {size}."
+msgstr ""
+"Isso excluirá permanentemente {count} arquivo(s) de log totalizando {size}."
 
 #: src/ui/preferences/debug_page.py:736 src/ui/profile_dialogs.py:823
 msgid "This action cannot be undone."
@@ -3881,7 +4123,9 @@ msgstr "Falha ao limpar"
 
 #: src/ui/preferences/debug_page.py:779
 msgid "Some log files could not be deleted. They may be in use or protected."
-msgstr "Alguns arquivos de log não puderam ser excluídos. Eles podem estar em uso ou protegidos."
+msgstr ""
+"Alguns arquivos de log não puderam ser excluídos. Eles podem estar em uso ou "
+"protegidos."
 
 #: src/ui/preferences/device_scan_page.py:88 src/ui/preferences/window.py:53
 msgid "Device Scan"
@@ -3893,7 +4137,9 @@ msgstr "Em geral"
 
 #: src/ui/preferences/device_scan_page.py:110
 msgid "Automatically scan storage devices when they are connected"
-msgstr "Verifica automaticamente os dispositivos de armazenamento quando eles estão conectados"
+msgstr ""
+"Verifica automaticamente os dispositivos de armazenamento quando eles estão "
+"conectados"
 
 #: src/ui/preferences/device_scan_page.py:113
 msgid "Enable Device Auto-Scan"
@@ -3909,7 +4155,8 @@ msgstr "Tipos de dispositivos"
 
 #: src/ui/preferences/device_scan_page.py:135
 msgid "Select which types of devices to scan automatically"
-msgstr "Selecione quais tipos de dispositivos serão verificados automaticamente"
+msgstr ""
+"Selecione quais tipos de dispositivos serão verificados automaticamente"
 
 #: src/ui/preferences/device_scan_page.py:163
 msgid "Options"
@@ -3949,7 +4196,9 @@ msgstr "Notificações"
 
 #: src/ui/preferences/device_scan_page.py:220
 msgid "Show desktop notifications for device scan events"
-msgstr "Mostrar notificações na área de trabalho para eventos de verificação de dispositivos"
+msgstr ""
+"Mostrar notificações na área de trabalho para eventos de verificação de "
+"dispositivos"
 
 #: src/ui/preferences/device_scan_page.py:234
 #: src/ui/preferences/scheduled_page.py:173
@@ -4190,13 +4439,16 @@ msgstr "Salvamento Manual Necessário"
 
 #: src/ui/preferences/save_page.py:230
 msgid "Database Updates, Scanner, On-Access, Scheduled Scans."
-msgstr "Atualizações de banco de dados, scanner, varreduras agendadas e ao acessar."
+msgstr ""
+"Atualizações de banco de dados, scanner, varreduras agendadas e ao acessar."
 
 #: src/ui/preferences/save_page.py:237
 msgid ""
 "Database Updates, Scanner, On-Access, Scheduled Scans. When needed, you will "
 "be asked for administrator permission once."
-msgstr "Atualizações de banco de dados, scanner, varreduras agendadas e ao acessar. Quando necessário, será solicitada permissão de administrador uma vez."
+msgstr ""
+"Atualizações de banco de dados, scanner, varreduras agendadas e ao acessar. "
+"Quando necessário, será solicitada permissão de administrador uma vez."
 
 #: src/ui/preferences/save_page.py:253
 msgid "Apply Configuration"
@@ -4224,7 +4476,16 @@ msgid ""
 "- Disk space issues (Flatpak)\n"
 "\n"
 "Check the application logs for details."
-msgstr "Não é possível salvar as configurações do Freshclam: falha ao carregar a configuração.\n\nIsso pode ser devido a:\n- Arquivo de configuração ausente\n- Permissões insuficientes\n- Problemas de espaço em disco (Flatpak)\n\nVerifique os logs do aplicativo para obter detalhes."
+msgstr ""
+"Não é possível salvar as configurações do Freshclam: falha ao carregar a "
+"configuração.\n"
+"\n"
+"Isso pode ser devido a:\n"
+"- Arquivo de configuração ausente\n"
+"- Permissões insuficientes\n"
+"- Problemas de espaço em disco (Flatpak)\n"
+"\n"
+"Verifique os logs do aplicativo para obter detalhes."
 
 #: src/ui/preferences/save_page.py:319 src/ui/preferences/save_page.py:339
 msgid "Validation Error"
@@ -4236,7 +4497,11 @@ msgid ""
 "Cannot save clamd settings: Configuration failed to load.\n"
 "\n"
 "Check that {path} exists and is readable."
-msgstr "Não é possível salvar as configurações do clamd: falha ao carregar a configuração.\n\nVerifique isso {path} existe e é legível."
+msgstr ""
+"Não é possível salvar as configurações do clamd: falha ao carregar a "
+"configuração.\n"
+"\n"
+"Verifique isso {path} existe e é legível."
 
 #: src/ui/preferences/save_page.py:508
 msgid "Configuration Saved"
@@ -4245,7 +4510,9 @@ msgstr "Configuração salva"
 #: src/ui/preferences/save_page.py:509
 msgid ""
 "Configuration saved. Active ClamAV services were restarted where needed."
-msgstr "Configuração salva. Os serviços ativos do ClamAV foram reiniciados quando necessário."
+msgstr ""
+"Configuração salva. Os serviços ativos do ClamAV foram reiniciados quando "
+"necessário."
 
 #: src/ui/preferences/save_page.py:514
 msgid "No Changes to Apply"
@@ -4255,7 +4522,9 @@ msgstr "Nenhuma alteração a ser aplicada"
 msgid ""
 "No configuration changes were detected, so nothing was saved. Open a "
 "settings page and modify a value before saving."
-msgstr "Nenhuma alteração de configuração foi detectada, portanto nada foi salvo. Abra uma página de configurações e modifique um valor antes de salvar."
+msgstr ""
+"Nenhuma alteração de configuração foi detectada, portanto nada foi salvo. "
+"Abra uma página de configurações e modifique um valor antes de salvar."
 
 #: src/ui/preferences/save_page.py:523
 msgid "Save Failed"
@@ -4290,7 +4559,9 @@ msgstr "Back-end de verificação"
 msgid ""
 "Select how ClamUI performs scans. Daemon runs on host via flatpak-spawn. "
 "Auto-saved."
-msgstr "Selecione como o ClamUI realiza varreduras. Daemon é executado no host via flatpak-spawn. Salvo automaticamente."
+msgstr ""
+"Selecione como o ClamUI realiza varreduras. Daemon é executado no host via "
+"flatpak-spawn. Salvo automaticamente."
 
 #: src/ui/preferences/scanner_page.py:293
 msgid "Select how ClamUI performs scans. Auto-saved."
@@ -4325,18 +4596,24 @@ msgstr "Sobre back-ends de verificação"
 msgid ""
 "Recommended — Automatically uses daemon if available, falls back to clamscan "
 "for reliability"
-msgstr "Recomendado — Usa automaticamente o daemon se disponível, recorre ao clamscan para obter confiabilidade"
+msgstr ""
+"Recomendado — Usa automaticamente o daemon se disponível, recorre ao "
+"clamscan para obter confiabilidade"
 
 #: src/ui/preferences/scanner_page.py:385
 msgid ""
 "Fastest — Instant startup with in-memory database, requires clamd service "
 "running"
-msgstr "Mais rápido – inicialização instantânea com banco de dados na memória, requer execução do serviço clamd"
+msgstr ""
+"Mais rápido – inicialização instantânea com banco de dados na memória, "
+"requer execução do serviço clamd"
 
 #: src/ui/preferences/scanner_page.py:387
 msgid ""
 "Most compatible — Works anywhere, loads database each scan (3-10 sec startup)"
-msgstr "Mais compatível — Funciona em qualquer lugar, carrega o banco de dados a cada varredura (inicialização de 3 a 10 segundos)"
+msgstr ""
+"Mais compatível — Funciona em qualquer lugar, carrega o banco de dados a "
+"cada varredura (inicialização de 3 a 10 segundos)"
 
 #: src/ui/preferences/scanner_page.py:461
 msgid "Daemon available"
@@ -4355,7 +4632,9 @@ msgstr "Documentação não encontrada"
 msgid ""
 "The scan backends documentation file could not be found. It may have been "
 "moved or deleted."
-msgstr "O arquivo de documentação de backends de verificação não foi encontrado. Pode ter sido movido ou excluído."
+msgstr ""
+"O arquivo de documentação de backends de verificação não foi encontrado. "
+"Pode ter sido movido ou excluído."
 
 #: src/ui/preferences/scanner_page.py:534
 msgid "Error Opening Documentation"
@@ -4681,7 +4960,9 @@ msgstr "Excluir chave de API?"
 msgid ""
 "This will remove your VirusTotal API key. You'll need to enter it again to "
 "use VirusTotal scanning."
-msgstr "Isso removerá sua chave de API do VirusTotal. Você precisará digitá-lo novamente para usar a verificação do VirusTotal."
+msgstr ""
+"Isso removerá sua chave de API do VirusTotal. Você precisará digitá-lo "
+"novamente para usar a verificação do VirusTotal."
 
 #: src/ui/preferences/virustotal_page.py:369
 msgid "API key deleted"
@@ -4779,7 +5060,8 @@ msgstr "Nenhuma meta adicionada"
 
 #: src/ui/profile_dialogs.py:224
 msgid "Click the folder or file button to add scan targets"
-msgstr "Clique no botão de pasta ou arquivo para adicionar alvos de verificação"
+msgstr ""
+"Clique no botão de pasta ou arquivo para adicionar alvos de verificação"
 
 #: src/ui/profile_dialogs.py:237
 msgid "Paths and patterns to skip during scan"
@@ -4859,7 +5141,8 @@ msgstr "Adicionar padrão de exclusão"
 
 #: src/ui/profile_dialogs.py:749
 msgid "Enter a glob pattern to exclude (e.g., *.tmp, .git/*, cache/*)"
-msgstr "Insira um padrão glob para excluir (por exemplo, *.tmp, .git/*, cache/*)"
+msgstr ""
+"Insira um padrão glob para excluir (por exemplo, *.tmp, .git/*, cache/*)"
 
 #: src/ui/profile_dialogs.py:817
 msgid "Delete Profile?"
@@ -4878,7 +5161,10 @@ msgstr "Restaurar perfis padrão?"
 msgid ""
 "This will reset Quick Scan, Full Scan, and Home Folder profiles to their "
 "original settings. Any changes you made to these profiles will be lost."
-msgstr "Isso redefinirá os perfis Quick Scan, Full Scan e Home Folder para suas configurações originais. Quaisquer alterações feitas nesses perfis serão perdidas."
+msgstr ""
+"Isso redefinirá os perfis Quick Scan, Full Scan e Home Folder para suas "
+"configurações originais. Quaisquer alterações feitas nesses perfis serão "
+"perdidas."
 
 #: src/ui/profile_dialogs.py:945
 msgid "Your custom profiles will not be affected."
@@ -5095,7 +5381,8 @@ msgstr "Restaurar arquivo em quarentena?"
 #: src/ui/quarantine_view.py:841
 #, python-brace-format
 msgid "This file was detected as \"{threat}\". It will be restored to {path}."
-msgstr "Este arquivo foi detectado como \"{threat}\". Será restaurado para {path}."
+msgstr ""
+"Este arquivo foi detectado como \"{threat}\". Será restaurado para {path}."
 
 #: src/ui/quarantine_view.py:844
 msgid "Restore Anyway"
@@ -5107,7 +5394,8 @@ msgstr "Arquivo restaurado com sucesso"
 
 #: src/ui/quarantine_view.py:877
 msgid "File restored, but the database entry could not be removed"
-msgstr "Arquivo restaurado, mas não foi possível remover a entrada do banco de dados"
+msgstr ""
+"Arquivo restaurado, mas não foi possível remover a entrada do banco de dados"
 
 #: src/ui/quarantine_view.py:882
 msgid "Failed to restore file"
@@ -5122,7 +5410,9 @@ msgstr "Excluir arquivo permanentemente?"
 msgid ""
 "The quarantined file from {path} (\"{threat}\") will be permanently deleted. "
 "This action cannot be undone."
-msgstr "O arquivo em quarentena de {path} (\"{threat}\") será excluído permanentemente. Esta ação não pode ser desfeita."
+msgstr ""
+"O arquivo em quarentena de {path} (\"{threat}\") será excluído "
+"permanentemente. Esta ação não pode ser desfeita."
 
 #: src/ui/quarantine_view.py:929
 msgid "File deleted successfully"
@@ -5130,7 +5420,8 @@ msgstr "Arquivo excluído com sucesso"
 
 #: src/ui/quarantine_view.py:937
 msgid "File deleted, but the database entry could not be removed"
-msgstr "Arquivo excluído, mas não foi possível remover a entrada do banco de dados"
+msgstr ""
+"Arquivo excluído, mas não foi possível remover a entrada do banco de dados"
 
 #: src/ui/quarantine_view.py:942
 msgid "Failed to delete file"
@@ -5244,7 +5535,9 @@ msgstr "Teste EICAR"
 
 #: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:2366
 msgid "Run a scan with EICAR test file to verify antivirus detection"
-msgstr "Execute uma varredura com arquivo de teste EICAR para verificar a detecção de antivírus"
+msgstr ""
+"Execute uma varredura com arquivo de teste EICAR para verificar a detecção "
+"de antivírus"
 
 #: src/ui/scan/scan_view.py:192 src/ui/scan_view.py:2392
 #, python-brace-format
@@ -5322,7 +5615,9 @@ msgstr "<b><big>Verificação em andamento</big></b>"
 msgid ""
 "A virus scan is currently running. If you close now, the scan will be "
 "cancelled and any partial results will be lost."
-msgstr "Uma verificação de vírus está em execução. Se você fechar agora, a verificação será cancelada e quaisquer resultados parciais serão perdidos."
+msgstr ""
+"Uma verificação de vírus está em execução. Se você fechar agora, a "
+"verificação será cancelada e quaisquer resultados parciais serão perdidos."
 
 #: src/ui/scan_in_progress_dialog.py:124
 msgid "Do you want to cancel the scan and close?"
@@ -5430,7 +5725,9 @@ msgstr "... e {count} mais"
 #, python-brace-format
 msgid ""
 "<b>Large result set:</b> Found {count} threats. Displaying first {limit}."
-msgstr "<b>Grande conjunto de resultados:</b> encontrado {count} ameaças. Exibindo primeiro {limit}."
+msgstr ""
+"<b>Grande conjunto de resultados:</b> encontrado {count} ameaças. Exibindo "
+"primeiro {limit}."
 
 #: src/ui/scan_results_dialog.py:409 src/ui/virustotal_results_dialog.py:344
 #, python-brace-format
@@ -5523,7 +5820,8 @@ msgstr "Exportar resultados da verificação"
 
 #: src/ui/scan_view.py:427
 msgid "Scan in progress - please wait until the current scan completes"
-msgstr "Verificação em andamento - aguarde até que a verificação atual seja concluída"
+msgstr ""
+"Verificação em andamento - aguarde até que a verificação atual seja concluída"
 
 #: src/ui/scan_view.py:434
 msgid "No files were dropped"
@@ -5569,7 +5867,9 @@ msgstr "Falha ao copiar detalhes da digitalização"
 msgid ""
 "Scan details are too large to copy. Use fullscreen to inspect the full "
 "output."
-msgstr "Os detalhes da digitalização são muito grandes para serem copiados. Use tela cheia para inspecionar a saída completa."
+msgstr ""
+"Os detalhes da digitalização são muito grandes para serem copiados. Use tela "
+"cheia para inspecionar a saída completa."
 
 #: src/ui/scan_view.py:876
 #, python-brace-format
@@ -5904,7 +6204,8 @@ msgstr "Ainda não há histórico de verificação"
 
 #: src/ui/statistics_view.py:953
 msgid "Run your first scan to see statistics and protection status"
-msgstr "Execute sua primeira verificação para ver estatísticas e status de proteção"
+msgstr ""
+"Execute sua primeira verificação para ver estatísticas e status de proteção"
 
 #: src/ui/statistics_view.py:973 src/ui/statistics_view.py:1038
 msgid "Unable to load statistics"
@@ -5983,7 +6284,8 @@ msgstr "Atualização de banco de dados"
 
 #: src/ui/update_view.py:95
 msgid "Update ClamAV virus definitions to detect the latest threats"
-msgstr "Atualize as definições de vírus ClamAV para detectar as ameaças mais recentes"
+msgstr ""
+"Atualize as definições de vírus ClamAV para detectar as ameaças mais recentes"
 
 #: src/ui/update_view.py:100
 msgid "Virus Definitions"
@@ -5991,7 +6293,9 @@ msgstr "Definições de vírus"
 
 #: src/ui/update_view.py:101
 msgid "Click 'Update Database' to download the latest virus signatures"
-msgstr "Clique em 'Atualizar banco de dados' para baixar as assinaturas de vírus mais recentes"
+msgstr ""
+"Clique em 'Atualizar banco de dados' para baixar as assinaturas de vírus "
+"mais recentes"
 
 #: src/ui/update_view.py:120 src/ui/update_view.py:536
 msgid "Update Database"
@@ -6009,7 +6313,10 @@ msgstr "Forçar atualização"
 msgid ""
 "Force update: Backs up local databases, deletes them, then downloads fresh "
 "copies from mirrors. Automatically restores from backup if update fails."
-msgstr "Forçar atualização: faz backup de bancos de dados locais, exclui-os e, em seguida, baixa novas cópias dos espelhos. Restaura automaticamente do backup se a atualização falhar."
+msgstr ""
+"Forçar atualização: faz backup de bancos de dados locais, exclui-os e, em "
+"seguida, baixa novas cópias dos espelhos. Restaura automaticamente do backup "
+"se a atualização falhar."
 
 #: src/ui/update_view.py:162
 msgid "Update Results"
@@ -6025,7 +6332,9 @@ msgstr "Nenhum resultado de atualização ainda."
 
 #: src/ui/update_view.py:198
 msgid "Click 'Update Database' to download the latest virus definitions."
-msgstr "Clique em 'Atualizar banco de dados' para baixar as definições de vírus mais recentes."
+msgstr ""
+"Clique em 'Atualizar banco de dados' para baixar as definições de vírus mais "
+"recentes."
 
 #: src/ui/update_view.py:226
 msgid "Checking freshclam..."
@@ -6076,11 +6385,14 @@ msgstr "Forçar atualização do banco de dados de vírus..."
 msgid ""
 "Backing up local databases, then deleting them to force fresh downloads from "
 "mirrors."
-msgstr "Fazer backup de bancos de dados locais e, em seguida, excluí-los para forçar novos downloads de espelhos."
+msgstr ""
+"Fazer backup de bancos de dados locais e, em seguida, excluí-los para forçar "
+"novos downloads de espelhos."
 
 #: src/ui/update_view.py:498
 msgid "Previous databases will be restored if the update fails."
-msgstr "Os bancos de dados anteriores serão restaurados se a atualização falhar."
+msgstr ""
+"Os bancos de dados anteriores serão restaurados se a atualização falhar."
 
 #: src/ui/update_view.py:500 src/ui/update_view.py:506
 msgid "Please wait, this may take a few minutes."
@@ -6102,8 +6414,10 @@ msgstr "Sinal de atualização enviado para o serviço Freshclam"
 #, python-brace-format
 msgid "Database updated successfully ({count} database updated)"
 msgid_plural "Database updated successfully ({count} databases updated)"
-msgstr[0] "Banco de dados atualizado com sucesso ({count} banco de dados atualizado)"
-msgstr[1] "Banco de dados atualizado com sucesso ({count} bancos de dados atualizados)"
+msgstr[0] ""
+"Banco de dados atualizado com sucesso ({count} banco de dados atualizado)"
+msgstr[1] ""
+"Banco de dados atualizado com sucesso ({count} bancos de dados atualizados)"
 
 #: src/ui/update_view.py:601
 msgid "Database is already up to date"
@@ -6177,7 +6491,8 @@ msgstr "  Taxa limitada: {databases}"
 
 #: src/ui/update_view.py:675
 msgid "Note: The freshclam service is handling the update in the background."
-msgstr "Nota: O serviço Freshclam está lidando com a atualização em segundo plano."
+msgstr ""
+"Nota: O serviço Freshclam está lidando com a atualização em segundo plano."
 
 #: src/ui/update_view.py:676
 msgid "Check service logs for detailed progress:"
@@ -6320,7 +6635,9 @@ msgstr "Chave de API VirusTotal necessária"
 msgid ""
 "To scan files with VirusTotal, you need a free API key. You can get one by "
 "creating a free account on virustotal.com."
-msgstr "Para verificar arquivos com o VirusTotal, você precisa de uma chave de API gratuita. Você pode obter um criando uma conta gratuita em virustotal.com."
+msgstr ""
+"Para verificar arquivos com o VirusTotal, você precisa de uma chave de API "
+"gratuita. Você pode obter um criando uma conta gratuita em virustotal.com."
 
 #: src/ui/virustotal_setup_dialog.py:164
 msgid "Enter API Key"
@@ -6340,7 +6657,8 @@ msgstr "Carregar arquivo manualmente"
 
 #: src/ui/virustotal_setup_dialog.py:207
 msgid "Open VirusTotal website to upload files without API key"
-msgstr "Abra o site do VirusTotal para fazer upload de arquivos sem chave de API"
+msgstr ""
+"Abra o site do VirusTotal para fazer upload de arquivos sem chave de API"
 
 #: src/ui/virustotal_setup_dialog.py:224
 msgid "Don't ask again when scanning without API key"
