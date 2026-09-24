@@ -473,8 +473,16 @@ class Scanner:
                 self._save_scan_log(result, time.monotonic() - start_time)
                 return result
 
-            # Parse the results
-            result = self._parse_results(path, stdout, stderr, exit_code)
+            # The capped verbose-output buffer may omit ClamAV's terminal
+            # summary. Keep the live progress count as a fallback so a
+            # completed scan is not mistaken for an all-files-failed scan.
+            result = self._parse_results(
+                path,
+                stdout,
+                stderr,
+                exit_code,
+                scanned_files_hint=progress_files_scanned,
+            )
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
@@ -876,7 +884,14 @@ class Scanner:
         # Wrap with flatpak-spawn if running inside Flatpak sandbox
         return wrap_host_command(cmd)
 
-    def _parse_results(self, path: str, stdout: str, stderr: str, exit_code: int) -> ScanResult:
+    def _parse_results(
+        self,
+        path: str,
+        stdout: str,
+        stderr: str,
+        exit_code: int,
+        scanned_files_hint: int = 0,
+    ) -> ScanResult:
         """
         Parse clamscan output into a ScanResult.
 
@@ -890,6 +905,9 @@ class Scanner:
             stdout: Standard output from clamscan
             stderr: Standard error from clamscan
             exit_code: Process exit code
+            scanned_files_hint: Files observed by live progress parsing. Used
+                only when the terminal scan summary is absent from captured
+                output.
 
         Returns:
             Parsed ScanResult
@@ -897,7 +915,7 @@ class Scanner:
         infected_files = []
         threat_details = []
         skipped_files, nonfatal_warnings, hard_error_lines = collect_clamav_warnings(stdout, stderr)
-        scanned_files = 0
+        scanned_files: int | None = None
         scanned_dirs = 0
         infected_count = 0
 
@@ -951,6 +969,13 @@ class Scanner:
                 match = re.search(r"Scanned directories:\s*(\d+)", line)
                 if match:
                     scanned_dirs = int(match.group(1))
+
+        # Verbose output is intentionally capped to bound memory use. If that
+        # drops the terminal summary, the streaming callback's completed-file
+        # count still proves that the scan processed files. An explicit
+        # "Scanned files: 0" summary remains authoritative.
+        if scanned_files is None:
+            scanned_files = scanned_files_hint
 
         # Determine overall status based on exit code
         warning_message = None

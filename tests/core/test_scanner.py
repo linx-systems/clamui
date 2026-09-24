@@ -1209,6 +1209,71 @@ Infected files: 1
         assert result_nonfatal_only.has_warnings is True
 
 
+class TestScannerStreamingResults:
+    """Integration tests for completed scans using streamed ClamAV output."""
+
+    def test_completed_scan_uses_progress_count_when_summary_is_truncated(
+        self, tmp_path, monkeypatch
+    ):
+        """A capped verbose buffer must not turn a warning-only scan into an error."""
+        import src.core.scanner_base as scanner_base
+
+        child_script = "\n".join(
+            [
+                "import sys",
+                "for i in range(40):",
+                '    print(f"Scanning /tmp/file-{i:03d}-with-a-long-name.bin")',
+                'print("----------- SCAN SUMMARY -----------")',
+                'print("Scanned files: 40")',
+                'print("Infected files: 0")',
+                (
+                    'print("LibClamAV Warning: cli_tnef: file truncated, returning CLEAN", '
+                    "file=sys.stderr)"
+                ),
+                "sys.exit(2)",
+            ]
+        )
+        scanner = Scanner()
+        monkeypatch.setattr(scanner_base, "MAX_ACCUMULATED_BYTES", 256)
+        processes = []
+        real_popen = subprocess.Popen
+
+        def start_process(*args, **kwargs):
+            process = real_popen(*args, **kwargs)
+            processes.append(process)
+            return process
+
+        try:
+            with (
+                mock.patch(
+                    "src.core.scanner.check_clamav_installed",
+                    return_value=(True, "ClamAV test"),
+                ),
+                mock.patch.object(
+                    scanner,
+                    "_build_command",
+                    return_value=[sys.executable, "-c", child_script],
+                ),
+                mock.patch("src.core.scanner.subprocess.Popen", side_effect=start_process),
+                mock.patch.object(scanner, "_save_scan_log"),
+            ):
+                result = scanner.scan_sync(
+                    str(tmp_path),
+                    progress_callback=lambda _progress: None,
+                    backend_override="clamscan",
+                )
+        finally:
+            for process in processes:
+                if process.stdout:
+                    process.stdout.close()
+                if process.stderr:
+                    process.stderr.close()
+
+        assert result.status == ScanStatus.CLEAN
+        assert result.scanned_files == 40
+        assert result.error_message is None
+
+
 class TestScannerThreatDetailsIntegration:
     """Integration tests for enhanced scanner with threat details."""
 

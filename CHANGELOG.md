@@ -9,6 +9,7 @@
 ### Fixed
 
 - Bundled GLib's desktop-launch helper in the AppImage so audit documentation links open on KDE and other non-Ubuntu host layouts. (#194)
+- Prevented large standalone full scans from being reported as failed when capped verbose output hid the final summary and only nonfatal ClamAV warnings remained. (#217)
 
 ## [0.4.0] - 2026-08-23
 
