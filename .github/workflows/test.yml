@@ -23,6 +23,7 @@ jobs:
           sudo apt-get install -y \
             python3-gi \
             python3-gi-cairo \
+            python3-requests \
             gir1.2-gtk-4.0 \
             gir1.2-adw-1 \
             xvfb
@@ -44,6 +45,7 @@ jobs:
           from src.ui.preferences.onaccess_page import OnAccessPage
           from src.ui.preferences.scanner_page import ScannerPage
           from src.ui.preferences.scheduled_page import ScheduledPage
+          from src.ui.privileged_helper_dialog import PrivilegedHelperDialog
           from src.ui.virustotal_setup_dialog import VirusTotalSetupDialog
 
           print('All modules imported successfully with libadwaita', end=' ')

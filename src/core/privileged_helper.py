@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 import threading
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -179,9 +179,10 @@ class _HostProcessTimeout(_HostProcessError):
     """A required host package-management command exceeded its deadline."""
 
 
-class PrivilegedHelperState(StrEnum):
+class PrivilegedHelperState(str, Enum):  # noqa: UP042 - Ubuntu 22.04 CI uses Python 3.10
     """Availability of the host privileged configuration helper."""
 
+    __str__ = str.__str__
     INSTALLED = "installed"
     INSTALLABLE = "installable"
     UNSUPPORTED = "unsupported"
