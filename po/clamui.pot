@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.4.0\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-09-10 19:42+0200\n"
+"POT-Creation-Date: 2026-09-24 23:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,26 +18,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: src/app.py:424
+#: src/app.py:425
 msgid "Updating stored logs for privacy"
 msgstr ""
 
-#: src/app.py:427
+#: src/app.py:428
 #, python-brace-format
 msgid "Updating stored log for privacy ({processed}/{total})"
 msgid_plural "Updating stored logs for privacy ({processed}/{total})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/app.py:769
+#: src/app.py:770
 msgid "Select File or Folder"
 msgstr ""
 
-#: src/app.py:958
+#: src/app.py:959
 msgid "A scan is already running — the new scan request was ignored"
 msgstr ""
 
-#: src/app.py:979
+#: src/app.py:980
 #, python-brace-format
 msgid ""
 "VirusTotal scans one file per request — {count} additional selection was "
@@ -1934,98 +1934,98 @@ msgstr ""
 msgid "Unknown Device"
 msgstr ""
 
-#: src/core/privileged_helper.py:272
+#: src/core/privileged_helper.py:273
 msgid ""
 "The host helper was found, but its installed package version could not be "
 "verified."
 msgstr ""
 
-#: src/core/privileged_helper.py:279
+#: src/core/privileged_helper.py:280
 msgid ""
 "The privileged helper is only installed automatically for Flatpak ClamUI."
 msgstr ""
 
-#: src/core/privileged_helper.py:285
+#: src/core/privileged_helper.py:286
 msgid ""
 "Automatic privileged-helper installation is currently supported only on "
 "Debian-family hosts."
 msgstr ""
 
-#: src/core/privileged_helper.py:754
+#: src/core/privileged_helper.py:755
 msgid "The privileged helper is already installed."
 msgstr ""
 
-#: src/core/privileged_helper.py:759
+#: src/core/privileged_helper.py:760
 msgid "The privileged helper cannot be installed automatically here."
 msgstr ""
 
-#: src/core/privileged_helper.py:767
+#: src/core/privileged_helper.py:768
 msgid "Timed out while checking the ClamUI release."
 msgstr ""
 
-#: src/core/privileged_helper.py:772
+#: src/core/privileged_helper.py:773
 msgid ""
 "Could not contact GitHub to check the ClamUI release. Check your connection "
 "and try again."
 msgstr ""
 
-#: src/core/privileged_helper.py:776
+#: src/core/privileged_helper.py:777
 msgid "The matching ClamUI helper release could not be verified."
 msgstr ""
 
-#: src/core/privileged_helper.py:786
+#: src/core/privileged_helper.py:787
 msgid "Timed out while downloading the privileged helper. Try again."
 msgstr ""
 
-#: src/core/privileged_helper.py:791
+#: src/core/privileged_helper.py:792
 msgid ""
 "Could not download the privileged helper. Check your connection and try "
 "again."
 msgstr ""
 
-#: src/core/privileged_helper.py:794
+#: src/core/privileged_helper.py:795
 msgid "The downloaded privileged helper could not be verified."
 msgstr ""
 
-#: src/core/privileged_helper.py:800
+#: src/core/privileged_helper.py:801
 msgid "The downloaded privileged helper has an unexpected package identity."
 msgstr ""
 
-#: src/core/privileged_helper.py:805
+#: src/core/privileged_helper.py:806
 msgid ""
 "The downloaded privileged helper does not have a valid ClamUI signature."
 msgstr ""
 
-#: src/core/privileged_helper.py:811
+#: src/core/privileged_helper.py:812
 msgid "Authorization was cancelled. The privileged helper was not installed."
 msgstr ""
 
-#: src/core/privileged_helper.py:817
+#: src/core/privileged_helper.py:818
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""
 
-#: src/core/privileged_helper.py:825
+#: src/core/privileged_helper.py:826
 msgid ""
 "The privileged helper was installed but is still unavailable. Restart ClamUI "
 "and try again."
 msgstr ""
 
-#: src/core/privileged_helper.py:829
+#: src/core/privileged_helper.py:830
 msgid "The privileged helper was installed successfully."
 msgstr ""
 
-#: src/core/privileged_helper.py:834
+#: src/core/privileged_helper.py:835
 msgid ""
 "Timed out while verifying or installing the privileged helper. Try again."
 msgstr ""
 
-#: src/core/privileged_helper.py:839
+#: src/core/privileged_helper.py:840
 msgid ""
 "Could not run the host package-management tools. Install the helper manually."
 msgstr ""
 
-#: src/core/privileged_helper.py:850
+#: src/core/privileged_helper.py:851
 msgid "Privileged-helper installation is already in progress."
 msgstr ""
 
@@ -2984,7 +2984,7 @@ msgid "JSON Files"
 msgstr ""
 
 #: src/ui/file_manager_integration_dialog.py:86
-#: src/ui/preferences/behavior_page.py:282
+#: src/ui/preferences/behavior_page.py:295
 msgid "File Manager Integration"
 msgstr ""
 
@@ -3407,80 +3407,88 @@ msgstr ""
 msgid "Always ask"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:78
+#: src/ui/preferences/behavior_page.py:80
 #: src/ui/preferences/virustotal_page.py:202 src/ui/preferences/window.py:48
 msgid "Behavior"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:93
-#: src/ui/preferences/behavior_page.py:121
+#: src/ui/preferences/behavior_page.py:95
+#: src/ui/preferences/behavior_page.py:123
 msgid "Window Behavior"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:96
+#: src/ui/preferences/behavior_page.py:98
 msgid ""
 "System tray is not available. Window behavior settings require a system tray "
 "to be active."
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:122
+#: src/ui/preferences/behavior_page.py:124
 msgid "Configure what happens when closing the window"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:126
+#: src/ui/preferences/behavior_page.py:128
 msgid "When closing window"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:128
+#: src/ui/preferences/behavior_page.py:130
 msgid "Choose what happens when you close the main window"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:158
+#: src/ui/preferences/behavior_page.py:151
+msgid "Start in System Tray"
+msgstr ""
+
+#: src/ui/preferences/behavior_page.py:153
+msgid "Launch in the background and show only the tray icon"
+msgstr ""
+
+#: src/ui/preferences/behavior_page.py:171
 msgid "Scan Behavior"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:159
+#: src/ui/preferences/behavior_page.py:172
 msgid "Configure how scans are displayed"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:163
+#: src/ui/preferences/behavior_page.py:176
 msgid "Show Live Scan Progress"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:165
+#: src/ui/preferences/behavior_page.py:178
 msgid "Display files being scanned in real-time with detailed progress"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:183
-#: src/ui/preferences/behavior_page.py:187
+#: src/ui/preferences/behavior_page.py:196
+#: src/ui/preferences/behavior_page.py:200
 msgid "Language"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:184
+#: src/ui/preferences/behavior_page.py:197
 msgid "Override the application language (requires restart)"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:188
+#: src/ui/preferences/behavior_page.py:201
 msgid "Select the display language for the interface"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:194
+#: src/ui/preferences/behavior_page.py:207
 msgid "Automatic (System)"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:241
+#: src/ui/preferences/behavior_page.py:254
 msgid "Restart ClamUI to apply the new language"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:284
+#: src/ui/preferences/behavior_page.py:297
 msgid "Add context menu actions to scan files directly from your file manager"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:288
+#: src/ui/preferences/behavior_page.py:301
 msgid "Configure Integration"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:289
+#: src/ui/preferences/behavior_page.py:302
 msgid "Install or manage 'Scan with ClamUI' menu actions"
 msgstr ""
 

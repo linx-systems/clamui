@@ -359,9 +359,10 @@ class ClamUIApp(Adw.Application):
         if self._first_activation:
             self._first_activation = False
             start_minimized = self.settings_manager.get("start_minimized", False)
-            if start_minimized:
+            if start_minimized and not self._initial_scan_paths:
                 if self._tray_indicator:
-                    win.hide()
+                    win.hide_window()
+                    self._tray_indicator.update_window_menu_label(visible=False)
                 else:
                     logger.warning("start_minimized enabled but tray not available, showing window")
 

@@ -186,12 +186,12 @@ Show real-time file-by-file scanning progress during scans. When disabled, a sim
 **Default:** `false`
 **Valid Values:** `true`, `false`
 
-Controls whether ClamUI starts minimized to the system tray on application launch.
+Controls whether normal ClamUI launches start in the system tray. This can be changed from
+**Preferences → Behavior → Start in System Tray**.
 
-**Description:**
-When enabled, ClamUI will launch in the background without showing the main window. This is useful for users who want
-ClamUI to run automatically at startup without interrupting their workflow. Requires system tray support to be
-available.
+When enabled, ClamUI launches in the background with only the tray icon visible. Launches that include files or
+folders to scan still show the main window. If tray integration cannot be started, ClamUI also keeps the window
+visible so the application remains accessible.
 
 **Example:**
 

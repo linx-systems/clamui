@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a **Start in System Tray** preference for login/autostart workflows while keeping explicit file and folder scans visible. (#221)
+
 ### Fixed
 
 - Bundled GLib's desktop-launch helper in the AppImage so audit documentation links open on KDE and other non-Ubuntu host layouts. (#194)

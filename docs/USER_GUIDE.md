@@ -54,7 +54,7 @@ Monitor your protection status at a glance. Understand the protection status ove
 
 ### ⚙️ [Settings and Preferences](user-guide/settings.md)
 
-Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, configure automatic scanning of USB and removable drives, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
+Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (start in the system tray, minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, configure automatic scanning of USB and removable drives, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
 
 ### 🔔 [System Tray and Background Features](user-guide/tray.md)
 

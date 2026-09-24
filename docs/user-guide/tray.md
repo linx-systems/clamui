@@ -271,43 +271,19 @@ autostart configurations.
 - Reduce startup distraction (no window popping up)
 - Perfect for "set it and forget it" scheduled scanning
 
-#### Enabling Start Minimized
+#### Enabling Start in System Tray
 
-⚠️ **Requirement:** System tray integration must be available. If tray is not available, ClamUI will start normally with
-window visible (it won't start invisible).
+⚠️ **Requirement:** System tray integration must be available. If tray integration cannot be started, ClamUI keeps
+the window visible so the application remains accessible.
 
-**Currently Not Configurable in UI:**
+1. Open **Preferences** (`Ctrl+,`).
+2. Select **Behavior**.
+3. Under **Window Behavior**, enable **Start in System Tray**.
 
-The start-minimized feature is controlled by the `start_minimized` setting in your configuration file. Currently, there
-is no UI toggle for this setting.
+The setting is saved immediately. It applies the next time ClamUI starts normally. Opening one or more files or
+folders with ClamUI still shows the window so that you can follow the requested scan.
 
-**To Enable Manually:**
-
-1. Close ClamUI if it's running
-2. Open your configuration file in a text editor:
-   ```bash
-   # Native installation
-   nano ~/.config/clamui/settings.json
-
-   # Flatpak installation
-   nano ~/.var/app/io.github.linx_systems.ClamUI/config/clamui/settings.json
-   ```
-3. Find the line with `"start_minimized": false`
-4. Change it to `"start_minimized": true`
-5. Save the file
-
-**Configuration Example:**
-
-```json
-{
-  "scan_backend": "auto",
-  "minimize_to_tray": true,
-  "start_minimized": true,
-  "notifications_enabled": true
-}
-```
-
-💡 **Tip:** Combine `start_minimized` with `minimize_to_tray` for the best background experience.
+To disable background startup, return to **Preferences → Behavior** and turn **Start in System Tray** off.
 
 #### Using Start Minimized
 
@@ -335,9 +311,9 @@ is no UI toggle for this setting.
 
 Automatically start ClamUI at login with the window hidden:
 
-**Step 1: Enable Start Minimized**
+**Step 1: Enable Start in System Tray**
 
-- Set `start_minimized` to `true` in settings.json (see above)
+- Open **Preferences → Behavior** and enable **Start in System Tray**.
 
 **Step 2: Create Autostart Entry**
 
@@ -383,8 +359,8 @@ EOF
 rm ~/.config/autostart/clamui.desktop
 ```
 
-💡 **Tip:** With autostart + start minimized + scheduled scans, you get "set and forget" antivirus protection that runs
-automatically in the background.
+💡 **Tip:** With autostart, **Start in System Tray**, and scheduled scans, you get "set and forget" antivirus
+protection that runs automatically in the background.
 
 #### Temporarily Showing Window on Startup
 

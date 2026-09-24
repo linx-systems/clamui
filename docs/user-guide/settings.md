@@ -82,6 +82,7 @@ For raw JSON keys, defaults, and deployment-style examples, see `docs/CONFIGURAT
 |------------------------------------------|---------------------------------------------------------------------------------------------|
 | **Language**                             | Override the display language (auto uses system locale). Requires restart.                   |
 | **When closing window**                  | Choose whether closing ClamUI minimizes to tray, quits, or asks every time.                 |
+| **Start in System Tray**                  | Launches in the background with only the tray icon visible.                                  |
 | **Show Live Scan Progress**              | Shows each file being scanned in real time. Turn off for a quieter progress display.        |
 | **Configure Integration** (Flatpak only) | Installs/manages right-click "Scan with ClamUI" actions in supported file managers.         |
 
@@ -205,7 +206,6 @@ These are in `~/.config/clamui/settings.json`:
 
 - `notifications_enabled` (default: `true`): Desktop notifications on/off.
 - `minimize_to_tray` (default: `false`): Minimize window into tray instead of taskbar.
-- `start_minimized` (default: `false`): Start hidden/minimized at launch (when tray is available).
 - `quarantine_directory` (default: `""`): Override default quarantine folder.
 - `daemon_socket_path` (default: `""`): Custom daemon socket path.
 - `clamd_conf_path` (default: `""`): Custom path to `clamd.conf`.
@@ -221,7 +221,7 @@ These are in `~/.config/clamui/settings.json`:
 
 ### Behavior Settings
 
-The **Behavior** page controls how ClamUI behaves when you close the app and how scan progress is shown.
+The **Behavior** page controls startup and close behavior as well as how scan progress is shown.
 
 #### Opening Behavior Settings
 
@@ -234,7 +234,12 @@ The **Behavior** page controls how ClamUI behaves when you close the app and how
     - **Minimize to tray**
     - **Quit completely**
     - **Always ask**
-- If system tray support is unavailable, this section shows an informational message instead of controls.
+- **Start in System Tray**:
+    - **On**: normal launches open in the background with only the tray icon visible
+    - **Off**: normal launches show the main window
+    - Launches with files or folders to scan always show the window
+- If system tray support is unavailable, this section shows an informational message instead of controls. ClamUI
+  also keeps the main window visible if tray startup fails.
 
 #### Scan Behavior
 

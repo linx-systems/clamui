@@ -290,6 +290,64 @@ class TestClamUIAppLifecycle:
         assert hasattr(app, "do_startup")
         assert callable(app.do_startup)
 
+    def test_start_minimized_hides_normal_launch_in_tray(self, app):
+        """A normal first launch starts hidden when the tray preference is enabled."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_called_once()
+        app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=False)
+
+    def test_start_minimized_does_not_hide_requested_scan(self, app):
+        """Opening scan targets must remain visible even when background startup is enabled."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+        app._initial_scan_paths = ["/tmp/requested-file"]
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch.object(app, "_process_initial_scan_paths"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+        app._tray_indicator.update_window_menu_label.assert_not_called()
+
+    def test_start_minimized_keeps_window_visible_without_tray(self, app):
+        """The window remains recoverable when no tray integration is available."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = None
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+
     def test_on_quit_handler_exists(self, app):
         """Test that the _on_quit handler method exists."""
         assert hasattr(app, "_on_quit")

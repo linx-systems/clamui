@@ -135,6 +135,46 @@ class TestBehaviorPageCreatePage:
         _clear_src_modules()
 
 
+class TestBehaviorPageStartMinimized:
+    """Test the start-in-system-tray preference."""
+
+    def test_load_start_minimized_updates_row_without_saving(self, mock_gi_modules):
+        """Loading the saved value must not trigger the change handler."""
+        settings_manager = MagicMock()
+        settings_manager.get.return_value = True
+
+        from src.ui.preferences.behavior_page import BehaviorPage
+
+        page_instance = BehaviorPage(settings_manager=settings_manager, tray_available=True)
+        mock_row = MagicMock()
+        page_instance._start_minimized_row = mock_row
+        page_instance._start_minimized_handler_id = 17
+
+        page_instance._load_start_minimized()
+
+        settings_manager.get.assert_called_once_with("start_minimized", False)
+        mock_row.handler_block.assert_called_once_with(17)
+        mock_row.set_active.assert_called_once_with(True)
+        mock_row.handler_unblock.assert_called_once_with(17)
+        settings_manager.set.assert_not_called()
+        _clear_src_modules()
+
+    def test_start_minimized_change_is_persisted(self, mock_gi_modules):
+        """Changing the switch must persist the user-visible behavior."""
+        settings_manager = MagicMock()
+
+        from src.ui.preferences.behavior_page import BehaviorPage
+
+        page_instance = BehaviorPage(settings_manager=settings_manager, tray_available=True)
+        mock_row = MagicMock()
+        mock_row.get_active.return_value = True
+
+        page_instance._on_start_minimized_changed(mock_row, None)
+
+        settings_manager.set.assert_called_once_with("start_minimized", True)
+        _clear_src_modules()
+
+
 class TestBehaviorPageCloseBehaviorOption:
     """Test close behavior ComboRow functionality."""
 
