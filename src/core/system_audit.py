@@ -90,7 +90,7 @@ _URLS = {
     "ssh_root_login": "https://man7.org/linux/man-pages/man5/sshd_config.5.html",
     "lynis": "https://cisofy.com/lynis/",
     "chkrootkit": "https://www.chkrootkit.org/",
-    "open_ports": "https://wiki.archlinux.org/title/Security#Network",
+    "open_ports": "https://wiki.archlinux.org/title/Security#Network_and_firewalls",
     "portmaster": "https://safing.io/portmaster/",
     "portmaster_install": "https://docs.safing.io/portmaster/install/linux",
     "portmaster_api": "https://docs.safing.io/portmaster/api",
