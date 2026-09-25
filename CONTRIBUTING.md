@@ -31,7 +31,7 @@ For bugs and feature requests, open a public issue on
 
 ## Development Setup
 
-Full environment setup — system packages per distribution, running from source, and the architecture overview — is in
+Full environment setup - system packages per distribution, running from source, and the architecture overview - is in
 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). The short version, once the system GTK4/PyGObject packages are installed:
 
 ```bash
@@ -47,7 +47,7 @@ is installed as a package.
 ## Making a Change
 
 1. Fork the repository and clone your fork.
-2. Create a branch for your work. Branch names and commit message styles are not enforced — just make them descriptive.
+2. Create a branch for your work. Branch names and commit message styles are not enforced - just make them descriptive.
 3. Make your change, following the existing patterns in the code you are touching.
 4. Validate your change (see below).
 5. Push the branch and open a pull request against `master`.
@@ -76,7 +76,7 @@ These come up in almost every change and are worth knowing before you start:
 - **Relative imports inside `src/`.** Use `from .module import Thing`, never `from src.module import Thing`. The
   package installs as `clamui`, so absolute `src.*` imports fail outside a source checkout.
 - **Translatable user-facing text.** Wrap every user-visible string with gettext `_()`. Never put an f-string inside
-  `_()` — use `_("Scanned {count} files").format(count=count)` so translators get a stable template. Log messages are
+  `_()` - use `_("Scanned {count} files").format(count=count)` so translators get a stable template. Log messages are
   not translated.
 - **libadwaita 1.1 compatibility.** Ubuntu 22.04 is the baseline. Do not use APIs added after libadwaita 1.1; runtime
   fallbacks live in `src/ui/compat.py`.
@@ -97,7 +97,7 @@ architecture, module reference, and coding patterns, see [AGENTS.md](AGENTS.md).
 
 ## Pull Requests
 
-- Keep the scope focused — one fix or feature per pull request.
+- Keep the scope focused - one fix or feature per pull request.
 - Explain what changed, why, and how you verified it.
 - Link the related issue where one exists (`Fixes #123`).
 - Update documentation and translatable strings alongside the code they describe.

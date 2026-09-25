@@ -10,7 +10,7 @@ ClamUI is a user-friendly desktop application that brings the powerful ClamAV an
 
 Whether you're downloading files, managing USB drives, or just want peace of mind about your system's security, ClamUI makes virus scanning simple and accessible.
 
-Beyond on-demand scanning, ClamUI includes a **Security Audit** view that reviews your system's overall security posture — ClamAV health, firewall, mandatory access control, automatic updates, intrusion detection, SSH hardening, and Portmaster — with optional deeper checks via Lynis and chkrootkit. It can also **automatically scan USB and removable drives** the moment they are connected.
+Beyond on-demand scanning, ClamUI includes a **Security Audit** view that reviews your system's overall security posture - ClamAV health, firewall, mandatory access control, automatic updates, intrusion detection, SSH hardening, and Portmaster - with optional deeper checks via Lynis and chkrootkit. It can also **automatically scan USB and removable drives** the moment they are connected.
 
 ## Who is this guide for?
 
@@ -52,13 +52,19 @@ Set up automated, hands-free protection with scheduled scans. Learn why schedule
 
 Monitor your protection status at a glance. Understand the protection status overview, view comprehensive scan statistics, filter by timeframe (Day, Week, Month, All Time), interpret scan activity charts and trends, and use quick actions to export or update virus definitions.
 
+### 🛡️ [Security Audit](user-guide/security-audit.md)
+
+Review ClamAV health and key system-security checks, understand the audit statuses, and run optional authorized Lynis
+or chkrootkit deep scans. The audit provides guidance rather than remediation; a rejected Portmaster token is cleared
+so the application can request authorization again.
+
 ### ⚙️ [Settings and Preferences](user-guide/settings.md)
 
-Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (start in the system tray, minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, configure automatic scanning of USB and removable drives, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
+Customize ClamUI to match your needs and system configuration. Access the preferences window, navigate the multi-page settings interface, configure application behavior (Start in System Tray, minimize to tray, notifications, close behavior), choose scan backends (auto, daemon, clamscan), manage database update settings with freshclam, configure scanner options (max file size, recursive scanning), set up on-access scanning for real-time protection, configure automatic scanning of USB and removable drives, manage global exclusion patterns, integrate VirusTotal for enhanced threat intelligence, enable debug logging, configure notification behavior, and understand settings storage and best practices.
 
 ### 🔔 [System Tray and Background Features](user-guide/tray.md)
 
-Keep ClamUI accessible with system tray integration. Enable the system tray icon, configure minimize to tray behavior, use start minimized for background operation, access quick actions from the tray menu (scan, update, quarantine, quit), and understand how background scanning works with tray status indicators.
+Keep ClamUI accessible with system tray integration. Enable the system tray icon, configure minimize-to-tray behavior, use **Start in System Tray** for background operation, access quick actions from the tray menu (scan, update, quit), and understand how background scanning works with tray status indicators.
 
 ### 🔧 [Troubleshooting](user-guide/troubleshooting.md)
 

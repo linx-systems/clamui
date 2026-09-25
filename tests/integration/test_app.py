@@ -1377,7 +1377,7 @@ class TestAppLifecycleDatabaseDir:
 
     def test_ensure_db_dir_does_not_raise_when_fallback_also_fails(self, app):
         """If both the XDG dir and the /var/lib/clamav fallback fail, startup must
-        not crash — ensure_clamav_database_dir should swallow the fallback OSError.
+        not crash - ensure_clamav_database_dir should swallow the fallback OSError.
         """
         from pathlib import Path
 
@@ -1543,7 +1543,7 @@ class TestClamUIAppInitialScanPaths:
 
     def test_second_invocation_while_scanning_is_ignored_with_toast(self, app, mock_gtk_modules):
         """A second CLI/file-manager invocation during an active scan must not
-        touch the selection (the worker thread iterates it) — the request is
+        touch the selection (the worker thread iterates it) - the request is
         dropped and the user is told via a toast.
 
         Regression: _replace_selected_paths() cleared and repopulated the same

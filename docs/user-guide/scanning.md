@@ -112,7 +112,7 @@ This visual feedback confirms ClamUI is ready to accept your file.
 - ❌ Dropping during an active scan (rejected with error message)
 - ❌ Special URIs that don't resolve to local paths
 
-**Multi-file drops**: You can drop several files and folders at once — every valid path is added to the target list
+**Multi-file drops**: You can drop several files and folders at once - every valid path is added to the target list
 and included in the next scan. Invalid paths (nonexistent locations, or symlinks that point into protected system
 directories) are rejected by validation, and an error toast explains why if nothing valid was dropped.
 
@@ -702,13 +702,12 @@ clamui scan PATH [PATH ...]
 
 Useful options:
 
-- `--no-recursive` — do not descend into directories
-- `--profile NAME` / `-p NAME` — apply a saved profile's exclusion patterns
-- `--quarantine` / `-q` — automatically quarantine detected threats
-- `--json` — emit machine-readable JSON
-- `--verbose` / `-v` — print the ClamAV version and extra detail
-
-The command exits `0` when clean, `1` when threats are found, and `2` on error — the same codes ClamAV uses. Run
+- `--no-recursive` - do not descend into directories
+- `--profile NAME` / `-p NAME` - apply a saved profile's exclusion patterns
+- `--quarantine` / `-q` - automatically quarantine detected threats
+- `--json` - emit machine-readable JSON
+- `--verbose` / `-v` - print the ClamAV version and extra detail
+The command exits `0` when clean, `1` when threats are found, and `2` on error - the same codes ClamAV uses. Run
 `clamui help` for the full subcommand list.
 
 ---

@@ -1,4 +1,4 @@
-# quarantine/ — SQLite Quarantine Subsystem
+# quarantine/ - SQLite Quarantine Subsystem
 
 Self-contained subsystem: database + file handler + connection pool + manager facade.
 
@@ -8,7 +8,7 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 
 ```
 quarantine/
-├── manager.py         # High-level API — quarantine, restore, delete, list
+├── manager.py         # High-level API - quarantine, restore, delete, list
 ├── database.py        # SQLite metadata storage (threat name, hash, timestamps)
 ├── file_handler.py    # Secure file operations (move, encrypt, restore)
 └── connection_pool.py # SQLite connection pooling (thread-safe)
@@ -18,9 +18,9 @@ quarantine/
 
 ```
 QuarantineManager (facade)
-├── QuarantineDatabase  — metadata CRUD (SQLite)
-├── SecureFileHandler   — file move/restore with integrity checks
-└── ConnectionPool      — thread-safe SQLite connections
+├── QuarantineDatabase  - metadata CRUD (SQLite)
+├── SecureFileHandler   - file move/restore with integrity checks
+└── ConnectionPool      - thread-safe SQLite connections
 ```
 
 - **Manager** orchestrates database + file operations in single transactions
@@ -35,7 +35,7 @@ QuarantineManager (facade)
 - **Thread safety**: `threading.Lock()` in manager, connection pool for DB
 - **Async pair**: `quarantine_file_async()` / `restore_file_async()` / `delete_file_async()` / `get_all_entries_async()` with `GLib.idle_add()` callbacks
 - **Permissions**: Quarantined files get `0o400` (owner read-only), quarantine dir gets `0o700`, DB file (and WAL/SHM) `0o600`
-- **Outcome codes**: `QuarantineStatus` enum — `SUCCESS`, `FILE_NOT_FOUND`, `PERMISSION_DENIED`, `DISK_FULL`, `DATABASE_ERROR`, `ALREADY_QUARANTINED`, `ENTRY_NOT_FOUND`, `RESTORE_DESTINATION_EXISTS`, `INVALID_RESTORE_PATH`, `ERROR`
+- **Outcome codes**: `QuarantineStatus` enum - `SUCCESS`, `FILE_NOT_FOUND`, `PERMISSION_DENIED`, `DISK_FULL`, `DATABASE_ERROR`, `ALREADY_QUARANTINED`, `ENTRY_NOT_FOUND`, `RESTORE_DESTINATION_EXISTS`, `INVALID_RESTORE_PATH`, `ERROR`
 - **ConnectionPool**: WAL mode, default `pool_size=5`
 
 ## Where to Look
@@ -49,6 +49,6 @@ QuarantineManager (facade)
 
 ## Anti-Patterns
 
-- **Direct DB access**: Always go through `QuarantineManager` — it coordinates file + DB ops
+- **Direct DB access**: Always go through `QuarantineManager` - it coordinates file + DB ops
 - **Skipping hash verify**: Always verify SHA-256 before restore (integrity check)
 - **Missing permissions**: Quarantined files MUST be `0o400`, dir MUST be `0o700`, DB file MUST be `0o600`

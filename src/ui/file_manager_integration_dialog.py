@@ -325,7 +325,7 @@ class FileManagerIntegrationDialog(Adw.Window):
             # is_active + INSTALLED = no-op
             # not is_active + NOT_INSTALLED = no-op
 
-        # Show result summary. On failure keep the dialog open — closing it
+        # Show result summary. On failure keep the dialog open - closing it
         # immediately would destroy the toast before the user could see that
         # anything failed (details are only in the log).
         self._show_result_toast(installed_count, removed_count, repaired_count, error_count)

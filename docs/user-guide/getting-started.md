@@ -176,7 +176,7 @@ This is the most straightforward approach:
 3. A file picker dialog will appear ("Select Files" or "Select Folders")
 4. Navigate to the file(s) or folder(s) you want to scan and select them
 5. Confirm your choice; you can add several targets at once
-6. Selected targets appear in the list below — use **Clear All** to start over
+6. Selected targets appear in the list below - use **Clear All** to start over
 
 💡 **What should I scan first?** Start with your Downloads folder - it's where files from the internet arrive and is most
 likely to contain threats.

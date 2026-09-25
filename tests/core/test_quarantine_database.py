@@ -471,7 +471,7 @@ class TestQuarantineDatabase:
 
 
 class TestQuarantineDatabasePermissionMasking:
-    """Regression tests for VULN-004 — defense-in-depth permission masking.
+    """Regression tests for VULN-004 - defense-in-depth permission masking.
 
     Original ``original_permissions`` values must be masked to ``& 0o777``
     on both write and read paths so that setuid/setgid/sticky bits cannot
@@ -580,7 +580,7 @@ class TestQuarantineDatabasePermissionMasking:
             None,
         )
         entry = QuarantineEntry.from_row(row)
-        # Implementation may default to 0o644 — masking a None must NOT crash.
+        # Implementation may default to 0o644 - masking a None must NOT crash.
         assert entry.original_permissions == 0o644
 
 

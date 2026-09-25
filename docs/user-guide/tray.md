@@ -59,16 +59,16 @@ background helper that speaks the **StatusNotifierItem (SNI)** D-Bus protocol di
 exports its right-click menu via **DBusMenu** (`libdbusmenu`). The icon appears wherever a
 *StatusNotifierWatcher* is running:
 
-- **KDE Plasma, Cinnamon, MATE, Budgie:** watcher built in — works out of the box
+- **KDE Plasma, Cinnamon, MATE, Budgie:** watcher built in - works out of the box
 - **XFCE:** enable the "Status Notifier" panel plugin
 - **GNOME Shell:** install the "AppIndicator and KStatusNotifierItem Support" extension (it
   provides the watcher GNOME otherwise lacks)
 
 **Supporting components:**
 
-- **libdbusmenu** (`gir1.2-dbusmenu-glib-0.4` on Debian/Ubuntu) — required for the
+- **libdbusmenu** (`gir1.2-dbusmenu-glib-0.4` on Debian/Ubuntu) - required for the
   right-click menu. Without it the icon still appears, but the context menu does not.
-- **Pillow + cairosvg** — installed automatically with ClamUI; used to render the branded,
+- **Pillow + cairosvg** - installed automatically with ClamUI; used to render the branded,
   color-coded status icons. If unavailable, ClamUI falls back to your icon theme's symbolic
   icons.
 
@@ -97,8 +97,8 @@ The tray icon changes to reflect your protection status:
 
 ### Minimize to Tray
 
-When minimize-to-tray is enabled, clicking the minimize button hides the window to the system tray instead of minimizing
-it to your taskbar.
+When `minimize_to_tray` is enabled, clicking the window-manager minimize button hides the window to the system tray
+instead of minimizing it to your taskbar.
 
 #### What is Minimize to Tray?
 
@@ -127,19 +127,18 @@ it to your taskbar.
 - You have many windows open and want to reduce taskbar clutter
 - You prefer tray-based workflow for background applications
 
-#### Enabling Minimize to Tray
+#### Enabling Window-Manager Minimize to Tray
 
-⚠️ **Requirement:** System tray integration must be available (
-see [Enabling System Tray Integration](#enabling-system-tray-integration)).
+⚠️ **Requirement:** System tray integration must be available (see
+[Enabling System Tray Integration](#enabling-system-tray-integration)).
 
-**Currently Not Configurable in UI:**
+`minimize_to_tray` is a JSON setting for the window-manager minimize button; there is no separate preference control
+for it. It does **not** control closing the window. Use **Preferences → Behavior → When closing window** to choose
+whether closing ClamUI minimizes to the tray, quits, or asks every time.
 
-The minimize-to-tray feature is controlled by the `minimize_to_tray` setting in your configuration file. Currently,
-there is no UI toggle for this setting.
+**To Enable the Window-Manager Minimize Button Behavior:**
 
-**To Enable Manually:**
-
-1. Close ClamUI if it's running
+1. Close ClamUI if it's running.
 2. Open your configuration file in a text editor:
    ```bash
    # Native installation
@@ -148,9 +147,9 @@ there is no UI toggle for this setting.
    # Flatpak installation
    nano ~/.var/app/io.github.linx_systems.ClamUI/config/clamui/settings.json
    ```
-3. Find the line with `"minimize_to_tray": false`
-4. Change it to `"minimize_to_tray": true`
-5. Save the file and restart ClamUI
+3. Find the line with `"minimize_to_tray": false`.
+4. Change it to `"minimize_to_tray": true`.
+5. Save the file and restart ClamUI.
 
 **Configuration Example:**
 
@@ -222,8 +221,8 @@ your choice. This lets you keep ClamUI running in the tray after the window is c
 The first time you click the window's close button (with a system tray available), ClamUI
 shows a **"What would you like to do when closing the window?"** dialog with two options:
 
-- **Minimize to tray** — Hide the window but keep ClamUI running in the background
-- **Quit completely** — Close the window and exit ClamUI
+- **Minimize to tray** - Hide the window but keep ClamUI running in the background
+- **Quit completely** - Close the window and exit ClamUI
 
 Enable **"Remember my choice"** to skip the prompt next time. Your selection is stored in
 the `close_behavior` setting.
@@ -232,24 +231,24 @@ the `close_behavior` setting.
 
 Open **Preferences → Behavior → When closing window** and choose one of:
 
-- **Minimize to tray** — closing the window always hides it to the tray
-- **Quit completely** — closing the window always exits ClamUI
-- **Always ask** — show the prompt every time you close the window
+- **Minimize to tray** - closing the window always hides it to the tray
+- **Quit completely** - closing the window always exits ClamUI
+- **Always ask** - show the prompt every time you close the window
 
 ⚠️ **Note:** The Behavior page (and these options) only appear when a system tray is
 available. Without a tray, closing the window always quits ClamUI.
 
-💡 **Tip:** "Minimize to tray" close behavior pairs well with `start_minimized` so ClamUI
+💡 **Tip:** "Minimize to tray" close behavior pairs well with **Start in System Tray** so ClamUI
 stays available in the tray from login until you explicitly quit.
 
 ---
 
-### Start Minimized
+### Start in System Tray
 
-Start-minimized allows ClamUI to launch directly to the system tray without showing the main window, perfect for
+**Start in System Tray** lets normal ClamUI launches hide after the tray starts successfully, which is useful for
 autostart configurations.
 
-#### What is Start Minimized?
+#### What is Start in System Tray?
 
 **Normal Startup (Default):**
 
@@ -257,7 +256,7 @@ autostart configurations.
 - Window is visible and ready to use
 - Must manually minimize if you don't need it
 
-**Start Minimized (Optional):**
+**Start in System Tray (Optional):**
 
 - Launch ClamUI → no window appears
 - Tray icon appears in notification area
@@ -273,8 +272,9 @@ autostart configurations.
 
 #### Enabling Start in System Tray
 
-⚠️ **Requirement:** System tray integration must be available. If tray integration cannot be started, ClamUI keeps
-the window visible so the application remains accessible.
+⚠️ **Requirement:** Your desktop must provide a working StatusNotifierWatcher. ClamUI starts the tray subprocess and
+then hides a normal launch, while desktop watcher registration completes asynchronously. Confirm that the tray icon
+appears before relying on this setting.
 
 1. Open **Preferences** (`Ctrl+,`).
 2. Select **Behavior**.
@@ -285,14 +285,14 @@ folders with ClamUI still shows the window so that you can follow the requested 
 
 To disable background startup, return to **Preferences → Behavior** and turn **Start in System Tray** off.
 
-#### Using Start Minimized
+#### Using Start in System Tray
 
 **When Enabled:**
 
-1. Launch ClamUI (from menu, terminal, or autostart)
-2. No window appears
-3. Tray icon appears in notification area
-4. Application is running and ready
+1. Launch ClamUI from the menu, terminal, or autostart.
+2. A normal launch hides its window after starting the tray subprocess.
+3. The icon appears if your desktop's StatusNotifierWatcher accepts registration.
+4. Launching with one or more file/folder scan targets keeps the window visible.
 
 **To Show the Window:**
 
@@ -307,7 +307,7 @@ To disable background startup, return to **Preferences → Behavior** and turn *
 - Virus definitions update automatically (if configured)
 - Notifications appear for important events
 
-#### Setting Up Autostart with Start Minimized
+#### Setting Up Autostart with Start in System Tray
 
 Automatically start ClamUI at login with the window hidden:
 
@@ -364,12 +364,12 @@ protection that runs automatically in the background.
 
 #### Temporarily Showing Window on Startup
 
-If you need to show the window despite having `start_minimized` enabled:
+If you need to show the window despite having **Start in System Tray** enabled:
 
-**Launch from terminal with window visible:**
+**Launch a scan target from the terminal:**
 
 ```bash
-# This always shows window regardless of start_minimized setting
+# Scan-target launches always show the window
 clamui /path/to/scan
 ```
 
@@ -689,7 +689,7 @@ When a background scan completes, ClamUI notifies you:
 
 **Daily Background Protection:**
 
-1. Enable autostart with start-minimized
+1. Enable autostart with **Start in System Tray**
 2. Configure scheduled daily Quick Scan (morning, Downloads folder)
 3. Configure scheduled weekly Full Scan (Sunday evening)
 4. Enable battery-aware scanning
@@ -715,9 +715,8 @@ invisibly.
 | **System Tray Icon**    | At-a-glance protection status          | StatusNotifierWatcher present |
 | **Tray Menu**           | Quick access to common actions         | System tray enabled           |
 | **Minimize to Tray**    | Hide window to tray instead of taskbar | System tray + setting enabled |
-| **Start Minimized**     | Launch to tray without window          | System tray + setting enabled |
+| **Start in System Tray** | Hide normal launches after tray startup | System tray + setting enabled |
 | **Quick Actions**       | Run scans/updates from tray            | System tray enabled           |
-| **Background Scanning** | Run scans while window hidden          | None (always available)       |
 
 **Key Takeaways:**
 

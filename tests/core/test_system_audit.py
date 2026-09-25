@@ -807,7 +807,7 @@ class TestTier1ChecksList:
 
 
 class TestCheckPortmaster:
-    """Tests for check_portmaster — must NEVER produce FAIL or WARNING when
+    """Tests for check_portmaster - must NEVER produce FAIL or WARNING when
     Portmaster is simply not present (this is the contract enforced by the
     user requirement 'if not detected or found it should not raise any flags').
     """

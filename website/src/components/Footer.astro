@@ -5,10 +5,18 @@ const year = new Date().getFullYear();
 <footer class="border-t hairline mt-10">
   <div class="container-tight py-12 grid gap-10 sm:grid-cols-[auto_1fr_auto] items-start">
     <div class="flex items-center gap-2.5">
-      <img src="/favicon.svg" alt="" width="24" height="24" class="rounded" />
+      <img
+        src="/favicon.svg"
+        alt=""
+        width="24"
+        height="24"
+        loading="lazy"
+        decoding="async"
+        class="rounded"
+      />
       <span class="font-semibold tracking-tight text-white">ClamUI</span>
     </div>
-    <nav class="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
+    <nav aria-label="Footer" class="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
       <div>
         <div class="text-white/40 text-[11px] uppercase tracking-wider font-mono mb-2">Project</div>
         <ul class="space-y-1.5">

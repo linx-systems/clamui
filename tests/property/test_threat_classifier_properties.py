@@ -2,7 +2,7 @@
 Property-based tests for src/core/threat_classifier.py.
 
 Exercises the classification and categorization logic against adversarial
-and realistic threat-name inputs. These are pure functions — no mocking
+and realistic threat-name inputs. These are pure functions - no mocking
 needed.
 """
 

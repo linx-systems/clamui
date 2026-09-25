@@ -78,7 +78,7 @@ class TestBackwardsCompatibilityImports:
         """Test that functions can be imported using 'from src.core.utils import' syntax."""
         # This is the most common backwards compatibility import pattern
         # If this import fails, backwards compatibility is broken
-        from src.core.utils import (  # noqa: F401 — backward compat test
+        from src.core.utils import (  # noqa: F401 - backward compat test
             check_clamav_installed,
             check_clamdscan_installed,
             check_freshclam_installed,

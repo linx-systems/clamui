@@ -508,7 +508,7 @@ class TrayService:
         parameters: GLib.Variant,
         invocation: Gio.DBusMethodInvocation,
     ) -> None:
-        # Threat model: SNI is a same-session protocol — the DE's taskbar
+        # Threat model: SNI is a same-session protocol - the DE's taskbar
         # widget must be able to call Activate, so we cannot restrict by
         # sender. All handlers below are limited to benign UI events
         # (show/hide window) and must never be given destructive side effects

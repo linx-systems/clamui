@@ -255,11 +255,11 @@ You can modify any profile, including the built-in default profiles. If you chan
 
 - ❌ Profile ID (internal identifier)
 - ❌ Creation date
-- ❌ Default profile flag (`is_default`) — editing a built-in profile keeps it marked as a default
+- ❌ Default profile flag (`is_default`) - editing a built-in profile keeps it marked as a default
 
 **Editing Default Profiles**:
 
-Default profiles (Quick Scan, Full Scan, Home Folder) **can** be edited directly — the **Edit** button is available for them just like custom profiles. Only **deletion** is blocked for defaults.
+Default profiles (Quick Scan, Full Scan, Home Folder) **can** be edited directly - the **Edit** button is available for them just like custom profiles. Only **deletion** is blocked for defaults.
 
 If you want to keep the originals untouched, you can instead duplicate a default by exporting and re-importing it (the import creates a copy with a new name like "Quick Scan (2)"), then edit the copy. Either way, you can always revert the built-in profiles to their shipped configuration with **Restore default profiles**.
 
@@ -445,7 +445,7 @@ The JSON file contains:
 
 - Profile `id`, `name`, and `description`
 - Target directories list (`targets`)
-- Exclusions (`exclusions` — `paths` and/or `patterns`)
+- Exclusions (`exclusions` - `paths` and/or `patterns`)
 - Extra scan options (`options`)
 - Metadata: `is_default` flag and `created_at` / `updated_at` timestamps
 

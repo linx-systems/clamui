@@ -1,4 +1,4 @@
-# preferences/ — Modular Preferences System
+# preferences/ - Modular Preferences System
 
 13 modules (12 pages/helpers + `__init__`). Pages reach the stack via a **mixed** factory pattern: `create_page()` is an **instance method** on some pages and a `@staticmethod` on others, with per-page signatures (not uniform). `BehaviorPage` is built eagerly as the default visible page; every other page is lazy, created on first navigation via the `_page_factories` dict in `window.py`.
 
@@ -8,7 +8,7 @@ Parent: [`../AGENTS.md`](../AGENTS.md)
 
 ```
 preferences/
-├── window.py          # PreferencesWindow — sidebar nav, lazy page creation
+├── window.py          # PreferencesWindow - sidebar nav, lazy page creation
 ├── base.py            # PreferencesPageMixin + widget helper functions
 ├── scanner_page.py    # Scanner backend settings (TEMPLATE for new pages)
 ├── database_page.py   # Freshclam database settings
@@ -26,7 +26,7 @@ preferences/
 
 ### 1. Create the page module
 
-**`create_page()` signatures are NOT uniform** — pick a template matching the page's data source:
+**`create_page()` signatures are NOT uniform** - pick a template matching the page's data source:
 - **Config-backed pages** (read/write clamd.conf / freshclam.conf): `@staticmethod create_page(...)` taking a `widgets_dict`. Good templates: `scanner_page.py` (`ScannerPage`), `database_page.py` (`DatabasePage`). Exact params vary (e.g. `ScannerPage.create_page(config_path, widgets_dict, settings_manager, clamd_available, parent_window)`, `DatabasePage.create_page(config_path, widgets_dict, parent_window)`).
 - **Simple settings pages** (read/write `settings.json`): **instance method** `create_page(self)` with deps stored in `__init__`. Templates: `behavior_page.py`, `device_scan_page.py`, `exclusions_page.py`.
 
@@ -77,7 +77,7 @@ def _create_my_page(self):
 Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_factories` are created on first navigation via `_ensure_page_created()`. Current `NAVIGATION_ITEMS` order: behavior, exclusions, database, scanner, scheduled, device_scan, onaccess, virustotal, debug, save.
 
 ### 3. Write tests
-`tests/ui/preferences/test_my_page.py` — use `mock_gi_modules` fixture.
+`tests/ui/preferences/test_my_page.py` - use `mock_gi_modules` fixture.
 
 ## Key APIs from base.py
 
@@ -93,7 +93,7 @@ Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_facto
 
 ## Anti-Patterns (preferences-specific)
 
-- **Eager page creation**: Only `behavior_page` loads eagerly — all others use lazy factory pattern
+- **Eager page creation**: Only `behavior_page` loads eagerly - all others use lazy factory pattern
 - **`Adw.SpinRow` / `Adw.PasswordEntryRow`**: Use `create_spin_row()` / `create_password_entry_row()` from base.py
 - **Direct widget value access**: Use `populate_*` helpers for loading, `collect_data()` for saving
-- **Storing row instead of spin_button**: `create_spin_row()` returns `(row, spin_button)` — store the `spin_button` in `widgets_dict` for `get_value()`/`set_value()`
+- **Storing row instead of spin_button**: `create_spin_row()` returns `(row, spin_button)` - store the `spin_button` in `widgets_dict` for `get_value()`/`set_value()`

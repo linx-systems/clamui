@@ -42,7 +42,7 @@ database**. You must install ClamAV on the host for every installation method (D
 Flatpak). The Flatpak and AppImage invoke the host's ClamAV (the Flatpak via `flatpak-spawn --host`).
 
 At minimum ClamUI needs `clamscan` and `freshclam` (the virus-database updater). Daemon mode additionally
-requires the ClamAV daemon (`clamd`) and `clamdscan` — see
+requires the ClamAV daemon (`clamd`) and `clamdscan` - see
 [SCAN_BACKENDS.md](./SCAN_BACKENDS.md) for daemon setup and the backend selection.
 
 ```bash
@@ -118,12 +118,13 @@ On supported Debian-family hosts, ClamUI checks for that helper when it launches
 
 Choosing **Not Now** remembers that dismissal only for the current ClamUI version, preventing repeated automatic startup prompts for that version. It does not disable or cache the helper-status check: **Preferences > Save** continues to show the helper's current status and its installation action. A later ClamUI version may prompt again for its matching helper.
 
-You can also review the helper status or install it later from **Preferences > Save**. This action is available only on supported Debian-family hosts; the project currently provides no RPM or pacman helper artifact. It installs only the helper, its Python modules, and the polkit policy — not the full native app.
+You can also review the helper status or install it later from **Preferences > Save**. This action is available only on supported Debian-family hosts; the project currently provides no RPM or pacman helper artifact. It installs only the helper, its Python modules, and the polkit policy - not the full native app.
 
 If automatic installation is unavailable or you prefer to install it yourself, download the version-matched release asset (the same version as the Flatpak) and use the manual fallback:
 
 ```bash
-sudo apt install ./clamui-privileged-helper_<version>_all.deb
+VERSION=x.y.z
+sudo apt install "./clamui-privileged-helper_${VERSION}_all.deb"
 ```
 
 `sudo flatpak run ... install-privileged-helper` cannot install host files: the sandbox `/usr` is not the host `/usr`. If the helper is absent, unavailable, or fails validation or installation, ClamUI fails closed: system-setting saves do not change host configuration. Exclusions remain sandbox-local ClamUI application settings.
@@ -229,7 +230,7 @@ flatpak override --user --filesystem=/path/to/directory io.github.linx_systems.C
 ## AppImage Installation
 
 ClamUI is also distributed as a portable AppImage that bundles Python, GTK4, and libadwaita. It runs on
-most modern Linux distributions without installation. **ClamAV is not bundled** — it must be installed on the
+most modern Linux distributions without installation. **ClamAV is not bundled** - it must be installed on the
 host (see [ClamAV Requirement](#clamav-requirement)).
 
 ### Download and Run
@@ -294,7 +295,7 @@ sudo apt install clamav clamav-freshclam
 
 > **Note:** The build dependencies (`python3-dev`, `libcairo2-dev`, `libgirepository-2.0-dev`, `pkg-config`,
 `libjpeg-dev`, `zlib1g-dev`) are only required when running from source with `uv run clamui`. The `.deb`
-> package is architecture-independent (`all`) — it installs the Python sources to
+> package is architecture-independent (`all`) - it installs the Python sources to
 `/usr/lib/python3/dist-packages/clamui/` and declares its runtime dependencies (`python3-gi`,
 `python3-gi-cairo`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`, …), which `apt` pulls in automatically, so no
 > compilation is needed. ClamUI requires Python 3.11 or newer. On older Ubuntu versions (22.04), use
@@ -309,9 +310,9 @@ cd clamui
 ./scripts/local-run.sh
 ```
 
-On Ubuntu/Pop!_OS 22.04, `local-run.sh` automatically installs `PyGObject<3.50`. Newer
-PyGObject releases require GLib 2.80+, while 22.04 ships GLib 2.72 and
-`libgirepository1.0-dev`.
+Stock Ubuntu/Pop!_OS 22.04 does not satisfy the current source dependency floor:
+`PyGObject>=3.56.3` requires GLib 2.80+, while those releases ship GLib 2.72. Use the Flatpak there, or
+run the source tree in a development environment with newer GLib.
 
 ### Download and Install
 
@@ -323,13 +324,14 @@ and install them together so `apt` resolves the dependency and configures the
 helper:
 
 ```bash
-sudo apt install ./clamui_<version>_all.deb \
-  ./clamui-privileged-helper_<version>_all.deb
+VERSION=x.y.z
+sudo apt install "./clamui_${VERSION}_all.deb" \
+  "./clamui-privileged-helper_${VERSION}_all.deb"
 ```
 
 This installs ClamUI and its polkit helper in one step. The privileged helper
 is packaged separately so Flatpak users can install it on the host without the
-full native app — see "Saving System Settings (Privileged Helper)" under
+full native app - see "Saving System Settings (Privileged Helper)" under
 Flatpak Installation above.
 
 ### What Gets Installed
@@ -360,7 +362,8 @@ cd clamui
 ./debian/build-deb.sh
 ```
 
-This produces `clamui_<version>_all.deb` in the project root.
+This produces the matching `clamui_<version>_all.deb` and
+`clamui-privileged-helper_<version>_all.deb` artifacts in the project root.
 
 ### Run ClamUI
 
@@ -609,18 +612,22 @@ details, see [SIGNING.md](./SIGNING.md).
 ### Debian Package
 
 ```bash
-# Import ClamUI's public key
-curl -fsSL https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc | gpg --import
+# Download and verify ClamUI's public signing key
+curl -fsSLo signing-key.asc \
+  https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc
+EXPECTED_FINGERPRINT=037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
+ACTUAL_FINGERPRINT="$(gpg --show-keys --with-colons signing-key.asc | awk -F: '$1 == "fpr" { print $10; exit }')"
+test "$ACTUAL_FINGERPRINT" = "$EXPECTED_FINGERPRINT" || {
+  echo "Unexpected ClamUI signing-key fingerprint" >&2
+  exit 1
+}
+gpg --import signing-key.asc
 
-# Verify the package
+# Verify both matching packages; each must report GOODSIG for the fingerprint above
 dpkg-sig --verify clamui_*.deb clamui-privileged-helper_*.deb
-# Expected output: GOODSIG _gpgbuilder ...
 ```
 
-> **Security Note:** Before importing keys, verify you're downloading from the official repository. You can also
-> download `signing-key.asc` directly
-> from [the repository](https://github.com/linx-systems/clamui/blob/master/signing-key.asc) and import it manually with
-`gpg --import signing-key.asc`.
+Treat any fingerprint mismatch or signature-verification failure as a failed verification; do not install the package.
 
 ### Flatpak (via Flathub)
 

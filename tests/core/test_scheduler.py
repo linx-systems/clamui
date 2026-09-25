@@ -630,7 +630,7 @@ class TestSchedulerCronIntegration:
 
 
 class TestSchedulerCronMarkerSubstring:
-    """Regression tests for BUG-004 — substring-match crontab marker.
+    """Regression tests for BUG-004 - substring-match crontab marker.
 
     Prior behavior used ``self.CRON_MARKER in line`` which silently dropped
     any user crontab line that merely contained the marker as a substring,
@@ -676,7 +676,7 @@ class TestSchedulerCronMarkerSubstring:
         """A user comment containing the marker as a substring must not consume the next line."""
         # Choose a comment whose text fully contains the literal marker as a substring.
         marker = scheduler.CRON_MARKER  # "# ClamUI Scheduled Scan"
-        user_comment = f"{marker} (legacy backup notes — keep below)"
+        user_comment = f"{marker} (legacy backup notes - keep below)"
         user_job = "0 5 * * * /usr/bin/important-user-job"
         crontab = f"{user_comment}\n{user_job}\n"
 
@@ -721,7 +721,7 @@ class TestSchedulerCronMarkerSubstring:
         assert success is True
         # Marker line itself is removed.
         assert marker not in new_crontab
-        # User line below the marker must NOT be dropped — it's clearly not
+        # User line below the marker must NOT be dropped - it's clearly not
         # a ClamUI command.
         assert non_clamui_line in new_crontab
 
@@ -1157,7 +1157,7 @@ class TestSchedulerMultiTokenAndPercentEscaping:
 
 
 class TestSchedulerCliCommandTokenization:
-    """Regression tests for issue #150 residuals — flat-string command re-splitting.
+    """Regression tests for issue #150 residuals - flat-string command re-splitting.
 
     _get_cli_command_path() now returns argv tokens (list[str]); consumers must
     quote each token verbatim and never shlex.split() a flat command string.

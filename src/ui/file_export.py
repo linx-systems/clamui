@@ -239,7 +239,7 @@ class FileExportHelper:
         except Exception as e:
             # Content generation (e.g. CSV/JSON formatting) or any other
             # unexpected failure must not propagate out of the async file
-            # dialog callback as an unhandled exception — surface it to the
+            # dialog callback as an unhandled exception - surface it to the
             # user via a toast instead of failing silently.
             logger.exception("Unexpected error during file export")
             self._show_toast(_("Error exporting file: {error}").format(error=str(e)), is_error=True)

@@ -2173,7 +2173,7 @@ Cons: ⚠️ Deletes everything
 **Can ClamUI auto-scan USB drives when I plug them in?**
 
 **Yes.** ClamUI includes an automatic **Device Scan** feature that scans newly
-connected storage devices in the background. It is **disabled by default** — turn it
+connected storage devices in the background. It is **disabled by default** - turn it
 on in Preferences:
 
 1. Open **Preferences** (Ctrl+,)
@@ -2183,10 +2183,10 @@ on in Preferences:
    Devices and External Drives are selected by default; Network mounts are also
    available)
 5. Tune the **Options** group as needed:
-    - **Maximum device size** to auto-scan (default 32 GB) — larger devices are skipped
-    - **Auto-Quarantine Threats** (off by default — review detections first)
+    - **Maximum device size** to auto-scan (default 32 GB) - larger devices are skipped
+    - **Auto-Quarantine Threats** (off by default - review detections first)
     - **Notifications** for device scan events (on by default)
-    - **Skip on Battery** (on by default — won't drain a laptop on battery)
+    - **Skip on Battery** (on by default - won't drain a laptop on battery)
 
 Once enabled, plugging in a matching device triggers a background scan after a short
 delay, and you're notified when it finishes.

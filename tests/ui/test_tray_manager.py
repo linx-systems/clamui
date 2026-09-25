@@ -1464,7 +1464,7 @@ class TestTrayManagerEdgeCases:
 
 
 class TestTrayManagerSubprocessCrashRecovery:
-    """Regression tests for UI-001 — silent tray subprocess crash detection.
+    """Regression tests for UI-001 - silent tray subprocess crash detection.
 
     Prior behavior: when the tray subprocess died (segfault, OOM, D-Bus loss)
     the stdout reader exited silently on EOF; ``_ready`` stayed True; ``is_active``
@@ -1496,7 +1496,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         mock_process.poll = mock.Mock(return_value=139)  # SIGSEGV
         manager._process = mock_process
 
-        # Don't actually respawn during this test — patch start() to noop
+        # Don't actually respawn during this test - patch start() to noop
         with mock.patch.object(manager, "start", return_value=True):
             manager._read_stdout()
 
@@ -1574,7 +1574,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         mock_start.assert_not_called()
 
     def test_respawn_count_resets_after_60_seconds(self, mock_gtk_modules):
-        """Respawn count window is 60s — older respawns shouldn't trip the breaker."""
+        """Respawn count window is 60s - older respawns shouldn't trip the breaker."""
         import time
         from io import StringIO
 
@@ -1596,7 +1596,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         with mock.patch.object(manager, "start", return_value=True) as mock_start:
             manager._read_stdout()
 
-        # Window expired — respawn should be allowed again.
+        # Window expired - respawn should be allowed again.
         mock_start.assert_called()
 
     def test_init_initializes_respawn_state(self, mock_gtk_modules):
@@ -1611,7 +1611,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         assert manager._tray_down is False
 
     def test_no_respawn_when_process_still_alive(self, mock_gtk_modules):
-        """poll()==None means the child is still alive — must NOT respawn/orphan it."""
+        """poll()==None means the child is still alive - must NOT respawn/orphan it."""
         from src.ui.tray_manager import TrayManager
 
         manager = TrayManager()

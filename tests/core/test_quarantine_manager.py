@@ -594,7 +594,7 @@ class TestQuarantineManagerPermissions:
         finally:
             conn.close()
 
-        # Restore — masking must strip the high bits.
+        # Restore - masking must strip the high bits.
         restore_result = manager.restore_file(entry_id)
         assert restore_result.is_success is True
 

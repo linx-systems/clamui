@@ -60,7 +60,7 @@ _NONFATAL_LIBCLAMAV_PATTERNS = (
 
 # LibClamAV Warning patterns emitted when ClamAV hits a configured scan limit
 # (max scan/file size, recursion depth) or a truncated container. ClamAV scans
-# what it can and CONTINUES — these are by-design protections (e.g. against
+# what it can and CONTINUES - these are by-design protections (e.g. against
 # decompression bombs), not failures, so they must not turn the scan into an
 # error. Matched case-insensitively against the warning line. See GitHub issue:
 # full scan reported ERROR after hitting a large compressed file.
@@ -76,7 +76,7 @@ _NONFATAL_WARNING_PATTERNS = (
 
 # Per-file CL_ETIMEOUT reply: "<path>: Time limit reached ERROR". The file was
 # PARTIALLY scanned before the per-file time limit hit and the scan continued,
-# so it belongs in nonfatal_warnings — reporting it as "not accessible" would
+# so it belongs in nonfatal_warnings - reporting it as "not accessible" would
 # be wrong.
 _NONFATAL_TIME_LIMIT_MARKER = ": Time limit reached"
 
@@ -143,7 +143,7 @@ def communicate_with_cancel_check(
         if len(chunk) <= remaining:
             parts.append(chunk)
             return total + len(chunk)
-        # Truncation point — keep marker so parsers see the boundary.
+        # Truncation point - keep marker so parsers see the boundary.
         parts.append(chunk[:remaining])
         parts.append(f"\n[{stream_name} truncated at {MAX_ACCUMULATED_BYTES} bytes]\n")
         logger.warning(
@@ -315,7 +315,7 @@ def stream_process_output(
                 if remaining_stdout:
                     # Line callbacks get the buffered partial line rejoined with
                     # the drained data; the accumulated buffer must only receive
-                    # the newly drained bytes — incomplete_line was already
+                    # the newly drained bytes - incomplete_line was already
                     # appended as part of the chunk it arrived in, and appending
                     # it again would corrupt the final output parsed for results.
                     data = incomplete_line + remaining_stdout
@@ -434,7 +434,7 @@ def _extract_skipped_path(line: str) -> str | None:
     for prefix in _NONFATAL_SKIP_PATH_PREFIXES:
         if line.startswith(prefix):
             rest = line[len(prefix) :]
-            # "<path>: <strerror text>" — strerror messages contain no colon,
+            # "<path>: <strerror text>" - strerror messages contain no colon,
             # so splitting on the last colon keeps colons inside the path.
             file_path = rest.rsplit(":", 1)[0].strip() if ":" in rest else rest.strip()
             return file_path or None
@@ -447,7 +447,7 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
     Returns a tuple of ``(skipped_files, nonfatal_warnings, hard_error_lines)``:
 
     - ``skipped_files``: paths ClamAV could not open/process (permissions,
-      unsupported type) — the file was skipped entirely.
+      unsupported type) - the file was skipped entirely.
     - ``nonfatal_warnings``: limit/truncation warnings where ClamAV partially
       scanned a file and continued (e.g. a large compressed file exceeding the
       scan-size cap). These are by-design and are NOT errors.
@@ -477,7 +477,7 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
         if any(ignored in line for ignored in _IGNORABLE_WARNING_LINES):
             continue
 
-        # Non-fatal LibClamAV parse errors (e.g. corrupt ZIP archives) —
+        # Non-fatal LibClamAV parse errors (e.g. corrupt ZIP archives) -
         # ClamAV skips the file internally and continues scanning.
         if line.startswith("LibClamAV Error:") and any(
             pattern in line for pattern in _NONFATAL_LIBCLAMAV_PATTERNS

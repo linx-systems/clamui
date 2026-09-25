@@ -32,11 +32,12 @@ Please include:
 
 ## Supported Versions
 
-ClamUI is currently in early development. Security updates are provided for:
+ClamUI is currently in early development. Security updates are provided for the latest minor release:
 
 | Version | Supported          |
 |---------|--------------------|
-| 0.1.x   | :white_check_mark: |
+| 0.4.x   | :white_check_mark: |
+| < 0.4   | :x:                |
 
 As the project matures, this policy will be updated to reflect long-term support commitments.
 

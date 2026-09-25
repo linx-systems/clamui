@@ -1483,7 +1483,7 @@ class ScanView(Gtk.Box):
         # Update progress bar
         if self._progress_bar is not None:
             if progress.percentage is not None:
-                # Stop pulsing — we now have deterministic progress
+                # Stop pulsing - we now have deterministic progress
                 if self._pulse_timeout_id is not None:
                     GLib.source_remove(self._pulse_timeout_id)
                     self._pulse_timeout_id = None
@@ -1668,7 +1668,7 @@ class ScanView(Gtk.Box):
             nonlocal last_infected_count, last_update
             now = time.monotonic()
 
-            # Bypass throttle for new threat detections — these are rare
+            # Bypass throttle for new threat detections - these are rare
             # and must reach the UI immediately
             is_new_threat = progress.infected_count > last_infected_count
             if is_new_threat:
@@ -1842,7 +1842,7 @@ class ScanView(Gtk.Box):
             self._eicar_temp_path = create_eicar_temp(parent_dir=temp_dir)
             # Belt-and-braces cleanup: if the app is force-quit / crashes mid-
             # scan, the normal _on_scan_complete cleanup never runs and the
-            # EICAR file lingers — the next scan of that directory then flags
+            # EICAR file lingers - the next scan of that directory then flags
             # it as a real threat (UI-010). Register an atexit handler as a
             # safety net; the unregister handle is invoked on the happy path
             # to avoid a redundant double-unlink at interpreter shutdown.
@@ -1877,7 +1877,7 @@ class ScanView(Gtk.Box):
         # paths (scan button, EICAR test, "run" from the manage-profiles dialog,
         # the app-level start-scan action/accelerator). The scan/EICAR buttons
         # are disabled while scanning, but the manage-profiles dialog and the
-        # app action are not — starting another scan here would spawn a second
+        # app action are not - starting another scan here would spawn a second
         # worker thread sharing the same Scanner, corrupting cancellation and
         # leaving the UI in an inconsistent state. Ignore the duplicate request.
         if self._is_scanning:
@@ -2216,7 +2216,7 @@ class ScanView(Gtk.Box):
                 )
             )
 
-        # Reset progress bar for new target — restart pulsing until
+        # Reset progress bar for new target - restart pulsing until
         # real progress data arrives from the scanner
         if self._progress_bar is not None:
             self._progress_bar.set_fraction(0.0)

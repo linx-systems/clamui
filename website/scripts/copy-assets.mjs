@@ -21,7 +21,7 @@ const tasks = [
     to: resolve(websiteRoot, "src/assets/logo.svg"),
   },
   {
-    from: resolve(repoRoot, "screenshots/social-preview.png"),
+    from: resolve(repoRoot, "screenshots/ClamUI-Social-Preview-1280x640.png"),
     to: resolve(websiteRoot, "public/og-image.png"),
   },
   {

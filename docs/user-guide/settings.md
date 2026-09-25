@@ -82,7 +82,7 @@ For raw JSON keys, defaults, and deployment-style examples, see `docs/CONFIGURAT
 |------------------------------------------|---------------------------------------------------------------------------------------------|
 | **Language**                             | Override the display language (auto uses system locale). Requires restart.                   |
 | **When closing window**                  | Choose whether closing ClamUI minimizes to tray, quits, or asks every time.                 |
-| **Start in System Tray**                  | Launches in the background with only the tray icon visible.                                  |
+| **Start in System Tray**                  | Starts the tray subprocess, then hides normal launches; scan-target launches stay visible. Confirm that your desktop exposes the tray icon before relying on background startup. |
 | **Show Live Scan Progress**              | Shows each file being scanned in real time. Turn off for a quieter progress display.        |
 | **Configure Integration** (Flatpak only) | Installs/manages right-click "Scan with ClamUI" actions in supported file managers.         |
 
@@ -238,8 +238,8 @@ The **Behavior** page controls startup and close behavior as well as how scan pr
     - **On**: normal launches open in the background with only the tray icon visible
     - **Off**: normal launches show the main window
     - Launches with files or folders to scan always show the window
-- If system tray support is unavailable, this section shows an informational message instead of controls. ClamUI
-  also keeps the main window visible if tray startup fails.
+- If system tray support is unavailable, this section shows an informational message instead of controls. Desktop
+  watcher registration is asynchronous, so confirm that the tray icon appears before relying on background startup.
 
 #### Scan Behavior
 
@@ -700,12 +700,12 @@ settings cannot be edited.
 
 ClamAV's on-access scanning uses two complementary layers to monitor your filesystem in real time:
 
-- **Layer 1 — fanotify (base on-access):** A Linux kernel interface that intercepts file **open** and **access** events.
+- **Layer 1 - fanotify (base on-access):** A Linux kernel interface that intercepts file **open** and **access** events.
   Whenever any process tries to read or execute a file, fanotify notifies ClamAV so the file can be scanned. This layer
   is always active when on-access scanning is configured. With Prevention Mode enabled, fanotify can also **block** the
   file access until the scan completes.
 
-- **Layer 2 — inotify (Extra Scanning / DDD):** A separate kernel interface that catches file **creation** and
+- **Layer 2 - inotify (Extra Scanning / DDD):** A separate kernel interface that catches file **creation** and
   **move/rename** events. Without this layer, a file dropped into a monitored folder is *not* scanned until something
   actually tries to open it. Enabling Extra Scanning adds this coverage so new files are scanned immediately when they
   appear.
@@ -741,17 +741,17 @@ Exclude Paths: /home/user/Downloads/large-archives
 | **Deny on Error**   | If scan cannot complete, access is denied anyway.       | **Off** unless you need strict fail-closed policy.                   |
 | **Disable DDD**     | Disables Dynamic Directory Determination (DDD).         | **Off** (default behavior is safer for normal recursive monitoring). |
 
-**Prevention Mode** — controls what happens when malware is detected:
+**Prevention Mode** - controls what happens when malware is detected:
 
 - **Off** (notification-only): Files are scanned when accessed. If malware is found, ClamAV logs an alert, but the
-  process that opened the file is **not blocked** — it can still read the file. Useful for monitoring without disrupting
+process that opened the file is **not blocked** - it can still read the file. Useful for monitoring without disrupting
   workflows.
 - **On** (active blocking): Fanotify uses kernel-level permission events to **block** the process from opening the
   file. The process receives an "Operation not permitted" error. This is true real-time protection.
 - Requires `CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y` in the kernel (most desktop Linux distributions have this enabled by
   default).
 
-**Extra Scanning** — controls whether file creation and move events are caught:
+**Extra Scanning** - controls whether file creation and move events are caught:
 
 - **Off**: Only file open/access events are caught via fanotify. A new file created or moved into a monitored directory
   is **not** scanned until a process tries to open it. On kernels >= 5.1, fanotify can catch some of these events
@@ -759,18 +759,18 @@ Exclude Paths: /home/user/Downloads/large-archives
 - **On**: Uses inotify (via the DDD system) to also catch `create` and `move-to` events. Files are scanned immediately
   when they appear in monitored directories, not just when accessed. Recommended for better coverage.
 
-**Deny on Error** — controls behavior when a scan fails (only takes effect when Prevention Mode is On):
+**Deny on Error** - controls behavior when a scan fails (only takes effect when Prevention Mode is On):
 
 - **Off** (fail-open): If a scan fails (e.g., timeout, daemon unavailable), the file access is **allowed**. The user
   can still open the file. This avoids disruption but means an unscanned file may be accessed.
 - **On** (fail-closed): If a scan fails, access is **denied** anyway. Stricter security, but may block legitimate files
   during scanner issues (e.g., daemon restart, high load).
 
-**Disable DDD** — controls recursive subdirectory monitoring:
+**Disable DDD** - controls recursive subdirectory monitoring:
 
 - **Off** (DDD enabled, default): DDD uses inotify to recursively track **all subdirectories** under each Include Path
   in real time. New subdirectories created later are also picked up automatically. This is the recommended setting.
-- **On** (DDD disabled): Only the exact directories listed in Include Paths are monitored — **not** their
+- **On** (DDD disabled): Only the exact directories listed in Include Paths are monitored - **not** their
   subdirectories. Use this only if you hit inotify watch-point limits (see [Performance Settings](#performance-settings)
   below) or want intentionally narrow monitoring.
 
@@ -780,11 +780,11 @@ This table shows which filesystem events are caught by each layer:
 
 | Event                          | Base (fanotify) | Extra Scanning (inotify) |
 |--------------------------------|-----------------|--------------------------|
-| File opened / read             | Caught          | —                        |
-| File executed                  | Caught          | —                        |
+| File opened / read             | Caught          | -                        |
+| File executed                  | Caught          | -                        |
 | New file created               | Not caught\*    | Caught                   |
 | File moved / renamed into dir  | Not caught\*    | Caught                   |
-| New subdirectory tracking      | —               | Caught (via DDD)         |
+| New subdirectory tracking      | -               | Caught (via DDD)         |
 
 \* On kernel >= 5.1, fanotify may also catch these events natively.
 
@@ -890,7 +890,7 @@ coverage.
 
 ### Device Scan Settings
 
-The **Device Scan** page configures automatic scanning of newly connected storage devices — USB flash drives,
+The **Device Scan** page configures automatic scanning of newly connected storage devices - USB flash drives,
 external drives, and network mounts. All settings on this page are **auto-saved** immediately; **Save & Apply** is
 not required.
 
@@ -908,9 +908,9 @@ not required.
 
 Choose which kinds of devices are auto-scanned (`device_auto_scan_types`, default `["removable", "external"]`):
 
-- **Removable Devices** — USB flash drives, SD cards, and other removable media.
-- **External Drives** — external HDDs and SSDs (ejectable but not removable media).
-- **Network Mounts** — NFS, SMB/CIFS, and SSHFS mounts.
+- **Removable Devices** - USB flash drives, SD cards, and other removable media.
+- **External Drives** - external HDDs and SSDs (ejectable but not removable media).
+- **Network Mounts** - NFS, SMB/CIFS, and SSHFS mounts.
 
 #### Options
 
@@ -1302,9 +1302,9 @@ Auto-saved settings include:
 > - **Flatpak:** The command is native-host-only and **cannot** be run from the
 >   sandbox (`sudo flatpak run ... install-privileged-helper` is unsupported).
 >   Download the matching `clamui-privileged-helper_<version>_all.deb` release
->   asset and install it on the host with
->   `sudo apt install ./clamui-privileged-helper_<version>_all.deb` (use the
->   same version as your Flatpak).
+>   asset, set `VERSION=x.y.z` to that release's version, and install it on the host with
+>   `sudo apt install "./clamui-privileged-helper_${VERSION}_all.deb"`. Use the same
+>   version as your Flatpak.
 
 **What Gets Saved:**
 

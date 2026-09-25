@@ -586,7 +586,7 @@ class TestRequeueSourceTracking:
 
         # Capture the lambda passed to timeout_add_seconds and invoke it.
         # Simulate the limit being lifted before fire so the recursive
-        # _start_background_scan would proceed normally — but we also drop
+        # _start_background_scan would proceed normally - but we also drop
         # the active scans to ensure that path is taken.
         cb = mock_glib.timeout_add_seconds.call_args_list[0].args[1]
         monitor._active_scans.clear()

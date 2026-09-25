@@ -83,7 +83,7 @@ SETUP_GUIDES = {
             ),
         ],
         # A tuple of sentences: each is translated separately at display
-        # time, then joined — concatenating N_() results at module level
+        # time, then joined - concatenating N_() results at module level
         # would produce msgids that never match the catalog.
         "notes": (
             N_("clamd is the ClamAV daemon for faster scanning."),

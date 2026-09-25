@@ -410,12 +410,12 @@ class ScannerPage(PreferencesPageMixin):
         """
         subtitles = {
             0: _(
-                "Recommended — Automatically uses daemon if available, falls back to clamscan for reliability"
+                "Recommended - Automatically uses daemon if available, falls back to clamscan for reliability"
             ),
             1: _(
-                "Fastest — Instant startup with in-memory database, requires clamd service running"
+                "Fastest - Instant startup with in-memory database, requires clamd service running"
             ),
-            2: _("Most compatible — Works anywhere, loads database each scan (3-10 sec startup)"),
+            2: _("Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"),
         }
         row.set_subtitle(subtitles.get(selected, subtitles[0]))
 
@@ -833,7 +833,7 @@ class ScannerPage(PreferencesPageMixin):
 
         # Populate file type scanning switches. ClamAV enables all of these
         # by default when the key is absent from clamd.conf, so a missing key
-        # must show as ON — defaulting to off would write "ScanPE no" etc. on
+        # must show as ON - defaulting to off would write "ScanPE no" etc. on
         # the next save and silently disable executable/document scanning.
         for key in (
             "ScanPE",

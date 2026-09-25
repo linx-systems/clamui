@@ -270,7 +270,7 @@ class TrayManager:
         ``RESPAWN_WINDOW`` seconds).
 
         On deliberate shutdown (``_shutting_down`` set, or ``_running``
-        already False): does nothing — the caller of ``stop()`` is the
+        already False): does nothing - the caller of ``stop()`` is the
         owner of the ``_ready`` flag in that case.
         """
         import time
@@ -279,7 +279,7 @@ class TrayManager:
             shutting_down = self._shutting_down
             running = self._running
             if shutting_down or not running:
-                # Deliberate shutdown — leave _ready alone; stop() handles it.
+                # Deliberate shutdown - leave _ready alone; stop() handles it.
                 return
             # Unexpected EOF (subprocess crashed). Reset _ready now.
             self._ready = False
@@ -292,7 +292,7 @@ class TrayManager:
             except Exception:
                 logger.debug("Failed to poll tray subprocess for exit code", exc_info=True)
 
-        # poll() returning None means the child is still alive — the reader
+        # poll() returning None means the child is still alive - the reader
         # ended for another reason. Do NOT respawn, or we'd orphan a live child.
         if exit_code is None:
             logger.warning(
@@ -309,18 +309,18 @@ class TrayManager:
                 self._tray_down = True
                 logger.error(
                     "Tray subprocess crashed (exit_code=%s); circuit breaker "
-                    "engaged after %d respawns within %.0fs — giving up",
+                    "engaged after %d respawns within %.0fs - giving up",
                     exit_code,
                     self._respawn_count,
                     self.RESPAWN_WINDOW,
                 )
                 return
             if not window_open:
-                # Window expired — reset counter.
+                # Window expired - reset counter.
                 self._respawn_count = 0
             self._respawn_count += 1
             self._last_respawn_time = now
-            # Close the dead process's pipes before dropping the reference —
+            # Close the dead process's pipes before dropping the reference -
             # a crash-looping subprocess would otherwise leak three fds per
             # respawn. Then clear it so start() will spawn a new one.
             self._close_pipes()

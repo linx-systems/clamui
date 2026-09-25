@@ -28,7 +28,7 @@
 
 <br>
 
-<img src="./screenshots/main_view.png" alt="Main View" width="800">
+<img src="./screenshots/ClamUI-Social-Preview-1280x640.png" alt="ClamUI logo and scan results view, highlighting open source, zero telemetry, GTK4 and libadwaita, and system security audit" width="800">
 
 </div>
 
@@ -46,23 +46,23 @@ ClamUI provides a comprehensive set of features designed to make antivirus prote
 
 ### Scanning & Protection
 
-- **Easy File Scanning** — Native GTK4 file dialogs for intuitive file selection
-- **Async Scanning** — Background processing keeps the UI responsive during scans
-- **Quarantine Management** — Safely isolate and manage detected threats
-- **Scan Profiles** — Create custom configurations for different use cases
-- **On-Access Scanning** — Configure real-time file monitoring via clamonacc
-- **Automatic Device Scanning** — Scan USB drives and external storage on mount
+- **Easy File Scanning** - Native GTK4 file dialogs for intuitive file selection
+- **Async Scanning** - Background processing keeps the UI responsive during scans
+- **Quarantine Management** - Safely isolate and manage detected threats
+- **Scan Profiles** - Create custom configurations for different use cases
+- **On-Access Scanning** - Configure real-time file monitoring via clamonacc
+- **Automatic Device Scanning** - Scan USB drives and external storage on mount
 
 </td>
 <td width="50%" valign="top">
 
 ### Security & Monitoring
 
-- **System Security Audit** — Dashboard checking firewall, AppArmor/SELinux, SSH hardening, intrusion detection, and more
-- **Deep Security Scans** — Optional Lynis and chkrootkit scans with privilege elevation
-- **Scan History** — Track and review all past scan results
-- **Statistics Dashboard** — Monitor scanning activity and threat detections
-- **VirusTotal Integration** — Optional enhanced threat analysis via API
+- **System Security Audit** - Dashboard checking firewall, AppArmor/SELinux, SSH hardening, intrusion detection, and more
+- **Deep Security Scans** - Optional Lynis and chkrootkit scans with privilege elevation
+- **Scan History** - Track and review all past scan results
+- **Statistics Dashboard** - Monitor scanning activity and threat detections
+- **VirusTotal Integration** - Opt-in enhanced threat analysis via API
 
 </td>
 </tr>
@@ -71,23 +71,23 @@ ClamUI provides a comprehensive set of features designed to make antivirus prote
 
 ### User Experience
 
-- **Modern UI** — Native Adwaita styling with proper GNOME integration
-- **System Tray** — Quick access with actions and real-time scan progress
-- **Desktop Notifications** — Stay informed of scan results and updates
-- **Language Selection** — Override the UI language without changing system locale
-- **File Manager Integration** — Right-click "Scan with ClamUI" in Nautilus, Dolphin, and Nemo
+- **Modern UI** - Native Adwaita styling with proper GNOME integration
+- **System Tray** - Quick access, real-time scan progress, and optional **Start in System Tray** background startup
+- **Desktop Notifications** - Stay informed of scan results and updates
+- **Language Selection** - Override the UI language without changing system locale
+- **File Manager Integration** - Right-click "Scan with ClamUI" in Nautilus, Dolphin, and Nemo
 
 </td>
 <td width="50%" valign="top">
 
 ### Flexibility
 
-- **Multiple Scan Backends** — Choose between daemon (clamd) or direct (clamscan)
-- **Scheduled Scans** — Configure automatic scanning with systemd or cron
-- **ClamAV Config Editor** — Edit clamd.conf and freshclam.conf directly from the GUI
-- **CLI Subcommands** — Full headless management: scan, quarantine, profiles, status, history
-- **Debug & Diagnostics** — Configurable log verbosity, log export, and privacy-hardened logging
-- **Multi-Distro Support** — Auto-detects ClamAV config paths across Debian, Fedora, and more
+- **Multiple Scan Backends** - Choose between daemon (clamd) or direct (clamscan)
+- **Scheduled Scans** - Configure automatic scanning with systemd or cron
+- **ClamAV Config Editor** - Edit clamd.conf and freshclam.conf directly from the GUI
+- **CLI Subcommands** - Full headless management: scan, quarantine, profiles, status, history
+- **Debug & Diagnostics** - Configurable log verbosity, log export, and privacy-hardened logging
+- **Multi-Distro Support** - Auto-detects ClamAV config paths across Debian, Fedora, and more
 
 </td>
 </tr>
@@ -132,8 +132,13 @@ cd clamui
 ./scripts/local-run.sh
 ```
 
-On Ubuntu/Pop!_OS 22.04, use `./scripts/local-run.sh` instead of raw `uv sync`. Newer
-`PyGObject` releases require GLib 2.80+, while 22.04 ships GLib 2.72.
+Stock Ubuntu/Pop!_OS 22.04 does not satisfy the current source dependency floor: `PyGObject>=3.56.3`
+requires GLib 2.80+, while those releases ship GLib 2.72. Use the Flatpak there, or develop in an environment with newer GLib.
+
+> **Host ClamAV required:** Every installation format (Flatpak, AppImage, Debian package, and source) uses host
+> ClamAV and does not bundle its engine or database. Install host `clamscan` and `freshclam`; daemon mode also
+> requires host `clamd` and `clamdscan`.
+
 
 > **More Installation Options:** See the [Installation Guide](./docs/INSTALL.md) for .deb packages and system-wide installation
 
@@ -180,6 +185,9 @@ clamui status --json
 # View scan history
 clamui history
 clamui history --limit 50 --type scan --json
+
+# Install the privileged helper and polkit policy (native host only)
+sudo clamui install-privileged-helper
 
 # Get help
 clamui help
@@ -231,7 +239,7 @@ ClamUI stores user preferences and can be configured through the Preferences dia
 </tr>
 <tr>
 <td><strong>System Tray</strong></td>
-<td>Enable start minimized and minimize to tray options</td>
+<td>Optionally start normal launches in the tray; closing behavior is configured separately</td>
 </tr>
 <tr>
 <td><strong>Scan Profiles</strong></td>
@@ -291,7 +299,7 @@ Comprehensive guides to help you get the most out of ClamUI:
 <td>Backend options, performance comparison, and selection guide</td>
 </tr>
 <tr>
-<td><a href="./SECURITY.txt"><strong>Security Policy</strong></a></td>
+<td><a href="./SECURITY.md"><strong>Security Policy</strong></a></td>
 <td>Security contact and reporting</td>
 </tr>
 </table>
@@ -309,10 +317,10 @@ ClamUI requires the following components to be installed on your system:
 </tr>
 <tr>
 <td><strong>ClamAV</strong></td>
-<td>The host <code>clamscan</code> command-line tool. The Flatpak package also requires ClamAV on the host.</td>
+<td>All installation formats use host <code>clamscan</code> and <code>freshclam</code>; ClamUI does not bundle the engine or virus database. Daemon mode also requires host <code>clamd</code> and <code>clamdscan</code>.</td>
 </tr>
 <tr>
-<td><strong>GTK4 + libadwaita</strong></td>
+<td><strong>GTK 4.6+ + libadwaita 1.1+</strong></td>
 <td>For the graphical interface</td>
 </tr>
 <tr>

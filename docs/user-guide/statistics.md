@@ -725,7 +725,7 @@ operations without navigating to other views.
 **What it does:**
 
 - Switches to the **Scan view** and selects the **Quick Scan** profile (your `~/Downloads` folder)
-- Does **not** start the scan automatically — review the target, then click **Start Scan**. If the Quick Scan profile is missing, it falls back to your home directory
+- Does **not** start the scan automatically - review the target, then click **Start Scan**. If the Quick Scan profile is missing, it falls back to your home directory
 - Uses your configured scan backend and settings
 
 **When to use it:**

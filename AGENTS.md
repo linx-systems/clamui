@@ -1,6 +1,6 @@
-# AGENTS.md — ClamUI AI Assistant Guide
+# AGENTS.md - ClamUI AI Assistant Guide
 
-> Canonical AI-assistant guide for this repository. Also read by Claude Code, Cursor, Aider, Continue, and Zed via the AGENTS.md convention. `CLAUDE.md` is a stub that redirects here — keep updates to this file.
+> Canonical AI-assistant guide for this repository. Also read by Claude Code, Cursor, Aider, Continue, and Zed via the AGENTS.md convention. `CLAUDE.md` is a stub that redirects here - keep updates to this file.
 
 ## Project Overview
 
@@ -8,19 +8,18 @@ ClamUI is a modern Linux desktop application providing a graphical user interfac
 
 **Key Facts:**
 
-- Python 3.11+ required
-- GTK4/libadwaita UI (targets libadwaita 1.1+ for Ubuntu 22.04 / Pop!\_OS 22.04 baseline)
-- ClamAV integration via subprocess (clamscan, clamdscan, freshclam)
-- Distributed as native Debian package, AppImage, and Flatpak
-- VirusTotal integration for enhanced threat analysis
-- Translations: de, en, es, fr, it, zh_CN (see `po/LINGUAS`)
+- Python 3.11+ required; GTK 4.6+ and libadwaita 1.1+ required
+- Every package format uses host `clamscan` and `freshclam`; daemon mode also needs host `clamd` and `clamdscan`. ClamUI never bundles the engine or its database.
+- Distributed as native Debian packages, AppImage, and Flatpak
+- VirusTotal integration is opt-in
+- Translations: de, en, es, zh_CN, it, fr, pt_BR, hu (see `po/LINGUAS`)
 - MIT licensed
 
 ## Repository Structure (top level)
 
 ```
 clamui/
-├── src/                    Application source — read per-dir AGENTS.md (below)
+├── src/                    Application source - see local guides where listed below
 │   ├── main.py             Application entry point
 │   ├── app.py              Adw.Application (lifecycle, views, tray)
 │   ├── cli/                CLI entry points + command router
@@ -31,15 +30,15 @@ clamui/
 ├── docs/                   Developer + user docs (table below)
 │   ├── architecture/       Architectural notes (e.g. tray-subprocess)
 │   └── user-guide/         End-user pages (getting-started, scanning, quarantine, …)
-├── po/                     Translations (de, en, es, fr, it, zh_CN) + POTFILES.in, clamui.pot
+├── po/                     Translations (de, en, es, zh_CN, it, fr, pt_BR, hu) + POTFILES.in, clamui.pot
 ├── scripts/                Dev + packaging scripts (local-run, update-pot, nemo actions, hooks/)
 ├── appimage/               AppImage build (build-appimage.sh)
 ├── flathub/                Flatpak manifest + generated Python deps
 ├── debian/                 Debian packaging
 ├── data/                   Desktop integration (.desktop, nemo_action, metainfo.xml)
 ├── icons/                  Application icons
+├── screenshots/            Canonical README and website screenshot sources
 ├── website/                Astro marketing site
-├── planning/, thoughts/    Internal planning / AI-tooling context snapshots
 ├── CODE_OF_CONDUCT.md      Community behavior and enforcement standards
 ├── CONTRIBUTING.md         Contributor workflow and pull-request guidance
 └── pyproject.toml          Project config + dependencies
@@ -47,13 +46,14 @@ clamui/
 
 ### Hierarchical context docs (read the nearest one before editing)
 
-Each source subdirectory has a concise local `AGENTS.md` with scope-specific architectural framing — tighter than this root file. When working inside one of these directories, read its `AGENTS.md` first:
+Local guides exist only for the areas listed below. Read the applicable one before editing there; other
+directories are governed by this root guide:
 
-- [`src/core/AGENTS.md`](src/core/AGENTS.md) — business-logic layer (no UI deps)
-- [`src/core/quarantine/AGENTS.md`](src/core/quarantine/AGENTS.md) — SQLite quarantine subsystem
-- [`src/ui/AGENTS.md`](src/ui/AGENTS.md) — GTK4/Adwaita UI layer
-- [`src/ui/scan/AGENTS.md`](src/ui/scan/AGENTS.md) — scan workflow (coordinator pattern, replaces monolithic `scan_view.py`)
-- [`src/ui/preferences/AGENTS.md`](src/ui/preferences/AGENTS.md) — modular preferences pages
+- [`src/core/AGENTS.md`](src/core/AGENTS.md) - business-logic layer (no UI deps)
+- [`src/core/quarantine/AGENTS.md`](src/core/quarantine/AGENTS.md) - SQLite quarantine subsystem
+- [`src/ui/AGENTS.md`](src/ui/AGENTS.md) - GTK4/Adwaita UI layer
+- [`src/ui/scan/AGENTS.md`](src/ui/scan/AGENTS.md) - scan workflow (coordinator pattern, replaces monolithic `scan_view.py`)
+- [`src/ui/preferences/AGENTS.md`](src/ui/preferences/AGENTS.md) - modular preferences pages
 
 ## Architecture Documentation
 
@@ -123,6 +123,11 @@ uv sync --dev
 # Run from source
 uv run clamui
 ```
+
+For a runtime-only local launch that installs distribution dependencies, use `./scripts/local-run.sh`.
+Stock Ubuntu 22.04 / Pop!_OS 22.04 does not satisfy the current source dependency floor:
+`PyGObject>=3.56.3` requires GLib 2.80+, while those releases ship GLib 2.72. Use the Flatpak there,
+or develop in an environment with newer GLib; the UI code still targets GTK 4.6 and libadwaita 1.1.
 
 **Important:** The pre-commit hook is **required** for development. It prevents absolute `src.*` imports which break when ClamUI is installed as a Debian package. See [Import Conventions](#import-conventions-package-compatibility) for details.
 
@@ -246,10 +251,11 @@ def scan_async(self, path: str, callback: Callable[[ScanResult], None]) -> None:
 
 ### Scanner Type System
 
-Scanner results use a shared type system defined in `scanner_types.py`:
+Scanner results use the shared type system in `src/core/scanner_types.py`. From another `src/core/`
+module, import it relatively:
 
 ```python
-from src.core.scanner_types import ScanStatus, ThreatDetail, ScanResult
+from .scanner_types import ScanStatus, ThreatDetail, ScanResult
 
 # ScanStatus enum: CLEAN, INFECTED, ERROR, CANCELLED
 # ThreatDetail dataclass for structured threat information
@@ -319,10 +325,10 @@ def check_clamav_installed() -> Tuple[bool, Optional[str]]:
 
 ### Flatpak Support
 
-Commands that execute on the host system must be wrapped:
+Commands that execute on the host system must be wrapped. From a `src/core/` module:
 
 ```python
-from src.core.flatpak import wrap_host_command, is_flatpak
+from .flatpak import wrap_host_command, is_flatpak
 
 cmd = wrap_host_command(["clamscan", "--version"])
 # In Flatpak: ['flatpak-spawn', '--host', 'clamscan', '--version']
@@ -372,7 +378,7 @@ class MyDialog(Adw.Window):
         self.connect("close-request", self._on_close_request)  # not "closed"
 ```
 
-Present with `dialog.set_transient_for(parent); dialog.present()` — **not** `dialog.present(parent)` (that's 1.5+).
+Present with `dialog.set_transient_for(parent); dialog.present()` - **not** `dialog.present(parent)` (that's 1.5+).
 
 **Compatibility helpers (`src/ui/preferences/base.py`):**
 
@@ -436,10 +442,10 @@ class DatabasePage(PreferencesPageMixin):
 
 ### Reusable Export Dialog Pattern
 
-Use `FileExportHelper` for file export dialogs:
+Use `FileExportHelper` for file export dialogs. From a sibling UI module:
 
 ```python
-from src.ui.file_export import FileExportHelper, FileFilter
+from .file_export import FileExportHelper, FileFilter
 
 FileExportHelper.show_export_dialog(
     filters=[FileFilter(name="CSV Files", extension="csv")],
@@ -451,10 +457,10 @@ FileExportHelper.show_export_dialog(
 
 ### Pagination Pattern
 
-Use `PaginatedListController` for large lists:
+Use `PaginatedListController` for large lists. From a sibling UI module:
 
 ```python
-from src.ui.pagination import PaginatedListController
+from .pagination import PaginatedListController
 
 controller = PaginatedListController(
     list_box=self.list_box,
@@ -489,20 +495,23 @@ from ..core.keyring_manager import get_api_key, set_api_key, delete_api_key
 set_api_key(api_key)   # Stores the VirusTotal key in the system keyring
 key = get_api_key()    # Returns the stored key or None
 delete_api_key()       # Removes the stored key
-# Each accepts an optional settings_manager arg enabling plaintext fallback when opted in.
 ```
+
+Plaintext `settings.json` storage is used only when keyring storage is unavailable **and** the user has
+explicitly set `allow_plaintext_api_key_fallback` to `true` in `settings.json`.
 
 ## Testing Guidelines
 
 ### GTK Mocking (conftest.py)
 
-Tests use centralized GTK mocking from `tests/conftest.py`:
+Tests use centralized GTK mocking from `tests/conftest.py`. `src.*` imports are allowed in tests:
 
 ```python
-def test_something(mock_gi_modules):
-    gtk = mock_gi_modules['gtk']
-    from src.ui.some_view import SomeView
-    # SomeView can be imported with mocked GTK
+def test_navigation_sidebar_can_be_created(mock_gi_modules):
+    from src.ui.sidebar import NavigationSidebar
+
+    sidebar = NavigationSidebar()
+    assert sidebar is not None
 ```
 
 ### Fixtures
@@ -629,28 +638,32 @@ def test_something(mock_gi_modules):
 - Validates names, paths, and exclusion patterns
 - Supports import/export with duplicate name handling
 
-### ClamUIApp (`src/app.py`)
+### Application and UI seams
 
-- Main `Adw.Application` class
-- Manages view lifecycle and navigation
-- Handles tray integration via subprocess (GIO D-Bus for SNI protocol)
-- Implements start-minimized functionality
+- `ClamUIApp` (`src/app.py`) owns lifecycle and lazy views; delegate lifecycle, notifications, tray events,
+  and navigation to `AppLifecycleManager`, `NotificationDispatcher`, `TrayIntegration`, and `ViewCoordinator`.
+- `SettingsManager` is the single settings persistence and listener seam; `LoggingConfig` configures
+  privacy-aware debug logs, while `LogManager` owns scan/update logs.
+- Keep privileged system-config writes behind `core/privileged_helper.py`,
+  `write_config_with_elevation()` / `write_configs_with_elevation()`, and the installed polkit helper.
+- `src/ui/scan/` is composition-based: add widgets and wire them through `ScanView`; route scan execution
+  through `ScanController` and tray-driven orchestration through `ScanCoordinator`.
 
 ### Preferences System (`src/ui/preferences/`)
 
 - `PreferencesWindow` - Main window orchestrating all pages
 - `PreferencesPageMixin` - Base class with shared utilities
 - Individual page classes for each settings category:
-  - `BehaviorPage` — close behavior, notifications, tray
-  - `DatabasePage` — freshclam settings
-  - `ExclusionsPage` — exclusion patterns
-  - `OnAccessPage` — on-access scanning
-  - `ScannerPage` — clamd configuration
-  - `ScheduledPage` — scheduled scans
-  - `VirusTotalPage` — VirusTotal API setup
-  - `DebugPage` — diagnostics, logging controls
-  - `DeviceScanPage` — removable-device scan configuration
-  - `SavePage` — save & apply with permission elevation
+  - `BehaviorPage` - close behavior, notifications, tray
+  - `DatabasePage` - freshclam settings
+  - `ExclusionsPage` - exclusion patterns
+  - `OnAccessPage` - on-access scanning
+  - `ScannerPage` - clamd configuration
+  - `ScheduledPage` - scheduled scans
+  - `VirusTotalPage` - VirusTotal API setup
+  - `DebugPage` - diagnostics, logging controls
+  - `DeviceScanPage` - removable-device scan configuration
+  - `SavePage` - save & apply with permission elevation
 
 ### UI Helpers (`src/ui/view_helpers.py`)
 
@@ -675,13 +688,12 @@ def test_something(mock_gi_modules):
 
 ## Configuration & Settings
 
-### Settings Location
+Settings, profiles, and data follow XDG locations:
 
-- XDG compliant: `~/.config/clamui/settings.json`
-- Profiles: `~/.config/clamui/profiles.json`
-- Quarantine DB: `~/.local/share/clamui/quarantine.db`
-- Quarantine files: `~/.local/share/clamui/quarantine/`
-- Logs: `~/.local/share/clamui/logs/`
+- Settings and profiles: `$XDG_CONFIG_HOME/clamui/{settings,profiles}.json` (defaults to `~/.config`)
+- Quarantine database and files: `$XDG_DATA_HOME/clamui/quarantine{.db,/}` (defaults to `~/.local/share`);
+  an explicit `quarantine_directory` setting overrides the file directory.
+- Scan/update logs: `$XDG_DATA_HOME/clamui/logs/`; debug logs: `$XDG_DATA_HOME/clamui/debug/`.
 
 ### Key Settings
 
@@ -697,11 +709,19 @@ def test_something(mock_gi_modules):
 }
 ```
 
-VirusTotal is configured via **Preferences → VirusTotal** (the API key lives in the system keyring), not via settings keys. See [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) for the full `DEFAULT_SETTINGS` reference.
+The UI label for `start_minimized` is **Start in System Tray**. A normal launch starts the tray subprocess
+and then hides; an explicit scan-target launch stays visible. StatusNotifierWatcher registration is asynchronous,
+so documentation must tell users to confirm that their desktop exposes the icon before relying on background startup.
+
+VirusTotal is opt-in and configured via **Preferences → VirusTotal**. Its API key uses the system keyring
+by default; plaintext settings fallback requires the user's explicit opt-in. See
+[`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) for the full `DEFAULT_SETTINGS` reference.
 
 #### Scan Backend Options
 
-`scan_backend` ∈ {`"auto"` (default), `"daemon"`, `"clamscan"`}. Auto prefers clamd when available (instant startup, parallel via `--multiscan`/`--fdpass`), falls back to clamscan (3–10 sec startup, always available). See [`docs/SCAN_BACKENDS.md`](docs/SCAN_BACKENDS.md) for performance tables, daemon setup, and troubleshooting.
+`scan_backend` ∈ {`"auto"` (default), `"daemon"`, `"clamscan"`}. Auto prefers an available clamd daemon
+and otherwise uses `clamscan`; daemon mode requires `clamd` and `clamdscan`. See
+[`docs/SCAN_BACKENDS.md`](docs/SCAN_BACKENDS.md) for setup and troubleshooting.
 
 ## CI/CD Workflows
 
@@ -714,17 +734,20 @@ VirusTotal is configured via **Preferences → VirusTotal** (the API key lives i
 
 ### Other workflows
 
-- **lint.yml** — ubuntu-22.04 / py3.12; `ruff check` + `ruff format`; blocks absolute `src.*` imports
-- **build-appimage.yml** — ubuntu-24.04; builds AppImage + `.zsync` (7-day artifact); smoke tests; optional GPG signing on tags
-- **build-flatpak.yml** — x86_64 (ubuntu-22.04) + aarch64 (ubuntu-24.04-arm); flathub-infra builder gnome-49; 7-day artifact
-- **build-deb.yml** — ubuntu-22.04; runs `build-deb.sh`; optional `dpkg-sig`
-- **build-all.yml** — manual dispatch; chains the deb/flatpak/appimage builds
-- **release.yml** — on a `v*` tag, creates a draft release from `RELEASE_NOTES.md`
-- **codeql.yml** — push/PR/weekly CodeQL analysis (Python)
-- **i18n.yml** — on `po/**` changes, runs `check-translations.sh` + `check-potfiles.sh`
-- **dependency-review.yml** — dependency review on PRs
-- **dependency-audit.yml** — push/PR/weekly Python dependency vulnerability audit
-- **deploy-website.yml** — builds and deploys the Astro marketing site (`website/`) to GitHub Pages on website changes, releases, and weekly
+- **lint.yml** - ubuntu-22.04 / py3.12; `ruff check` + `ruff format`; blocks absolute `src.*` production imports
+- **build-appimage.yml** - ubuntu-24.04; builds AppImage + `.zsync` (7-day artifact); smoke tests; optional GPG signing on tags
+- **build-flatpak.yml** - x86_64 (ubuntu-22.04) + aarch64 (ubuntu-24.04-arm); flathub-infra builder gnome-49; 7-day artifact
+- **build-deb.yml** - ubuntu-22.04; builds `clamui_<version>_all.deb` and the matching
+  `clamui-privileged-helper_<version>_all.deb`, optionally signing both with `dpkg-sig`
+- **build-all.yml** - manual dispatch that calls the Debian, Flatpak, and AppImage reusable workflows
+- **release.yml** - on a `v*` tag, calls the Debian workflow with inherited signing secrets, then creates a
+  draft release from `RELEASE_NOTES.md` with both Debian artifacts
+- **codeql.yml** - push/PR/weekly CodeQL analysis (Python)
+- **i18n.yml** - on `po/**` changes, runs `check-translations.sh` + `check-potfiles.sh`
+- **dependency-review.yml** - dependency review on PRs
+- **dependency-audit.yml** - push/PR/weekly Python dependency vulnerability audit
+- **deploy-website.yml** - uses Bun to copy source assets and build `website/`, then deploys `website/dist` to
+  GitHub Pages on relevant `master` pushes (`website/`, `screenshots/`, `icons/`), published releases, and weekly
 
 ## Security Considerations
 
@@ -739,13 +762,21 @@ VirusTotal is configured via **Preferences → VirusTotal** (the API key lives i
 
 ## Common Tasks
 
+### Updating Website Screenshots
+
+Use root `screenshots/` as the source of truth. `screenshots/ClamUI-Social-Preview-1280x640.png` is the
+canonical README hero and website social-card source. Update website asset-copying/metadata as needed, but
+do not hand-edit generated `website/public/` copies or `website/dist/`.
+
 ### Adding a New View
 
-1. Create `src/ui/new_view.py` inheriting from `Gtk.Box` or similar
-2. Add a lazy `@property` for it in `ClamUIApp` (`src/app.py`) — views are **not** instantiated in `do_activate()`
-3. Register a `show-<view>` action in `ViewCoordinator.setup_actions()` (`src/view_coordinator.py`) and add an `_on_show_<view>` callback in `app.py` (`_setup_actions()` delegates to `ViewCoordinator`)
-4. Add a `("<id>", "<icon>-symbolic", N_("Label"))` tuple to `NAVIGATION_ITEMS` in `src/ui/sidebar.py`
-5. Write tests in `tests/ui/test_new_view.py`
+1. Create `src/ui/new_view.py` inheriting from `Gtk.Box` or similar.
+2. Add a lazy `@property` in `ClamUIApp` (`src/app.py`); do not construct the view in `do_activate()`.
+3. Add its `show-<id>` action in `ViewCoordinator.setup_actions()` and an `app.py` callback that sets the
+   lazy view as content and active view.
+4. Add a matching `("<id>", "<icon>-symbolic", N_("Label"))` sidebar tuple; `MainWindow` activates
+   `show-<id>` from that ID.
+5. Write tests in `tests/ui/test_new_view.py`.
 
 ### Adding a Core Feature
 
@@ -758,10 +789,12 @@ VirusTotal is configured via **Preferences → VirusTotal** (the API key lives i
 
 ### Adding a Preferences Page
 
-1. Create `src/ui/preferences/new_page.py` inheriting from `PreferencesPageMixin`
-2. Implement `create_page()` (an instance method, or `@staticmethod` for config-backed pages)
-3. Add page instantiation in `PreferencesWindow.__init__()`
-4. Write tests in `tests/ui/preferences/test_new_page.py`
+1. Create `src/ui/preferences/new_page.py` inheriting from `PreferencesPageMixin`; match a config-backed
+   static `create_page()` or simple-settings instance `create_page()` template.
+2. Import it in `src/ui/preferences/window.py`, add its sidebar tuple, and register a lazy factory in
+   `_page_factories`.
+3. Preserve the existing loading model: only `BehaviorPage` is eager; new pages are created on first navigation.
+4. Write tests in `tests/ui/preferences/test_new_page.py`.
 
 ### Modifying Scan Profiles
 
@@ -787,7 +820,14 @@ clamui = "src.main:main"
 clamui-scheduled-scan = "src.cli.scheduled_scan:main"
 ```
 
-The `src/cli/` package uses a command router (`router.py`) whose `CLI_SUBCOMMANDS` dispatches 7 subcommands: `scan`, `quarantine`, `profile`, `status`, `history`, `help`, and `install-privileged-helper`. These map to `scan_cmd.py`, `quarantine_cmd.py`, `profile_cmd.py`, `status_cmd.py`, `history_cmd.py`, `help_cmd.py`, and `install_helper.py` (plus `output.py` helpers). `install_helper.py` registers `clamui install-privileged-helper`, which installs the root-owned `/usr/bin/clamui-apply-preferences` wrapper plus the polkit policy (`io.github.linx_systems.ClamUI.policy`) so system ClamAV config writes can elevate via `pkexec`; the privileged wrapper is deliberately not a Python project entry point. To add a subcommand, create a `*_cmd.py` module and register it in `router.py`.
+The `src/cli/` package uses a command router (`router.py`) whose `CLI_SUBCOMMANDS` dispatches 7 subcommands:
+`scan`, `quarantine`, `profile`, `status`, `history`, `help`, and `install-privileged-helper`. These map to
+the corresponding `*_cmd.py` modules (plus `output.py` helpers). `clamui-scheduled-scan` is deliberately a
+separate headless entry point for systemd timers or cron and does not pass through that router or start GTK.
+`install_helper.py` registers `clamui install-privileged-helper`, which installs the root-owned
+`/usr/bin/clamui-apply-preferences` wrapper plus the polkit policy
+(`io.github.linx_systems.ClamUI.policy`) so system ClamAV config writes can elevate via `pkexec`; the
+privileged wrapper is deliberately not a Python project entry point.
 
 ## Dependencies
 
@@ -798,7 +838,7 @@ Key runtime dependencies:
 - `matplotlib>=3.11.0` - Statistics view charts
 - `requests>=2.34.2` / `urllib3>=2.7.0` / `certifi>=2026.6.17` - VirusTotal HTTP + TLS
 - `keyring>=25.7.0` - Secure credential storage (VirusTotal API key)
-- `Pillow>=12.2.0` - Tray icon generation (composite status badges)
+- `Pillow>=12.3.0` - Tray icon generation (composite status badges)
 - `cairosvg>=2.9.0` - SVG to PNG conversion for tray icons
 
 **Build dependencies for Pillow (Ubuntu/Debian):**
@@ -917,7 +957,9 @@ See `appimage/build-appimage.sh` for detailed build configuration.
 ## Packaging Notes
 
 - Flatpak uses `--filesystem=host` (read-write) for full scanning + quarantine operations and runs host ClamAV tools through `flatpak-spawn --host`.
-- Debian packages require Python 3.11+.
-- Flatpak and AppImage both require host ClamAV; neither should be treated as owning the virus database.
+- Every format requires host ClamAV and does not own the engine or virus database: `clamscan` and
+  `freshclam` are required; daemon mode additionally requires `clamd` and `clamdscan`.
+- Debian artifacts are architecture-independent `clamui_<version>_all.deb` and matching
+  `clamui-privileged-helper_<version>_all.deb`; install them together.
 - `urllib3>=2.7.0` is pinned for CVE fix (decompression-bomb bypass on redirects).
 - See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) and [`SECURITY.md`](SECURITY.md) for historical security-hardening changes and current advisories.

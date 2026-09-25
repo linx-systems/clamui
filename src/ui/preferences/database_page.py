@@ -794,7 +794,7 @@ class DatabasePage(PreferencesPageMixin):
             populate_int_field(config, widgets_dict, key)
 
         # Load existing DatabaseCustomURL entries. Clear rows from any prior
-        # populate first — reloading the config (e.g. after Detect/Browse)
+        # populate first - reloading the config (e.g. after Detect/Browse)
         # would otherwise duplicate every URL row and write duplicated
         # DatabaseCustomURL lines on the next save.
         group = widgets_dict.get("_custom_url_group")

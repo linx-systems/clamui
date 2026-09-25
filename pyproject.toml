@@ -105,12 +105,12 @@ ignore = [
     "S607",   # partial path for process (ClamAV binaries found via PATH)
     "S606",   # process without shell (same rationale as S603)
     "S311",   # random not for crypto (used for log sampling)
-    "S103",   # file permissions — intentional security hardening (0o600)
-    "S108",   # hardcoded /tmp paths — used legitimately for temp operations
-    "S110",   # try-except-pass — used in cleanup/fallback code
-    "S112",   # try-except-continue — same rationale
-    "S314",   # XML ElementTree — only parses trusted local config/coverage files
-    "S608",   # SQL-like string — false positives on log messages
+    "S103",   # file permissions - intentional security hardening (0o600)
+    "S108",   # hardcoded /tmp paths - used legitimately for temp operations
+    "S110",   # try-except-pass - used in cleanup/fallback code
+    "S112",   # try-except-continue - same rationale
+    "S314",   # XML ElementTree - only parses trusted local config/coverage files
+    "S608",   # SQL-like string - false positives on log messages
     "PT009",  # unittest-style asserts (existing class-based test convention)
     "PT027",  # unittest assertRaises (same reason)
     "RUF005", # collection literal concatenation (stylistic preference)

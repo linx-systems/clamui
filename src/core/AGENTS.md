@@ -1,4 +1,4 @@
-# core/ — Business Logic Layer
+# core/ - Business Logic Layer
 
 30 modules. No UI dependencies. All scanning, configuration, security, and system integration.
 
@@ -40,10 +40,10 @@ core/
 Every operation exposes `operation_sync()` (blocks) and `operation_async()` (spawns daemon thread + `GLib.idle_add(callback)`). Used in Scanner, Updater, QuarantineManager, VirusTotalClient, LogManager.
 
 ### Cancellation
-`threading.Event()` — call `.set()` to cancel, `.clear()` at start of new operation. Use `communicate_with_cancel_check()` from `scanner_base.py` instead of `process.wait()`.
+`threading.Event()` - call `.set()` to cancel, `.clear()` at start of new operation. Use `communicate_with_cancel_check()` from `scanner_base.py` instead of `process.wait()`.
 
 ### Error Returns
-`(success: bool, error_message: Optional[str])` tuples — no custom exceptions. Operations return dataclass results with `status` enum + `error_message` field.
+`(success: bool, error_message: Optional[str])` tuples - no custom exceptions. Operations return dataclass results with `status` enum + `error_message` field.
 
 ### Type System
 - `@dataclass` with `@property` for computed values (e.g., `ScanResult.is_clean`)
@@ -69,8 +69,8 @@ Every operation exposes `operation_sync()` (blocks) and `operation_async()` (spa
 
 ## Anti-Patterns (core-specific)
 
-- **Blocking main thread**: Never call `scan_sync()` from UI — use `scan_async()`
-- **`process.wait()`**: Use `communicate_with_cancel_check()` — supports cancellation
+- **Blocking main thread**: Never call `scan_sync()` from UI - use `scan_async()`
+- **`process.wait()`**: Use `communicate_with_cancel_check()` - supports cancellation
 - **Forgetting cancel reset**: Always `self._cancel_event.clear()` at start of sync methods
 - **Flatpak ClamAV ownership**: Flatpak uses host ClamAV via `flatpak-spawn --host`; do not add bundled `/app/bin` ClamAV or sandbox database assumptions
 - **Unsanitized logging**: All user/external input through `sanitize_log_line()` or `sanitize_log_text()`

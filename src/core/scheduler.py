@@ -896,7 +896,7 @@ WantedBy=timers.target
             # Use anchored equality (with .strip()) to avoid dropping user
             # lines that merely contain the marker text as a substring.
             # Also verify the following line actually looks like a ClamUI
-            # cron command before consuming it — defense against a marker
+            # cron command before consuming it - defense against a marker
             # whose paired command was previously edited away by the user.
             lines = current_crontab.splitlines()
             new_lines = []

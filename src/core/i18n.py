@@ -155,7 +155,7 @@ def get_available_languages() -> list[tuple[str, str]]:
     project_root = os.path.dirname(src_dir)
     linguas_path = os.path.join(project_root, "po", "LINGUAS")
 
-    # In AppImage/Flatpak, LINGUAS isn't bundled — scan locale dir instead
+    # In AppImage/Flatpak, LINGUAS isn't bundled - scan locale dir instead
     if not os.path.isfile(linguas_path):
         locale_dir = _get_locale_dir()
         if locale_dir and os.path.isdir(locale_dir):

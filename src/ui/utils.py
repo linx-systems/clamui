@@ -164,7 +164,7 @@ def enable_escape_to_close(window: Gtk.Window) -> None:
     Make Escape close a dialog window.
 
     The project's dialogs are Adw.Window subclasses (for libadwaita 1.1
-    compatibility), which — unlike Gtk.Dialog/Adw.MessageDialog — do not
+    compatibility), which - unlike Gtk.Dialog/Adw.MessageDialog - do not
     bind Escape by default. GNOME HIG expects every dialog to close on
     Escape; call this from the dialog's __init__.
 

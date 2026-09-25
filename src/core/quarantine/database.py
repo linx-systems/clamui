@@ -61,7 +61,7 @@ class QuarantineEntry:
         Returns:
             New QuarantineEntry instance
         """
-        # VULN-004: defense-in-depth — mask permission bits read from DB to
+        # VULN-004: defense-in-depth - mask permission bits read from DB to
         # the low 9 bits (rwx for user/group/other). Prevents setuid/setgid/
         # sticky bits from propagating out of a tampered or corrupted DB row.
         raw_perms = row[7] if len(row) > 7 else None
@@ -224,7 +224,7 @@ class QuarantineDatabase:
         for db_file in db_files:
             # Open with O_NOFOLLOW so a symlink planted here cannot redirect chmod
             # to an arbitrary file. ENOENT is expected for WAL/SHM when SQLite hasn't
-            # created them yet; ELOOP means a symlink — both are silently skipped.
+            # created them yet; ELOOP means a symlink - both are silently skipped.
             try:
                 fd = os.open(db_file, os.O_RDONLY | os.O_NOFOLLOW)
             except OSError:
@@ -328,7 +328,7 @@ class QuarantineDatabase:
         Returns:
             The ID of the newly created entry, or None if failed
         """
-        # VULN-004: defense-in-depth — mask permission bits before insert so
+        # VULN-004: defense-in-depth - mask permission bits before insert so
         # the DB only ever stores the low 9 bits (rwx user/group/other).
         # Prevents accidental or malicious propagation of setuid/setgid/sticky.
         original_permissions = original_permissions & 0o777

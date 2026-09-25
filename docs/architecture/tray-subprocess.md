@@ -22,7 +22,7 @@ JSON messages over stdin/stdout pipes.
 ## Component Relationships
 
 The system tray feature spans the main GTK4 process and a separate subprocess. In the main process the work is
-layered across three classes — `TrayIntegration`, `TrayIndicator`, and `TrayManager` — that sit between the app and
+layered across three classes - `TrayIntegration`, `TrayIndicator`, and `TrayManager` - that sit between the app and
 the subprocess:
 
 ```mermaid
@@ -62,7 +62,7 @@ graph LR
 | Component               | GTK Version | Role                                                                                                                                                                            |
 |-------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **app.py**              | GTK4        | Main application class (`ClamUIApp(Adw.Application)`). Owns a `TrayIntegration` and creates a `TrayIndicator`. Exposes `_on_tray_*` callbacks that the tray invokes.            |
-| **tray_integration.py** | GTK4        | `TrayIntegration`: menu-action business logic in the main process — executes quick/full scans, database updates, profile selection, window toggle, quit, and device-scan events. App's `_on_tray_*` handlers delegate here. |
+| **tray_integration.py** | GTK4        | `TrayIntegration`: menu-action business logic in the main process - executes quick/full scans, database updates, profile selection, window toggle, quit, and device-scan events. App's `_on_tray_*` handlers delegate here. |
 | **tray_indicator.py**   | GTK4        | `TrayIndicator`: thin compatibility wrapper that creates and owns a `TrayManager`, wires the app's `_on_tray_*` callbacks into it, and forwards status/progress/profile updates. Preserves the historical `TrayIndicator` API used by app wiring. |
 | **tray_manager.py**     | GTK4        | `TrayManager`: spawns the tray subprocess, sends JSON commands via stdin, reads events from stdout and logs from stderr on background threads. Thread-safe (`threading.Lock`); uses `GLib.idle_add()` for callbacks; bounded crash respawn. Imports only `GLib`, not GTK widgets. |
 | **tray_service.py**     | None (GIO)  | `TrayService`: subprocess entry point. Uses GIO D-Bus for the StatusNotifierItem protocol, libdbusmenu (`Dbusmenu.Server`) for the context menu, processes commands from stdin, sends events to stdout. |

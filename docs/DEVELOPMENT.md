@@ -73,15 +73,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync --dev
 ```
 
-> **Ubuntu/Pop!_OS 22.04 note:** `uv sync` may resolve `PyGObject 3.50+`, which needs
-> GLib 2.80+. Jammy ships GLib 2.72, so create the venv manually and preinstall a
-> compatible PyGObject first:
->
-> ```bash
-> uv venv --python 3.11
-> uv pip install --python .venv/bin/python "PyGObject<3.50"
-> uv pip install --python .venv/bin/python -e ".[dev]"
-> ```
+> **Ubuntu/Pop!_OS 22.04 note:** the current source dependency floor is `PyGObject>=3.56.3`,
+> which requires GLib 2.80+, while Jammy ships GLib 2.72. Use the Flatpak for end-user
+> installation on those releases, or develop in a container/host with newer GLib. The UI code
+> remains compatible with GTK 4.6 and libadwaita 1.1; this limitation is in the current Python
+> source-install dependency set.
 
 Alternatively, use pip:
 

@@ -341,7 +341,7 @@ Specify which files and folders to scan automatically.
 - **Why**: USB drives are common malware vectors
 - ⚠️ **Note**: Drive must be connected at scan time
 
-💡 **Tip**: For drives that aren't connected at the scheduled time, ClamUI can also scan USB/removable media **automatically when they're plugged in** — a separate feature configured in **Preferences** → **Device Scan** (see the [Settings guide](settings.md)).
+💡 **Tip**: For drives that aren't connected at the scheduled time, ClamUI can also scan USB/removable media **automatically when they're plugged in** - a separate feature configured in **Preferences** → **Device Scan** (see the [Settings guide](settings.md)).
 
 #### Setting Scan Targets
 

@@ -42,7 +42,7 @@ from .view_helpers import StatusLevel, clear_status_classes, set_status_class
 
 logger = logging.getLogger(__name__)
 
-# Status icon fallback chains — Gio.ThemedIcon tries each name in order.
+# Status icon fallback chains - Gio.ThemedIcon tries each name in order.
 # GTK stops at the first icon found by the theme even if it renders broken,
 # so we put the most reliable icons FIRST (actions/emblems dirs are safest).
 _STATUS_ICON_NAMES: dict[AuditStatus, list[str]] = {
@@ -104,7 +104,7 @@ class AuditView(Gtk.Box):
         self._section_status_icons: dict[str, Gtk.Image] = {}
         self._section_spinners: dict[str, Gtk.Spinner] = {}
 
-        # Optional collapsible wrapper for Portmaster (single instance — only
+        # Optional collapsible wrapper for Portmaster (single instance - only
         # this section needs collapsed-when-absent behavior).
         self._portmaster_expander: Gtk.Expander | None = None
         self._portmaster_authorize_running = False
@@ -252,7 +252,7 @@ class AuditView(Gtk.Box):
                 # default-open when detected). _update_section_ui flips the
                 # expanded state after the check completes.
                 expander = Gtk.Expander()
-                expander.set_label(_("Portmaster — checking…"))
+                expander.set_label(_("Portmaster - checking…"))
                 expander.set_expanded(True)
                 expander.set_child(group)
                 self._portmaster_expander = expander
@@ -268,13 +268,13 @@ class AuditView(Gtk.Box):
             _("Require administrator privileges and may take several minutes")
         )
 
-        # Lynis row — shows "Checking..." initially, updated after availability check
+        # Lynis row - shows "Checking..." initially, updated after availability check
         self._lynis_row = self._create_deep_scan_action_row(
             _("Lynis Security Audit"), _("Checking availability...")
         )
         self._deep_scan_group.add(self._lynis_row)
 
-        # chkrootkit row — same pattern
+        # chkrootkit row - same pattern
         self._rootkit_row = self._create_deep_scan_action_row(
             _("Rootkit Detection"), _("Checking availability...")
         )
@@ -549,10 +549,10 @@ class AuditView(Gtk.Box):
         if expander is None:
             return
         if result.overall_status == AuditStatus.SKIPPED:
-            expander.set_label(_("Portmaster — not detected (optional)"))
+            expander.set_label(_("Portmaster - not detected (optional)"))
             expander.set_expanded(False)
         elif result.overall_status == AuditStatus.UNKNOWN:
-            expander.set_label(_("Portmaster — could not probe"))
+            expander.set_label(_("Portmaster - could not probe"))
             expander.set_expanded(False)
         else:
             expander.set_label(_("Portmaster"))
@@ -593,7 +593,7 @@ class AuditView(Gtk.Box):
             info_button.connect("clicked", self._on_info_clicked, check.info_url)
             suffix_box.append(info_button)
 
-        # Status icon — use Gio.ThemedIcon for cross-theme fallbacks
+        # Status icon - use Gio.ThemedIcon for cross-theme fallbacks
         status_icon = self._create_status_image(check.status)
         suffix_box.append(status_icon)
 

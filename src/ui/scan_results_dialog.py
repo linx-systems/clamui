@@ -193,7 +193,7 @@ class ScanResultsDialog(Adw.Window):
                 )
             elif self._scan_result.warning_message:
                 # Warnings without a skipped-file count (e.g. non-fatal scanner
-                # warnings) — never render a bare "0 file(s)" subtitle.
+                # warnings) - never render a bare "0 file(s)" subtitle.
                 expander.set_subtitle(
                     _("No threats found ({warning})").format(
                         warning=GLib.markup_escape_text(self._scan_result.warning_message)

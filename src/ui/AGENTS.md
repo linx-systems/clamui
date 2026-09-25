@@ -1,4 +1,4 @@
-# ui/ — GTK4/Adwaita UI Layer
+# ui/ - GTK4/Adwaita UI Layer
 
 30 modules + 2 subpackages (scan/, preferences/). Depends on `core/` for business logic. (`app.py`, `notification_dispatcher.py`, `app_lifecycle.py` live at src/ root, not here.)
 
@@ -8,9 +8,9 @@ Parent: [`../../AGENTS.md`](../../AGENTS.md) | Subs: [`scan/AGENTS.md`](scan/AGE
 
 ```
 ui/
-├── window.py              # Main window — sidebar nav, content switching
-├── sidebar.py             # NavigationSidebar — 7 nav items
-├── coordinator.py         # View lifecycle — lazy loading, view switching
+├── window.py              # Main window - sidebar nav, content switching
+├── sidebar.py             # NavigationSidebar - 7 nav items
+├── coordinator.py         # View lifecycle - lazy loading, view switching
 ├── scan_view.py           # Legacy scan view (being replaced by scan/)
 ├── logs_view.py           # Scan history with pagination + daemon mode
 ├── quarantine_view.py     # Quarantine management with search
@@ -43,7 +43,7 @@ ui/
 
 ## Key Patterns
 
-### Compatibility Layer (`compat.py`) — USE THESE, NOT RAW WIDGETS
+### Compatibility Layer (`compat.py`) - USE THESE, NOT RAW WIDGETS
 
 | Factory | Replaces | Version |
 |---------|----------|---------|
@@ -56,12 +56,12 @@ ui/
 
 Factory functions monkey-patch method APIs to match higher-version signatures. Callers use identical methods regardless of runtime libadwaita version.
 
-### View Helpers (`view_helpers.py`) — ALWAYS USE THESE
+### View Helpers (`view_helpers.py`) - ALWAYS USE THESE
 
-- `create_empty_state(EmptyStateConfig(...))` — placeholder for empty lists
-- `LoadingStateController` — spinner + button sensitivity management
-- `create_header_button_box(buttons=[...])` — consistent header layouts
-- `set_status_class(widget, StatusLevel.SUCCESS)` — semantic CSS class management
+- `create_empty_state(EmptyStateConfig(...))` - placeholder for empty lists
+- `LoadingStateController` - spinner + button sensitivity management
+- `create_header_button_box(buttons=[...])` - consistent header layouts
+- `set_status_class(widget, StatusLevel.SUCCESS)` - semantic CSS class management
 
 ### Dialog Pattern (ALL dialogs inherit `Adw.Window`)
 ```python
@@ -87,9 +87,9 @@ def _do_background():
 threading.Thread(target=_do_background, daemon=True).start()
 ```
 
-**Always reset loading state in `finally` blocks** — prevents stuck spinners.
+**Always reset loading state in `finally` blocks** - prevents stuck spinners.
 
-### View Lifecycle — TWO coordinators
+### View Lifecycle - TWO coordinators
 - **`src/ui/coordinator.py`** (`ViewCoordinator`, UI-scoped): lazy-loads & caches 6 content views via `@property` (`_scan_view` etc.); switched via `switch_to(view_name, window)`. Views: scan, update, logs, components, statistics, quarantine.
 - **`src/view_coordinator.py`** (`ViewCoordinator`, app-level): `setup_actions()` registers actions+accels, `switch_to_view(name, widget)`, `get_current_view()`.
 
@@ -108,8 +108,8 @@ The sidebar (`sidebar.py`, `NAVIGATION_ITEMS`) exposes **7** destinations: scan,
 
 ## Anti-Patterns (ui-specific)
 
-- **Raw `Adw.EntryRow`/`SwitchRow`/etc.**: Use compat factories — breaks Ubuntu 22.04
-- **`Adw.Dialog`**: Use `Adw.Window` — `Adw.Dialog` requires libadwaita 1.5+
+- **Raw `Adw.EntryRow`/`SwitchRow`/etc.**: Use compat factories - breaks Ubuntu 22.04
+- **`Adw.Dialog`**: Use `Adw.Window` - `Adw.Dialog` requires libadwaita 1.5+
 - **Icons without `resolve_icon_name()`**: Breaks on non-GNOME themes
 - **Emoji in status indicators**: Use semantic icons (`object-select-symbolic`, `dialog-warning-symbolic`)
 - **`GLib.idle_add()` missing**: All background→UI updates MUST go through it

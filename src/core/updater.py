@@ -386,7 +386,7 @@ class FreshclamUpdater:
                 elif state in ("inactive", "failed", "activating", "deactivating"):
                     # systemd prints "inactive" even for units it has never
                     # heard of, so confirm the unit actually exists before
-                    # concluding installed-but-stopped — otherwise a distro
+                    # concluding installed-but-stopped - otherwise a distro
                     # using the other unit name (openSUSE's freshclam.service)
                     # would short-circuit here and never be probed.
                     if systemd_unit_exists(service_name):
@@ -1051,7 +1051,7 @@ class FreshclamUpdater:
                     "-c",
                     script,
                     "clamui-force-update",  # $0 (script name for diagnostics)
-                    freshclam,  # $1 (safe — not interpreted as shell syntax)
+                    freshclam,  # $1 (safe - not interpreted as shell syntax)
                 ]
             else:
                 # Without pkexec the same transaction is attempted directly;

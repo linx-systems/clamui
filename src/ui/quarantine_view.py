@@ -283,7 +283,7 @@ class QuarantineView(Gtk.Box):
         header_box.set_spacing(12)
 
         # Search entry (placeholder text requires GTK 4.10+; skipped on older
-        # versions — setting the property there raises TypeError)
+        # versions - setting the property there raises TypeError)
         self._search_entry = Gtk.SearchEntry()
         safe_set_placeholder_text(self._search_entry, _("Search by threat name or path..."))
         self._search_entry.set_hexpand(True)

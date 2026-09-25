@@ -97,7 +97,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 def _print_overview() -> None:
     """Print the full command overview with all subcommands."""
-    print(_("ClamUI — ClamAV antivirus management\n"))
+    print(_("ClamUI - ClamAV antivirus management\n"))
     print(_("Usage:"))
     print(_("  clamui                   Launch the graphical interface"))
     print(_("  clamui <command> [args]   Run a CLI command\n"))
@@ -137,7 +137,7 @@ def _print_command_help(name: str) -> int:
         return 1
 
     summary = str(info["summary"])
-    print(_("clamui {name} — {summary}\n").format(name=name, summary=_(summary)))
+    print(_("clamui {name} - {summary}\n").format(name=name, summary=_(summary)))
     print(_("Examples:"))
     for example in info.get("examples", []):
         print(f"  $ {example}")

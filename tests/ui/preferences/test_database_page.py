@@ -455,7 +455,7 @@ class TestDatabasePageCollectData:
 
         Collecting from an empty dict would include an empty
         DatabaseCustomURL list, which Save & Apply translates into
-        remove_key("DatabaseCustomURL") — stripping the user's custom
+        remove_key("DatabaseCustomURL") - stripping the user's custom
         signature URLs even though the Database page was never opened.
         """
         from src.ui.preferences.database_page import DatabasePage

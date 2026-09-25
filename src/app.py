@@ -760,7 +760,7 @@ class ClamUIApp(Adw.Application):
             self._update_view._start_update()
 
     def _on_scan_file(self, action, param):
-        """Handle the scan-file action — open file/folder chooser, then show in scan view."""
+        """Handle the scan-file action - open file/folder chooser, then show in scan view."""
         win = self.props.active_window
         if not win:
             return
@@ -821,7 +821,7 @@ class ClamUIApp(Adw.Application):
             self._current_view = "quarantine"
 
     def _on_about(self, action, param):
-        """Handle about action — show about dialog."""
+        """Handle about action - show about dialog."""
         from .ui.utils import resolve_icon_name
 
         present_about_dialog(
@@ -956,7 +956,7 @@ class ClamUIApp(Adw.Application):
             self._initial_scan_paths = []
             self._initial_use_virustotal = False
             self._show_window_toast(
-                _("A scan is already running — the new scan request was ignored")
+                _("A scan is already running - the new scan request was ignored")
             )
             return
 
@@ -977,9 +977,9 @@ class ClamUIApp(Adw.Application):
                 ignored_count = len(paths) - 1
                 self._show_window_toast(
                     ngettext(
-                        "VirusTotal scans one file per request — "
+                        "VirusTotal scans one file per request - "
                         "{count} additional selection was ignored",
-                        "VirusTotal scans one file per request — "
+                        "VirusTotal scans one file per request - "
                         "{count} additional selections were ignored",
                         ignored_count,
                     ).format(count=ignored_count)

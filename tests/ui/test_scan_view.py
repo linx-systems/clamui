@@ -1242,7 +1242,7 @@ class TestMultiTargetScanning:
                 with mock.patch("src.ui.scan_view.ScanResult") as mock_scan_result_class:
                     mock_scan_view._scan_worker()
 
-        # Only the snapshotted targets are scanned — never the intruders.
+        # Only the snapshotted targets are scanned - never the intruders.
         calls = mock_scan_view._scanner.scan_sync.call_args_list
         assert [call[0][0] for call in calls] == ["/path1", "/path2"]
         # The aggregated result path is derived from the snapshot too.
@@ -1295,7 +1295,7 @@ class TestMultiTargetScanning:
             "/root/other.txt",
             "/etc/shadow",
         ]
-        # Count derived from the deduplicated list — the file skipped by both
+        # Count derived from the deduplicated list - the file skipped by both
         # overlapping targets must not be counted twice.
         assert call_kwargs["skipped_count"] == 3
         # Summary re-derived with the single-target phrasing.

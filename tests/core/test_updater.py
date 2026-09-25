@@ -2504,7 +2504,7 @@ class TestUpdateSyncPreferService:
         """Test returns error when service trigger fails (no fallback to manual).
 
         When the service is running but signal delivery fails, we must NOT
-        fall back to manual freshclam — the service holds all locks and the
+        fall back to manual freshclam - the service holds all locks and the
         manual method would fail with a confusing lock contention error.
         """
         from src.core.updater import (

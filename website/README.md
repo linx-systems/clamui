@@ -2,30 +2,31 @@
 
 Marketing site for [ClamUI](https://github.com/linx-systems/clamui), published at **https://clamui.com**.
 
-Built with [Astro](https://astro.build) + [Tailwind CSS](https://tailwindcss.com). Static output; deploys to GitHub Pages via `.github/workflows/deploy-website.yml`.
+Built with [Astro](https://astro.build) + [Tailwind CSS](https://tailwindcss.com). Static output is built and deployed to GitHub Pages by `.github/workflows/deploy-website.yml`.
 
 ## Local development
 
 ```bash
 cd website
-npm install
-npm run dev        # http://localhost:4321
+bun install --frozen-lockfile
+bun run dev        # http://localhost:4321
 ```
 
-The `prebuild` / `predev` scripts copy assets (logo, screenshots) from the repo root into `public/` — there's no duplication in source control.
+The `prebuild` / `predev` scripts sync the logo and screenshots from the repository root into `public/`; do not edit those generated copies. In particular, `screenshots/ClamUI-Social-Preview-1280x640.png` is copied to `public/og-image.png` for social metadata.
 
-## Production build
+## Checking and building
 
 ```bash
-npm run build
-npm run preview
+bun run check
+bun run build
+bun run preview
 ```
 
 ## Deploying
 
-Pushing changes under `website/**` on `master` triggers the `deploy-website` workflow, which builds the site and publishes it to the `gh-pages` branch. GitHub Pages serves that branch at `clamui.com`.
+Pushes to `master` that affect website sources, workflow configuration, screenshots, or icons trigger `deploy-website`; published releases, a weekly schedule, and manual dispatch do too. The workflow runs `bun run build`, uploads `website/dist` as a GitHub Pages artifact, and deploys that artifact through GitHub Actions.
 
-**One-time setup (already documented in the plan):**
+**One-time setup:**
 
 1. Repo → Settings → Pages: Source = *GitHub Actions*, Custom domain = `clamui.com`, Enforce HTTPS = on (enable after DNS propagates).
 2. DNS at the registrar:

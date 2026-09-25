@@ -28,20 +28,28 @@ matches.
 Debian packages are signed using `dpkg-sig`. To verify:
 
 ```bash
-# Import ClamUI's public signing key
-curl -fsSL https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc | gpg --import
+# Download and verify ClamUI's public signing key
+curl -fsSLo signing-key.asc \
+  https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc
+EXPECTED_FINGERPRINT=037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
+ACTUAL_FINGERPRINT="$(gpg --show-keys --with-colons signing-key.asc | awk -F: '$1 == "fpr" { print $10; exit }')"
+test "$ACTUAL_FINGERPRINT" = "$EXPECTED_FINGERPRINT" || {
+  echo "Unexpected ClamUI signing-key fingerprint" >&2
+  exit 1
+}
+gpg --import signing-key.asc
 
-# Verify the package signature
-dpkg-sig --verify clamui_*.deb
-
-# Expected output for valid signature:
-# GOODSIG _gpgbuilder <key-fingerprint>
+# Verify both matching package signatures
+dpkg-sig --verify clamui_*.deb clamui-privileged-helper_*.deb
+# Expected output for each valid package:
+# GOODSIG _gpgbuilder 037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
 ```
 
-> **Note:** The `.deb` is signed in CI with `dpkg-sig --sign builder` on Ubuntu 22.04. The `dpkg-sig --verify` command has a
-> known BADSIG bug on that toolchain version and may report a failure even for a valid signature. To confirm the signature
-> member is present without relying on `--verify`, run `ar t clamui_*.deb | grep _gpgbuilder` — a `_gpgbuilder` entry means
-> the package was signed.
+> **Note:** The `.deb` packages are signed in CI with `dpkg-sig --sign builder` on Ubuntu 22.04. The `dpkg-sig --verify`
+> command can report `BADSIG` with some verifier/toolchain combinations. An `_gpgbuilder` member shown by
+> `ar t <package>.deb` confirms only that a signature member is present; it does **not** authenticate the package.
+> Verify both packages on a toolchain that reports `GOODSIG` for the imported ClamUI key. Do not install either package
+> when cryptographic verification fails.
 
 > **Security Note:** Before importing keys, verify you're downloading from the official repository. You can also
 > download `signing-key.asc` directly

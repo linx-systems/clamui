@@ -43,7 +43,7 @@ msginit \
     --locale=<LANG>
 ```
 
-Replace `<LANG>` with the appropriate [language code](https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html) — for example `de` for German, `fr` for French, or `pt_BR` for Brazilian Portuguese.
+Replace `<LANG>` with the appropriate [language code](https://www.gnu.org/software/gettext/manual/html_node/Usual-Language-Codes.html) - for example `de` for German, `fr` for French, or `pt_BR` for Brazilian Portuguese.
 
 `msginit` pre-fills the PO header (your name, email, plural forms) based on your locale settings. Review and correct the header if needed.
 
@@ -76,7 +76,7 @@ Open `po/<LANG>.po` in a PO editor or a text editor and translate each `msgstr` 
 - Keep format placeholders intact: `{count}`, `{name}`, `%(prog)s`, etc.
 - Preserve leading/trailing whitespace and newlines from the original string.
 - Translate the `msgstr`, not the `msgid`.
-- Strings marked `#, fuzzy` need review — remove the fuzzy flag after translating.
+- Strings marked `#, fuzzy` need review - remove the fuzzy flag after translating.
 - For plural forms, fill in all `msgstr[N]` entries according to your language's plural rules.
 
 ### Step 4: Test locally
@@ -101,10 +101,10 @@ Verify that the translated strings appear correctly in the UI.
 
 Your PR should include:
 
-- `po/<LANG>.po` — the translation file
-- `po/LINGUAS` — updated with your language code
+- `po/<LANG>.po` - the translation file
+- `po/LINGUAS` - updated with your language code
 
-Do **not** include compiled `.mo` files — these are generated during the build process.
+- Do **not** include compiled `.mo` files - these are generated during the build process.
 
 ## Updating an Existing Translation
 
@@ -140,7 +140,7 @@ This merges new strings into your PO file, marks removed strings as obsolete, an
 
 | File | Purpose |
 |------|---------|
-| `po/clamui.pot` | POT template — extracted translatable strings (do not edit manually) |
+| `po/clamui.pot` | POT template - extracted translatable strings (do not edit manually) |
 | `po/POTFILES.in` | List of source files scanned for translatable strings |
 | `po/LINGUAS` | List of available language codes |
 | `po/<LANG>.po` | Translation file for a specific language |

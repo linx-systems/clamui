@@ -186,12 +186,12 @@ Show real-time file-by-file scanning progress during scans. When disabled, a sim
 **Default:** `false`
 **Valid Values:** `true`, `false`
 
-Controls whether normal ClamUI launches start in the system tray. This can be changed from
+Controls whether normal ClamUI launches use **Start in System Tray**. This can be changed from
 **Preferences → Behavior → Start in System Tray**.
 
-When enabled, ClamUI launches in the background with only the tray icon visible. Launches that include files or
-folders to scan still show the main window. If tray integration cannot be started, ClamUI also keeps the window
-visible so the application remains accessible.
+When enabled, ClamUI starts its tray subprocess and then hides normal launches. Launches that include files or folders
+to scan stay visible. Desktop watcher registration completes asynchronously, so confirm that your desktop exposes the
+tray icon before relying on background startup.
 
 **Example:**
 
@@ -208,13 +208,12 @@ visible so the application remains accessible.
 **Type:** Boolean
 **Default:** `false`
 **Valid Values:** `true`, `false`
-
-Controls whether closing the main window minimizes to the system tray instead of quitting.
+Controls the window-manager minimize button when system tray integration is available.
 
 **Description:**
-When enabled, clicking the window close button will hide the window to the system tray instead of exiting the
-application. The application continues running in the background and can be restored by clicking the tray icon. When
-disabled, closing the window exits ClamUI completely.
+When enabled, clicking the window-manager minimize button hides the window to the system tray instead of minimizing it
+to the taskbar. It does not control what happens when you close the window; configure that separately in
+**Preferences → Behavior → When closing window**.
 
 **Example:**
 

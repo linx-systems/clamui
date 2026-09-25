@@ -853,7 +853,7 @@ class DaemonScanner:
         elif exit_code == 0:
             # Exit 0 is the daemon's authoritative success signal. Only genuine
             # error replies (per-file "... ERROR" or clamdscan's own "ERROR:" /
-            # "LibClamAV Error:" lines) may override it — stray unrecognized
+            # "LibClamAV Error:" lines) may override it - stray unrecognized
             # warning lines must not flip a successful scan to ERROR.
             genuine_error_lines = [line for line in hard_error_lines if is_genuine_error_line(line)]
             status = ScanStatus.ERROR if genuine_error_lines else ScanStatus.CLEAN

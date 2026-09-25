@@ -534,7 +534,7 @@ files longer, don't use this feature - delete files individually instead.
 
 ### Managing Quarantine from the Command Line
 
-ClamUI ships a headless `clamui quarantine` subcommand for managing isolated files without opening the GUI — useful over SSH or in scripts:
+ClamUI ships a headless `clamui quarantine` subcommand for managing isolated files without opening the GUI - useful over SSH or in scripts:
 
 ```bash
 # List all quarantined files (add --json for machine-readable output)
@@ -631,14 +631,14 @@ When you quarantine a file, ClamUI:
 
 - The quarantine directory itself is owner-only (`0o700`); no other user can list or enter it
 - Quarantined files are stored **owner read-only** (`0o400`) so they cannot be executed or modified in place
-- All file operations use `O_NOFOLLOW` (symlinks are rejected) and an atomic fd-based copy-then-unlink — never a plain move — to close TOCTOU races
+- All file operations use `O_NOFOLLOW` (symlinks are rejected) and an atomic fd-based copy-then-unlink - never a plain move - to close TOCTOU races
 - The metadata database and its WAL/SHM sidecar files are owner read/write only (`0o600`)
 - Isolation is enforced by both location and restrictive permissions, not just database tracking
 
 **Default permissions**:
 
 - Quarantine directory (`quarantine/`): `700` (rwx------, owner only)
-- Quarantined files: `400` (r--------, owner read-only — cannot execute)
+- Quarantined files: `400` (r--------, owner read-only - cannot execute)
 - Metadata database (`quarantine.db`) and WAL/SHM files: `600` (rw-------, owner read/write)
 
 #### Storage Considerations

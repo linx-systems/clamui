@@ -175,7 +175,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
 
         # Default config file paths. The authoritative paths are resolved in
         # _resolve_config_paths_background() (host I/O, moved off the GTK main
-        # loop — see U2). Seed with the distribution defaults so any page
+        # loop - see U2). Seed with the distribution defaults so any page
         # created before the background load finishes has a sane placeholder
         # path to display; the applier corrects these after resolution.
         self._freshclam_conf_path = "/etc/clamav/freshclam.conf"
@@ -531,7 +531,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
 
         # Update title to reflect current page
         page_label = self._get_page_label(page_id)
-        self._title_label.set_label(_("Preferences — {page}").format(page=page_label))
+        self._title_label.set_label(_("Preferences - {page}").format(page=page_label))
 
         # If leaflet is folded, navigate to content
         if self._leaflet.get_folded():
@@ -554,7 +554,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
             selected_row = self._sidebar_list.get_selected_row()
             if selected_row and isinstance(selected_row, PreferencesSidebarRow):
                 page_label = self._get_page_label(selected_row.page_id)
-                self._title_label.set_label(_("Preferences — {page}").format(page=page_label))
+                self._title_label.set_label(_("Preferences - {page}").format(page=page_label))
 
     def _on_back_clicked(self, button):
         """Handle back button click to return to sidebar."""
@@ -565,7 +565,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         Resolve host config paths and load configs on a worker thread.
 
         Runs the blocking host I/O (path resolution via
-        resolve_*_conf_path/config_file_exists, and parse_config reads — both
+        resolve_*_conf_path/config_file_exists, and parse_config reads - both
         of which shell out through ``flatpak-spawn --host`` under Flatpak) off
         the GTK main loop, then marshals the results back to the main thread
         via ``GLib.idle_add(self._apply_loaded_configs)`` so all widget
@@ -601,7 +601,7 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
             # Check if clamd.conf exists (subprocess under Flatpak).
             self._clamd_available = config_file_exists(self._clamd_conf_path)
 
-            # Parse both configs (host file reads). Pure I/O — no widgets.
+            # Parse both configs (host file reads). Pure I/O - no widgets.
             self._load_configs_io()
         except Exception:
             logger.exception("Background config resolution/load failed")

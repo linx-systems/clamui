@@ -143,7 +143,7 @@ class ConnectionPool:
         for db_file in db_files:
             # Open with O_NOFOLLOW so a symlink planted here cannot redirect chmod
             # to an arbitrary file. ENOENT is expected for WAL/SHM when SQLite hasn't
-            # created them yet; ELOOP means a symlink — both are silently skipped.
+            # created them yet; ELOOP means a symlink - both are silently skipped.
             try:
                 fd = os.open(db_file, os.O_RDONLY | os.O_NOFOLLOW)
             except OSError:
