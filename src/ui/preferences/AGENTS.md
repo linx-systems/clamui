@@ -1,6 +1,6 @@
 # preferences/ - Modular Preferences System
 
-13 modules (12 pages/helpers + `__init__`). Pages reach the stack via a **mixed** factory pattern: `create_page()` is an **instance method** on some pages and a `@staticmethod` on others, with per-page signatures (not uniform). `BehaviorPage` is built eagerly as the default visible page; every other page is lazy, created on first navigation via the `_page_factories` dict in `window.py`.
+13 modules (12 pages/helpers + `__init__`). Pages reach stack by **mixed** factory pattern: `create_page()` be **instance method** on some pages, `@staticmethod` on others, signatures differ per page (no uniform). `BehaviorPage` born eager as default visible page; all other pages lazy, born on first walk-to via `_page_factories` dict in `window.py`.
 
 Parent: [`../AGENTS.md`](../AGENTS.md)
 
@@ -26,9 +26,9 @@ preferences/
 
 ### 1. Create the page module
 
-**`create_page()` signatures are NOT uniform** - pick a template matching the page's data source:
-- **Config-backed pages** (read/write clamd.conf / freshclam.conf): `@staticmethod create_page(...)` taking a `widgets_dict`. Good templates: `scanner_page.py` (`ScannerPage`), `database_page.py` (`DatabasePage`). Exact params vary (e.g. `ScannerPage.create_page(config_path, widgets_dict, settings_manager, clamd_available, parent_window)`, `DatabasePage.create_page(config_path, widgets_dict, parent_window)`).
-- **Simple settings pages** (read/write `settings.json`): **instance method** `create_page(self)` with deps stored in `__init__`. Templates: `behavior_page.py`, `device_scan_page.py`, `exclusions_page.py`.
+**`create_page()` signatures NOT uniform** - pick template matching page data source:
+- **Config-backed pages** (read/write clamd.conf / freshclam.conf): `@staticmethod create_page(...)` take `widgets_dict`. Good templates: `scanner_page.py` (`ScannerPage`), `database_page.py` (`DatabasePage`). Params vary (e.g. `ScannerPage.create_page(config_path, widgets_dict, settings_manager, clamd_available, parent_window)`, `DatabasePage.create_page(config_path, widgets_dict, parent_window)`).
+- **Simple settings pages** (read/write `settings.json`): **instance method** `create_page(self)`, deps stashed in `__init__`. Templates: `behavior_page.py`, `device_scan_page.py`, `exclusions_page.py`.
 
 Static `widgets_dict` form (config-backed; ScannerPage/DatabasePage style):
 
@@ -74,7 +74,7 @@ def _create_my_page(self):
     page = MyPage.create_page(self._my_widgets, parent_window=self)
     self._add_page_to_stack("my_page", page)
 ```
-Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_factories` are created on first navigation via `_ensure_page_created()`. Current `NAVIGATION_ITEMS` order: behavior, exclusions, database, scanner, scheduled, device_scan, onaccess, virustotal, debug, save.
+Only `BehaviorPage` born eager in `_create_pages()`; pages in `_page_factories` born on first walk-to via `_ensure_page_created()`. Now `NAVIGATION_ITEMS` order: behavior, exclusions, database, scanner, scheduled, device_scan, onaccess, virustotal, debug, save.
 
 ### 3. Write tests
 `tests/ui/preferences/test_my_page.py` - use `mock_gi_modules` fixture.
@@ -83,17 +83,17 @@ Only `BehaviorPage` is built eagerly in `_create_pages()`; pages in `_page_facto
 
 | Function | Purpose |
 |----------|---------|
-| `create_spin_row(title, subtitle, min_val, max_val, step=1, page_step=10, initial_val=None)` | Returns `(row, spin_button)` tuple; use `initial_val` when the initial value should differ from `min_val` |
+| `create_spin_row(title, subtitle, min_val, max_val, step=1, page_step=10, initial_val=None)` | Give back `(row, spin_button)` tuple; use `initial_val` when start value must differ from `min_val` |
 | `create_password_entry_row(title)` | Password entry with visibility toggle |
 | `populate_bool_field(config, widgets, key, default)` | Load bool into switch |
 | `populate_int_field(config, widgets, key)` | Load int into spin button |
 | `populate_text_field(config, widgets, key)` | Load text into entry |
-| `create_status_row(title, status_ok, ok_message, error_message)` | Returns `(row, icon)` (icon is a `Gtk.Image`) for status display |
+| `create_status_row(title, status_ok, ok_message, error_message)` | Give back `(row, icon)` (icon be `Gtk.Image`) for status show |
 | `styled_prefix_icon(icon_name)` | 12px-margin dim icon for row prefix |
 
 ## Anti-Patterns (preferences-specific)
 
-- **Eager page creation**: Only `behavior_page` loads eagerly - all others use lazy factory pattern
+- **Eager page creation**: Only `behavior_page` load eager - all others use lazy factory pattern
 - **`Adw.SpinRow` / `Adw.PasswordEntryRow`**: Use `create_spin_row()` / `create_password_entry_row()` from base.py
-- **Direct widget value access**: Use `populate_*` helpers for loading, `collect_data()` for saving
-- **Storing row instead of spin_button**: `create_spin_row()` returns `(row, spin_button)` - store the `spin_button` in `widgets_dict` for `get_value()`/`set_value()`
+- **Direct widget value access**: Use `populate_*` helpers for load, `collect_data()` for save
+- **Storing row instead of spin_button**: `create_spin_row()` give back `(row, spin_button)` - stash `spin_button` in `widgets_dict` for `get_value()`/`set_value()`

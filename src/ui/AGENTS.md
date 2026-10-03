@@ -1,6 +1,6 @@
 # ui/ - GTK4/Adwaita UI Layer
 
-30 modules + 2 subpackages (scan/, preferences/). Depends on `core/` for business logic. (`app.py`, `notification_dispatcher.py`, `app_lifecycle.py` live at src/ root, not here.)
+30 modules + 2 subpackages (scan/, preferences/). Need `core/` for brain work. (`app.py`, `notification_dispatcher.py`, `app_lifecycle.py` sit at src/ root, not here.)
 
 Parent: [`../../AGENTS.md`](../../AGENTS.md) | Subs: [`scan/AGENTS.md`](scan/AGENTS.md), [`preferences/AGENTS.md`](preferences/AGENTS.md)
 
@@ -54,14 +54,14 @@ ui/
 | `present_about_dialog()` | `Adw.AboutDialog` (→ `Gtk.AboutDialog`) | 1.2+ |
 | `open_paths_dialog()` / `save_path_dialog()` | `Gtk.FileDialog` (→ `Gtk.FileChooserNative`) | GTK 4.10+ |
 
-Factory functions monkey-patch method APIs to match higher-version signatures. Callers use identical methods regardless of runtime libadwaita version.
+Factory monkey-patch method API to match big-version shape. Caller use same method no matter what libadwaita version run.
 
 ### View Helpers (`view_helpers.py`) - ALWAYS USE THESE
 
-- `create_empty_state(EmptyStateConfig(...))` - placeholder for empty lists
-- `LoadingStateController` - spinner + button sensitivity management
-- `create_header_button_box(buttons=[...])` - consistent header layouts
-- `set_status_class(widget, StatusLevel.SUCCESS)` - semantic CSS class management
+- `create_empty_state(EmptyStateConfig(...))` - filler for empty list
+- `LoadingStateController` - spinner + button sensitivity boss
+- `create_header_button_box(buttons=[...])` - same-same header layout
+- `set_status_class(widget, StatusLevel.SUCCESS)` - meaning-CSS-class boss
 
 ### Dialog Pattern (ALL dialogs inherit `Adw.Window`)
 ```python
@@ -87,19 +87,19 @@ def _do_background():
 threading.Thread(target=_do_background, daemon=True).start()
 ```
 
-**Always reset loading state in `finally` blocks** - prevents stuck spinners.
+**Always reset loading state in `finally` blocks** - stop stuck spinner.
 
 ### View Lifecycle - TWO coordinators
-- **`src/ui/coordinator.py`** (`ViewCoordinator`, UI-scoped): lazy-loads & caches 6 content views via `@property` (`_scan_view` etc.); switched via `switch_to(view_name, window)`. Views: scan, update, logs, components, statistics, quarantine.
-- **`src/view_coordinator.py`** (`ViewCoordinator`, app-level): `setup_actions()` registers actions+accels, `switch_to_view(name, widget)`, `get_current_view()`.
+- **`src/ui/coordinator.py`** (`ViewCoordinator`, UI-scoped): lazy-load + cache 6 content view by `@property` (`_scan_view` etc.); flip by `switch_to(view_name, window)`. View: scan, update, logs, components, statistics, quarantine.
+- **`src/view_coordinator.py`** (`ViewCoordinator`, app-level): `setup_actions()` sign up actions+accels, `switch_to_view(name, widget)`, `get_current_view()`.
 
-The sidebar (`sidebar.py`, `NAVIGATION_ITEMS`) exposes **7** destinations: scan, update, logs, components, quarantine, statistics, audit. `audit_view` (AuditView) is instantiated directly, NOT via the lazy `ui/coordinator.py`.
+Sidebar (`sidebar.py`, `NAVIGATION_ITEMS`) show **7** spot: scan, update, logs, components, quarantine, statistics, audit. `audit_view` (AuditView) born direct, NOT by lazy `ui/coordinator.py`.
 
 ## Where to Look
 
 | Task | Module | Notes |
 |------|--------|-------|
-| Add a view | `sidebar.py` (`NAVIGATION_ITEMS`) + `view_coordinator.py` (`setup_actions`) + `app.py` (lazy `@property`) | Register nav item, action, and view property |
+| Add a view | `sidebar.py` (`NAVIGATION_ITEMS`) + `view_coordinator.py` (`setup_actions`) + `app.py` (lazy `@property`) | Sign up nav item, action, view property |
 | Add a dialog | Inherit `Adw.Window` | Use `create_toolbar_view()` for header |
 | Paginate a list | `pagination.py` | `PaginatedListController(listbox, ...)` |
 | Export data | `file_export.py` | `FileExportHelper.show_export_dialog(...)` |
@@ -108,9 +108,9 @@ The sidebar (`sidebar.py`, `NAVIGATION_ITEMS`) exposes **7** destinations: scan,
 
 ## Anti-Patterns (ui-specific)
 
-- **Raw `Adw.EntryRow`/`SwitchRow`/etc.**: Use compat factories - breaks Ubuntu 22.04
-- **`Adw.Dialog`**: Use `Adw.Window` - `Adw.Dialog` requires libadwaita 1.5+
-- **Icons without `resolve_icon_name()`**: Breaks on non-GNOME themes
-- **Emoji in status indicators**: Use semantic icons (`object-select-symbolic`, `dialog-warning-symbolic`)
-- **`GLib.idle_add()` missing**: All background→UI updates MUST go through it
-- **No loading state reset in `finally`**: Causes permanently stuck spinners
+- **Raw `Adw.EntryRow`/`SwitchRow`/etc.**: Use compat factory - raw break Ubuntu 22.04
+- **`Adw.Dialog`**: Use `Adw.Window` - `Adw.Dialog` want libadwaita 1.5+
+- **Icons without `resolve_icon_name()`**: Break on non-GNOME theme
+- **Emoji in status indicators**: Use meaning-icon (`object-select-symbolic`, `dialog-warning-symbolic`)
+- **`GLib.idle_add()` missing**: All background→UI update MUST go through it
+- **No loading state reset in `finally`**: Make forever-stuck spinner

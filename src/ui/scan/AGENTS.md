@@ -1,6 +1,6 @@
 # scan/ - Scan Workflow (Coordinator Pattern)
 
-8 modules. Composition-based scan UI replacing monolithic `scan_view.py`.
+8 modules. Composition scan UI. Replace big `scan_view.py`.
 
 Parent: [`../AGENTS.md`](../AGENTS.md)
 
@@ -29,20 +29,20 @@ ScanView (composition root - Gtk.Box)
 └── ScanResultsWidget   ← "View Results" button, threat count
 ```
 
-Each component is independently testable. `ScanView` wires them together.
+Each part test alone. `ScanView` tie together.
 
 ## Key Patterns
 
 ### State Flow
-States are `IDLE / SCANNING / CANCELLED` (the `ScanState` enum in `scan_controller.py`). Completion and errors are NOT enum members - they are delivered through `on_complete` / result callbacks.
+States `IDLE / SCANNING / CANCELLED` (`ScanState` enum in `scan_controller.py`). Done and error NOT enum — come through `on_complete` / result callbacks.
 
-`ScanController` manages transitions. Progress updates via `GLib.idle_add()` from scan thread.
+`ScanController` do transitions. Progress update via `GLib.idle_add()` from scan thread.
 
 ### Drag-and-Drop
-`TargetSelector` accepts file drops. Uses `validate_dropped_files()` from `core/path_validation.py` - rejects symlinks to protected dirs, non-existent paths.
+`TargetSelector` take file drops. Use `validate_dropped_files()` from `core/path_validation.py` — throw away symlinks to protected dirs, paths not exist.
 
 ### Profile Integration
-`ProfileSelector` loads from `ProfileManager`. Selected profile determines scan targets, exclusions, and backend. Profile changes trigger `TargetSelector` update.
+`ProfileSelector` load from `ProfileManager`. Chosen profile set scan targets, exclusions, backend. Profile change trigger `TargetSelector` update.
 
 ## Where to Look
 
@@ -56,6 +56,6 @@ States are `IDLE / SCANNING / CANCELLED` (the `ScanState` enum in `scan_controll
 
 ## Anti-Patterns
 
-- **Direct Scanner calls from UI**: Go through `ScanController` - it handles threading + cancellation
-- **Progress updates without `GLib.idle_add()`**: Progress callback runs on scan thread, not GTK thread
-- **Monolithic changes**: Add new components as separate widgets, wire in `scan_view.py`
+- **Direct Scanner calls from UI**: Use `ScanController` — it do threading + cancellation
+- **Progress updates without `GLib.idle_add()`**: Progress callback run on scan thread, not GTK thread
+- **Monolithic changes**: Add new parts as separate widgets, wire in `scan_view.py`
