@@ -1,0 +1,48 @@
+name: Validate Website
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "website/**"
+      - ".github/workflows/website.yml"
+      - "scripts/check-built-links.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Starlight site
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22.12.0"
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        working-directory: website
+        run: bun install --frozen-lockfile
+
+      - name: Check website
+        working-directory: website
+        run: bun run check
+
+      - name: Build Starlight site
+        working-directory: website
+        run: bun run build
+
+      - name: Check built local links and anchors
+        run: python3 scripts/check-built-links.py website/dist
+
+      - name: Verify Starlight search index
+        run: test -f website/dist/pagefind/pagefind.js

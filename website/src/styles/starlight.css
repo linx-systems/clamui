@@ -1,0 +1,20 @@
+/* Starlight pages do not load the marketing Tailwind stylesheet or its reset. */
+:root {
+  --sl-font: Cantarell, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sl-color-accent-low: #1d3826;
+  --sl-color-accent: #a8c9b0;
+  --sl-color-accent-high: #e0ede3;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #e0ede3;
+  --sl-color-accent: #3d7a4e;
+  --sl-color-accent-high: #2d5c3a;
+}
+
+@media (max-width: 25rem) {
+  .site-title {
+    font-size: var(--sl-text-base);
+  }
+}

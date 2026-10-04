@@ -1,51 +1,41 @@
 # ClamUI Website
 
-Marketing site for [ClamUI](https://github.com/linx-systems/clamui), published at **https://clamui.com**.
+[ClamUI](https://github.com/linx-systems/clamui)'s marketing site and documentation, published at **https://clamui.com**. It uses Astro, Tailwind CSS, and Starlight at `/docs/`; GitHub Pages deploys the static output through `.github/workflows/deploy-website.yml`.
 
-Built with [Astro](https://astro.build) + [Tailwind CSS](https://tailwindcss.com). Static output is built and deployed to GitHub Pages by `.github/workflows/deploy-website.yml`.
-
-## Local development
+## Work locally
 
 ```bash
 cd website
 bun install --frozen-lockfile
-bun run dev        # http://localhost:4321
-```
-
-The `prebuild` / `predev` scripts sync the logo and screenshots from the repository root into `public/`; do not edit those generated copies. In particular, `screenshots/ClamUI-Social-Preview-1280x640.png` is copied to `public/og-image.png` for social metadata.
-
-## Checking and building
-
-```bash
+bun run dev
 bun run check
 bun run build
 bun run preview
 ```
 
-## Deploying
+`prebuild` and `predev` synchronize root icons and screenshots into `public/`. Do not edit those generated copies; `screenshots/ClamUI-Social-Preview-1280x640.png` becomes `public/og-image.png`.
 
-Pushes to `master` that affect website sources, workflow configuration, screenshots, or icons trigger `deploy-website`; published releases, a weekly schedule, and manual dispatch do too. The workflow runs `bun run build`, uploads `website/dist` as a GitHub Pages artifact, and deploys that artifact through GitHub Actions.
+## Write documentation
 
-**One-time setup:**
+Write every published guide in `src/content/docs/docs/`. Use concise task-focused Markdown or MDX, canonical root-relative `/docs/.../` links, and add a sidebar entry in `astro.config.mjs`. The release reference pages import root `CHANGELOG.md` and `RELEASE_NOTES.md`; do not duplicate their content. Root `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` are GitHub discoverability pointers, not a second documentation tree.
 
-1. Repo → Settings → Pages: Source = *GitHub Actions*, Custom domain = `clamui.com`, Enforce HTTPS = on (enable after DNS propagates).
-2. DNS at the registrar:
-   - `clamui.com` A records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `clamui.com` AAAA records: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
-   - `www.clamui.com` CNAME → `linx-systems.github.io`
-3. `public/CNAME` contains `clamui.com` so the custom-domain setting survives deploys.
+The `/docs/` site uses Starlight for navigation, full-text search, and copyable code blocks without a separate CMS, server, or search service.
+
+## Deployment
+
+Pushes to `master` that affect website sources, workflow configuration, screenshots, or icons trigger `deploy-website`; published releases, a weekly schedule, and manual dispatch do too. The workflow builds `website/dist` and deploys it as a GitHub Pages artifact. One-time Pages/DNS setup remains in repository settings: source GitHub Actions, custom domain `clamui.com`, HTTPS after DNS propagation, GitHub Pages A/AAAA records, `www` CNAME to `linx-systems.github.io`, and `public/CNAME` containing `clamui.com`.
 
 ## Structure
 
-```
+```text
 website/
-├── scripts/copy-assets.mjs    # syncs logo + screenshots from repo root
-├── public/                    # static, unprocessed assets
-├── src/
-│   ├── layouts/Base.astro     # <head>, OG/Twitter, theme bootstrap
-│   ├── pages/index.astro      # landing page composition
-│   ├── components/            # Hero, FeatureRow, InstallTabs, ...
-│   ├── content/features.ts    # feature copy
-│   └── styles/global.css      # Tailwind + custom utilities
-└── astro.config.mjs
+├── astro.config.mjs
+├── scripts/copy-assets.mjs
+├── public/
+└── src/
+    ├── components/
+    ├── content/docs/docs/
+    ├── layouts/
+    ├── pages/
+    └── styles/
 ```
