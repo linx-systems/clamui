@@ -17,6 +17,8 @@ class _FakeManager:
         self.action_callbacks = None
         self.window_toggle_callback = None
         self.profile_select_callback = None
+        self.availability_callback = None
+        self.is_available = False
         self.start_called = False
         self.update_profiles_calls = []
         self.status_calls = []
@@ -32,6 +34,9 @@ class _FakeManager:
 
     def set_profile_select_callback(self, on_select):
         self.profile_select_callback = on_select
+
+    def set_availability_callback(self, on_changed):
+        self.availability_callback = on_changed
 
     def start(self):
         self.start_called = True
@@ -61,6 +66,7 @@ def _build_app():
     app._on_tray_quit = mock.MagicMock()
     app._on_tray_window_toggle = mock.MagicMock()
     app._on_tray_profile_select = mock.MagicMock()
+    app._on_tray_availability_changed = mock.MagicMock()
     return app
 
 
@@ -83,6 +89,19 @@ def test_init_wires_callbacks_and_starts(monkeypatch, mock_gi_modules):
     }
     assert indicator._manager.window_toggle_callback == (app._on_tray_window_toggle, None)
     assert indicator._manager.profile_select_callback == app._on_tray_profile_select
+    assert indicator._manager.availability_callback == app._on_tray_availability_changed
+
+
+def test_availability_requires_registered_tray_host(monkeypatch, mock_gi_modules):
+    """A started tray subprocess is not available before host registration."""
+    from src.ui import tray_indicator
+
+    monkeypatch.setattr(tray_indicator, "TrayManager", _FakeManager)
+    indicator = tray_indicator.TrayIndicator(_build_app())
+
+    assert indicator.is_available is False
+    indicator._manager.is_available = True
+    assert indicator.is_available is True
 
 
 def test_init_raises_when_manager_fails_to_start(monkeypatch, mock_gi_modules):

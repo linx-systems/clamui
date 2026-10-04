@@ -290,12 +290,13 @@ class TestClamUIAppLifecycle:
         assert hasattr(app, "do_startup")
         assert callable(app.do_startup)
 
-    def test_start_minimized_hides_normal_launch_in_tray(self, app):
-        """A normal first launch starts hidden when the tray preference is enabled."""
+    def test_start_minimized_waits_for_registered_tray_host(self, app):
+        """A spawned but unregistered tray must not hide the only window."""
         window = mock.MagicMock()
         app.props = SimpleNamespace(active_window=window)
         app._scan_view = mock.MagicMock()
         app._tray_indicator = mock.MagicMock()
+        app._tray_indicator.is_available = False
         app._settings_manager = mock.MagicMock()
         app._settings_manager.get.return_value = True
 
@@ -306,6 +307,9 @@ class TestClamUIAppLifecycle:
             app.do_activate()
 
         window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+
+        app._on_tray_availability_changed(True)
         window.hide_window.assert_called_once()
         app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=False)
 
@@ -329,6 +333,39 @@ class TestClamUIAppLifecycle:
         window.present.assert_called_once()
         window.hide_window.assert_not_called()
         app._tray_indicator.update_window_menu_label.assert_not_called()
+
+    def test_late_tray_registration_does_not_hide_after_a_later_activation(self, app):
+        """A later user activation cancels the pending startup hide."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._tray_indicator.is_available = False
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+            app.do_activate()
+
+        app._on_tray_availability_changed(True)
+        window.hide_window.assert_not_called()
+
+    def test_tray_disconnect_restores_hidden_window(self, app):
+        """Losing the registered tray host must not leave a headless app."""
+        window = mock.MagicMock()
+        window.is_visible.return_value = False
+        app.props = SimpleNamespace(active_window=window)
+        app._tray_indicator = mock.MagicMock()
+        app._start_minimized_pending = False
+
+        app._on_tray_availability_changed(False)
+
+        window.show_window.assert_called_once()
+        app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=True)
 
     def test_start_minimized_keeps_window_visible_without_tray(self, app):
         """The window remains recoverable when no tray integration is available."""
@@ -1470,6 +1507,48 @@ class TestClamUIAppVirusTotalScan:
         assert captured.get("parent") is app.props.active_window
         assert captured.get("presented") is True
 
+    def test_virustotal_request_uses_stored_key_without_setup_or_clamav(self, app):
+        """A CLI VirusTotal request with a key goes directly to VirusTotal."""
+        app._settings_manager = mock.MagicMock()
+        app._trigger_virustotal_scan = mock.MagicMock()
+        app._show_virustotal_setup_dialog = mock.MagicMock()
+
+        with mock.patch("src.core.keyring_manager.get_api_key", return_value="stored-key"):
+            app._handle_virustotal_scan_request("/tmp/sample")
+
+        app._trigger_virustotal_scan.assert_called_once_with("/tmp/sample", "stored-key")
+        app._show_virustotal_setup_dialog.assert_not_called()
+
+    def test_virustotal_setup_uses_callback_only_after_explicit_key_save(self, app):
+        """Cancelling setup has no callback, upload, or ClamAV fallback path."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._settings_manager = mock.MagicMock()
+        app._trigger_virustotal_scan = mock.MagicMock()
+        captured = {}
+
+        class FakeDialog:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+
+            def set_transient_for(self, parent):
+                captured["parent"] = parent
+
+            def present(self):
+                captured["presented"] = True
+
+        with mock.patch("src.ui.virustotal_setup_dialog.VirusTotalSetupDialog", FakeDialog):
+            app._show_virustotal_setup_dialog("/tmp/sample")
+
+        assert captured["settings_manager"] is app._settings_manager
+        assert captured["parent"] is window
+        assert captured["presented"] is True
+        assert "on_open_website" not in captured
+        app._trigger_virustotal_scan.assert_not_called()
+
+        captured["on_key_saved"]("saved-key")
+        app._trigger_virustotal_scan.assert_called_once_with("/tmp/sample", "saved-key")
+
 
 class TestClamUIAppInitialScanPaths:
     """Regression tests for forwarding CLI-provided scan targets to the UI."""
@@ -1520,12 +1599,12 @@ class TestClamUIAppInitialScanPaths:
         app._scan_view = mock_scan_view
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
         app._initial_use_virustotal = True
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
 
         app._process_initial_scan_paths()
 
         mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
-        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         mock_scan_view._replace_selected_paths.assert_not_called()
         mock_scan_view._start_scan.assert_not_called()
 
@@ -1611,14 +1690,14 @@ class TestClamUIAppInitialScanPaths:
         %F) must tell the user that only the first file is scanned."""
         mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf", "/tmp/c.pdf"]
         app._initial_use_virustotal = True
 
         app._process_initial_scan_paths()
 
         mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
-        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         app.props.active_window.add_toast.assert_called_once()
         toast_message = mock_gtk_modules["Adw"].Toast.new.call_args[0][0]
         assert "VirusTotal" in toast_message
@@ -1628,10 +1707,11 @@ class TestClamUIAppInitialScanPaths:
         """A single-file VirusTotal request needs no 'selections ignored' toast."""
         mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
         app._initial_scan_paths = ["/tmp/a.pdf"]
         app._initial_use_virustotal = True
 
         app._process_initial_scan_paths()
 
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         app.props.active_window.add_toast.assert_not_called()

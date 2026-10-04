@@ -7,7 +7,8 @@ which runs with GTK3 to avoid GTK4 version conflicts. Communication
 is done via JSON messages over stdin/stdout.
 
 For detailed architecture documentation including process boundaries, IPC protocol,
-threading model, and sequence diagrams, see: docs/architecture/tray-subprocess.md
+threading model, and sequence diagrams, see:
+https://clamui.com/docs/contributing/architecture/
 """
 
 import atexit
@@ -63,8 +64,8 @@ class TrayManager:
         self._state_lock = threading.Lock()
         self._running = False
         self._ready = False
+        self._available = False
         self._current_status = "protected"
-
         # Crash recovery state (UI-001).
         # _shutting_down distinguishes deliberate stop() from subprocess crash;
         # _respawn_count + _last_respawn_time implement a sliding-window
@@ -81,6 +82,7 @@ class TrayManager:
         self._on_quit: Callable[[], None] | None = None
         self._on_window_toggle: Callable[[], None] | None = None
         self._on_profile_select: Callable[[str], None] | None = None
+        self._on_availability_changed: Callable[[bool], None] | None = None
 
         # Profile state
         self._current_profile_id: str | None = None
@@ -281,9 +283,13 @@ class TrayManager:
             if shutting_down or not running:
                 # Deliberate shutdown - leave _ready alone; stop() handles it.
                 return
-            # Unexpected EOF (subprocess crashed). Reset _ready now.
+        became_unavailable = False
+        with self._state_lock:
+            became_unavailable = self._available
             self._ready = False
-
+            self._available = False
+        if became_unavailable:
+            GLib.idle_add(self._notify_availability, False)
         # Capture exit code for logging.
         exit_code: int | None = None
         if self._process is not None:
@@ -415,6 +421,16 @@ class TrayManager:
             # does not race other main-thread _send_command writers.
             GLib.idle_add(self._resync_tray_state)
 
+        elif event == "available":
+            with self._state_lock:
+                self._available = True
+            GLib.idle_add(self._notify_availability, True)
+
+        elif event == "unavailable":
+            with self._state_lock:
+                self._available = False
+            GLib.idle_add(self._notify_availability, False)
+
         elif event == "pong":
             logger.debug("Received pong from tray service")
 
@@ -491,6 +507,15 @@ class TrayManager:
             logger.error(f"Failed to send command to tray service: {e}")
             return False
 
+    def _notify_availability(self, available: bool) -> bool:
+        """Deliver tray-host state changes on the GTK main loop."""
+        if self._on_availability_changed is not None:
+            try:
+                self._on_availability_changed(available)
+            except Exception:
+                logger.exception("Tray availability callback failed")
+        return False
+
     def set_action_callbacks(
         self,
         on_quick_scan: Callable[[], None] | None = None,
@@ -538,6 +563,10 @@ class TrayManager:
         """
         self._on_profile_select = on_select
         logger.debug("Profile select callback configured")
+
+    def set_availability_callback(self, on_changed: Callable[[bool], None]) -> None:
+        """Set the callback notified when a tray host registers or disappears."""
+        self._on_availability_changed = on_changed
 
     def update_status(self, status: str) -> None:
         """
@@ -623,8 +652,11 @@ class TrayManager:
                 self._process = None
 
         with self._state_lock:
+            became_unavailable = self._available
             self._ready = False
-        logger.info("Tray manager stopped")
+            self._available = False
+        if became_unavailable:
+            GLib.idle_add(self._notify_availability, False)
 
     def cleanup(self) -> None:
         """
@@ -641,12 +673,18 @@ class TrayManager:
         self._on_quit = None
         self._on_window_toggle = None
         self._on_profile_select = None
+        self._on_availability_changed = None
 
     @property
     def is_active(self) -> bool:
-        """Check if the tray service is running and ready."""
+        """Check whether a desktop tray host has accepted the service."""
+        return self.is_available
+
+    @property
+    def is_available(self) -> bool:
+        """Check whether the running tray service is registered with a host."""
         with self._state_lock:
-            return self._running and self._ready and self._process is not None
+            return self._running and self._ready and self._available and self._process is not None
 
     @property
     def is_library_available(self) -> bool:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.4.0\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-09-25 13:24+0200\n"
+"POT-Creation-Date: 2026-10-04 11:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,33 +18,30 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: src/app.py:425
+#: src/app.py:431
 msgid "Updating stored logs for privacy"
 msgstr ""
 
-#: src/app.py:428
+#: src/app.py:434
 #, python-brace-format
 msgid "Updating stored log for privacy ({processed}/{total})"
 msgid_plural "Updating stored logs for privacy ({processed}/{total})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/app.py:770
+#: src/app.py:801
 msgid "Select File or Folder"
 msgstr ""
 
-#: src/app.py:959
+#: src/app.py:992
 msgid "A scan is already running - the new scan request was ignored"
 msgstr ""
 
-#: src/app.py:980
+#: src/app.py:1022
 #, python-brace-format
-msgid ""
-"VirusTotal scans one file per request - {count} additional selection was "
-"ignored"
+msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
-"VirusTotal scans one file per request - {count} additional selections were "
-"ignored"
+"VirusTotal scans one file at a time; {count} selections were ignored."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -196,8 +193,8 @@ msgid ""
 "root. Try: sudo clamui install-privileged-helper"
 msgstr ""
 
-#: src/cli/install_helper.py:289 src/core/result_formatters.py:167
-#: src/ui/update_view.py:682
+#: src/cli/install_helper.py:289 src/core/result_formatters.py:176
+#: src/ui/update_view.py:684
 #, python-brace-format
 msgid "Error: {message}"
 msgstr ""
@@ -259,7 +256,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/cli/history_cmd.py:88 src/core/result_formatters.py:130
+#: src/cli/history_cmd.py:88 src/core/result_formatters.py:132
 msgid "Summary"
 msgstr ""
 
@@ -771,12 +768,12 @@ msgstr ""
 msgid "Scan Duration: {duration:.1f} seconds"
 msgstr ""
 
-#: src/cli/scheduled_scan.py:503 src/core/result_formatters.py:132
+#: src/cli/scheduled_scan.py:503 src/core/result_formatters.py:134
 #, python-brace-format
 msgid "Files Scanned: {count}"
 msgstr ""
 
-#: src/cli/scheduled_scan.py:504 src/core/result_formatters.py:134
+#: src/cli/scheduled_scan.py:504 src/core/result_formatters.py:136
 #, python-brace-format
 msgid "Threats Found: {count}"
 msgstr ""
@@ -923,8 +920,8 @@ msgstr ""
 msgid "Scanned {count} files. System appears clean."
 msgstr ""
 
-#: src/notification_dispatcher.py:41 src/core/result_formatters.py:171
-#: src/ui/scan_results_dialog.py:217
+#: src/notification_dispatcher.py:41 src/core/result_formatters.py:181
+#: src/ui/scan_results_dialog.py:218
 msgid "Scan Cancelled"
 msgstr ""
 
@@ -932,8 +929,8 @@ msgstr ""
 msgid "The scan was cancelled by the user."
 msgstr ""
 
-#: src/notification_dispatcher.py:44 src/core/result_formatters.py:163
-#: src/ui/scan_results_dialog.py:232 src/ui/virustotal_results_dialog.py:198
+#: src/notification_dispatcher.py:44 src/core/result_formatters.py:171
+#: src/ui/scan_results_dialog.py:233 src/ui/virustotal_results_dialog.py:198
 msgid "Scan Error"
 msgstr ""
 
@@ -979,7 +976,59 @@ msgstr ""
 msgid "No threats detected by VirusTotal"
 msgstr ""
 
-#: src/core/clamav_config.py:1160
+#: src/core/clamav_config.py:1102
+#, python-brace-format
+msgid ""
+"ClamUI privileged helper not installed on the host. The Flatpak sandbox "
+"cannot access protected system ClamAV configuration files directly. Download "
+"the matching '{package_name}' from the ClamUI releases page. On Debian/"
+"Ubuntu, install it on the host with 'sudo apt install ./{package_name}'. "
+"Other distributions do not currently have a supported ClamUI privileged-"
+"helper package. Do not install it with 'sudo flatpak run': Flatpak cannot "
+"install this helper on the host."
+msgstr ""
+
+#: src/core/clamav_config.py:1112
+msgid ""
+"ClamUI privileged helper not installed. Run 'sudo clamui install-privileged-"
+"helper' on this host to install it and enable protected system ClamAV "
+"configuration access."
+msgstr ""
+
+#: src/core/clamav_config.py:1123
+#, python-brace-format
+msgid "Protected configuration path is not allowed: {error}"
+msgstr ""
+
+#: src/core/clamav_config.py:1142
+msgid "pkexec not found - cannot authorize configuration read"
+msgstr ""
+
+#: src/core/clamav_config.py:1144
+msgid "Timed out reading protected configuration"
+msgstr ""
+
+#: src/core/clamav_config.py:1146
+#, python-brace-format
+msgid "Failed to authorize configuration read: {error}"
+msgstr ""
+
+#: src/core/clamav_config.py:1150
+msgid "Authentication was canceled. Configuration was not loaded."
+msgstr ""
+
+#: src/core/clamav_config.py:1157 src/core/clamav_config.py:1379
+msgid ""
+"Privileged helper rejected the request: protocol mismatch. Update the "
+"'clamui-privileged-helper' package on the host."
+msgstr ""
+
+#: src/core/clamav_config.py:1167
+#, python-brace-format
+msgid "Failed to read protected configuration: {error}"
+msgstr ""
+
+#: src/core/clamav_config.py:1278
 #, python-brace-format
 msgid ""
 "ClamUI privileged helper not installed on the host. The Flatpak sandbox "
@@ -992,25 +1041,25 @@ msgid ""
 "install this helper on the host."
 msgstr ""
 
-#: src/core/clamav_config.py:1175
+#: src/core/clamav_config.py:1293
 msgid ""
 "ClamUI privileged helper not installed. Run 'sudo clamui install-privileged-"
 "helper' on this host to install it and enable saving system ClamAV "
 "configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1220
+#: src/core/clamav_config.py:1338
 msgid ""
 "The staging directory is not reachable by the privileged helper running on "
 "the host, so preferences cannot be applied from the Flatpak sandbox. A host-"
 "side ClamUI install is required to change system configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1234
+#: src/core/clamav_config.py:1352
 msgid "Authentication was canceled. Configuration changes were not applied."
 msgstr ""
 
-#: src/core/clamav_config.py:1240
+#: src/core/clamav_config.py:1358
 msgid ""
 "Could not obtain administrator authorization to apply these changes. If you "
 "were not shown a password prompt, the ClamUI polkit policy or privileged "
@@ -1019,97 +1068,91 @@ msgid ""
 "polkit policy) to enable saving system configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1253
+#: src/core/clamav_config.py:1371
 msgid ""
 "Privileged helper rejected the request: missing PKEXEC_UID. The polkit "
 "policy may be misconfigured."
 msgstr ""
 
-#: src/core/clamav_config.py:1261
-msgid ""
-"Privileged helper rejected the request: protocol mismatch. Update the "
-"'clamui-privileged-helper' package on the host."
-msgstr ""
-
-#: src/core/clamav_config.py:1278
+#: src/core/clamav_config.py:1396
 #, python-brace-format
 msgid ""
 "Configuration was applied, but staging cleanup failed for {staging_dir}: "
 "{cleanup_error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:66
+#: src/core/clamav_detection.py:67
 msgid ""
 "ClamAV is not installed. Install the ClamAV package for your distribution."
 msgstr ""
 
-#: src/core/clamav_detection.py:67
+#: src/core/clamav_detection.py:68
 #, python-brace-format
 msgid "ClamAV is not installed. Please install it with: {command}"
 msgstr ""
 
-#: src/core/clamav_detection.py:75
+#: src/core/clamav_detection.py:76
 msgid ""
 "freshclam is not installed. Install the ClamAV database updater package for "
 "your distribution."
 msgstr ""
 
-#: src/core/clamav_detection.py:78
+#: src/core/clamav_detection.py:79
 #, python-brace-format
 msgid "freshclam is not installed. Please install it with: {command}"
 msgstr ""
 
-#: src/core/clamav_detection.py:88
+#: src/core/clamav_detection.py:89
 msgid ""
 "clamdscan is not installed. Install the ClamAV daemon package for your "
 "distribution."
 msgstr ""
 
-#: src/core/clamav_detection.py:90
+#: src/core/clamav_detection.py:91
 #, python-brace-format
 msgid "clamdscan is not installed. Please install it with: {command}"
 msgstr ""
 
-#: src/core/clamav_detection.py:126
+#: src/core/clamav_detection.py:127
 #, python-brace-format
 msgid "ClamAV found but returned error: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:130
+#: src/core/clamav_detection.py:131
 msgid "ClamAV check timed out"
 msgstr ""
 
-#: src/core/clamav_detection.py:132
+#: src/core/clamav_detection.py:133
 msgid "ClamAV executable not found"
 msgstr ""
 
-#: src/core/clamav_detection.py:134
+#: src/core/clamav_detection.py:135
 msgid "Permission denied when accessing ClamAV"
 msgstr ""
 
-#: src/core/clamav_detection.py:136
+#: src/core/clamav_detection.py:137
 #, python-brace-format
 msgid "Error checking ClamAV: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:172
+#: src/core/clamav_detection.py:173
 #, python-brace-format
 msgid "freshclam found but returned error: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:178
+#: src/core/clamav_detection.py:179
 msgid "freshclam check timed out"
 msgstr ""
 
-#: src/core/clamav_detection.py:180 src/core/updater.py:844
+#: src/core/clamav_detection.py:181 src/core/updater.py:866
 msgid "freshclam executable not found"
 msgstr ""
 
-#: src/core/clamav_detection.py:182
+#: src/core/clamav_detection.py:183
 msgid "Permission denied when accessing freshclam"
 msgstr ""
 
-#: src/core/clamav_detection.py:184
+#: src/core/clamav_detection.py:185
 #, python-brace-format
 msgid "Error checking freshclam: {error}"
 msgstr ""
@@ -1136,32 +1179,32 @@ msgstr ""
 msgid "Could not find clamd socket. Is clamav-daemon installed?"
 msgstr ""
 
-#: src/core/clamav_detection.py:350
+#: src/core/clamav_detection.py:348
 #, python-brace-format
 msgid ""
 "Daemon socket permission denied. Check LocalSocketMode or LocalSocketGroup "
 "in {path}: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:355
+#: src/core/clamav_detection.py:353
 #, python-brace-format
 msgid "Daemon socket permission denied: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:357
+#: src/core/clamav_detection.py:355
 #, python-brace-format
 msgid "Daemon not responding: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:360
+#: src/core/clamav_detection.py:358
 msgid "Connection to clamd timed out"
 msgstr ""
 
-#: src/core/clamav_detection.py:362
+#: src/core/clamav_detection.py:360
 msgid "clamdscan executable not found"
 msgstr ""
 
-#: src/core/clamav_detection.py:364
+#: src/core/clamav_detection.py:362
 #, python-brace-format
 msgid "Error connecting to clamd: {error}"
 msgstr ""
@@ -1171,712 +1214,728 @@ msgstr ""
 msgid "Database directory does not exist: {path}"
 msgstr ""
 
-#: src/core/clamav_detection.py:397
+#: src/core/clamav_detection.py:405
 #, python-brace-format
 msgid "Permission denied accessing: {path}"
 msgstr ""
 
-#: src/core/clamav_detection.py:399
+#: src/core/clamav_detection.py:407
 #, python-brace-format
 msgid "Error accessing database: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:401
+#: src/core/clamav_detection.py:413 src/core/clamav_detection.py:488
+msgid ""
+"Virus database files exist but are not readable by this user. Use the ClamAV "
+"daemon backend or grant this user read access through your system's ClamAV "
+"configuration."
+msgstr ""
+
+#: src/core/clamav_detection.py:418
 msgid "No virus database files found. Please download the database first."
 msgstr ""
 
-#: src/core/clamav_detection.py:435
+#: src/core/clamav_detection.py:450
 #, python-brace-format
 msgid "Timed out checking host database directory: {path}"
 msgstr ""
 
-#: src/core/clamav_detection.py:437 src/core/system_audit.py:275
+#: src/core/clamav_detection.py:452 src/core/system_audit.py:274
 msgid "flatpak-spawn not available"
 msgstr ""
 
-#: src/core/clamav_detection.py:439
+#: src/core/clamav_detection.py:454
 #, python-brace-format
 msgid "Error checking host database directory: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:445
+#: src/core/clamav_detection.py:460
 #, python-brace-format
 msgid "Error accessing host database directory {path}: {error}"
 msgstr ""
 
-#: src/core/clamav_detection.py:453
+#: src/core/clamav_detection.py:469
 #, python-brace-format
 msgid "No virus database files found in host directory: {path}"
 msgstr ""
 
-#: src/core/clamav_detection.py:509
+#: src/core/clamav_detection.py:482
+#, python-brace-format
+msgid "Error checking host database readability: {error}"
+msgstr ""
+
+#: src/core/clamav_detection.py:551
 msgid "No host database directories were found"
 msgstr ""
 
-#: src/core/clamav_detection.py:513
+#: src/core/clamav_detection.py:555
 #, python-brace-format
 msgid ""
 "No host ClamAV virus database files found. Update the host database with "
 "freshclam. Details: {detail}"
 msgstr ""
 
-#: src/core/system_audit.py:273
+#: src/core/clamav_detection.py:569
+msgid "No virus database files found."
+msgstr ""
+
+#: src/core/system_audit.py:272
 msgid "Timed out reading database"
 msgstr ""
 
-#: src/core/system_audit.py:279 src/core/system_audit.py:288
+#: src/core/system_audit.py:278 src/core/system_audit.py:287
 msgid "Permission denied reading database"
 msgstr ""
 
-#: src/core/system_audit.py:286
+#: src/core/system_audit.py:285
 msgid "Database file not found"
 msgstr ""
 
-#: src/core/system_audit.py:308
+#: src/core/system_audit.py:307
 msgid "Invalid database file format"
 msgstr ""
 
-#: src/core/system_audit.py:324
+#: src/core/system_audit.py:323
 msgid "Could not parse database timestamp"
 msgstr ""
 
-#: src/core/system_audit.py:444 src/ui/audit_view.py:195
+#: src/core/system_audit.py:443 src/ui/audit_view.py:195
 msgid "ClamAV Health"
 msgstr ""
 
-#: src/core/system_audit.py:453 src/core/system_audit.py:462
+#: src/core/system_audit.py:452 src/core/system_audit.py:461
 msgid "ClamAV Installation"
 msgstr ""
 
-#: src/core/system_audit.py:455
+#: src/core/system_audit.py:454
 #, python-brace-format
 msgid "Installed: {version}"
 msgstr ""
 
-#: src/core/system_audit.py:464
+#: src/core/system_audit.py:463
 msgid "ClamAV is not installed"
 msgstr ""
 
-#: src/core/system_audit.py:465
+#: src/core/system_audit.py:464
 msgid "Install ClamAV to enable virus scanning"
 msgstr ""
 
-#: src/core/system_audit.py:481 src/core/system_audit.py:492
-#: src/core/system_audit.py:505 src/core/system_audit.py:520
-#: src/core/system_audit.py:533 src/core/system_audit.py:544
+#: src/core/system_audit.py:480 src/core/system_audit.py:491
+#: src/core/system_audit.py:504 src/core/system_audit.py:519
+#: src/core/system_audit.py:532 src/core/system_audit.py:543
 msgid "Virus Database"
 msgstr ""
 
-#: src/core/system_audit.py:483
+#: src/core/system_audit.py:482
 #, python-brace-format
 msgid "Up to date ({days} days old, built {date})"
 msgstr ""
 
-#: src/core/system_audit.py:494 src/core/system_audit.py:507
+#: src/core/system_audit.py:493 src/core/system_audit.py:506
 #, python-brace-format
 msgid "Database is {days} days old (built {date})"
 msgstr ""
 
-#: src/core/system_audit.py:497
+#: src/core/system_audit.py:496
 msgid "Update virus database to ensure protection"
 msgstr ""
 
-#: src/core/system_audit.py:510
+#: src/core/system_audit.py:509
 msgid "Database is critically outdated. Update immediately."
 msgstr ""
 
-#: src/core/system_audit.py:522
+#: src/core/system_audit.py:521
 #, python-brace-format
 msgid "Database built {date} (age could not be determined)"
 msgstr ""
 
-#: src/core/system_audit.py:535
+#: src/core/system_audit.py:534
 msgid "No virus database found"
 msgstr ""
 
-#: src/core/system_audit.py:536
+#: src/core/system_audit.py:535
 msgid "Download virus database"
 msgstr ""
 
-#: src/core/system_audit.py:546
+#: src/core/system_audit.py:545
 msgid "Database files exist but age could not be determined"
 msgstr ""
 
-#: src/core/system_audit.py:557 src/core/system_audit.py:570
-#: src/core/system_audit.py:579 src/ui/logs_view.py:278
+#: src/core/system_audit.py:556 src/core/system_audit.py:569
+#: src/core/system_audit.py:578 src/ui/logs_view.py:278
 msgid "ClamAV Daemon"
 msgstr ""
 
-#: src/core/system_audit.py:559
+#: src/core/system_audit.py:558
 #, python-brace-format
 msgid "Service {name} is running"
 msgstr ""
 
-#: src/core/system_audit.py:572
+#: src/core/system_audit.py:571
 msgid "Daemon is responding"
 msgstr ""
 
-#: src/core/system_audit.py:581
+#: src/core/system_audit.py:580
 msgid "ClamAV daemon is not running"
 msgstr ""
 
-#: src/core/system_audit.py:582
+#: src/core/system_audit.py:581
 msgid "Start the daemon for faster scanning"
 msgstr ""
 
-#: src/core/system_audit.py:594 src/core/system_audit.py:604
-#: src/core/system_audit.py:969 src/core/system_audit.py:1032
+#: src/core/system_audit.py:593 src/core/system_audit.py:603
+#: src/core/system_audit.py:968 src/core/system_audit.py:1031
 #: src/ui/audit_view.py:204
 msgid "Automatic Updates"
 msgstr ""
 
-#: src/core/system_audit.py:596
+#: src/core/system_audit.py:595
 msgid "Freshclam service is active"
 msgstr ""
 
-#: src/core/system_audit.py:606
+#: src/core/system_audit.py:605
 msgid "Freshclam automatic update service is not running"
 msgstr ""
 
-#: src/core/system_audit.py:607
+#: src/core/system_audit.py:606
 msgid "Enable automatic database updates"
 msgstr ""
 
-#: src/core/system_audit.py:620 src/core/system_audit.py:699
+#: src/core/system_audit.py:619 src/core/system_audit.py:698
 #: src/ui/audit_view.py:196
 msgid "Firewall"
 msgstr ""
 
-#: src/core/system_audit.py:635 src/core/system_audit.py:645
+#: src/core/system_audit.py:634 src/core/system_audit.py:644
 msgid "UFW Firewall"
 msgstr ""
 
-#: src/core/system_audit.py:637
+#: src/core/system_audit.py:636
 msgid "UFW is active and enabled"
 msgstr ""
 
-#: src/core/system_audit.py:647
+#: src/core/system_audit.py:646
 msgid "UFW service is running but firewall may be disabled"
 msgstr ""
 
-#: src/core/system_audit.py:648
+#: src/core/system_audit.py:647
 msgid "Enable the firewall"
 msgstr ""
 
-#: src/core/system_audit.py:661 src/core/system_audit.py:671
+#: src/core/system_audit.py:660 src/core/system_audit.py:670
 msgid "Firewalld"
 msgstr ""
 
-#: src/core/system_audit.py:663
+#: src/core/system_audit.py:662
 msgid "Firewalld is running"
 msgstr ""
 
-#: src/core/system_audit.py:673
+#: src/core/system_audit.py:672
 msgid "Firewalld is installed but not running"
 msgstr ""
 
-#: src/core/system_audit.py:674
+#: src/core/system_audit.py:673
 msgid "Start the firewall"
 msgstr ""
 
-#: src/core/system_audit.py:687
+#: src/core/system_audit.py:686
 msgid "nftables"
 msgstr ""
 
-#: src/core/system_audit.py:689
+#: src/core/system_audit.py:688
 msgid "nftables service is active"
 msgstr ""
 
-#: src/core/system_audit.py:701
+#: src/core/system_audit.py:700
 msgid "No active firewall detected"
 msgstr ""
 
-#: src/core/system_audit.py:702
+#: src/core/system_audit.py:701
 msgid "Install and enable a firewall for network protection"
 msgstr ""
 
-#: src/core/system_audit.py:730 src/core/system_audit.py:743
+#: src/core/system_audit.py:729 src/core/system_audit.py:742
 msgid "Firewall Manager"
 msgstr ""
 
-#: src/core/system_audit.py:732
+#: src/core/system_audit.py:731
 #, python-brace-format
 msgid "{name} is available"
 msgstr ""
 
-#: src/core/system_audit.py:734
+#: src/core/system_audit.py:733
 #, python-brace-format
 msgid "Open {name}"
 msgstr ""
 
-#: src/core/system_audit.py:745
+#: src/core/system_audit.py:744
 msgid "No graphical firewall manager detected"
 msgstr ""
 
-#: src/core/system_audit.py:746
+#: src/core/system_audit.py:745
 msgid "Install a GUI for easier firewall management"
 msgstr ""
 
-#: src/core/system_audit.py:833 src/core/system_audit.py:845
-#: src/core/system_audit.py:855
+#: src/core/system_audit.py:832 src/core/system_audit.py:844
+#: src/core/system_audit.py:854
 msgid "Open Ports"
 msgstr ""
 
-#: src/core/system_audit.py:835
+#: src/core/system_audit.py:834
 #, python-brace-format
 msgid "{count} ports listening, risky ports: {ports}"
 msgstr ""
 
-#: src/core/system_audit.py:838
+#: src/core/system_audit.py:837
 msgid "Review if these services need to be exposed"
 msgstr ""
 
-#: src/core/system_audit.py:847
+#: src/core/system_audit.py:846
 #, python-brace-format
 msgid "{count} ports listening"
 msgstr ""
 
-#: src/core/system_audit.py:848
+#: src/core/system_audit.py:847
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 
-#: src/core/system_audit.py:857
+#: src/core/system_audit.py:856
 msgid "No open ports detected"
 msgstr ""
 
-#: src/core/system_audit.py:867 src/ui/audit_view.py:199
+#: src/core/system_audit.py:866 src/ui/audit_view.py:199
 msgid "Access Control"
 msgstr ""
 
-#: src/core/system_audit.py:888
+#: src/core/system_audit.py:887
 msgid "MAC Framework"
 msgstr ""
 
-#: src/core/system_audit.py:890
+#: src/core/system_audit.py:889
 msgid "No mandatory access control framework detected"
 msgstr ""
 
-#: src/core/system_audit.py:891
+#: src/core/system_audit.py:890
 msgid "Consider enabling AppArmor or SELinux"
 msgstr ""
 
-#: src/core/system_audit.py:915 src/core/system_audit.py:922
+#: src/core/system_audit.py:914 src/core/system_audit.py:921
 msgid "AppArmor"
 msgstr ""
 
-#: src/core/system_audit.py:917
+#: src/core/system_audit.py:916
 msgid "AppArmor is enabled"
 msgstr ""
 
-#: src/core/system_audit.py:924
+#: src/core/system_audit.py:923
 msgid "AppArmor module is loaded but not enabled"
 msgstr ""
 
-#: src/core/system_audit.py:925
+#: src/core/system_audit.py:924
 msgid "Enable AppArmor for application sandboxing"
 msgstr ""
 
-#: src/core/system_audit.py:941 src/core/system_audit.py:948
-#: src/core/system_audit.py:956
+#: src/core/system_audit.py:940 src/core/system_audit.py:947
+#: src/core/system_audit.py:955
 msgid "SELinux"
 msgstr ""
 
-#: src/core/system_audit.py:943
+#: src/core/system_audit.py:942
 msgid "SELinux is enforcing"
 msgstr ""
 
-#: src/core/system_audit.py:950
+#: src/core/system_audit.py:949
 msgid "SELinux is in permissive mode"
 msgstr ""
 
-#: src/core/system_audit.py:951
+#: src/core/system_audit.py:950
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 
-#: src/core/system_audit.py:958
+#: src/core/system_audit.py:957
 msgid "SELinux is disabled"
 msgstr ""
 
-#: src/core/system_audit.py:959
+#: src/core/system_audit.py:958
 msgid "Enable SELinux for mandatory access control"
 msgstr ""
 
-#: src/core/system_audit.py:982 src/core/system_audit.py:992
+#: src/core/system_audit.py:981 src/core/system_audit.py:991
 msgid "Unattended Upgrades"
 msgstr ""
 
-#: src/core/system_audit.py:984
+#: src/core/system_audit.py:983
 msgid "Automatic security updates are enabled"
 msgstr ""
 
-#: src/core/system_audit.py:994
+#: src/core/system_audit.py:993
 msgid "Unattended upgrades is installed but disabled"
 msgstr ""
 
-#: src/core/system_audit.py:995
+#: src/core/system_audit.py:994
 msgid "Enable automatic security updates"
 msgstr ""
 
-#: src/core/system_audit.py:1008 src/core/system_audit.py:1019
+#: src/core/system_audit.py:1007 src/core/system_audit.py:1018
 msgid "DNF Automatic"
 msgstr ""
 
-#: src/core/system_audit.py:1010
+#: src/core/system_audit.py:1009
 msgid "DNF automatic updates are enabled"
 msgstr ""
 
-#: src/core/system_audit.py:1021
+#: src/core/system_audit.py:1020
 msgid "DNF automatic is installed but timer is not active"
 msgstr ""
 
-#: src/core/system_audit.py:1022
+#: src/core/system_audit.py:1021
 msgid "Enable automatic updates"
 msgstr ""
 
-#: src/core/system_audit.py:1034
+#: src/core/system_audit.py:1033
 msgid "Could not determine automatic update status"
 msgstr ""
 
-#: src/core/system_audit.py:1035
+#: src/core/system_audit.py:1034
 msgid "Configure automatic security updates"
 msgstr ""
 
-#: src/core/system_audit.py:1058
+#: src/core/system_audit.py:1057
 msgid "Pending Reboot"
 msgstr ""
 
-#: src/core/system_audit.py:1060
+#: src/core/system_audit.py:1059
 msgid "System reboot required to apply updates"
 msgstr ""
 
-#: src/core/system_audit.py:1061
+#: src/core/system_audit.py:1060
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 
-#: src/core/system_audit.py:1070 src/ui/audit_view.py:209
+#: src/core/system_audit.py:1069 src/ui/audit_view.py:209
 msgid "Intrusion Detection"
 msgstr ""
 
-#: src/core/system_audit.py:1081 src/core/system_audit.py:1092
+#: src/core/system_audit.py:1080 src/core/system_audit.py:1091
 msgid "fail2ban"
 msgstr ""
 
-#: src/core/system_audit.py:1083
+#: src/core/system_audit.py:1082
 msgid "fail2ban is active and protecting services"
 msgstr ""
 
-#: src/core/system_audit.py:1094
+#: src/core/system_audit.py:1093
 msgid "fail2ban is installed but not running"
 msgstr ""
 
-#: src/core/system_audit.py:1095
+#: src/core/system_audit.py:1094
 msgid "Start fail2ban to protect against brute force attacks"
 msgstr ""
 
-#: src/core/system_audit.py:1107 src/core/system_audit.py:1118
+#: src/core/system_audit.py:1106 src/core/system_audit.py:1117
 msgid "CrowdSec"
 msgstr ""
 
-#: src/core/system_audit.py:1109
+#: src/core/system_audit.py:1108
 msgid "CrowdSec is active with community threat intelligence"
 msgstr ""
 
-#: src/core/system_audit.py:1120
+#: src/core/system_audit.py:1119
 msgid "CrowdSec is installed but not running"
 msgstr ""
 
-#: src/core/system_audit.py:1121
+#: src/core/system_audit.py:1120
 msgid "Start CrowdSec for collaborative intrusion prevention"
 msgstr ""
 
-#: src/core/system_audit.py:1131
+#: src/core/system_audit.py:1130
 msgid "Intrusion Prevention"
 msgstr ""
 
-#: src/core/system_audit.py:1133
+#: src/core/system_audit.py:1132
 msgid "No intrusion detection system found"
 msgstr ""
 
-#: src/core/system_audit.py:1134
+#: src/core/system_audit.py:1133
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 
-#: src/core/system_audit.py:1147 src/ui/audit_view.py:212
+#: src/core/system_audit.py:1146 src/ui/audit_view.py:212
 msgid "SSH Security"
 msgstr ""
 
-#: src/core/system_audit.py:1162 src/core/system_audit.py:1172
+#: src/core/system_audit.py:1161 src/core/system_audit.py:1171
 msgid "SSH Server"
 msgstr ""
 
-#: src/core/system_audit.py:1164
+#: src/core/system_audit.py:1163
 msgid "SSH server is not running (no remote attack surface)"
 msgstr ""
 
-#: src/core/system_audit.py:1174
+#: src/core/system_audit.py:1173
 msgid "SSH server is running"
 msgstr ""
 
-#: src/core/system_audit.py:1184
+#: src/core/system_audit.py:1183
 msgid "SSH Configuration"
 msgstr ""
 
-#: src/core/system_audit.py:1186
+#: src/core/system_audit.py:1185
 msgid "Could not read SSH configuration"
 msgstr ""
 
-#: src/core/system_audit.py:1197 src/core/system_audit.py:1206
+#: src/core/system_audit.py:1196 src/core/system_audit.py:1205
 msgid "Root Login"
 msgstr ""
 
-#: src/core/system_audit.py:1199
+#: src/core/system_audit.py:1198
 #, python-brace-format
 msgid "Root login: {value}"
 msgstr ""
 
-#: src/core/system_audit.py:1208
+#: src/core/system_audit.py:1207
 #, python-brace-format
 msgid "Root login is allowed ({value})"
 msgstr ""
 
-#: src/core/system_audit.py:1209
+#: src/core/system_audit.py:1208
 msgid "Disable root SSH login for security"
 msgstr ""
 
-#: src/core/system_audit.py:1219 src/core/system_audit.py:1228
+#: src/core/system_audit.py:1218 src/core/system_audit.py:1227
 msgid "Password Auth"
 msgstr ""
 
-#: src/core/system_audit.py:1221
+#: src/core/system_audit.py:1220
 msgid "Password authentication is disabled (key-only)"
 msgstr ""
 
-#: src/core/system_audit.py:1230
+#: src/core/system_audit.py:1229
 msgid "Password authentication is enabled"
 msgstr ""
 
-#: src/core/system_audit.py:1231
+#: src/core/system_audit.py:1230
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr ""
 
-#: src/core/system_audit.py:1241 src/core/system_audit.py:1250
+#: src/core/system_audit.py:1240 src/core/system_audit.py:1249
 msgid "X11 Forwarding"
 msgstr ""
 
-#: src/core/system_audit.py:1243
+#: src/core/system_audit.py:1242
 msgid "X11 forwarding is disabled"
 msgstr ""
 
-#: src/core/system_audit.py:1252
+#: src/core/system_audit.py:1251
 msgid "X11 forwarding is enabled"
 msgstr ""
 
-#: src/core/system_audit.py:1253
+#: src/core/system_audit.py:1252
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr ""
 
-#: src/core/system_audit.py:1330 src/ui/audit_view.py:273
+#: src/core/system_audit.py:1329 src/ui/audit_view.py:273
 #: src/ui/audit_view.py:308
 msgid "Lynis Security Audit"
 msgstr ""
 
-#: src/core/system_audit.py:1339
+#: src/core/system_audit.py:1338
 msgid "Lynis"
 msgstr ""
 
-#: src/core/system_audit.py:1341
+#: src/core/system_audit.py:1340
 msgid "Lynis is not installed"
 msgstr ""
 
-#: src/core/system_audit.py:1342
+#: src/core/system_audit.py:1341
 msgid "Install Lynis for comprehensive security auditing"
 msgstr ""
 
-#: src/core/system_audit.py:1370 src/core/system_audit.py:1380
-#: src/core/system_audit.py:1392 src/core/system_audit.py:1424
+#: src/core/system_audit.py:1369 src/core/system_audit.py:1379
+#: src/core/system_audit.py:1391 src/core/system_audit.py:1423
 msgid "Lynis Audit"
 msgstr ""
 
-#: src/core/system_audit.py:1372
+#: src/core/system_audit.py:1371
 msgid "Lynis audit timed out after 5 minutes"
 msgstr ""
 
-#: src/core/system_audit.py:1382
+#: src/core/system_audit.py:1381
 #, python-brace-format
 msgid "Failed to run Lynis: {error}"
 msgstr ""
 
-#: src/core/system_audit.py:1394 src/core/system_audit.py:1522
+#: src/core/system_audit.py:1393 src/core/system_audit.py:1521
 msgid "Authentication was cancelled"
 msgstr ""
 
-#: src/core/system_audit.py:1412
+#: src/core/system_audit.py:1411
 msgid "Hardening Index"
 msgstr ""
 
-#: src/core/system_audit.py:1414
+#: src/core/system_audit.py:1413
 #, python-brace-format
 msgid "Score: {score}/100"
 msgstr ""
 
-#: src/core/system_audit.py:1415
+#: src/core/system_audit.py:1414
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr ""
 
-#: src/core/system_audit.py:1426
+#: src/core/system_audit.py:1425
 #, python-brace-format
 msgid "Audit completed (exit code {code})"
 msgstr ""
 
-#: src/core/system_audit.py:1467 src/ui/audit_view.py:279
+#: src/core/system_audit.py:1466 src/ui/audit_view.py:279
 #: src/ui/audit_view.py:311
 msgid "Rootkit Detection"
 msgstr ""
 
-#: src/core/system_audit.py:1476
+#: src/core/system_audit.py:1475
 msgid "chkrootkit"
 msgstr ""
 
-#: src/core/system_audit.py:1478
+#: src/core/system_audit.py:1477
 msgid "chkrootkit is not installed"
 msgstr ""
 
-#: src/core/system_audit.py:1479
+#: src/core/system_audit.py:1478
 msgid "Install chkrootkit for rootkit detection"
 msgstr ""
 
-#: src/core/system_audit.py:1498 src/core/system_audit.py:1508
-#: src/core/system_audit.py:1520 src/core/system_audit.py:1540
-#: src/core/system_audit.py:1560 src/core/system_audit.py:1580
+#: src/core/system_audit.py:1497 src/core/system_audit.py:1507
+#: src/core/system_audit.py:1519 src/core/system_audit.py:1539
+#: src/core/system_audit.py:1559 src/core/system_audit.py:1579
 msgid "Rootkit Scan"
 msgstr ""
 
-#: src/core/system_audit.py:1500
+#: src/core/system_audit.py:1499
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr ""
 
-#: src/core/system_audit.py:1510
+#: src/core/system_audit.py:1509
 #, python-brace-format
 msgid "Failed to run chkrootkit: {error}"
 msgstr ""
 
-#: src/core/system_audit.py:1533
+#: src/core/system_audit.py:1532
 #, python-brace-format
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 
-#: src/core/system_audit.py:1562
+#: src/core/system_audit.py:1561
 #, python-brace-format
 msgid "{count} potential rootkit(s) detected"
 msgstr ""
 
-#: src/core/system_audit.py:1563
+#: src/core/system_audit.py:1562
 msgid "Investigate the detected threats immediately"
 msgstr ""
 
-#: src/core/system_audit.py:1571
+#: src/core/system_audit.py:1570
 msgid "Finding"
 msgstr ""
 
-#: src/core/system_audit.py:1582
+#: src/core/system_audit.py:1581
 msgid "No rootkits detected"
 msgstr ""
 
-#: src/core/system_audit.py:1617 src/core/system_audit.py:1634
-#: src/core/system_audit.py:1669 src/core/system_audit.py:1680
-#: src/core/system_audit.py:1689 src/ui/audit_view.py:213
+#: src/core/system_audit.py:1616 src/core/system_audit.py:1633
+#: src/core/system_audit.py:1668 src/core/system_audit.py:1679
+#: src/core/system_audit.py:1688 src/ui/audit_view.py:213
 #: src/ui/audit_view.py:558
 msgid "Portmaster"
 msgstr ""
 
-#: src/core/system_audit.py:1636
+#: src/core/system_audit.py:1635
 msgid "Portmaster is running and protecting connections"
 msgstr ""
 
-#: src/core/system_audit.py:1658
+#: src/core/system_audit.py:1657
 msgid "Module Status"
 msgstr ""
 
-#: src/core/system_audit.py:1660
+#: src/core/system_audit.py:1659
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 
-#: src/core/system_audit.py:1662
+#: src/core/system_audit.py:1661
 msgid "Authorize"
 msgstr ""
 
-#: src/core/system_audit.py:1671
+#: src/core/system_audit.py:1670
 msgid "Portmaster is installed but not running"
 msgstr ""
 
-#: src/core/system_audit.py:1672
+#: src/core/system_audit.py:1671
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
-#: src/core/system_audit.py:1682
+#: src/core/system_audit.py:1681
 msgid "Not detected - optional network monitor and application firewall"
 msgstr ""
 
-#: src/core/system_audit.py:1691
+#: src/core/system_audit.py:1690
 #, python-brace-format
 msgid "Could not probe Portmaster: {error}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:372
+#: src/core/file_manager_integration.py:356
 msgid "Linux Mint / Cinnamon file manager"
 msgstr ""
 
-#: src/core/file_manager_integration.py:387
+#: src/core/file_manager_integration.py:371
 msgid "GNOME Files"
 msgstr ""
 
-#: src/core/file_manager_integration.py:402
+#: src/core/file_manager_integration.py:386
 msgid "KDE file manager"
 msgstr ""
 
-#: src/core/file_manager_integration.py:427
-#: src/core/file_manager_integration.py:512
+#: src/core/file_manager_integration.py:411
+#: src/core/file_manager_integration.py:496
 msgid "Not running as Flatpak"
 msgstr ""
 
-#: src/core/file_manager_integration.py:430
-#: src/core/file_manager_integration.py:515
+#: src/core/file_manager_integration.py:414
+#: src/core/file_manager_integration.py:499
 msgid "Integration files not found"
 msgstr ""
 
-#: src/core/file_manager_integration.py:441
-#: src/core/file_manager_integration.py:526
-#: src/core/file_manager_integration.py:601
+#: src/core/file_manager_integration.py:425
+#: src/core/file_manager_integration.py:510
+#: src/core/file_manager_integration.py:585
 #, python-brace-format
 msgid "Unknown file manager: {name}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:462
-#: src/core/file_manager_integration.py:466
-#: src/core/file_manager_integration.py:549
-#: src/core/file_manager_integration.py:553
+#: src/core/file_manager_integration.py:446
+#: src/core/file_manager_integration.py:450
+#: src/core/file_manager_integration.py:533
+#: src/core/file_manager_integration.py:537
 #, python-brace-format
 msgid "Invalid destination path: {path}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:482
-#: src/core/file_manager_integration.py:568
-#: src/core/file_manager_integration.py:617 src/core/updater.py:853
+#: src/core/file_manager_integration.py:466
+#: src/core/file_manager_integration.py:552
+#: src/core/file_manager_integration.py:601 src/core/updater.py:875
 #, python-brace-format
 msgid "Permission denied: {error}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:487
+#: src/core/file_manager_integration.py:471
 #, python-brace-format
 msgid "Failed to install integration: {error}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:573
+#: src/core/file_manager_integration.py:557
 #, python-brace-format
 msgid "Failed to repair integration: {error}"
 msgstr ""
 
-#: src/core/file_manager_integration.py:622
+#: src/core/file_manager_integration.py:606
 #, python-brace-format
 msgid "Failed to remove integration: {error}"
 msgstr ""
@@ -2029,7 +2088,7 @@ msgstr ""
 msgid "Privileged-helper installation is already in progress."
 msgstr ""
 
-#: src/core/notification_manager.py:79 src/ui/scan_results_dialog.py:187
+#: src/core/notification_manager.py:79 src/ui/scan_results_dialog.py:188
 msgid "Scan Complete"
 msgstr ""
 
@@ -2041,7 +2100,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: src/core/notification_manager.py:87 src/core/notification_manager.py:175
-#: src/ui/scan_results_dialog.py:203
+#: src/ui/scan_results_dialog.py:204
 msgid "No threats found"
 msgstr ""
 
@@ -2217,302 +2276,302 @@ msgid ""
 "may still appear in the list until cleaned up."
 msgstr ""
 
-#: src/core/result_formatters.py:37 src/core/scanner_base.py:575
+#: src/core/result_formatters.py:38 src/core/scanner_base.py:577
 #, python-brace-format
 msgid "{count} file(s) could not be accessed"
 msgstr ""
 
-#: src/core/result_formatters.py:55
+#: src/core/result_formatters.py:56
 #, python-brace-format
 msgid "Scan complete - No threats found ({count} file(s) not accessible)"
 msgstr ""
 
-#: src/core/result_formatters.py:59
+#: src/core/result_formatters.py:60
 #, python-brace-format
 msgid "Scan complete - No threats found ({warning})"
 msgstr ""
 
-#: src/core/result_formatters.py:62
+#: src/core/result_formatters.py:63
 msgid "Scan complete - No threats found"
 msgstr ""
 
-#: src/core/result_formatters.py:121
+#: src/core/result_formatters.py:123
 msgid "ClamUI Scan Report"
 msgstr ""
 
-#: src/core/result_formatters.py:123
+#: src/core/result_formatters.py:125
 #, python-brace-format
 msgid "Scan Date: {timestamp}"
 msgstr ""
 
-#: src/core/result_formatters.py:124
+#: src/core/result_formatters.py:126
 #, python-brace-format
 msgid "Scanned Path: {path}"
 msgstr ""
 
-#: src/core/result_formatters.py:125 src/ui/logs_view.py:788
+#: src/core/result_formatters.py:127 src/ui/logs_view.py:788
 #, python-brace-format
 msgid "Status: {status}"
 msgstr ""
 
-#: src/core/result_formatters.py:133
+#: src/core/result_formatters.py:135
 #, python-brace-format
 msgid "Directories Scanned: {count}"
 msgstr ""
 
-#: src/core/result_formatters.py:140 src/ui/scan_results_dialog.py:345
+#: src/core/result_formatters.py:142 src/ui/scan_results_dialog.py:346
 msgid "Detected Threats"
 msgstr ""
 
-#: src/core/result_formatters.py:147
+#: src/core/result_formatters.py:149
 #, python-brace-format
 msgid "[{index}] {severity} - {category}"
 msgstr ""
 
-#: src/core/result_formatters.py:151
+#: src/core/result_formatters.py:156
 #, python-brace-format
 msgid "    File: {path}"
 msgstr ""
 
-#: src/core/result_formatters.py:152
+#: src/core/result_formatters.py:159
 #, python-brace-format
 msgid "    Threat: {name}"
 msgstr ""
 
-#: src/core/result_formatters.py:156
+#: src/core/result_formatters.py:164
 msgid "No Threats Detected"
 msgstr ""
 
-#: src/core/result_formatters.py:159
+#: src/core/result_formatters.py:167
 msgid "All scanned files are clean."
 msgstr ""
 
-#: src/core/result_formatters.py:174
+#: src/core/result_formatters.py:184
 msgid "The scan was cancelled before completion."
 msgstr ""
 
-#: src/core/result_formatters.py:218
+#: src/core/result_formatters.py:229
 msgid "File Path"
 msgstr ""
 
-#: src/core/result_formatters.py:218
+#: src/core/result_formatters.py:229
 msgid "Threat Name"
 msgstr ""
 
-#: src/core/result_formatters.py:218
+#: src/core/result_formatters.py:229
 msgid "Category"
 msgstr ""
 
-#: src/core/result_formatters.py:218
+#: src/core/result_formatters.py:229
 msgid "Severity"
 msgstr ""
 
-#: src/core/result_formatters.py:218
+#: src/core/result_formatters.py:229
 msgid "Timestamp"
 msgstr ""
 
-#: src/core/scanner_base.py:573 src/core/scanner_base.py:590
+#: src/core/scanner_base.py:575 src/core/scanner_base.py:592
 msgid "No files could be scanned"
 msgstr ""
 
-#: src/core/scanner_base.py:580
+#: src/core/scanner_base.py:582
 #, python-brace-format
 msgid ""
 "{count} non-fatal warning(s) during scan; some files may have been only "
 "partially scanned"
 msgstr ""
 
-#: src/core/scanner_base.py:593
+#: src/core/scanner_base.py:595
 #, python-brace-format
 msgid "{count} file(s) could not be read"
 msgstr ""
 
-#: src/core/scanner_base.py:767
+#: src/core/scanner_base.py:769
 msgid "Scan cancelled by user"
 msgstr ""
 
-#: src/core/updater.py:421
+#: src/core/updater.py:437
 #, python-brace-format
 msgid "Freshclam service not running (status: {status})"
 msgstr ""
 
-#: src/core/updater.py:438
+#: src/core/updater.py:454
 msgid "Could not determine freshclam PID"
 msgstr ""
 
-#: src/core/updater.py:440
+#: src/core/updater.py:456
 #, python-brace-format
 msgid "Failed to get freshclam PID: {error}"
 msgstr ""
 
-#: src/core/updater.py:455 src/core/updater.py:476
+#: src/core/updater.py:471 src/core/updater.py:492
 #, python-brace-format
 msgid "Update signal sent to freshclam service (PID {pid})"
 msgstr ""
 
-#: src/core/updater.py:481 src/core/updater.py:491
+#: src/core/updater.py:497 src/core/updater.py:507
 #, python-brace-format
 msgid "Failed to send signal: {error}"
 msgstr ""
 
-#: src/core/updater.py:485
+#: src/core/updater.py:501
 msgid "Timeout sending elevated signal to freshclam"
 msgstr ""
 
-#: src/core/updater.py:494
+#: src/core/updater.py:510
 msgid "Timeout sending signal to freshclam"
 msgstr ""
 
-#: src/core/updater.py:496
+#: src/core/updater.py:512
 #, python-brace-format
 msgid "Error sending signal: {error}"
 msgstr ""
 
-#: src/core/updater.py:557
+#: src/core/updater.py:573
 #, python-brace-format
 msgid "previous database could not be restored: {error}"
 msgstr ""
 
-#: src/core/updater.py:561
+#: src/core/updater.py:577
 msgid "previous database could not be restored"
 msgstr ""
 
-#: src/core/updater.py:613
+#: src/core/updater.py:635
 msgid ""
 "Could not trigger freshclam service update. Try restarting the service: sudo "
 "systemctl restart clamav-freshclam"
 msgstr ""
 
-#: src/core/updater.py:641
+#: src/core/updater.py:663
 #, python-brace-format
 msgid ""
 "Another freshclam instance is running (PID {pid}). Stop it first: sudo "
 "systemctl stop clamav-freshclam"
 msgstr ""
 
-#: src/core/updater.py:862
+#: src/core/updater.py:884
 #, python-brace-format
 msgid "Update failed: {error}"
 msgstr ""
 
-#: src/core/updater.py:873
+#: src/core/updater.py:895
 msgid "Update timed out after 10 minutes"
 msgstr ""
 
-#: src/core/updater.py:885
+#: src/core/updater.py:907
 msgid "Update cancelled by user"
 msgstr ""
 
-#: src/core/updater.py:1240 src/ui/update_view.py:661
+#: src/core/updater.py:1257 src/ui/update_view.py:663
 #, python-brace-format
 msgid "{database} until {cooldown}"
 msgstr ""
 
-#: src/core/updater.py:1277
+#: src/core/updater.py:1294
 msgid ""
 "Authentication cancelled. Database update requires administrator privileges."
 msgstr ""
 
-#: src/core/updater.py:1279
+#: src/core/updater.py:1296
 msgid "Authorization failed. You are not authorized to update the database."
 msgstr ""
 
-#: src/core/updater.py:1286
+#: src/core/updater.py:1303
 #, python-brace-format
 msgid "Updated: {databases}"
 msgstr ""
 
-#: src/core/updater.py:1292
+#: src/core/updater.py:1309
 #, python-brace-format
 msgid "Already current: {databases}"
 msgstr ""
 
-#: src/core/updater.py:1299
+#: src/core/updater.py:1316
 #, python-brace-format
 msgid ""
 "Database update partially completed. {progress}. Rate limited: {details}."
 msgstr ""
 
-#: src/core/updater.py:1302
+#: src/core/updater.py:1319
 #, python-brace-format
 msgid "Update rate limited for: {details}."
 msgstr ""
 
-#: src/core/updater.py:1306
+#: src/core/updater.py:1323
 msgid "Update rate limited by mirror. Please wait a few minutes and try again."
 msgstr ""
 
-#: src/core/updater.py:1311
+#: src/core/updater.py:1328
 msgid ""
 "Update blocked by CDN. This may be due to rate limiting. Please wait and try "
 "again later."
 msgstr ""
 
-#: src/core/updater.py:1317
+#: src/core/updater.py:1334
 msgid "ClamAV mirror is currently unavailable. Please try again later."
 msgstr ""
 
-#: src/core/updater.py:1323
+#: src/core/updater.py:1340
 msgid "SSL/TLS certificate error. The mirror may have configuration issues."
 msgstr ""
 
-#: src/core/updater.py:1327
+#: src/core/updater.py:1344
 msgid "Connection timed out. Please check your network connection."
 msgstr ""
 
-#: src/core/updater.py:1331
+#: src/core/updater.py:1348
 msgid "Authorization failed. Please try again and enter your password."
 msgstr ""
 
-#: src/core/updater.py:1335
+#: src/core/updater.py:1352
 msgid "Database is locked. Another freshclam instance may be running."
 msgstr ""
 
-#: src/core/updater.py:1339
+#: src/core/updater.py:1356
 msgid ""
 "Permission denied. You may need elevated privileges to update the database."
 msgstr ""
 
-#: src/core/updater.py:1343
+#: src/core/updater.py:1360
 msgid "Connection error. Please check your network connection."
 msgstr ""
 
-#: src/core/updater.py:1347
+#: src/core/updater.py:1364
 msgid "DNS resolution failed. Please check your network settings."
 msgstr ""
 
-#: src/core/updater.py:1353
+#: src/core/updater.py:1370
 msgid "Update failed with an unknown error. Check the logs for details."
 msgstr ""
 
-#: src/core/updater.py:1365
+#: src/core/updater.py:1382
 #, python-brace-format
 msgid "Database update completed - {count} database(s) updated"
 msgstr ""
 
-#: src/core/updater.py:1369
+#: src/core/updater.py:1386
 msgid "Database update completed - Already up to date"
 msgstr ""
 
-#: src/core/updater.py:1371
+#: src/core/updater.py:1388
 msgid "Database update cancelled"
 msgstr ""
 
-#: src/core/updater.py:1373
+#: src/core/updater.py:1390
 #, python-brace-format
 msgid "Database update failed: {error}"
 msgstr ""
 
-#: src/core/updater.py:1374 src/ui/scan_results_dialog.py:234
-#: src/ui/scan_view.py:646 src/ui/scan_view.py:2278
-#: src/ui/virustotal_results_dialog.py:199
+#: src/core/updater.py:1391 src/ui/preferences/window.py:830
+#: src/ui/scan_results_dialog.py:235 src/ui/scan_view.py:658
+#: src/ui/scan_view.py:2308 src/ui/virustotal_results_dialog.py:199
 msgid "Unknown error"
 msgstr ""
 
 #: src/core/virustotal.py:262 src/core/virustotal.py:316
 #: src/core/virustotal.py:478 src/core/virustotal.py:621
 #: src/core/virustotal.py:629 src/ui/scan/scan_view.py:257
-#: src/ui/scan_view.py:2274
+#: src/ui/scan_view.py:2304
 msgid "Scan cancelled"
 msgstr ""
 
@@ -2666,9 +2725,9 @@ msgstr ""
 #: src/ui/preferences/debug_page.py:747
 #: src/ui/preferences/virustotal_page.py:359 src/ui/profile_dialogs.py:123
 #: src/ui/profile_dialogs.py:724 src/ui/profile_dialogs.py:873
-#: src/ui/profile_dialogs.py:995 src/ui/quarantine_view.py:100
-#: src/ui/scan/scan_view.py:175 src/ui/scan_view.py:1261
-#: src/ui/scan_view.py:1907 src/ui/update_view.py:145
+#: src/ui/profile_dialogs.py:995 src/ui/quarantine_view.py:101
+#: src/ui/scan/scan_view.py:175 src/ui/scan_view.py:1281
+#: src/ui/scan_view.py:1935 src/ui/update_view.py:147
 msgid "Cancel"
 msgstr ""
 
@@ -2681,8 +2740,8 @@ msgid "_Open"
 msgstr ""
 
 #: src/ui/compat.py:426 src/ui/compat.py:492 src/ui/file_export.py:192
-#: src/ui/preferences/database_page.py:336
-#: src/ui/preferences/scanner_page.py:242
+#: src/ui/preferences/database_page.py:376
+#: src/ui/preferences/scanner_page.py:255
 msgid "_Cancel"
 msgstr ""
 
@@ -2703,7 +2762,7 @@ msgid "Refresh Audit"
 msgstr ""
 
 #: src/ui/audit_view.py:237 src/ui/audit_view.py:786
-#: src/ui/components_view.py:243 src/ui/logs_view.py:521
+#: src/ui/components_view.py:253 src/ui/logs_view.py:521
 #: src/ui/statistics_view.py:186
 msgid "Checking..."
 msgstr ""
@@ -2762,7 +2821,7 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-#: src/ui/audit_view.py:654 src/ui/components_view.py:370
+#: src/ui/audit_view.py:654 src/ui/components_view.py:380
 #: src/ui/logs_view.py:401
 msgid "Copy to clipboard"
 msgstr ""
@@ -2790,141 +2849,141 @@ msgstr ""
 msgid "clamscan Installation"
 msgstr ""
 
-#: src/ui/components_view.py:42
+#: src/ui/components_view.py:43
 msgid ""
 "clamscan is the on-demand virus scanner. After installation, update the "
 "virus database with freshclam."
 msgstr ""
 
-#: src/ui/components_view.py:46
+#: src/ui/components_view.py:47
 msgid "freshclam Installation"
 msgstr ""
 
-#: src/ui/components_view.py:53
+#: src/ui/components_view.py:58
 msgid ""
 "freshclam updates the virus database. Enable the service for automatic "
 "updates:"
 msgstr ""
 
-#: src/ui/components_view.py:59
+#: src/ui/components_view.py:64
 msgid "clamdscan Installation"
 msgstr ""
 
-#: src/ui/components_view.py:66
+#: src/ui/components_view.py:72
 msgid ""
 "clamdscan is a client for the clamd daemon, providing faster scanning. "
 "Requires clamd daemon to be running."
 msgstr ""
 
-#: src/ui/components_view.py:70
+#: src/ui/components_view.py:76
 msgid "clamd Daemon Setup"
 msgstr ""
 
-#: src/ui/components_view.py:89
+#: src/ui/components_view.py:99
 msgid "clamd is the ClamAV daemon for faster scanning."
 msgstr ""
 
-#: src/ui/components_view.py:90
+#: src/ui/components_view.py:100
 msgid "Configuration file location is auto-detected in Preferences."
 msgstr ""
 
-#: src/ui/components_view.py:92
+#: src/ui/components_view.py:102
 msgid ""
 "On Fedora, ClamUI uses /etc/clamd.d/scan.conf. If the daemon is running but "
 "still unavailable, verify socket permissions and test with: clamdscan --"
 "config-file=/etc/clamd.d/scan.conf --ping 3"
 msgstr ""
 
-#: src/ui/components_view.py:161
+#: src/ui/components_view.py:171
 msgid "ClamAV Components"
 msgstr ""
 
-#: src/ui/components_view.py:163
+#: src/ui/components_view.py:173
 msgid "Check the status of ClamAV components and get setup instructions"
 msgstr ""
 
-#: src/ui/components_view.py:168
+#: src/ui/components_view.py:178
 msgid "Component Status"
 msgstr ""
 
-#: src/ui/components_view.py:169
+#: src/ui/components_view.py:179
 msgid "View installation status and setup guides for ClamAV tools"
 msgstr ""
 
-#: src/ui/components_view.py:184
+#: src/ui/components_view.py:194
 msgid "Components Status"
 msgstr ""
 
-#: src/ui/components_view.py:189
+#: src/ui/components_view.py:199
 msgid ""
 "ClamAV tools must be installed on the host system. Flatpak runs them through "
 "flatpak-spawn."
 msgstr ""
 
-#: src/ui/components_view.py:195
+#: src/ui/components_view.py:205
 msgid "Expand each component for installation instructions"
 msgstr ""
 
-#: src/ui/components_view.py:204
+#: src/ui/components_view.py:214
 msgid "Virus Scanner"
 msgstr ""
 
-#: src/ui/components_view.py:209
+#: src/ui/components_view.py:219
 msgid "Database Updater"
 msgstr ""
 
-#: src/ui/components_view.py:218
+#: src/ui/components_view.py:228
 msgid "Daemon Scanner Client"
 msgstr ""
 
-#: src/ui/components_view.py:222
+#: src/ui/components_view.py:232
 msgid "Scanner Daemon"
 msgstr ""
 
-#: src/ui/components_view.py:255
+#: src/ui/components_view.py:265
 msgid "Checking"
 msgstr ""
 
-#: src/ui/components_view.py:420 src/ui/preferences/scanner_page.py:374
+#: src/ui/components_view.py:430 src/ui/preferences/scanner_page.py:387
 msgid "Refresh Status"
 msgstr ""
 
-#: src/ui/components_view.py:548 src/ui/components_view.py:549
+#: src/ui/components_view.py:558 src/ui/components_view.py:559
 msgid "Installed"
 msgstr ""
 
-#: src/ui/components_view.py:559 src/ui/components_view.py:610
+#: src/ui/components_view.py:569 src/ui/components_view.py:620
 #: src/ui/logs_view.py:1282
 msgid "Not installed"
 msgstr ""
 
-#: src/ui/components_view.py:560 src/ui/components_view.py:611
+#: src/ui/components_view.py:570 src/ui/components_view.py:621
 msgid "Not installed - expand for setup instructions"
 msgstr ""
 
-#: src/ui/components_view.py:592 src/ui/logs_view.py:1269
+#: src/ui/components_view.py:602 src/ui/logs_view.py:1269
 msgid "Running"
 msgstr ""
 
-#: src/ui/components_view.py:593
+#: src/ui/components_view.py:603
 msgid "Daemon is running"
 msgstr ""
 
-#: src/ui/components_view.py:601 src/ui/logs_view.py:1276
+#: src/ui/components_view.py:611 src/ui/logs_view.py:1276
 msgid "Stopped"
 msgstr ""
 
-#: src/ui/components_view.py:602
+#: src/ui/components_view.py:612
 msgid "Daemon is installed but not running"
 msgstr ""
 
-#: src/ui/components_view.py:618 src/ui/logs_view.py:1297
-#: src/ui/quarantine_view.py:788 src/ui/statistics_view.py:191
+#: src/ui/components_view.py:628 src/ui/logs_view.py:1297
+#: src/ui/quarantine_view.py:791 src/ui/statistics_view.py:191
 #: src/ui/statistics_view.py:865 src/ui/statistics_view.py:894
 msgid "Unknown"
 msgstr ""
 
-#: src/ui/components_view.py:619 src/ui/statistics_view.py:861
+#: src/ui/components_view.py:629 src/ui/statistics_view.py:861
 #: src/ui/statistics_view.py:1049
 msgid "Unable to determine status"
 msgstr ""
@@ -3155,7 +3214,7 @@ msgstr ""
 msgid "Export daemon logs to file"
 msgstr ""
 
-#: src/ui/logs_view.py:520 src/ui/preferences/scanner_page.py:354
+#: src/ui/logs_view.py:520 src/ui/preferences/scanner_page.py:367
 msgid "Daemon Status"
 msgstr ""
 
@@ -3198,7 +3257,7 @@ msgstr ""
 msgid "Type: {type}"
 msgstr ""
 
-#: src/ui/logs_view.py:791 src/ui/quarantine_view.py:767
+#: src/ui/logs_view.py:791 src/ui/quarantine_view.py:769
 #, python-brace-format
 msgid "Path: {path}"
 msgstr ""
@@ -3242,7 +3301,7 @@ msgstr ""
 msgid "  Duration: {duration}"
 msgstr ""
 
-#: src/ui/logs_view.py:845 src/ui/scan_view.py:666 src/ui/update_view.py:639
+#: src/ui/logs_view.py:845 src/ui/scan_view.py:678 src/ui/update_view.py:641
 msgid "Summary:"
 msgstr ""
 
@@ -3309,8 +3368,8 @@ msgstr ""
 msgid "Error loading daemon logs:"
 msgstr ""
 
-#: src/ui/pagination.py:169 src/ui/quarantine_view.py:443
-#: src/ui/quarantine_view.py:630
+#: src/ui/pagination.py:169 src/ui/quarantine_view.py:444
+#: src/ui/quarantine_view.py:631
 msgid "entries"
 msgstr ""
 
@@ -3370,7 +3429,7 @@ msgid "Could not open folder: {error}"
 msgstr ""
 
 #: src/ui/preferences/base.py:687 src/ui/preferences/save_page.py:192
-#: src/ui/preferences/scanner_page.py:625
+#: src/ui/preferences/scanner_page.py:617
 msgid "OK"
 msgstr ""
 
@@ -3529,199 +3588,215 @@ msgstr ""
 msgid "Database Updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:222
+#: src/ui/preferences/database_page.py:223
 #: src/ui/preferences/scanner_page.py:124
 #, python-brace-format
 msgid "Detected: {path}"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:225
+#: src/ui/preferences/database_page.py:226
 msgid "No freshclam.conf found in known locations"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:239
+#: src/ui/preferences/database_page.py:240
 #: src/ui/preferences/scanner_page.py:137
 msgid "Configuration File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:241
+#: src/ui/preferences/database_page.py:242
 msgid "freshclam.conf location"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:277
-#: src/ui/preferences/scanner_page.py:179
+#: src/ui/preferences/database_page.py:248
+#: src/ui/preferences/scanner_page.py:145
+msgid "Read as Administrator"
+msgstr ""
+
+#: src/ui/preferences/database_page.py:252
+#: src/ui/preferences/scanner_page.py:149
+msgid ""
+"Request administrator authorization to read a protected configuration file"
+msgstr ""
+
+#: src/ui/preferences/database_page.py:292
+msgid ""
+"Failed to save configuration selection. The previous file remains active."
+msgstr ""
+
+#: src/ui/preferences/database_page.py:317
+#: src/ui/preferences/scanner_page.py:192
 msgid "Configuration files"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:300
-#: src/ui/preferences/scanner_page.py:206
+#: src/ui/preferences/database_page.py:340
+#: src/ui/preferences/scanner_page.py:219
 #, python-brace-format
 msgid "Selected: {path}"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:313
-#: src/ui/preferences/database_page.py:332
-#: src/ui/preferences/scanner_page.py:219
-#: src/ui/preferences/scanner_page.py:238
+#: src/ui/preferences/database_page.py:353
+#: src/ui/preferences/database_page.py:372
+#: src/ui/preferences/scanner_page.py:232
+#: src/ui/preferences/scanner_page.py:251
 msgid "Select Configuration File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:335
-#: src/ui/preferences/scanner_page.py:241
+#: src/ui/preferences/database_page.py:375
+#: src/ui/preferences/scanner_page.py:254
 msgid "_Select"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:367
+#: src/ui/preferences/database_page.py:407
 msgid "Paths"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:368
+#: src/ui/preferences/database_page.py:408
 msgid "Configure database and log file locations"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:373
+#: src/ui/preferences/database_page.py:413
 msgid "Database Directory"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:383
+#: src/ui/preferences/database_page.py:423
 msgid "Update Log File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:393
+#: src/ui/preferences/database_page.py:433
 msgid "Notify ClamD Config"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:403
-#: src/ui/preferences/scanner_page.py:805
+#: src/ui/preferences/database_page.py:443
+#: src/ui/preferences/scanner_page.py:797
 msgid "Verbose Logging"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:404
+#: src/ui/preferences/database_page.py:444
 msgid "Enable detailed logging for database updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:410
-#: src/ui/preferences/scanner_page.py:812
+#: src/ui/preferences/database_page.py:450
+#: src/ui/preferences/scanner_page.py:804
 msgid "Syslog Logging"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:411
-#: src/ui/preferences/scanner_page.py:813
+#: src/ui/preferences/database_page.py:451
+#: src/ui/preferences/scanner_page.py:805
 msgid "Send log messages to system log"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:432
+#: src/ui/preferences/database_page.py:472
 msgid "Update Behavior"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:433
+#: src/ui/preferences/database_page.py:473
 msgid "Configure how often and where to check for updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:441
+#: src/ui/preferences/database_page.py:481
 msgid "Checks Per Day"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:442
+#: src/ui/preferences/database_page.py:482
 msgid "Number of update checks per day (0 to disable)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:453
+#: src/ui/preferences/database_page.py:493
 msgid "Database Mirror"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:481
+#: src/ui/preferences/database_page.py:521
 msgid "Custom Signature Databases"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:484
+#: src/ui/preferences/database_page.py:524
 msgid ""
 "Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
 "- 'DatabaseCustomURL' prefix auto-stripped."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:496
+#: src/ui/preferences/database_page.py:536
 msgid "Add URL(s)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:497
+#: src/ui/preferences/database_page.py:537
 msgid "Paste URL or multi-line config block"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:507
+#: src/ui/preferences/database_page.py:547
 #: src/ui/preferences/exclusions_page.py:146 src/ui/profile_dialogs.py:729
 msgid "Add"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:508
+#: src/ui/preferences/database_page.py:548
 msgid "Add custom signature URL(s)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:516
+#: src/ui/preferences/database_page.py:556
 msgid "Suggested"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:518
+#: src/ui/preferences/database_page.py:558
 msgid "Add free community signature databases (URLhaus, InterServer)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:573
+#: src/ui/preferences/database_page.py:613
 msgid "Remove this URL"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:638
+#: src/ui/preferences/database_page.py:678
 msgid "Popular Signature Providers"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:641
+#: src/ui/preferences/database_page.py:681
 msgid ""
 "Third-party databases can significantly improve detection rates. Providers "
 "marked with a key icon require free registration."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:653
+#: src/ui/preferences/database_page.py:693
 msgid "Registration required"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:667
+#: src/ui/preferences/database_page.py:707
 msgid "Free registration required"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:677
+#: src/ui/preferences/database_page.py:717
 msgid "Tip: fangfrisch"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:680
+#: src/ui/preferences/database_page.py:720
 msgid ""
 "For SaneSecurity and other rsync-based providers, install the 'fangfrisch' "
 "tool which handles downloading and updating signatures automatically."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:712
+#: src/ui/preferences/database_page.py:752
 msgid "Proxy Settings"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:713
+#: src/ui/preferences/database_page.py:753
 msgid "Configure HTTP proxy for database downloads (optional)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:718
+#: src/ui/preferences/database_page.py:758
 msgid "Proxy Server"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:731
+#: src/ui/preferences/database_page.py:771
 msgid "Proxy Port"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:732
+#: src/ui/preferences/database_page.py:772
 msgid "Proxy server port number (0 to disable)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:743
+#: src/ui/preferences/database_page.py:783
 msgid "Proxy Username"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:755
+#: src/ui/preferences/database_page.py:795
 msgid "Proxy Password"
 msgstr ""
 
@@ -4151,7 +4226,7 @@ msgid "On Access"
 msgstr ""
 
 #: src/ui/preferences/onaccess_page.py:94
-#: src/ui/preferences/scanner_page.py:156
+#: src/ui/preferences/scanner_page.py:169
 msgid "Configuration Status"
 msgstr ""
 
@@ -4236,12 +4311,12 @@ msgid "Maximum number of scanning threads"
 msgstr ""
 
 #: src/ui/preferences/onaccess_page.py:230
-#: src/ui/preferences/scanner_page.py:726
+#: src/ui/preferences/scanner_page.py:718
 msgid "Max File Size (MB)"
 msgstr ""
 
 #: src/ui/preferences/onaccess_page.py:231
-#: src/ui/preferences/scanner_page.py:727
+#: src/ui/preferences/scanner_page.py:719
 msgid "Maximum file size to scan (0 = unlimited)"
 msgstr ""
 
@@ -4477,212 +4552,202 @@ msgstr ""
 msgid "clamd.conf location"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:158
+#: src/ui/preferences/scanner_page.py:171
 msgid "ClamD Configuration"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:159
+#: src/ui/preferences/scanner_page.py:172
 msgid "clamd.conf not found - Scanner settings unavailable"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:192
+#: src/ui/preferences/scanner_page.py:205
 msgid "Selected configuration file is not accessible from the host"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:268
+#: src/ui/preferences/scanner_page.py:281
 msgid "Failed to save configuration file selection"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:312
-#: src/ui/preferences/scanner_page.py:331
+#: src/ui/preferences/scanner_page.py:325
+#: src/ui/preferences/scanner_page.py:344
 msgid "Scan Backend"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:318
+#: src/ui/preferences/scanner_page.py:331
 msgid ""
 "Select how ClamUI performs scans. Daemon runs on host via flatpak-spawn. "
 "Auto-saved."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:322
+#: src/ui/preferences/scanner_page.py:335
 msgid "Select how ClamUI performs scans. Auto-saved."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:327
+#: src/ui/preferences/scanner_page.py:340
 msgid "Auto (prefer daemon)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:328
+#: src/ui/preferences/scanner_page.py:341
 msgid "ClamAV Daemon (clamd)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:329
+#: src/ui/preferences/scanner_page.py:342
 msgid "Standalone Scanner (clamscan)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:356
-#: src/ui/preferences/scanner_page.py:359
+#: src/ui/preferences/scanner_page.py:369
+#: src/ui/preferences/scanner_page.py:372
 msgid "Checking daemon connection..."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:389
+#: src/ui/preferences/scanner_page.py:402
 msgid "Documentation"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:390
+#: src/ui/preferences/scanner_page.py:403
 msgid "About scan backends"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:413
+#: src/ui/preferences/scanner_page.py:426
 msgid ""
 "Recommended - Automatically uses daemon if available, falls back to clamscan "
 "for reliability"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:416
+#: src/ui/preferences/scanner_page.py:429
 msgid ""
 "Fastest - Instant startup with in-memory database, requires clamd service "
 "running"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:418
+#: src/ui/preferences/scanner_page.py:431
 msgid ""
 "Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:453
+#: src/ui/preferences/scanner_page.py:466
 msgid "Failed to save scan backend selection"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:506
+#: src/ui/preferences/scanner_page.py:519
 msgid "Daemon available"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:507
+#: src/ui/preferences/scanner_page.py:520
 #, python-brace-format
 msgid "Not available: {message}"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:558
-msgid "Documentation Not Found"
-msgstr ""
-
-#: src/ui/preferences/scanner_page.py:560
-msgid ""
-"The scan backends documentation file could not be found. It may have been "
-"moved or deleted."
-msgstr ""
-
-#: src/ui/preferences/scanner_page.py:579
+#: src/ui/preferences/scanner_page.py:571
 msgid "Error Opening Documentation"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:580
+#: src/ui/preferences/scanner_page.py:572
 #, python-brace-format
 msgid "Could not open documentation file: {error}"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:655
+#: src/ui/preferences/scanner_page.py:647
 msgid "File Type Scanning"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:656
+#: src/ui/preferences/scanner_page.py:648
 msgid "Enable or disable scanning for specific file types"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:661
+#: src/ui/preferences/scanner_page.py:653
 msgid "Scan PE Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:662
+#: src/ui/preferences/scanner_page.py:654
 msgid "Scan Windows/DOS executable files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:668
+#: src/ui/preferences/scanner_page.py:660
 msgid "Scan ELF Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:669
+#: src/ui/preferences/scanner_page.py:661
 msgid "Scan Unix/Linux executable files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:675
+#: src/ui/preferences/scanner_page.py:667
 msgid "Scan OLE2 Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:676
+#: src/ui/preferences/scanner_page.py:668
 msgid "Scan Microsoft Office documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:682
+#: src/ui/preferences/scanner_page.py:674
 msgid "Scan PDF Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:683
+#: src/ui/preferences/scanner_page.py:675
 msgid "Scan PDF documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:689
+#: src/ui/preferences/scanner_page.py:681
 msgid "Scan HTML Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:690
+#: src/ui/preferences/scanner_page.py:682
 msgid "Scan HTML documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:696
+#: src/ui/preferences/scanner_page.py:688
 msgid "Scan Archive Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:697
+#: src/ui/preferences/scanner_page.py:689
 msgid "Scan compressed archives (ZIP, RAR, etc.)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:720
+#: src/ui/preferences/scanner_page.py:712
 msgid "Performance and Limits"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:721
+#: src/ui/preferences/scanner_page.py:713
 msgid "Configure scanning limits and performance settings"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:738
+#: src/ui/preferences/scanner_page.py:730
 msgid "Max Scan Size (MB)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:739
+#: src/ui/preferences/scanner_page.py:731
 msgid "Maximum total scan size (0 = unlimited)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:750
+#: src/ui/preferences/scanner_page.py:742
 msgid "Max Archive Recursion"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:751
+#: src/ui/preferences/scanner_page.py:743
 msgid "Maximum recursion depth for archives"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:763
+#: src/ui/preferences/scanner_page.py:755
 msgid "Max Files in Archive"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:764
+#: src/ui/preferences/scanner_page.py:756
 msgid "Maximum number of files to scan in archive (0 = unlimited)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:791
+#: src/ui/preferences/scanner_page.py:783
 msgid "Logging"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:792
+#: src/ui/preferences/scanner_page.py:784
 msgid "Configure logging options for the scanner"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:797
+#: src/ui/preferences/scanner_page.py:789
 msgid "Log File Path"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:806
+#: src/ui/preferences/scanner_page.py:798
 msgid "Enable detailed scanner logging"
 msgstr ""
 
@@ -4908,7 +4973,7 @@ msgid "Failed to delete API key"
 msgstr ""
 
 #: src/ui/preferences/virustotal_page.py:385 src/ui/profile_dialogs.py:878
-#: src/ui/quarantine_view.py:817 src/ui/quarantine_view.py:904
+#: src/ui/quarantine_view.py:820 src/ui/quarantine_view.py:915
 msgid "Delete"
 msgstr ""
 
@@ -4933,11 +4998,11 @@ msgid "Save"
 msgstr ""
 
 #: src/ui/preferences/window.py:147 src/ui/preferences/window.py:306
-#: src/ui/window.py:631
+#: src/ui/window.py:629
 msgid "Preferences"
 msgstr ""
 
-#: src/ui/preferences/window.py:300 src/ui/window.py:517
+#: src/ui/preferences/window.py:300 src/ui/window.py:515
 msgid "Back to navigation"
 msgstr ""
 
@@ -4949,6 +5014,16 @@ msgstr ""
 #: src/ui/preferences/window.py:757
 #, python-brace-format
 msgid "Failed to load {file}: {error}"
+msgstr ""
+
+#: src/ui/preferences/window.py:829
+#, python-brace-format
+msgid "Could not load configuration with administrator authorization: {error}"
+msgstr ""
+
+#: src/ui/preferences/window.py:848
+#, python-brace-format
+msgid "Loaded {file} with administrator authorization"
 msgstr ""
 
 #: src/ui/privileged_helper_dialog.py:47
@@ -5022,7 +5097,7 @@ msgstr ""
 
 #: src/ui/profile_dialogs.py:192 src/ui/profile_dialogs.py:591
 #: src/ui/scan/target_selector.py:78 src/ui/scan/target_selector.py:233
-#: src/ui/scan_view.py:934 src/ui/scan_view.py:1219
+#: src/ui/scan_view.py:946 src/ui/scan_view.py:1239
 msgid "Scan Targets"
 msgstr ""
 
@@ -5038,7 +5113,7 @@ msgstr ""
 msgid "Add file"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:975
+#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:994
 msgid "No targets added"
 msgstr ""
 
@@ -5103,12 +5178,12 @@ msgstr ""
 msgid "Pattern"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1010
+#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1030
 msgid "Remove"
 msgstr ""
 
 #: src/ui/profile_dialogs.py:589 src/ui/scan/target_selector.py:239
-#: src/ui/scan_view.py:1225
+#: src/ui/scan_view.py:1245
 #, python-brace-format
 msgid "Scan Targets ({count})"
 msgstr ""
@@ -5149,7 +5224,7 @@ msgstr ""
 msgid "Your custom profiles will not be affected."
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1000 src/ui/quarantine_view.py:810
+#: src/ui/profile_dialogs.py:1000 src/ui/quarantine_view.py:813
 msgid "Restore"
 msgstr ""
 
@@ -5242,247 +5317,247 @@ msgstr ""
 msgid "Profile imported"
 msgstr ""
 
-#: src/ui/quarantine_view.py:240 src/ui/scan_view.py:2399
-#: src/ui/update_view.py:173
+#: src/ui/quarantine_view.py:241 src/ui/scan_view.py:2429
+#: src/ui/update_view.py:175
 msgid "Dismiss"
 msgstr ""
 
-#: src/ui/quarantine_view.py:254
+#: src/ui/quarantine_view.py:255
 msgid "Quarantine Storage"
 msgstr ""
 
-#: src/ui/quarantine_view.py:255
+#: src/ui/quarantine_view.py:256
 msgid "Secure storage for isolated threats"
 msgstr ""
 
-#: src/ui/quarantine_view.py:259
+#: src/ui/quarantine_view.py:260
 msgid "Total Size"
 msgstr ""
 
-#: src/ui/quarantine_view.py:260
+#: src/ui/quarantine_view.py:261
 msgid "Calculating..."
 msgstr ""
 
-#: src/ui/quarantine_view.py:265
+#: src/ui/quarantine_view.py:266
 msgid "0 items"
 msgstr ""
 
-#: src/ui/quarantine_view.py:277
+#: src/ui/quarantine_view.py:278
 msgid "Quarantined Files"
 msgstr ""
 
-#: src/ui/quarantine_view.py:278
+#: src/ui/quarantine_view.py:279
 msgid "Detected threats isolated from your system"
 msgstr ""
 
-#: src/ui/quarantine_view.py:288
+#: src/ui/quarantine_view.py:289
 msgid "Search by threat name or path..."
 msgstr ""
 
-#: src/ui/quarantine_view.py:306
+#: src/ui/quarantine_view.py:307
 msgid "Refresh quarantine list"
 msgstr ""
 
-#: src/ui/quarantine_view.py:314
+#: src/ui/quarantine_view.py:315
 msgid "Clear Old Items"
 msgstr ""
 
-#: src/ui/quarantine_view.py:315
+#: src/ui/quarantine_view.py:316
 msgid "Remove quarantined files older than 30 days"
 msgstr ""
 
-#: src/ui/quarantine_view.py:346
+#: src/ui/quarantine_view.py:347
 msgid "No Quarantined Files"
 msgstr ""
 
-#: src/ui/quarantine_view.py:347
+#: src/ui/quarantine_view.py:348
 msgid "Detected threats will be isolated here for review"
 msgstr ""
 
-#: src/ui/quarantine_view.py:359
+#: src/ui/quarantine_view.py:360
 msgid "No matching entries"
 msgstr ""
 
-#: src/ui/quarantine_view.py:360
+#: src/ui/quarantine_view.py:361
 msgid "Try a different search term"
 msgstr ""
 
-#: src/ui/quarantine_view.py:374
+#: src/ui/quarantine_view.py:375
 msgid "Loading quarantine entries..."
 msgstr ""
 
-#: src/ui/quarantine_view.py:443 src/ui/quarantine_view.py:630
+#: src/ui/quarantine_view.py:444 src/ui/quarantine_view.py:631
 msgid "filtered entries"
 msgstr ""
 
-#: src/ui/quarantine_view.py:646
+#: src/ui/quarantine_view.py:647
 #, python-brace-format
 msgid "Removed {count} old quarantine entry"
 msgid_plural "Removed {count} old quarantine entries"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/quarantine_view.py:656
+#: src/ui/quarantine_view.py:657
 msgid "No old entries found to remove"
 msgstr ""
 
-#: src/ui/quarantine_view.py:710
+#: src/ui/quarantine_view.py:711
 #, python-brace-format
 msgid "{filtered} of {total} items"
 msgstr ""
 
-#: src/ui/quarantine_view.py:715
+#: src/ui/quarantine_view.py:716
 #, python-brace-format
 msgid "{count} item"
 msgid_plural "{count} items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/quarantine_view.py:758 src/ui/quarantine_view.py:842
-#: src/ui/quarantine_view.py:903
+#: src/ui/quarantine_view.py:759 src/ui/quarantine_view.py:845
+#: src/ui/quarantine_view.py:913
 msgid "Unknown Threat"
 msgstr ""
 
-#: src/ui/quarantine_view.py:789
+#: src/ui/quarantine_view.py:792
 #, python-brace-format
 msgid "Quarantined: {date}"
 msgstr ""
 
-#: src/ui/quarantine_view.py:796
+#: src/ui/quarantine_view.py:799
 #, python-brace-format
 msgid "Size: {size}"
 msgstr ""
 
-#: src/ui/quarantine_view.py:840
+#: src/ui/quarantine_view.py:843
 msgid "Restore Quarantined File?"
 msgstr ""
 
-#: src/ui/quarantine_view.py:841
+#: src/ui/quarantine_view.py:844
 #, python-brace-format
 msgid "This file was detected as \"{threat}\". It will be restored to {path}."
 msgstr ""
 
-#: src/ui/quarantine_view.py:844
+#: src/ui/quarantine_view.py:848
 msgid "Restore Anyway"
 msgstr ""
 
-#: src/ui/quarantine_view.py:869
+#: src/ui/quarantine_view.py:873
 msgid "File restored successfully"
 msgstr ""
 
-#: src/ui/quarantine_view.py:877
+#: src/ui/quarantine_view.py:882
 msgid "File restored, but the database entry could not be removed"
 msgstr ""
 
-#: src/ui/quarantine_view.py:882
+#: src/ui/quarantine_view.py:889
 msgid "Failed to restore file"
 msgstr ""
 
-#: src/ui/quarantine_view.py:899
+#: src/ui/quarantine_view.py:907
 msgid "Permanently Delete File?"
 msgstr ""
 
-#: src/ui/quarantine_view.py:901
+#: src/ui/quarantine_view.py:909
 #, python-brace-format
 msgid ""
 "The quarantined file from {path} (\"{threat}\") will be permanently deleted. "
 "This action cannot be undone."
 msgstr ""
 
-#: src/ui/quarantine_view.py:929
+#: src/ui/quarantine_view.py:940
 msgid "File deleted successfully"
 msgstr ""
 
-#: src/ui/quarantine_view.py:937
+#: src/ui/quarantine_view.py:949
 msgid "File deleted, but the database entry could not be removed"
 msgstr ""
 
-#: src/ui/quarantine_view.py:942
+#: src/ui/quarantine_view.py:956
 msgid "Failed to delete file"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:733
+#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:745
 msgid "Scan Profile"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:738
+#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:750
 msgid "Profile"
 msgstr ""
 
 #: src/ui/scan/profile_selector.py:65 src/ui/scan/profile_selector.py:103
-#: src/ui/scan_view.py:744 src/ui/scan_view.py:829
+#: src/ui/scan_view.py:756 src/ui/scan_view.py:841
 msgid "No Profile (Manual)"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:756
+#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:768
 msgid "Manage profiles"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:48 src/ui/scan_view.py:1287
+#: src/ui/scan/scan_progress_widget.py:49 src/ui/scan_view.py:1307
 msgid "Scan Progress"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:62 src/ui/scan/scan_view.py:292
-#: src/ui/scan_view.py:1301
+#: src/ui/scan/scan_progress_widget.py:63 src/ui/scan/scan_view.py:292
+#: src/ui/scan_view.py:1321
 msgid "Scanning..."
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:72 src/ui/scan_view.py:1311
+#: src/ui/scan/scan_progress_widget.py:73 src/ui/scan_view.py:1331
 msgid "Currently scanning"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:73
-#: src/ui/scan/scan_progress_widget.py:118 src/ui/scan_view.py:1312
-#: src/ui/scan_view.py:1948
+#: src/ui/scan/scan_progress_widget.py:74
+#: src/ui/scan/scan_progress_widget.py:119 src/ui/scan_view.py:1332
+#: src/ui/scan_view.py:1977
 msgid "Waiting for scan data..."
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:83
-#: src/ui/scan/scan_progress_widget.py:121 src/ui/scan_view.py:1323
-#: src/ui/scan_view.py:1953
+#: src/ui/scan/scan_progress_widget.py:84
+#: src/ui/scan/scan_progress_widget.py:122 src/ui/scan_view.py:1343
+#: src/ui/scan_view.py:1982
 msgid "Scanned 0 files"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:93 src/ui/scan_results_dialog.py:212
-#: src/ui/scan_view.py:1333 src/ui/statistics_view.py:294
+#: src/ui/scan/scan_progress_widget.py:94 src/ui/scan_results_dialog.py:213
+#: src/ui/scan_view.py:1353 src/ui/statistics_view.py:294
 msgid "Threats Detected"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:157
+#: src/ui/scan/scan_progress_widget.py:158
 #, python-brace-format
 msgid "Target {current} of {total} \\u2014 {pct}%"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:162
+#: src/ui/scan/scan_progress_widget.py:163
 #, python-brace-format
 msgid "Scanning... {pct}%"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:173
-#: src/ui/scan/scan_progress_widget.py:193 src/ui/scan_view.py:1545
-#: src/ui/scan_view.py:1565
+#: src/ui/scan/scan_progress_widget.py:176
+#: src/ui/scan/scan_progress_widget.py:196 src/ui/scan_view.py:1565
+#: src/ui/scan_view.py:1585
 #, python-brace-format
 msgid "Scanned {scanned} / {total} files"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:180
-#: src/ui/scan/scan_progress_widget.py:201 src/ui/scan_view.py:1528
-#: src/ui/scan_view.py:1552 src/ui/scan_view.py:1573
+#: src/ui/scan/scan_progress_widget.py:183
+#: src/ui/scan/scan_progress_widget.py:204 src/ui/scan_view.py:1548
+#: src/ui/scan_view.py:1572 src/ui/scan_view.py:1593
 #, python-brace-format
 msgid "Scanned {scanned} files"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:185 src/ui/scan_view.py:1534
-#: src/ui/scan_view.py:1557
+#: src/ui/scan/scan_progress_widget.py:188 src/ui/scan_view.py:1554
+#: src/ui/scan_view.py:1577
 #, python-brace-format
 msgid "Target {current} of {total} ({cumulative} total)"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:213 src/ui/scan_view.py:1583
+#: src/ui/scan/scan_progress_widget.py:216 src/ui/scan_view.py:1603
 msgid "Unknown threat"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:237 src/ui/scan_view.py:1611
+#: src/ui/scan/scan_progress_widget.py:240 src/ui/scan_view.py:1631
 #, python-brace-format
 msgid "Threats Detected ({n})"
 msgid_plural "Threats Detected ({n})"
@@ -5494,24 +5569,24 @@ msgstr[1] ""
 msgid "View Results ({n})"
 msgstr ""
 
-#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1702
-#: src/ui/scan_view.py:1727
+#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1722
+#: src/ui/scan_view.py:1747
 msgid "View Results"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:161 src/ui/scan_view.py:1244
+#: src/ui/scan/scan_view.py:161 src/ui/scan_view.py:1264
 msgid "Start Scan"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:167 src/ui/scan_view.py:1253
+#: src/ui/scan/scan_view.py:167 src/ui/scan_view.py:1273
 msgid "EICAR Test"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:2366
+#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:2396
 msgid "Run a scan with EICAR test file to verify antivirus detection"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:192 src/ui/scan_view.py:2392
+#: src/ui/scan/scan_view.py:192 src/ui/scan_view.py:2422
 #, python-brace-format
 msgid "Backend: {name}"
 msgstr ""
@@ -5520,7 +5595,7 @@ msgstr ""
 msgid "Cannot add targets while scanning"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2266
+#: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2296
 #, python-brace-format
 msgid "Scan complete - {count} threat(s) detected"
 msgstr ""
@@ -5530,22 +5605,22 @@ msgstr ""
 msgid "Scan error: {error}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:273 src/ui/scan_view.py:1766
+#: src/ui/scan/scan_view.py:273 src/ui/scan_view.py:1786
 msgid "Please select a file or folder to scan"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:306 src/ui/scan_view.py:2214
+#: src/ui/scan/scan_view.py:306 src/ui/scan_view.py:2244
 #, python-brace-format
 msgid "Target {current} of {total}: {path}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:311 src/ui/scan_view.py:1932
-#: src/ui/scan_view.py:2211
+#: src/ui/scan/scan_view.py:311 src/ui/scan_view.py:1961
+#: src/ui/scan_view.py:2241
 #, python-brace-format
 msgid "Scanning {path}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:334 src/ui/scan_view.py:1870
+#: src/ui/scan/scan_view.py:334 src/ui/scan_view.py:1898
 #, python-brace-format
 msgid "Failed to create EICAR test file: {error}"
 msgstr ""
@@ -5555,15 +5630,15 @@ msgid "Remove target"
 msgstr ""
 
 #: src/ui/scan/target_selector.py:79 src/ui/scan/target_selector.py:234
-#: src/ui/scan_view.py:935 src/ui/scan_view.py:1220
+#: src/ui/scan_view.py:947 src/ui/scan_view.py:1240
 msgid "Drop files here or click Add"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:944
+#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:956
 msgid "Add files"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:952
+#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:964
 msgid "Add folders"
 msgstr ""
 
@@ -5571,7 +5646,7 @@ msgstr ""
 msgid "No targets selected"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1222
+#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1242
 msgid "Scan Target (1)"
 msgstr ""
 
@@ -5601,333 +5676,337 @@ msgstr ""
 msgid "Cancel Scan and Close"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:101
+#: src/ui/scan_results_dialog.py:102
 msgid "Scan Results"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:124
+#: src/ui/scan_results_dialog.py:125
 msgid "Copy results to clipboard"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:135 src/ui/scan_results_dialog.py:630
+#: src/ui/scan_results_dialog.py:136 src/ui/scan_results_dialog.py:636
 #, python-brace-format
 msgid "Quarantine {n} Threat"
 msgid_plural "Quarantine All ({n})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:179 src/ui/sidebar.py:32
+#: src/ui/scan_results_dialog.py:180 src/ui/sidebar.py:32
 msgid "Statistics"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:190
+#: src/ui/scan_results_dialog.py:191
 #, python-brace-format
 msgid "No threats found ({count} file(s) not accessible)"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:198
+#: src/ui/scan_results_dialog.py:199
 #, python-brace-format
 msgid "No threats found ({warning})"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:208 src/ui/scan_results_dialog.py:220
+#: src/ui/scan_results_dialog.py:209 src/ui/scan_results_dialog.py:221
 #, python-brace-format
 msgid "{n} threat"
 msgid_plural "{n} threats"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:213
+#: src/ui/scan_results_dialog.py:214
 #, python-brace-format
 msgid "{threat_text} found"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:225
+#: src/ui/scan_results_dialog.py:226
 #, python-brace-format
 msgid "Partial results - {threat_text} found"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:228
+#: src/ui/scan_results_dialog.py:229
 msgid "Partial results shown"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:250
+#: src/ui/scan_results_dialog.py:251
 msgid "Files scanned:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:253
+#: src/ui/scan_results_dialog.py:254
 msgid "Directories:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:258
+#: src/ui/scan_results_dialog.py:259
 msgid "Threats found:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:263
+#: src/ui/scan_results_dialog.py:264
 msgid "Not accessible:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:268
+#: src/ui/scan_results_dialog.py:269
 msgid "Error:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:298
+#: src/ui/scan_results_dialog.py:299
 msgid "Files Not Accessible"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:302
+#: src/ui/scan_results_dialog.py:303
 msgid "Permission Denied"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:306
+#: src/ui/scan_results_dialog.py:307
 #, python-brace-format
 msgid "{n} file could not be scanned"
 msgid_plural "{n} files could not be scanned"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:334
+#: src/ui/scan_results_dialog.py:335
 #, python-brace-format
 msgid "... and {count} more"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:356
+#: src/ui/scan_results_dialog.py:357
 #, python-brace-format
 msgid ""
 "<b>Large result set:</b> Found {count} threats. Displaying first {limit}."
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:409 src/ui/virustotal_results_dialog.py:344
+#: src/ui/scan_results_dialog.py:410 src/ui/virustotal_results_dialog.py:344
 #, python-brace-format
 msgid "Show {count} more"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:472 src/ui/sidebar.py:31
+#: src/ui/scan_results_dialog.py:473 src/ui/sidebar.py:31
 msgid "Quarantine"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:480
+#: src/ui/scan_results_dialog.py:481
 msgid "Exclude"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:483
+#: src/ui/scan_results_dialog.py:484
 msgid "Add file path to exclusion list"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:489
+#: src/ui/scan_results_dialog.py:490
 msgid "Copy Path"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:506
+#: src/ui/scan_results_dialog.py:507
 msgid "Quarantined"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:516
+#: src/ui/scan_results_dialog.py:517
 #, python-brace-format
 msgid "Quarantined: {name}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:519
+#: src/ui/scan_results_dialog.py:523
 #, python-brace-format
 msgid "Failed: {error}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:525
+#: src/ui/scan_results_dialog.py:532
 msgid "Cannot access settings"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:536 src/ui/scan_results_dialog.py:551
+#: src/ui/scan_results_dialog.py:543 src/ui/scan_results_dialog.py:558
 msgid "Excluded"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:539
+#: src/ui/scan_results_dialog.py:546
 msgid "Path already in exclusion list"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:556
+#: src/ui/scan_results_dialog.py:563
 #, python-brace-format
 msgid "Added to exclusions: {name}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:562
+#: src/ui/scan_results_dialog.py:570
 #, python-brace-format
 msgid "Copied: {path}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:570
+#: src/ui/scan_results_dialog.py:578
 msgid "Quarantining..."
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:605
+#: src/ui/scan_results_dialog.py:611
 #, python-brace-format
 msgid "Quarantined {n} threat"
 msgid_plural "Quarantined {n} threats"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:612
+#: src/ui/scan_results_dialog.py:618
 #, python-brace-format
 msgid "Quarantined {success}, failed {failed}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:643
+#: src/ui/scan_results_dialog.py:649
 msgid "No results to export"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:652
+#: src/ui/scan_results_dialog.py:658
 msgid "Results copied to clipboard"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:653 src/ui/virustotal_results_dialog.py:458
+#: src/ui/scan_results_dialog.py:659 src/ui/virustotal_results_dialog.py:458
 msgid "Failed to copy results"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:661
+#: src/ui/scan_results_dialog.py:667
 msgid "Export Scan Results"
 msgstr ""
 
-#: src/ui/scan_view.py:427
+#: src/ui/scan_view.py:439
 msgid "Scan in progress - please wait until the current scan completes"
 msgstr ""
 
-#: src/ui/scan_view.py:434
+#: src/ui/scan_view.py:446
 msgid "No files were dropped"
 msgstr ""
 
-#: src/ui/scan_view.py:454
+#: src/ui/scan_view.py:466
 msgid "Unable to accept dropped files"
 msgstr ""
 
-#: src/ui/scan_view.py:515 src/ui/scan_view.py:708
+#: src/ui/scan_view.py:527 src/ui/scan_view.py:720
 msgid "Scan details"
 msgstr ""
 
-#: src/ui/scan_view.py:516
+#: src/ui/scan_view.py:528
 msgid "Detailed scan output appears here when available"
 msgstr ""
 
-#: src/ui/scan_view.py:525
+#: src/ui/scan_view.py:537
 msgid "Copy details"
 msgstr ""
 
-#: src/ui/scan_view.py:533
+#: src/ui/scan_view.py:545
 msgid "View details fullscreen"
 msgstr ""
 
-#: src/ui/scan_view.py:672
+#: src/ui/scan_view.py:684
 msgid "Error output:"
 msgstr ""
 
-#: src/ui/scan_view.py:678
+#: src/ui/scan_view.py:690
 msgid "Scan output:"
 msgstr ""
 
-#: src/ui/scan_view.py:695
+#: src/ui/scan_view.py:707
 msgid "Scan details copied to clipboard"
 msgstr ""
 
-#: src/ui/scan_view.py:696
+#: src/ui/scan_view.py:708
 msgid "Failed to copy scan details"
 msgstr ""
 
-#: src/ui/scan_view.py:698
+#: src/ui/scan_view.py:710
 msgid ""
 "Scan details are too large to copy. Use fullscreen to inspect the full "
 "output."
 msgstr ""
 
-#: src/ui/scan_view.py:876
+#: src/ui/scan_view.py:888
 #, python-brace-format
 msgid "Profile '{name}' has no valid targets"
 msgstr ""
 
-#: src/ui/scan_view.py:960
+#: src/ui/scan_view.py:972
 msgid "Clear all"
 msgstr ""
 
-#: src/ui/scan_view.py:976
+#: src/ui/scan_view.py:995
 msgid "Drop files here or click Add Files/Folders"
 msgstr ""
 
-#: src/ui/scan_view.py:1052
+#: src/ui/scan_view.py:1072
 msgid "Select Files to Scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1074
+#: src/ui/scan_view.py:1094
 msgid "Select Folders to Scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1245
+#: src/ui/scan_view.py:1265
 msgid "Start Scan (F5)"
 msgstr ""
 
-#: src/ui/scan_view.py:1262 src/ui/scan_view.py:1908
+#: src/ui/scan_view.py:1282 src/ui/scan_view.py:1936
 msgid "Cancel the current scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1499
+#: src/ui/scan_view.py:1519
 #, python-brace-format
 msgid "Target {current} of {total} \\u2014 {pct}%{overflow}"
 msgstr ""
 
-#: src/ui/scan_view.py:1508
+#: src/ui/scan_view.py:1528
 #, python-brace-format
 msgid "Scanning... {pct}%{overflow}"
 msgstr ""
 
-#: src/ui/scan_view.py:1719
+#: src/ui/scan_view.py:1739
 #, python-brace-format
 msgid "View Results ({n} Threat)"
 msgid_plural "View Results ({n} Threats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_view.py:1904
+#: src/ui/scan_view.py:1816
+msgid "Virus database is not available"
+msgstr ""
+
+#: src/ui/scan_view.py:1932
 msgid "Cancel All"
 msgstr ""
 
-#: src/ui/scan_view.py:1905
+#: src/ui/scan_view.py:1933
 msgid "Cancel all remaining scans"
 msgstr ""
 
-#: src/ui/scan_view.py:1929
+#: src/ui/scan_view.py:1958
 #, python-brace-format
 msgid "Scanning {path} \\u2014 File count pending"
 msgstr ""
 
-#: src/ui/scan_view.py:1936
+#: src/ui/scan_view.py:1965
 #, python-brace-format
 msgid "Scanning {count} items \\u2014 File count pending"
 msgstr ""
 
-#: src/ui/scan_view.py:1942
+#: src/ui/scan_view.py:1971
 #, python-brace-format
 msgid "Scanning {count} items"
 msgstr ""
 
-#: src/ui/scan_view.py:2282 src/ui/scan_view.py:2336
+#: src/ui/scan_view.py:2312 src/ui/scan_view.py:2366
 #, python-brace-format
 msgid "Scan error: {detail}"
 msgstr ""
 
-#: src/ui/scan_view.py:2289 src/ui/scan_view.py:2339
+#: src/ui/scan_view.py:2319 src/ui/scan_view.py:2369
 msgid "Detailed scan error output"
 msgstr ""
 
-#: src/ui/scan_view.py:2290
+#: src/ui/scan_view.py:2320
 msgid "Detailed ClamAV output from the latest failed scan"
 msgstr ""
 
-#: src/ui/scan_view.py:2301
+#: src/ui/scan_view.py:2331
 #, python-brace-format
 msgid "Scan completed with status: {status}"
 msgstr ""
 
-#: src/ui/scan_view.py:2340
+#: src/ui/scan_view.py:2370
 msgid "Detailed application error output from the latest failed scan"
 msgstr ""
 
-#: src/ui/scan_view.py:2398
+#: src/ui/scan_view.py:2428
 msgid "Ready to scan"
 msgstr ""
 
@@ -6083,7 +6162,7 @@ msgstr ""
 msgid "Common scanning operations"
 msgstr ""
 
-#: src/ui/statistics_view.py:621 src/ui/tray_service.py:324
+#: src/ui/statistics_view.py:621 src/ui/tray_service.py:326
 msgid "Quick Scan"
 msgstr ""
 
@@ -6213,246 +6292,246 @@ msgstr ""
 msgid "{minutes}m {seconds}s"
 msgstr ""
 
-#: src/ui/tray_service.py:310
+#: src/ui/tray_service.py:312
 msgid "Hide Window"
 msgstr ""
 
-#: src/ui/tray_service.py:310
+#: src/ui/tray_service.py:312
 msgid "Show Window"
 msgstr ""
 
-#: src/ui/tray_service.py:331
+#: src/ui/tray_service.py:333
 msgid "Full Scan"
 msgstr ""
 
-#: src/ui/tray_service.py:339
+#: src/ui/tray_service.py:341
 msgid "Scan with profile"
 msgstr ""
 
-#: src/ui/tray_service.py:361
+#: src/ui/tray_service.py:363
 msgid "Update Definitions"
 msgstr ""
 
-#: src/ui/tray_service.py:373 src/ui/window.py:633
+#: src/ui/tray_service.py:375 src/ui/window.py:631
 msgid "Quit"
 msgstr ""
 
-#: src/ui/tray_service.py:492
+#: src/ui/tray_service.py:494
 #, python-brace-format
 msgid "ClamUI - {status}"
 msgstr ""
 
-#: src/ui/update_view.py:93
+#: src/ui/update_view.py:95
 msgid "Database Update"
 msgstr ""
 
-#: src/ui/update_view.py:95
+#: src/ui/update_view.py:97
 msgid "Update ClamAV virus definitions to detect the latest threats"
 msgstr ""
 
-#: src/ui/update_view.py:100
+#: src/ui/update_view.py:102
 msgid "Virus Definitions"
 msgstr ""
 
-#: src/ui/update_view.py:101
+#: src/ui/update_view.py:103
 msgid "Click 'Update Database' to download the latest virus signatures"
 msgstr ""
 
-#: src/ui/update_view.py:120 src/ui/update_view.py:536
+#: src/ui/update_view.py:122 src/ui/update_view.py:538
 msgid "Update Database"
 msgstr ""
 
-#: src/ui/update_view.py:121
+#: src/ui/update_view.py:123
 msgid "Update Database (F6)"
 msgstr ""
 
-#: src/ui/update_view.py:132
+#: src/ui/update_view.py:134
 msgid "Force Update"
 msgstr ""
 
-#: src/ui/update_view.py:135
+#: src/ui/update_view.py:137
 msgid ""
 "Force update: Backs up local databases, deletes them, then downloads fresh "
 "copies from mirrors. Automatically restores from backup if update fails."
 msgstr ""
 
-#: src/ui/update_view.py:162
+#: src/ui/update_view.py:164
 msgid "Update Results"
 msgstr ""
 
-#: src/ui/update_view.py:163
+#: src/ui/update_view.py:165
 msgid "Results will appear here after updating"
 msgstr ""
 
-#: src/ui/update_view.py:196
+#: src/ui/update_view.py:198
 msgid "No update results yet."
 msgstr ""
 
-#: src/ui/update_view.py:198
+#: src/ui/update_view.py:200
 msgid "Click 'Update Database' to download the latest virus definitions."
 msgstr ""
 
-#: src/ui/update_view.py:226
+#: src/ui/update_view.py:228
 msgid "Checking freshclam..."
 msgstr ""
 
-#: src/ui/update_view.py:244
+#: src/ui/update_view.py:246
 msgid "Checking service..."
 msgstr ""
 
-#: src/ui/update_view.py:264 src/ui/update_view.py:376
+#: src/ui/update_view.py:266 src/ui/update_view.py:378
 #, python-brace-format
 msgid "freshclam: {version}"
 msgstr ""
 
-#: src/ui/update_view.py:279 src/ui/update_view.py:388
+#: src/ui/update_view.py:281 src/ui/update_view.py:390
 msgid "freshclam not found"
 msgstr ""
 
-#: src/ui/update_view.py:284 src/ui/update_view.py:393
+#: src/ui/update_view.py:286 src/ui/update_view.py:395
 msgid "freshclam not installed"
 msgstr ""
 
-#: src/ui/update_view.py:288 src/ui/update_view.py:430
+#: src/ui/update_view.py:290 src/ui/update_view.py:432
 msgid "Service: N/A"
 msgstr ""
 
-#: src/ui/update_view.py:326
+#: src/ui/update_view.py:328
 msgid "Error checking freshclam status"
 msgstr ""
 
-#: src/ui/update_view.py:421
+#: src/ui/update_view.py:423
 msgid "Service: Active"
 msgstr ""
 
-#: src/ui/update_view.py:427
+#: src/ui/update_view.py:429
 msgid "Service: Stopped"
 msgstr ""
 
-#: src/ui/update_view.py:433
+#: src/ui/update_view.py:435
 msgid "Service: Manual Mode"
 msgstr ""
 
-#: src/ui/update_view.py:492
+#: src/ui/update_view.py:494
 msgid "Force updating virus database..."
 msgstr ""
 
-#: src/ui/update_view.py:495
+#: src/ui/update_view.py:497
 msgid ""
 "Backing up local databases, then deleting them to force fresh downloads from "
 "mirrors."
 msgstr ""
 
-#: src/ui/update_view.py:498
+#: src/ui/update_view.py:500
 msgid "Previous databases will be restored if the update fails."
 msgstr ""
 
-#: src/ui/update_view.py:500 src/ui/update_view.py:506
+#: src/ui/update_view.py:502 src/ui/update_view.py:508
 msgid "Please wait, this may take a few minutes."
 msgstr ""
 
-#: src/ui/update_view.py:504
+#: src/ui/update_view.py:506
 msgid "Updating virus database..."
 msgstr ""
 
-#: src/ui/update_view.py:526
+#: src/ui/update_view.py:528
 msgid "Updating..."
 msgstr ""
 
-#: src/ui/update_view.py:590
+#: src/ui/update_view.py:592
 msgid "Update signal sent to freshclam service"
 msgstr ""
 
-#: src/ui/update_view.py:594
+#: src/ui/update_view.py:596
 #, python-brace-format
 msgid "Database updated successfully ({count} database updated)"
 msgid_plural "Database updated successfully ({count} databases updated)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/update_view.py:601
+#: src/ui/update_view.py:603
 msgid "Database is already up to date"
 msgstr ""
 
-#: src/ui/update_view.py:604
+#: src/ui/update_view.py:606
 msgid "Update cancelled"
 msgstr ""
 
-#: src/ui/update_view.py:607
+#: src/ui/update_view.py:609
 msgid "Update error occurred"
 msgstr ""
 
-#: src/ui/update_view.py:621
+#: src/ui/update_view.py:623
 msgid "UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"
 msgstr ""
 
-#: src/ui/update_view.py:623
+#: src/ui/update_view.py:625
 msgid "UPDATE COMPLETE - DATABASE UPDATED"
 msgstr ""
 
-#: src/ui/update_view.py:625
+#: src/ui/update_view.py:627
 msgid "UPDATE COMPLETE - ALREADY UP TO DATE"
 msgstr ""
 
-#: src/ui/update_view.py:627
+#: src/ui/update_view.py:629
 msgid "UPDATE CANCELLED"
 msgstr ""
 
-#: src/ui/update_view.py:629
+#: src/ui/update_view.py:631
 msgid "UPDATE PARTIALLY COMPLETE"
 msgstr ""
 
-#: src/ui/update_view.py:631
+#: src/ui/update_view.py:633
 msgid "UPDATE RATE LIMITED"
 msgstr ""
 
-#: src/ui/update_view.py:633
+#: src/ui/update_view.py:635
 msgid "UPDATE ERROR"
 msgstr ""
 
-#: src/ui/update_view.py:640
+#: src/ui/update_view.py:642
 #, python-brace-format
 msgid "  Status: {status}"
 msgstr ""
 
-#: src/ui/update_view.py:641
+#: src/ui/update_view.py:643
 #, python-brace-format
 msgid "  Method: {method}"
 msgstr ""
 
-#: src/ui/update_view.py:643
+#: src/ui/update_view.py:645
 #, python-brace-format
 msgid "  Databases updated: {count}"
 msgstr ""
 
-#: src/ui/update_view.py:646
+#: src/ui/update_view.py:648
 #, python-brace-format
 msgid "  Updated databases: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:652
+#: src/ui/update_view.py:654
 #, python-brace-format
 msgid "  Already current: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:669
+#: src/ui/update_view.py:671
 #, python-brace-format
 msgid "  Rate limited: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:675
+#: src/ui/update_view.py:677
 msgid "Note: The freshclam service is handling the update in the background."
 msgstr ""
 
-#: src/ui/update_view.py:676
+#: src/ui/update_view.py:678
 msgid "Check service logs for detailed progress:"
 msgstr ""
 
-#: src/ui/update_view.py:688
+#: src/ui/update_view.py:690
 msgid "freshclam Output:"
 msgstr ""
 
-#: src/ui/update_view.py:694
+#: src/ui/update_view.py:696
 msgid "Error Output:"
 msgstr ""
 
@@ -6615,22 +6694,22 @@ msgstr ""
 msgid "Failed to save API key"
 msgstr ""
 
-#: src/ui/window.py:534
+#: src/ui/window.py:532
 msgid "Scan System (Quick Scan)"
 msgstr ""
 
-#: src/ui/window.py:542
+#: src/ui/window.py:540
 msgid "Scan File or Folder"
 msgstr ""
 
-#: src/ui/window.py:627
+#: src/ui/window.py:625
 msgid "Menu (F10)"
 msgstr ""
 
-#: src/ui/window.py:632
+#: src/ui/window.py:630
 msgid "About ClamUI"
 msgstr ""
 
-#: src/ui/window.py:643
+#: src/ui/window.py:641
 msgid "ClamAV Desktop Scanner"
 msgstr ""

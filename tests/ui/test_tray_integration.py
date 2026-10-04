@@ -10,6 +10,7 @@ def _make_app(active_window):
     app = mock.MagicMock()
     app.props.active_window = active_window
     app._tray_indicator = mock.MagicMock()
+    app._tray_indicator.is_available = True
     return app
 
 
@@ -25,6 +26,18 @@ def test_toggle_window_hides_visible_window_and_updates_label():
     win.hide_window.assert_called_once()
     win.show_window.assert_not_called()
     app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=False)
+
+
+def test_toggle_window_does_not_hide_without_registered_tray_host():
+    """A stale tray action cannot hide the last reachable window."""
+    win = mock.MagicMock()
+    win.is_visible.return_value = True
+    app = _make_app(win)
+    app._tray_indicator.is_available = False
+
+    TrayIntegration(app).toggle_window()
+
+    win.hide_window.assert_not_called()
 
 
 def test_toggle_window_shows_hidden_window_and_updates_label():

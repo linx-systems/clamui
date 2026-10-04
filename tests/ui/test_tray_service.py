@@ -83,6 +83,7 @@ def tray_service(tray_service_class):
     service._watcher_registered = False
     service._watcher_name = None
     service._watcher_retry_source_id = 0
+    service._watcher_watch_id = 0
     service._icon_pixmap_cache = {}
 
     # Status state
@@ -685,6 +686,39 @@ class TestSNIProtocol:
 
         assert mock_bus.call.call_count == 3
         tray_service._schedule_watcher_retry.assert_called_once()
+
+    def test_register_with_watcher_notifies_parent_only_after_dbus_success(
+        self, tray_service, mock_glib_gio
+    ):
+        """A spawned service becomes available only after fake watcher acceptance."""
+        mock_bus = mock.MagicMock()
+        tray_service._bus = mock_bus
+        tray_service._send_message = mock.MagicMock()
+
+        tray_service._register_with_watcher()
+
+        call = mock_bus.call.call_args
+        callback = call[0][9]
+        callback(mock_bus, mock.sentinel.result, call[0][10])
+
+        assert tray_service._watcher_registered is True
+        tray_service._send_message.assert_called_once_with({"event": "available"})
+        mock_bus.call_finish.assert_called_once_with(mock.sentinel.result)
+
+    def test_watcher_loss_notifies_parent_and_retries_registration(self, tray_service):
+        """A disappearing registered watcher makes the window recoverable."""
+        tray_service._watcher_registered = True
+        tray_service._watcher_name = "org.kde.StatusNotifierWatcher"
+        tray_service._watcher_watch_id = 1
+        tray_service._send_message = mock.MagicMock()
+        tray_service._clear_watcher_watch = mock.MagicMock()
+        tray_service._register_with_watcher = mock.MagicMock()
+
+        tray_service._on_watcher_vanished(mock.MagicMock(), "org.kde.StatusNotifierWatcher")
+
+        assert tray_service._watcher_registered is False
+        tray_service._send_message.assert_called_once_with({"event": "unavailable"})
+        tray_service._register_with_watcher.assert_called_once()
 
     def test_register_with_watcher_marks_successful_registration(self, tray_service):
         """Test successful watcher registration records the watcher name."""

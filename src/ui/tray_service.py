@@ -13,7 +13,8 @@ It implements the org.kde.StatusNotifierItem specification which is supported by
 The SNI protocol uses DBusMenu for context menus, which allows right-click
 functionality without requiring GTK.
 
-For detailed architecture documentation, see: docs/architecture/tray-subprocess.md
+For detailed architecture documentation, see:
+https://clamui.com/docs/contributing/architecture/
 
 Protocol:
 - Input (stdin): JSON commands like {"action": "update_status", "status": "scanning"}
@@ -220,6 +221,7 @@ class TrayService:
         self._watcher_registered = False
         self._watcher_name: str | None = None
         self._watcher_retry_source_id = 0
+        self._watcher_watch_id = 0
         self._icon_pixmap_cache: dict[tuple[str, int], GLib.Variant] = {}
 
         # Status state
@@ -609,6 +611,37 @@ class TrayService:
             source_remove(self._watcher_retry_source_id)
         self._watcher_retry_source_id = 0
 
+    def _clear_watcher_watch(self) -> None:
+        """Stop observing the previously registered watcher."""
+        if not self._watcher_watch_id:
+            return
+        Gio.bus_unwatch_name(self._watcher_watch_id)
+        self._watcher_watch_id = 0
+
+    def _watch_registered_watcher(self) -> None:
+        """Report loss of the host that accepted this status notifier."""
+        if not self._bus or not self._watcher_name:
+            return
+        self._clear_watcher_watch()
+        self._watcher_watch_id = Gio.bus_watch_name_on_connection(
+            self._bus,
+            self._watcher_name,
+            Gio.BusNameWatcherFlags.NONE,
+            None,
+            self._on_watcher_vanished,
+        )
+
+    def _on_watcher_vanished(self, connection, watcher_name: str) -> None:
+        """Restore the main window and resume registration after host loss."""
+        if not self._running or watcher_name != self._watcher_name:
+            return
+        logger.warning("StatusNotifierWatcher disappeared: %s", watcher_name)
+        self._watcher_registered = False
+        self._watcher_name = None
+        self._clear_watcher_watch()
+        self._send_message({"event": "unavailable"})
+        self._register_with_watcher()
+
     def _schedule_watcher_retry(self) -> None:
         """Retry watcher registration when the host is not ready yet."""
         if not self._running or self._watcher_registered or self._watcher_retry_source_id:
@@ -673,6 +706,8 @@ class TrayService:
             self._watcher_registered = True
             self._watcher_name = watcher_name
             self._clear_watcher_retry()
+            self._watch_registered_watcher()
+            self._send_message({"event": "available"})
             logger.info(f"Successfully registered with {watcher_name}")
         except Exception as e:
             logger.debug(f"Failed to register with {watcher_name}: {e}")
@@ -708,9 +743,13 @@ class TrayService:
     ) -> None:
         """Called when D-Bus name is lost."""
         logger.warning(f"D-Bus name lost: {name}")
+        was_registered = self._watcher_registered
         self._watcher_registered = False
         self._watcher_name = None
         self._clear_watcher_retry()
+        self._clear_watcher_watch()
+        if was_registered:
+            self._send_message({"event": "unavailable"})
 
     def _send_action(self, action: str) -> None:
         """Send an action event to the main application."""
@@ -815,6 +854,7 @@ class TrayService:
         self._watcher_registered = False
         self._watcher_name = None
         self._clear_watcher_retry()
+        self._clear_watcher_watch()
 
         # Quit main loop
         if self._loop:

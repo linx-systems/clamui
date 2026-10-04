@@ -143,12 +143,13 @@ class MainWindow(Adw.ApplicationWindow):
         if not settings.get("minimize_to_tray", False):
             return False
 
-        # Check if tray indicator is available
+        # Check that a tray host, not merely the service subprocess, accepted
+        # the indicator before hiding the only reachable application window.
         if not hasattr(self._application, "tray_indicator"):
             return False
 
         tray = self._application.tray_indicator
-        return tray is not None
+        return tray is not None and bool(getattr(tray, "is_available", False))
 
     def _do_minimize_to_tray(self) -> bool:
         """
@@ -159,21 +160,18 @@ class MainWindow(Adw.ApplicationWindow):
         Returns:
             False to remove from idle queue
         """
-        # Restore window from minimized state first
+        if not self._is_tray_available():
+            logger.debug("Tray became unavailable before minimize-to-tray completed")
+            return False
+
         self.unminimize()
-
-        # Then hide to tray
         self.hide_window()
-
         logger.debug("Window minimized to tray")
 
-        # Update tray menu label if tray is available (window is now hidden)
-        if hasattr(self._application, "tray_indicator"):
-            tray = self._application.tray_indicator
-            if tray is not None and hasattr(tray, "update_window_menu_label"):
-                tray.update_window_menu_label(visible=False)
-
-        return False  # Remove from idle queue
+        tray = self._application.tray_indicator
+        if hasattr(tray, "update_window_menu_label"):
+            tray.update_window_menu_label(visible=False)
+        return False
 
     def _on_close_request(self, window) -> bool:
         """
@@ -237,7 +235,7 @@ class MainWindow(Adw.ApplicationWindow):
             return False
 
         tray = self._application.tray_indicator
-        return tray is not None
+        return tray is not None and bool(getattr(tray, "is_available", False))
 
     def _get_close_behavior(self) -> str | None:
         """

@@ -69,6 +69,7 @@ class TestTrayManagerInit:
         assert manager._on_quit is None
         assert manager._on_window_toggle is None
         assert manager._on_profile_select is None
+        assert manager._on_availability_changed is None
 
     def test_init_not_running(self, mock_gtk_modules):
         """Test TrayManager starts as not running."""
@@ -283,6 +284,27 @@ class TestTrayManagerHandleMessage:
         assert status_cmds and status_cmds[0]["status"] == "scanning"
         assert any(c.get("action") == "update_profiles" for c in sent)
 
+    def test_host_availability_notifies_callback_after_registration(self, mock_gtk_modules):
+        """A ready child is unavailable until the watcher accepts its SNI item."""
+        from src.ui.tray_manager import TrayManager
+
+        manager = TrayManager()
+        manager._running = True
+        manager._process = mock.MagicMock()
+        availability = []
+        manager.set_availability_callback(availability.append)
+
+        manager._handle_message({"event": "ready"})
+        assert manager.is_available is False
+
+        manager._handle_message({"event": "available"})
+        assert manager.is_available is True
+        assert availability == [True]
+
+        manager._handle_message({"event": "unavailable"})
+        assert manager.is_available is False
+        assert availability == [True, False]
+
     def test_handle_pong_message(self, mock_gtk_modules):
         """Test handling pong message doesn't crash."""
         from src.ui.tray_manager import TrayManager
@@ -456,8 +478,8 @@ class TestTrayManagerProperties:
 
         assert manager.is_active is False
 
-    def test_is_active_true_when_running_and_ready(self, mock_gtk_modules):
-        """Test is_active is True when running and ready."""
+    def test_is_active_requires_watcher_registration(self, mock_gtk_modules):
+        """A ready subprocess is inactive until the tray host accepts it."""
         from src.ui.tray_manager import TrayManager
 
         manager = TrayManager()
@@ -465,6 +487,8 @@ class TestTrayManagerProperties:
         manager._process = mock.Mock()
         manager._ready = True
 
+        assert manager.is_active is False
+        manager._available = True
         assert manager.is_active is True
 
     def test_is_library_available_depends_on_process(self, mock_gtk_modules):
