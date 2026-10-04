@@ -738,6 +738,64 @@ class TestSchedulerCronMarkerSubstring:
         assert clamui_cmd not in new_crontab
         assert marker not in new_crontab
 
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "0 2 * * * /usr/bin/clamui-scheduled-scan --target /home",
+            "0 2 * * * /usr/bin/python3 -m src.cli.scheduled_scan --target /home",
+            "0 2 * * * /usr/bin/python3.13 -m clamui.cli.scheduled_scan --target /home",
+            "0 2 * * * flatpak run --command=clamui-scheduled-scan org.x.App",
+        ],
+    )
+    def test_recognizes_known_clamui_command_forms(self, command):
+        """Exact argv tokens identify entry point, source, installed, and Flatpak commands."""
+        from src.core.scheduler import _is_clamui_cron_command
+
+        assert _is_clamui_cron_command(command)
+
+    def test_does_not_recognize_module_name_in_unrelated_command(self):
+        """A module-name argument alone must not authorize removal of a user job."""
+        from src.core.scheduler import _is_clamui_cron_command
+
+        assert not _is_clamui_cron_command(
+            "0 2 * * * /usr/bin/backup --note clamui.cli.scheduled_scan"
+        )
+
+    def test_enable_replaces_repaired_installed_module_entry(self, scheduler):
+        """Enabling replaces, rather than duplicates, the documented Debian workaround."""
+        repaired = "0 2 * * * /usr/bin/python3 -m clamui.cli.scheduled_scan --target /home"
+        user_job = "30 4 * * * /usr/bin/backup.sh"
+        captured = {}
+
+        def fake_run(command, *args, **kwargs):
+            if command[-1] == "-l":
+                return mock.MagicMock(
+                    returncode=0,
+                    stdout=f"{user_job}\n{scheduler.CRON_MARKER}\n{repaired}\n",
+                    stderr="",
+                )
+            captured["crontab"] = kwargs["input"]
+            return mock.MagicMock(returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch("src.core.scheduler.subprocess.run", side_effect=fake_run),
+            mock.patch.object(
+                scheduler,
+                "_get_cli_command_path",
+                return_value=["/usr/bin/clamui-scheduled-scan"],
+            ),
+        ):
+            success, error = scheduler._enable_cron_schedule(
+                ScheduleFrequency.DAILY, "02:00", ["/home"], 0, 1, False, False
+            )
+
+        assert success is True
+        assert error is None
+        assert repaired not in captured["crontab"]
+        assert captured["crontab"].count(scheduler.CRON_MARKER) == 1
+        assert user_job in captured["crontab"]
+        assert "/usr/bin/clamui-scheduled-scan --target /home" in captured["crontab"]
+
 
 class TestGetVenvPaths:
     """Tests for Scheduler._get_venv_paths()."""
@@ -910,9 +968,8 @@ class TestGetCliCommandPath:
                         assert result == [str(cli_script)]
 
     def test_returns_module_execution_with_venv_python(self, scheduler):
-        """Test falls back to module execution when only venv Python exists."""
+        """Test module fallback follows the scheduler's package namespace."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create mock venv with Python but no entry point script
             venv_bin = Path(tmpdir) / "clamui" / "venv" / "bin"
             venv_bin.mkdir(parents=True)
             python_bin = venv_bin / "python"
@@ -928,24 +985,20 @@ class TestGetCliCommandPath:
                     with mock.patch("src.core.scheduler.is_flatpak", return_value=False):
                         result = scheduler._get_cli_command_path()
 
-                        assert result == [str(python_bin), "-m", "src.cli.scheduled_scan"]
+        package_root = Scheduler.__module__.split(".", 1)[0]
+        assert result == [str(python_bin), "-m", f"{package_root}.cli.scheduled_scan"]
 
-    def test_correct_module_path_in_fallback(self, scheduler):
-        """Test that fallback uses correct module path src.cli.scheduled_scan."""
+    def test_module_fallback_follows_scheduler_package_namespace(self, scheduler):
+        """Test the system Python fallback derives its package namespace."""
         with mock.patch("src.core.scheduler.is_flatpak", return_value=False):
             with mock.patch("src.core.scheduler.which_host_command") as mock_which:
-                # Nothing in PATH
                 mock_which.side_effect = lambda x: "/usr/bin/python3" if x == "python3" else None
-
-                # No venvs exist
                 with mock.patch.object(scheduler, "_get_venv_paths", return_value=[]):
                     with mock.patch.object(scheduler, "_check_path_exists", return_value=False):
                         result = scheduler._get_cli_command_path()
 
-                        # Should use correct module path (exact token)
-                        assert "src.cli.scheduled_scan" in result
-                        # Should NOT use the old buggy path
-                        assert "src.scheduled_scan" not in result
+        package_root = Scheduler.__module__.split(".", 1)[0]
+        assert result == ["/usr/bin/python3", "-m", f"{package_root}.cli.scheduled_scan"]
 
     def test_prefers_entry_point_over_module(self, scheduler):
         """Test that entry point script is preferred over module execution."""

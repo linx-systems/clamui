@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 # PIL import with graceful fallback
 PIL_AVAILABLE = False
-CAIROSVG_AVAILABLE = False
 
 try:
     from PIL import Image, ImageDraw
@@ -24,14 +23,6 @@ try:
     PIL_AVAILABLE = True
 except ImportError:
     logger.warning("PIL/Pillow not available, custom tray icons disabled")
-
-# Try to import cairosvg for SVG support
-try:
-    import cairosvg
-
-    CAIROSVG_AVAILABLE = True
-except ImportError:
-    logger.debug("cairosvg not available, SVG icons will need PNG fallback")
 
 
 def find_clamui_base_icon() -> str | None:
@@ -76,13 +67,11 @@ def find_clamui_base_icon() -> str | None:
             logger.info(f"Found ClamUI PNG icon at: {icon_path}")
             return str(icon_path.absolute())
 
-    # Second pass: look for SVG (fallback - requires conversion)
+    # Second pass: look for SVG (fallback)
     for search_path in search_paths:
         icon_path = search_path / icon_filenames[1]  # SVG
         if icon_path.exists():
             logger.info(f"Found ClamUI SVG icon at: {icon_path}")
-            # Note: SVG requires cairosvg or similar to convert
-            # For now, return it and let the caller handle it
             return str(icon_path.absolute())
 
     logger.warning(f"ClamUI base icon not found. Searched paths: {[str(p) for p in search_paths]}")
@@ -149,12 +138,8 @@ class TrayIconGenerator:
         if not self._base_icon_path.exists():
             raise FileNotFoundError(f"Base icon not found: {base_icon_path}")
 
-        # If base icon is SVG, convert it to PNG first
+        # SVGs need a PNG intermediate for Pillow compositing.
         if self._base_icon_path.suffix.lower() == ".svg":
-            if not CAIROSVG_AVAILABLE:
-                raise RuntimeError(
-                    "cairosvg is required to use SVG icons. Install it with: pip install cairosvg"
-                )
             self._convert_svg_to_png()
 
         logger.debug(f"TrayIconGenerator initialized with base: {base_icon_path}")
@@ -172,14 +157,16 @@ class TrayIconGenerator:
 
         logger.info(f"Converting SVG to PNG: {self._base_icon_path}")
         try:
-            # Convert SVG to PNG at a reasonable size for tray icons
-            # Use 128x128 as source, will be resized to ICON_SIZE later
-            cairosvg.svg2png(
-                url=str(self._base_icon_path),
-                write_to=str(converted_path),
-                output_width=128,
-                output_height=128,
+            # GdkPixbuf uses the system librsvg loader; Pillow downsizes to tray size.
+            import gi
+
+            gi.require_version("GdkPixbuf", "2.0")
+            from gi.repository import GdkPixbuf
+
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                str(self._base_icon_path), 128, 128, True
             )
+            pixbuf.savev(str(converted_path), "png", [], [])
             self._converted_png_path = converted_path
             logger.info(f"SVG converted to PNG: {converted_path}")
         except Exception as e:
@@ -356,12 +343,20 @@ def is_available() -> bool:
     if base_icon is None:
         return False
 
-    # If it's an SVG, we need cairosvg to convert it
-    if base_icon.lower().endswith(".svg") and not CAIROSVG_AVAILABLE:
-        logger.warning(
-            "Found SVG icon but cairosvg is not available. "
-            "Install cairosvg for SVG support, or provide a PNG icon."
-        )
-        return False
+    if base_icon.lower().endswith(".svg"):
+        try:
+            import gi
+
+            gi.require_version("GdkPixbuf", "2.0")
+            from gi.repository import GdkPixbuf
+        except ImportError:
+            logger.warning("Found SVG icon but GdkPixbuf is not available")
+            return False
+
+        if not any(
+            "svg" in icon_format.get_extensions() for icon_format in GdkPixbuf.Pixbuf.get_formats()
+        ):
+            logger.warning("Found SVG icon but no GdkPixbuf SVG loader is available")
+            return False
 
     return True

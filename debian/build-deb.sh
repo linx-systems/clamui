@@ -17,6 +17,10 @@
 
 set -euo pipefail
 
+# Build package payload with standard readable directory/file permissions even
+# when the caller's shell uses a restrictive umask.
+umask 022
+
 # Colors for output (only if terminal supports it)
 if [ -t 1 ]; then
 	RED='\033[0;31m'
@@ -421,17 +425,15 @@ copy_python_source() {
 	return 0
 }
 
-# Create the launcher script in /usr/bin/
+# Create launcher scripts in /usr/bin/
 create_launcher_script() {
-	log_info "=== Creating Launcher Script ==="
+	log_info "=== Creating Launcher Scripts ==="
 	echo
 
 	LAUNCHER_PATH="$BUILD_DIR/usr/bin/$PACKAGE_NAME"
+	SCHEDULED_LAUNCHER_PATH="$BUILD_DIR/usr/bin/$PACKAGE_NAME-scheduled-scan"
 
 	log_info "Creating launcher script: $LAUNCHER_PATH"
-
-	# Create the launcher script
-	# Note: Using 'clamui.main' since we install source as /usr/lib/python3/dist-packages/clamui/
 	cat >"$LAUNCHER_PATH" <<'LAUNCHER'
 #!/usr/bin/env python3
 """ClamUI launcher script for Debian package installation."""
@@ -441,17 +443,25 @@ from clamui.main import main
 sys.exit(main())
 LAUNCHER
 
-	# Make executable (755)
-	chmod 755 "$LAUNCHER_PATH"
+	log_info "Creating scheduled scan launcher: $SCHEDULED_LAUNCHER_PATH"
+	cat >"$SCHEDULED_LAUNCHER_PATH" <<'LAUNCHER'
+#!/usr/bin/env python3
+"""ClamUI scheduled scan launcher for Debian package installation."""
+import sys
 
-	# Verify launcher was created
-	if [ ! -x "$LAUNCHER_PATH" ]; then
-		log_error "Failed to create launcher script"
+from clamui.cli.scheduled_scan import main
+sys.exit(main())
+LAUNCHER
+
+	chmod 755 "$LAUNCHER_PATH" "$SCHEDULED_LAUNCHER_PATH"
+
+	if [ ! -x "$LAUNCHER_PATH" ] || [ ! -x "$SCHEDULED_LAUNCHER_PATH" ]; then
+		log_error "Failed to create launcher scripts"
 		return 1
 	fi
 
-	log_success "Launcher script created successfully"
-	log_info "Installed to: /usr/bin/$PACKAGE_NAME"
+	log_success "Launcher scripts created successfully"
+	log_info "Installed to: /usr/bin/$PACKAGE_NAME and /usr/bin/$PACKAGE_NAME-scheduled-scan"
 
 	return 0
 }

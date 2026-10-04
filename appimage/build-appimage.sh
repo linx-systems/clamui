@@ -5,7 +5,7 @@
 #
 # Usage: ./appimage/build-appimage.sh [--help]
 #
-# Prerequisites: wget, Python 3, GTK4/libadwaita system packages (Ubuntu 24.04+)
+# Prerequisites: wget, Python 3.11+, GTK4/libadwaita system packages (Ubuntu 24.04+)
 # Output: ClamUI-VERSION-x86_64.AppImage in the project root
 
 set -e
@@ -54,7 +54,8 @@ This script builds a portable AppImage for ClamUI.
 Prerequisites:
     - wget
     - Python 3.11+
-    - GTK4/libadwaita system packages (python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1)
+    - GTK4/libadwaita system packages (python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1,
+      gir1.2-gdkpixbuf-2.0, librsvg2-common)
     - pip (python3-pip)
     - FUSE (libfuse2) for running AppImages
 
@@ -117,6 +118,11 @@ PIP_CMD=""
 # Extra library paths for bundled .libs directories (set during pip install)
 EXTRA_LIB_PATHS=""
 
+# SVG loader libraries passed to linuxdeploy after the loader is copied into
+# the GdkPixbuf module directory.
+SVG_LOADER=""
+LIBRSVG=""
+
 #
 # Version Extraction
 #
@@ -171,13 +177,18 @@ check_prerequisites() {
 		PREREQS_OK=0
 	fi
 
-	# Check Python 3
-	log_info "Checking for Python 3..."
+	# Check Python 3.11+ (matches pyproject.toml)
+	log_info "Checking for Python 3.11+..."
 	if command -v python3 >/dev/null 2>&1; then
 		PYTHON_VERSION=$(python3 --version 2>&1)
-		log_success "Python found: $PYTHON_VERSION"
+		if python3 -c "import sys; raise SystemExit(sys.version_info < (3, 11))"; then
+			log_success "Python found: $PYTHON_VERSION"
+		else
+			log_error "Python 3.11+ required; found: $PYTHON_VERSION"
+			PREREQS_OK=0
+		fi
 	else
-		log_error "Python 3 not found. Install: sudo apt install python3"
+		log_error "Python 3.11+ not found. Install: sudo apt install python3"
 		PREREQS_OK=0
 	fi
 
@@ -229,7 +240,7 @@ check_prerequisites() {
 
 	if [ "$PREREQS_OK" = "0" ]; then
 		log_error "Missing prerequisites. Please install them and try again."
-		log_info "Quick install: sudo apt install wget python3 python3-pip python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 libfuse2"
+		log_info "Quick install: sudo apt install wget python3 python3-pip python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gdkpixbuf-2.0 librsvg2-common libfuse2"
 		exit 1
 	fi
 
@@ -419,7 +430,7 @@ bundle_python() {
 		mkdir -p "$APPDIR_PYTHON/lib"
 		cp "$LIBDIR/$LIBPYTHON" "$APPDIR_PYTHON/lib/"
 		# Also copy versioned symlinks
-		for f in "$LIBDIR"/libpython${PYTHON_VER}*.so*; do
+		for f in "$LIBDIR"/libpython"${PYTHON_VER}"*.so*; do
 			if [ -f "$f" ]; then
 				cp -P "$f" "$APPDIR_PYTHON/lib/" 2>/dev/null || true
 			fi
@@ -429,7 +440,7 @@ bundle_python() {
 		log_warning "Could not locate Python shared library (statically linked?)"
 		log_info "Trying alternative locations..."
 		for dir in /usr/lib/x86_64-linux-gnu /usr/lib64 /usr/lib; do
-			for f in "$dir"/libpython${PYTHON_VER}*.so*; do
+			for f in "$dir"/libpython"${PYTHON_VER}"*.so*; do
 				if [ -f "$f" ]; then
 					cp -P "$f" "$APPDIR_PYTHON/lib/" 2>/dev/null || true
 					log_success "Found and copied: $f"
@@ -509,14 +520,14 @@ install_pip_deps() {
 	PYTHON_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 	SITE_DEST="$APPDIR/usr/lib/python${PYTHON_VER}/site-packages"
 
-	# Install pure Python dependencies
+	# Resolve the complete dependency graph instead of maintaining an incomplete
+	# hand-written transitive list. PyGObject and pycairo are copied from the
+	# host because they must match its GTK stack.
 	log_info "Installing Python dependencies via ${PIP_CMD}..."
 
-	# Build pip install args (uv pip doesn't support --quiet the same way)
 	PIP_ARGS=(
 		install
 		--target "$SITE_DEST"
-		--no-deps
 	)
 
 	# uv pip uses --python to specify interpreter; regular pip uses --ignore-installed
@@ -527,32 +538,13 @@ install_pip_deps() {
 	fi
 
 	DEPS=(
-		requests
-		urllib3
-		psutil
-		keyring
-		matplotlib
-		charset-normalizer
-		idna
-		certifi
-		"jaraco.classes"
-		"jaraco.functools"
-		"jaraco.context"
-		more-itertools
-		importlib-metadata
-		zipp
-		SecretStorage
-		jeepney
-		pyparsing
-		packaging
-		cycler
-		python-dateutil
-		six
-		kiwisolver
-		Pillow
-		fonttools
-		contourpy
-		numpy
+		"certifi>=2026.7.22"
+		"keyring>=25.7.0"
+		"matplotlib>=3.11.2"
+		"Pillow>=12.3.0"
+		"psutil>=7.2.2"
+		"requests>=2.34.2"
+		"urllib3>=2.8.0"
 	)
 
 	$PIP_CMD "${PIP_ARGS[@]}" "${DEPS[@]}"
@@ -739,6 +731,38 @@ bundle_gi_libraries() {
 	echo
 	return 0
 }
+bundle_svg_loader() {
+	log_info "=== Bundling SVG Pixbuf Loader ==="
+	echo
+
+	local loader
+	for loader in \
+		/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so \
+		/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so \
+		/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so; do
+		if [ -f "$loader" ]; then
+			SVG_LOADER="$loader"
+			break
+		fi
+	done
+
+	for LIBRSVG in /usr/lib/x86_64-linux-gnu/librsvg-2.so.2 /usr/lib64/librsvg-2.so.2 /usr/lib/librsvg-2.so.2; do
+		if [ -f "$LIBRSVG" ]; then
+			break
+		fi
+	done
+
+	if [ -z "$SVG_LOADER" ] || [ ! -f "$LIBRSVG" ]; then
+		log_error "librsvg2-common SVG loader or librsvg-2.so.2 not found"
+		return 1
+	fi
+
+	install -Dm755 "$SVG_LOADER" \
+		"$APPDIR/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so"
+	log_success "Bundled SVG Pixbuf loader"
+	return 0
+}
+
 #
 # Bundle GIO Desktop Launcher
 #
@@ -1115,6 +1139,8 @@ run_linuxdeploy() {
 		--appimage-extract-and-run \
 		--appdir "$APPDIR" \
 		--desktop-file "$APPDIR/$APP_ID.desktop" \
+		--library "$SVG_LOADER" \
+		--library "$LIBRSVG" \
 		--plugin gtk
 
 	echo
@@ -1322,6 +1348,14 @@ main() {
 	# so linuxdeploy can't discover them by tracing the python3 binary)
 	if ! bundle_gi_libraries; then
 		log_error "Failed to bundle GI-loaded libraries."
+		cleanup
+		exit 1
+	fi
+
+	# Bundle the librsvg loader before linuxdeploy generates the AppDir-local
+	# GdkPixbuf loader cache.
+	if ! bundle_svg_loader; then
+		log_error "Failed to bundle SVG Pixbuf loader."
 		cleanup
 		exit 1
 	fi

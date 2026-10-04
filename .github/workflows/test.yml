@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout repository
@@ -94,7 +94,7 @@ jobs:
         env:
           HYPOTHESIS_PROFILE: ci
         run: |
-          xvfb-run -a uv run pytest tests/core tests/ui tests/integration tests/profiles tests/property \
+          xvfb-run -a uv run pytest \
             --ignore=tests/e2e \
             --cov=src \
             --cov-report=term-missing \

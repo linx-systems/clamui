@@ -103,7 +103,7 @@ install_dependencies() {
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
-                echo "Please install dependencies manually. See docs/INSTALL.md"
+                echo "Please install dependencies manually. See https://clamui.com/docs/installation/"
                 exit 1
                 ;;
         esac

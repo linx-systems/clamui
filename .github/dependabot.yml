@@ -1,7 +1,15 @@
 version: 2
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pip"
+    directory: "/flathub"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/website"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"

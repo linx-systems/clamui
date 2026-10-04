@@ -20,7 +20,6 @@ jobs:
 
   build-flatpak:
     uses: ./.github/workflows/build-flatpak.yml
-    secrets: inherit
 
   build-appimage:
     uses: ./.github/workflows/build-appimage.yml

@@ -44,18 +44,29 @@ def _validate_target_paths(targets: list[str]) -> str | None:
 
 
 def _is_clamui_cron_command(line: str) -> bool:
-    """Return True if a crontab line looks like a ClamUI scheduled-scan command.
-
-    Used as a safety check before dropping the line that follows a ClamUI
-    marker line. We intentionally accept any of the known invocations:
-    - ``clamui-scheduled-scan`` entry-point binary (PATH or absolute)
-    - ``-m src.cli.scheduled_scan`` module form (venv fallback)
-    - ``flatpak run --command=clamui-scheduled-scan ...`` Flatpak form
-    """
-    stripped = line.strip()
-    if not stripped:
+    """Return whether *line* runs ClamUI's scheduled-scan command."""
+    try:
+        command = shlex.split(line)[5:]
+    except ValueError:
         return False
-    return "clamui-scheduled-scan" in stripped or "src.cli.scheduled_scan" in stripped
+
+    if not command:
+        return False
+    if os.path.basename(command[0]) == "clamui-scheduled-scan":
+        return True
+    if command[0] == "flatpak" and "--command=clamui-scheduled-scan" in command[1:]:
+        return True
+
+    interpreter = os.path.basename(command[0])
+    if interpreter != "python" and not (
+        interpreter.startswith("python") and interpreter[6:].replace(".", "").isdigit()
+    ):
+        return False
+    return any(
+        command[index : index + 2]
+        in (["-m", "src.cli.scheduled_scan"], ["-m", "clamui.cli.scheduled_scan"])
+        for index in range(1, len(command) - 1)
+    )
 
 
 class SchedulerBackend(Enum):
@@ -570,6 +581,7 @@ class Scheduler:
         if is_flatpak():
             app_id = os.environ.get("FLATPAK_ID", "io.github.linx_systems.ClamUI")
             return ["flatpak", "run", "--command=clamui-scheduled-scan", app_id]
+        module_name = f"{__name__.split('.', 1)[0]}.cli.scheduled_scan"
 
         # 1. First try to find it in PATH
         cli_path = which_host_command("clamui-scheduled-scan")
@@ -586,14 +598,12 @@ class Scheduler:
         for venv_path in self._get_venv_paths():
             python_bin = venv_path / "bin" / "python"
             if self._check_path_exists(python_bin):
-                # Use the venv's Python with the correct module path
-                return [str(python_bin), "-m", "src.cli.scheduled_scan"]
+                return [str(python_bin), "-m", module_name]
 
-        # 4. Last resort: System Python with correct module path
-        # (This likely won't work unless installed system-wide via pip)
+        # 4. Last resort: System Python with this package's module path.
         python_path = which_host_command("python3") or which_host_command("python")
         if python_path:
-            return [python_path, "-m", "src.cli.scheduled_scan"]
+            return [python_path, "-m", module_name]
 
         return None
 

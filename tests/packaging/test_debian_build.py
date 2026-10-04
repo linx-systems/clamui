@@ -12,9 +12,11 @@ Tests cover:
 These tests prevent build regressions that would only surface in production.
 """
 
+import json
 import re
 import shutil
 import subprocess
+import sys
 import tomllib
 from pathlib import Path
 
@@ -135,6 +137,67 @@ class TestLauncherScript:
 
         # Should NOT use src.main
         assert "src.main" not in content, "Launcher should NOT import from 'src.main'"
+
+    def test_copied_debian_namespace_generates_installed_scheduler_commands(self, tmp_path):
+        """The source copy used by Debian must schedule the installed namespace."""
+        site_packages = tmp_path / "usr/lib/python3/dist-packages"
+        shutil.copytree(PROJECT_ROOT / "src", site_packages / "clamui")
+        probe = tmp_path / "probe.py"
+        probe.write_text(
+            """
+import json
+import sys
+import types
+from pathlib import Path
+from unittest.mock import patch
+
+site_packages = Path(sys.argv[1])
+sys.path.insert(0, str(site_packages))
+utils = types.ModuleType("clamui.core.utils")
+utils.get_clean_env = lambda: {}
+utils.is_flatpak = lambda: False
+utils.which_host_command = lambda command: sys.executable if command == "python3" else None
+utils.wrap_host_command = lambda command: command
+sys.modules[utils.__name__] = utils
+
+import clamui.core.scheduler as scheduler_module
+from clamui.core.scheduler import ScheduleFrequency, Scheduler
+
+scheduler = object.__new__(Scheduler)
+with patch.object(Scheduler, "_get_venv_paths", return_value=[]):
+    cli = scheduler._get_cli_command_path()
+service = scheduler._generate_service_file(cli, ["/tmp/scan"], False, False)
+written = {}
+def fake_run(command, **kwargs):
+    if command[-1] == "-l":
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+    written["crontab"] = kwargs["input"]
+    return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+with patch.object(scheduler_module.subprocess, "run", side_effect=fake_run):
+    scheduler._get_cli_command_path = lambda: cli
+    scheduler._enable_cron_schedule(
+        ScheduleFrequency.DAILY, "02:00", ["/tmp/scan"], 0, 1, False, False
+    )
+print(json.dumps({"file": scheduler_module.__file__, "cli": cli, "service": service, "cron": written["crontab"]}))
+""".strip(),
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [sys.executable, "-I", str(probe), str(site_packages)],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stderr
+        generated = json.loads(result.stdout)
+        assert str(site_packages) in generated["file"]
+        assert generated["cli"][1:] == ["-m", "clamui.cli.scheduled_scan"]
+        assert "src.cli.scheduled_scan" not in generated["service"]
+        assert "ExecStart=" in generated["service"]
+        assert "-m clamui.cli.scheduled_scan --target /tmp/scan" in generated["service"]
+        assert "-m clamui.cli.scheduled_scan --target /tmp/scan" in generated["cron"]
 
 
 class TestPackageStructure:
@@ -331,6 +394,22 @@ class TestHelperDependencyAndNoOverlap:
         assert f"clamui-privileged-helper (= {version})" in depends.split(", "), (
             f"full package must depend on exact-version helper {version!r}: {depends!r}"
         )
+
+    def test_full_package_includes_installed_scheduled_scan_launcher(self, tmp_path: Path) -> None:
+        """Debian schedules through its own clamui namespace entry point."""
+        if shutil.which("dpkg-deb") is None:
+            pytest.skip("dpkg-deb required to inspect the .deb artifact")
+
+        version = self._project_version()
+        subprocess.run([str(self.BUILDER), str(tmp_path)], check=True, capture_output=True)
+        full = tmp_path / f"clamui_{version}_all.deb"
+        payload_root = tmp_path / "full"
+        payload = self._payload(full, payload_root)
+        launcher = payload_root / "usr/bin/clamui-scheduled-scan"
+
+        assert "usr/bin/clamui-scheduled-scan" in payload
+        assert launcher.stat().st_mode & 0o111
+        assert "from clamui.cli.scheduled_scan import main" in launcher.read_text(encoding="utf-8")
 
     def test_no_payload_path_owned_by_both_packages(self, tmp_path: Path) -> None:
         """No host path (file) appears in both the full and helper .deb payloads."""

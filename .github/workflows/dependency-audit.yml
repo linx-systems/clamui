@@ -26,29 +26,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v10.2.0
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3-gi \
-            python3-gi-cairo \
-            gir1.2-gtk-4.0 \
-            gir1.2-adw-1 \
-            libgirepository-2.0-dev \
-            libcairo2-dev \
-            pkg-config \
-            python3-dev
+      - name: Verify locked dependencies
+        run: uv lock --check
 
-      - name: Ensure uv.lock exists
-        run: uv lock
-
-      - name: Export dependencies for audit
-        # Must be a block scalar: a plain scalar folds the newlines and turns
-        # the backslash continuations into literal arguments, breaking uv.
+      - name: Export locked dependencies for audit
         run: |
-          uv export --all-groups --format requirements.txt \
+          uv export --locked --all-groups --format requirements.txt \
             --no-hashes --no-emit-local \
             -o requirements-audit.txt
 
       - name: Audit dependencies for known CVEs
-        run: uvx pip-audit -r requirements-audit.txt
+        run: uvx pip-audit --desc --format markdown -r requirements-audit.txt
