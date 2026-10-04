@@ -20,6 +20,7 @@
 - Used the selected custom `freshclam.conf` for manual database updates.
 - Corrected tray-availability, VirusTotal setup, scan selection, and result-scroller behavior.
 - Kept Configuration File paths readable by using compact configuration-file actions in Scanner and Database preferences.
+- Rendered Mermaid diagrams in the documentation with light/dark theme support and a mobile-friendly tray architecture layout.
 
 ### Security
 

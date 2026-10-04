@@ -6,7 +6,9 @@ description: Why and how ClamUI isolates StatusNotifierItem integration.
 ClamUI keeps the GTK4/libadwaita application and the tray service in separate processes. The main process stays usable if the tray crashes; the tray service is GTK-independent and communicates through newline-delimited JSON on stdin/stdout.
 
 ```mermaid
-flowchart LR
+flowchart TB
+  accTitle: ClamUI tray subprocess architecture
+  accDescr: ClamUIApp connects to TrayIntegration and TrayIndicator. TrayIndicator delegates to TrayManager, which exchanges JSON over standard input and output with the GTK-independent TrayService. TrayService uses TrayIconGenerator.
   App[ClamUIApp] --> Integration[TrayIntegration]
   App --> Indicator[TrayIndicator]
   Indicator --> Manager[TrayManager]

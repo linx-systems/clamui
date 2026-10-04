@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import mermaid from "astro-mermaid";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
@@ -8,6 +9,14 @@ export default defineConfig({
   output: "static",
   compressHTML: true,
   integrations: [
+    mermaid({
+      theme: "default",
+      autoTheme: true,
+      enableLog: false,
+      mermaidConfig: {
+        securityLevel: "strict",
+      },
+    }),
     starlight({
       title: "ClamUI Documentation",
       description: "Install, use, configure, and contribute to ClamUI.",
