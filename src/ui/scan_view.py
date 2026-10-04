@@ -18,6 +18,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 from ..core.i18n import _, ngettext
 from ..core.quarantine import QuarantineManager
 from ..core.result_formatters import clean_scan_status_message, compose_scan_warning
+from ..core.sanitize import sanitize_surrogate_path
 from ..core.scanner import Scanner, ScanProgress, ScanResult, ScanStatus
 from ..core.utils import (
     format_scan_path,
@@ -61,6 +62,7 @@ EICAR_TEST_STRING = _EICAR_HELPER_STRING
 STATUS_DETAIL_SUMMARY_MAX_CHARS = 160
 STATUS_DETAIL_MIN_HEIGHT = 120
 STATUS_DETAIL_MAX_HEIGHT = 260
+TARGET_LIST_MAX_HEIGHT = 300
 
 
 class ScanView(Gtk.Box):
@@ -180,12 +182,22 @@ class ScanView(Gtk.Box):
         self.connect("notify::parent", self._on_parent_changed)
 
     def _setup_ui(self):
-        """Set up the scan view UI layout."""
-        self.set_margin_top(12)
-        self.set_margin_bottom(12)
-        self.set_margin_start(12)
-        self.set_margin_end(12)
-        self.set_spacing(12)
+        """Set up the scrollable scan view layout."""
+        self.set_vexpand(True)
+        self.set_hexpand(True)
+
+        self._content_scrolled = Gtk.ScrolledWindow()
+        self._content_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self._content_scrolled.set_vexpand(True)
+        self._content_scrolled.set_hexpand(True)
+
+        self._content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self._content_box.set_margin_top(12)
+        self._content_box.set_margin_bottom(12)
+        self._content_box.set_margin_start(12)
+        self._content_box.set_margin_end(12)
+        self._content_scrolled.set_child(self._content_box)
+        self.append(self._content_scrolled)
 
         # Set up CSS for drag-and-drop visual feedback
         self._setup_drop_css()
@@ -560,7 +572,7 @@ class ScanView(Gtk.Box):
 
         scrolled.set_child(text_view)
         detail_group.add(scrolled)
-        self.append(detail_group)
+        self._content_box.append(detail_group)
 
     def _set_status_detail_content(self, content: str) -> None:
         """Update the stored detail content and the visible text buffer."""
@@ -768,7 +780,7 @@ class ScanView(Gtk.Box):
         profile_row.add_suffix(profile_control_box)
         profile_group.add(profile_row)
 
-        self.append(profile_group)
+        self._content_box.append(profile_group)
 
         # Load profiles after widget is realized (to access profile manager)
         self.connect("realize", self._on_realize_load_profiles)
@@ -966,6 +978,13 @@ class ScanView(Gtk.Box):
         self._selection_group.set_header_suffix(button_box)
 
         # Paths list box
+        # Bound the target list independently so a large selection cannot
+        # consume the whole scan view before its controls are reached.
+        self._paths_scrolled = Gtk.ScrolledWindow()
+        self._paths_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self._paths_scrolled.set_max_content_height(TARGET_LIST_MAX_HEIGHT)
+        self._paths_scrolled.set_propagate_natural_height(True)
+
         self._paths_listbox = Gtk.ListBox()
         self._paths_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         self._paths_listbox.add_css_class("boxed-list")
@@ -978,8 +997,9 @@ class ScanView(Gtk.Box):
         self._paths_placeholder.add_css_class("dim-label")
         self._paths_listbox.append(self._paths_placeholder)
 
-        self._selection_group.add(self._paths_listbox)
-        self.append(self._selection_group)
+        self._paths_scrolled.set_child(self._paths_listbox)
+        self._selection_group.add(self._paths_scrolled)
+        self._content_box.append(self._selection_group)
 
     def _create_path_row(self, path: str) -> Adw.ActionRow:
         """
@@ -993,12 +1013,12 @@ class ScanView(Gtk.Box):
         """
         row = Adw.ActionRow()
 
-        # Format path for display
-        formatted_path = format_scan_path(path)
+        # Keep the raw path for scanning while making GTK text UTF-8 safe.
+        formatted_path = sanitize_surrogate_path(format_scan_path(path))
         row.set_title(GLib.markup_escape_text(formatted_path))
 
-        # Set tooltip with full path
-        row.set_tooltip_text(path)
+        # Tooltip with the complete display-safe path.
+        row.set_tooltip_text(sanitize_surrogate_path(path))
 
         # Choose icon based on path type
         icon_name = "folder-symbolic" if os.path.isdir(path) else "text-x-generic-symbolic"
@@ -1268,7 +1288,7 @@ class ScanView(Gtk.Box):
 
         scan_group.add(button_box)
 
-        self.append(scan_group)
+        self._content_box.append(scan_group)
 
     def _create_progress_section(self):
         """Create the Adwaita-styled progress section (initially hidden).
@@ -1347,7 +1367,7 @@ class ScanView(Gtk.Box):
         self._threat_group.add(scrolled)
         self._progress_section.append(self._threat_group)
 
-        self.append(self._progress_section)
+        self._content_box.append(self._progress_section)
 
     def _start_progress_pulse(self):
         """Start the progress bar pulsing animation."""
@@ -1595,9 +1615,9 @@ class ScanView(Gtk.Box):
             return
 
         row = Adw.ActionRow()
-        row.set_title(Path(file_path).name)
-        row.set_subtitle(threat_name)
-        row.set_tooltip_text(file_path)
+        row.set_title(sanitize_surrogate_path(Path(file_path).name))
+        row.set_subtitle(sanitize_surrogate_path(threat_name))
+        row.set_tooltip_text(sanitize_surrogate_path(file_path))
 
         icon = Gtk.Image.new_from_icon_name(resolve_icon_name("dialog-warning-symbolic"))
         icon.add_css_class("warning")
@@ -1644,7 +1664,7 @@ class ScanView(Gtk.Box):
             if len(display_path) > 60:
                 display_path = "..." + display_path[-57:]
 
-        return display_path
+        return sanitize_surrogate_path(display_path)
 
     def _create_progress_callback(
         self,
@@ -1706,7 +1726,7 @@ class ScanView(Gtk.Box):
         self._view_results_button.connect("clicked", self._on_view_results_clicked)
         self._view_results_section.append(self._view_results_button)
 
-        self.append(self._view_results_section)
+        self._content_box.append(self._view_results_section)
 
     def _show_view_results(self, threat_count: int):
         """Show the view results button with appropriate label."""
@@ -1785,9 +1805,17 @@ class ScanView(Gtk.Box):
         """
         from ..core.clamav_detection import check_database_available
 
-        db_available, error_msg = check_database_available()
+        backend = self._scan_backend_override or self._scanner.get_active_backend()
+        db_available, error_msg = check_database_available(
+            settings_manager=self._settings_manager,
+            require_readable=backend != "daemon",
+        )
         if not db_available:
             logger.warning("Database not available: %s", error_msg)
+            self._set_status_message(
+                error_msg or _("Virus database is not available"),
+                StatusLevel.ERROR,
+            )
             self._show_database_missing_dialog()
             return False
         return True
@@ -1924,6 +1952,7 @@ class ScanView(Gtk.Box):
                 display_path = format_scan_path(self._selected_paths[0])
                 if len(display_path) > 50:
                     display_path = "..." + display_path[-47:]
+                display_path = sanitize_surrogate_path(display_path)
                 if show_live_progress:
                     self._progress_label.set_label(
                         _("Scanning {path} \u2014 File count pending").format(path=display_path)
@@ -2206,6 +2235,7 @@ class ScanView(Gtk.Box):
         display_path = format_scan_path(current_path)
         if len(display_path) > 40:
             display_path = "..." + display_path[-37:]
+        display_path = sanitize_surrogate_path(display_path)
 
         if total_count == 1:
             self._progress_label.set_label(_("Scanning {path}").format(path=display_path))
@@ -2359,7 +2389,7 @@ class ScanView(Gtk.Box):
         self._backend_label.add_css_class("dim-label")
         self._backend_label.add_css_class("caption")
         self._update_backend_label()
-        self.append(self._backend_label)
+        self._content_box.append(self._backend_label)
 
     def _get_eicar_tooltip_text(self, backend: str) -> str:
         """Get EICAR button tooltip text for the active backend."""
@@ -2398,7 +2428,7 @@ class ScanView(Gtk.Box):
         self._status_banner.set_title(_("Ready to scan"))
         self._status_banner.set_button_label(_("Dismiss"))
         self._status_banner.connect("button-clicked", self._on_status_banner_dismissed)
-        self.append(self._status_banner)
+        self._content_box.append(self._status_banner)
 
     def set_on_scan_state_changed(self, callback):
         """

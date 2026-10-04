@@ -19,7 +19,6 @@ from gi.repository import GLib
 
 from .flatpak import is_flatpak, wrap_host_command
 from .log_manager import LogManager
-from .sanitize import sanitize_surrogate_path
 from .scanner_base import (
     cleanup_process,
     collect_clamav_warnings,
@@ -224,14 +223,20 @@ class DaemonScanner:
                 )
                 os.fchmod(fd, 0o600)
                 try:
-                    f = os.fdopen(fd, "w")
+                    f = os.fdopen(fd, "wb")
                 except Exception:
                     with contextlib.suppress(OSError):
                         os.close(fd)
                     raise
 
                 with f:
-                    f.write("\n".join(sanitize_surrogate_path(p) for p in file_paths))
+                    entries = [os.fsencode(file_path) for file_path in file_paths]
+                    if any(b"\n" in entry or b"\r" in entry or b"\0" in entry for entry in entries):
+                        raise ValueError(
+                            "Cannot scan paths containing newline, carriage return, or NUL "
+                            "with clamd file lists"
+                        )
+                    f.write(b"\n".join(entries))
 
             # Build clamdscan command (use verbose mode if progress callback provided)
             cmd = self._build_command(
@@ -249,7 +254,7 @@ class DaemonScanner:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     encoding="utf-8",
-                    errors="replace",
+                    errors="surrogateescape",
                     env=get_clean_env(),
                 )
 
@@ -471,7 +476,7 @@ class DaemonScanner:
             cmd.append("--")
             cmd.append(path)
 
-        return wrap_host_command(cmd, force_host=True)
+        return wrap_host_command(cmd)
 
     def _get_file_list_temp_dir(self) -> str | None:
         """

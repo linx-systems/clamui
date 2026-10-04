@@ -281,6 +281,27 @@ class TestFormatResultsAsText:
 
         assert "/home/user/文档/テスト/résumé.pdf" in text
 
+    def test_format_results_as_text_replaces_surrogates(self):
+        """Text export must be valid UTF-8 even for raw filesystem filenames."""
+        result = self._create_scan_result(
+            status=ScanStatus.INFECTED,
+            path="/tmp/infected_\udcff",
+            infected_count=1,
+            threat_details=[
+                ThreatDetail(
+                    file_path="/tmp/infected_\udcff",
+                    threat_name="TestThreat",
+                    category="Test",
+                    severity="low",
+                )
+            ],
+        )
+
+        text = format_results_as_text(result)
+
+        assert "\udcff" not in text
+        text.encode("utf-8")
+
 
 class TestFormatResultsAsCsv:
     """Tests for the format_results_as_csv function."""
@@ -370,6 +391,26 @@ class TestFormatResultsAsCsv:
         assert "2024-01-15 14:30:45" in lines[1]
         assert "/home/user/Downloads/suspicious.doc" in lines[2]
         assert "Win.Trojan.Agent" in lines[2]
+
+    def test_format_results_as_csv_replaces_surrogates(self):
+        """CSV export must be encodable when a detected filename is raw bytes."""
+        result = self._create_scan_result(
+            status=ScanStatus.INFECTED,
+            infected_count=1,
+            threat_details=[
+                ThreatDetail(
+                    file_path="/tmp/infected_\udcff",
+                    threat_name="TestThreat",
+                    category="Test",
+                    severity="low",
+                )
+            ],
+        )
+
+        output = format_results_as_csv(result)
+
+        assert "\udcff" not in output
+        output.encode("utf-8")
 
     def test_format_results_as_csv_auto_timestamp(self):
         """Test that timestamp is auto-generated when not provided."""

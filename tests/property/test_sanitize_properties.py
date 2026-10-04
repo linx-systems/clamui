@@ -103,17 +103,15 @@ def test_sanitize_log_text_has_no_nulls(text: str) -> None:
 
 @given(surrogate_text())
 def test_sanitize_surrogate_path_is_utf8_encodable(text: str) -> None:
-    result = sanitize_surrogate_path(text)
-    result.encode("utf-8")
+    sanitize_surrogate_path(text).encode("utf-8")
 
 
 @given(st.text())
-def test_sanitize_surrogate_path_idempotent_for_valid_utf8(text: str) -> None:
-    """Strings already encodable to UTF-8 are returned unchanged."""
+def test_sanitize_surrogate_path_keeps_utf8_text(text: str) -> None:
     try:
         text.encode("utf-8")
     except UnicodeEncodeError:
-        return  # not applicable
+        return
     assert sanitize_surrogate_path(text) == text
 
 

@@ -1,6 +1,7 @@
 # ClamUI Daemon Scanner Tests
 """Unit tests for the daemon scanner module."""
 
+import os
 import stat
 import subprocess
 from pathlib import Path
@@ -107,37 +108,14 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to verify it's called with force_host=True
-        with patch(
-            "src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x
-        ) as mock_wrap:
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True)
-            # Verify force_host=True is passed for daemon commands
-            mock_wrap.assert_called_once()
-            call_kwargs = mock_wrap.call_args[1]
-            assert call_kwargs.get("force_host") is True
 
-        # Now uses binary name directly (not full path from which_host_command)
         assert cmd[0] == "clamdscan"
         assert "--multiscan" in cmd
         assert "--fdpass" in cmd
         assert "-i" in cmd
         assert str(test_file) in cmd
-
-    def test_build_command_uses_force_host(self, tmp_path, daemon_scanner_class):
-        """Test _build_command uses force_host=True for Flatpak daemon communication."""
-        test_file = tmp_path / "test.txt"
-        test_file.write_text("test content")
-
-        scanner = daemon_scanner_class()
-
-        with patch(
-            "src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x
-        ) as mock_wrap:
-            scanner._build_command(str(test_file), recursive=True)
-            # Must use force_host=True so clamdscan talks to host's daemon
-            mock_wrap.assert_called_once()
-            assert mock_wrap.call_args[1].get("force_host") is True
 
     def test_build_command_force_stream_uses_stream_mode(self, tmp_path, daemon_scanner_class):
         """Test force_stream switches daemon scans to clamdscan --stream."""
@@ -146,7 +124,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True, force_stream=True)
 
         assert cmd[0] == "clamdscan"
@@ -163,7 +141,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(
                 str(test_file),
                 recursive=True,
@@ -191,7 +169,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class(settings_manager=mock_settings)
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True)
 
         # clamdscan does NOT support --exclude options (they're silently ignored)
@@ -211,7 +189,7 @@ class TestDaemonScannerBuildCommand:
         with patch(
             "src.core.daemon_scanner.resolve_clamd_conf_path", return_value="/etc/clamd.d/scan.conf"
         ):
-            with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+            with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
                 cmd = scanner._build_command(str(test_file), recursive=True)
 
         assert cmd[0] == "clamdscan"
@@ -1194,6 +1172,90 @@ class TestDaemonScannerCountTargets:
         assert str(included_file) in file_list_content
         assert str(excluded_file) not in file_list_content
 
+    def test_scan_sync_writes_file_list_with_raw_filename_bytes(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """File lists preserve non-UTF-8 filename bytes for clamdscan."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        raw_file = os.fsencode(str(scan_dir)) + b"/corrupt_\xff"
+        file_descriptor = os.open(raw_file, os.O_WRONLY | os.O_CREAT, 0o600)
+        os.close(file_descriptor)
+
+        scanner = daemon_scanner_class()
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("src.core.daemon_scanner.os.unlink"),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            mock_process = MagicMock()
+            mock_process.communicate.return_value = ("", "")
+            mock_process.returncode = 0
+            mock_popen.return_value = mock_process
+
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions={"paths": [str(scan_dir / "excluded")], "patterns": []},
+            )
+
+        assert result.status == scan_status_class.CLEAN
+        command = mock_popen.call_args[0][0]
+        file_list_path = command[command.index("--file-list") + 1]
+        assert Path(file_list_path).read_bytes() == raw_file
+
+    def test_scan_sync_rejects_newline_filename_in_file_list(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Newline-delimited clamd lists reject ambiguous filenames before scanning."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "ambiguous\nname").touch()
+
+        scanner = daemon_scanner_class()
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch.object(scanner, "_save_scan_log"),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions={"paths": [str(scan_dir / "excluded")], "patterns": []},
+            )
+
+        assert result.status == scan_status_class.ERROR
+        assert "newline" in result.error_message
+        mock_popen.assert_not_called()
+
+    def test_scan_sync_keeps_raw_detected_filename_for_quarantine(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Detected paths retain their raw bytes instead of a replacement surrogate."""
+        raw_file = os.fsencode(str(tmp_path)) + b"/infected_\xff"
+        raw_path = os.fsdecode(raw_file)
+        scanner = daemon_scanner_class()
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch.object(scanner, "_save_scan_log"),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            mock_process = MagicMock()
+            mock_process.communicate.return_value = (
+                f"{raw_path}: Eicar-Test-Signature FOUND\n",
+                "",
+            )
+            mock_process.returncode = 1
+            mock_popen.return_value = mock_process
+
+            result = scanner.scan_sync(str(tmp_path), count_targets=False)
+
+        assert result.status == scan_status_class.INFECTED
+        assert os.fsencode(result.threat_details[0].file_path) == raw_file
+        assert mock_popen.call_args.kwargs["errors"] == "surrogateescape"
+
     def test_filter_excludes_profile_path_subdirectory(
         self, daemon_scanner_class, scan_status_class, tmp_path
     ):
@@ -1995,9 +2057,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to simulate Flatpak wrapping with force_host=True
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return ["flatpak-spawn", "--host"] + cmd
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):
@@ -2021,9 +2081,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # In native mode, wrap_host_command returns command unchanged
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return cmd  # Native mode: command unchanged
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):
@@ -2042,9 +2100,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to add flatpak-spawn prefix with force_host=True
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return ["flatpak-spawn", "--host"] + cmd
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):

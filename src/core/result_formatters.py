@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from .i18n import _
+from .sanitize import sanitize_surrogate_path
 
 if TYPE_CHECKING:
     from .scanner import ScanResult
@@ -110,6 +111,7 @@ def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -
     """
     if timestamp is None:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = sanitize_surrogate_path(timestamp)
 
     lines = []
 
@@ -121,7 +123,7 @@ def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -
     lines.append(_("ClamUI Scan Report"))
     lines.append(header_line)
     lines.append(_("Scan Date: {timestamp}").format(timestamp=timestamp))
-    lines.append(_("Scanned Path: {path}").format(path=result.path))
+    lines.append(_("Scanned Path: {path}").format(path=sanitize_surrogate_path(result.path)))
     lines.append(_("Status: {status}").format(status=result.status.value.upper()))
     lines.append("")
 
@@ -142,14 +144,20 @@ def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -
         lines.append("")
 
         for i, threat in enumerate(result.threat_details, 1):
-            severity_upper = threat.severity.upper()
+            severity_upper = sanitize_surrogate_path(threat.severity).upper()
             lines.append(
                 _("[{index}] {severity} - {category}").format(
-                    index=i, severity=severity_upper, category=threat.category
+                    index=i,
+                    severity=severity_upper,
+                    category=sanitize_surrogate_path(threat.category),
                 )
             )
-            lines.append(_("    File: {path}").format(path=threat.file_path))
-            lines.append(_("    Threat: {name}").format(name=threat.threat_name))
+            lines.append(
+                _("    File: {path}").format(path=sanitize_surrogate_path(threat.file_path))
+            )
+            lines.append(
+                _("    Threat: {name}").format(name=sanitize_surrogate_path(threat.threat_name))
+            )
             lines.append("")
     elif result.status.value == "clean":
         lines.append(sub_header_line)
@@ -164,7 +172,9 @@ def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -
         lines.append(sub_header_line)
         lines.append("")
         if result.error_message:
-            lines.append(_("Error: {message}").format(message=result.error_message))
+            lines.append(
+                _("Error: {message}").format(message=sanitize_surrogate_path(result.error_message))
+            )
         lines.append("")
     elif result.status.value == "cancelled":
         lines.append(sub_header_line)
@@ -208,6 +218,7 @@ def format_results_as_csv(result: "ScanResult", timestamp: str | None = None) ->
     """
     if timestamp is None:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = sanitize_surrogate_path(timestamp)
 
     # Use StringIO to write CSV to a string
     output = io.StringIO()
@@ -222,7 +233,13 @@ def format_results_as_csv(result: "ScanResult", timestamp: str | None = None) ->
     if result.threat_details:
         for threat in result.threat_details:
             writer.writerow(
-                [threat.file_path, threat.threat_name, threat.category, threat.severity, timestamp]
+                [
+                    sanitize_surrogate_path(threat.file_path),
+                    sanitize_surrogate_path(threat.threat_name),
+                    sanitize_surrogate_path(threat.category),
+                    sanitize_surrogate_path(threat.severity),
+                    timestamp,
+                ]
             )
 
     return output.getvalue()

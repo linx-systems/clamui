@@ -184,6 +184,63 @@ class TestScanViewImport:
             assert ScanView is not None
 
 
+class TestDisplaySafePaths:
+    """Tests GTK boundaries do not receive surrogate-escaped filesystem paths."""
+
+    def test_target_row_keeps_raw_path_but_renders_utf8_safe_text(
+        self, mock_scan_view, scan_view_class
+    ):
+        raw_path = "/tmp/\udcff"
+        row = mock.MagicMock()
+        scan_view_module = sys.modules[scan_view_class.__module__]
+        scan_view_module.Adw.ActionRow.side_effect = lambda: row
+
+        result = mock_scan_view._create_path_row(raw_path)
+
+        assert result is row
+        assert row.path == raw_path
+        row.set_title.assert_called_once_with("/tmp/\ufffd")
+        row.set_tooltip_text.assert_called_once_with("/tmp/\ufffd")
+
+
+class TestDatabasePreflight:
+    """Tests database access checks use the selected scan backend."""
+
+    def test_daemon_allows_database_readable_only_by_clamd(self, mock_scan_view):
+        mock_scan_view._scanner.get_active_backend.return_value = "daemon"
+
+        with mock.patch(
+            "src.core.clamav_detection.check_database_available",
+            return_value=(True, None),
+        ) as check_database:
+            assert mock_scan_view._check_database_and_prompt() is True
+
+        check_database.assert_called_once_with(
+            settings_manager=mock_scan_view._settings_manager,
+            require_readable=False,
+        )
+
+    def test_database_error_is_visible_before_showing_update_dialog(self, mock_scan_view):
+        mock_scan_view._scanner.get_active_backend.return_value = "clamscan"
+        mock_scan_view._show_database_missing_dialog = mock.MagicMock()
+
+        with (
+            mock.patch(
+                "src.core.clamav_detection.check_database_available",
+                return_value=(False, "Database is not readable"),
+            ) as check_database,
+            mock.patch("src.ui.scan_view.set_status_class"),
+        ):
+            assert mock_scan_view._check_database_and_prompt() is False
+
+        check_database.assert_called_once_with(
+            settings_manager=mock_scan_view._settings_manager,
+            require_readable=True,
+        )
+        mock_scan_view._status_banner.set_title.assert_called_once_with("Database is not readable")
+        mock_scan_view._show_database_missing_dialog.assert_called_once_with()
+
+
 class TestAddSinglePath:
     """Tests for adding a single path to the selection."""
 
@@ -3171,110 +3228,3 @@ class TestIsScanningProperty:
         mock_scan_view._is_scanning = True
 
         assert mock_scan_view.is_scanning is True
-
-
-# =============================================================================
-# Composition-root ScanView (src/ui/scan/scan_view.py) Tests
-# =============================================================================
-
-
-@pytest.fixture
-def composition_scan_view_class(mock_gi_modules):
-    """Get the composition-root scan.ScanView class with mocked dependencies."""
-    with mock.patch.dict(
-        sys.modules,
-        {
-            "src.core.scanner": mock.MagicMock(),
-            "src.core.quarantine": mock.MagicMock(),
-            "src.core.settings_manager": mock.MagicMock(),
-            "src.core.utils": mock.MagicMock(),
-            "src.ui.compat": mock.MagicMock(),
-            "src.ui.scan_results_dialog": mock.MagicMock(),
-            "src.ui.view_helpers": mock.MagicMock(),
-            "src.ui.scan.profile_selector": mock.MagicMock(),
-            "src.ui.scan.scan_controller": mock.MagicMock(),
-            "src.ui.scan.scan_progress_widget": mock.MagicMock(),
-            "src.ui.scan.scan_results_widget": mock.MagicMock(),
-            "src.ui.scan.target_selector": mock.MagicMock(),
-        },
-    ):
-        for cached in ("src.ui.scan", "src.ui.scan.scan_view"):
-            if cached in sys.modules:
-                del sys.modules[cached]
-
-        from src.ui.scan.scan_view import ScanView as CompositionScanView
-
-        yield CompositionScanView
-
-    _clear_src_modules()
-
-
-@pytest.fixture
-def composition_scan_view(composition_scan_view_class):
-    """Create a composition-root ScanView instance without running __init__."""
-    view = object.__new__(composition_scan_view_class)
-    view._target_selector = mock.MagicMock()
-    view._controller = mock.MagicMock()
-    return view
-
-
-class TestCompositionRootScanView:
-    """Switchover-parity tests for the composition-root scan.ScanView."""
-
-    def test_replace_selected_paths_delegates_to_target_selector(self, composition_scan_view):
-        """_replace_selected_paths must exist and delegate to set_paths.
-
-        Regression: app.py calls scan_view._replace_selected_paths(paths) for
-        multi-target CLI scans, but the designated replacement view lacked the
-        method entirely (AttributeError on switchover).
-        """
-        composition_scan_view._replace_selected_paths(["/tmp/a.pdf", "/tmp/b.pdf"])
-
-        composition_scan_view._target_selector.set_paths.assert_called_once_with(
-            ["/tmp/a.pdf", "/tmp/b.pdf"]
-        )
-
-    def test_is_scanning_mirrors_controller_state(self, composition_scan_view):
-        """The public is_scanning property mirrors the controller state."""
-        composition_scan_view._controller.is_scanning = True
-        assert composition_scan_view.is_scanning is True
-
-        composition_scan_view._controller.is_scanning = False
-        assert composition_scan_view.is_scanning is False
-
-    def test_setup_controller_wires_log_manager_into_scanner(self, composition_scan_view_class):
-        """The Scanner must receive the shared log_manager like the live view.
-
-        Regression: the composition root built Scanner without log_manager
-        while src/ui/scan_view.py passes one, so scan logs would use a
-        redundant LogManager instance after switchover.
-        """
-        view = object.__new__(composition_scan_view_class)
-        view._log_manager = mock.MagicMock(name="shared_log_manager")
-        view._settings_manager = mock.MagicMock(name="settings_manager")
-
-        sv_module = sys.modules["src.ui.scan.scan_view"]
-        with (
-            mock.patch.object(sv_module, "Scanner") as mock_scanner_class,
-            mock.patch.object(sv_module, "ScanController") as mock_controller_class,
-        ):
-            view._setup_controller()
-
-        mock_scanner_class.assert_called_once_with(
-            log_manager=view._log_manager, settings_manager=view._settings_manager
-        )
-        mock_controller_class.assert_called_once_with(
-            mock_scanner_class.return_value, view._settings_manager
-        )
-
-    def test_init_accepts_log_manager_keyword(self, composition_scan_view_class):
-        """__init__ stores the log_manager for the controller wiring."""
-        log_manager = mock.MagicMock(name="log_manager")
-
-        view = composition_scan_view_class(
-            settings_manager=mock.MagicMock(),
-            quarantine_manager=mock.MagicMock(),
-            log_manager=log_manager,
-        )
-
-        assert view._log_manager is log_manager

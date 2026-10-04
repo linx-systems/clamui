@@ -154,6 +154,22 @@ class TestQuarantineManager:
         # Verify file is in quarantine
         assert Path(result.entry.quarantine_path).exists()
 
+    def test_quarantine_and_restore_preserve_raw_filename_bytes(self, manager, temp_dir):
+        """SQLite metadata must retain byte filenames across quarantine and restore."""
+        raw_path = os.fsencode(temp_dir) + b"/infected_\xff"
+        with open(raw_path, "wb") as file:
+            file.write(b"raw filename content")
+
+        result = manager.quarantine_file(os.fsdecode(raw_path), "TestThreat")
+
+        assert result.is_success is True
+        assert os.fsencode(result.entry.original_path) == raw_path
+        stored_entry = manager.get_entry(result.entry.id)
+        assert os.fsencode(stored_entry.original_path) == raw_path
+        assert manager.restore_file(result.entry.id).is_success is True
+        with open(raw_path, "rb") as file:
+            assert file.read() == b"raw filename content"
+
     def test_quarantine_file_sets_permissions(self, manager, test_file):
         """Test quarantined file has restrictive permissions."""
         result = manager.quarantine_file(test_file, "TestThreat")

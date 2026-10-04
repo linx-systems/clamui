@@ -18,6 +18,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk
 
 from ...core.i18n import _, ngettext
+from ...core.sanitize import sanitize_surrogate_path
 from ...core.scanner import ScanProgress
 from ..compat import safe_set_subtitle_lines
 from ..utils import resolve_icon_name
@@ -163,7 +164,9 @@ class ScanProgressWidget(Gtk.Box):
 
         # Current file row
         if progress.current_file:
-            self._current_file_row.set_subtitle(self._truncate_path(progress.current_file))
+            self._current_file_row.set_subtitle(
+                sanitize_surrogate_path(self._truncate_path(progress.current_file))
+            )
 
         # Stats row
         total = cumulative_files + progress.files_scanned
@@ -222,9 +225,9 @@ class ScanProgressWidget(Gtk.Box):
     def _append_threat_row(self, file_path: str, threat_name: str):
         """Append a threat row to the live threat list."""
         row = Adw.ActionRow()
-        row.set_title(Path(file_path).name)
-        row.set_subtitle(threat_name)
-        row.set_tooltip_text(file_path)
+        row.set_title(sanitize_surrogate_path(Path(file_path).name))
+        row.set_subtitle(sanitize_surrogate_path(threat_name))
+        row.set_tooltip_text(sanitize_surrogate_path(file_path))
 
         icon = Gtk.Image.new_from_icon_name(resolve_icon_name("dialog-warning-symbolic"))
         icon.add_css_class("warning")

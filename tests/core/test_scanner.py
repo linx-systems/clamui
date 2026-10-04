@@ -1315,6 +1315,43 @@ Infected files: 1
         assert result.threat_details[0].category == "Trojan"
         assert result.threat_details[0].severity == "high"
 
+    def test_scan_sync_preserves_surrogateescaped_threat_path(self, tmp_path):
+        """Clamscan's raw filename bytes survive result parsing unchanged."""
+        settings = mock.MagicMock()
+        settings.get.side_effect = lambda key, default=None: (
+            "clamscan" if key == "scan_backend" else default
+        )
+        scanner = Scanner(settings_manager=settings)
+        raw_path = "/tmp/eicar_\udcfe.txt"
+        mock_stdout = (
+            f"{raw_path}: Eicar-Test-Signature FOUND\n"
+            "\n"
+            "----------- SCAN SUMMARY -----------\n"
+            "Scanned files: 1\n"
+            "Infected files: 1\n"
+        )
+
+        with mock.patch("src.core.scanner.get_clamav_path", return_value="/usr/bin/clamscan"):
+            with mock.patch("src.core.scanner.wrap_host_command", side_effect=lambda x: x):
+                with mock.patch(
+                    "src.core.scanner.check_clamav_installed",
+                    return_value=(True, "1.0.0"),
+                ):
+                    with mock.patch("subprocess.Popen") as mock_popen:
+                        mock_process = mock.MagicMock()
+                        mock_process.communicate.return_value = (mock_stdout, "")
+                        mock_process.returncode = 1
+                        mock_popen.return_value = mock_process
+
+                        result = scanner.scan_sync(str(tmp_path))
+
+        assert result.threat_details[0].file_path == raw_path
+        assert (
+            result.threat_details[0].file_path.encode("utf-8", "surrogateescape")
+            == b"/tmp/eicar_\xfe.txt"
+        )
+        assert mock_popen.call_args.kwargs["errors"] == "surrogateescape"
+
     def test_scan_sync_multiple_threat_details_integration(self, tmp_path):
         """Integration test: scan_sync handles multiple threats with different severities."""
         test_dir = tmp_path / "test_dir"

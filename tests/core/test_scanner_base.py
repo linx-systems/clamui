@@ -1,6 +1,7 @@
 # ClamUI Scanner Base Tests
 """Unit tests for the scanner_base module."""
 
+import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
@@ -305,6 +306,29 @@ class TestStreamProcessOutput:
 
         assert stdout == "line1\nno newline at end"
         assert lines == ["line1", "no newline at end"]
+
+    def test_stream_output_preserves_non_utf8_filename_bytes(self):
+        """Progress parsing receives a surrogateescape path, not U+FFFD."""
+        mock_process = MagicMock()
+        mock_process.poll.side_effect = [None, 0]
+        mock_process.stdout.fileno.return_value = 1
+        mock_process.stderr.fileno.return_value = 2
+        lines: list[str] = []
+
+        with (
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch(
+                "src.core.scanner_base.os.read",
+                side_effect=[b"/tmp/infected_\xff: Test FOUND\n", b"", b""],
+            ),
+        ):
+            stdout, _stderr, cancelled = stream_process_output(
+                mock_process, lambda: False, lines.append
+            )
+
+        assert cancelled is False
+        assert os.fsencode(stdout.split(":", 1)[0]) == b"/tmp/infected_\xff"
+        assert os.fsencode(lines[0].split(":", 1)[0]) == b"/tmp/infected_\xff"
 
     def test_stream_output_does_not_deadlock_on_large_stderr(self):
         """Regression test for issue #146: full scan hanging at ~72%.

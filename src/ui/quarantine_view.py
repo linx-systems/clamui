@@ -25,6 +25,7 @@ from ..core.quarantine import (
     QuarantineResult,
     QuarantineStatus,
 )
+from ..core.sanitize import sanitize_surrogate_path
 from .compat import create_banner, create_toolbar_view, safe_set_placeholder_text
 from .pagination import PaginatedListController
 from .utils import add_row_icon, enable_escape_to_close, resolve_icon_name
@@ -755,7 +756,7 @@ class QuarantineView(Gtk.Box):
 
         # Threat name
         threat_label = Gtk.Label()
-        threat_label.set_text(entry.threat_name or _("Unknown Threat"))
+        threat_label.set_text(sanitize_surrogate_path(entry.threat_name or _("Unknown Threat")))
         threat_label.set_halign(Gtk.Align.START)
         threat_label.add_css_class("heading")
         header_box.append(threat_label)
@@ -764,7 +765,9 @@ class QuarantineView(Gtk.Box):
 
         # Original path
         path_label = Gtk.Label()
-        path_label.set_text(_("Path: {path}").format(path=entry.original_path))
+        path_label.set_text(
+            _("Path: {path}").format(path=sanitize_surrogate_path(entry.original_path))
+        )
         path_label.set_halign(Gtk.Align.START)
         path_label.add_css_class("monospace")
         path_label.add_css_class("dim-label")
@@ -839,7 +842,8 @@ class QuarantineView(Gtk.Box):
         dialog = QuarantineConfirmDialog(
             heading=_("Restore Quarantined File?"),
             body=_('This file was detected as "{threat}". It will be restored to {path}.').format(
-                threat=entry.threat_name or _("Unknown Threat"), path=entry.original_path
+                threat=sanitize_surrogate_path(entry.threat_name or _("Unknown Threat")),
+                path=sanitize_surrogate_path(entry.original_path),
             ),
             confirm_label=_("Restore Anyway"),
             destructive=True,
@@ -873,13 +877,17 @@ class QuarantineView(Gtk.Box):
         elif result.status == QuarantineStatus.DATABASE_ERROR:
             # File operation succeeded but the DB row lingers; warn and still refresh
             self._status_banner.set_title(
-                result.error_message
-                or _("File restored, but the database entry could not be removed")
+                sanitize_surrogate_path(
+                    result.error_message
+                    or _("File restored, but the database entry could not be removed")
+                )
             )
             self._status_banner.set_revealed(True)
             GLib.timeout_add(500, self._load_entries_async)
         else:
-            self._status_banner.set_title(result.error_message or _("Failed to restore file"))
+            self._status_banner.set_title(
+                sanitize_surrogate_path(result.error_message or _("Failed to restore file"))
+            )
             self._status_banner.set_revealed(True)
 
         return False
@@ -900,7 +908,10 @@ class QuarantineView(Gtk.Box):
             body=_(
                 'The quarantined file from {path} ("{threat}") will be permanently '
                 "deleted. This action cannot be undone."
-            ).format(path=entry.original_path, threat=entry.threat_name or _("Unknown Threat")),
+            ).format(
+                path=sanitize_surrogate_path(entry.original_path),
+                threat=sanitize_surrogate_path(entry.threat_name or _("Unknown Threat")),
+            ),
             confirm_label=_("Delete"),
             destructive=True,
         )
@@ -933,13 +944,17 @@ class QuarantineView(Gtk.Box):
         elif result.status == QuarantineStatus.DATABASE_ERROR:
             # File operation succeeded but the DB row lingers; warn and still refresh
             self._status_banner.set_title(
-                result.error_message
-                or _("File deleted, but the database entry could not be removed")
+                sanitize_surrogate_path(
+                    result.error_message
+                    or _("File deleted, but the database entry could not be removed")
+                )
             )
             self._status_banner.set_revealed(True)
             GLib.timeout_add(500, self._load_entries_async)
         else:
-            self._status_banner.set_title(result.error_message or _("Failed to delete file"))
+            self._status_banner.set_title(
+                sanitize_surrogate_path(result.error_message or _("Failed to delete file"))
+            )
             self._status_banner.set_revealed(True)
 
         return False

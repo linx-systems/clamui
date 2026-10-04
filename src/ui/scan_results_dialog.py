@@ -17,6 +17,7 @@ from gi.repository import Adw, GLib, Gtk
 from ..core.clipboard import copy_to_clipboard
 from ..core.i18n import _, ngettext
 from ..core.quarantine import QuarantineManager, QuarantineStatus
+from ..core.sanitize import sanitize_surrogate_path
 from ..core.scanner import ScanResult, ScanStatus, ThreatDetail
 from ..core.utils import format_flatpak_portal_path
 from .clipboard_helper import ClipboardHelper
@@ -323,7 +324,7 @@ class ScanResultsDialog(Adw.Window):
 
         for file_path in display_files:
             row = Adw.ActionRow()
-            row.set_title(GLib.markup_escape_text(file_path))
+            row.set_title(GLib.markup_escape_text(sanitize_surrogate_path(file_path)))
             row.add_css_class("property")
             expander.add_row(row)
 
@@ -452,7 +453,7 @@ class ScanResultsDialog(Adw.Window):
 
         # File path (format Flatpak portal paths for readability)
         path_label = Gtk.Label()
-        path_label.set_label(format_flatpak_portal_path(threat.file_path))
+        path_label.set_label(sanitize_surrogate_path(format_flatpak_portal_path(threat.file_path)))
         path_label.set_xalign(0)
         path_label.set_wrap(True)
         path_label.set_selectable(True)
@@ -513,10 +514,16 @@ class ScanResultsDialog(Adw.Window):
                 self._update_quarantine_all_button()
 
             self._show_toast(
-                _("Quarantined: {name}").format(name=os.path.basename(threat.file_path))
+                _("Quarantined: {name}").format(
+                    name=sanitize_surrogate_path(os.path.basename(threat.file_path))
+                )
             )
         else:
-            self._show_toast(_("Failed: {error}").format(error=result.error_message))
+            self._show_toast(
+                _("Failed: {error}").format(
+                    error=sanitize_surrogate_path(result.error_message or "")
+                )
+            )
 
     def _on_add_exclusion(self, button: Gtk.Button, threat: ThreatDetail):
         """Add threat's file path to exclusion list."""
@@ -553,13 +560,14 @@ class ScanResultsDialog(Adw.Window):
         button.add_css_class("excluded")
 
         self._show_toast(
-            _("Added to exclusions: {name}").format(name=os.path.basename(threat.file_path))
+            _("Added to exclusions: {name}").format(
+                name=sanitize_surrogate_path(os.path.basename(threat.file_path))
+            )
         )
 
     def _on_copy_path(self, button: Gtk.Button, threat: ThreatDetail):
-        """Copy threat file path to clipboard."""
-        copy_to_clipboard(threat.file_path)
-        self._show_toast(_("Copied: {path}").format(path=threat.file_path))
+        copy_to_clipboard(sanitize_surrogate_path(threat.file_path))
+        self._show_toast(_("Copied: {path}").format(path=sanitize_surrogate_path(threat.file_path)))
 
     def _on_quarantine_all_clicked(self, button: Gtk.Button):
         """Handle quarantine all button click."""
@@ -583,9 +591,7 @@ class ScanResultsDialog(Adw.Window):
                     success_count += 1
                 else:
                     error_count += 1
-                    logger.warning(
-                        f"Failed to quarantine {threat.file_path}: {result.error_message}"
-                    )
+                    logger.warning("Failed to quarantine threat: %s", result.error_message)
 
             GLib.idle_add(self._on_quarantine_all_complete, success_count, error_count)
 

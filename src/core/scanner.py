@@ -423,7 +423,7 @@ class Scanner:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     encoding="utf-8",
-                    errors="replace",
+                    errors="surrogateescape",
                     env=get_clean_env(),
                 )
 

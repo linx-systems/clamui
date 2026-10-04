@@ -276,7 +276,7 @@ def stream_process_output(
                             local_total = _append(
                                 parts,
                                 local_total,
-                                raw.decode("utf-8", errors="replace"),
+                                raw.decode("utf-8", errors="surrogateescape"),
                                 stream_name,
                             )
                         except OSError:
@@ -296,7 +296,7 @@ def stream_process_output(
                         raw = os.read(stdout_fd, 4096)
                         if not raw:
                             break
-                        remaining_chunks.append(raw.decode("utf-8", errors="replace"))
+                        remaining_chunks.append(raw.decode("utf-8", errors="surrogateescape"))
                     except OSError:
                         break
                 remaining_stdout = "".join(remaining_chunks)
@@ -307,7 +307,9 @@ def stream_process_output(
                         raw = os.read(stderr_fd, 4096)
                         if not raw:
                             break
-                        remaining_stderr_chunks.append(raw.decode("utf-8", errors="replace"))
+                        remaining_stderr_chunks.append(
+                            raw.decode("utf-8", errors="surrogateescape")
+                        )
                     except OSError:
                         break
                 remaining_stderr = "".join(remaining_stderr_chunks)
@@ -369,7 +371,7 @@ def stream_process_output(
                         stderr_eof = True
                     continue
 
-                chunk = raw_bytes.decode("utf-8", errors="replace")
+                chunk = raw_bytes.decode("utf-8", errors="surrogateescape")
 
                 if fd == stdout_fd:
                     # Accumulate for final parsing (capped to avoid memory exhaustion)

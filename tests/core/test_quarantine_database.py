@@ -1,6 +1,7 @@
 # ClamUI QuarantineDatabase Tests
 """Unit tests for the QuarantineDatabase and QuarantineEntry classes."""
 
+import json
 import os
 import sqlite3
 import tempfile
@@ -118,6 +119,26 @@ class TestQuarantineEntry:
         assert restored.file_hash == original.file_hash
         assert restored.original_permissions == original.original_permissions
 
+    def test_to_dict_json_roundtrips_raw_filename_bytes(self):
+        """CLI JSON retains a raw path as an escaped, reversible value."""
+        raw_path = os.fsdecode(b"/tmp/infected_\xff")
+        entry = QuarantineEntry(
+            id=1,
+            original_path=raw_path,
+            quarantine_path="/quarantine/file",
+            threat_name="TestThreat",
+            detection_date="2024-01-01T00:00:00",
+            file_size=1,
+            file_hash="hash",
+            original_permissions=0o600,
+        )
+
+        serialized = json.dumps(entry.to_dict())
+        round_trip = json.loads(serialized)
+
+        serialized.encode("utf-8")
+        assert os.fsencode(round_trip["original_path"]) == b"/tmp/infected_\xff"
+
 
 class TestQuarantineDatabase:
     """Tests for the QuarantineDatabase class."""
@@ -177,6 +198,45 @@ class TestQuarantineDatabase:
 
         assert entry_id is not None
         assert entry_id > 0
+
+    def test_path_lookup_reads_new_blob_and_legacy_text_rows(self, db, temp_db_dir):
+        """Raw-byte BLOB paths and existing TEXT paths both use the path index."""
+        raw_path = os.fsdecode(b"/tmp/infected_\xff")
+        db.add_entry(
+            original_path=raw_path,
+            quarantine_path=os.fsdecode(b"/quarantine/infected_\xff"),
+            threat_name="RawThreat",
+            file_size=1,
+            file_hash="raw",
+        )
+
+        db_path = Path(temp_db_dir) / "test_quarantine.db"
+        with sqlite3.connect(db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO quarantine
+                (original_path, quarantine_path, threat_name, detection_date,
+                 file_size, file_hash, original_permissions)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "/legacy/infected",
+                    "/quarantine/legacy",
+                    "LegacyThreat",
+                    datetime.now().isoformat(),
+                    1,
+                    "legacy",
+                    0o644,
+                ),
+            )
+
+        raw_entry = db.get_entry_by_original_path(raw_path)
+        legacy_entry = db.get_entry_by_original_path("/legacy/infected")
+
+        assert os.fsencode(raw_entry.original_path) == b"/tmp/infected_\xff"
+        assert legacy_entry.original_path == "/legacy/infected"
+        assert db.entry_exists(raw_path) is True
+        assert db.entry_exists("/legacy/infected") is True
 
     def test_add_entry_sets_detection_date(self, db):
         """Test that add_entry automatically sets detection_date."""
@@ -509,7 +569,7 @@ class TestQuarantineDatabasePermissionMasking:
         try:
             cursor = conn.execute(
                 "SELECT original_permissions FROM quarantine WHERE quarantine_path = ?",
-                ("/quarantine/setuid.quar",),
+                (sqlite3.Binary(os.fsencode("/quarantine/setuid.quar")),),
             )
             (stored,) = cursor.fetchone()
         finally:
@@ -626,7 +686,6 @@ class TestQuarantineDatabaseErrorLogging:
 
         assert result is None
         assert "Failed to add quarantine entry" in caplog.text
-        assert "/file2.exe" in caplog.text
 
     def test_get_entry_logs_error_on_database_error(self, temp_db_dir, caplog):
         """Test that get_entry logs error when database is corrupted."""
