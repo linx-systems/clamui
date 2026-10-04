@@ -11,7 +11,7 @@ ui/
 ├── window.py              # Main window - sidebar nav, content switching
 ├── sidebar.py             # NavigationSidebar - 7 nav items
 ├── coordinator.py         # View lifecycle - lazy loading, view switching
-├── scan_view.py           # Legacy scan view (being replaced by scan/)
+├── scan_view.py           # Active scan view used by app.py; scan/ holds modular components
 ├── logs_view.py           # Scan history with pagination + daemon mode
 ├── quarantine_view.py     # Quarantine management with search
 ├── statistics_view.py     # Statistics dashboard (matplotlib)
@@ -37,7 +37,7 @@ ui/
 ├── tray_service.py        # Tray D-Bus service (GIO, runs in subprocess)
 ├── tray_indicator.py      # Low-level SNI tray widget
 ├── tray_icons.py          # Tray icon management
-├── scan/                  # Modular scan workflow → scan/AGENTS.md
+├── scan/                  # Modular scan components; its ScanView is not the active screen
 └── preferences/           # Settings pages → preferences/AGENTS.md
 ```
 
@@ -83,6 +83,7 @@ class MyDialog(Adw.Window):
 def _do_background():
     result = expensive_operation()
     GLib.idle_add(self._update_ui, result)
+
 
 threading.Thread(target=_do_background, daemon=True).start()
 ```

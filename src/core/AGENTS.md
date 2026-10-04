@@ -52,7 +52,7 @@ Each op give `operation_sync()` (block) and `operation_async()` (spawn daemon th
 
 ### Security Audit & ClamAV Config (v0.2.0 subsystems)
 - `system_audit.py`: security-posture auditor. `run_audit()` (Tier 1: ClamAV health, firewall, MAC framework, auto-update, intrusion detect, SSH harden, Portmaster) and `run_deep_audit()` (Tier 2: Lynis, chkrootkit). Give back `AuditReport` (`AuditSectionResult`/`AuditCheckResult`, `AuditStatus`, `AuditCategory`); show by `ui/audit_view.py`.
-- `clamav_config.py`: comment-keep parser/writer for `clamd.conf`/`freshclam.conf` (`ClamAVConfig`, `parse_config`/`write_config`). System-path write go through `write_config_with_elevation()` / `write_configs_with_elevation()` (pkexec). `privileged_paths.py` hold pkexec allowlist validator (`PROTOCOL_VERSION=3`, `validate_destination`).
+- `clamav_config.py`: comment-keep parser/writer for `clamd.conf`/`freshclam.conf` (`ClamAVConfig`, `parse_config`/`write_config`). System-path write go through `write_config_with_elevation()` / `write_configs_with_elevation()` (pkexec). `privileged_paths.py` hold pkexec allowlist validator (`PROTOCOL_VERSION=4`, `validate_destination`).
 
 ## Where to Look
 

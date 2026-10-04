@@ -36,6 +36,7 @@ Static `widgets_dict` form (config-backed; ScannerPage/DatabasePage style):
 from ..compat import create_switch_row, create_entry_row
 from .base import PreferencesPageMixin, create_spin_row, populate_bool_field
 
+
 class MyPage(PreferencesPageMixin):
     @staticmethod
     def create_page(widgets_dict: dict, settings_manager, parent_window) -> Adw.PreferencesPage:

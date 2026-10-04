@@ -6,10 +6,23 @@
 
 - Added a **Start in System Tray** preference for login/autostart workflows while keeping explicit file and folder scans visible. (#221)
 
+### Changed
+
+- Moved project documentation into the Starlight site at `/docs/`, retaining root release notes as canonical sources.
+- Updated Flatpak to GNOME 51/Python 3.14 and replaced the tray's CairoSVG dependency with GdkPixbuf/librsvg rasterization.
+
 ### Fixed
 
 - Bundled GLib's desktop-launch helper in the AppImage so audit documentation links open on KDE and other non-Ubuntu host layouts. (#194)
 - Prevented large standalone full scans from being reported as failed when capped verbose output hid the final summary and only nonfatal ClamAV warnings remained. (#217)
+- Preserved raw POSIX filename bytes for `clamscan`, daemon scans, and quarantine restore; reject newline-containing daemon file-list targets.
+- Used the installed scheduled-scan module path when generating Debian jobs.
+- Used the selected custom `freshclam.conf` for manual database updates.
+- Corrected tray-availability, VirusTotal setup, scan selection, and result-scroller behavior.
+
+### Security
+
+- Hardened trusted helper discovery in system `sbin` directories and atomic configuration writes, with administrator reads and `0600` custom configs.
 
 ## [0.4.0] - 2026-08-23
 
@@ -38,7 +51,6 @@
 [Unreleased]: https://github.com/linx-systems/clamui/compare/v0.4.0...HEAD
 
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
-
 ## [0.3.0] - 2026-06-26
 
 ### Added

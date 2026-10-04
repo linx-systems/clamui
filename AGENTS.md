@@ -4,12 +4,12 @@
 
 ## Project Overview
 
-ClamUI = Linux desktop app. Give pretty face to ClamAV antivirus. Make with **PyGObject**, **GTK4**, **libadwaita** so GNOME happy.
+ClamUI = Linux desktop app. Pretty face for ClamAV antivirus. Make with **PyGObject**, **GTK4**, **libadwaita** so GNOME happy.
 
 **Key Facts:**
 
-- Need Python 3.11+; need GTK 4.6+, libadwaita 1.1+
-- All package format use host `clamscan` + `freshclam`; daemon mode also want host `clamd` + `clamdscan`. ClamUI never carry engine or database.
+- Need Python 3.11+; GTK 4.6+, libadwaita 1.1+
+- All package use host `clamscan` + `freshclam`; daemon mode also want host `clamd` + `clamdscan`. ClamUI never carry engine or database.
 - Ship as Debian package, AppImage, Flatpak
 - VirusTotal opt-in only
 - Tongues: de, en, es, zh_CN, it, fr, pt_BR, hu (look `po/LINGUAS`)
@@ -27,9 +27,7 @@ clamui/
 │   ├── profiles/           Scan profile management
 │   └── ui/                 GTK4/Adwaita UI components
 ├── tests/                  Mirrors src/ (core/, ui/, profiles/, integration/, e2e/)
-├── docs/                   Developer + user docs (table below)
-│   ├── architecture/       Architectural notes (e.g. tray-subprocess)
-│   └── user-guide/         End-user pages (getting-started, scanning, quarantine, …)
+├── website/                Astro + Starlight site; docs source at `website/src/content/docs/docs/`
 ├── po/                     Translations (de, en, es, zh_CN, it, fr, pt_BR, hu) + POTFILES.in, clamui.pot
 ├── scripts/                Dev + packaging scripts (local-run, update-pot, nemo actions, hooks/)
 ├── appimage/               AppImage build (build-appimage.sh)
@@ -38,7 +36,6 @@ clamui/
 ├── data/                   Desktop integration (.desktop, nemo_action, metainfo.xml)
 ├── icons/                  Application icons
 ├── screenshots/            Canonical README and website screenshot sources
-├── website/                Astro marketing site
 ├── CODE_OF_CONDUCT.md      Community behavior and enforcement standards
 ├── CONTRIBUTING.md         Contributor workflow and pull-request guidance
 └── pyproject.toml          Project config + dependencies
@@ -51,24 +48,34 @@ Local guide only for area below. Read right one before edit there; other dir fol
 - [`src/core/AGENTS.md`](src/core/AGENTS.md) - brain layer (no UI dep)
 - [`src/core/quarantine/AGENTS.md`](src/core/quarantine/AGENTS.md) - SQLite quarantine part
 - [`src/ui/AGENTS.md`](src/ui/AGENTS.md) - GTK4/Adwaita UI layer
-- [`src/ui/scan/AGENTS.md`](src/ui/scan/AGENTS.md) - scan flow (coordinator way, replace big old `scan_view.py`)
+- [`src/ui/scan/AGENTS.md`](src/ui/scan/AGENTS.md) - scan-flow components; active view is [`src/ui/scan_view.py`](src/ui/scan_view.py)
 - [`src/ui/preferences/AGENTS.md`](src/ui/preferences/AGENTS.md) - small preferences page
 
-## Architecture Documentation
+## Documentation
 
-Want deep tech doc on build pattern? Look `docs/` dir:
+Truth docs live: [`website/src/content/docs/docs/`](website/src/content/docs/docs/), serve at
+[`/docs/`](https://clamui.com/docs/).
 
-| Document                                                                       | Description                                         |
-| ------------------------------------------------------------------------------ | --------------------------------------------------- |
-| [`docs/architecture/tray-subprocess.md`](docs/architecture/tray-subprocess.md) | Tray subprocess build (GIO D-Bus/SNI) |
-| [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md)                               | Big config reference               |
-| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)                                   | Dev environment setup                       |
-| [`docs/INSTALL.md`](docs/INSTALL.md)                                           | Install guide                                |
-| [`docs/SCAN_BACKENDS.md`](docs/SCAN_BACKENDS.md)                               | Scan backend choice + speed                |
-| [`docs/SIGNING.md`](docs/SIGNING.md)                                           | Package sign + verify                 |
-| [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)                           | Common ouch + fix                      |
-| [`docs/TRANSLATING.md`](docs/TRANSLATING.md)                                   | Tongue-help guide                        |
-| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)                                     | Doc for user                               |
+| Source | Public page |
+| --- | --- |
+| [`contributing/architecture.md`](website/src/content/docs/docs/contributing/architecture.md) | [Tray architecture](https://clamui.com/docs/contributing/architecture/) |
+| [`reference/configuration.md`](website/src/content/docs/docs/reference/configuration.md) | [Configuration](https://clamui.com/docs/reference/configuration/) |
+| [`contributing/development.md`](website/src/content/docs/docs/contributing/development.md) | [Development](https://clamui.com/docs/contributing/development/) |
+| [`installation.md`](website/src/content/docs/docs/installation.md) | [Installation](https://clamui.com/docs/installation/) |
+| [`reference/scan-backends.md`](website/src/content/docs/docs/reference/scan-backends.md) | [Scan backends](https://clamui.com/docs/reference/scan-backends/) |
+| [`contributing/signing.md`](website/src/content/docs/docs/contributing/signing.md) | [Signing](https://clamui.com/docs/contributing/signing/) |
+| [`troubleshooting.md`](website/src/content/docs/docs/troubleshooting.md) | [Troubleshooting](https://clamui.com/docs/troubleshooting/) |
+| [`contributing/translating.md`](website/src/content/docs/docs/contributing/translating.md) | [Translating](https://clamui.com/docs/contributing/translating/) |
+| [`index.md`](website/src/content/docs/docs/index.md) | [User docs](https://clamui.com/docs/) |
+
+Put tight Markdown/MDX under dat source tree, use root-relative `/docs/.../` link, + fix
+Starlight sidebar in [`website/astro.config.mjs`](website/astro.config.mjs). Keep root
+`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` as GitHub door;
+`CHANGELOG.md` + `RELEASE_NOTES.md` stay release food for MDX. No touch made-by-machine
+`website/public/` asset or `website/dist/`.
+
+Docs change? Run from `website/`: frozen Bun install, `bun run check`, `bun run build`;
+then `python3 ../scripts/check-built-links.py dist`. Website CI do same check again.
 
 ### Community Documentation
 
@@ -78,7 +85,7 @@ Want deep tech doc on build pattern? Look `docs/` dir:
 
 ### System Tray Subprocess Architecture
 
-**Location**: [`docs/architecture/tray-subprocess.md`](docs/architecture/tray-subprocess.md)
+**Location**: [`website/src/content/docs/docs/contributing/architecture.md`](website/src/content/docs/docs/contributing/architecture.md)
 
 ClamUI use subprocess for tray:
 
@@ -96,7 +103,7 @@ Subprocess use pure GIO D-Bus (no GTK) for SNI protocol, with `Dbusmenu` (GLib A
 
 **When to reference this:**
 
-- Build thing that poke tray (status, progress, icon)
+- Build thing dat poke tray (status, progress, icon)
 - Hunt IPC talk bug between main app + tray
 - Learn why some op need thread-safe callback
 - Touch tray code in `src/ui/tray_*.py`
@@ -114,7 +121,7 @@ sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 \
 sudo apt install libjpeg-dev zlib1g-dev
 
 # Install Python dependencies with uv
-uv sync --dev
+uv sync --locked --extra dev
 
 # Install git hooks (REQUIRED)
 ./scripts/hooks/install-hooks.sh
@@ -123,12 +130,12 @@ uv sync --dev
 uv run clamui
 ```
 
-Want runtime-only local launch that install distro dep? Use `./scripts/local-run.sh`.
+Want runtime-only local launch dat install distro dep? Use `./scripts/local-run.sh`.
 Plain Ubuntu 22.04 / Pop!_OS 22.04 too old for source dep floor:
 `PyGObject>=3.56.3` want GLib 2.80+, but those ship GLib 2.72. Use Flatpak there,
 or dev where GLib new; UI code still aim GTK 4.6 + libadwaita 1.1.
 
-**Important:** Pre-commit hook is **must** for dev. It block absolute `src.*` import that break when ClamUI install as Debian package. Look [Import Conventions](#import-conventions-package-compatibility).
+**Important:** Pre-commit hook is **must** for dev. It block absolute `src.*` import dat break when ClamUI install as Debian package. Look [Import Conventions](#import-conventions-package-compatibility).
 
 ### Testing
 
@@ -232,7 +239,8 @@ label.set_text(_(item))
 
 **After adding/changing translatable strings:**
 
-Run `./scripts/update-pot.sh` to make POT template again. Add new tongue? Look [`docs/TRANSLATING.md`](docs/TRANSLATING.md).
+Run `./scripts/update-pot.sh` to make POT template again. New tongue? Look
+[`website/src/content/docs/docs/contributing/translating.md`](website/src/content/docs/docs/contributing/translating.md).
 
 ### Async Operations (GTK Thread Safety)
 
@@ -324,7 +332,7 @@ def check_clamav_installed() -> Tuple[bool, Optional[str]]:
 
 ### Flatpak Support
 
-Command that run on host must wrap. From `src/core/` module:
+Command dat run on host must wrap. From `src/core/` module:
 
 ```python
 from .flatpak import wrap_host_command, is_flatpak
@@ -645,8 +653,9 @@ def test_navigation_sidebar_can_be_created(mock_gi_modules):
   privacy-aware debug log, `LogManager` own scan/update log.
 - Keep privileged system-config write behind `core/privileged_helper.py`,
   `write_config_with_elevation()` / `write_configs_with_elevation()`, + installed polkit helper.
-- `src/ui/scan/` build by piece: add widget + wire through `ScanView`; send scan run
-  through `ScanController`, tray-drive orchestration through `ScanCoordinator`.
+- Active scan screen is `src/ui/scan_view.py` (`ScanView`), which `src/app.py` loads. Add
+  `src/ui/scan/` components only when wired into that active view; send scan run through
+  `ScanController`, tray-drive orchestration through `ScanCoordinator`.
 
 ### Preferences System (`src/ui/preferences/`)
 
@@ -714,19 +723,19 @@ so doc must tell user to eyeball dat desktop show icon before trust background s
 
 VirusTotal opt-in, set via **Preferences → VirusTotal**. API key use system keyring
 by default; plaintext settings fall need user say yes loud. Look
-[`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) for full `DEFAULT_SETTINGS` reference.
+[`/docs/reference/configuration/`](https://clamui.com/docs/reference/configuration/) for full `DEFAULT_SETTINGS` reference.
 
 #### Scan Backend Options
 
 `scan_backend` ∈ {`"auto"` (default), `"daemon"`, `"clamscan"`}. Auto like clamd daemon when there
 else use `clamscan`; daemon mode need `clamd` + `clamdscan`. Look
-[`docs/SCAN_BACKENDS.md`](docs/SCAN_BACKENDS.md) for setup + fix-trouble.
+[`/docs/reference/scan-backends/`](https://clamui.com/docs/reference/scan-backends/) for setup + fix-trouble.
 
 ## CI/CD Workflows
 
 ### test.yml
 
-- Run on **ubuntu-24.04 + ubuntu-22.04**, Python 3.11 / 3.12 / 3.13
+- Run on **ubuntu-24.04 + ubuntu-22.04**, Python 3.11–3.14
 - Use xvfb for headless GTK test
 - Python 3.12 upload `coverage.xml` (30-day keep); `fail_under` is 50
 - Hold libadwaita-1.1 compat test on ubuntu-22.04
@@ -735,7 +744,7 @@ else use `clamscan`; daemon mode need `clamd` + `clamdscan`. Look
 
 - **lint.yml** - ubuntu-22.04 / py3.12; `ruff check` + `ruff format`; block absolute `src.*` prod import
 - **build-appimage.yml** - ubuntu-24.04; build AppImage + `.zsync` (7-day artifact); smoke test; maybe GPG sign on tag
-- **build-flatpak.yml** - x86_64 (ubuntu-22.04) + aarch64 (ubuntu-24.04-arm); flathub-infra builder gnome-49; 7-day artifact
+- **build-flatpak.yml** - x86_64 (ubuntu-22.04) + aarch64 (ubuntu-24.04-arm); flathub-infra builder GNOME 51; 7-day artifact
 - **build-deb.yml** - ubuntu-22.04; build `clamui_<version>_all.deb` + matching
   `clamui-privileged-helper_<version>_all.deb`, maybe sign both with `dpkg-sig`
 - **build-all.yml** - hand-push dat call Debian, Flatpak, AppImage reusable workflow
@@ -764,8 +773,8 @@ else use `clamscan`; daemon mode need `clamd` + `clamdscan`. Look
 ### Updating Website Screenshots
 
 Root `screenshots/` = truth. `screenshots/ClamUI-Social-Preview-1280x640.png` = the
-one true README hero + website social-card source. Update website asset-copy/metadata when need, but
-no hand-edit generated `website/public/` copy or `website/dist/`.
+one true README hero + website social-card source. Fix website asset-copy/metadata when need, but
+no hand-edit made-by-machine `website/public/` copy or `website/dist/`.
 
 ### Adding a New View
 
@@ -830,15 +839,15 @@ privileged wrapper on purpose not Python project entry point.
 
 ## Dependencies
 
-Key runtime dep:
+`pyproject.toml` = truth for runtime dependency; keep its security floor:
+`urllib3>=2.8.0` + `certifi>=2026.7.22`. Python 3.11+, `PyGObject>=3.56.3` want
+GLib 2.80+ for source work; packaged UI support still aim GTK 4.6+ + libadwaita 1.1+.
 
-- `PyGObject>=3.56.3` / `pycairo>=1.29.0` - GTK4/Adwaita binding (come from system/GNOME runtime)
-- `psutil>=7.2.2` - Battery status (scheduled-scan skip-on-battery)
-- `matplotlib>=3.11.0` - Statistics view chart
-- `requests>=2.34.2` / `urllib3>=2.7.0` / `certifi>=2026.6.17` - VirusTotal HTTP + TLS
-- `keyring>=25.7.0` - Safe secret keep (VirusTotal API key)
-- `Pillow>=12.3.0` - Tray icon make (stacked status badge)
-- `cairosvg>=2.9.0` - SVG to PNG for tray icon
+Tray SVG fallback uses the native GdkPixbuf librsvg loader lazily, then Pillow stacks its badge.
+Do not add CairoSVG. Package that loader: Debian needs `gir1.2-gdkpixbuf-2.0` +
+`librsvg2-common`; AppImage carries `libpixbufloader-svg.so` + `librsvg-2.so.2`; Flatpak builds
+install checked-in [`icons/io.github.linx_systems.ClamUI.png`](icons/io.github.linx_systems.ClamUI.png).
+When its SVG changes, regenerate that PNG once and commit both; see the [Development guide](https://clamui.com/docs/contributing/development/).
 
 **Build dependencies for Pillow (Ubuntu/Debian):**
 ```bash
@@ -849,20 +858,16 @@ sudo apt install libjpeg-dev zlib1g-dev
 
 ### Flatpak Python Dependencies
 
-Python dep for Flatpak build managed with:
+Python dep born from locked requirement:
 
-- **Build dependencies**: `flatpak-pip-generator` from [flatpak-builder-tools](https://github.com/flatpak/flatpak-builder-tools/tree/master/pip)
-- **Runtime dependencies**: `req2flatpak` (like binary wheel, build faster)
+- `flathub/requirements-build.txt` → committed `flathub/python3-build-deps.json`
+  via `flatpak-pip-generator`.
+- `flathub/requirements-runtime.txt` = looked-at floor list; locked export make
+  `flathub/requirements-runtime-pinned.txt`, then committed `flathub/python3-runtime-deps.json`
+  via `req2flatpak`.
 
-**Files:**
-
-- `flathub/requirements-build.txt` - Build dep (hatchling)
-- `flathub/requirements-runtime.txt` - Runtime dep with floor version
-- `flathub/requirements-runtime-pinned.txt` - Pinned version for req2flatpak
-- `flathub/python3-build-deps.json` - Made build dep (commit to git)
-- `flathub/python3-runtime-deps.json` - Made runtime dep (commit to git)
-
-**Note:** PyGObject + pycairo come from GNOME runtime, so left out of generation.
+PyGObject + pycairo come from GNOME, so generation leave them out. Keep generated source change
+with their input requirement + aim both runtime arch.
 
 ### Flatpak-Specific Code
 
@@ -878,34 +883,34 @@ extension just for ClamAV.
 
 ### Regenerating Flatpak Dependencies
 
-When dep in `pyproject.toml` change:
+Runtime dep change? Fix locked requirement + make both committed JSON file again:
 
 ```bash
-# Install the generators
+# Install generators
 pipx install flatpak-pip-generator
 pipx install req2flatpak
 
-# Ensure the GNOME SDK is installed
-flatpak install flathub org.gnome.Sdk//49
+# Ensure GNOME 51 SDK is installed
+flatpak install flathub org.gnome.Sdk//51
 
 cd flathub/
 
-# 1. Generate build dependencies (uses flatpak-pip-generator)
+# Build dependencies
 flatpak_pip_generator \
-    --runtime='org.gnome.Sdk//49' \
+    --runtime='org.gnome.Sdk//51' \
     --requirements-file='requirements-build.txt' \
     --output='python3-build-deps' \
     --checker-data
 
-# 2. Update requirements-runtime-pinned.txt with new versions
-#    Then generate runtime dependencies for BOTH architectures (x86_64 and aarch64)
+# Runtime dependencies for x86_64 and aarch64
 req2flatpak \
     -r requirements-runtime-pinned.txt \
-    -t 313-x86_64 313-aarch64 \
+    -t 314-x86_64 314-aarch64 \
     -o python3-runtime-deps.json
 ```
 
-**Note:** `-t` flag eat many target split by space. Use `313-x86_64 313-aarch64` make one JSON file with arch-specific entry for binary wheel + shared entry for pure Python wheel.
+GNOME 51 give Python 3.14.7; use both `314-x86_64` + `314-aarch64`, not host Python
+version, so binary wheel + pure-Python dep share one made file.
 
 ### Testing Flatpak Build
 
