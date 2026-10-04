@@ -198,50 +198,6 @@ class TestCheckIntegrationStatus:
                 ]
 
 
-class TestCheckIntegrationInstalled:
-    """Tests for _check_integration_installed() backward-compat wrapper."""
-
-    def test_returns_true_when_all_installed(self, tmp_path):
-        """Test returns True when all files exist (INSTALLED status)."""
-        local_share = tmp_path / "share"
-        for _, dest_rel in file_manager_integration.NEMO_INTEGRATIONS:
-            dest = local_share / dest_rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text("test")
-
-        with mock.patch.object(
-            file_manager_integration, "_get_local_share_dir", return_value=local_share
-        ):
-            result = file_manager_integration._check_integration_installed(FileManager.NEMO)
-            assert result is True
-
-    def test_returns_false_when_partial(self, tmp_path):
-        """Test returns False when only some files exist (PARTIAL status)."""
-        local_share = tmp_path / "share"
-        # Create only the first file
-        _, first_dest = file_manager_integration.NEMO_INTEGRATIONS[0]
-        dest = local_share / first_dest
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text("test")
-
-        with mock.patch.object(
-            file_manager_integration, "_get_local_share_dir", return_value=local_share
-        ):
-            result = file_manager_integration._check_integration_installed(FileManager.NEMO)
-            assert result is False
-
-    def test_returns_false_when_none_installed(self, tmp_path):
-        """Test returns False when no files exist."""
-        local_share = tmp_path / "share"
-        local_share.mkdir()
-
-        with mock.patch.object(
-            file_manager_integration, "_get_local_share_dir", return_value=local_share
-        ):
-            result = file_manager_integration._check_integration_installed(FileManager.NEMO)
-            assert result is False
-
-
 class TestIntegrationLists:
     """Tests for integration list completeness."""
 

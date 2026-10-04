@@ -262,7 +262,7 @@ Foreground yes
         return None
 
 
-def wrap_host_command(command: list[str], force_host: bool = False) -> list[str]:
+def wrap_host_command(command: list[str]) -> list[str]:
     """
     Wrap a command with flatpak-spawn --host if needed in Flatpak.
 
@@ -273,8 +273,6 @@ def wrap_host_command(command: list[str], force_host: bool = False) -> list[str]
     Args:
         command: The command to wrap as a list of strings
                  (e.g., ['clamscan', '--version'])
-        force_host: Kept for backwards-compatible call sites. Host execution is
-                    already the only Flatpak behavior.
 
     Returns:
         The command, wrapped for host execution if running in Flatpak
@@ -283,11 +281,8 @@ def wrap_host_command(command: list[str], force_host: bool = False) -> list[str]
         >>> wrap_host_command(['clamscan', '--version'])
         ['clamscan', '--version']  # When not in Flatpak
 
-        >>> wrap_host_command(['clamscan', '--version'])
-        ['flatpak-spawn', '--host', 'clamscan', '--version']  # Host binary in Flatpak
-
-        >>> wrap_host_command(['clamdscan', '--ping'], force_host=True)
-        ['flatpak-spawn', '--host', 'clamdscan', '--ping']  # Forced host execution
+        >>> wrap_host_command(['clamdscan', '--ping'])
+        ['flatpak-spawn', '--host', 'clamdscan', '--ping']  # Host binary in Flatpak
     """
     if not command:
         return command

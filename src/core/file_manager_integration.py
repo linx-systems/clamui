@@ -308,7 +308,7 @@ def _refresh_dolphin_service_menu_cache() -> None:
     for binary in ("kbuildsycoca6", "kbuildsycoca5"):
         try:
             subprocess.run(
-                wrap_host_command([binary, "--noincremental"], force_host=True),
+                wrap_host_command([binary, "--noincremental"]),
                 capture_output=True,
                 check=True,
                 text=True,
@@ -323,22 +323,6 @@ def _refresh_dolphin_service_menu_cache() -> None:
             logger.debug("Failed to refresh KDE cache via %s: %s", binary, e.stderr or e)
         except Exception as e:
             logger.debug("Failed to refresh KDE cache via %s: %s", binary, e)
-
-
-def _check_integration_installed(file_manager: FileManager) -> bool:
-    """
-    Check if integration files are already installed for a file manager.
-
-    Backward-compatible wrapper around _check_integration_status().
-
-    Args:
-        file_manager: The file manager to check.
-
-    Returns:
-        True if all integration files are installed.
-    """
-    status, _ = _check_integration_status(file_manager)
-    return status == IntegrationStatus.INSTALLED
 
 
 def get_available_integrations() -> list[IntegrationInfo]:
