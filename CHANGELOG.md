@@ -19,6 +19,7 @@
 - Used the installed scheduled-scan module path when generating Debian jobs.
 - Used the selected custom `freshclam.conf` for manual database updates.
 - Corrected tray-availability, VirusTotal setup, scan selection, and result-scroller behavior.
+- Kept Configuration File paths readable by using compact administrator-read actions in Scanner and Database preferences.
 
 ### Security
 

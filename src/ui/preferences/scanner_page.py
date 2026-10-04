@@ -142,8 +142,8 @@ class ScannerPage(PreferencesPageMixin):
         )
 
         if parent_window is not None:
-            read_button = Gtk.Button(label=_("Read as Administrator"))
-            read_button.set_valign(Gtk.Align.CENTER)
+            read_button = Gtk.Button()
+            read_button.set_icon_name(resolve_icon_name("system-lock-screen-symbolic"))
             read_button.add_css_class("flat")
             read_button.set_tooltip_text(
                 _("Request administrator authorization to read a protected configuration file")
