@@ -213,14 +213,15 @@ class DatabasePage(PreferencesPageMixin):
             def _on_detect_freshclam():
                 detected = detect_freshclam_conf_path()
                 if detected:
-                    path_row.set_subtitle(detected)
-                    parent_window._freshclam_conf_path = detected
-                    sm = getattr(parent_window, "_settings_manager", None)
-                    if sm:
-                        sm.set("freshclam_conf_path", detected)
-                    parent_window._reload_freshclam_config()
-                    toast = Adw.Toast.new(_("Detected: {path}").format(path=detected))
-                    parent_window.add_toast(toast)
+                    DatabasePage._apply_config_selection(
+                        parent_window,
+                        path_row,
+                        "freshclam_conf_path",
+                        "_freshclam_conf_path",
+                        detected,
+                        detected,
+                        _("Detected: {path}").format(path=detected),
+                    )
                 else:
                     toast = Adw.Toast.new(_("No freshclam.conf found in known locations"))
                     parent_window.add_toast(toast)
@@ -243,6 +244,19 @@ class DatabasePage(PreferencesPageMixin):
             on_browse=on_browse,
         )
 
+        if parent_window is not None:
+            read_button = Gtk.Button(label=_("Read as Administrator"))
+            read_button.set_valign(Gtk.Align.CENTER)
+            read_button.add_css_class("flat")
+            read_button.set_tooltip_text(
+                _("Request administrator authorization to read a protected configuration file")
+            )
+            read_button.connect(
+                "clicked",
+                lambda _button: parent_window._request_config_authorized_read("freshclam"),
+            )
+            path_row.add_suffix(read_button)
+
         # Create paths group
         DatabasePage._create_paths_group(page, widgets_dict, temp_instance)
 
@@ -259,6 +273,32 @@ class DatabasePage(PreferencesPageMixin):
         DatabasePage._create_proxy_group(page, widgets_dict, temp_instance)
 
         return page
+
+    @staticmethod
+    def _apply_config_selection(
+        parent_window,
+        path_row,
+        settings_key,
+        attr_name,
+        stored_path,
+        display_path,
+        success_message,
+    ) -> bool:
+        """Persist selection before changing the displayed or active config."""
+        settings_manager = getattr(parent_window, "_settings_manager", None)
+        if settings_manager is not None and not settings_manager.set(settings_key, stored_path):
+            parent_window.add_toast(
+                Adw.Toast.new(
+                    _("Failed to save configuration selection. The previous file remains active.")
+                )
+            )
+            return False
+
+        setattr(parent_window, attr_name, stored_path)
+        path_row.set_subtitle(display_path)
+        parent_window._reload_freshclam_config()
+        parent_window.add_toast(Adw.Toast.new(success_message))
+        return True
 
     @staticmethod
     def _browse_for_config(parent_window, path_row, settings_key, attr_name):
@@ -290,15 +330,15 @@ class DatabasePage(PreferencesPageMixin):
                     else:
                         display_path = format_flatpak_portal_path(file_path)
 
-                path_row.set_subtitle(display_path)
-                setattr(parent_window, attr_name, stored_path)
-                sm = getattr(parent_window, "_settings_manager", None)
-                if sm:
-                    sm.set(settings_key, stored_path)
-                if attr_name == "_freshclam_conf_path":
-                    parent_window._reload_freshclam_config()
-                toast = Adw.Toast.new(_("Selected: {path}").format(path=display_path))
-                parent_window.add_toast(toast)
+                DatabasePage._apply_config_selection(
+                    parent_window,
+                    path_row,
+                    settings_key,
+                    attr_name,
+                    stored_path,
+                    display_path,
+                    _("Selected: {path}").format(path=display_path),
+                )
 
         # In Flatpak, /etc doesn't exist inside the sandbox.
         # Skip setting initial folder so the portal presents host filesystem.

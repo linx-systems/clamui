@@ -74,6 +74,23 @@ class TestUpdateViewImport:
         assert UpdateView is not None
 
 
+class TestUpdateViewInitialization:
+    """Tests updater receives the shared application settings."""
+
+    def test_uses_given_settings_manager_for_updater(self, update_view_module):
+        settings_manager = mock.MagicMock()
+        UpdateView = update_view_module.UpdateView
+
+        with (
+            mock.patch.object(UpdateView, "_setup_ui"),
+            mock.patch.object(update_view_module, "FreshclamUpdater") as updater,
+            mock.patch.object(update_view_module.threading, "Thread"),
+        ):
+            UpdateView(settings_manager=settings_manager)
+
+        updater.assert_called_once_with(settings_manager=settings_manager)
+
+
 # =============================================================================
 # Notification Behavior Tests
 # =============================================================================

@@ -32,11 +32,15 @@ ALLOWED_DEST_DIRS: tuple[Path, ...] = (
 )
 ALLOWED_DEST_FILES: tuple[Path, ...] = (Path("/etc/freshclam.conf"),)
 
-# Bumped to 3 so every callsite explicitly opts into canonical destination
-# binding. The helper rejects any argv that does not lead with
-# ``--protocol=3``; this lets a freshly-installed helper coexist with an
-# out-of-date caller and fail closed.
-PROTOCOL_VERSION = 3
+# Bound privileged config reads so an allowed but unexpectedly large file
+# cannot make the GUI retain unbounded root-read output.
+MAX_CONFIG_READ_BYTES = 1024 * 1024
+
+# Bumped to 4 because the helper now has an explicit, allowlisted read mode.
+# The helper rejects any argv that does not lead with ``--protocol=4``; this
+# lets a freshly-installed helper coexist with an out-of-date caller and fail
+# closed.
+PROTOCOL_VERSION = 4
 
 
 def is_running_as_root() -> bool:

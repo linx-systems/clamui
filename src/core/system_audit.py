@@ -32,7 +32,7 @@ from .clamav_detection import (
     check_clamd_connection,
     check_database_available,
 )
-from .flatpak import get_clean_env, is_flatpak, wrap_host_command
+from .flatpak import get_clean_env, is_flatpak, which_host_command, wrap_host_command
 from .i18n import _
 from .install_commands import InstallTarget, recommend_install_command
 from .keyring_manager import delete_portmaster_token, get_portmaster_token
@@ -206,9 +206,8 @@ def _check_systemd_service(service_name: str) -> tuple[bool, str]:
 
 
 def is_binary_installed(binary_name: str) -> bool:
-    """Check if a binary is available on the system (or host if Flatpak)."""
-    rc, _stdout, _stderr = _run_command(["which", binary_name])
-    return rc == 0
+    """Check whether a host command is available."""
+    return which_host_command(binary_name) is not None
 
 
 def _is_service_installed(service_name: str) -> bool:
@@ -1331,9 +1330,9 @@ def run_lynis_audit() -> AuditSectionResult:
         icon_name="system-run-symbolic",
     )
 
-    # Check if lynis is installed
-    rc, stdout, _stderr = _run_command(["which", "lynis"])
-    if rc != 0:
+    # Resolve once so a host administrative path is also used for pkexec.
+    lynis_path = which_host_command("lynis")
+    if lynis_path is None:
         section.checks.append(
             AuditCheckResult(
                 name=_("Lynis"),
@@ -1352,7 +1351,7 @@ def run_lynis_audit() -> AuditSectionResult:
             wrap_host_command(
                 [
                     "pkexec",
-                    "lynis",
+                    lynis_path,
                     "audit",
                     "system",
                     "--cronjob",
@@ -1468,9 +1467,9 @@ def run_rootkit_check() -> AuditSectionResult:
         icon_name="system-run-symbolic",
     )
 
-    # Check if chkrootkit is installed
-    rc, _stdout, _stderr = _run_command(["which", "chkrootkit"])
-    if rc != 0:
+    # Resolve once so a host administrative path is also used for pkexec.
+    chkrootkit_path = which_host_command("chkrootkit")
+    if chkrootkit_path is None:
         section.checks.append(
             AuditCheckResult(
                 name=_("chkrootkit"),
@@ -1486,7 +1485,7 @@ def run_rootkit_check() -> AuditSectionResult:
     # Run chkrootkit with pkexec in quiet mode
     try:
         result = subprocess.run(
-            wrap_host_command(["pkexec", "chkrootkit", "-q"]),
+            wrap_host_command(["pkexec", chkrootkit_path, "-q"]),
             capture_output=True,
             text=True,
             timeout=_DEEP_SCAN_TIMEOUT,

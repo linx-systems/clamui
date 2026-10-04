@@ -8,6 +8,7 @@ src/dst-pair protocol.  The destination allowlist itself is exercised in
 the protocol/PKEXEC_UID handshake, and the systemd-restart wiring.
 """
 
+import io
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -59,7 +60,7 @@ class TestApplyPreferencesCli:
 
         assert exit_code == 0
         assert destination.read_text(encoding="utf-8") == "LogVerbose yes\n"
-        assert (destination.stat().st_mode & 0o777) == 0o644
+        assert (destination.stat().st_mode & 0o777) == 0o600
 
     def test_main_rejects_odd_argument_count(self, tmp_path, monkeypatch):
         """Helper should fail when source/destination args are not paired."""
@@ -72,6 +73,24 @@ class TestApplyPreferencesCli:
         _bootstrap(monkeypatch, tmp_path)
         exit_code = main([PROTOCOL_TOKEN])
         assert exit_code == 2
+
+    def test_main_reads_only_allowlisted_config(self, tmp_path, monkeypatch):
+        """Explicit read mode never reads a path outside the config allowlist."""
+        monkeypatch.setenv("PKEXEC_UID", str(os.geteuid()))
+        allowed_dir = tmp_path / "etc-clamav"
+        allowed_dir.mkdir()
+        config = allowed_dir / "freshclam.conf"
+        config.write_text("DatabaseDirectory /var/lib/clamav\n", encoding="utf-8")
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_DIRS", (allowed_dir,))
+        monkeypatch.setattr(privileged_paths, "ALLOWED_DEST_FILES", ())
+
+        stdout = type("_Stdout", (), {"buffer": io.BytesIO()})()
+        with patch.object(apply_preferences.sys, "stdout", stdout):
+            assert main([PROTOCOL_TOKEN, "--read-config", str(config)]) == 0
+
+        assert stdout.buffer.getvalue() == b"DatabaseDirectory /var/lib/clamav\n"
+        with patch.object(apply_preferences.sys, "stdout", stdout):
+            assert main([PROTOCOL_TOKEN, "--read-config", "/etc/shadow"]) != 0
 
     def test_main_fails_for_missing_source(self, tmp_path, monkeypatch):
         """Helper should fail when staged source file does not exist."""

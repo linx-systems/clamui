@@ -358,19 +358,16 @@ def get_xdg_user_dir(dir_type: str) -> str | None:
 
 
 def which_host_command(binary: str) -> str | None:
+    """Find a binary path on the host system.
+
+    A regular user's PATH often excludes administrative tool directories, so
+    after the normal lookup misses, resolve only ``/usr/sbin`` and ``/sbin``.
+    Flatpak lookups run entirely on the host; no sandbox binary is accepted.
     """
-    Find a binary path on the host system.
+    fallback_paths = ()
+    if Path(binary).name == binary:
+        fallback_paths = (f"/usr/sbin/{binary}", f"/sbin/{binary}")
 
-    When running inside a Flatpak sandbox, this uses
-    ``flatpak-spawn --host which``. ClamAV tools are intentionally required on
-    the host and are not resolved from /app/bin.
-
-    Args:
-        binary: The name of the binary to find (e.g., 'clamscan')
-
-    Returns:
-        The full path to the binary if found, None otherwise
-    """
     if is_flatpak():
         try:
             result = subprocess.run(
@@ -379,13 +376,40 @@ def which_host_command(binary: str) -> str | None:
                 text=True,
                 timeout=5,
             )
-            if result.returncode == 0:
-                return result.stdout.strip()
-            return None
-        except Exception as e:
-            logger.debug("Failed to find binary '%s' on host: %s", binary, e)
-            return None
-    return shutil.which(binary)
+            resolved = result.stdout.strip()
+            if result.returncode == 0 and resolved:
+                return resolved
+
+            for candidate in fallback_paths:
+                result = subprocess.run(
+                    [
+                        "flatpak-spawn",
+                        "--host",
+                        "test",
+                        "-f",
+                        candidate,
+                        "-a",
+                        "-x",
+                        candidate,
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if result.returncode == 0:
+                    return candidate
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as error:
+            logger.debug("Failed to find binary '%s' on host: %s", binary, error)
+        return None
+
+    resolved = shutil.which(binary)
+    if resolved:
+        return resolved
+    for candidate in fallback_paths:
+        resolved = shutil.which(candidate)
+        if resolved and Path(resolved).is_file():
+            return resolved
+    return None
 
 
 def _resolve_portal_path_via_xattr(portal_path: str) -> str | None:

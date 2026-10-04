@@ -15,6 +15,7 @@ class DistroFamily(Enum):
 
     DEBIAN = "debian"
     FEDORA = "fedora"
+    FEDORA_ATOMIC = "fedora_atomic"
     ARCH = "arch"
 
 
@@ -90,6 +91,30 @@ _COMMANDS = MappingProxyType(
     }
 )
 
+_FEDORA_ATOMIC_VARIANTS = frozenset(
+    {
+        "silverblue",
+        "kinoite",
+        "sericea",
+        "onyx",
+        "sway-atomic",
+        "budgie-atomic",
+        "cosmic-atomic",
+    }
+)
+
+_ATOMIC_REBOOT = "\nsudo systemctl reboot"
+
+_ATOMIC_COMMANDS = MappingProxyType(
+    {
+        InstallTarget.CLAMAV: "sudo rpm-ostree install clamav clamd" + _ATOMIC_REBOOT,
+        InstallTarget.FRESHCLAM: "sudo rpm-ostree install clamav-freshclam" + _ATOMIC_REBOOT,
+        InstallTarget.CLAMD: "sudo rpm-ostree install clamd" + _ATOMIC_REBOOT,
+        InstallTarget.LYNIS: "sudo rpm-ostree install lynis" + _ATOMIC_REBOOT,
+        InstallTarget.CHKROOTKIT: "sudo rpm-ostree install chkrootkit" + _ATOMIC_REBOOT,
+    }
+)
+
 _KEY_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 
@@ -109,9 +134,11 @@ def parse_distro_family(os_release_text: str) -> DistroFamily | None:
 
     Only the exact ``ID`` is authoritative. ``ID_LIKE`` is deliberately not
     used because derivative distributions can share a package manager while
-    using different package names.
+    using different package names. Fedora Atomic variants use rpm-ostree, not
+    dnf, so they are resolved separately.
     """
     distro_id: str | None = None
+    variant_id: str | None = None
     for raw_line in os_release_text.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -120,13 +147,22 @@ def parse_distro_family(os_release_text: str) -> DistroFamily | None:
         key = key.strip()
         if not _KEY_PATTERN.fullmatch(key):
             continue
+        parsed_value = _parse_value(value.strip())
         if key == "ID":
-            distro_id = _parse_value(value.strip())
+            distro_id = parsed_value
             if distro_id is None:
                 return None
+        elif key == "VARIANT_ID":
+            variant_id = parsed_value
 
     if distro_id is None:
         return None
+    if (
+        distro_id == "fedora"
+        and variant_id
+        and (variant_id in _FEDORA_ATOMIC_VARIANTS or variant_id.endswith("-atomic"))
+    ):
+        return DistroFamily.FEDORA_ATOMIC
     return _DISTRO_IDS.get(distro_id)
 
 
@@ -142,6 +178,8 @@ def get_install_command(target: InstallTarget, family: DistroFamily | None) -> s
     """Return the verified install command for a target and distro family."""
     if family is None:
         return None
+    if family is DistroFamily.FEDORA_ATOMIC:
+        return _ATOMIC_COMMANDS.get(target)
     return _COMMANDS[family].get(target)
 
 

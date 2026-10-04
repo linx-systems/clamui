@@ -7,10 +7,13 @@ deliberately small, has no GTK dependency, and treats every input as
 adversarial.  See ``src/core/privileged_paths.py`` for the validators that
 form the actual security boundary; this module is the wiring around them.
 
-Protocol (version 3):
+Protocol (version 4):
 
-    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=3 \
+    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=4 \
         <staged-src-1> <dest-1>  [<staged-src-2> <dest-2> ...]
+
+    PKEXEC_UID=<uid>  pkexec  clamui-apply-preferences  --protocol=4 \
+        --read-config <allowlisted-config>
 
 The helper:
 
@@ -18,13 +21,16 @@ The helper:
    or non-numeric (exit 3).  This pins source-file authentication to the
    user who actually authorised the elevation, not to the running root
    process.
-2. Requires ``--protocol=3`` as the first positional argument so an
+2. Requires ``--protocol=4`` as the first positional argument so an
    outdated caller paired with the hardened helper fails closed (exit 4)
    instead of being interpreted as ``src dest src dest ...``.
-3. Resolves the per-user staging root, opens it ``O_NOFOLLOW`` /
+3. For ``--read-config``, validates the requested path against the same
+   configuration allowlist used for writes, opens it without following
+   symlinks, and emits at most 1 MiB to stdout.
+4. Resolves the per-user staging root, opens it ``O_NOFOLLOW`` /
    ``O_DIRECTORY``, and verifies it is owned by the calling UID with
    mode ``0o700`` (or stricter).
-4. For each ``(src, dst)`` pair:
+5. For each ``(src, dst)`` pair:
 
    - Opens ``src`` with ``O_RDONLY | O_NOFOLLOW | O_NONBLOCK`` (refuses
      symlinks atomically, refuses to block on FIFOs).
@@ -34,11 +40,12 @@ The helper:
      no traversal, parent must be one of the allowed dirs after symlink
      resolution) and retains only its canonical allowed path.
    - Atomically installs via ``mkstemp`` in the destination directory,
-     ``copyfileobj`` from the validated FD, ``fsync``, ``chmod 0o644``,
-     ``os.replace`` onto the destination.  On any error the temp file is
-     unlinked.
+     ``copyfileobj`` from the validated FD, ``fsync``, preserves the existing
+     regular destination's owner and mode, then ``os.replace``s it. New files
+     retain ``mkstemp``'s restrictive ``0o600`` mode. On any error the temp
+     file is unlinked.
 
-5. Restarts any active ClamAV systemd units affected by the writes.
+6. Restarts any active ClamAV systemd units affected by the writes.
 """
 
 from __future__ import annotations
@@ -46,12 +53,14 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 from ..core.privileged_paths import (
+    MAX_CONFIG_READ_BYTES,
     PROTOCOL_VERSION,
     staging_root_for_uid,
     validate_destination,
@@ -80,7 +89,7 @@ _CLAMD_UNITS: tuple[str, ...] = (
 # 1  generic error (validation failure, IO error, restart failure)
 # 2  argument parsing error (odd number of pairs, no pairs)
 # 3  PKEXEC_UID missing/zero/non-numeric
-# 4  protocol mismatch (caller did not pass --protocol=3 first)
+# 4  protocol mismatch (caller did not pass --protocol=4 first)
 EXIT_OK = 0
 EXIT_GENERIC_ERROR = 1
 EXIT_BAD_ARGS = 2
@@ -94,7 +103,7 @@ def _parse_path_pairs(args: list[str]) -> list[tuple[Path, Path]]:
 
     Args:
         args: Flat list of alternating source and destination paths
-            (after the ``--protocol=3`` token has been consumed).
+            (after the ``--protocol=4`` token has been consumed).
 
     Returns:
         List of ``(source, destination)`` ``Path`` tuples.
@@ -132,16 +141,41 @@ def _resolve_staging_root(uid: int) -> Path:
     return staging_root_for_uid(uid)
 
 
+def _existing_destination_metadata(destination: Path) -> tuple[int, int, int] | None:
+    """Return a regular destination's ``(uid, gid, mode)``, without following links."""
+    try:
+        fd = os.open(str(destination), os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    except FileNotFoundError:
+        return None
+
+    try:
+        destination_stat = os.fstat(fd)
+    finally:
+        os.close(fd)
+
+    if not stat.S_ISREG(destination_stat.st_mode):
+        raise ValueError(f"Configuration destination is not a regular file: {destination}")
+
+    return (
+        destination_stat.st_uid,
+        destination_stat.st_gid,
+        stat.S_IMODE(destination_stat.st_mode),
+    )
+
+
 def _atomic_install(source_fd: int, destination: Path) -> None:
     """
-    Atomically install ``source_fd``'s content into ``destination`` (mode 0o644).
+    Atomically install ``source_fd``'s content into ``destination``.
 
+    Existing regular destinations retain their ownership and permissions;
+    newly created configurations use ``mkstemp``'s restrictive ``0o600`` mode.
     The temp file is created in the destination directory so ``os.replace`` is
     atomic for this one file. This function takes ownership of ``source_fd`` and
     closes it even if destination preparation fails.
     """
     with os.fdopen(source_fd, "rb", closefd=True) as source_file:
         destination.parent.mkdir(parents=True, exist_ok=True)
+        existing_metadata = _existing_destination_metadata(destination)
         tmp_fd, tmp_name = tempfile.mkstemp(
             dir=str(destination.parent),
             prefix=f".{destination.name}.",
@@ -154,7 +188,11 @@ def _atomic_install(source_fd: int, destination: Path) -> None:
                 shutil.copyfileobj(source_file, tmp_file)
                 tmp_file.flush()
                 os.fsync(tmp_file.fileno())
-            os.chmod(tmp_name, 0o644)
+                if existing_metadata is not None:
+                    uid, gid, mode = existing_metadata
+                    os.fchown(tmp_file.fileno(), uid, gid)
+                    os.fchmod(tmp_file.fileno(), mode)
+                    os.fsync(tmp_file.fileno())
             os.replace(tmp_name, destination)
         except BaseException:
             if tmp_file is None:
@@ -182,6 +220,32 @@ def _open_and_validate_source(
         os.close(source_fd)
         raise
     return source_fd
+
+
+def _read_allowlisted_config(requested_path: Path) -> int:
+    """Write one bounded, allowlisted configuration file to stdout."""
+    try:
+        config_path = validate_destination(requested_path)
+        fd = os.open(str(config_path), os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd, "rb", closefd=True) as config_file:
+            file_stat = os.fstat(config_file.fileno())
+            if not stat.S_ISREG(file_stat.st_mode):
+                raise ValueError(f"Configuration is not a regular file: {config_path}")
+            if file_stat.st_size > MAX_CONFIG_READ_BYTES:
+                raise ValueError(
+                    f"Configuration exceeds {MAX_CONFIG_READ_BYTES} byte read limit: {config_path}"
+                )
+            content = config_file.read(MAX_CONFIG_READ_BYTES + 1)
+            if len(content) > MAX_CONFIG_READ_BYTES:
+                raise ValueError(
+                    f"Configuration exceeds {MAX_CONFIG_READ_BYTES} byte read limit: {config_path}"
+                )
+    except (OSError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return EXIT_GENERIC_ERROR
+
+    sys.stdout.buffer.write(content)
+    return EXIT_OK
 
 
 def _restart_units_for_destinations(destinations: list[Path]) -> None:
@@ -259,6 +323,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return EXIT_BAD_PROTOCOL
     args = args[1:]
+
+    if args and args[0] == "--read-config":
+        if len(args) != 2:
+            print("Error: expected exactly one configuration path to read.", file=sys.stderr)
+            return EXIT_BAD_ARGS
+        return _read_allowlisted_config(Path(args[1]))
 
     try:
         pairs = _parse_path_pairs(args)

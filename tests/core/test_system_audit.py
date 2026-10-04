@@ -698,37 +698,41 @@ class TestCheckAutoUpdates:
 class TestRunLynisAudit:
     """Tests for run_lynis_audit function."""
 
-    @patch("src.core.system_audit._run_command")
-    def test_lynis_not_installed(self, mock_cmd):
-        mock_cmd.return_value = (-1, "", "command not found")
+    @patch("src.core.system_audit.which_host_command", return_value=None)
+    def test_lynis_not_installed(self, mock_resolve):
         result = run_lynis_audit()
         assert result.category == AuditCategory.DEEP_SCAN_LYNIS
         assert result.checks[0].status == AuditStatus.UNKNOWN
+        mock_resolve.assert_called_once_with("lynis")
 
     @patch("src.core.system_audit._parse_lynis_report")
     @patch("src.core.system_audit.subprocess.run")
-    @patch("src.core.system_audit._run_command")
-    def test_lynis_pkexec_cancelled(self, mock_cmd, mock_run, mock_report):
-        mock_cmd.return_value = (0, "/usr/bin/lynis", "")
+    @patch("src.core.system_audit.wrap_host_command", side_effect=lambda command: command)
+    @patch("src.core.system_audit.which_host_command", return_value="/usr/sbin/lynis")
+    def test_lynis_pkexec_cancelled(self, mock_resolve, mock_wrap, mock_run, mock_report):
         mock_run.return_value = MagicMock(returncode=126, stdout="", stderr="")
         result = run_lynis_audit()
         assert result.checks[0].status == AuditStatus.SKIPPED
+        mock_resolve.assert_called_once_with("lynis")
+        mock_wrap.assert_called_once_with(
+            ["pkexec", "/usr/sbin/lynis", "audit", "system", "--cronjob", "--quiet"]
+        )
 
 
 class TestRunRootkitCheck:
     """Tests for run_rootkit_check function."""
 
-    @patch("src.core.system_audit._run_command")
-    def test_chkrootkit_not_installed(self, mock_cmd):
-        mock_cmd.return_value = (-1, "", "command not found")
+    @patch("src.core.system_audit.which_host_command", return_value=None)
+    def test_chkrootkit_not_installed(self, mock_resolve):
         result = run_rootkit_check()
         assert result.category == AuditCategory.DEEP_SCAN_ROOTKIT
         assert result.checks[0].status == AuditStatus.UNKNOWN
+        mock_resolve.assert_called_once_with("chkrootkit")
 
     @patch("src.core.system_audit.subprocess.run")
-    @patch("src.core.system_audit._run_command")
-    def test_chkrootkit_clean(self, mock_cmd, mock_run):
-        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
+    @patch("src.core.system_audit.wrap_host_command", side_effect=lambda command: command)
+    @patch("src.core.system_audit.which_host_command", return_value="/sbin/chkrootkit")
+    def test_chkrootkit_clean(self, mock_resolve, mock_wrap, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0,
             stdout="Checking `amd'... not found\nChecking `basename'... not infected\n",
@@ -736,13 +740,14 @@ class TestRunRootkitCheck:
         )
         result = run_rootkit_check()
         assert any(c.status == AuditStatus.PASS for c in result.checks)
+        mock_resolve.assert_called_once_with("chkrootkit")
+        mock_wrap.assert_called_once_with(["pkexec", "/sbin/chkrootkit", "-q"])
 
     @patch("src.core.system_audit.subprocess.run")
-    @patch("src.core.system_audit._run_command")
-    def test_chkrootkit_nonzero_exit_is_not_clean(self, mock_cmd, mock_run):
+    @patch("src.core.system_audit.which_host_command", return_value="/usr/sbin/chkrootkit")
+    def test_chkrootkit_nonzero_exit_is_not_clean(self, mock_resolve, mock_run):
         """A non-zero chkrootkit exit means the scan did not complete; we must
         report UNKNOWN, never a false 'No rootkits detected' PASS."""
-        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
         mock_run.return_value = MagicMock(
             returncode=2,
             stdout="",
@@ -752,11 +757,11 @@ class TestRunRootkitCheck:
         statuses = [c.status for c in result.checks]
         assert AuditStatus.UNKNOWN in statuses
         assert not any(c.status == AuditStatus.PASS for c in result.checks)
+        mock_resolve.assert_called_once_with("chkrootkit")
 
     @patch("src.core.system_audit.subprocess.run")
-    @patch("src.core.system_audit._run_command")
-    def test_chkrootkit_infected(self, mock_cmd, mock_run):
-        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
+    @patch("src.core.system_audit.which_host_command", return_value="/usr/sbin/chkrootkit")
+    def test_chkrootkit_infected(self, mock_resolve, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0,
             stdout="Checking `bindshell'... INFECTED\n",
@@ -764,14 +769,13 @@ class TestRunRootkitCheck:
         )
         result = run_rootkit_check()
         assert any(c.status == AuditStatus.FAIL for c in result.checks)
+        mock_resolve.assert_called_once_with("chkrootkit")
 
     @patch("src.core.system_audit.subprocess.run")
-    @patch("src.core.system_audit._run_command")
-    def test_chkrootkit_multiple_infected_counted_individually(self, mock_cmd, mock_run):
-        """Each INFECTED line must be parsed as a separate finding. Sanitizing the
-        whole multiline stdout with a single-line sanitizer collapses newlines and
-        would merge every finding into one, undercounting the rootkits."""
-        mock_cmd.return_value = (0, "/usr/sbin/chkrootkit", "")
+    @patch("src.core.system_audit.which_host_command", return_value="/usr/sbin/chkrootkit")
+    def test_chkrootkit_multiple_infected_counted_individually(self, mock_resolve, mock_run):
+        """Multi-line stdout must preserve each finding; sanitizing it to one
+        line would merge them and undercount rootkits."""
         mock_run.return_value = MagicMock(
             returncode=0,
             stdout=(
@@ -784,6 +788,7 @@ class TestRunRootkitCheck:
         result = run_rootkit_check()
         findings = [c for c in result.checks if "INFECTED" in (c.detail or "")]
         assert len(findings) == 3
+        mock_resolve.assert_called_once_with("chkrootkit")
 
 
 # =============================================================================

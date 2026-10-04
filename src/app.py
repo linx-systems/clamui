@@ -276,7 +276,7 @@ class ClamUIApp(Adw.Application):
         if self._update_view is None:
             from .ui.update_view import UpdateView
 
-            self._update_view = UpdateView()
+            self._update_view = UpdateView(settings_manager=self._settings_manager)
         return self._update_view
 
     @property

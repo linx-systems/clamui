@@ -128,31 +128,6 @@ class TestWrapHostCommand:
                 "--max-filesize=100M",
             ]
 
-    def test_wrap_host_command_force_host_uses_host(self):
-        """Test wrap_host_command with force_host=True uses host binary."""
-        with mock.patch.object(flatpak, "is_flatpak", return_value=True):
-            # Even if an executable exists at /app/bin/clamdscan,
-            # Flatpak ClamAV commands should use flatpak-spawn --host.
-            with mock.patch("os.path.isfile", return_value=True):
-                with mock.patch("os.access", return_value=True):
-                    command = ["clamdscan", "--ping", "3"]
-                    result = flatpak.wrap_host_command(command, force_host=True)
-                    assert result == [
-                        "flatpak-spawn",
-                        "--host",
-                        "clamdscan",
-                        "--ping",
-                        "3",
-                    ]
-
-    def test_wrap_host_command_force_host_not_in_flatpak(self):
-        """Test wrap_host_command with force_host=True returns original when not in Flatpak."""
-        with mock.patch.object(flatpak, "is_flatpak", return_value=False):
-            command = ["clamdscan", "--ping", "3"]
-            result = flatpak.wrap_host_command(command, force_host=True)
-            # Not in Flatpak, so just return the original command
-            assert result == ["clamdscan", "--ping", "3"]
-
     def test_wrap_host_command_ignores_app_bin_binary(self):
         """Test Flatpak commands use host binaries even when /app/bin has a match."""
         with mock.patch.object(flatpak, "is_flatpak", return_value=True):
@@ -181,6 +156,34 @@ class TestWhichHostCommand:
                 result = flatpak.which_host_command("nonexistent")
                 assert result is None
 
+    def test_which_host_command_native_falls_back_to_sbin(self):
+        """Administrative commands remain discoverable outside a user's PATH."""
+        with (
+            mock.patch.object(flatpak, "is_flatpak", return_value=False),
+            mock.patch(
+                "shutil.which",
+                side_effect=[None, None, "/sbin/chkrootkit"],
+            ) as mock_which,
+            mock.patch.object(flatpak.Path, "is_file", return_value=True),
+        ):
+            assert flatpak.which_host_command("chkrootkit") == "/sbin/chkrootkit"
+
+        assert mock_which.call_args_list == [
+            mock.call("chkrootkit"),
+            mock.call("/usr/sbin/chkrootkit"),
+            mock.call("/sbin/chkrootkit"),
+        ]
+
+    def test_which_host_command_does_not_fallback_for_a_path(self):
+        """The fixed fallback directories only accept command basenames."""
+        with (
+            mock.patch.object(flatpak, "is_flatpak", return_value=False),
+            mock.patch("shutil.which", return_value=None) as mock_which,
+        ):
+            assert flatpak.which_host_command("../chkrootkit") is None
+
+        mock_which.assert_called_once_with("../chkrootkit")
+
     def test_which_host_command_in_flatpak_found(self):
         """Test which_host_command uses flatpak-spawn when in Flatpak."""
         with mock.patch.object(flatpak, "is_flatpak", return_value=True):
@@ -208,6 +211,40 @@ class TestWhichHostCommand:
                 result = flatpak.which_host_command("nonexistent")
                 assert result is None
 
+    def test_which_host_command_in_flatpak_falls_back_to_usr_sbin(self):
+        """A host administrative binary is resolved without a shell."""
+        missing = mock.Mock(returncode=1, stdout="")
+        found = mock.Mock(returncode=0, stdout="")
+        with (
+            mock.patch.object(flatpak, "is_flatpak", return_value=True),
+            mock.patch("subprocess.run", side_effect=[missing, found]) as mock_run,
+        ):
+            assert flatpak.which_host_command("lynis") == "/usr/sbin/lynis"
+
+        assert mock_run.call_args_list == [
+            mock.call(
+                ["flatpak-spawn", "--host", "which", "lynis"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            ),
+            mock.call(
+                [
+                    "flatpak-spawn",
+                    "--host",
+                    "test",
+                    "-f",
+                    "/usr/sbin/lynis",
+                    "-a",
+                    "-x",
+                    "/usr/sbin/lynis",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            ),
+        ]
+
     def test_which_host_command_in_flatpak_timeout(self):
         """Test which_host_command handles timeout gracefully."""
         with mock.patch.object(flatpak, "is_flatpak", return_value=True):
@@ -218,10 +255,10 @@ class TestWhichHostCommand:
                 result = flatpak.which_host_command("clamscan")
                 assert result is None
 
-    def test_which_host_command_in_flatpak_exception(self):
-        """Test which_host_command handles exceptions gracefully."""
+    def test_which_host_command_in_flatpak_os_error(self):
+        """Test which_host_command handles host-process errors gracefully."""
         with mock.patch.object(flatpak, "is_flatpak", return_value=True):
-            with mock.patch("subprocess.run", side_effect=Exception("Unexpected error")):
+            with mock.patch("subprocess.run", side_effect=OSError("host unavailable")):
                 result = flatpak.which_host_command("clamscan")
                 assert result is None
 
@@ -1180,11 +1217,7 @@ class TestCleanEnvWiring:
         clean_env = {"PATH": "/usr/bin:/bin", "HOME": "/home/user"}
         with (
             mock.patch.object(fmi, "get_clean_env", return_value=clean_env) as mock_clean,
-            mock.patch.object(
-                fmi,
-                "wrap_host_command",
-                side_effect=lambda cmd, force_host=False: cmd,
-            ),
+            mock.patch.object(fmi, "wrap_host_command", side_effect=lambda cmd: cmd),
             mock.patch("subprocess.run") as mock_run,
         ):
             fmi._refresh_dolphin_service_menu_cache()

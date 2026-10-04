@@ -35,7 +35,8 @@ SETUP_GUIDES = {
         "title": N_("clamscan Installation"),
         "commands": [
             ("Ubuntu/Debian", "sudo apt install clamav"),
-            ("Fedora", "sudo dnf install clamav"),
+            ("Fedora Workstation", "sudo dnf install clamav"),
+            ("Fedora Atomic", "sudo rpm-ostree install clamav clamd\nsudo systemctl reboot"),
             ("Arch Linux", "sudo pacman -S clamav"),
         ],
         "notes": N_(
@@ -46,7 +47,11 @@ SETUP_GUIDES = {
         "title": N_("freshclam Installation"),
         "commands": [
             ("Ubuntu/Debian", "sudo apt install clamav-freshclam"),
-            ("Fedora", "sudo dnf install clamav-freshclam"),
+            ("Fedora Workstation", "sudo dnf install clamav-freshclam"),
+            (
+                "Fedora Atomic",
+                "sudo rpm-ostree install clamav-freshclam\nsudo systemctl reboot",
+            ),
             ("Arch Linux", "sudo pacman -S clamav"),
         ],
         "notes": N_(
@@ -59,7 +64,8 @@ SETUP_GUIDES = {
         "title": N_("clamdscan Installation"),
         "commands": [
             ("Ubuntu/Debian", "sudo apt install clamav-daemon"),
-            ("Fedora", "sudo dnf install clamd"),
+            ("Fedora Workstation", "sudo dnf install clamd"),
+            ("Fedora Atomic", "sudo rpm-ostree install clamd\nsudo systemctl reboot"),
             ("Arch Linux", "sudo pacman -S clamav"),
         ],
         "notes": N_(
@@ -74,8 +80,12 @@ SETUP_GUIDES = {
                 "sudo apt install clamav-daemon\nsudo systemctl enable clamav-daemon\nsudo systemctl start clamav-daemon",
             ),
             (
-                "Fedora",
+                "Fedora Workstation",
                 "sudo dnf install clamd clamav-freshclam\nsudo freshclam\nsudo systemctl enable clamd@scan\nsudo systemctl start clamd@scan",
+            ),
+            (
+                "Fedora Atomic",
+                "sudo rpm-ostree install clamd clamav-freshclam\nsudo systemctl reboot",
             ),
             (
                 "Arch Linux",

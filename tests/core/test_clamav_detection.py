@@ -3,6 +3,7 @@
 
 import re
 import subprocess
+from pathlib import Path
 from unittest import mock
 
 from src.core import clamav_detection
@@ -348,8 +349,8 @@ class TestCheckClamdscanInstalled:
             assert installed is False
             assert "not installed" in message.lower()
 
-    def test_check_clamdscan_uses_wrap_host_command_with_force_host(self):
-        """Test check_clamdscan_installed uses wrap_host_command with force_host=True."""
+    def test_check_clamdscan_uses_wrap_host_command(self):
+        """Test check_clamdscan_installed wraps its host command."""
         with mock.patch.object(
             clamav_detection, "which_host_command", return_value="/usr/bin/clamdscan"
         ):
@@ -365,8 +366,7 @@ class TestCheckClamdscanInstalled:
                         stderr="",
                     )
                     clamav_detection.check_clamdscan_installed()
-                    # Uses force_host=True because clamdscan must talk to HOST's daemon
-                    mock_wrap.assert_called_once_with(["clamdscan", "--version"], force_host=True)
+                    mock_wrap.assert_called_once_with(["clamdscan", "--version"])
 
 
 class TestGetClamdSocketPath:
@@ -697,8 +697,7 @@ class TestCheckClamdConnection:
                                         "/etc/clamd.d/scan.conf",
                                         "--ping",
                                         "3",
-                                    ],
-                                    force_host=True,
+                                    ]
                                 )
 
     def test_check_clamd_connection_permission_denied_mentions_socket_permissions(self):
@@ -734,8 +733,8 @@ class TestCheckClamdConnection:
                         assert "localsocketgroup" in message.lower()
                         assert "/etc/clamd.d/scan.conf" in message
 
-    def test_check_clamd_connection_uses_wrap_host_command_with_force_host(self):
-        """Test check_clamd_connection uses wrap_host_command with force_host=True."""
+    def test_check_clamd_connection_uses_wrap_host_command(self):
+        """Test check_clamd_connection wraps its host command."""
         with mock.patch.object(
             clamav_detection,
             "check_clamdscan_installed",
@@ -754,10 +753,7 @@ class TestCheckClamdConnection:
                             stderr="",
                         )
                         clamav_detection.check_clamd_connection()
-                        # Uses force_host=True because daemon runs on HOST
-                        mock_wrap.assert_called_once_with(
-                            ["clamdscan", "--ping", "3"], force_host=True
-                        )
+                        mock_wrap.assert_called_once_with(["clamdscan", "--ping", "3"])
 
 
 class TestGetClamavPath:
@@ -895,6 +891,49 @@ class TestCheckDatabaseAvailable:
                 is_available, error = clamav_detection.check_database_available()
                 assert is_available is False
                 assert "Permission denied" in error
+
+    def test_unreadable_definitions_block_clamscan_but_not_daemon(self):
+        """Daemon ownership is valid when clamd, rather than desktop, reads definitions."""
+        database_dir = mock.MagicMock()
+        database_dir.exists.return_value = True
+        database_file = mock.MagicMock()
+        database_file.suffix = ".cvd"
+        database_file.open.side_effect = PermissionError("Access denied")
+        database_dir.iterdir.return_value = [database_file]
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=False),
+            mock.patch("src.core.clamav_detection.Path", return_value=database_dir),
+        ):
+            direct_available, direct_error = clamav_detection.check_database_available(
+                require_readable=True
+            )
+            daemon_available, daemon_error = clamav_detection.check_database_available(
+                require_readable=False
+            )
+
+        assert direct_available is False
+        assert "not readable" in direct_error
+        assert daemon_available is True
+        assert daemon_error is None
+
+    def test_database_discovery_uses_selected_freshclam_config(self):
+        """Database lookup starts with DatabaseDirectory from the selected config."""
+        settings_manager = mock.MagicMock()
+        config = mock.MagicMock()
+        config.get_value.return_value = "/srv/clamav-db"
+        with (
+            mock.patch.object(
+                clamav_detection,
+                "resolve_freshclam_conf_path",
+                return_value="/opt/clamav/freshclam.conf",
+            ) as resolve,
+            mock.patch("src.core.clamav_config.parse_config", return_value=(config, None)),
+        ):
+            directories = clamav_detection._host_database_dirs_to_check(settings_manager)
+
+        assert directories[0] == "/srv/clamav-db"
+        resolve.assert_called_once_with(settings_manager)
 
     def test_check_database_available_oserror(self, tmp_path):
         """Test check_database_available handles OS errors."""
@@ -1299,6 +1338,31 @@ class TestResolveFreshclamConfPath:
             result = clamav_detection.resolve_freshclam_conf_path(mock_sm)
             assert result == "/etc/freshclam.conf"
             mock_sm.set.assert_called_once_with("freshclam_conf_path", "/etc/freshclam.conf")
+
+    def test_skips_legacy_flatpak_saved_path(self):
+        """A surviving sandbox config never wins over the current host config."""
+        mock_sm = mock.Mock()
+        mock_sm.get.return_value = clamav_detection._LEGACY_FLATPAK_FRESHCLAM_CONF_PATH
+
+        with (
+            mock.patch.object(clamav_detection, "is_flatpak", return_value=True),
+            mock.patch.object(
+                clamav_detection,
+                "get_freshclam_config_path",
+                return_value=Path(clamav_detection._LEGACY_FLATPAK_FRESHCLAM_CONF_PATH),
+            ),
+            mock.patch.object(
+                clamav_detection,
+                "detect_freshclam_conf_path",
+                return_value="/etc/freshclam.conf",
+            ) as detect,
+            mock.patch.object(clamav_detection, "config_file_exists") as exists,
+        ):
+            assert clamav_detection.resolve_freshclam_conf_path(mock_sm) == "/etc/freshclam.conf"
+
+        exists.assert_not_called()
+        detect.assert_called_once_with()
+        assert mock.call("freshclam_conf_path", "") in mock_sm.set.call_args_list
 
     def test_returns_none_when_nothing_found(self):
         """Test returns None when no config found."""

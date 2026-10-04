@@ -1268,3 +1268,41 @@ class TestLazyPageCreation:
         # Should not raise
         window._ensure_page_created("nonexistent_page")
         assert "nonexistent_page" not in window._created_pages
+
+
+class TestAuthorizedConfigRead:
+    """Tests the explicit asynchronous privileged-read action."""
+
+    def test_request_reads_selected_freshclam_config_in_worker(self, mock_gi_modules):
+        from src.ui.preferences.window import PreferencesWindow
+
+        window = mock.MagicMock()
+        window._freshclam_conf_path = "/etc/freshclam.conf"
+        with mock.patch("src.ui.preferences.window.threading.Thread") as thread:
+            PreferencesWindow._request_config_authorized_read(window, "freshclam")
+
+        thread.assert_called_once_with(
+            target=window._authorized_config_read_background,
+            args=("freshclam", "/etc/freshclam.conf"),
+            daemon=True,
+        )
+
+    def test_worker_uses_explicit_authorization(self, mock_gi_modules):
+        from src.ui.preferences.window import PreferencesWindow
+
+        window = mock.MagicMock()
+        config = mock.MagicMock()
+        with (
+            mock.patch(
+                "src.ui.preferences.window.parse_config", return_value=(config, None)
+            ) as parse,
+            mock.patch("src.ui.preferences.window.GLib.idle_add") as idle_add,
+        ):
+            PreferencesWindow._authorized_config_read_background(
+                window, "clamd", "/etc/clamd.d/scan.conf"
+            )
+
+        parse.assert_called_once_with("/etc/clamd.d/scan.conf", authorize_read=True)
+        idle_add.assert_called_once_with(
+            window._apply_authorized_config_read, "clamd", config, None
+        )

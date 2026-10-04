@@ -287,6 +287,24 @@ class TestFreshclamUpdaterBuildCommand:
                         assert cmd[0] == "/usr/bin/freshclam"
                         assert "--verbose" in cmd
 
+    def test_build_command_uses_selected_freshclam_config(self, updater_module):
+        """Manual updates must invoke the file selected in Preferences."""
+        FreshclamUpdater = updater_module["FreshclamUpdater"]
+        settings_manager = MagicMock()
+        with (
+            patch(
+                "src.core.updater.resolve_freshclam_conf_path",
+                return_value="/opt/clamav/custom-freshclam.conf",
+            ),
+            patch("src.core.updater.get_freshclam_path", return_value="/usr/bin/freshclam"),
+            patch("src.core.updater.get_pkexec_path", return_value=None),
+            patch("src.core.updater.wrap_host_command", side_effect=lambda command: command),
+        ):
+            updater = FreshclamUpdater(log_manager=MagicMock(), settings_manager=settings_manager)
+            command = updater._build_command()
+
+        assert "--config-file=/opt/clamav/custom-freshclam.conf" in command
+
     def test_build_command_uses_wrap_host_command(self, updater_module):
         """Test command is wrapped for Flatpak compatibility."""
         FreshclamUpdater = updater_module["FreshclamUpdater"]

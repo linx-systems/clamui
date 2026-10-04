@@ -96,7 +96,7 @@ class ViewCoordinator:
         from .update_view import UpdateView
 
         if self._update_view is None:
-            self._update_view = UpdateView()
+            self._update_view = UpdateView(settings_manager=self._context.settings_manager)
         return self._update_view
 
     @property

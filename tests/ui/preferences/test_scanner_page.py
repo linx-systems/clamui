@@ -905,31 +905,8 @@ class TestScannerPageAsyncDaemonCheck:
 class TestScannerPageLearnMore:
     """Tests for learn more documentation link."""
 
-    def test_on_learn_more_clicked_opens_documentation_when_exists(self, mock_gi_modules, tmp_path):
-        """Test _on_learn_more_clicked opens documentation when file exists."""
-        mock_parent_window = mock.MagicMock()
-
-        from src.ui.preferences.scanner_page import ScannerPage
-
-        # Mock the Path and exists check
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
-            with mock.patch("subprocess.Popen") as mock_popen:
-                # Make the docs path exist
-                mock_docs_path = mock.MagicMock()
-                mock_docs_path.exists.return_value = True
-                mock_docs_path.__str__.return_value = "/path/to/docs/SCAN_BACKENDS.md"
-                mock_path.return_value.parent.parent.parent.parent = mock.MagicMock()
-                mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                    mock_docs_path
-                )
-
-                ScannerPage._on_learn_more_clicked(mock_parent_window)
-
-                # Should open the file with xdg-open
-                mock_popen.assert_called_once()
-
-    def test_on_learn_more_clicked_shows_error_when_not_exists(self, mock_gi_modules):
-        """Test _on_learn_more_clicked shows error when documentation doesn't exist."""
+    def test_on_learn_more_clicked_shows_error_when_open_fails(self, mock_gi_modules):
+        """Test that a failed documentation launch shows an error."""
         adw = mock_gi_modules["adw"]
         mock_parent_window = mock.MagicMock()
         mock_dialog = mock.MagicMock()
@@ -937,56 +914,15 @@ class TestScannerPageLearnMore:
 
         from src.ui.preferences.scanner_page import ScannerPage
 
-        # Mock the Path and exists check
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
+        with mock.patch("subprocess.Popen") as mock_popen:
             with mock.patch.object(adw, "Window", mock_window_class):
-                # Make the docs path not exist
-                # Chain: Path(__file__).parent.parent.parent.parent / "docs" / "SCAN_BACKENDS.md"
-                mock_docs_path = mock.MagicMock()
-                mock_docs_path.exists.return_value = False
-                # Need to chain two __truediv__ calls
-                intermediate_mock = mock.MagicMock()
-                intermediate_mock.__truediv__.return_value = mock_docs_path
-                mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                    intermediate_mock
-                )
+                mock_popen.side_effect = Exception("Failed to open")
 
                 ScannerPage._on_learn_more_clicked(mock_parent_window)
 
-                # Should create and present Adw.Window-based error dialog
                 mock_window_class.assert_called_once()
                 mock_dialog.set_transient_for.assert_called_once_with(mock_parent_window)
                 mock_dialog.present.assert_called_once()
-
-    def test_on_learn_more_clicked_shows_error_when_open_fails(self, mock_gi_modules):
-        """Test _on_learn_more_clicked shows error when opening file fails."""
-        adw = mock_gi_modules["adw"]
-        mock_parent_window = mock.MagicMock()
-        mock_dialog = mock.MagicMock()
-        mock_window_class = mock.MagicMock(return_value=mock_dialog)
-
-        from src.ui.preferences.scanner_page import ScannerPage
-
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
-            with mock.patch("subprocess.Popen") as mock_popen:
-                with mock.patch.object(adw, "Window", mock_window_class):
-                    # Make the docs path exist
-                    mock_docs_path = mock.MagicMock()
-                    mock_docs_path.exists.return_value = True
-                    mock_path.return_value.parent.parent.parent.parent = mock.MagicMock()
-                    mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                        mock_docs_path
-                    )
-
-                    # Make Popen raise an exception
-                    mock_popen.side_effect = Exception("Failed to open")
-
-                    ScannerPage._on_learn_more_clicked(mock_parent_window)
-
-                    # Should create and present Adw.Window-based error dialog
-                    mock_window_class.assert_called_once()
-                    mock_dialog.set_transient_for.assert_called_once_with(mock_parent_window)
-                    mock_dialog.present.assert_called_once()
 
 
 class TestScannerPagePopulateFields:

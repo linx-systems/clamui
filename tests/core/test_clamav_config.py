@@ -998,8 +998,8 @@ class TestWriteConfigWithElevation:
         assert success is False
         assert "No file path specified" in error
 
-    def test_write_sets_permissions(self, tmp_path):
-        """Test writing sets correct file permissions."""
+    def test_write_sets_restrictive_permissions_for_new_file(self, tmp_path):
+        """A new direct configuration must not be broadly readable."""
         config_file = tmp_path / "test.conf"
         config = ClamAVConfig(file_path=config_file)
         config.set_value("LogVerbose", "yes")
@@ -1007,8 +1007,31 @@ class TestWriteConfigWithElevation:
         success, error = write_config_with_elevation(config)
 
         assert success is True
-        # Check file has 0o644 permissions (rw-r--r--)
-        assert (config_file.stat().st_mode & 0o777) == 0o644
+        assert error is None
+        assert (config_file.stat().st_mode & 0o777) == 0o600
+
+    @pytest.mark.parametrize("mode", [0o600, 0o640])
+    def test_direct_write_preserves_existing_confidential_metadata(self, tmp_path, mode):
+        """An edit must retain an existing private configuration's metadata."""
+        config_file = tmp_path / "freshclam.conf"
+        config_file.write_text("HTTPProxyPassword secret\nChecks 24\n")
+        os.chmod(config_file, mode)
+        original_stat = config_file.stat()
+
+        success, error = clamav_config_module._write_config_direct(
+            config_file,
+            "HTTPProxyPassword secret\nChecks 12\n",
+        )
+
+        replacement_stat = config_file.stat()
+        assert success is True
+        assert error is None
+        assert config_file.read_text() == "HTTPProxyPassword secret\nChecks 12\n"
+        assert replacement_stat.st_mode & 0o777 == mode
+        assert (replacement_stat.st_uid, replacement_stat.st_gid) == (
+            original_stat.st_uid,
+            original_stat.st_gid,
+        )
 
     def test_write_preserves_config_content(self, tmp_path):
         """Test writing preserves all config content."""
@@ -1429,6 +1452,27 @@ class TestParseConfigFlatpak:
 
         assert config is None
         assert "permission denied" in error.lower()
+
+    def test_explicit_authorization_reads_root_only_host_config(self):
+        """A denied host read only reaches the helper after explicit authorization."""
+        config_content = "DatabaseDirectory /var/lib/clamav\n"
+        with (
+            mock.patch("src.core.flatpak.is_flatpak", return_value=True),
+            mock.patch("src.core.clamav_detection.config_file_exists", return_value=True),
+            mock.patch(
+                "src.core.flatpak.read_host_file",
+                return_value=(None, "Permission denied: Cannot read /etc/freshclam.conf"),
+            ),
+            mock.patch(
+                "src.core.clamav_config.read_config_with_elevation",
+                return_value=(config_content, None),
+            ) as read_elevated,
+        ):
+            config, error = parse_config("/etc/freshclam.conf", authorize_read=True)
+
+        assert error is None
+        assert config.get_value("DatabaseDirectory") == "/var/lib/clamav"
+        read_elevated.assert_called_once_with("/etc/freshclam.conf")
 
     def test_user_path_in_flatpak_uses_direct_io(self, tmp_path):
         """Test that user-writable paths in Flatpak use direct I/O."""

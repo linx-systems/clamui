@@ -30,9 +30,9 @@ from src.core.privileged_paths import (
 class TestProtocolVersion:
     """The protocol version is part of the security contract."""
 
-    def test_protocol_version_is_three(self):
-        """Helper rejects callers that don't pass --protocol=3."""
-        assert PROTOCOL_VERSION == 3
+    def test_protocol_version_is_four(self):
+        """Helper rejects callers that do not opt into allowlisted read mode."""
+        assert PROTOCOL_VERSION == 4
 
 
 class TestAllowlistShape:

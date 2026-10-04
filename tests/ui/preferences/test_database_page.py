@@ -714,3 +714,30 @@ class TestThirdPartyProviders:
 
         for provider in THIRD_PARTY_PROVIDERS:
             assert provider["free"] is True, f"{provider['name']} should be free"
+
+
+class TestDatabaseConfigSelection:
+    """Tests selection is committed only after settings persistence."""
+
+    def test_failed_persistence_keeps_current_selection(self, mock_gi_modules):
+        from src.ui.preferences.database_page import DatabasePage
+
+        parent = mock.MagicMock()
+        parent._freshclam_conf_path = "/etc/freshclam.conf"
+        parent._settings_manager.set.return_value = False
+        path_row = mock.MagicMock()
+
+        saved = DatabasePage._apply_config_selection(
+            parent,
+            path_row,
+            "freshclam_conf_path",
+            "_freshclam_conf_path",
+            "/opt/clamav/custom.conf",
+            "/opt/clamav/custom.conf",
+            "Selected",
+        )
+
+        assert saved is False
+        assert parent._freshclam_conf_path == "/etc/freshclam.conf"
+        path_row.set_subtitle.assert_not_called()
+        parent._reload_freshclam_config.assert_not_called()

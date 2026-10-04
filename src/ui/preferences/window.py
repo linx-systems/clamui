@@ -802,6 +802,56 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
             self._freshclam_load_error = str(e)
         self._notify_load_errors()
 
+    def _request_config_authorized_read(self, config_kind: str) -> None:
+        """Start a user-requested privileged config read without blocking GTK."""
+        if config_kind not in {"freshclam", "clamd"}:
+            logger.warning("Ignoring unknown authorized config read kind: %s", config_kind)
+            return
+        path = self._freshclam_conf_path if config_kind == "freshclam" else self._clamd_conf_path
+        thread = threading.Thread(
+            target=self._authorized_config_read_background,
+            args=(config_kind, path),
+            daemon=True,
+        )
+        thread.start()
+
+    def _authorized_config_read_background(self, config_kind: str, path: str) -> None:
+        """Read an allowlisted root-only config after the user requested it."""
+        config, error = parse_config(path, authorize_read=True)
+        GLib.idle_add(self._apply_authorized_config_read, config_kind, config, error)
+
+    def _apply_authorized_config_read(self, config_kind: str, config, error: str | None) -> bool:
+        """Apply an authorized read result on the GTK thread."""
+        if error or config is None:
+            self.add_toast(
+                Adw.Toast.new(
+                    _(
+                        "Could not load configuration with administrator authorization: {error}"
+                    ).format(error=error or _("Unknown error"))
+                )
+            )
+            return False
+
+        if config_kind == "freshclam":
+            self._freshclam_config = config
+            self._freshclam_load_error = None
+            self._populate_freshclam_fields()
+        else:
+            self._clamd_config = config
+            self._clamd_load_error = None
+            self._clamd_available = True
+            self._populate_clamd_fields()
+            self._populate_onaccess_fields()
+
+        self.add_toast(
+            Adw.Toast.new(
+                _("Loaded {file} with administrator authorization").format(
+                    file="freshclam.conf" if config_kind == "freshclam" else "clamd.conf"
+                )
+            )
+        )
+        return False
+
     def _populate_freshclam_fields(self):
         """
         Populate freshclam configuration fields from loaded config.

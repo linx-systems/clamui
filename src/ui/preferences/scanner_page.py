@@ -141,6 +141,19 @@ class ScannerPage(PreferencesPageMixin):
             on_browse=_on_browse_clamd,
         )
 
+        if parent_window is not None:
+            read_button = Gtk.Button(label=_("Read as Administrator"))
+            read_button.set_valign(Gtk.Align.CENTER)
+            read_button.add_css_class("flat")
+            read_button.set_tooltip_text(
+                _("Request administrator authorization to read a protected configuration file")
+            )
+            read_button.connect(
+                "clicked",
+                lambda _button: parent_window._request_config_authorized_read("clamd"),
+            )
+            path_row.add_suffix(read_button)
+
         if clamd_available:
             # Create file type scanning group
             ScannerPage._create_scanning_group(page, widgets_dict, temp_instance)
@@ -536,37 +549,16 @@ class ScannerPage(PreferencesPageMixin):
     @staticmethod
     def _on_learn_more_clicked(parent_window):
         """
-        Open the scan backends documentation file.
-
-        Opens docs/SCAN_BACKENDS.md in the user's default application
-        (typically a web browser or text editor) using xdg-open.
+        Open the scan backends documentation in the user's default browser.
 
         Args:
             parent_window: Parent window to present error dialogs on
         """
         import subprocess
 
-        # Get the path to the documentation file
-        # From src/ui/preferences/scanner_page.py -> src/ui/preferences/ -> src/ui/ -> src/ -> project_root/
-        docs_path = Path(__file__).parent.parent.parent.parent / "docs" / "SCAN_BACKENDS.md"
-
-        # Check if file exists
-        if not docs_path.exists():
-            # Show error if documentation doesn't exist
-            ScannerPage._show_message_dialog(
-                parent_window,
-                _("Documentation Not Found"),
-                _(
-                    "The scan backends documentation file could not be found. "
-                    "It may have been moved or deleted."
-                ),
-            )
-            return
-
         try:
-            # Use xdg-open on Linux to open file in default application
             subprocess.Popen(
-                ["xdg-open", str(docs_path)],
+                ["xdg-open", "https://clamui.com/docs/reference/scan-backends/"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True,

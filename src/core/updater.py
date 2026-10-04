@@ -20,6 +20,7 @@ from pathlib import Path
 
 from gi.repository import GLib
 
+from .clamav_detection import detect_freshclam_conf_path, resolve_freshclam_conf_path
 from .flatpak import (
     get_clamav_database_dir,
     is_flatpak,
@@ -148,7 +149,11 @@ chown "$dir_owner:$dir_group" "$staging" || exit 1
 # Preserve the caller's stdin explicitly: POSIX shells otherwise connect
 # asynchronous commands to /dev/null.
 exec 3<&0
-"$1" --datadir="$staging" --verbose <&3 &
+if [ -n "${2:-}" ]; then
+    "$1" "$2" --datadir="$staging" --verbose <&3 &
+else
+    "$1" --datadir="$staging" --verbose <&3 &
+fi
 freshclam_pid=$!
 exec 3<&-
 wait "$freshclam_pid"
@@ -308,19 +313,30 @@ class FreshclamUpdater:
     while safely updating the UI via GLib.idle_add.
     """
 
-    def __init__(self, log_manager: LogManager | None = None):
+    def __init__(self, log_manager: LogManager | None = None, settings_manager=None):
         """
-        Initialize the updater.
+        Initialize updater.
 
         Args:
-            log_manager: Optional LogManager instance for saving update logs.
-                         If not provided, a default instance is created.
+            log_manager: Optional LogManager instance saving update logs. If not
+                provided, a default instance is created.
+            settings_manager: Optional settings source for the selected host
+                freshclam configuration.
         """
         self._current_process: subprocess.Popen | None = None
         self._process_lock = threading.Lock()
         self._update_cancelled = False
         self._force_update_backup_dir: Path | None = None
-        self._log_manager = log_manager if log_manager else LogManager()
+        self._log_manager = log_manager or LogManager()
+        self._settings_manager = settings_manager
+        self._freshclam_config_path = (
+            resolve_freshclam_conf_path(settings_manager) if settings_manager is not None else None
+        )
+
+    def _refresh_selected_config(self) -> None:
+        """Refresh the path selected in Preferences before each update."""
+        if self._settings_manager is not None:
+            self._freshclam_config_path = resolve_freshclam_conf_path(self._settings_manager)
 
     def check_available(self) -> tuple[bool, str | None]:
         """
@@ -580,6 +596,12 @@ class FreshclamUpdater:
             stderr=version_or_error or "freshclam not installed",
             error_message=version_or_error,
         )
+
+    def _uses_custom_freshclam_config(self) -> bool:
+        """Return whether the user selected a config different from the host default."""
+        if self._settings_manager is None or not self._freshclam_config_path:
+            return False
+        return self._freshclam_config_path != detect_freshclam_conf_path()
 
     def _try_service_update_result(
         self, *, force: bool, prefer_service: bool
@@ -912,12 +934,16 @@ class FreshclamUpdater:
             UpdateResult with update details
         """
         start_time = time.monotonic()
+        self._refresh_selected_config()
 
         availability_result = self._check_availability_result()
         if availability_result is not None:
             return self._finish_update(availability_result, start_time)
 
-        service_result = self._try_service_update_result(force=force, prefer_service=prefer_service)
+        service_result = self._try_service_update_result(
+            force=force,
+            prefer_service=prefer_service and not self._uses_custom_freshclam_config(),
+        )
         if service_result is not None:
             return self._finish_update(service_result, start_time)
 
@@ -1039,43 +1065,34 @@ class FreshclamUpdater:
         """
         freshclam = get_freshclam_path() or "freshclam"
         pkexec = get_pkexec_path()
+        config_arg = (
+            f"--config-file={self._freshclam_config_path}" if self._freshclam_config_path else None
+        )
 
         if force:
             script = _build_force_update_script()
+            command_args = [freshclam]
+            if config_arg:
+                command_args.append(config_arg)
             if pkexec:
-                # Pass freshclam as $1 (positional data), never as shell source.
-                # This keeps paths containing shell metacharacters harmless.
                 cmd = [
                     pkexec,
                     "sh",
                     "-c",
                     script,
-                    "clamui-force-update",  # $0 (script name for diagnostics)
-                    freshclam,  # $1 (safe - not interpreted as shell syntax)
+                    "clamui-force-update",
+                    *command_args,
                 ]
             else:
-                # Without pkexec the same transaction is attempted directly;
-                # it may fail with a permission error for root-owned databases,
-                # but it never falls back to deleting live definitions.
-                cmd = [
-                    "sh",
-                    "-c",
-                    script,
-                    "clamui-force-update",
-                    freshclam,
-                ]
+                # Without pkexec the transaction is attempted directly; it may
+                # fail on root-owned databases but never deletes live definitions.
+                cmd = ["sh", "-c", script, "clamui-force-update", *command_args]
             return wrap_host_command(cmd)
 
-        if pkexec:
-            cmd = [pkexec, freshclam]
-        else:
-            # Fallback to running without elevation (may fail with permission error)
-            cmd = [freshclam]
-
-        # Add verbose flag for more detailed output
+        cmd = [pkexec, freshclam] if pkexec else [freshclam]
+        if config_arg:
+            cmd.append(config_arg)
         cmd.append("--verbose")
-
-        # Wrap with flatpak-spawn if running inside Flatpak sandbox
         return wrap_host_command(cmd)
 
     def _parse_results(self, stdout: str, stderr: str, exit_code: int) -> UpdateResult:

@@ -24,7 +24,7 @@ import pytest
 # Contract tables
 # ---------------------------------------------------------------------------
 
-EXPECTED_FAMILIES = ("DEBIAN", "FEDORA", "ARCH")
+EXPECTED_FAMILIES = ("DEBIAN", "FEDORA", "FEDORA_ATOMIC", "ARCH")
 
 EXPECTED_TARGETS = (
     "CLAMAV",
@@ -60,6 +60,20 @@ COMMAND_MATRIX: list[tuple[str, str, str | None]] = [
     ("INTRUSION_PREVENTION", "FEDORA", "sudo dnf install fail2ban"),
     ("LYNIS", "FEDORA", "sudo dnf install lynis"),
     ("CHKROOTKIT", "FEDORA", "sudo dnf install chkrootkit"),
+    # -- Fedora Atomic -----------------------------------------------------
+    ("CLAMAV", "FEDORA_ATOMIC", "sudo rpm-ostree install clamav clamd\nsudo systemctl reboot"),
+    (
+        "FRESHCLAM",
+        "FEDORA_ATOMIC",
+        "sudo rpm-ostree install clamav-freshclam\nsudo systemctl reboot",
+    ),
+    ("CLAMD", "FEDORA_ATOMIC", "sudo rpm-ostree install clamd\nsudo systemctl reboot"),
+    ("FIREWALL", "FEDORA_ATOMIC", None),
+    ("FIREWALL_GUI", "FEDORA_ATOMIC", None),
+    ("AUTOMATIC_UPDATES", "FEDORA_ATOMIC", None),
+    ("INTRUSION_PREVENTION", "FEDORA_ATOMIC", None),
+    ("LYNIS", "FEDORA_ATOMIC", "sudo rpm-ostree install lynis\nsudo systemctl reboot"),
+    ("CHKROOTKIT", "FEDORA_ATOMIC", "sudo rpm-ostree install chkrootkit\nsudo systemctl reboot"),
     # -- Arch family -------------------------------------------------------
     ("CLAMAV", "ARCH", "sudo pacman -S clamav"),
     ("FRESHCLAM", "ARCH", "sudo pacman -S clamav"),
@@ -79,12 +93,14 @@ COMMAND_MATRIX: list[tuple[str, str, str | None]] = [
 FAMILY_PREFIX = {
     "DEBIAN": "sudo apt install ",
     "FEDORA": "sudo dnf install ",
+    "FEDORA_ATOMIC": "sudo rpm-ostree install ",
     "ARCH": "sudo pacman -S ",
 }
 
 FOREIGN_MANAGERS = {
     "DEBIAN": ("dnf", "pacman"),
     "FEDORA": ("apt", "pacman"),
+    "FEDORA_ATOMIC": ("apt", "dnf", "pacman"),
     "ARCH": ("apt", "dnf"),
 }
 
@@ -117,6 +133,22 @@ PRETTY_NAME="Arch Linux"
 ID=arch
 BUILD_ID=rolling
 HOME_URL="https://archlinux.org/"
+"""
+
+FEDORA_KINOITE_OS_RELEASE = """\
+NAME="Fedora Linux"
+ID=fedora
+VARIANT="KDE Plasma"
+VARIANT_ID=kinoite
+VERSION_ID=41
+"""
+
+FEDORA_SILVERBLUE_OS_RELEASE = """\
+NAME="Fedora Linux"
+ID=fedora
+VARIANT="Silverblue"
+VARIANT_ID=silverblue
+VERSION_ID=41
 """
 
 
@@ -206,6 +238,15 @@ class TestParseDistroFamilyExactIds:
         parse_distro_family = _module().parse_distro_family
 
         assert parse_distro_family(os_release) is _family(expected_family)
+
+    @pytest.mark.parametrize(
+        "os_release",
+        [FEDORA_KINOITE_OS_RELEASE, FEDORA_SILVERBLUE_OS_RELEASE],
+    )
+    def test_atomic_variants_use_rpm_ostree(self, os_release):
+        parse_distro_family = _module().parse_distro_family
+
+        assert parse_distro_family(os_release) is _family("FEDORA_ATOMIC")
 
     @pytest.mark.parametrize(
         "line",
@@ -428,6 +469,7 @@ class TestDetectDistroFamily:
             (UBUNTU_OS_RELEASE, "DEBIAN"),
             (FEDORA_OS_RELEASE, "FEDORA"),
             (ARCH_OS_RELEASE, "ARCH"),
+            (FEDORA_KINOITE_OS_RELEASE, "FEDORA_ATOMIC"),
         ],
     )
     def test_detects_family_from_host_file(self, os_release, expected_family):
@@ -492,6 +534,11 @@ class TestRecommendInstallCommand:
             (ARCH_OS_RELEASE, "LYNIS", "sudo pacman -S lynis"),
             (ARCH_OS_RELEASE, "CHKROOTKIT", None),
             (ARCH_OS_RELEASE, "AUTOMATIC_UPDATES", None),
+            (
+                FEDORA_KINOITE_OS_RELEASE,
+                "FRESHCLAM",
+                "sudo rpm-ostree install clamav-freshclam\nsudo systemctl reboot",
+            ),
         ],
     )
     def test_end_to_end_from_host_file(self, os_release, target, expected):
@@ -521,6 +568,18 @@ class TestRecommendInstallCommand:
 
         assert result == expected
         mock_detect.assert_called_once_with()
+
+    @pytest.mark.parametrize("target", EXPECTED_TARGETS)
+    def test_atomic_recommendations_never_suggest_dnf(self, target):
+        module = _module()
+
+        with _host_os_release(FEDORA_SILVERBLUE_OS_RELEASE):
+            command = module.recommend_install_command(_target(target))
+
+        if command is not None:
+            assert command.startswith("sudo rpm-ostree install ")
+            assert "sudo systemctl reboot" in command
+            assert "dnf" not in command
 
     def test_recommendation_never_probes_for_package_manager_binaries(self):
         """Issue #184: an Arch host must never be told to run apt."""

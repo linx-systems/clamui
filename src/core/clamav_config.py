@@ -21,6 +21,7 @@ from .privileged_paths import (
     PROTOCOL_VERSION,
     is_running_as_root,
     staging_root_for_uid,
+    validate_destination,
 )
 
 logger = logging.getLogger(__name__)
@@ -339,21 +340,22 @@ class ClamAVConfig:
         return result
 
 
-def parse_config(file_path: str) -> tuple[ClamAVConfig | None, str | None]:
+def parse_config(
+    file_path: str, *, authorize_read: bool = False
+) -> tuple[ClamAVConfig | None, str | None]:
     """
     Parse a ClamAV configuration file.
 
     Reads and parses ClamAV config files (freshclam.conf, clamd.conf) which use
     a simple key-value format (not INI format, no sections).
 
-    Format:
-    - Key Value (separated by space, value is everything after first space)
-    - Lines starting with # are comments
-    - Empty lines are preserved
-    - Same key can appear multiple times (multi-value options)
+    ``authorize_read`` is only for an explicit user action in Preferences. It
+    permits an installed, allowlisted privileged helper to read a root-only
+    system config; ordinary loads never trigger authentication.
 
     Args:
         file_path: Path to the configuration file
+        authorize_read: Whether the user explicitly approved an elevated read
 
     Returns:
         Tuple of (config, error):
@@ -387,6 +389,8 @@ def parse_config(file_path: str) -> tuple[ClamAVConfig | None, str | None]:
             return (None, f"Configuration file not found: {file_path}")
 
         content, error = read_host_file(str(resolved_path))
+        if (error or content is None) and authorize_read:
+            content, error = read_config_with_elevation(str(resolved_path))
         if error or content is None:
             return (None, error or f"Failed to read {file_path}")
 
@@ -401,21 +405,33 @@ def parse_config(file_path: str) -> tuple[ClamAVConfig | None, str | None]:
             return (None, f"Path is not a file: {file_path}")
 
         if not os.access(resolved_path, os.R_OK):
-            return (None, f"Permission denied: Cannot read {file_path}")
-
-        try:
-            with open(resolved_path, encoding="utf-8") as f:
-                raw_lines = f.readlines()
-        except UnicodeDecodeError:
+            if not authorize_read:
+                return (None, f"Permission denied: Cannot read {file_path}")
+            content, error = read_config_with_elevation(str(resolved_path))
+            if error or content is None:
+                return (None, error or f"Failed to read {file_path}")
+            raw_lines = content.splitlines(keepends=True)
+        else:
             try:
-                with open(resolved_path, encoding="latin-1") as f:
+                with open(resolved_path, encoding="utf-8") as f:
                     raw_lines = f.readlines()
-            except Exception as e:
+            except UnicodeDecodeError:
+                try:
+                    with open(resolved_path, encoding="latin-1") as f:
+                        raw_lines = f.readlines()
+                except Exception as e:
+                    return (None, f"Error reading configuration file: {e!s}")
+            except PermissionError:
+                if not authorize_read:
+                    return (None, f"Permission denied: Cannot read {file_path}")
+                content, error = read_config_with_elevation(str(resolved_path))
+                if error or content is None:
+                    return (None, error or f"Failed to read {file_path}")
+                raw_lines = content.splitlines(keepends=True)
+            except OSError as e:
                 return (None, f"Error reading configuration file: {e!s}")
-        except PermissionError:
-            return (None, f"Permission denied: Cannot read {file_path}")
-        except OSError as e:
-            return (None, f"Error reading configuration file: {e!s}")
+    # The native/Flatpak branches above set ``raw_lines`` from either a normal
+    # read or an explicitly authorized, allowlisted privileged read.
 
     # Create config object
     config = ClamAVConfig(file_path=resolved_path, raw_lines=raw_lines)
@@ -947,6 +963,9 @@ def _write_config_direct(file_path: Path, content: str) -> tuple[bool, str | Non
     """
     Write config content directly without privilege elevation.
 
+    Existing regular files retain their ownership and permissions. New
+    user-managed configurations are created with restrictive ``0o600`` mode.
+
     Args:
         file_path: Target path to write
         content: Serialized configuration content
@@ -955,9 +974,27 @@ def _write_config_direct(file_path: Path, content: str) -> tuple[bool, str | Non
         Tuple of (success, error_message)
     """
     try:
-        file_path.write_text(content, encoding="utf-8")
-        # Set reasonable permissions for user files
-        file_path.chmod(0o644)
+        try:
+            fd = os.open(str(file_path), os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        except FileNotFoundError:
+            fd = os.open(
+                str(file_path),
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                0o600,
+            )
+            is_new_file = True
+        else:
+            is_new_file = False
+
+        with os.fdopen(fd, "w", encoding="utf-8") as config_file:
+            config_stat = os.fstat(config_file.fileno())
+            if not stat.S_ISREG(config_stat.st_mode):
+                raise ValueError(f"Configuration is not a regular file: {file_path}")
+            if is_new_file:
+                os.fchmod(config_file.fileno(), 0o600)
+            else:
+                config_file.truncate(0)
+            config_file.write(content)
         return (True, None)
     except Exception as e:
         return (False, f"Failed to write config: {e!s}")
@@ -1055,6 +1092,87 @@ def _get_privileged_writer_path() -> str | None:
 def privileged_writer_available() -> bool:
     """Return whether the privileged configuration writer can be resolved."""
     return _get_privileged_writer_path() is not None
+
+
+def _privileged_helper_unavailable_message() -> str:
+    """Return the existing installation guidance for the trusted helper."""
+    if _running_in_flatpak():
+        package_name = f"clamui-privileged-helper_{__version__}_all.deb"
+        return _(
+            "ClamUI privileged helper not installed on the host. "
+            "The Flatpak sandbox cannot access protected system ClamAV "
+            "configuration files directly. Download the matching "
+            "'{package_name}' from the ClamUI releases page. On Debian/Ubuntu, "
+            "install it on the host with 'sudo apt install ./{package_name}'. "
+            "Other distributions do not currently have a supported ClamUI "
+            "privileged-helper package. Do not install it with 'sudo flatpak run': "
+            "Flatpak cannot install this helper on the host."
+        ).format(package_name=package_name)
+    return _(
+        "ClamUI privileged helper not installed. Run "
+        "'sudo clamui install-privileged-helper' on this host to install it "
+        "and enable protected system ClamAV configuration access."
+    )
+
+
+def read_config_with_elevation(file_path: str) -> tuple[str | None, str | None]:
+    """Explicitly read one allowlisted system config through the trusted helper."""
+    try:
+        config_path = validate_destination(Path(file_path))
+    except (TypeError, ValueError, OSError) as error:
+        return (None, _("Protected configuration path is not allowed: {error}").format(error=error))
+
+    helper_path = _get_privileged_writer_path()
+    if helper_path is None:
+        return (None, _privileged_helper_unavailable_message())
+
+    command = [
+        "pkexec",
+        helper_path,
+        f"--protocol={PROTOCOL_VERSION}",
+        "--read-config",
+        str(config_path),
+    ]
+    if _running_in_flatpak():
+        command = ["flatpak-spawn", "--host", *command]
+
+    try:
+        result = subprocess.run(command, capture_output=True, timeout=10, check=False)
+    except FileNotFoundError:
+        return (None, _("pkexec not found - cannot authorize configuration read"))
+    except subprocess.TimeoutExpired:
+        return (None, _("Timed out reading protected configuration"))
+    except OSError as error:
+        return (None, _("Failed to authorize configuration read: {error}").format(error=error))
+
+    if result.returncode != 0:
+        if result.returncode == 126:
+            return (None, _("Authentication was canceled. Configuration was not loaded."))
+        if result.returncode == 127:
+            return (None, _privileged_helper_unavailable_message())
+        if result.returncode == 4:
+            return (
+                None,
+                _(
+                    "Privileged helper rejected the request: protocol mismatch. "
+                    "Update the 'clamui-privileged-helper' package on the host."
+                ),
+            )
+        stderr = result.stderr
+        detail = (
+            stderr.decode("utf-8", errors="replace").strip()
+            if isinstance(stderr, bytes)
+            else str(stderr).strip()
+        )
+        return (None, _("Failed to read protected configuration: {error}").format(error=detail))
+
+    stdout = result.stdout
+    if isinstance(stdout, str):
+        return (stdout, None)
+    try:
+        return (stdout.decode("utf-8"), None)
+    except UnicodeDecodeError:
+        return (stdout.decode("latin-1"), None)
 
 
 def _make_staging_dir() -> Path:
