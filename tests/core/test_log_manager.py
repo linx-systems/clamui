@@ -409,6 +409,22 @@ class TestLogEntry:
         # Newlines in error message should become spaces (single-line field)
         assert "Permission denied [FAKE] Success" in entry.details
 
+    def test_from_scan_result_data_handles_raw_filename_without_json_surrogates(self):
+        """Persisted scan logs omit raw filename bytes safely."""
+        raw_path = os.fsdecode(b"/tmp/infected_\xff")
+        entry = LogEntry.from_scan_result_data(
+            scan_status="infected",
+            path=raw_path,
+            duration=1.0,
+            infected_count=1,
+            threat_details=[{"file_path": raw_path, "threat_name": "TestThreat"}],
+        )
+
+        assert entry.path is None
+        serialized = json.dumps(entry.to_dict())
+        assert "\\udcff" not in serialized
+        serialized.encode("utf-8")
+
     def test_from_scan_result_data_sanitizes_suffix(self):
         """Test from_scan_result_data sanitizes suffix field."""
         entry = LogEntry.from_scan_result_data(
