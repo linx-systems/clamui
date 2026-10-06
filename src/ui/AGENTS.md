@@ -1,117 +1,86 @@
 # ui/ - GTK4/Adwaita UI Layer
 
-30 modules + 2 subpackages (scan/, preferences/). Need `core/` for brain work. (`app.py`, `notification_dispatcher.py`, `app_lifecycle.py` sit at src/ root, not here.)
+Parent: [`../../AGENTS.md`](../../AGENTS.md) | Subguides:
+[`scan/AGENTS.md`](scan/AGENTS.md), [`preferences/AGENTS.md`](preferences/AGENTS.md)
 
-Parent: [`../../AGENTS.md`](../../AGENTS.md) | Subs: [`scan/AGENTS.md`](scan/AGENTS.md), [`preferences/AGENTS.md`](preferences/AGENTS.md)
+The root guide owns package-import, i18n, thread-safety, and runtime-baseline
+rules. Keep UI code compatible with that baseline; do not duplicate runtime pins
+here.
 
-## Structure
+## Routing and ownership
 
-```
-ui/
-├── window.py              # Main window - sidebar nav, content switching
-├── sidebar.py             # NavigationSidebar - 7 nav items
-├── coordinator.py         # View lifecycle - lazy loading, view switching
-├── scan_view.py           # Active scan view used by app.py; scan/ holds modular components
-├── logs_view.py           # Scan history with pagination + daemon mode
-├── quarantine_view.py     # Quarantine management with search
-├── statistics_view.py     # Statistics dashboard (matplotlib)
-├── components_view.py     # ClamAV component status checker
-├── update_view.py         # Database update interface
-├── audit_view.py          # Security audit dashboard (Tier1/Tier2)
-├── compat.py              # libadwaita 1.0+ compatibility factories
-├── view_helpers.py        # Shared patterns (empty state, loading, status)
-├── utils.py               # resolve_icon_name(), present_dialog()
-├── pagination.py          # PaginatedListController for large lists
-├── file_export.py         # FileExportHelper (CSV/JSON/TEXT)
-├── clipboard_helper.py    # Clipboard operations
-├── eicar_helper.py        # EICAR test-file helper
-├── scan_results_dialog.py # Results dialog with quarantine actions
-├── scan_in_progress_dialog.py      # Active-scan blocking dialog
-├── database_missing_dialog.py      # Missing DB prompt
-├── close_behavior_dialog.py        # Close-to-tray vs quit choice
-├── file_manager_integration_dialog.py  # Nemo/Nautilus install dialog
-├── fullscreen_dialog.py            # Fullscreen log viewer
-├── profile_dialogs.py     # Profile create/edit/import/export dialogs
-├── virustotal_*.py        # VirusTotal results + setup dialogs
-├── tray_manager.py        # System tray subprocess launcher
-├── tray_service.py        # Tray D-Bus service (GIO, runs in subprocess)
-├── tray_indicator.py      # Low-level SNI tray widget
-├── tray_icons.py          # Tray icon management
-├── scan/                  # Modular scan components; its ScanView is not the active screen
-└── preferences/           # Settings pages → preferences/AGENTS.md
-```
+- `src/app.py` owns `ClamUIApp` lifecycle, lazy view instances, and the active
+  view name. On first activation it creates `MainWindow`, installs
+  `src/ui/scan_view.py:ScanView`, and selects `scan`.
+- `window.py` owns the adaptive shell. Its sidebar callback activates
+  `app.show-<view-id>`; `set_content_view()` replaces the displayed widget and
+  `set_active_view()` synchronizes sidebar selection and the folded-window title.
+- `sidebar.py` is the navigation-item source. `src/view_coordinator.py` registers
+  the matching application actions and shortcuts; the corresponding handlers in
+  `src/app.py` obtain the lazy view and update the window.
+- Add a routed view by changing all three of those routing seams and adding the
+  lazy property/handler in `src/app.py`. Keep the sidebar ID and
+  `show-<view-id>` action aligned.
 
-## Key Patterns
+There are two `ViewCoordinator` implementations with different roles:
 
-### Compatibility Layer (`compat.py`) - USE THESE, NOT RAW WIDGETS
+- `src/view_coordinator.py:ViewCoordinator` is the coordinator constructed by
+  `ClamUIApp`. It registers actions, switches a supplied widget into the active
+  window, and provides the statistics quick-scan route.
+- `src/ui/coordinator.py:ViewCoordinator` is an AppContext-oriented view cache
+  with `switch_to(view_name, window)`. It manages its own supported view set and
+  is not constructed by the current `ClamUIApp` route. Do not add a second live
+  routing path without a complete cutover.
 
-| Factory | Replaces | Version |
-|---------|----------|---------|
-| `create_entry_row()` | `Adw.EntryRow` | 1.2+ |
-| `create_switch_row()` | `Adw.SwitchRow` | 1.4+ |
-| `create_toolbar_view()` | `Adw.ToolbarView` | 1.4+ |
-| `create_banner()` | `Adw.Banner` | 1.3+ |
-| `present_about_dialog()` | `Adw.AboutDialog` (→ `Gtk.AboutDialog`) | 1.2+ |
-| `open_paths_dialog()` / `save_path_dialog()` | `Gtk.FileDialog` (→ `Gtk.FileChooserNative`) | GTK 4.10+ |
+## UI map
 
-Factory monkey-patch method API to match big-version shape. Caller use same method no matter what libadwaita version run.
+- `scan_view.py` is the active scan screen. See `scan/AGENTS.md` before changing
+  the unintegrated modular scan package.
+- `window.py` and `sidebar.py` implement navigation; `compat.py`,
+  `view_helpers.py`, `utils.py`, `pagination.py`, and `file_export.py` provide
+  shared UI behavior.
+- `*_view.py` modules provide individual content screens; `*_dialog.py` modules
+  provide dialogs. `preferences/` owns the settings window and pages.
+- Tray modules use the tray subprocess boundary described by the root guide.
 
-### View Helpers (`view_helpers.py`) - ALWAYS USE THESE
+## Compatibility helpers
 
-- `create_empty_state(EmptyStateConfig(...))` - filler for empty list
-- `LoadingStateController` - spinner + button sensitivity boss
-- `create_header_button_box(buttons=[...])` - same-same header layout
-- `set_status_class(widget, StatusLevel.SUCCESS)` - meaning-CSS-class boss
+Use these helpers when the corresponding newer API is needed:
 
-### Dialog Pattern (ALL dialogs inherit `Adw.Window`)
-```python
-class MyDialog(Adw.Window):
-    def __init__(self, parent=None):
-        super().__init__(title=_("Title"), modal=True, deletable=True)
-        self.set_default_size(400, 300)
-        if parent:
-            self.set_transient_for(parent)
-        toolbar_view = create_toolbar_view()
-        toolbar_view.add_top_bar(Adw.HeaderBar())
-        toolbar_view.set_content(content)
-        self.set_content(toolbar_view)
-```
+| Helper | Compatibility target |
+|---|---|
+| `create_entry_row(icon_name=None)` | `Adw.EntryRow` (1.2+) |
+| `create_switch_row(icon_name=None)` | `Adw.SwitchRow` (1.4+) |
+| `create_toolbar_view()` | `Adw.ToolbarView` (1.4+) |
+| `create_banner()` | `Adw.Banner` (1.3+) |
+| `present_about_dialog(parent, *, app_name, version, ...)` | `Adw.AboutDialog` (1.5+), with a `Gtk.AboutDialog` fallback |
+| `open_paths_dialog(parent, *, title, on_selected, select_folders=False, multiple=False, initial_folder=None, filters=None)` | `Gtk.FileDialog` (GTK 4.10+), with a native chooser fallback |
+| `save_path_dialog(parent, *, title, on_selected, initial_name=None, filters=None)` | `Gtk.FileDialog` saving, with a native chooser fallback |
 
-### Thread Safety
-```python
-# Background work → GLib.idle_add for UI update
-def _do_background():
-    result = expensive_operation()
-    GLib.idle_add(self._update_ui, result)
+The row, toolbar, and banner factories expose only the compatibility methods
+implemented in `compat.py`; do not treat their returned base widgets as complete
+replacements for every newer-widget API. Use the `safe_*` helpers in that module
+for optional row, stack, and list APIs.
 
+For a new modal dialog, use the compatible `Adw.Window` pattern:
+`set_default_size()`, `set_transient_for()`, `set_content()`, and the
+`close-request` signal. Build its header/content with `create_toolbar_view()`;
+do not introduce `Adw.Dialog`-family APIs.
 
-threading.Thread(target=_do_background, daemon=True).start()
-```
+## Shared UI helpers
 
-**Always reset loading state in `finally` blocks** - stop stuck spinner.
+- `create_empty_state(EmptyStateConfig(...))` creates a placeholder box.
+- `LoadingStateController(spinner, buttons, extra_buttons=None).set_loading(...)`
+  keeps the spinner and related controls synchronized.
+- `create_header_button_box(buttons, spacing=6, include_spinner=False)` returns
+  `(header_box, spinner_or_none)`.
+- `set_status_class(widget, StatusLevel)` applies one semantic status CSS class.
+- Resolve themed icon names through `resolve_icon_name()` before assigning an
+  icon to a widget.
 
-### View Lifecycle - TWO coordinators
-- **`src/ui/coordinator.py`** (`ViewCoordinator`, UI-scoped): lazy-load + cache 6 content view by `@property` (`_scan_view` etc.); flip by `switch_to(view_name, window)`. View: scan, update, logs, components, statistics, quarantine.
-- **`src/view_coordinator.py`** (`ViewCoordinator`, app-level): `setup_actions()` sign up actions+accels, `switch_to_view(name, widget)`, `get_current_view()`.
+## Async UI contract
 
-Sidebar (`sidebar.py`, `NAVIGATION_ITEMS`) show **7** spot: scan, update, logs, components, quarantine, statistics, audit. `audit_view` (AuditView) born direct, NOT by lazy `ui/coordinator.py`.
-
-## Where to Look
-
-| Task | Module | Notes |
-|------|--------|-------|
-| Add a view | `sidebar.py` (`NAVIGATION_ITEMS`) + `view_coordinator.py` (`setup_actions`) + `app.py` (lazy `@property`) | Sign up nav item, action, view property |
-| Add a dialog | Inherit `Adw.Window` | Use `create_toolbar_view()` for header |
-| Paginate a list | `pagination.py` | `PaginatedListController(listbox, ...)` |
-| Export data | `file_export.py` | `FileExportHelper.show_export_dialog(...)` |
-| Icon creation | `utils.py` | Always `resolve_icon_name(name, fallback)` |
-| Status styling | `view_helpers.py` | `set_status_class(widget, StatusLevel.X)` |
-
-## Anti-Patterns (ui-specific)
-
-- **Raw `Adw.EntryRow`/`SwitchRow`/etc.**: Use compat factory - raw break Ubuntu 22.04
-- **`Adw.Dialog`**: Use `Adw.Window` - `Adw.Dialog` want libadwaita 1.5+
-- **Icons without `resolve_icon_name()`**: Break on non-GNOME theme
-- **Emoji in status indicators**: Use meaning-icon (`object-select-symbolic`, `dialog-warning-symbolic`)
-- **`GLib.idle_add()` missing**: All background→UI update MUST go through it
-- **No loading state reset in `finally`**: Make forever-stuck spinner
+Run slow work off the GTK main loop. Schedule every GTK mutation made from a
+worker with `GLib.idle_add()`, including completion and error cleanup. Restore
+the affected controls on every terminal path so no spinner or disabled control
+is left behind.

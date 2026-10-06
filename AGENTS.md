@@ -323,7 +323,9 @@ class ScanResult:
 
 ### Error Handling Pattern
 
-Give back tuple of `(success: bool, error_or_value: Optional[str])`:
+Preserve the existing API's failure contract. Scan, update, VirusTotal, and quarantine
+operations return typed results with status and error details. Availability checks
+and configuration helpers commonly return `(success, value_or_error)` tuples:
 
 ```python
 def check_clamav_installed() -> Tuple[bool, Optional[str]]:
@@ -653,9 +655,11 @@ def test_navigation_sidebar_can_be_created(mock_gi_modules):
   privacy-aware debug log, `LogManager` own scan/update log.
 - Keep privileged system-config write behind `core/privileged_helper.py`,
   `write_config_with_elevation()` / `write_configs_with_elevation()`, + installed polkit helper.
-- Active scan screen is `src/ui/scan_view.py` (`ScanView`), which `src/app.py` loads. Add
-  `src/ui/scan/` components only when wired into that active view; send scan run through
-  `ScanController`, tray-drive orchestration through `ScanCoordinator`.
+- Active scan screen is `src/ui/scan_view.py` (`ScanView`), which `src/app.py` loads.
+  It owns the active scan worker and state. The separate `src/ui/scan/` composition,
+  `ScanController`, and `ScanCoordinator` are not wired into the running application;
+  changes there alone do not change the active scan screen. See
+  [`src/ui/scan/AGENTS.md`](src/ui/scan/AGENTS.md) before touching those components.
 
 ### Preferences System (`src/ui/preferences/`)
 
@@ -790,7 +794,7 @@ no hand-edit made-by-machine `website/public/` copy or `website/dist/`.
 
 1. Make module in `src/core/`
 2. Use dataclass for result, enum for status
-3. Give both sync + async method
+3. For long-running operations called by the UI, provide a non-blocking entry point using the existing sync/async and main-loop callback patterns.
 4. Add thread lock for shared state
 5. Use `sanitize_log_line()` for any user/outside input log
 6. Write big test pile

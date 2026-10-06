@@ -1,87 +1,75 @@
-# core/ - Business Logic Layer
+# `src/core/` — application services
 
-30 module. No UI need. All scan, config, security, system glue.
+Read the root [`AGENTS.md`](../../AGENTS.md) first. For quarantine work, also read
+[`quarantine/AGENTS.md`](quarantine/AGENTS.md).
 
-Parent: [`../../AGENTS.md`](../../AGENTS.md) | Sub: [`quarantine/AGENTS.md`](quarantine/AGENTS.md)
+Core owns scanning, ClamAV integration, settings, persisted logs, security helpers,
+and other non-widget services. Keep widget presentation in `src/ui/`; use the GTK
+main loop when a core boundary must hand work back to it.
 
-## Structure
+## Navigation
 
-```
-core/
-├── scanner.py / scanner_base.py / daemon_scanner.py  # Scan orchestration
-├── clamav_detection.py   # ClamAV/freshclam/clamdscan detection + socket probe
-├── scanner_types.py      # ScanStatus, ScanResult, ThreatDetail dataclasses
-├── threat_classifier.py  # Severity/category classification (70+ patterns)
-├── log_manager.py        # Scan history persistence
-├── updater.py            # freshclam database updates
-├── scheduler.py          # systemd/cron scheduled scans
-├── system_audit.py       # Security-posture auditor (Tier-1/Tier-2)
-├── clamav_config.py      # clamd.conf/freshclam.conf parse + write
-├── privileged_paths.py   # pkexec allowlist validators (apply-prefs)
-├── portmaster_client.py  # Optional Portmaster audit client
-├── settings_manager.py   # JSON settings (XDG_CONFIG_HOME)
-├── notification_manager.py / battery_manager.py / device_monitor.py
-├── virustotal.py         # VirusTotal API v3 + rate limiting
-├── statistics_calculator.py  # Scan statistics + protection status
-├── result_formatters.py  # Format scan results as text/CSV
-├── file_manager_integration.py  # Nemo/Nautilus/Dolphin context menus
-├── keyring_manager.py    # System keyring with fallback
-├── flatpak.py            # Flatpak detection + host command wrapping
-├── sanitize.py           # Log injection prevention
-├── path_validation.py    # Symlink safety + path traversal prevention
-├── app_context.py        # Service locator with lazy init
-├── i18n.py / utils.py / logging_config.py / clipboard.py
-└── quarantine/           # SQLite quarantine subsystem → quarantine/AGENTS.md
-```
+| Task | Start here |
+| --- | --- |
+| Scan execution, cancellation, and result parsing | `scanner.py`, `daemon_scanner.py`, `scanner_base.py`, `scanner_types.py` |
+| ClamAV discovery or updates | `clamav_detection.py`, `updater.py` |
+| Host execution in Flatpak | `flatpak.py` |
+| ClamAV configuration and privileged writes | `clamav_config.py`, `privileged_paths.py`, `privileged_helper.py` |
+| Settings, logs, or credentials | `settings_manager.py`, `log_manager.py`, `keyring_manager.py` |
+| Quarantine metadata and files | `quarantine/` and its local guide |
 
-## Key Patterns
+## Public-service contracts
 
-### Sync/Async Pair (MANDATORY for long-running ops)
-Each op give `operation_sync()` (block) and `operation_async()` (spawn daemon thread + `GLib.idle_add(callback)`). Use in Scanner, Updater, QuarantineManager, VirusTotalClient, LogManager.
+### Results and failures
 
-### Cancellation
-`threading.Event()` - `.set()` to cancel, `.clear()` at start of new op. Use `communicate_with_cancel_check()` from `scanner_base.py`, not `process.wait()`.
+Match the API you are changing; core has no universal error-return shape. Scan,
+update, VirusTotal, and quarantine operations expose typed result objects with a
+status and error detail. Availability checks and configuration helpers commonly
+return `(success, value_or_error)` tuples. Preserve existing status values and
+`error_message` fields rather than replacing them with a new exception or result
+convention. Let explicitly documented programmer-error exceptions remain explicit
+(for example, invalid connection-pool configuration).
 
-### Error Returns
-`(success: bool, error_message: Optional[str])` tuple - no custom exception. Op return dataclass result with `status` enum + `error_message` field.
+### Async and GTK boundaries
 
-### Type System
-- `@dataclass` with `@property` for computed value (e.g. `ScanResult.is_clean`)
-- Enum status: `ScanStatus`, `UpdateStatus`, `QuarantineStatus` (string value, lowercase)
-- `TYPE_CHECKING` + lazy import to break circular dep
+Do not add a `_sync`/`_async` pair by default: only APIs that already need a
+non-blocking UI entry point use that pattern. Existing scan, update, VirusTotal,
+log retrieval, and quarantine async methods run their synchronous operation in a
+daemon thread, then schedule the completion callback with `GLib.idle_add()`.
 
-### Security Audit & ClamAV Config (v0.2.0 subsystems)
-- `system_audit.py`: security-posture auditor. `run_audit()` (Tier 1: ClamAV health, firewall, MAC framework, auto-update, intrusion detect, SSH harden, Portmaster) and `run_deep_audit()` (Tier 2: Lynis, chkrootkit). Give back `AuditReport` (`AuditSectionResult`/`AuditCheckResult`, `AuditStatus`, `AuditCategory`); show by `ui/audit_view.py`.
-- `clamav_config.py`: comment-keep parser/writer for `clamd.conf`/`freshclam.conf` (`ClamAVConfig`, `parse_config`/`write_config`). System-path write go through `write_config_with_elevation()` / `write_configs_with_elevation()` (pkexec). `privileged_paths.py` hold pkexec allowlist validator (`PROTOCOL_VERSION=4`, `validate_destination`).
+`Scanner.scan_sync()` and `DaemonScanner.scan_sync()` invoke a supplied progress
+callback on their calling thread. A UI progress callback must schedule its own GTK
+work on the main loop. Do not touch GTK widgets from the worker.
 
-## Where to Look
+### Scanning and cancellation
 
-| Task | Module | Notes |
-|------|--------|-------|
-| Add scan backend | `scanner.py`, `scanner_base.py` | Follow daemon_scanner.py pattern |
-| Parse ClamAV output | `scanner_types.py`, `threat_classifier.py` | Dataclass + pattern-based classification |
-| Add scheduled task | `scheduler.py` | Supports systemd + cron, validates injection |
-| Store credentials | `keyring_manager.py` | System keyring with JSON fallback |
-| Add settings | `settings_manager.py` | Add to `DEFAULT_SETTINGS` dict |
-| Subprocess commands | `flatpak.py` | `wrap_host_command()` + `shlex.quote()` |
-| Edit ClamAV config | `clamav_config.py` | `write_config_with_elevation()` (single pkexec) |
-| Add audit check | `system_audit.py` | `run_audit()` Tier-1 / `run_deep_audit()` Tier-2 |
+`Scanner` and `DaemonScanner` clear their cancellation event at the start of a
+scan. Their subprocess paths use the cancellation-aware helpers in
+`scanner_base.py`; retain those checks when changing long-running scanner code.
+Use the existing `cancel()` method and process lock rather than manipulating the
+current process directly.
 
-## Anti-Patterns (core-specific)
+### Paths, logging, and persistence
 
-- **Blocking main thread**: Never call `scan_sync()` from UI - use `scan_async()`
-- **`process.wait()`**: Use `communicate_with_cancel_check()` - do cancel
-- **Forgetting cancel reset**: Always `self._cancel_event.clear()` at start of sync method
-- **Flatpak ClamAV ownership**: Flatpak use host ClamAV via `flatpak-spawn --host`; no add bundled `/app/bin` ClamAV or sandbox db assumption
-- **Unsanitized logging**: All user/outside input through `sanitize_log_line()` or `sanitize_log_text()`
-- **Missing Flatpak wrap**: All subprocess call need `wrap_host_command()` in Flatpak
+Validate paths at the boundary appropriate to the operation, and sanitize
+user-controlled or command-derived text before putting it in logs. Keep
+`TYPE_CHECKING` imports and lazy imports where they break an existing import cycle.
+Use XDG-aware settings/data helpers rather than hard-coding a home-directory path.
 
-## Common Imports
+## Flatpak host-command ownership
 
-```python
-from .scanner_types import ScanResult, ScanStatus, ThreatDetail
-from .sanitize import sanitize_log_line, sanitize_log_text
-from .path_validation import validate_path, check_symlink_safety
-from .flatpak import is_flatpak, wrap_host_command
-from .i18n import _, ngettext
-```
+`wrap_host_command()` is for commands that must execute on the host. In Flatpak,
+ClamAV tools and host service commands are run through `flatpak-spawn --host`;
+native execution is unchanged. Do not wrap a sandbox-local command merely because
+the app is running in Flatpak. Flatpak does not bundle ClamAV, and current scanning
+and update paths use the host tools and host configuration rather than a sandbox
+database.
+
+## Core safety checks
+
+- Preserve relative imports within `src/`.
+- Keep subprocess arguments as argument lists; use the existing Flatpak helper for
+  host-owned commands.
+- Preserve scanner cancellation and bounded subprocess-output handling.
+- Treat config writes and privileged helper paths as security boundaries; keep their
+  validation and elevation flow intact.
