@@ -17,6 +17,10 @@ shown by ClamUIApp. For a user-visible scan UI change, edit
 working explicitly on the modular implementation or performing a complete,
 caller-wide cutover.
 
+`ScanCoordinator` is not used by the live scan, tray, or VirusTotal paths;
+those paths run through `ClamUIApp`, its active `scan_view`, and their existing
+callbacks in `src/app.py`.
+
 ## Local components
 
 - `scan_view.py` is the modular composition root. It wires

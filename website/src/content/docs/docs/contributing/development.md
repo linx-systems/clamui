@@ -56,6 +56,95 @@ Use relative imports inside `src/`; absolute `src.*` imports break installed pac
 
 The native-host-only `sudo clamui install-privileged-helper` installs the root-owned preference helper and polkit policy. Do not run it inside Flatpak; install the matching helper package on the host instead.
 
+## Maintain local Repowise architecture guidance
+
+Repowise indexes and configuration live in the ignored `.repowise/` directory. They are local machine state, so do not commit them or put provider credentials in them. After creating or recovering a local index, restore this guidance block in the root `.repowise/config.yaml` before generating architecture prose:
+
+```yaml
+generation_context:
+  token_budget: 8000
+  files:
+    repo_overview:
+      - src/ui/scan/AGENTS.md
+      - src/app.py
+    onboarding/getting_started:
+      - src/ui/scan/AGENTS.md
+      - src/app.py
+    onboarding/key_concepts:
+      - src/ui/scan/AGENTS.md
+      - src/app.py
+    onboarding/how_it_works:
+      - src/ui/scan/AGENTS.md
+      - src/app.py
+    onboarding/active_landscape:
+      - src/ui/scan/AGENTS.md
+      - src/app.py
+```
+
+The indexed guidance records the current boundary: `src/ui/scan_view.py:ScanView`,
+created by `ClamUIApp.scan_view` in `src/app.py`, is the active desktop scan
+screen. `src/ui/scan/` is a modular alternative; its `ScanCoordinator` and
+`ScanController` are not constructed by the current application route.
+
+For an approved repair with the Claude CLI provider, first inspect the local
+generation plan:
+
+```bash
+repowise generate --page repo_overview:clamui --cascade none --provider claude_cli --model claude-haiku-4-5 --dry-run
+```
+
+`claude_cli` uses the Claude subscription rather than a local Ollama model.
+Only after the plan has been reviewed and the subscription use has explicit
+approval, write the page:
+
+```bash
+repowise generate --page repo_overview:clamui --cascade none --provider claude_cli --model claude-haiku-4-5 --yes
+```
+
+Repowise records the selected guidance in the generated page metadata under
+`source_evidence`; for the overview, confirm that it lists both
+`src/ui/scan/AGENTS.md` and `src/app.py` as included. This grounding makes the
+fact available on later regeneration, but generated prose still requires
+review: an LLM cannot be guaranteed to reproduce every fact perfectly.
+
+To pin a correction while prose is being regenerated, use the dashboard API's
+`PATCH /api/pages/lookup/notes?page_id=<page-id>` endpoint with
+`human_notes`. The note survives model regeneration and is returned by the
+dashboard page APIs. It is not a retrieval guarantee: MCP `get_context`
+includes it only for file pages, while `get_overview` and search do not expose
+it. Keep the source guidance above as the durable correction.
+
+## Restore local Repowise semantic search
+
+Both the root repository and `website/` have separate ignored Repowise state.
+In each local `.repowise/config.yaml`, set:
+
+```yaml
+embedder: ollama
+embedding_model: embeddinggemma
+```
+
+In each corresponding ignored `.repowise/.env`, set the local embedding
+connection values:
+
+```dotenv
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_EMBEDDING_MODEL=embeddinggemma
+OLLAMA_EMBEDDING_DIMS=768
+```
+
+With Ollama and `embeddinggemma` available locally, rebuild both vector stores
+from the repository root:
+
+```bash
+repowise reindex . --embedder ollama
+repowise reindex website --embedder ollama
+```
+
+Reindexing embeds existing pages locally and does not generate prose. Restart
+the Repowise MCP server and dashboard after reindexing so they reconnect to the
+updated local semantic indexes.
+
 ## Validate before a pull request
 
 ```bash
