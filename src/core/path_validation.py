@@ -19,6 +19,34 @@ logger = logging.getLogger(__name__)
 
 from .flatpak import format_flatpak_portal_path
 
+_PROTECTED_SYSTEM_DIRS = (
+    Path("/etc"),
+    Path("/var"),
+    Path("/usr"),
+    Path("/bin"),
+    Path("/sbin"),
+    Path("/lib"),
+    Path("/lib64"),
+    Path("/boot"),
+    Path("/root"),
+)
+_USER_WRITABLE_DIRS = (Path("/home"), Path("/tmp"), Path("/var/tmp"))
+_VAR_HOME_DIR = Path("/var/home")
+
+
+def _is_path_under(candidate: Path, base: Path) -> bool:
+    candidate_parts = candidate.parts
+    base_parts = base.parts
+    if len(candidate_parts) < len(base_parts):
+        return False
+    return candidate_parts[: len(base_parts)] == base_parts
+
+
+def _safe_symlink_result(path: Path, resolved: Path, is_symlink: bool) -> tuple[bool, str | None]:
+    if is_symlink:
+        return (True, f"Path is a symlink: {path} -> {resolved}")
+    return (True, None)
+
 
 def check_symlink_safety(path: Path) -> tuple[bool, str | None]:
     """
@@ -37,78 +65,36 @@ def check_symlink_safety(path: Path) -> tuple[bool, str | None]:
         - (False, error_message) if path is potentially dangerous
     """
     try:
-        # Define protected system directories that symlinks should not escape to
-        # when the original path is in a user directory
-        protected_dirs = [
-            Path("/etc"),
-            Path("/var"),
-            Path("/usr"),
-            Path("/bin"),
-            Path("/sbin"),
-            Path("/lib"),
-            Path("/lib64"),
-            Path("/boot"),
-            Path("/root"),
-        ]
-
-        # If the original path is in a user-writable location (like /home or /tmp),
-        # check if the resolved path escapes to a protected system directory
-        user_dirs = [Path("/home"), Path("/tmp"), Path("/var/tmp")]
-
-        def is_path_under(candidate: Path, base: Path) -> bool:
-            candidate_parts = candidate.parts
-            base_parts = base.parts
-            if len(candidate_parts) < len(base_parts):
-                return False
-            return candidate_parts[: len(base_parts)] == base_parts
-
         raw_path = path.expanduser()
         if not raw_path.is_absolute():
             raw_path = Path.cwd() / raw_path
-        raw_parent = raw_path.parent
-        is_in_user_dir = any(is_path_under(raw_parent, user_dir) for user_dir in user_dirs)
-
-        # Check if the path itself is a symlink
+        is_in_user_dir = any(
+            _is_path_under(raw_path.parent, user_dir) for user_dir in _USER_WRITABLE_DIRS
+        )
         is_symlink = path.is_symlink()
+
         if not is_symlink and not is_in_user_dir:
             return (True, None)
 
-        # Get the resolved target (follows symlinked parents and '..' traversal)
         resolved = path.resolve()
-
-        # Check if the symlink target exists
         if is_symlink and not resolved.exists():
             return (False, f"Symlink target does not exist: {path} -> {resolved}")
 
-        if is_in_user_dir:
-            # Special case: /var/home is a legitimate user home on immutable distros
-            # (Fedora Silverblue, Kinoite, etc. where /home -> /var/home)
-            if is_path_under(resolved, Path("/var/home")):
-                if is_symlink:
-                    return (True, f"Path is a symlink: {path} -> {resolved}")
-                return (True, None)
+        if not is_in_user_dir:
+            return _safe_symlink_result(path, resolved, is_symlink)
 
-            # Resolutions that land back inside a user-writable/temp dir are
-            # legitimate (e.g. /tmp, /var/tmp). Allow them before the protected_dirs
-            # check, since /var is protected and /tmp can resolve under /var on some
-            # systems. This does not weaken /var/lib, /var/cache, /etc, etc.
-            if any(is_path_under(resolved, user_dir) for user_dir in user_dirs):
-                if is_symlink:
-                    return (True, f"Path is a symlink: {path} -> {resolved}")
-                return (True, None)
+        if _is_path_under(resolved, _VAR_HOME_DIR) or any(
+            _is_path_under(resolved, user_dir) for user_dir in _USER_WRITABLE_DIRS
+        ):
+            return _safe_symlink_result(path, resolved, is_symlink)
 
-            for protected in protected_dirs:
-                if is_path_under(resolved, protected):
-                    return (
-                        False,
-                        f"Path resolves to protected directory: {path} -> {resolved}",
-                    )
+        if any(_is_path_under(resolved, protected) for protected in _PROTECTED_SYSTEM_DIRS):
+            return (
+                False,
+                f"Path resolves to protected directory: {path} -> {resolved}",
+            )
 
-        # Symlink is present but appears safe
-        if is_symlink:
-            return (True, f"Path is a symlink: {path} -> {resolved}")
-
-        return (True, None)
+        return _safe_symlink_result(path, resolved, is_symlink)
 
     except (OSError, RuntimeError, ValueError) as e:
         return (False, f"Error checking symlink: {e!s}")

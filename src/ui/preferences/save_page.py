@@ -537,6 +537,44 @@ class SavePage(PreferencesPageMixin):
         self._apply_updates_to_config(prospective, onaccess_updates)
         return prospective
 
+    @classmethod
+    def _prepare_config_for_write(
+        cls,
+        config: ClamAVConfig | None,
+        update_groups: tuple[dict, ...],
+        prospective_config: ClamAVConfig | None,
+    ) -> ClamAVConfig | None:
+        """Return a changed config proposal, or None when no write is needed."""
+        if not config or not update_groups:
+            return None
+
+        before = config.to_string()
+        proposed_config = prospective_config
+        if proposed_config is None:
+            proposed_config = cls._copy_config_for_path(config, config.file_path)
+            for updates in update_groups:
+                cls._apply_updates_to_config(proposed_config, updates)
+
+        after = proposed_config.to_string()
+        if not isinstance(before, str) or not isinstance(after, str) or before != after:
+            return proposed_config
+        return None
+
+    def _prepare_system_freshclam_config(
+        self,
+        freshclam_updates: dict,
+        prospective_freshclam_config: ClamAVConfig | None,
+    ) -> ClamAVConfig | None:
+        """Return a changed proposal for the system freshclam configuration."""
+        # User-local freshclam config would be ignored by the current update
+        # path, so freshclam changes intentionally stay on the system/elevated
+        # path.
+        return self._prepare_config_for_write(
+            self._window._freshclam_config,
+            (freshclam_updates,) if freshclam_updates else (),
+            prospective_freshclam_config,
+        )
+
     def _save_configs_thread(
         self,
         freshclam_updates: dict,
@@ -574,44 +612,21 @@ class SavePage(PreferencesPageMixin):
             if self._clamd_available:
                 backup_config(self._clamd_conf_path)
 
-            configs_to_write = []
+            system_freshclam_config = self._prepare_system_freshclam_config(
+                freshclam_updates, prospective_freshclam_config
+            )
+            system_clamd_config = self._prepare_config_for_write(
+                self._window._clamd_config,
+                (clamd_updates, onaccess_updates) if clamd_updates or onaccess_updates else (),
+                prospective_clamd_config,
+            )
+            configs_to_write = [
+                config
+                for config in (system_freshclam_config, system_clamd_config)
+                if config is not None
+            ]
             config_changes_applied = False
             config_write_warning: str | None = None
-            system_clamd_config: ClamAVConfig | None = None
-
-            # Save freshclam.conf. User-local freshclam config would be ignored by
-            # the current update path, so freshclam changes intentionally stay on
-            # the system/elevated path.
-            system_freshclam_config: ClamAVConfig | None = None
-            if freshclam_updates and self._window._freshclam_config:
-                freshclam_config = self._window._freshclam_config
-                before = freshclam_config.to_string()
-                if prospective_freshclam_config is None:
-                    proposed_config = self._copy_config_for_path(
-                        freshclam_config, freshclam_config.file_path
-                    )
-                    self._apply_updates_to_config(proposed_config, freshclam_updates)
-                else:
-                    proposed_config = prospective_freshclam_config
-                after = proposed_config.to_string()
-                if not isinstance(before, str) or not isinstance(after, str) or before != after:
-                    configs_to_write.append(proposed_config)
-                    system_freshclam_config = proposed_config
-            if (clamd_updates or onaccess_updates) and self._window._clamd_config:
-                clamd_config = self._window._clamd_config
-                before = clamd_config.to_string()
-                if prospective_clamd_config is None:
-                    proposed_config = self._copy_config_for_path(
-                        clamd_config, clamd_config.file_path
-                    )
-                    self._apply_updates_to_config(proposed_config, clamd_updates)
-                    self._apply_updates_to_config(proposed_config, onaccess_updates)
-                else:
-                    proposed_config = prospective_clamd_config
-                after = proposed_config.to_string()
-                if not isinstance(before, str) or not isinstance(after, str) or before != after:
-                    configs_to_write.append(proposed_config)
-                    system_clamd_config = proposed_config
 
             if configs_to_write:
                 success, error = write_configs_with_elevation(configs_to_write)

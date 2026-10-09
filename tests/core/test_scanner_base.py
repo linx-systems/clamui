@@ -195,6 +195,31 @@ class TestStreamProcessOutput:
         assert cancelled is False
         assert _stdout == "final"
 
+    def test_stream_output_keeps_cap_when_callback_raises_os_error(self):
+        """Recovery after a callback error must retain the prior capped total."""
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_process.stdout.fileno.return_value = 1
+        mock_process.stderr.fileno.return_value = 2
+        mock_process.communicate.return_value = ("omega\n", "")
+
+        def failing_callback(_line: str) -> None:
+            raise OSError("callback failed")
+
+        with (
+            patch.dict(stream_process_output.__globals__, {"MAX_ACCUMULATED_BYTES": 8}),
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch("src.core.scanner_base.os.read", return_value=b"alpha\nbeta\n"),
+        ):
+            stdout, stderr, cancelled = stream_process_output(
+                mock_process, lambda: False, failing_callback
+            )
+
+        assert cancelled is False
+        assert stdout == "alpha\nbe\n[stdout truncated at 8 bytes]\n"
+        assert stderr == ""
+        assert stdout.count("[stdout truncated at 8 bytes]") == 1
+
     def test_stream_output_line_callback_called_for_each_line(self):
         """Test that on_line callback is called for each complete line."""
         mock_process = MagicMock()
@@ -246,7 +271,10 @@ class TestStreamProcessOutput:
         expected_stderr = "12345678\n[stderr truncated at 8 bytes]\n"
         lines: list[str] = []
 
-        with patch("src.core.scanner_base.MAX_ACCUMULATED_BYTES", 8):
+        # Other modules reload ``src.*`` during their isolation fixtures. Patch
+        # the globals bound to these imported functions, not a replacement
+        # module object later installed in ``sys.modules``.
+        with patch.dict(stream_process_output.__globals__, {"MAX_ACCUMULATED_BYTES": 8}):
             if not streaming:
                 process = MagicMock()
                 process.communicate.return_value = (stdout_input, stderr_input)

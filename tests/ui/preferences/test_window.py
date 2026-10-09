@@ -564,6 +564,41 @@ class TestConfigLoading:
                         window._load_configs_io()
                         assert window._freshclam_load_error == "Parse error"
 
+    def test_load_configs_records_each_config_result_independently(
+        self,
+        mock_gi_modules,
+        mock_path_exists,
+        mock_scheduler,
+        mock_page_modules,
+    ):
+        """A clamd parse failure must not replace a loaded freshclam config."""
+        from src.ui.preferences.window import PreferencesWindow
+
+        freshclam_config = mock.MagicMock()
+        freshclam_config.values = {"DatabaseMirror": "database.example"}
+
+        with mock.patch(
+            "src.ui.preferences.window.parse_config",
+            side_effect=[(freshclam_config, None), (None, "Clamd parse error")],
+        ) as mock_parse:
+            with mock.patch.object(PreferencesWindow, "_setup_ui"):
+                with mock.patch("src.ui.preferences.window.threading.Thread"):
+                    with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
+                        window = PreferencesWindow()
+                        window._clamd_available = True
+                        window._load_configs_io()
+
+        assert window._freshclam_config is freshclam_config
+        assert window._freshclam_load_error is None
+        assert window._clamd_config is None
+        assert window._clamd_load_error == "Clamd parse error"
+        mock_parse.assert_has_calls(
+            [
+                mock.call(window._freshclam_conf_path),
+                mock.call(window._clamd_conf_path),
+            ]
+        )
+
 
 class TestFlatpakSupport:
     """Tests for Flatpak-specific functionality."""

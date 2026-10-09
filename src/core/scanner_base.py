@@ -121,6 +121,20 @@ def _append_bounded_output(parts: list[str], total: int, chunk: str, stream_name
     return MAX_ACCUMULATED_BYTES
 
 
+def _append_output_pair(
+    stdout_parts: list[str],
+    stdout_total: int,
+    stdout: str | None,
+    stderr_parts: list[str],
+    stderr_total: int,
+    stderr: str | None,
+) -> tuple[int, int]:
+    """Add subprocess stdout and stderr to their bounded buffers."""
+    stdout_total = _append_bounded_output(stdout_parts, stdout_total, stdout or "", "stdout")
+    stderr_total = _append_bounded_output(stderr_parts, stderr_total, stderr or "", "stderr")
+    return stdout_total, stderr_total
+
+
 def _iter_fd_chunks(fd: int) -> Iterator[str]:
     """Yield decoded chunks currently available from a file descriptor."""
     while True:
@@ -151,6 +165,56 @@ def _emit_stdout_lines(text: str, on_line: Callable[[str], None], *, final: bool
         if line:
             on_line(line)
     return incomplete_line
+
+
+def _finish_stream_output(
+    stdout_fd: int,
+    stderr_fd: int,
+    stdout_parts: list[str],
+    stdout_total: int,
+    stderr_parts: list[str],
+    stderr_total: int,
+    incomplete_line: str,
+    on_line: Callable[[str], None],
+) -> tuple[int, int]:
+    """Drain completed streams and deliver the final stdout line."""
+    remaining_stdout = "".join(_iter_fd_chunks(stdout_fd))
+    remaining_stderr = "".join(_iter_fd_chunks(stderr_fd))
+    _emit_stdout_lines(incomplete_line + remaining_stdout, on_line, final=True)
+    stdout_total, stderr_total = _append_output_pair(
+        stdout_parts, stdout_total, remaining_stdout, stderr_parts, stderr_total, remaining_stderr
+    )
+    return stdout_total, stderr_total
+
+
+def _terminate_streaming_process(process: subprocess.Popen) -> None:
+    """Stop a cancelled streaming process, escalating after its grace period."""
+    process.terminate()
+    try:
+        process.wait(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+
+
+def _wait_for_streaming_process_exit(process: subprocess.Popen) -> None:
+    """Wait briefly for a process whose output streams have both closed."""
+    try:
+        process.wait(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        process.kill()
+
+
+def _iter_ready_stream_chunks(
+    readable: list[int], read_fds: list[int]
+) -> Iterator[tuple[int, str]]:
+    """Yield decoded chunks from readable streams and remove EOF descriptors."""
+    for fd in readable:
+        raw_bytes = os.read(fd, 4096)
+        if not raw_bytes:
+            read_fds.remove(fd)
+            continue
+        yield fd, raw_bytes.decode("utf-8", errors="surrogateescape")
 
 
 def communicate_with_cancel_check(
@@ -193,11 +257,8 @@ def communicate_with_cancel_check(
             try:
                 process.terminate()
                 stdout, stderr = process.communicate(timeout=2.0)
-                stdout_total = _append_bounded_output(
-                    stdout_parts, stdout_total, stdout or "", "stdout"
-                )
-                stderr_total = _append_bounded_output(
-                    stderr_parts, stderr_total, stderr or "", "stderr"
+                stdout_total, stderr_total = _append_output_pair(
+                    stdout_parts, stdout_total, stdout, stderr_parts, stderr_total, stderr
                 )
             except subprocess.TimeoutExpired:
                 process.kill()
@@ -206,11 +267,8 @@ def communicate_with_cancel_check(
 
         try:
             stdout, stderr = process.communicate(timeout=0.5)
-            stdout_total = _append_bounded_output(
-                stdout_parts, stdout_total, stdout or "", "stdout"
-            )
-            stderr_total = _append_bounded_output(
-                stderr_parts, stderr_total, stderr or "", "stderr"
+            stdout_total, stderr_total = _append_output_pair(
+                stdout_parts, stdout_total, stdout, stderr_parts, stderr_total, stderr
             )
             return "".join(stdout_parts), "".join(stderr_parts), False
         except subprocess.TimeoutExpired:
@@ -278,89 +336,58 @@ def stream_process_output(
         while True:
             # Check for cancellation first
             if is_cancelled():
-                process.terminate()
-                try:
-                    process.wait(timeout=2.0)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait()
+                _terminate_streaming_process(process)
                 # Drain remaining output via os.read() to avoid mixing
                 # with the TextIOWrapper used by process.communicate().
                 stdout_total = _drain_fd_output(stdout_fd, stdout_parts, stdout_total, "stdout")
                 stderr_total = _drain_fd_output(stderr_fd, stderr_parts, stderr_total, "stderr")
                 return "".join(stdout_parts), "".join(stderr_parts), True
 
-            # Check if process has finished
             if process.poll() is not None:
-                # Line callbacks get the buffered partial line rejoined with the
-                # drained data; the accumulated buffer receives only the newly
-                # drained bytes, avoiding duplicate partial stdout.
-                remaining_stdout = "".join(_iter_fd_chunks(stdout_fd))
-                remaining_stderr = "".join(_iter_fd_chunks(stderr_fd))
-                _emit_stdout_lines(incomplete_line + remaining_stdout, on_line, final=True)
-                stdout_total = _append_bounded_output(
-                    stdout_parts, stdout_total, remaining_stdout or "", "stdout"
+                stdout_total, stderr_total = _finish_stream_output(
+                    stdout_fd,
+                    stderr_fd,
+                    stdout_parts,
+                    stdout_total,
+                    stderr_parts,
+                    stderr_total,
+                    incomplete_line,
+                    on_line,
                 )
-                stderr_total = _append_bounded_output(
-                    stderr_parts, stderr_total, remaining_stderr or "", "stderr"
-                )
-                break
+                return "".join(stdout_parts), "".join(stderr_parts), False
 
             if not read_fds:
                 # Both streams closed but process still hasn't exited.
                 # Give it a moment, then escalate to kill so the next poll()
                 # iteration takes the drain-and-exit branch above.
-                try:
-                    process.wait(timeout=2.0)
-                except subprocess.TimeoutExpired:
-                    process.kill()
+                _wait_for_streaming_process_exit(process)
                 continue
 
             # Use select to wait for data with timeout
             readable = select.select(read_fds, [], [], poll_interval)[0]
 
-            for fd in readable:
-                # Use os.read() for truly non-blocking reads.
-                # process.stdout.read(n) uses TextIOWrapper which internally
-                # loops to accumulate n chars, blocking on the pipe even after
-                # select() returns readable.
-                raw_bytes = os.read(fd, 4096)
-                if not raw_bytes:
-                    # EOF on this stream. Stop selecting on it; the other stream
-                    # may still have data, and the process.poll() branch will
-                    # perform the final drain.
-                    read_fds.remove(fd)
-                    continue
-
-                chunk = raw_bytes.decode("utf-8", errors="surrogateescape")
-
-                if fd == stdout_fd:
-                    # Accumulate for final parsing (capped to avoid memory exhaustion).
-                    stdout_total = _append_bounded_output(
-                        stdout_parts, stdout_total, chunk, "stdout"
-                    )
-                    incomplete_line = _emit_stdout_lines(
-                        incomplete_line + chunk, on_line, final=False
-                    )
-                else:
-                    # stderr: accumulate only (no line callback). Both parsers
-                    # in scanner.py and daemon_scanner.py operate on stdout only,
-                    # and routing stderr ERROR-suffixed lines into on_line would
-                    # corrupt the progress counter.
+            for fd, chunk in _iter_ready_stream_chunks(readable, read_fds):
+                if fd != stdout_fd:
                     stderr_total = _append_bounded_output(
                         stderr_parts, stderr_total, chunk, "stderr"
                     )
+                    continue
+
+                stdout_total = _append_bounded_output(stdout_parts, stdout_total, chunk, "stdout")
+                incomplete_line = _emit_stdout_lines(incomplete_line + chunk, on_line, final=False)
 
     except OSError as e:
         logger.warning("Error streaming process output: %s", e)
         # Try to get any remaining output
         try:
             remaining_stdout, remaining_stderr = process.communicate(timeout=2.0)
-            stdout_total = _append_bounded_output(
-                stdout_parts, stdout_total, remaining_stdout or "", "stdout"
-            )
-            stderr_total = _append_bounded_output(
-                stderr_parts, stderr_total, remaining_stderr or "", "stderr"
+            stdout_total, stderr_total = _append_output_pair(
+                stdout_parts,
+                stdout_total,
+                remaining_stdout,
+                stderr_parts,
+                stderr_total,
+                remaining_stderr,
             )
         except subprocess.TimeoutExpired:
             process.kill()

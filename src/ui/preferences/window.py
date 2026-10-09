@@ -608,6 +608,31 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         finally:
             GLib.idle_add(self._apply_loaded_configs)
 
+    def _load_config_io(
+        self,
+        config_name: str,
+        config_path: str,
+        config_attribute: str,
+        error_attribute: str,
+    ):
+        """Parse one known ClamAV config and record its loading state."""
+        logger.debug("Loading %s config from: %s", config_name, config_path)
+        try:
+            config, error = parse_config(config_path)
+            setattr(self, config_attribute, config)
+            if error:
+                logger.warning("Failed to load %s.conf: %s", config_name, error)
+                setattr(self, error_attribute, error)
+            elif config:
+                # values is a dict in ClamAVConfig.
+                values = getattr(config, "values", None)
+                num_options = len(values) if isinstance(values, dict) else 0
+                logger.info("Loaded %s.conf with %d options", config_name, num_options)
+                setattr(self, error_attribute, None)
+        except Exception as error:
+            logger.exception("Unexpected error loading %s.conf: %s", config_name, error)
+            setattr(self, error_attribute, str(error))
+
     def _load_configs_io(self):
         """
         Parse ClamAV configuration files without touching widgets.
@@ -617,48 +642,22 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
         ``self``. Widget population is deferred to ``_apply_loaded_configs``
         on the main thread. Safe to call off the GTK main loop.
         """
-        # Load freshclam.conf
-        logger.debug("Loading freshclam config from: %s", self._freshclam_conf_path)
-        try:
-            self._freshclam_config, error = parse_config(self._freshclam_conf_path)
-            if error:
-                logger.warning("Failed to load freshclam.conf: %s", error)
-                self._freshclam_load_error = error
-            elif self._freshclam_config:
-                # Log number of options loaded (values is a dict in ClamAVConfig)
-                num_options = (
-                    len(self._freshclam_config.values)
-                    if hasattr(self._freshclam_config, "values")
-                    and isinstance(self._freshclam_config.values, dict)
-                    else 0
-                )
-                logger.info("Loaded freshclam.conf with %d options", num_options)
-                self._freshclam_load_error = None
-        except Exception as e:
-            logger.exception("Unexpected error loading freshclam.conf: %s", e)
-            self._freshclam_load_error = str(e)
+        self._load_config_io(
+            "freshclam",
+            self._freshclam_conf_path,
+            "_freshclam_config",
+            "_freshclam_load_error",
+        )
 
-        # Load clamd.conf if available
+        # clamd.conf is meaningful only when the host-aware availability
+        # check found it.
         if self._clamd_available:
-            logger.debug("Loading clamd config from: %s", self._clamd_conf_path)
-            try:
-                self._clamd_config, error = parse_config(self._clamd_conf_path)
-                if error:
-                    logger.warning("Failed to load clamd.conf: %s", error)
-                    self._clamd_load_error = error
-                elif self._clamd_config:
-                    # Log number of options loaded (values is a dict in ClamAVConfig)
-                    num_options = (
-                        len(self._clamd_config.values)
-                        if hasattr(self._clamd_config, "values")
-                        and isinstance(self._clamd_config.values, dict)
-                        else 0
-                    )
-                    logger.info("Loaded clamd.conf with %d options", num_options)
-                    self._clamd_load_error = None
-            except Exception as e:
-                logger.exception("Unexpected error loading clamd.conf: %s", e)
-                self._clamd_load_error = str(e)
+            self._load_config_io(
+                "clamd",
+                self._clamd_conf_path,
+                "_clamd_config",
+                "_clamd_load_error",
+            )
 
     def _apply_loaded_configs(self):
         """

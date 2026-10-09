@@ -1408,6 +1408,27 @@ class TestTrayManagerEdgeCases:
         assert "Tray service didn't stop gracefully" in caplog.text
         assert "Tray service didn't terminate" in caplog.text
 
+    def test_stop_terminates_without_killing_after_second_wait_succeeds(self, mock_gtk_modules):
+        """Test the graceful timeout path stops after successful termination."""
+        import subprocess
+
+        from src.ui.tray_manager import TrayManager
+
+        manager = TrayManager()
+        mock_process = mock.Mock()
+        mock_process.wait.side_effect = [subprocess.TimeoutExpired("cmd", 2.0), None]
+        mock_process.stdin = mock.Mock()
+        mock_process.stdout = mock.Mock()
+        mock_process.stderr = mock.Mock()
+        manager._process = mock_process
+        manager._running = True
+
+        manager.stop()
+
+        mock_process.wait.assert_has_calls([mock.call(timeout=2.0), mock.call(timeout=1.0)])
+        mock_process.terminate.assert_called_once()
+        mock_process.kill.assert_not_called()
+
     def test_stop_handles_exception(self, mock_gtk_modules, caplog):
         """Test stop handles exceptions during shutdown."""
         import logging

@@ -536,9 +536,9 @@ class TestFormatScanPath:
         """Test format_scan_path returns already formatted portal paths as-is."""
         portal_formatted = "[Portal] test.txt"
 
-        with mock.patch(
-            "src.core.path_validation.format_flatpak_portal_path",
-            return_value=portal_formatted,
+        with mock.patch.dict(
+            format_scan_path.__globals__,
+            {"format_flatpak_portal_path": mock.Mock(return_value=portal_formatted)},
         ):
             result = format_scan_path("/some/path")
             assert result == portal_formatted
