@@ -2087,3 +2087,466 @@ class TestBackupConfigFlatpak:
 
         backups = list(tmp_path.glob("clamd.bak.*"))
         assert len(backups) == 1
+
+
+class TestPrivilegedConfigFailureBoundaries:
+    """Public failure behavior at direct and elevated write boundaries."""
+
+    def test_mixed_batch_keeps_direct_write_when_helper_is_unavailable(self, monkeypatch, tmp_path):
+        direct_path = tmp_path / "user.conf"
+        elevated_path = tmp_path / "system.conf"
+        elevated_original = "LogVerbose no\n"
+        elevated_path.write_text(elevated_original, encoding="utf-8")
+
+        direct_config = ClamAVConfig(file_path=direct_path)
+        direct_config.set_value("LogVerbose", "yes")
+        elevated_config = ClamAVConfig(file_path=elevated_path)
+        elevated_config.set_value("Checks", "12")
+
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_path_needs_elevation",
+            lambda path: path == elevated_path,
+        )
+        monkeypatch.setattr(clamav_config_module, "_get_privileged_writer_path", lambda: None)
+
+        success, error = write_configs_with_elevation([direct_config, elevated_config])
+
+        assert success is False
+        assert "helper" in error.lower()
+        assert direct_path.read_text(encoding="utf-8") == direct_config.to_string()
+        assert elevated_path.read_text(encoding="utf-8") == elevated_original
+
+    @pytest.mark.parametrize(
+        ("returncode", "status_fragment"),
+        [(126, "canceled"), (1, "failed to write")],
+    )
+    def test_mixed_batch_writes_direct_file_before_helper_failure(
+        self, monkeypatch, tmp_path, returncode, status_fragment
+    ):
+        direct_path = tmp_path / "user.conf"
+        elevated_path = tmp_path / "system.conf"
+        elevated_original = "LogVerbose no\n"
+        elevated_path.write_text(elevated_original, encoding="utf-8")
+
+        direct_config = ClamAVConfig(file_path=direct_path)
+        direct_config.set_value("LogVerbose", "yes")
+        elevated_config = ClamAVConfig(file_path=elevated_path)
+        elevated_config.set_value("Checks", "12")
+
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_path_needs_elevation",
+            lambda path: path == elevated_path,
+        )
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(
+            clamav_config_module,
+            "staging_root_for_uid",
+            lambda _uid: tmp_path / "staging-root",
+        )
+
+        helper_started = []
+
+        def _failed_helper(_command, **_kwargs):
+            assert direct_path.read_text(encoding="utf-8") == direct_config.to_string()
+            helper_started.append(True)
+            return mock.Mock(returncode=returncode, stderr="helper failure", stdout="")
+
+        monkeypatch.setattr(clamav_config_module.subprocess, "run", _failed_helper)
+
+        success, error = write_configs_with_elevation([direct_config, elevated_config])
+
+        assert success is False
+        assert status_fragment in error.lower()
+        assert helper_started == [True]
+        assert direct_path.read_text(encoding="utf-8") == direct_config.to_string()
+        assert elevated_path.read_text(encoding="utf-8") == elevated_original
+
+    def test_staging_root_creation_failure_does_not_invoke_helper(self, monkeypatch, tmp_path):
+        config = ClamAVConfig(file_path=tmp_path / "system.conf")
+        config.set_value("LogVerbose", "yes")
+        blocked_root = tmp_path / "blocked-staging-root"
+        blocked_root.write_text("not a directory", encoding="utf-8")
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: True)
+        monkeypatch.setattr(clamav_config_module, "_running_in_flatpak", lambda: False)
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(clamav_config_module, "staging_root_for_uid", lambda _uid: blocked_root)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "helper must not run when staging cannot be created"
+            ),
+        )
+
+        success, error = write_configs_with_elevation([config])
+
+        assert success is False
+        assert "unexpected error" in error.lower()
+        assert blocked_root.read_text(encoding="utf-8") == "not a directory"
+
+    def test_staging_open_failure_cleans_real_staging_directory(self, monkeypatch, tmp_path):
+        config = ClamAVConfig(file_path=tmp_path / "system.conf")
+        config.set_value("LogVerbose", "yes")
+        staging_root = tmp_path / "staging-root"
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: True)
+        monkeypatch.setattr(clamav_config_module, "_running_in_flatpak", lambda: False)
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(clamav_config_module, "staging_root_for_uid", lambda _uid: staging_root)
+        real_open = clamav_config_module.os.open
+
+        def _fail_staged_file_open(path, *args, **kwargs):
+            if str(path).endswith(".conf"):
+                raise OSError("staging disk full")
+            return real_open(path, *args, **kwargs)
+
+        monkeypatch.setattr(clamav_config_module.os, "open", _fail_staged_file_open)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail("helper must not run after staging open failure"),
+        )
+
+        success, error = write_configs_with_elevation([config])
+
+        assert success is False
+        assert "unexpected error" in error.lower()
+        assert staging_root.is_dir()
+        assert list(staging_root.iterdir()) == []
+
+    def test_staging_write_failure_removes_created_staged_file(self, monkeypatch, tmp_path):
+        config = ClamAVConfig(file_path=tmp_path / "system.conf")
+        config.set_value("LogVerbose", "yes")
+        staging_root = tmp_path / "staging-root"
+        real_fdopen = clamav_config_module.os.fdopen
+        staged_paths = []
+
+        class FailingStagedWriter:
+            def __init__(self, file_handle):
+                self.file_handle = file_handle
+
+            def __enter__(self):
+                return self
+
+            def write(self, _content):
+                staged_path = next(staging_root.glob("*/*.conf"))
+                assert staged_path.is_file()
+                staged_paths.append(staged_path)
+                raise OSError("staging write failed")
+
+            def __exit__(self, *_args):
+                self.file_handle.close()
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: True)
+        monkeypatch.setattr(clamav_config_module, "_running_in_flatpak", lambda: False)
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(clamav_config_module, "staging_root_for_uid", lambda _uid: staging_root)
+        monkeypatch.setattr(
+            clamav_config_module.os,
+            "fdopen",
+            lambda fd, *args, **kwargs: FailingStagedWriter(real_fdopen(fd, *args, **kwargs)),
+        )
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "helper must not run after staging write failure"
+            ),
+        )
+
+        success, error = write_configs_with_elevation([config])
+
+        assert success is False
+        assert "unexpected error" in error.lower()
+        assert len(staged_paths) == 1
+        assert not staged_paths[0].exists()
+        assert list(staging_root.iterdir()) == []
+
+
+class TestReadConfigWithElevationBoundaries:
+    """Authorization and process-result behavior for protected config reads."""
+
+    def test_rejects_path_outside_read_allowlist_before_helper_resolution(self, monkeypatch):
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: pytest.fail("unallowlisted reads must not resolve the helper"),
+        )
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail("unallowlisted reads must not invoke pkexec"),
+        )
+
+        content, error = clamav_config_module.read_config_with_elevation("/etc/shadow")
+
+        assert content is None
+        assert "not allowed" in error.lower()
+
+    def test_requires_trusted_helper_before_reading_allowed_path(self, monkeypatch):
+        monkeypatch.setattr(clamav_config_module, "_get_privileged_writer_path", lambda: None)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail("untrusted helper must not reach pkexec"),
+        )
+
+        content, error = clamav_config_module.read_config_with_elevation("/etc/freshclam.conf")
+
+        assert content is None
+        assert "helper" in error.lower()
+
+    @pytest.mark.parametrize(
+        ("failure", "status_fragment"),
+        [
+            (FileNotFoundError(), "pkexec"),
+            (clamav_config_module.subprocess.TimeoutExpired("pkexec", 10), "timed out"),
+        ],
+    )
+    def test_reports_missing_or_timed_out_authorization_executable(
+        self, monkeypatch, failure, status_fragment
+    ):
+        def _raise_process_failure(*_args, **_kwargs):
+            raise failure
+
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(clamav_config_module.subprocess, "run", _raise_process_failure)
+
+        content, error = clamav_config_module.read_config_with_elevation("/etc/freshclam.conf")
+
+        assert content is None
+        assert status_fragment in error.lower()
+
+    @pytest.mark.parametrize(
+        ("returncode", "stderr", "status_fragment"),
+        [
+            (126, "", "canceled"),
+            (127, "", "helper"),
+            (4, "", "protocol mismatch"),
+            (1, "authorization denied", "authorization denied"),
+        ],
+    )
+    def test_reports_substantive_denial_for_helper_return_codes(
+        self, monkeypatch, returncode, stderr, status_fragment
+    ):
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: mock.Mock(returncode=returncode, stderr=stderr),
+        )
+
+        content, error = clamav_config_module.read_config_with_elevation("/etc/freshclam.conf")
+
+        assert content is None
+        assert status_fragment in error.lower()
+
+    @pytest.mark.parametrize(
+        ("stdout", "expected_content"),
+        [
+            ("LogVerbose yes\n", "LogVerbose yes\n"),
+            (b"LogVerbose yes\n", "LogVerbose yes\n"),
+            (b"ByteOrder \xe9\n", "ByteOrder é\n"),
+        ],
+    )
+    def test_reads_string_utf8_and_latin1_helper_output(
+        self, monkeypatch, stdout, expected_content
+    ):
+        monkeypatch.setattr(
+            clamav_config_module,
+            "_get_privileged_writer_path",
+            lambda: "/usr/bin/clamui-apply-preferences",
+        )
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: mock.Mock(returncode=0, stdout=stdout),
+        )
+
+        content, error = clamav_config_module.read_config_with_elevation("/etc/freshclam.conf")
+
+        assert error is None
+        assert content == expected_content
+
+
+class TestDirectWriteFilesystemFailures:
+    """Filesystem rejection and failure behavior stays on the direct path."""
+
+    def test_symlink_target_is_rejected_without_elevation(self, monkeypatch, tmp_path):
+        target = tmp_path / "actual.conf"
+        target_original = "LogVerbose no\n"
+        target.write_text(target_original, encoding="utf-8")
+        symlink = tmp_path / "config.conf"
+        symlink.symlink_to(target)
+
+        config = ClamAVConfig(file_path=symlink)
+        config.set_value("LogVerbose", "yes")
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: False)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "direct write failures must not request elevation"
+            ),
+        )
+
+        success, error = write_config_with_elevation(config)
+
+        assert success is False
+        assert "failed to write config" in error.lower()
+        assert symlink.is_symlink()
+        assert target.read_text(encoding="utf-8") == target_original
+
+    def test_nonregular_open_file_descriptor_is_rejected_without_elevation(
+        self, monkeypatch, tmp_path
+    ):
+        fifo = tmp_path / "config.fifo"
+        os.mkfifo(fifo)
+        fifo_fd = os.open(fifo, os.O_RDWR | os.O_NONBLOCK)
+        config = ClamAVConfig(file_path=fifo)
+        config.set_value("LogVerbose", "yes")
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: False)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "direct write failures must not request elevation"
+            ),
+        )
+        with monkeypatch.context() as patch:
+            patch.setattr(clamav_config_module.os, "open", lambda *_args, **_kwargs: fifo_fd)
+            success, error = write_config_with_elevation(config)
+
+        assert success is False
+        assert "not a regular file" in error.lower()
+
+    def test_direct_stream_open_failure_preserves_existing_target_without_elevation(
+        self, monkeypatch, tmp_path
+    ):
+        config_path = tmp_path / "config.conf"
+        original_content = "LogVerbose no\n"
+        config_path.write_text(original_content, encoding="utf-8")
+        config = ClamAVConfig(file_path=config_path)
+        config.set_value("LogVerbose", "yes")
+
+        def _fail_fdopen(fd, *_args, **_kwargs):
+            os.close(fd)
+            raise OSError("cannot open direct output stream")
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: False)
+        monkeypatch.setattr(clamav_config_module.os, "fdopen", _fail_fdopen)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "direct write failures must not request elevation"
+            ),
+        )
+
+        success, error = write_config_with_elevation(config)
+
+        assert success is False
+        assert "failed to write config" in error.lower()
+        assert config_path.read_text(encoding="utf-8") == original_content
+
+    def test_direct_content_write_failure_reports_error_without_elevation(
+        self, monkeypatch, tmp_path
+    ):
+        config_path = tmp_path / "config.conf"
+        config_path.write_text("LogVerbose no\n", encoding="utf-8")
+        config = ClamAVConfig(file_path=config_path)
+        config.set_value("LogVerbose", "yes")
+        real_fdopen = clamav_config_module.os.fdopen
+
+        class FailingDirectWriter:
+            def __init__(self, file_handle):
+                self.file_handle = file_handle
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                self.file_handle.close()
+
+            def fileno(self):
+                return self.file_handle.fileno()
+
+            def truncate(self, size):
+                return self.file_handle.truncate(size)
+
+            def write(self, _content):
+                raise OSError("direct write failed")
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: False)
+        monkeypatch.setattr(
+            clamav_config_module.os,
+            "fdopen",
+            lambda fd, *args, **kwargs: FailingDirectWriter(real_fdopen(fd, *args, **kwargs)),
+        )
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "direct write failures must not request elevation"
+            ),
+        )
+
+        success, error = write_config_with_elevation(config)
+
+        assert success is False
+        assert "failed to write config" in error.lower()
+
+    def test_direct_create_failure_leaves_no_target_and_does_not_elevate(
+        self, monkeypatch, tmp_path
+    ):
+        config_path = tmp_path / "new.conf"
+        config = ClamAVConfig(file_path=config_path)
+        config.set_value("LogVerbose", "yes")
+
+        monkeypatch.setattr(clamav_config_module, "_path_needs_elevation", lambda _path: False)
+        monkeypatch.setattr(
+            clamav_config_module.subprocess,
+            "run",
+            lambda *_args, **_kwargs: pytest.fail(
+                "direct write failures must not request elevation"
+            ),
+        )
+        with monkeypatch.context() as patch:
+            patch.setattr(
+                clamav_config_module.os,
+                "open",
+                lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+            )
+            success, error = write_config_with_elevation(config)
+
+        assert success is False
+        assert "failed to write config" in error.lower()
+        assert not config_path.exists()

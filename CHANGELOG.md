@@ -5,6 +5,7 @@
 ### Added
 
 - Added a **Start in System Tray** preference for login/autostart workflows while keeping explicit file and folder scans visible. (#221)
+- Added regression coverage for privileged configuration read failures, mixed direct/elevated saves, staging cleanup, and direct-write filesystem rejection.
 
 ### Changed
 
