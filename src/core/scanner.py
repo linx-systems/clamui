@@ -499,11 +499,47 @@ class Scanner:
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
+    def _collect_count_exclusions(
+        self, profile_exclusions: dict | None
+    ) -> tuple[list[str], list[str]]:
+        """Collect file and directory exclusions used during pre-counting."""
+        exclude_patterns: list[str] = []
+        exclude_dirs: list[str] = []
+
+        if self._settings_manager is not None:
+            exclusions = self._settings_manager.get("exclusion_patterns", [])
+            for exclusion in exclusions:
+                if not exclusion.get("enabled", True):
+                    continue
+                pattern = exclusion.get("pattern", "")
+                if not pattern:
+                    continue
+                if exclusion.get("type", "pattern") == "directory":
+                    exclude_dirs.append(pattern)
+                    continue
+                exclude_patterns.append(pattern)
+
+        if not profile_exclusions:
+            return exclude_patterns, exclude_dirs
+
+        for excl_path in profile_exclusions.get("paths", []):
+            if not excl_path:
+                continue
+            if excl_path.startswith("~"):
+                excl_path = str(Path(excl_path).expanduser())
+            exclude_dirs.append(excl_path)
+
+        for pattern in profile_exclusions.get("patterns", []):
+            if pattern:
+                exclude_patterns.append(pattern)
+
+        return exclude_patterns, exclude_dirs
+
     def _count_files(self, path: str, profile_exclusions: dict | None = None) -> int | None:
         """
         Pre-count files for progress calculation.
 
-        Uses os.scandir for fast counting, respecting exclusion patterns.
+        Uses os.walk for fast counting, respecting exclusion patterns.
 
         Args:
             path: Path to scan
@@ -529,37 +565,7 @@ class Scanner:
         if not scan_path.is_dir():
             return None
 
-        # Collect exclusion patterns
-        exclude_patterns: list[str] = []
-        exclude_dirs: list[str] = []
-
-        # Global exclusions from settings
-        if self._settings_manager is not None:
-            exclusions = self._settings_manager.get("exclusion_patterns", [])
-            for exclusion in exclusions:
-                if not exclusion.get("enabled", True):
-                    continue
-                pattern = exclusion.get("pattern", "")
-                if not pattern:
-                    continue
-                exclusion_type = exclusion.get("type", "pattern")
-                if exclusion_type == "directory":
-                    exclude_dirs.append(pattern)
-                else:
-                    exclude_patterns.append(pattern)
-
-        # Profile exclusions
-        if profile_exclusions:
-            for excl_path in profile_exclusions.get("paths", []):
-                if excl_path:
-                    if excl_path.startswith("~"):
-                        excl_path = str(Path(excl_path).expanduser())
-                    exclude_dirs.append(excl_path)
-
-            for pattern in profile_exclusions.get("patterns", []):
-                if pattern:
-                    exclude_patterns.append(pattern)
-
+        exclude_patterns, exclude_dirs = self._collect_count_exclusions(profile_exclusions)
         file_count = 0
 
         try:
@@ -584,7 +590,7 @@ class Scanner:
                     if not self._is_path_excluded(file_path, f, exclude_patterns, is_dir=False):
                         file_count += 1
         except (PermissionError, OSError):
-            # If we can't access the directory, return 0
+            # Return the count accumulated before the inaccessible directory.
             return file_count
 
         return file_count

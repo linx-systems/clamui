@@ -2925,6 +2925,17 @@ class TestCountFiles:
         count = scanner._count_files(str(tmp_path))
         assert count == 3
 
+    def test_count_files_does_not_follow_directory_symlinks(self, tmp_path):
+        """Test _count_files retains os.walk's default symlink behavior."""
+        target_dir = tmp_path / "target"
+        target_dir.mkdir()
+        (target_dir / "target.txt").write_text("target")
+        (tmp_path / "linked-target").symlink_to(target_dir, target_is_directory=True)
+
+        scanner = Scanner()
+
+        assert scanner._count_files(str(tmp_path)) == 1
+
     def test_count_files_permission_error(self, tmp_path):
         """Test _count_files handles PermissionError gracefully."""
         scanner = Scanner()
@@ -2934,6 +2945,46 @@ class TestCountFiles:
 
         # Should return 0 on PermissionError (not crash)
         assert count == 0
+
+    def test_count_files_returns_partial_count_after_walk_error(self, tmp_path):
+        """Test _count_files keeps entries counted before a walk error."""
+
+        def partially_failing_walk(_path):
+            yield str(tmp_path), [], ["counted.txt"]
+            raise OSError("Directory became unavailable")
+
+        scanner = Scanner()
+
+        with mock.patch("os.walk", side_effect=partially_failing_walk):
+            assert scanner._count_files(str(tmp_path)) == 1
+
+    def test_count_files_applies_global_and_profile_exclusions(self, tmp_path):
+        """Test _count_files keeps global file and directory exclusions separate."""
+        (tmp_path / "included.txt").write_text("included")
+        (tmp_path / "disabled.log").write_text("disabled exclusion")
+        (tmp_path / "global.skip").write_text("global exclusion")
+        (tmp_path / "profile.skip").write_text("profile exclusion")
+        global_excluded = tmp_path / "global-excluded"
+        global_excluded.mkdir()
+        (global_excluded / "file.txt").write_text("global directory exclusion")
+        profile_excluded = tmp_path / "profile-excluded"
+        profile_excluded.mkdir()
+        (profile_excluded / "file.txt").write_text("profile directory exclusion")
+
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = [
+            {"pattern": "*.skip", "type": "file", "enabled": True},
+            {"pattern": "global-excluded", "type": "directory", "enabled": True},
+            {"pattern": "disabled.log", "type": "pattern", "enabled": False},
+        ]
+        scanner = Scanner(settings_manager=settings_manager)
+        profile_exclusions = {
+            "paths": ["~profile-excluded"],
+            "patterns": ["profile.skip"],
+        }
+
+        with mock.patch("src.core.scanner.Path.expanduser", return_value=profile_excluded):
+            assert scanner._count_files(str(tmp_path), profile_exclusions) == 2
 
     def test_count_files_respects_cancellation(self, tmp_path):
         """Test _count_files respects cancellation event."""

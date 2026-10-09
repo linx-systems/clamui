@@ -16,6 +16,7 @@
 - Separated modern and legacy About dialog setup while retaining GTK/libadwaita compatibility and presentation behavior.
 - Flattened daemon scan result parsing while preserving detection priority, skipped-file warnings, and error-message precedence.
 - Simplified daemon log discovery while preserving common-location priority, configured log fallback, and Flatpak host access.
+- Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.
 
 ### Fixed
 
