@@ -13,6 +13,7 @@
 - Simplified scanner output handling, daemon target counting, and ClamAV configuration parsing while preserving cancellation, exclusion scope, and explicit read-authorization behavior.
 - Simplified preference configuration saving/loading, tray shutdown, scan-output streaming, and symlink safety checks while preserving their existing behavior.
 - Clarified privileged-helper release asset validation without changing accepted metadata or security checks.
+- Separated modern and legacy About dialog setup while retaining GTK/libadwaita compatibility and presentation behavior.
 
 ### Fixed
 

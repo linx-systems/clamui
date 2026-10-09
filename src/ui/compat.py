@@ -280,27 +280,80 @@ def present_about_dialog(
     Adw.AboutDialog. Fall back to Gtk.AboutDialog on older runtimes.
     """
     if hasattr(Adw, "AboutDialog"):
-        about = Adw.AboutDialog()
-        about.set_application_name(app_name)
-        about.set_version(version)
-        if developer_name:
-            about.set_developer_name(developer_name)
-        if license_type is not None:
-            about.set_license_type(license_type)
-        if comments:
-            about.set_comments(comments)
-        if website:
-            about.set_website(website)
-        if issue_url and hasattr(about, "set_issue_url"):
-            about.set_issue_url(issue_url)
-        if icon_name:
-            about.set_application_icon(icon_name)
+        about = _create_adw_about_dialog(
+            app_name=app_name,
+            version=version,
+            developer_name=developer_name,
+            comments=comments,
+            website=website,
+            issue_url=issue_url,
+            icon_name=icon_name,
+            license_type=license_type,
+        )
         if parent is not None:
             about.present(parent)
         else:
             about.present()
         return about
 
+    about = _create_gtk_about_dialog(
+        app_name=app_name,
+        version=version,
+        developer_name=developer_name,
+        comments=comments,
+        website=website,
+        icon_name=icon_name,
+        license_type=license_type,
+    )
+    if parent is not None and hasattr(about, "set_transient_for"):
+        about.set_transient_for(parent)
+    if parent is not None and hasattr(about, "set_modal"):
+        about.set_modal(True)
+    about.present()
+    return about
+
+
+def _create_adw_about_dialog(
+    *,
+    app_name: str,
+    version: str,
+    developer_name: str | None,
+    comments: str | None,
+    website: str | None,
+    issue_url: str | None,
+    icon_name: str | None,
+    license_type,
+):
+    """Create and configure an Adw.AboutDialog."""
+    about = Adw.AboutDialog()
+    about.set_application_name(app_name)
+    about.set_version(version)
+    if developer_name:
+        about.set_developer_name(developer_name)
+    if license_type is not None:
+        about.set_license_type(license_type)
+    if comments:
+        about.set_comments(comments)
+    if website:
+        about.set_website(website)
+    if issue_url and hasattr(about, "set_issue_url"):
+        about.set_issue_url(issue_url)
+    if icon_name:
+        about.set_application_icon(icon_name)
+    return about
+
+
+def _create_gtk_about_dialog(
+    *,
+    app_name: str,
+    version: str,
+    developer_name: str | None,
+    comments: str | None,
+    website: str | None,
+    icon_name: str | None,
+    license_type,
+):
+    """Create and configure a Gtk.AboutDialog fallback."""
     about = Gtk.AboutDialog()
     if hasattr(about, "set_program_name"):
         about.set_program_name(app_name)
@@ -324,11 +377,6 @@ def present_about_dialog(
             about.set_logo_icon_name(icon_name)
         elif hasattr(about, "set_application_icon"):
             about.set_application_icon(icon_name)
-    if parent is not None and hasattr(about, "set_transient_for"):
-        about.set_transient_for(parent)
-    if parent is not None and hasattr(about, "set_modal"):
-        about.set_modal(True)
-    about.present()
     return about
 
 
