@@ -14,7 +14,7 @@
 - Simplified scanner output handling, daemon target counting, and ClamAV configuration parsing while preserving cancellation, exclusion scope, and explicit read-authorization behavior.
 - Simplified preference configuration saving/loading, tray shutdown, scan-output streaming, and symlink safety checks while preserving their existing behavior.
 - Clarified privileged-helper release asset validation without changing accepted metadata or security checks.
-- Separated modern and legacy About dialog setup while retaining GTK/libadwaita compatibility and presentation behavior.
+- Separated modern and legacy About dialog setup and removed redundant GTK setter checks while retaining GTK 4.6/libadwaita 1.1 compatibility and presentation behavior.
 - Flattened daemon scan result parsing while preserving detection priority, skipped-file warnings, and error-message precedence.
 - Simplified daemon log discovery while preserving common-location priority, configured log fallback, and Flatpak host access.
 - Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.

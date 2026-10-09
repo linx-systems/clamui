@@ -305,9 +305,8 @@ def present_about_dialog(
         icon_name=icon_name,
         license_type=license_type,
     )
-    if parent is not None and hasattr(about, "set_transient_for"):
+    if parent is not None:
         about.set_transient_for(parent)
-    if parent is not None and hasattr(about, "set_modal"):
         about.set_modal(True)
     about.present()
     return about
@@ -355,28 +354,18 @@ def _create_gtk_about_dialog(
 ):
     """Create and configure a Gtk.AboutDialog fallback."""
     about = Gtk.AboutDialog()
-    if hasattr(about, "set_program_name"):
-        about.set_program_name(app_name)
-    elif hasattr(about, "set_application_name"):
-        about.set_application_name(app_name)
-    if hasattr(about, "set_version"):
-        about.set_version(version)
+    about.set_program_name(app_name)
+    about.set_version(version)
     if developer_name:
-        if hasattr(about, "set_authors"):
-            about.set_authors([developer_name])
-        elif hasattr(about, "set_developers"):
-            about.set_developers([developer_name])
-    if license_type is not None and hasattr(about, "set_license_type"):
+        about.set_authors([developer_name])
+    if license_type is not None:
         about.set_license_type(license_type)
-    if comments and hasattr(about, "set_comments"):
+    if comments:
         about.set_comments(comments)
-    if website and hasattr(about, "set_website"):
+    if website:
         about.set_website(website)
     if icon_name:
-        if hasattr(about, "set_logo_icon_name"):
-            about.set_logo_icon_name(icon_name)
-        elif hasattr(about, "set_application_icon"):
-            about.set_application_icon(icon_name)
+        about.set_logo_icon_name(icon_name)
     return about
 
 
