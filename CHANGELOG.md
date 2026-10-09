@@ -17,6 +17,7 @@
 - Flattened daemon scan result parsing while preserving detection priority, skipped-file warnings, and error-message precedence.
 - Simplified daemon log discovery while preserving common-location priority, configured log fallback, and Flatpak host access.
 - Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.
+- Separated daemon scan-input preparation and temporary file-list ownership from execution while preserving exclusions, progress, cancellation, and cleanup.
 
 ### Fixed
 

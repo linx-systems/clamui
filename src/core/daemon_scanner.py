@@ -13,6 +13,7 @@ import tempfile
 import threading
 import time
 from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 from gi.repository import GLib
@@ -46,6 +47,22 @@ from .utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class _PreparedScanInput:
+    """Scan targets and terminal preparation state for one daemon scan."""
+
+    file_count: int
+    dir_count: int
+    file_paths: list[str] | None
+    use_file_list: bool
+    cancelled: bool
+
+    @property
+    def is_empty_file_list(self) -> bool:
+        """Whether filtering retained no files to pass to clamdscan."""
+        return self.use_file_list and not self.file_paths
 
 
 class DaemonScanner:
@@ -170,32 +187,17 @@ class DaemonScanner:
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
-        # Count files/directories before scanning (clamdscan doesn't report these).
-        # Also collect file paths whenever live progress is enabled or exclusions
-        # are active, because clamdscan only respects exclusions when ClamUI feeds
-        # an explicit file list instead of a directory root.
-        use_file_list = progress_callback is not None or self._has_active_exclusions(
-            profile_exclusions
+        prepared_input = self._prepare_scan_input(
+            path, profile_exclusions, count_targets, progress_callback
         )
-        should_count = count_targets or use_file_list
-        file_list_path: str | None = None
-        file_paths: list[str] | None = None
 
-        if should_count:
-            file_count, dir_count, file_paths = self._count_scan_targets(
-                path, profile_exclusions, collect_paths=use_file_list
-            )
-        else:
-            file_count, dir_count = 0, 0
-
-        # Check if cancelled during counting phase
-        if self._cancel_event.is_set():
+        if prepared_input.cancelled:
             result = create_cancelled_result(path)
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
         try:
-            if use_file_list and not file_paths:
+            if prepared_input.is_empty_file_list:
                 result = ScanResult(
                     status=ScanStatus.CLEAN,
                     path=path,
@@ -203,8 +205,8 @@ class DaemonScanner:
                     stderr="",
                     exit_code=0,
                     infected_files=[],
-                    scanned_files=file_count,
-                    scanned_dirs=dir_count,
+                    scanned_files=prepared_input.file_count,
+                    scanned_dirs=prepared_input.dir_count,
                     infected_count=0,
                     error_message=None,
                     threat_details=[],
@@ -212,109 +214,97 @@ class DaemonScanner:
                 self._save_scan_log(result, time.monotonic() - start_time)
                 return result
 
-            # Write file list to temp file for progress mode
-            # clamdscan only emits per-file output with --file-list, not when
-            # scanning a directory (which produces a single summary line)
-            if use_file_list and file_paths:
-                fd, file_list_path = tempfile.mkstemp(
-                    prefix="clamui_filelist_",
-                    suffix=".txt",
-                    dir=self._get_file_list_temp_dir(),
+            with self._temporary_file_list(prepared_input.file_paths) as file_list_path:
+                # Build clamdscan command (use verbose mode if progress callback provided)
+                cmd = self._build_command(
+                    path,
+                    recursive,
+                    profile_exclusions,
+                    verbose=progress_callback is not None,
+                    file_list_path=file_list_path,
+                    force_stream=force_stream,
                 )
-                os.fchmod(fd, 0o600)
+
+                with self._process_lock:
+                    self._current_process = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        encoding="utf-8",
+                        errors="surrogateescape",
+                        env=get_clean_env(),
+                    )
+
+                progress_files_scanned = 0
+                progress_infected_count = 0
+                progress_infected_files: list[str] = []
+
                 try:
-                    f = os.fdopen(fd, "wb")
-                except Exception:
-                    with contextlib.suppress(OSError):
-                        os.close(fd)
-                    raise
-
-                with f:
-                    entries = [os.fsencode(file_path) for file_path in file_paths]
-                    if any(b"\n" in entry or b"\r" in entry or b"\0" in entry for entry in entries):
-                        raise ValueError(
-                            "Cannot scan paths containing newline, carriage return, or NUL "
-                            "with clamd file lists"
+                    if progress_callback is not None:
+                        # Use streaming mode for real-time progress
+                        (
+                            stdout,
+                            stderr,
+                            was_cancelled,
+                            progress_files_scanned,
+                            progress_infected_count,
+                            progress_infected_files,
+                        ) = self._scan_with_progress(
+                            self._current_process,
+                            progress_callback,
+                            prepared_input.file_count,
                         )
-                    f.write(b"\n".join(entries))
+                    else:
+                        # Use standard blocking communication
+                        stdout, stderr, was_cancelled = communicate_with_cancel_check(
+                            self._current_process, self._cancel_event.is_set
+                        )
+                    exit_code = self._current_process.returncode
+                finally:
+                    # Ensure process is cleaned up even if communicate() raises
+                    # Acquire lock to safely clear process reference and get it for cleanup
+                    with self._process_lock:
+                        process = self._current_process
+                        self._current_process = None
+                    # Perform cleanup outside lock to avoid holding it during I/O
+                    cleanup_process(process)
 
-            # Build clamdscan command (use verbose mode if progress callback provided)
-            cmd = self._build_command(
-                path,
-                recursive,
-                profile_exclusions,
-                verbose=progress_callback is not None,
-                file_list_path=file_list_path,
-                force_stream=force_stream,
-            )
-
-            with self._process_lock:
-                self._current_process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    encoding="utf-8",
-                    errors="surrogateescape",
-                    env=get_clean_env(),
-                )
-
-            progress_files_scanned = 0
-            progress_infected_count = 0
-            progress_infected_files: list[str] = []
-
-            try:
-                if progress_callback is not None:
-                    # Use streaming mode for real-time progress
-                    (
+                # Check if cancelled during execution
+                if was_cancelled:
+                    # Use progress counters if available, fall back to pre-counted values
+                    scanned = (
+                        progress_files_scanned
+                        if progress_files_scanned > 0
+                        else prepared_input.file_count
+                    )
+                    result = create_cancelled_result(
+                        path,
                         stdout,
                         stderr,
-                        was_cancelled,
-                        progress_files_scanned,
-                        progress_infected_count,
-                        progress_infected_files,
-                    ) = self._scan_with_progress(
-                        self._current_process, progress_callback, file_count
+                        exit_code if exit_code is not None else -1,
+                        scanned_files=scanned,
+                        scanned_dirs=prepared_input.dir_count,
+                        infected_files=progress_infected_files,
+                        infected_count=progress_infected_count,
                     )
-                else:
-                    # Use standard blocking communication
-                    stdout, stderr, was_cancelled = communicate_with_cancel_check(
-                        self._current_process, self._cancel_event.is_set
-                    )
-                exit_code = self._current_process.returncode
-            finally:
-                # Ensure process is cleaned up even if communicate() raises
-                # Acquire lock to safely clear process reference and get it for cleanup
-                with self._process_lock:
-                    process = self._current_process
-                    self._current_process = None
-                # Perform cleanup outside lock to avoid holding it during I/O
-                cleanup_process(process)
+                    self._save_scan_log(result, time.monotonic() - start_time)
+                    return result
 
-            # Check if cancelled during execution
-            if was_cancelled:
-                # Use progress counters if available, fall back to pre-counted values
-                scanned = progress_files_scanned if progress_files_scanned > 0 else file_count
-                result = create_cancelled_result(
+                # Parse the results
+                result = self._parse_results(
                     path,
                     stdout,
                     stderr,
-                    exit_code if exit_code is not None else -1,
-                    scanned_files=scanned,
-                    scanned_dirs=dir_count,
-                    infected_files=progress_infected_files,
-                    infected_count=progress_infected_count,
+                    exit_code,
+                    prepared_input.file_count,
+                    prepared_input.dir_count,
                 )
+
+                # Apply exclusion filtering (clamdscan doesn't support --exclude)
+                result = self._filter_excluded_threats(result, profile_exclusions)
+
                 self._save_scan_log(result, time.monotonic() - start_time)
                 return result
-
-            # Parse the results
-            result = self._parse_results(path, stdout, stderr, exit_code, file_count, dir_count)
-
-            # Apply exclusion filtering (clamdscan doesn't support --exclude)
-            result = self._filter_excluded_threats(result, profile_exclusions)
-
-            self._save_scan_log(result, time.monotonic() - start_time)
-            return result
 
         except FileNotFoundError:
             result = create_error_result(path, "clamdscan executable not found")
@@ -328,17 +318,6 @@ class DaemonScanner:
             result = create_error_result(path, f"Scan failed: {e}", str(e))
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
-        finally:
-            # Clean up temp file list
-            if file_list_path is not None:
-                try:
-                    os.unlink(file_list_path)
-                except OSError:
-                    logger.debug(
-                        "Failed to remove temporary clamd file list %s",
-                        file_list_path,
-                        exc_info=True,
-                    )
 
     def scan_async(
         self,
@@ -393,6 +372,82 @@ class DaemonScanner:
             process = self._current_process
         # Terminate outside lock to avoid holding it during I/O
         terminate_process_gracefully(process)
+
+    def _prepare_scan_input(
+        self,
+        path: str,
+        profile_exclusions: dict | None,
+        count_targets: bool,
+        progress_callback: Callable[[ScanProgress], None] | None,
+    ) -> _PreparedScanInput:
+        """Collect scan targets and identify terminal input states."""
+        use_file_list = progress_callback is not None or self._has_active_exclusions(
+            profile_exclusions
+        )
+        should_count = count_targets or use_file_list
+        file_paths: list[str] | None = None
+
+        if should_count:
+            file_count, dir_count, file_paths = self._count_scan_targets(
+                path, profile_exclusions, collect_paths=use_file_list
+            )
+        else:
+            file_count, dir_count = 0, 0
+
+        return _PreparedScanInput(
+            file_count=file_count,
+            dir_count=dir_count,
+            file_paths=file_paths,
+            use_file_list=use_file_list,
+            cancelled=self._cancel_event.is_set(),
+        )
+
+    @contextlib.contextmanager
+    def _temporary_file_list(self, file_paths: list[str] | None) -> Iterator[str | None]:
+        """Yield a clamd file list while owning its descriptor and cleanup."""
+        file_list_path: str | None = None
+        fd: int | None = None
+
+        try:
+            if file_paths:
+                fd, file_list_path = tempfile.mkstemp(
+                    prefix="clamui_filelist_",
+                    suffix=".txt",
+                    dir=self._get_file_list_temp_dir(),
+                )
+                os.fchmod(fd, 0o600)
+                try:
+                    file_list = os.fdopen(fd, "wb")
+                except Exception:
+                    with contextlib.suppress(OSError):
+                        os.close(fd)
+                    fd = None
+                    raise
+
+                fd = None
+                with file_list:
+                    entries = [os.fsencode(file_path) for file_path in file_paths]
+                    if any(b"\n" in entry or b"\r" in entry or b"\0" in entry for entry in entries):
+                        raise ValueError(
+                            "Cannot scan paths containing newline, carriage return, or NUL "
+                            "with clamd file lists"
+                        )
+                    file_list.write(b"\n".join(entries))
+
+            yield file_list_path
+        finally:
+            if fd is not None:
+                with contextlib.suppress(OSError):
+                    os.close(fd)
+            if file_list_path is not None:
+                try:
+                    os.unlink(file_list_path)
+                except OSError:
+                    logger.debug(
+                        "Failed to remove temporary clamd file list %s",
+                        file_list_path,
+                        exc_info=True,
+                    )
 
     def _build_command(
         self,
