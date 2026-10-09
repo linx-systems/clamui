@@ -362,6 +362,24 @@ Total errors: 4
         assert result.status == scan_status_class.ERROR
         assert result.error_message == "No files could be scanned"
 
+    def test_parse_results_exit2_message_beats_stderr_when_all_files_failed(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """The exit-2 diagnosis is more specific than a concurrent stderr message."""
+        scanner = daemon_scanner_class()
+
+        result = scanner._parse_results(
+            "/root",
+            "/root/secret.txt: Access denied. ERROR\n",
+            "Connection refused",
+            2,
+            file_count=1,
+            dir_count=0,
+        )
+
+        assert result.status == scan_status_class.ERROR
+        assert result.error_message == "No files could be scanned"
+
     def test_parse_results_exit_code_2_with_detection_is_infected(
         self, daemon_scanner_class, scan_status_class
     ):

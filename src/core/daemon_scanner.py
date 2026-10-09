@@ -823,48 +823,47 @@ class DaemonScanner:
         Returns:
             Parsed ScanResult
         """
-        infected_files = []
-        threat_details = []
+        infected_files: list[str] = []
+        threat_details: list[ThreatDetail] = []
         skipped_files, nonfatal_warnings, hard_error_lines = collect_clamav_warnings(stdout, stderr)
         scanned_files = file_count
         scanned_dirs = dir_count
-        infected_count = 0
 
         # Regex pattern: "/path/to/file: ThreatName FOUND"
         # Uses rsplit(":") to handle colons in Windows paths (C:\)
-        # Also extracts threat name by removing " FOUND" suffix
-        for line in stdout.splitlines():
-            line = line.strip()
+        # Also extracts threat name by removing " FOUND" suffix.
+        for raw_line in stdout.splitlines():
+            line = raw_line.strip()
+            if not line.endswith("FOUND"):
+                continue
 
-            if line.endswith("FOUND"):
-                parts = line.rsplit(":", 1)
-                if len(parts) == 2:
-                    file_path = parts[0].strip()
-                    threat_part = parts[1].strip()
-                    threat_name = (
-                        threat_part.rsplit(" ", 1)[0].strip()
-                        if " FOUND" in threat_part
-                        else threat_part
-                    )
+            parts = line.rsplit(":", 1)
+            if len(parts) != 2:
+                continue
 
-                    infected_files.append(file_path)
+            file_path = parts[0].strip()
+            threat_part = parts[1].strip()
+            threat_name = (
+                threat_part.rsplit(" ", 1)[0].strip() if " FOUND" in threat_part else threat_part
+            )
+            infected_files.append(file_path)
+            threat_details.append(
+                ThreatDetail(
+                    file_path=file_path,
+                    threat_name=threat_name,
+                    category=categorize_threat(threat_name),
+                    severity=classify_threat_severity_str(threat_name),
+                )
+            )
 
-                    threat_detail = ThreatDetail(
-                        file_path=file_path,
-                        threat_name=threat_name,
-                        category=categorize_threat(threat_name),
-                        severity=classify_threat_severity_str(threat_name),
-                    )
-                    threat_details.append(threat_detail)
-                    infected_count += 1
+        infected_count = len(infected_files)
 
-        # Determine overall status based on exit code
+        # Detections are authoritative: clamdscan returns exit code 2 when it
+        # both finds a virus and hits an error (e.g. an unreadable file), so
+        # never let an error code mask a real threat.
         warning_message = None
         exit2_error_message = None
-        if infected_count > 0:
-            # Detections are authoritative: clamdscan returns exit code 2 when it
-            # both finds a virus and hits an error (e.g. an unreadable file), so
-            # never let an error code mask a real threat.
+        if infected_count:
             status = ScanStatus.INFECTED
             if exit_code == 2 and skipped_files:
                 warning_message = f"{len(skipped_files)} file(s) could not be accessed"
@@ -873,8 +872,11 @@ class DaemonScanner:
             # error replies (per-file "... ERROR" or clamdscan's own "ERROR:" /
             # "LibClamAV Error:" lines) may override it - stray unrecognized
             # warning lines must not flip a successful scan to ERROR.
-            genuine_error_lines = [line for line in hard_error_lines if is_genuine_error_line(line)]
-            status = ScanStatus.ERROR if genuine_error_lines else ScanStatus.CLEAN
+            status = (
+                ScanStatus.ERROR
+                if any(is_genuine_error_line(line) for line in hard_error_lines)
+                else ScanStatus.CLEAN
+            )
         elif exit_code == 1:
             status = ScanStatus.INFECTED
         elif exit_code == 2:
@@ -892,20 +894,18 @@ class DaemonScanner:
         else:
             status = ScanStatus.ERROR
 
-        # Prefer stderr for hard errors, but fall back to a concise stdout line when stderr is empty.
         error_message: str | None = None
         if status == ScanStatus.ERROR:
             error_message = exit2_error_message or stderr.strip() or None
-            if error_message is None:
-                if hard_error_lines:
-                    error_message = hard_error_lines[0]
-                else:
-                    for out_line in stdout.splitlines():
-                        candidate = out_line.strip()
-                        if candidate and "SCAN SUMMARY" not in candidate:
-                            error_message = candidate
-                            break
-
+        if error_message is None and status == ScanStatus.ERROR:
+            error_message = next(iter(hard_error_lines), None)
+        if error_message is None and status == ScanStatus.ERROR:
+            for out_line in stdout.splitlines():
+                candidate = out_line.strip()
+                if not candidate or "SCAN SUMMARY" in candidate:
+                    continue
+                error_message = candidate
+                break
         return ScanResult(
             status=status,
             path=path,

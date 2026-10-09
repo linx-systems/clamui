@@ -14,6 +14,7 @@
 - Simplified preference configuration saving/loading, tray shutdown, scan-output streaming, and symlink safety checks while preserving their existing behavior.
 - Clarified privileged-helper release asset validation without changing accepted metadata or security checks.
 - Separated modern and legacy About dialog setup while retaining GTK/libadwaita compatibility and presentation behavior.
+- Flattened daemon scan result parsing while preserving detection priority, skipped-file warnings, and error-message precedence.
 
 ### Fixed
 
