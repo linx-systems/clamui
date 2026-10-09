@@ -947,6 +947,160 @@ class TestDaemonScannerCountTargets:
         assert directory_count == 1
         assert file_paths == [str(included)]
 
+    @pytest.mark.parametrize("collect_paths", [False, True])
+    def test_count_targets_filters_combined_exclusion_scope(
+        self, tmp_path, daemon_scanner_class, collect_paths
+    ):
+        """Count only files left after global and profile exclusions."""
+        scan_dir = tmp_path / "scan"
+        names = (
+            "keep.txt",
+            "skip.log",
+            "nested/keep.py",
+            "nested/skip.bak",
+            "node_modules/dependency.js",
+            "profile-skip/secret.txt",
+        )
+        for name in names:
+            target = scan_dir / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("ordinary test data")
+
+        scanner = daemon_scanner_class()
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+        assert (file_count, directory_count) == (6, 4)
+        assert set(file_paths) == {str(scan_dir / name) for name in names}
+
+        settings_manager = MagicMock()
+        settings_manager.get.return_value = [
+            {"pattern": "node_modules", "type": "directory", "enabled": True},
+            {"pattern": "*.log", "type": "pattern", "enabled": True},
+            {"pattern": "*.txt", "type": "pattern", "enabled": False},
+        ]
+        scanner = daemon_scanner_class(settings_manager=settings_manager)
+        exclusions = {
+            "paths": [str(scan_dir / "profile-skip")],
+            "patterns": ["*.bak"],
+        }
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), exclusions, collect_paths
+        )
+
+        assert (file_count, directory_count) == (2, 2)
+        if collect_paths:
+            assert set(file_paths) == {
+                str(scan_dir / "keep.txt"),
+                str(scan_dir / "nested" / "keep.py"),
+            }
+        else:
+            assert file_paths is None
+
+    def test_count_targets_handles_empty_missing_and_explicit_file(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Keep empty, missing, and direct-file target behavior distinct."""
+        empty_dir = tmp_path / "empty"
+        empty_dir.mkdir()
+        selected_file = tmp_path / "selected.txt"
+        selected_file.write_text("selected")
+        settings_manager = MagicMock()
+        settings_manager.get.return_value = [
+            {"pattern": "*.txt", "type": "pattern", "enabled": True},
+        ]
+        scanner = daemon_scanner_class(settings_manager=settings_manager)
+
+        assert scanner._count_scan_targets(str(empty_dir), collect_paths=True) == (0, 0, [])
+        assert scanner._count_scan_targets(str(tmp_path / "missing"), collect_paths=True) == (
+            0,
+            0,
+            None,
+        )
+        assert scanner._count_scan_targets(str(selected_file), collect_paths=True) == (
+            1,
+            0,
+            [str(selected_file)],
+        )
+
+    def test_count_targets_discards_work_when_cancelled_before_first_walk_yield(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Cancellation before traversal starts returns no partial counts."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "keep.txt").write_text("ordinary test data")
+        scanner = daemon_scanner_class()
+        scanner._cancel_event.set()
+
+        assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, None)
+
+    def test_count_targets_discards_work_when_cancelled_after_one_directory(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Cancellation during traversal discards counts already accumulated."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        def walk_then_cancel(_path):
+            yield str(scan_dir), ["nested"], ["keep.txt"]
+            scanner._cancel_event.set()
+            yield str(scan_dir / "nested"), [], ["nested.txt"]
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=walk_then_cancel):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, None)
+
+    def test_count_targets_preserves_partial_counts_after_walk_error(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """A traversal error retains work completed before the error."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        def walk_then_fail(_path):
+            yield str(scan_dir), ["nested"], ["keep.txt"]
+            raise OSError("child enumeration failed")
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=walk_then_fail):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (
+                1,
+                2,
+                [str(scan_dir / "keep.txt")],
+            )
+
+    def test_count_targets_returns_empty_collection_after_immediate_walk_error(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """An error before traversal begins has no work to preserve."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=OSError("walk failed")):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, [])
+
+    def test_count_targets_does_not_follow_directory_symlinks(self, tmp_path, daemon_scanner_class):
+        """Directory links count as retained entries without scanning their targets."""
+        scan_dir = tmp_path / "scan"
+        outside_dir = tmp_path / "outside"
+        scan_dir.mkdir()
+        outside_dir.mkdir()
+        kept_file = scan_dir / "keep.txt"
+        kept_file.write_text("ordinary test data")
+        (outside_dir / "outside.txt").write_text("outside test data")
+        (scan_dir / "linked-outside").symlink_to(outside_dir, target_is_directory=True)
+        scanner = daemon_scanner_class()
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+
+        assert (file_count, directory_count) == (1, 2)
+        assert file_paths == [str(kept_file)]
+
     def test_scan_sync_with_count_targets_true_counts_files(
         self, tmp_path, daemon_scanner_class, scan_status_class
     ):

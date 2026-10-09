@@ -390,12 +390,143 @@ class TestParseConfig:
         assert config is None
         assert "not a file" in error.lower()
 
-    def test_parse_preserves_raw_lines(self, temp_config_file):
-        """Test that parse_config preserves raw lines."""
-        config, error = parse_config(temp_config_file)
+    def test_parse_mixed_document_round_trip(self, tmp_path):
+        """Parsing retains raw lines while serialization normalizes directives."""
+        source = (
+            "  # retained\n"
+            "\n"
+            "\tLogVerbose\t yes \t\n"
+            "SingleDirective\n"
+            "DatabaseMirror mirror-one\n"
+            "DatabaseMirror mirror two\n"
+            'LogFile "/tmp/a b#c" # literal\n'
+        )
+        normalized = (
+            "  # retained\n"
+            "\n"
+            "LogVerbose yes\n"
+            "SingleDirective\n"
+            "DatabaseMirror mirror-one\n"
+            "DatabaseMirror mirror two\n"
+            'LogFile "/tmp/a b#c" # literal\n'
+        )
+        config_file = tmp_path / "freshclam.conf"
+        config_file.write_text(source, encoding="utf-8")
+
+        config, error = parse_config(str(config_file))
 
         assert error is None
-        assert len(config.raw_lines) > 0
+        assert config is not None
+        assert config.raw_lines == source.splitlines(keepends=True)
+        assert config.get_values("DatabaseMirror") == ["mirror-one", "mirror two"]
+        assert config.get_value("SingleDirective") == ""
+        assert config.get_value("LogFile") == '"/tmp/a b#c" # literal'
+        assert config.values["LogVerbose"][0].line_number == 3
+        assert config.values["SingleDirective"][0].line_number == 4
+        assert config.values["DatabaseMirror"][0].line_number == 5
+        assert config.values["DatabaseMirror"][1].line_number == 6
+        assert config.values["LogFile"][0].line_number == 7
+        assert config.to_string() == normalized
+
+        config.set_value("LogVerbose", "no")
+        config_file.write_text(config.to_string(), encoding="utf-8")
+        reparsed, error = parse_config(str(config_file))
+
+        assert error is None
+        assert reparsed is not None
+        assert reparsed.to_string() == normalized.replace("LogVerbose yes\n", "LogVerbose no\n")
+
+    def test_parse_latin1_config(self, tmp_path):
+        """Latin-1 config files fall back after UTF-8 decoding fails."""
+        config_file = tmp_path / "latin1.conf"
+        config_file.write_bytes(b"Banner \xff\n")
+
+        config, error = parse_config(str(config_file))
+
+        assert error is None
+        assert config is not None
+        assert config.get_value("Banner") == "ÿ"
+
+    @pytest.mark.parametrize("authorize_read", [False, True])
+    def test_native_access_check_requires_explicit_authorization(self, tmp_path, authorize_read):
+        """An unreadable native path elevates only after explicit authorization."""
+        config_file = tmp_path / "unreadable.conf"
+        config_file.write_text("LogVerbose yes\n", encoding="utf-8")
+        elevated_content = "LogVerbose no\n"
+
+        with (
+            mock.patch("src.core.clamav_config.os.access", return_value=False),
+            mock.patch(
+                "src.core.clamav_config.read_config_with_elevation",
+                return_value=(elevated_content, None),
+            ) as read_elevated,
+        ):
+            config, error = parse_config(str(config_file), authorize_read=authorize_read)
+
+        if authorize_read:
+            assert error is None
+            assert config is not None
+            assert config.get_value("LogVerbose") == "no"
+            read_elevated.assert_called_once_with(str(config_file.resolve()))
+        else:
+            assert config is None
+            assert error == f"Permission denied: Cannot read {config_file}"
+            read_elevated.assert_not_called()
+
+    @pytest.mark.parametrize("authorize_read", [False, True])
+    def test_native_direct_permission_error_requires_explicit_authorization(
+        self, tmp_path, authorize_read
+    ):
+        """A direct UTF-8 open failure elevates only after explicit authorization."""
+        config_file = tmp_path / "unreadable.conf"
+        config_file.write_text("LogVerbose yes\n", encoding="utf-8")
+        elevated_content = "LogVerbose no\n"
+
+        with (
+            mock.patch("src.core.clamav_config.os.access", return_value=True),
+            mock.patch("builtins.open", side_effect=PermissionError("root only")),
+            mock.patch(
+                "src.core.clamav_config.read_config_with_elevation",
+                return_value=(elevated_content, None),
+            ) as read_elevated,
+        ):
+            config, error = parse_config(str(config_file), authorize_read=authorize_read)
+
+        if authorize_read:
+            assert error is None
+            assert config is not None
+            assert config.get_value("LogVerbose") == "no"
+            read_elevated.assert_called_once_with(str(config_file.resolve()))
+        else:
+            assert config is None
+            assert error == f"Permission denied: Cannot read {config_file}"
+            read_elevated.assert_not_called()
+
+    def test_latin1_retry_permission_error_does_not_elevate(self, tmp_path):
+        """A failed Latin-1 retry remains a normal read error."""
+        config_file = tmp_path / "invalid-utf8.conf"
+        config_file.write_bytes(b"Banner \xff\n")
+        utf8_file = mock.MagicMock()
+        utf8_file.__enter__.return_value.readlines.side_effect = UnicodeDecodeError(
+            "utf-8", b"\xff", 0, 1, "invalid start byte"
+        )
+
+        with (
+            mock.patch("src.core.clamav_config.os.access", return_value=True),
+            mock.patch(
+                "builtins.open",
+                side_effect=(utf8_file, PermissionError("latin-1 retry denied")),
+            ),
+            mock.patch(
+                "src.core.clamav_config.read_config_with_elevation",
+                return_value=("LogVerbose no\n", None),
+            ) as read_elevated,
+        ):
+            config, error = parse_config(str(config_file), authorize_read=True)
+
+        assert config is None
+        assert error == "Error reading configuration file: latin-1 retry denied"
+        read_elevated.assert_not_called()
 
     def test_parse_config_hash_in_value_is_not_inline_comment(self, tmp_path):
         """ClamAV config has no inline comments: '#' after a value is kept verbatim."""
@@ -1426,6 +1557,20 @@ class TestParseConfigFlatpak:
         assert config.get_value("DatabaseDirectory") == "/var/lib/clamav"
         assert config.get_value("LogVerbose") == "yes"
         mock_read.assert_called_once_with("/etc/clamd.d/scan.conf")
+
+    def test_system_path_in_flatpak_accepts_empty_host_document(self):
+        """An empty host document is a successful empty configuration."""
+        with (
+            mock.patch("src.core.flatpak.is_flatpak", return_value=True),
+            mock.patch("src.core.clamav_detection.config_file_exists", return_value=True),
+            mock.patch("src.core.flatpak.read_host_file", return_value=("", None)),
+        ):
+            config, error = parse_config("/etc/clamd.d/scan.conf")
+
+        assert error is None
+        assert config is not None
+        assert config.raw_lines == []
+        assert config.values == {}
 
     def test_system_path_in_flatpak_file_not_found(self):
         """Test that missing system files in Flatpak return proper error."""

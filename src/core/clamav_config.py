@@ -340,6 +340,84 @@ class ClamAVConfig:
         return result
 
 
+def _read_elevated_config_lines(
+    resolved_path: Path, original_path: str
+) -> tuple[list[str] | None, str | None]:
+    """Read configuration through the explicitly authorized helper."""
+    content, error = read_config_with_elevation(str(resolved_path))
+    if error or content is None:
+        return (None, error or f"Failed to read {original_path}")
+    return (content.splitlines(keepends=True), None)
+
+
+def _read_host_config_lines(
+    resolved_path: Path, original_path: str, *, authorize_read: bool
+) -> tuple[list[str] | None, str | None]:
+    """Read a system configuration file from the Flatpak host."""
+    from .clamav_detection import config_file_exists
+    from .flatpak import read_host_file
+
+    if not config_file_exists(str(resolved_path)):
+        return (None, f"Configuration file not found: {original_path}")
+
+    content, error = read_host_file(str(resolved_path))
+    if error or content is None:
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, error or f"Failed to read {original_path}")
+
+    raw_lines = content.splitlines(keepends=True)
+    logger.debug("Read config via flatpak-spawn: %s (%d lines)", original_path, len(raw_lines))
+    return (raw_lines, None)
+
+
+def _read_native_config_lines(
+    resolved_path: Path, original_path: str, *, authorize_read: bool
+) -> tuple[list[str] | None, str | None]:
+    """Read a directly accessible configuration file."""
+    if not resolved_path.exists():
+        return (None, f"Configuration file not found: {original_path}")
+
+    if not resolved_path.is_file():
+        return (None, f"Path is not a file: {original_path}")
+
+    if not os.access(resolved_path, os.R_OK):
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, f"Permission denied: Cannot read {original_path}")
+
+    try:
+        with open(resolved_path, encoding="utf-8") as file:
+            return (file.readlines(), None)
+    except UnicodeDecodeError:
+        try:
+            with open(resolved_path, encoding="latin-1") as file:
+                return (file.readlines(), None)
+        except Exception as error:
+            return (None, f"Error reading configuration file: {error!s}")
+    except PermissionError:
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, f"Permission denied: Cannot read {original_path}")
+    except OSError as error:
+        return (None, f"Error reading configuration file: {error!s}")
+
+
+def _parse_config_lines(resolved_path: Path, raw_lines: list[str]) -> ClamAVConfig:
+    """Build a configuration model from the acquired raw lines."""
+    config = ClamAVConfig(file_path=resolved_path, raw_lines=raw_lines)
+    for line_number, line in enumerate(raw_lines, start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        parts = stripped.split(None, 1)
+        key = parts[0]
+        value = parts[1] if len(parts) > 1 else ""
+        config.add_value(key, value, line_number)
+    return config
+
+
 def parse_config(
     file_path: str, *, authorize_read: bool = False
 ) -> tuple[ClamAVConfig | None, str | None]:
@@ -362,119 +440,31 @@ def parse_config(
         - (ClamAVConfig, None) on success
         - (None, error_message) on failure
     """
-    # Validate file path
     if not file_path or not file_path.strip():
         return (None, "No configuration file path specified")
 
     try:
         resolved_path = Path(file_path).resolve()
-    except (OSError, RuntimeError) as e:
-        return (None, f"Invalid file path: {e!s}")
+    except (OSError, RuntimeError) as error:
+        return (None, f"Invalid file path: {error!s}")
 
-    # Determine if we need to read across the Flatpak sandbox boundary.
-    # System paths (/etc, /usr, /var, /opt) don't exist inside the sandbox,
-    # so we must use flatpak-spawn --host cat to read them from the host.
-    from .flatpak import is_flatpak, read_host_file
+    from .flatpak import is_flatpak
 
     use_host_read = is_flatpak() and any(
         str(resolved_path).startswith(prefix) for prefix in _SYSTEM_PATH_PREFIXES
     )
-
     if use_host_read:
-        # In Flatpak: use config_file_exists() which already handles
-        # flatpak-spawn --host test -f, then read via flatpak-spawn --host cat
-        from .clamav_detection import config_file_exists
-
-        if not config_file_exists(str(resolved_path)):
-            return (None, f"Configuration file not found: {file_path}")
-
-        content, error = read_host_file(str(resolved_path))
-        if (error or content is None) and authorize_read:
-            content, error = read_config_with_elevation(str(resolved_path))
-        if error or content is None:
-            return (None, error or f"Failed to read {file_path}")
-
-        raw_lines = content.splitlines(keepends=True)
-        logger.debug("Read config via flatpak-spawn: %s (%d lines)", file_path, len(raw_lines))
+        raw_lines, error = _read_host_config_lines(
+            resolved_path, file_path, authorize_read=authorize_read
+        )
     else:
-        # Native path or user-writable path in Flatpak: direct file I/O
-        if not resolved_path.exists():
-            return (None, f"Configuration file not found: {file_path}")
+        raw_lines, error = _read_native_config_lines(
+            resolved_path, file_path, authorize_read=authorize_read
+        )
 
-        if not resolved_path.is_file():
-            return (None, f"Path is not a file: {file_path}")
-
-        if not os.access(resolved_path, os.R_OK):
-            if not authorize_read:
-                return (None, f"Permission denied: Cannot read {file_path}")
-            content, error = read_config_with_elevation(str(resolved_path))
-            if error or content is None:
-                return (None, error or f"Failed to read {file_path}")
-            raw_lines = content.splitlines(keepends=True)
-        else:
-            try:
-                with open(resolved_path, encoding="utf-8") as f:
-                    raw_lines = f.readlines()
-            except UnicodeDecodeError:
-                try:
-                    with open(resolved_path, encoding="latin-1") as f:
-                        raw_lines = f.readlines()
-                except Exception as e:
-                    return (None, f"Error reading configuration file: {e!s}")
-            except PermissionError:
-                if not authorize_read:
-                    return (None, f"Permission denied: Cannot read {file_path}")
-                content, error = read_config_with_elevation(str(resolved_path))
-                if error or content is None:
-                    return (None, error or f"Failed to read {file_path}")
-                raw_lines = content.splitlines(keepends=True)
-            except OSError as e:
-                return (None, f"Error reading configuration file: {e!s}")
-    # The native/Flatpak branches above set ``raw_lines`` from either a normal
-    # read or an explicitly authorized, allowlisted privileged read.
-
-    # Create config object
-    config = ClamAVConfig(file_path=resolved_path, raw_lines=raw_lines)
-
-    # Parse each line
-    for line_number, line in enumerate(raw_lines, start=1):
-        # Strip trailing whitespace/newline but preserve leading whitespace for raw_lines
-        stripped = line.strip()
-
-        # Skip empty lines
-        if not stripped:
-            continue
-
-        # Skip comment lines
-        if stripped.startswith("#"):
-            continue
-
-        # ClamAV config files (clamd.conf/freshclam.conf) do not support inline
-        # comments; only whole-line comments (handled above). Treat the entire
-        # stripped line as content so values containing '#' are preserved.
-        content = stripped
-
-        # Parse key-value pair
-        # ClamAV format: Key Value (separated by first space)
-        parts = content.split(None, 1)  # Split on first whitespace
-
-        if len(parts) == 0:
-            # Empty after stripping (shouldn't happen, but handle it)
-            continue
-
-        key = parts[0]
-
-        # Value is everything after the key (may be empty for boolean-style options)
-        value = parts[1] if len(parts) > 1 else ""
-
-        # Add value to config (supports multi-value options)
-        config_value = ClamAVConfigValue(value=value, line_number=line_number)
-
-        if key not in config.values:
-            config.values[key] = []
-        config.values[key].append(config_value)
-
-    return (config, None)
+    if raw_lines is None:
+        return (None, error)
+    return (_parse_config_lines(resolved_path, raw_lines), None)
 
 
 # Configuration option type definitions

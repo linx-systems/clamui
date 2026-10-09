@@ -10,6 +10,7 @@
 
 - Moved project documentation into the Starlight site at `/docs/`, retaining root release notes as canonical sources.
 - Updated Flatpak to GNOME 51/Python 3.14 and replaced the tray's CairoSVG dependency with GdkPixbuf/librsvg rasterization.
+- Simplified scanner output handling, daemon target counting, and ClamAV configuration parsing while preserving cancellation, exclusion scope, and explicit read-authorization behavior.
 
 ### Fixed
 
@@ -21,6 +22,7 @@
 - Corrected tray-availability, VirusTotal setup, scan selection, and result-scroller behavior.
 - Kept Configuration File paths readable by using compact configuration-file actions in Scanner and Database preferences.
 - Rendered Mermaid diagrams in the documentation with light/dark theme support and a mobile-friendly tray architecture layout.
+- Fixed scanner-test package isolation so later Flatpak configuration tests patch the restored modules rather than stale package references.
 
 ### Security
 

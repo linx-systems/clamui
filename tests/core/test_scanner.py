@@ -10,8 +10,8 @@ import pytest
 
 
 def _clear_src_modules():
-    """Clear all cached src.* modules to ensure clean imports."""
-    modules_to_remove = [mod for mod in list(sys.modules.keys()) if mod.startswith("src.")]
+    """Clear the complete src package tree to ensure clean imports."""
+    modules_to_remove = [mod for mod in sys.modules if mod == "src" or mod.startswith("src.")]
     for mod in modules_to_remove:
         del sys.modules[mod]
 
@@ -29,8 +29,9 @@ def ensure_fresh_scanner_import():
     global Scanner, ScanResult, ScanStatus, ThreatDetail, glob_to_regex, validate_pattern
     global classify_threat_severity_str, categorize_threat
 
-    # Save existing src.* modules so other test files' references stay valid
-    saved_modules = {k: v for k, v in sys.modules.items() if k.startswith("src.")}
+    # Save the root package too: imports mutate its child-module attributes.
+    # Restoring only sys.modules would leave src.core pointing at fresh modules.
+    saved_modules = {k: v for k, v in sys.modules.items() if k == "src" or k.startswith("src.")}
 
     # Clear any cached src modules before test
     _clear_src_modules()

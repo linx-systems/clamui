@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 from gi.repository import GLib
@@ -627,6 +627,52 @@ class DaemonScanner:
         )
         return stdout, stderr, was_cancelled, files_scanned, infected_count, infected_files
 
+    def _collect_target_exclusions(
+        self, profile_exclusions: dict | None
+    ) -> tuple[list[str], list[str]]:
+        """Collect file and directory exclusions used while counting targets."""
+        exclude_patterns: list[str] = []
+        exclude_dirs: list[str] = []
+
+        if self._settings_manager is not None:
+            exclusions = self._settings_manager.get("exclusion_patterns", [])
+            for exclusion in exclusions:
+                if not exclusion.get("enabled", True):
+                    continue
+                pattern = exclusion.get("pattern", "")
+                if not pattern:
+                    continue
+                if exclusion.get("type", "pattern") == "directory":
+                    exclude_dirs.append(pattern)
+                    continue
+                exclude_patterns.append(pattern)
+
+        if not profile_exclusions:
+            return exclude_patterns, exclude_dirs
+
+        for excl_path in profile_exclusions.get("paths", []):
+            if not excl_path:
+                continue
+            if excl_path.startswith("~"):
+                excl_path = str(Path(excl_path).expanduser())
+            exclude_dirs.append(excl_path)
+
+        for pattern in profile_exclusions.get("patterns", []):
+            if pattern:
+                exclude_patterns.append(pattern)
+
+        return exclude_patterns, exclude_dirs
+
+    def _iter_included_file_paths(
+        self, root: str, files: list[str], exclude_patterns: list[str]
+    ) -> Iterator[str]:
+        """Yield files in a walked directory that are not excluded."""
+        for filename in files:
+            full_path = os.path.join(root, filename)
+            if self._is_excluded(full_path, filename, exclude_patterns, is_dir=False):
+                continue
+            yield full_path
+
     def _count_scan_targets(
         self,
         path: str,
@@ -670,41 +716,10 @@ class DaemonScanner:
         if not scan_path.is_dir():
             return (0, 0, None)
 
-        # Collect exclusion patterns
-        exclude_patterns: list[str] = []
-        exclude_dirs: list[str] = []
-
-        # Global exclusions from settings
-        if self._settings_manager is not None:
-            exclusions = self._settings_manager.get("exclusion_patterns", [])
-            for exclusion in exclusions:
-                if not exclusion.get("enabled", True):
-                    continue
-                pattern = exclusion.get("pattern", "")
-                if not pattern:
-                    continue
-                exclusion_type = exclusion.get("type", "pattern")
-                if exclusion_type == "directory":
-                    exclude_dirs.append(pattern)
-                else:
-                    exclude_patterns.append(pattern)
-
-        # Profile exclusions
-        if profile_exclusions:
-            for excl_path in profile_exclusions.get("paths", []):
-                if excl_path:
-                    # Expand ~ in paths
-                    if excl_path.startswith("~"):
-                        excl_path = str(Path(excl_path).expanduser())
-                    exclude_dirs.append(excl_path)
-
-            for pattern in profile_exclusions.get("patterns", []):
-                if pattern:
-                    exclude_patterns.append(pattern)
-
+        exclude_patterns, exclude_dirs = self._collect_target_exclusions(profile_exclusions)
         file_count = 0
         dir_count = 0
-        file_paths: list[str] = []
+        file_paths = [] if collect_paths else None
 
         try:
             for root, dirs, files in os.walk(path):
@@ -715,30 +730,28 @@ class DaemonScanner:
 
                 # Filter out excluded directories (modifies dirs in-place)
                 dirs[:] = [
-                    d
-                    for d in dirs
-                    if not self._is_excluded(os.path.join(root, d), d, exclude_dirs, is_dir=True)
+                    directory
+                    for directory in dirs
+                    if not self._is_excluded(
+                        os.path.join(root, directory), directory, exclude_dirs, is_dir=True
+                    )
                 ]
 
                 # Count directories (excluding the root)
                 dir_count += len(dirs)
 
-                # Count files that aren't excluded
-                for f in files:
-                    fp = os.path.join(root, f)
-                    if not self._is_excluded(fp, f, exclude_patterns, is_dir=False):
-                        file_count += 1
-                        if collect_paths:
-                            file_paths.append(fp)
+                for file_path in self._iter_included_file_paths(root, files, exclude_patterns):
+                    file_count += 1
+                    if file_paths is not None:
+                        file_paths.append(file_path)
         except (PermissionError, OSError):
-            # If we can't access the directory, return 0 counts
             logger.debug("Failed to count files in scan target %s", path, exc_info=True)
 
         # Count the root directory itself
         if dir_count > 0 or file_count > 0:
             dir_count += 1
 
-        return (file_count, dir_count, file_paths if collect_paths else None)
+        return (file_count, dir_count, file_paths)
 
     def _has_active_exclusions(self, profile_exclusions: dict | None = None) -> bool:
         """Return True when any enabled exclusion requires file-list filtering."""
