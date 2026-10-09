@@ -19,6 +19,7 @@
 - Simplified daemon log discovery while preserving common-location priority, configured log fallback, and Flatpak host access.
 - Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.
 - Separated daemon scan-input preparation and temporary file-list ownership from execution while preserving exclusions, progress, cancellation, and cleanup.
+- Consolidated scanner preference boolean collection without changing directive order, size units, or missing-widget handling.
 
 ### Fixed
 

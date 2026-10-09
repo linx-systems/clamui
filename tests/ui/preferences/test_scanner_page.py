@@ -1123,6 +1123,28 @@ class TestScannerPageCollectData:
 
         assert isinstance(result, dict)
 
+    def test_collect_data_preserves_directive_order(self, mock_gi_modules, mock_widgets):
+        """Test collection preserves the clamd directive serialization order."""
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        result = ScannerPage.collect_data(mock_widgets, True)
+
+        assert list(result) == [
+            "ScanPE",
+            "ScanELF",
+            "ScanOLE2",
+            "ScanPDF",
+            "ScanHTML",
+            "ScanArchive",
+            "MaxFileSize",
+            "MaxScanSize",
+            "MaxRecursion",
+            "MaxFiles",
+            "LogFile",
+            "LogVerbose",
+            "LogSyslog",
+        ]
+
     def test_collect_data_returns_empty_dict_when_clamd_unavailable(
         self, mock_gi_modules, mock_widgets
     ):

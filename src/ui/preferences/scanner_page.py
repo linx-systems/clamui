@@ -50,6 +50,24 @@ from .base import (
     update_status_row,
 )
 
+_FILE_TYPE_SCAN_FIELDS = (
+    "ScanPE",
+    "ScanELF",
+    "ScanOLE2",
+    "ScanPDF",
+    "ScanHTML",
+    "ScanArchive",
+)
+_LOGGING_BOOLEAN_FIELDS = ("LogVerbose", "LogSyslog")
+
+
+def _collect_boolean_fields(widgets_dict: dict, updates: dict, fields: tuple[str, ...]) -> None:
+    """Collect available boolean fields as clamd yes/no directives."""
+    for key in fields:
+        value = get_widget_active(widgets_dict, key)
+        if value is not None:
+            updates[key] = "yes" if value else "no"
+
 
 class ScannerPage(PreferencesPageMixin):
     """
@@ -873,10 +891,7 @@ class ScannerPage(PreferencesPageMixin):
         updates = {}
 
         # Collect file type scanning settings
-        for key in ("ScanPE", "ScanELF", "ScanOLE2", "ScanPDF", "ScanHTML", "ScanArchive"):
-            value = get_widget_active(widgets_dict, key)
-            if value is not None:
-                updates[key] = "yes" if value else "no"
+        _collect_boolean_fields(widgets_dict, updates, _FILE_TYPE_SCAN_FIELDS)
 
         # Collect performance settings
         for key in ("MaxFileSize", "MaxScanSize"):
@@ -894,10 +909,7 @@ class ScannerPage(PreferencesPageMixin):
         if log_file:
             updates["LogFile"] = log_file
 
-        for key in ("LogVerbose", "LogSyslog"):
-            value = get_widget_active(widgets_dict, key)
-            if value is not None:
-                updates[key] = "yes" if value else "no"
+        _collect_boolean_fields(widgets_dict, updates, _LOGGING_BOOLEAN_FIELDS)
 
         return updates
 
