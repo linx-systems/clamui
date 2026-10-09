@@ -20,6 +20,7 @@
 - Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.
 - Separated daemon scan-input preparation and temporary file-list ownership from execution while preserving exclusions, progress, cancellation, and cleanup.
 - Consolidated scanner preference boolean collection without changing directive order, size units, or missing-widget handling.
+- Extracted stateless clamscan result parsing from the scanner lifecycle while preserving summary precedence, threat detection, and warning classification.
 
 ### Fixed
 

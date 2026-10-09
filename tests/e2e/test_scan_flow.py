@@ -17,6 +17,7 @@ _original_gi_repository = sys.modules.get("gi.repository")
 sys.modules["gi"] = mock.MagicMock()
 sys.modules["gi.repository"] = mock.MagicMock()
 
+from src.core.clamscan_parser import parse_clamscan_result
 from src.core.log_manager import LogEntry, LogManager
 from src.core.scanner import Scanner, glob_to_regex, validate_pattern
 from src.core.scanner_types import ScanProgress, ScanResult, ScanStatus, ThreatDetail
@@ -576,8 +577,7 @@ class TestE2EScanResultParsing:
         2. Parse with exit code 0.
         3. Verify clean status and scanned file/directory counts.
         """
-        scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
-        result = scanner._parse_results(str(e2e_env["scan_dir"]), CLEAN_SCAN_OUTPUT, "", 0)
+        result = parse_clamscan_result(str(e2e_env["scan_dir"]), CLEAN_SCAN_OUTPUT, "", 0)
 
         assert result.status == ScanStatus.CLEAN
         assert result.scanned_files == 2
@@ -593,8 +593,7 @@ class TestE2EScanResultParsing:
         2. Parse with exit code 1.
         3. Verify threat details match classifier integration outputs.
         """
-        scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
-        result = scanner._parse_results(str(e2e_env["scan_dir"]), INFECTED_SCAN_OUTPUT, "", 1)
+        result = parse_clamscan_result(str(e2e_env["scan_dir"]), INFECTED_SCAN_OUTPUT, "", 1)
 
         assert result.status == ScanStatus.INFECTED
         assert result.infected_count == 2
@@ -614,7 +613,6 @@ class TestE2EScanResultParsing:
         2. Parse with exit code 2.
         3. Verify CLEAN status with skipped file warnings populated.
         """
-        scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
         warning_output = """/root/secret1: Failed to open file ERROR
 /root/secret2: Failed to open file ERROR
 
@@ -624,7 +622,7 @@ Scanned files: 1
 Infected files: 0
 """
 
-        result = scanner._parse_results(str(e2e_env["scan_dir"]), warning_output, "", 2)
+        result = parse_clamscan_result(str(e2e_env["scan_dir"]), warning_output, "", 2)
 
         assert result.status == ScanStatus.CLEAN
         assert result.skipped_count == 2
@@ -640,7 +638,6 @@ Infected files: 0
         2. Parse with exit code 2.
         3. Verify ERROR status with a specific message instead of a green result.
         """
-        scanner = Scanner(log_manager=e2e_env["log_manager"], settings_manager=e2e_env["settings"])
         warning_output = """/root/secret1: Failed to open file ERROR
 /root/secret2: Failed to open file ERROR
 
@@ -650,7 +647,7 @@ Scanned files: 0
 Infected files: 0
 """
 
-        result = scanner._parse_results(str(e2e_env["scan_dir"]), warning_output, "", 2)
+        result = parse_clamscan_result(str(e2e_env["scan_dir"]), warning_output, "", 2)
 
         assert result.status == ScanStatus.ERROR
         assert "No files could be scanned" in (result.error_message or "")
