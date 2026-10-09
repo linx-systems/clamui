@@ -15,6 +15,7 @@ from unittest import mock
 import pytest
 
 from src.core.log_manager import (
+    CLAMD_LOG_PATHS,
     LOG_PRIVACY_STATE_FILENAME,
     DaemonStatus,
     LogEntry,
@@ -1028,12 +1029,56 @@ class TestLogManagerDaemonLogs:
             yield LogManager(log_dir=tmpdir)
 
     def test_get_daemon_log_path_not_found(self, log_manager):
-        """Test get_daemon_log_path returns None when no log exists."""
-        with mock.patch.object(Path, "exists", return_value=False):
-            result = log_manager.get_daemon_log_path()
-            # Result may be None if no log file is found
-            # This depends on system state, so just ensure it doesn't crash
-            assert result is None or isinstance(result, str)
+        """Return None when neither common logs nor a daemon config are available."""
+        with (
+            mock.patch.object(log_manager, "_file_exists_on_host", return_value=False),
+            mock.patch(
+                "src.core.clamav_detection.detect_clamd_conf_path", return_value=None
+            ) as detect_config,
+        ):
+            assert log_manager.get_daemon_log_path() is None
+
+        detect_config.assert_called_once_with()
+
+    def test_get_daemon_log_path_prefers_common_path(self, log_manager):
+        """Common log paths take precedence without invoking config detection."""
+        with (
+            mock.patch.object(log_manager, "_file_exists_on_host", return_value=True),
+            mock.patch("src.core.clamav_detection.detect_clamd_conf_path") as detect_config,
+        ):
+            assert log_manager.get_daemon_log_path() == CLAMD_LOG_PATHS[0]
+
+        detect_config.assert_not_called()
+
+    def test_get_daemon_log_path_falls_back_to_first_existing_config_directive(self, log_manager):
+        """Use the first configured LogFile path that exists."""
+        conf_path = "/etc/clamd.conf"
+        first_log_path = "/var/log/clamd-first.log"
+        later_log_path = "/var/log/clamd-later.log"
+
+        def file_exists(path):
+            return path in {conf_path, first_log_path, later_log_path}
+
+        with (
+            mock.patch.object(log_manager, "_file_exists_on_host", side_effect=file_exists),
+            mock.patch(
+                "src.core.clamav_detection.detect_clamd_conf_path", return_value=conf_path
+            ) as detect_config,
+            mock.patch("src.core.log_manager.is_flatpak", return_value=False),
+            mock.patch(
+                "builtins.open",
+                mock.mock_open(
+                    read_data=(
+                        "LogFile /var/log/clamd-missing.log\n"
+                        f"LogFile {first_log_path}\n"
+                        f"LogFile {later_log_path}\n"
+                    )
+                ),
+            ),
+        ):
+            assert log_manager.get_daemon_log_path() == first_log_path
+
+        detect_config.assert_called_once_with()
 
     def test_read_daemon_logs_file_not_found(self, log_manager):
         """Test read_daemon_logs when log file doesn't exist."""
