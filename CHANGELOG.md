@@ -12,6 +12,7 @@
 - Updated Flatpak to GNOME 51/Python 3.14 and replaced the tray's CairoSVG dependency with GdkPixbuf/librsvg rasterization.
 - Simplified scanner output handling, daemon target counting, and ClamAV configuration parsing while preserving cancellation, exclusion scope, and explicit read-authorization behavior.
 - Simplified preference configuration saving/loading, tray shutdown, scan-output streaming, and symlink safety checks while preserving their existing behavior.
+- Clarified privileged-helper release asset validation without changing accepted metadata or security checks.
 
 ### Fixed
 

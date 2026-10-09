@@ -125,7 +125,9 @@ def test_release_metadata_uses_exact_tag_url_and_validates_exact_asset(monkeypat
         _asset(browser_download_url="https://example.invalid/helper.deb"),
         _asset(digest="sha256:not-a-digest"),
         _asset(content_type="application/octet-stream"),
+        _asset(size=0),
         _asset(size=privileged_helper._HELPER_ASSET_LIMIT + 1),
+        {**_asset(), "digest": None},
     ],
 )
 def test_release_asset_rejects_non_exact_metadata(asset):

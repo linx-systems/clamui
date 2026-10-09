@@ -376,15 +376,15 @@ def _expected_asset(release: dict[str, Any]) -> tuple[int, str]:
     asset = matches[0]
     size = asset.get("size")
     digest = asset.get("digest")
+    if not isinstance(size, int) or size <= 0 or size > _HELPER_ASSET_LIMIT:
+        raise ValueError("matching helper asset metadata is invalid")
     if (
-        not isinstance(size, int)
-        or size <= 0
-        or size > _HELPER_ASSET_LIMIT
-        or asset.get("state") != "uploaded"
+        asset.get("state") != "uploaded"
         or asset.get("content_type") != "application/x-debian-package"
         or asset.get("browser_download_url") != _asset_url()
-        or not isinstance(digest, str)
     ):
+        raise ValueError("matching helper asset metadata is invalid")
+    if not isinstance(digest, str):
         raise ValueError("matching helper asset metadata is invalid")
 
     algorithm, separator, checksum = digest.partition(":")
