@@ -1,31 +1,40 @@
-# ClamUI v0.4.0
+# ClamUI v0.4.1
 
-Safer configuration writes, scan-result reliability, GTK baseline compatibility, and host-integration hardening.
+Hungarian localization, easier Flatpak host-helper setup, tray startup, and reliability fixes for scanning, host integration, and packaged builds.
 
 ## Highlights
 
-### Configuration, Compatibility & Installation
+### Flatpak host configuration
 
-- **Safer preferences** — preference saves now enforce ClamAV recursion limits, report configuration-load failures clearly, and retain standalone scanner settings when a Flatpak host helper is unavailable.
-- **GTK 4.6 / libadwaita 1.1 support restored** — ClamUI no longer relies on newer GTK APIs, preserving compatibility with the supported baseline.
-- **Flatpak and Python compatibility** — the release includes a version-matched `clamui-privileged-helper_0.4.0_all.deb` host companion for applying system ClamAV preferences from Flatpak; helper builds support Python 3.10 and glob conversion supports Python 3.14. (#170)
-- **Distro-aware install advice** — security-audit install commands now use `/etc/os-release` to select Debian-, Fedora-, or Arch-family commands, and safely omit a command for unknown distributions.
+- **Install the matching helper from ClamUI** - On supported Debian-family hosts, Flatpak users can now install the version-matched `clamui-privileged-helper` from Preferences. The flow obtains the exact release asset, checks its release metadata, package identity, and signature, then requests administrator authorization to install it.
+- **Clearer host-configuration boundary** - Database, Scanner, and On-Access preferences continue to target the host ClamAV configuration, not sandbox copies. Protected system-configuration writes fail without making changes when the trusted helper is unavailable.
+- **Better compatibility** - The privileged-helper import path is compatible with Python 3.10, so the Flatpak remains suitable for Ubuntu/Pop!_OS 22.04 hosts.
 
-### Scan, Update & Quarantine Reliability
+### Everyday use
 
-- **More trustworthy scan results** — multi-target scans are safe under concurrent invocation, accumulated output no longer duplicates trailing partial lines, all-failed scans report errors, and recognized nonfatal ClamAV warnings are presented consistently.
-- **Safer database updates** — forced database updates are staged before they replace the active database.
-- **Safer quarantine actions** — restore and permanent-delete actions require confirmation; dialogs close with Escape; and quarantine copies reject short writes to protect file integrity.
+- **Hungarian is now available** in the application language list.
+- **Start in System Tray** is a new Behavior preference for login/autostart workflows. Explicit file and folder scans remain visible, and ClamUI keeps the window visible if tray integration is unavailable.
+- **More reliable scan results** - Large `clamscan` scans are no longer reported as failed merely because bounded verbose output omitted the final summary while only nonfatal ClamAV warnings remained.
+- **Improved tray integration** - Generated tray icons are supplied as pixmaps for desktop hosts that do not reliably resolve sandbox-local themed icons; tray registration and VirusTotal setup handling were also corrected.
 
-### Security & Host Integration
+### Host integration and packages
 
-- **Canonical privileged writes** — elevated configuration writes fail closed unless the trusted helper and destination resolve to canonical paths.
-- **Token-safe scheduled commands** — scheduled scan commands are built from tokens rather than re-splitting shell strings.
-- **Sanitized AppImage host helpers** — all host helpers launched by AppImage builds run with a cleaned environment.
+- **Fedora setup uses the right update package** - ClamUI now recommends `clamav-freshclam`, and its availability check avoids Fedora's root-only default configuration.
+- **AppImage links work on more desktops** - The AppImage bundles GLib's desktop-launch helper so documentation links can open on KDE and other non-Ubuntu host layouts.
+- **Flatpak packaging is more self-contained** - Hatchling's build dependency sources are included, and the Flatpak runtime now uses GNOME 51 with Python 3.14.
+- **Documentation has moved to the ClamUI website**, including task-focused installation, configuration, and troubleshooting guidance.
 
-### Translations & Dependencies
+### Safety and correctness
 
-- Refreshed French and Simplified Chinese translations, added translatable UI strings, and updated Python, Flatpak, CI, and runtime dependencies including cryptography 50.0.0.
+- Preserve raw POSIX filename bytes through `clamscan`, daemon scans, and quarantine restore. Daemon scans reject targets containing a newline rather than submitting an ambiguous file list.
+- Manual database updates use the selected custom `freshclam.conf`.
+- Hardened trusted helper discovery and atomic configuration writes; newly created custom configurations use owner-only permissions.
+
+## Before you install or upgrade
+
+- **Install ClamAV on the host for every package format.** ClamUI does not bundle the ClamAV engine or definitions: install host `clamscan` and `freshclam`, then update definitions. Daemon scans also require host `clamd` and `clamdscan`.
+- **Flatpak users:** ClamUI calls host tools through `flatpak-spawn --host`. On Debian-family hosts, install the version-matched `clamui-privileged-helper_0.4.1_all.deb` when you need to change protected system ClamAV settings; the new in-app flow can do this on supported hosts. Do not use `sudo flatpak run … install-privileged-helper`: a Flatpak cannot install files on the host. No RPM or pacman helper asset is supplied.
+- **Ubuntu/Pop!_OS 22.04:** use Flatpak. The full Debian package requires Python 3.11+, while stock 22.04 provides Python 3.10.
 
 ## Install
 
@@ -34,9 +43,9 @@ Safer configuration writes, scan-result reliability, GTK baseline compatibility,
 flatpak install flathub io.github.linx_systems.ClamUI
 ```
 
-**AppImage**: Download `ClamUI-0.4.0-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.0).
+**AppImage**: Download `ClamUI-0.4.1-x86_64.AppImage` from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.1).
 
-**GitHub Release**: Download `clamui_0.4.0_all.deb` or the `clamui-x86_64.flatpak` / `clamui-aarch64.flatpak` bundle from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.0). Flatpak users who need to apply system-wide ClamAV preferences can install the matching `clamui-privileged-helper_0.4.0_all.deb` host companion.
+**GitHub Release**: Download `clamui_0.4.1_all.deb` or the `clamui-x86_64.flatpak` / `clamui-aarch64.flatpak` bundle from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.1). On Debian/Ubuntu, install the matching `clamui-privileged-helper_0.4.1_all.deb` when changing protected host ClamAV configuration.
 
 **From source**:
 ```bash
@@ -44,6 +53,4 @@ git clone https://github.com/linx-systems/clamui.git
 cd clamui && uv sync && uv run clamui
 ```
 
-## Contributors
-
-Thanks to everyone who contributed code, translations, and bug reports for this release. See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0) for details.
+See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1) for all changes.

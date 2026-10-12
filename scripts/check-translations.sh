@@ -46,7 +46,7 @@ fi
 
 # If no .po files exist, nothing more to check
 if [ "${#PO_FILES[@]}" -eq 0 ]; then
-    echo "No .po files found — nothing to validate."
+    echo "No .po files found - nothing to validate."
     if [ "$ERRORS" -gt 0 ]; then
         echo
         echo "Found $ERRORS error(s)."

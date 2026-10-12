@@ -165,6 +165,11 @@ class TrayIntegration:
             return
         tray.update_window_menu_label(visible=self._is_window_visible(win))
 
+    def _is_tray_available(self) -> bool:
+        """Check whether the indicator is registered with a desktop host."""
+        tray = getattr(self._app, "_tray_indicator", None)
+        return tray is not None and bool(getattr(tray, "is_available", False))
+
     def toggle_window(self):
         """Toggle the main window visibility from the tray."""
         win = self._get_window_for_toggle()
@@ -178,6 +183,9 @@ class TrayIntegration:
             return
 
         if self._is_window_visible(win):
+            if not self._is_tray_available():
+                logger.warning("Tray toggle ignored because no tray host is registered")
+                return
             if hasattr(win, "hide_window"):
                 win.hide_window()
             else:

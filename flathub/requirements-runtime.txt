@@ -1,11 +1,12 @@
 # Runtime dependencies for ClamUI Flatpak build
-# Used by flatpak-pip-generator to generate python3-runtime-deps.json
+# Used as the unpinned source list for dependency review.
 #
-# Note: PyGObject and pycairo are provided by org.gnome.Platform runtime
-# Note: pygobject-stubs are type stubs, not needed at runtime
-psutil>=7.2.2
-matplotlib>=3.11.0
-requests>=2.34.2
-urllib3>=2.7.0
-certifi>=2026.6.17
+# PyGObject and pycairo are provided by org.gnome.Platform.
+# pygobject-stubs are type stubs and are not needed at runtime.
+certifi>=2026.7.22
 keyring>=25.7.0
+matplotlib>=3.11.2
+pillow>=12.3.0
+psutil>=7.2.2
+requests>=2.34.2
+urllib3>=2.8.0

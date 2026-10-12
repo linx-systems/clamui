@@ -28,7 +28,7 @@ const release = await getLatestRelease();
       </a>
     </div>
 
-    <nav class="hidden md:flex items-center gap-1 text-sm text-white/70">
+    <nav aria-label="Primary" class="hidden md:flex items-center gap-1 text-sm text-white/70">
       <a href="#features" class="px-3 py-2 rounded-md hover:text-white hover:bg-white/[0.04]">Features</a>
       <a href="#why" class="px-3 py-2 rounded-md hover:text-white hover:bg-white/[0.04]">Why Linux AV?</a>
       <a href="#install" class="px-3 py-2 rounded-md hover:text-white hover:bg-white/[0.04]">Install</a>
@@ -42,6 +42,13 @@ const release = await getLatestRelease();
     </nav>
 
     <div class="flex items-center gap-2">
+      <a
+        href="/docs/"
+        class="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium text-white/80 transition-colors hover:bg-white/[0.04] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clam-sage/60"
+      >
+        <span class="sm:hidden">Docs</span>
+        <span class="hidden sm:inline">Documentation</span>
+      </a>
       <ThemeToggle />
       <a
         href="#install"

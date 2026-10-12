@@ -8,7 +8,7 @@ decide whether Portmaster is RUNNING, INSTALLED_NOT_RUNNING, or NOT_INSTALLED
 without raising any audit flags when the service simply isn't present.
 
 Detection chain (in order):
-1. GET /api/v1/ping  — unauthenticated liveness probe. "Pong" => RUNNING.
+1. GET /api/v1/ping  - unauthenticated liveness probe. "Pong" => RUNNING.
 2. On ConnectionError: probe `portmaster-start` binary and `portmaster.service`
    to distinguish INSTALLED_NOT_RUNNING from NOT_INSTALLED.
 
@@ -17,7 +17,7 @@ is fetched for richer per-module health rows. A 401 response clears the stale
 token from the keyring so the user is reprompted to re-authorize.
 
 The token itself is acquired via GET /api/v1/app/auth which prompts the user
-inside Portmaster's own UI — no manual key paste required.
+inside Portmaster's own UI - no manual key paste required.
 """
 
 from __future__ import annotations
@@ -105,7 +105,7 @@ def _parse_modules_status(payload: Any) -> list[PortmasterModuleRow]:
     The exact schema is documented as 'in progress' on the Safing docs, but the
     response is a JSON map from module name to a status object. We surface the
     'status' string and any failure message if present, and ignore anything we
-    can't parse — this is best-effort enrichment, not load-bearing.
+    can't parse - this is best-effort enrichment, not load-bearing.
     """
     rows: list[PortmasterModuleRow] = []
     if not isinstance(payload, dict):
@@ -124,7 +124,7 @@ def _fetch_modules_status(token: str) -> tuple[dict[str, Any] | None, bool, str 
     """GET /api/v1/modules/status with a bearer token.
 
     Returns (json, unauthorized, error_message). Unauthorized is True iff the
-    server returned 401 — caller should clear the cached token.
+    server returned 401 - caller should clear the cached token.
     """
     try:
         resp = requests.get(
@@ -184,7 +184,7 @@ def request_app_token(
 
     Calls GET /api/v1/app/auth which prompts the user inside Portmaster to
     approve or deny ClamUI. Returns (token, error). On user denial returns
-    (None, None) — that is the expected silent-fail path. On a network error
+    (None, None) - that is the expected silent-fail path. On a network error
     returns (None, message).
 
     Note: this call blocks until the user responds in Portmaster's UI (or it
@@ -212,11 +212,11 @@ def request_app_token(
         try:
             data = resp.json()
         except ValueError:
-            # Some Portmaster builds return text/plain — fall through to raw text.
+            # Some Portmaster builds return text/plain - fall through to raw text.
             return resp.text.strip() or None, None
         token = data.get("token") or data.get("Token") or data.get("key")
         return (token, None) if token else (None, "No token in response")
     if resp.status_code in (401, 403):
-        # User declined — not an error from our perspective.
+        # User declined - not an error from our perspective.
         return None, None
     return None, f"HTTP {resp.status_code}"

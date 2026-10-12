@@ -61,6 +61,8 @@ class BehaviorPage(PreferencesPageMixin):
         self._parent_window = parent_window
         self._close_behavior_row = None
         self._close_behavior_handler_id = None
+        self._start_minimized_row = None
+        self._start_minimized_handler_id = None
         self._live_progress_row = None
         self._live_progress_handler_id = None
         self._language_row = None
@@ -144,6 +146,17 @@ class BehaviorPage(PreferencesPageMixin):
         self._load_close_behavior()
 
         group.add(self._close_behavior_row)
+
+        self._start_minimized_row = create_switch_row(icon_name="window-minimize-symbolic")
+        self._start_minimized_row.set_title(_("Start in System Tray"))
+        self._start_minimized_row.set_subtitle(
+            _("Launch in the background and show only the tray icon")
+        )
+        self._start_minimized_handler_id = self._start_minimized_row.connect(
+            "notify::active", self._on_start_minimized_changed
+        )
+        self._load_start_minimized()
+        group.add(self._start_minimized_row)
 
         return group
 
@@ -303,6 +316,26 @@ class BehaviorPage(PreferencesPageMixin):
         )
         dialog.set_transient_for(self._parent_window)
         dialog.present()
+
+    def _load_start_minimized(self):
+        """Load the start-in-tray setting into its switch row."""
+        if self._settings_manager is None or self._start_minimized_row is None:
+            return
+
+        enabled = self._settings_manager.get("start_minimized", False)
+        handler_id = self._start_minimized_handler_id
+        if handler_id is not None:
+            self._start_minimized_row.handler_block(handler_id)
+        self._start_minimized_row.set_active(enabled)
+        if handler_id is not None:
+            self._start_minimized_row.handler_unblock(handler_id)
+
+    def _on_start_minimized_changed(self, row, pspec):
+        """Persist whether normal launches should start in the system tray."""
+        if self._settings_manager is None:
+            return
+
+        self._settings_manager.set("start_minimized", row.get_active())
 
     def _load_close_behavior(self):
         """Load the current close behavior setting into the ComboRow."""

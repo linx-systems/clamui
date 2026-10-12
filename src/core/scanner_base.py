@@ -16,7 +16,7 @@ import os
 import re
 import select
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
 from .i18n import _
 from .log_manager import LogEntry, LogManager
@@ -60,7 +60,7 @@ _NONFATAL_LIBCLAMAV_PATTERNS = (
 
 # LibClamAV Warning patterns emitted when ClamAV hits a configured scan limit
 # (max scan/file size, recursion depth) or a truncated container. ClamAV scans
-# what it can and CONTINUES — these are by-design protections (e.g. against
+# what it can and CONTINUES - these are by-design protections (e.g. against
 # decompression bombs), not failures, so they must not turn the scan into an
 # error. Matched case-insensitively against the warning line. See GitHub issue:
 # full scan reported ERROR after hitting a large compressed file.
@@ -76,7 +76,7 @@ _NONFATAL_WARNING_PATTERNS = (
 
 # Per-file CL_ETIMEOUT reply: "<path>: Time limit reached ERROR". The file was
 # PARTIALLY scanned before the per-file time limit hit and the scan continued,
-# so it belongs in nonfatal_warnings — reporting it as "not accessible" would
+# so it belongs in nonfatal_warnings - reporting it as "not accessible" would
 # be wrong.
 _NONFATAL_TIME_LIMIT_MARKER = ": Time limit reached"
 
@@ -98,6 +98,123 @@ def parse_total_errors(stdout: str) -> int:
         if match:
             return int(match.group(1))
     return 0
+
+
+def _append_bounded_output(parts: list[str], total: int, chunk: str, stream_name: str) -> int:
+    """Append a chunk to a bounded subprocess-output buffer."""
+    if not chunk or total >= MAX_ACCUMULATED_BYTES:
+        return total
+
+    remaining = MAX_ACCUMULATED_BYTES - total
+    if len(chunk) <= remaining:
+        parts.append(chunk)
+        return total + len(chunk)
+
+    # Truncation point - keep marker so parsers see the boundary.
+    parts.append(chunk[:remaining])
+    parts.append(f"\n[{stream_name} truncated at {MAX_ACCUMULATED_BYTES} bytes]\n")
+    logger.warning(
+        "Subprocess %s exceeded %d bytes; truncating accumulated buffer",
+        stream_name,
+        MAX_ACCUMULATED_BYTES,
+    )
+    return MAX_ACCUMULATED_BYTES
+
+
+def _append_output_pair(
+    stdout_parts: list[str],
+    stdout_total: int,
+    stdout: str | None,
+    stderr_parts: list[str],
+    stderr_total: int,
+    stderr: str | None,
+) -> tuple[int, int]:
+    """Add subprocess stdout and stderr to their bounded buffers."""
+    stdout_total = _append_bounded_output(stdout_parts, stdout_total, stdout or "", "stdout")
+    stderr_total = _append_bounded_output(stderr_parts, stderr_total, stderr or "", "stderr")
+    return stdout_total, stderr_total
+
+
+def _iter_fd_chunks(fd: int) -> Iterator[str]:
+    """Yield decoded chunks currently available from a file descriptor."""
+    while True:
+        try:
+            raw = os.read(fd, 4096)
+        except OSError:
+            return
+        if not raw:
+            return
+        yield raw.decode("utf-8", errors="surrogateescape")
+
+
+def _drain_fd_output(fd: int, parts: list[str], total: int, stream_name: str) -> int:
+    """Drain a stream into its bounded output buffer."""
+    try:
+        for chunk in _iter_fd_chunks(fd):
+            total = _append_bounded_output(parts, total, chunk, stream_name)
+    except OSError:
+        pass
+    return total
+
+
+def _emit_stdout_lines(text: str, on_line: Callable[[str], None], *, final: bool) -> str:
+    """Deliver complete stdout lines and return any incomplete trailing fragment."""
+    lines = text.split("\n")
+    incomplete_line = "" if final else lines.pop()
+    for line in lines:
+        if line:
+            on_line(line)
+    return incomplete_line
+
+
+def _finish_stream_output(
+    stdout_fd: int,
+    stderr_fd: int,
+    stdout_parts: list[str],
+    stdout_total: int,
+    stderr_parts: list[str],
+    stderr_total: int,
+    incomplete_line: str,
+    on_line: Callable[[str], None],
+) -> tuple[int, int]:
+    """Drain completed streams and deliver the final stdout line."""
+    remaining_stdout = "".join(_iter_fd_chunks(stdout_fd))
+    remaining_stderr = "".join(_iter_fd_chunks(stderr_fd))
+    _emit_stdout_lines(incomplete_line + remaining_stdout, on_line, final=True)
+    stdout_total, stderr_total = _append_output_pair(
+        stdout_parts, stdout_total, remaining_stdout, stderr_parts, stderr_total, remaining_stderr
+    )
+    return stdout_total, stderr_total
+
+
+def _terminate_streaming_process(process: subprocess.Popen) -> None:
+    """Stop a cancelled streaming process, escalating after its grace period."""
+    process.terminate()
+    try:
+        process.wait(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+
+
+def _wait_for_streaming_process_exit(process: subprocess.Popen) -> None:
+    """Wait briefly for a process whose output streams have both closed."""
+    try:
+        process.wait(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        process.kill()
+
+
+def _iter_ready_stream_chunks(
+    readable: list[int], read_fds: list[int]
+) -> Iterator[tuple[int, str]]:
+    """Yield decoded chunks from readable streams and remove EOF descriptors."""
+    for fd in readable:
+        raw_bytes = os.read(fd, 4096)
+        if not raw_bytes:
+            read_fds.remove(fd)
+            continue
+        yield fd, raw_bytes.decode("utf-8", errors="surrogateescape")
 
 
 def communicate_with_cancel_check(
@@ -134,33 +251,15 @@ def communicate_with_cancel_check(
     stdout_total = 0
     stderr_total = 0
 
-    def _append(parts: list[str], total: int, chunk: str, stream_name: str) -> int:
-        if not chunk:
-            return total
-        if total >= MAX_ACCUMULATED_BYTES:
-            return total
-        remaining = MAX_ACCUMULATED_BYTES - total
-        if len(chunk) <= remaining:
-            parts.append(chunk)
-            return total + len(chunk)
-        # Truncation point — keep marker so parsers see the boundary.
-        parts.append(chunk[:remaining])
-        parts.append(f"\n[{stream_name} truncated at {MAX_ACCUMULATED_BYTES} bytes]\n")
-        logger.warning(
-            "Subprocess %s exceeded %d bytes; truncating accumulated buffer",
-            stream_name,
-            MAX_ACCUMULATED_BYTES,
-        )
-        return MAX_ACCUMULATED_BYTES
-
     while True:
         if is_cancelled():
             # Terminate process and collect any remaining output
             try:
                 process.terminate()
                 stdout, stderr = process.communicate(timeout=2.0)
-                stdout_total = _append(stdout_parts, stdout_total, stdout or "", "stdout")
-                stderr_total = _append(stderr_parts, stderr_total, stderr or "", "stderr")
+                stdout_total, stderr_total = _append_output_pair(
+                    stdout_parts, stdout_total, stdout, stderr_parts, stderr_total, stderr
+                )
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
@@ -168,8 +267,9 @@ def communicate_with_cancel_check(
 
         try:
             stdout, stderr = process.communicate(timeout=0.5)
-            stdout_total = _append(stdout_parts, stdout_total, stdout or "", "stdout")
-            stderr_total = _append(stderr_parts, stderr_total, stderr or "", "stderr")
+            stdout_total, stderr_total = _append_output_pair(
+                stdout_parts, stdout_total, stdout, stderr_parts, stderr_total, stderr
+            )
             return "".join(stdout_parts), "".join(stderr_parts), False
         except subprocess.TimeoutExpired:
             continue  # Loop again, check cancel flag
@@ -217,195 +317,78 @@ def stream_process_output(
     stderr_total = 0
 
     if process.stdout is None or process.stderr is None:
-        # Fallback to blocking communicate if pipes not available
+        # Fallback to blocking communicate if pipes not available.
         logger.warning("stream_process_output called without stdout/stderr pipes")
         return communicate_with_cancel_check(process, is_cancelled)
 
-    def _append(parts: list[str], total: int, chunk: str, stream_name: str) -> int:
-        if not chunk:
-            return total
-        if total >= MAX_ACCUMULATED_BYTES:
-            return total
-        remaining = MAX_ACCUMULATED_BYTES - total
-        if len(chunk) <= remaining:
-            parts.append(chunk)
-            return total + len(chunk)
-        parts.append(chunk[:remaining])
-        parts.append(f"\n[{stream_name} truncated at {MAX_ACCUMULATED_BYTES} bytes]\n")
-        logger.warning(
-            "Subprocess %s exceeded %d bytes; truncating accumulated buffer",
-            stream_name,
-            MAX_ACCUMULATED_BYTES,
-        )
-        return MAX_ACCUMULATED_BYTES
-
-    # Get file descriptors for both streams. We must drain stderr concurrently
-    # with stdout to avoid a pipe-buffer deadlock: clamscan/clamdscan write
-    # LibClamAV warnings and permission errors to stderr, and a single
-    # write(stderr_fd) blocks once the kernel pipe buffer (~64 KiB on Linux)
-    # fills. While blocked, the process never advances, process.poll() stays
-    # None, and the scan freezes mid-run. See issue #146.
-    stdout_fd = process.stdout.fileno()
-    stderr_fd = process.stderr.fileno()
-    stdout_eof = False
-    stderr_eof = False
-    incomplete_line = ""
-
     try:
+        # Get file descriptors for both streams. We must drain stderr concurrently
+        # with stdout to avoid a pipe-buffer deadlock: clamscan/clamdscan write
+        # LibClamAV warnings and permission errors to stderr, and a single
+        # write(stderr_fd) blocks once the kernel pipe buffer (~64 KiB on Linux)
+        # fills. While blocked, the process never advances, process.poll() stays
+        # None, and the scan freezes mid-run. See issue #146.
+        stdout_fd = process.stdout.fileno()
+        stderr_fd = process.stderr.fileno()
+        read_fds = [stdout_fd, stderr_fd]
+        incomplete_line = ""
+
         while True:
             # Check for cancellation first
             if is_cancelled():
-                process.terminate()
-                try:
-                    process.wait(timeout=2.0)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait()
+                _terminate_streaming_process(process)
                 # Drain remaining output via os.read() to avoid mixing
-                # with the TextIOWrapper used by process.communicate()
-                for fd, parts, stream_name in [
-                    (stdout_fd, stdout_parts, "stdout"),
-                    (stderr_fd, stderr_parts, "stderr"),
-                ]:
-                    local_total = stdout_total if stream_name == "stdout" else stderr_total
-                    while True:
-                        try:
-                            raw = os.read(fd, 4096)
-                            if not raw:
-                                break
-                            local_total = _append(
-                                parts,
-                                local_total,
-                                raw.decode("utf-8", errors="replace"),
-                                stream_name,
-                            )
-                        except OSError:
-                            break
-                    if stream_name == "stdout":
-                        stdout_total = local_total
-                    else:
-                        stderr_total = local_total
+                # with the TextIOWrapper used by process.communicate().
+                stdout_total = _drain_fd_output(stdout_fd, stdout_parts, stdout_total, "stdout")
+                stderr_total = _drain_fd_output(stderr_fd, stderr_parts, stderr_total, "stderr")
                 return "".join(stdout_parts), "".join(stderr_parts), True
 
-            # Check if process has finished
             if process.poll() is not None:
-                # Process finished - drain remaining output via os.read()
-                remaining_chunks = []
-                while True:
-                    try:
-                        raw = os.read(stdout_fd, 4096)
-                        if not raw:
-                            break
-                        remaining_chunks.append(raw.decode("utf-8", errors="replace"))
-                    except OSError:
-                        break
-                remaining_stdout = "".join(remaining_chunks)
-
-                remaining_stderr_chunks = []
-                while True:
-                    try:
-                        raw = os.read(stderr_fd, 4096)
-                        if not raw:
-                            break
-                        remaining_stderr_chunks.append(raw.decode("utf-8", errors="replace"))
-                    except OSError:
-                        break
-                remaining_stderr = "".join(remaining_stderr_chunks)
-
-                if remaining_stdout:
-                    # Line callbacks get the buffered partial line rejoined with
-                    # the drained data; the accumulated buffer must only receive
-                    # the newly drained bytes — incomplete_line was already
-                    # appended as part of the chunk it arrived in, and appending
-                    # it again would corrupt the final output parsed for results.
-                    data = incomplete_line + remaining_stdout
-                    lines = data.split("\n")
-                    for line in lines:
-                        if line:  # Skip empty lines from split
-                            on_line(line)
-                    stdout_total = _append(stdout_parts, stdout_total, remaining_stdout, "stdout")
-                elif incomplete_line:
-                    # Flush the final incomplete line to the callback only; its
-                    # bytes are already in stdout_parts.
-                    on_line(incomplete_line)
-                if remaining_stderr:
-                    stderr_total = _append(stderr_parts, stderr_total, remaining_stderr, "stderr")
-                break
-
-            # Build the active read set. Once a stream reaches EOF we drop it
-            # so select() doesn't spin on a closed fd.
-            read_fds = []
-            if not stdout_eof:
-                read_fds.append(stdout_fd)
-            if not stderr_eof:
-                read_fds.append(stderr_fd)
+                stdout_total, stderr_total = _finish_stream_output(
+                    stdout_fd,
+                    stderr_fd,
+                    stdout_parts,
+                    stdout_total,
+                    stderr_parts,
+                    stderr_total,
+                    incomplete_line,
+                    on_line,
+                )
+                return "".join(stdout_parts), "".join(stderr_parts), False
 
             if not read_fds:
                 # Both streams closed but process still hasn't exited.
                 # Give it a moment, then escalate to kill so the next poll()
                 # iteration takes the drain-and-exit branch above.
-                try:
-                    process.wait(timeout=2.0)
-                except subprocess.TimeoutExpired:
-                    process.kill()
+                _wait_for_streaming_process_exit(process)
                 continue
 
             # Use select to wait for data with timeout
             readable = select.select(read_fds, [], [], poll_interval)[0]
 
-            for fd in readable:
-                # Use os.read() for truly non-blocking reads.
-                # process.stdout.read(n) uses TextIOWrapper which internally
-                # loops to accumulate n chars, blocking on the pipe even after
-                # select() returns readable.
-                raw_bytes = os.read(fd, 4096)
-                if not raw_bytes:
-                    # EOF on this stream. Mark it closed and stop selecting
-                    # on it; the other stream may still have data, and the
-                    # process.poll() branch will run the final drain.
-                    if fd == stdout_fd:
-                        stdout_eof = True
-                    else:
-                        stderr_eof = True
+            for fd, chunk in _iter_ready_stream_chunks(readable, read_fds):
+                if fd != stdout_fd:
+                    stderr_total = _append_bounded_output(
+                        stderr_parts, stderr_total, chunk, "stderr"
+                    )
                     continue
 
-                chunk = raw_bytes.decode("utf-8", errors="replace")
-
-                if fd == stdout_fd:
-                    # Accumulate for final parsing (capped to avoid memory exhaustion)
-                    stdout_total = _append(stdout_parts, stdout_total, chunk, "stdout")
-
-                    # Incomplete line handling: Buffer partial lines until newline arrives
-                    # - incomplete_line holds text from previous read that didn't end with \n
-                    # - Prepend it to current chunk to reassemble the full line
-                    # - lines[-1] becomes the new incomplete_line (empty string if chunk ended with \n)
-                    # - This ensures callbacks always receive complete lines
-                    data = incomplete_line + chunk
-                    lines = data.split("\n")
-
-                    # The last element might be incomplete (no newline yet)
-                    incomplete_line = lines[-1]
-
-                    # Process complete lines
-                    for line in lines[:-1]:
-                        if line:  # Skip empty lines
-                            on_line(line)
-                else:
-                    # stderr: accumulate only (no line callback). Both parsers
-                    # in scanner.py and daemon_scanner.py operate on stdout only,
-                    # and routing stderr ERROR-suffixed lines into on_line would
-                    # corrupt the progress counter.
-                    stderr_total = _append(stderr_parts, stderr_total, chunk, "stderr")
+                stdout_total = _append_bounded_output(stdout_parts, stdout_total, chunk, "stdout")
+                incomplete_line = _emit_stdout_lines(incomplete_line + chunk, on_line, final=False)
 
     except OSError as e:
         logger.warning("Error streaming process output: %s", e)
         # Try to get any remaining output
         try:
             remaining_stdout, remaining_stderr = process.communicate(timeout=2.0)
-            if remaining_stdout:
-                stdout_total = _append(stdout_parts, stdout_total, remaining_stdout, "stdout")
-            if remaining_stderr:
-                stderr_total = _append(stderr_parts, stderr_total, remaining_stderr, "stderr")
+            stdout_total, stderr_total = _append_output_pair(
+                stdout_parts,
+                stdout_total,
+                remaining_stdout,
+                stderr_parts,
+                stderr_total,
+                remaining_stderr,
+            )
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
@@ -434,7 +417,7 @@ def _extract_skipped_path(line: str) -> str | None:
     for prefix in _NONFATAL_SKIP_PATH_PREFIXES:
         if line.startswith(prefix):
             rest = line[len(prefix) :]
-            # "<path>: <strerror text>" — strerror messages contain no colon,
+            # "<path>: <strerror text>" - strerror messages contain no colon,
             # so splitting on the last colon keeps colons inside the path.
             file_path = rest.rsplit(":", 1)[0].strip() if ":" in rest else rest.strip()
             return file_path or None
@@ -447,7 +430,7 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
     Returns a tuple of ``(skipped_files, nonfatal_warnings, hard_error_lines)``:
 
     - ``skipped_files``: paths ClamAV could not open/process (permissions,
-      unsupported type) — the file was skipped entirely.
+      unsupported type) - the file was skipped entirely.
     - ``nonfatal_warnings``: limit/truncation warnings where ClamAV partially
       scanned a file and continued (e.g. a large compressed file exceeding the
       scan-size cap). These are by-design and are NOT errors.
@@ -477,7 +460,7 @@ def collect_clamav_warnings(stdout: str, stderr: str) -> tuple[list[str], list[s
         if any(ignored in line for ignored in _IGNORABLE_WARNING_LINES):
             continue
 
-        # Non-fatal LibClamAV parse errors (e.g. corrupt ZIP archives) —
+        # Non-fatal LibClamAV parse errors (e.g. corrupt ZIP archives) -
         # ClamAV skips the file internally and continues scanning.
         if line.startswith("LibClamAV Error:") and any(
             pattern in line for pattern in _NONFATAL_LIBCLAMAV_PATTERNS

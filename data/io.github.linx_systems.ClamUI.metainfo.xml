@@ -100,6 +100,17 @@
     </keywords>
 
     <releases>
+        <release version="0.4.1" date="2026-10-12">
+            <description>
+                <p>Safer host configuration, more reliable scan and tray behavior, and Flatpak packaging improvements</p>
+                <ul>
+                    <li>Keep secure host configuration and selected update settings, and improve Flatpak host helper installation</li>
+                    <li>Avoid false scan failures when bounded verbose output is truncated</li>
+                    <li>Wait for tray registration, honor VirusTotal setup state, and clarify configuration actions</li>
+                    <li>Improve Ubuntu 22.04 compatibility, add Hungarian translation, and refresh Python and Flatpak dependencies</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.4.0" date="2026-08-23">
             <description>
                 <p>Configuration safety, scan reliability, GTK baseline compatibility, and privileged-write hardening</p>
@@ -215,7 +226,7 @@
                     <li>Ubuntu 22.04 / Pop!_OS compatibility for PyGObject &lt; 3.50 and GLib 2.72</li>
                     <li>Dolphin (Plasma 6) file manager integration and Adwaita icon theme enforcement</li>
                     <li>Hardened preferences save flow, tray updates, and daemon exclusion handling</li>
-                    <li>Dropped Python 3.10 — minimum is now Python 3.11</li>
+                    <li>Dropped Python 3.10 - minimum is now Python 3.11</li>
                 </ul>
             </description>
         </release>

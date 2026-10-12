@@ -2,7 +2,7 @@
 """Security-focused unit tests for the quarantine restore/delete redesign.
 
 Covers:
-- VULN-003 (HIGH): TOCTOU on restore destination — symlink at original_path must
+- VULN-003 (HIGH): TOCTOU on restore destination - symlink at original_path must
   not be followed; the existing target must be untouched.
 - VULN-004 (MED): setuid/setgid/sticky bits stored in DB must be stripped on
   both write (add_entry) and read (from_row) and never restored to disk.

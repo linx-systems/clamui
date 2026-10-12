@@ -32,16 +32,16 @@ msgid "Select File or Folder"
 msgstr "选择文件或文件夹"
 
 #: src/app.py:894
-msgid "A scan is already running — the new scan request was ignored"
+msgid "A scan is already running - the new scan request was ignored"
 msgstr ""
 
 #: src/app.py:915
 #, python-brace-format
 msgid ""
-"VirusTotal scans one file per request — {count} additional selection was "
+"VirusTotal scans one file per request - {count} additional selection was "
 "ignored"
 msgid_plural ""
-"VirusTotal scans one file per request — {count} additional selections were "
+"VirusTotal scans one file per request - {count} additional selections were "
 "ignored"
 msgstr[0] ""
 
@@ -88,8 +88,8 @@ msgid "Command to show help for"
 msgstr "显示帮助的命令"
 
 #: src/cli/help_cmd.py:100
-msgid "ClamUI — ClamAV antivirus management\n"
-msgstr "ClamUI — ClamAV 防病毒管理\n"
+msgid "ClamUI - ClamAV antivirus management\n"
+msgstr "ClamUI - ClamAV 防病毒管理\n"
 
 #: src/cli/help_cmd.py:101
 msgid "Usage:"
@@ -142,8 +142,8 @@ msgstr "未知命令：{name}\n"
 
 #: src/cli/help_cmd.py:140
 #, python-brace-format
-msgid "clamui {name} — {summary}\n"
-msgstr "clamui {name} — {summary}\n"
+msgid "clamui {name} - {summary}\n"
+msgstr "clamui {name} - {summary}\n"
 
 #: src/cli/help_cmd.py:141
 msgid "Examples:"
@@ -512,8 +512,8 @@ msgid "Delete failed: {error}"
 msgstr "删除失败：{error}"
 
 #: src/cli/router.py:48
-msgid "ClamUI — ClamAV antivirus management"
-msgstr "ClamUI — ClamAV 防病毒管理"
+msgid "ClamUI - ClamAV antivirus management"
+msgstr "ClamUI - ClamAV 防病毒管理"
 
 #: src/cli/router.py:50
 msgid ""
@@ -634,7 +634,7 @@ msgstr "ClamAV 版本：{version}"
 
 #: src/cli/scheduled_scan.py:105
 msgid "ClamUI Scheduled Scan - Headless antivirus scanning"
-msgstr "ClamUI 定期扫描——无前端的防病毒扫描"
+msgstr "ClamUI 定期扫描--无前端的防病毒扫描"
 
 #: src/cli/scheduled_scan.py:108
 #, python-format
@@ -1858,7 +1858,7 @@ msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #: src/core/system_audit.py:1671
-msgid "Not detected — optional network monitor and application firewall"
+msgid "Not detected - optional network monitor and application firewall"
 msgstr ""
 
 #: src/core/system_audit.py:1680
@@ -1942,7 +1942,7 @@ msgstr ""
 "退方式（安全性较低）。"
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable — less secure)"
+msgid "Stored in settings file (keyring unavailable - less secure)"
 msgstr "已存储在设置文件中（密钥环不可用，安全性较低）"
 
 #: src/core/keyring_manager.py:140
@@ -2176,16 +2176,16 @@ msgstr "{n} 个文件无法被扫描"
 #: src/core/result_formatters.py:55
 #, python-brace-format
 msgid "Scan complete - No threats found ({count} file(s) not accessible)"
-msgstr "扫描完成 — 未发现威胁（{count} 个文件无法访问）"
+msgstr "扫描完成 - 未发现威胁（{count} 个文件无法访问）"
 
 #: src/core/result_formatters.py:59
 #, fuzzy, python-brace-format
 msgid "Scan complete - No threats found ({warning})"
-msgstr "扫描完成 — 未发现威胁"
+msgstr "扫描完成 - 未发现威胁"
 
 #: src/core/result_formatters.py:62
 msgid "Scan complete - No threats found"
-msgstr "扫描完成 — 未发现威胁"
+msgstr "扫描完成 - 未发现威胁"
 
 #: src/core/result_formatters.py:121
 msgid "ClamUI Scan Report"
@@ -2670,7 +2670,7 @@ msgid "Running security check"
 msgstr "正在运行安全检查"
 
 #: src/ui/audit_view.py:255
-msgid "Portmaster — checking…"
+msgid "Portmaster - checking…"
 msgstr ""
 
 #: src/ui/audit_view.py:266
@@ -2708,11 +2708,11 @@ msgid "Scan for known rootkits using chkrootkit"
 msgstr "使用 chkrootkit 扫描已知的 rootkit"
 
 #: src/ui/audit_view.py:552
-msgid "Portmaster — not detected (optional)"
+msgid "Portmaster - not detected (optional)"
 msgstr ""
 
 #: src/ui/audit_view.py:555
-msgid "Portmaster — could not probe"
+msgid "Portmaster - could not probe"
 msgstr ""
 
 #: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
@@ -4445,20 +4445,20 @@ msgstr "关于扫描后端"
 
 #: src/ui/preferences/scanner_page.py:382
 msgid ""
-"Recommended — Automatically uses daemon if available, falls back to clamscan "
+"Recommended - Automatically uses daemon if available, falls back to clamscan "
 "for reliability"
-msgstr "推荐——自动使用守护进程（如果可用），否则回退到 clamscan 以确保可靠性。"
+msgstr "推荐--自动使用守护进程（如果可用），否则回退到 clamscan 以确保可靠性。"
 
 #: src/ui/preferences/scanner_page.py:385
 msgid ""
-"Fastest — Instant startup with in-memory database, requires clamd service "
+"Fastest - Instant startup with in-memory database, requires clamd service "
 "running"
-msgstr "最快——使用内存数据库即时启动，需要 clamd 服务运行"
+msgstr "最快--使用内存数据库即时启动，需要 clamd 服务运行"
 
 #: src/ui/preferences/scanner_page.py:387
 msgid ""
-"Most compatible — Works anywhere, loads database each scan (3-10 sec startup)"
-msgstr "兼容性最强——哪里都能用，每次扫描都加载数据库（启动耗时3-10秒）"
+"Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
+msgstr "兼容性最强--哪里都能用，每次扫描都加载数据库（启动耗时3-10秒）"
 
 #: src/ui/preferences/scanner_page.py:461
 msgid "Daemon available"
@@ -4850,8 +4850,8 @@ msgstr "返回导航"
 
 #: src/ui/preferences/window.py:534 src/ui/preferences/window.py:557
 #, python-brace-format
-msgid "Preferences — {page}"
-msgstr "首选项 — {page}"
+msgid "Preferences - {page}"
+msgstr "首选项 - {page}"
 
 #: src/ui/preferences/window.py:757
 #, fuzzy, python-brace-format
@@ -5315,7 +5315,7 @@ msgstr "检测到威胁"
 #: src/ui/scan/scan_progress_widget.py:157
 #, python-brace-format
 msgid "Target {current} of {total} \\u2014 {pct}%"
-msgstr "第 {current}/{total} 个目标 — {pct}%"
+msgstr "第 {current}/{total} 个目标 - {pct}%"
 
 #: src/ui/scan/scan_progress_widget.py:162
 #, python-brace-format
@@ -5386,7 +5386,7 @@ msgstr "扫描过程中无法添加目标"
 #: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2266
 #, python-brace-format
 msgid "Scan complete - {count} threat(s) detected"
-msgstr "扫描完成 — 发现 {count} 个威胁"
+msgstr "扫描完成 - 发现 {count} 个威胁"
 
 #: src/ui/scan/scan_view.py:260
 #, python-brace-format
@@ -5753,12 +5753,12 @@ msgstr "取消全部剩下的扫描"
 #: src/ui/scan_view.py:1929
 #, python-brace-format
 msgid "Scanning {path} \\u2014 File count pending"
-msgstr "正在扫描 {path} — 等待统计文件数"
+msgstr "正在扫描 {path} - 等待统计文件数"
 
 #: src/ui/scan_view.py:1936
 #, python-brace-format
 msgid "Scanning {count} items \\u2014 File count pending"
-msgstr "正在扫描 {count} 个项目 — 等待统计文件数"
+msgstr "正在扫描 {count} 个项目 - 等待统计文件数"
 
 #: src/ui/scan_view.py:1942
 #, python-brace-format

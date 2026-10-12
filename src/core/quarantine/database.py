@@ -31,6 +31,16 @@ from .connection_pool import ConnectionPool
 logger = logging.getLogger(__name__)
 
 
+def _path_query_values(path: str) -> tuple[sqlite3.Binary, str | None]:
+    """Return BLOB and legacy TEXT bindings without encoding surrogates as TEXT."""
+    path_bytes = sqlite3.Binary(os.fsencode(path))
+    try:
+        path.encode("utf-8")
+    except UnicodeEncodeError:
+        return path_bytes, None
+    return path_bytes, path
+
+
 @dataclass
 class QuarantineEntry:
     """A single quarantine entry representing an isolated threat."""
@@ -61,7 +71,7 @@ class QuarantineEntry:
         Returns:
             New QuarantineEntry instance
         """
-        # VULN-004: defense-in-depth — mask permission bits read from DB to
+        # VULN-004: defense-in-depth - mask permission bits read from DB to
         # the low 9 bits (rwx for user/group/other). Prevents setuid/setgid/
         # sticky bits from propagating out of a tampered or corrupted DB row.
         raw_perms = row[7] if len(row) > 7 else None
@@ -71,8 +81,8 @@ class QuarantineEntry:
             masked_perms = raw_perms & 0o777
         return cls(
             id=row[0],
-            original_path=row[1],
-            quarantine_path=row[2],
+            original_path=os.fsdecode(row[1]) if isinstance(row[1], bytes) else row[1],
+            quarantine_path=os.fsdecode(row[2]) if isinstance(row[2], bytes) else row[2],
             threat_name=row[3],
             detection_date=row[4],
             file_size=row[5],
@@ -224,7 +234,7 @@ class QuarantineDatabase:
         for db_file in db_files:
             # Open with O_NOFOLLOW so a symlink planted here cannot redirect chmod
             # to an arbitrary file. ENOENT is expected for WAL/SHM when SQLite hasn't
-            # created them yet; ELOOP means a symlink — both are silently skipped.
+            # created them yet; ELOOP means a symlink - both are silently skipped.
             try:
                 fd = os.open(db_file, os.O_RDONLY | os.O_NOFOLLOW)
             except OSError:
@@ -328,7 +338,7 @@ class QuarantineDatabase:
         Returns:
             The ID of the newly created entry, or None if failed
         """
-        # VULN-004: defense-in-depth — mask permission bits before insert so
+        # VULN-004: defense-in-depth - mask permission bits before insert so
         # the DB only ever stores the low 9 bits (rwx user/group/other).
         # Prevents accidental or malicious propagation of setuid/setgid/sticky.
         original_permissions = original_permissions & 0o777
@@ -343,8 +353,8 @@ class QuarantineDatabase:
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
-                            original_path,
-                            quarantine_path,
+                            sqlite3.Binary(os.fsencode(original_path)),
+                            sqlite3.Binary(os.fsencode(quarantine_path)),
                             threat_name,
                             datetime.now().isoformat(),
                             file_size,
@@ -354,8 +364,8 @@ class QuarantineDatabase:
                     )
                     conn.commit()
                     return cursor.lastrowid
-            except sqlite3.Error as e:
-                logger.error("Failed to add quarantine entry for %s: %s", original_path, e)
+            except (sqlite3.Error, UnicodeEncodeError) as e:
+                logger.error("Failed to add quarantine entry: %s", e)
                 return None
 
     def get_entry(self, entry_id: int) -> QuarantineEntry | None:
@@ -403,19 +413,15 @@ class QuarantineDatabase:
                         """
                         SELECT id, original_path, quarantine_path, threat_name,
                                detection_date, file_size, file_hash, original_permissions
-                        FROM quarantine WHERE original_path = ?
+                        FROM quarantine WHERE original_path IN (?, ?)
                         """,
-                        (original_path,),
+                        _path_query_values(original_path),
                     )
                     row = cursor.fetchone()
                     if row:
                         return QuarantineEntry.from_row(row)
-            except sqlite3.Error as e:
-                logger.error(
-                    "Failed to get quarantine entry by original_path=%s: %s",
-                    original_path,
-                    e,
-                )
+            except (sqlite3.Error, UnicodeEncodeError) as e:
+                logger.error("Failed to get quarantine entry by original path: %s", e)
         return None
 
     def get_all_entries(self) -> list[QuarantineEntry]:
@@ -576,16 +582,12 @@ class QuarantineDatabase:
             try:
                 with self._get_connection() as conn:
                     cursor = conn.execute(
-                        "SELECT 1 FROM quarantine WHERE original_path = ? LIMIT 1",
-                        (original_path,),
+                        "SELECT 1 FROM quarantine WHERE original_path IN (?, ?) LIMIT 1",
+                        _path_query_values(original_path),
                     )
                     return cursor.fetchone() is not None
-            except sqlite3.Error as e:
-                logger.error(
-                    "Failed to check quarantine entry existence for %s: %s",
-                    original_path,
-                    e,
-                )
+            except (sqlite3.Error, UnicodeEncodeError) as e:
+                logger.error("Failed to check quarantine entry existence: %s", e)
                 return False
 
     def close(self) -> None:

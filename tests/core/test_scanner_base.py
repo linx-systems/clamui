@@ -1,8 +1,11 @@
 # ClamUI Scanner Base Tests
 """Unit tests for the scanner_base module."""
 
+import os
 import subprocess
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.core.scanner_base import (
     KILL_WAIT_TIMEOUT,
@@ -192,6 +195,31 @@ class TestStreamProcessOutput:
         assert cancelled is False
         assert _stdout == "final"
 
+    def test_stream_output_keeps_cap_when_callback_raises_os_error(self):
+        """Recovery after a callback error must retain the prior capped total."""
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_process.stdout.fileno.return_value = 1
+        mock_process.stderr.fileno.return_value = 2
+        mock_process.communicate.return_value = ("omega\n", "")
+
+        def failing_callback(_line: str) -> None:
+            raise OSError("callback failed")
+
+        with (
+            patch.dict(stream_process_output.__globals__, {"MAX_ACCUMULATED_BYTES": 8}),
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch("src.core.scanner_base.os.read", return_value=b"alpha\nbeta\n"),
+        ):
+            stdout, stderr, cancelled = stream_process_output(
+                mock_process, lambda: False, failing_callback
+            )
+
+        assert cancelled is False
+        assert stdout == "alpha\nbe\n[stdout truncated at 8 bytes]\n"
+        assert stderr == ""
+        assert stdout.count("[stdout truncated at 8 bytes]") == 1
+
     def test_stream_output_line_callback_called_for_each_line(self):
         """Test that on_line callback is called for each complete line."""
         mock_process = MagicMock()
@@ -229,6 +257,61 @@ class TestStreamProcessOutput:
         assert "/path/file1.txt: OK" in lines
         assert "/path/file2.txt: OK" in lines
         assert "/path/file3.txt: FOUND" in lines
+
+    @pytest.mark.parametrize(
+        "streaming",
+        [False, True],
+        ids=["communicate", "stream"],
+    )
+    def test_output_accumulation_is_capped_without_stopping_streaming_callbacks(self, streaming):
+        """Both output paths retain one cap marker while streaming stays live."""
+        stdout_input = "alpha\nbeta\nomega\n"
+        stderr_input = "1234567890"
+        expected_stdout = "alpha\nbe\n[stdout truncated at 8 bytes]\n"
+        expected_stderr = "12345678\n[stderr truncated at 8 bytes]\n"
+        lines: list[str] = []
+
+        # Other modules reload ``src.*`` during their isolation fixtures. Patch
+        # the globals bound to these imported functions, not a replacement
+        # module object later installed in ``sys.modules``.
+        with patch.dict(stream_process_output.__globals__, {"MAX_ACCUMULATED_BYTES": 8}):
+            if not streaming:
+                process = MagicMock()
+                process.communicate.return_value = (stdout_input, stderr_input)
+                stdout, stderr, cancelled = communicate_with_cancel_check(process, lambda: False)
+            else:
+                process = MagicMock()
+                process.poll.side_effect = [None, 0]
+                process.stdout.fileno.return_value = 1
+                process.stderr.fileno.return_value = 2
+
+                with (
+                    patch(
+                        "src.core.scanner_base.select.select",
+                        return_value=([1], [], []),
+                    ),
+                    patch(
+                        "src.core.scanner_base.os.read",
+                        side_effect=[
+                            b"alpha\nbeta\n",
+                            b"omega\n",
+                            b"",
+                            b"1234567890",
+                            b"",
+                        ],
+                    ),
+                ):
+                    stdout, stderr, cancelled = stream_process_output(
+                        process, lambda: False, lines.append
+                    )
+
+        assert cancelled is False
+        assert stdout == expected_stdout
+        assert stderr == expected_stderr
+        assert stdout.count("[stdout truncated at 8 bytes]") == 1
+        assert stderr.count("[stderr truncated at 8 bytes]") == 1
+        if streaming:
+            assert lines == ["alpha", "beta", "omega"]
 
     def test_stream_output_partial_line_not_duplicated_in_stdout(self):
         """A trailing partial line must appear exactly once in accumulated stdout.
@@ -306,6 +389,29 @@ class TestStreamProcessOutput:
         assert stdout == "line1\nno newline at end"
         assert lines == ["line1", "no newline at end"]
 
+    def test_stream_output_preserves_non_utf8_filename_bytes(self):
+        """Progress parsing receives a surrogateescape path, not U+FFFD."""
+        mock_process = MagicMock()
+        mock_process.poll.side_effect = [None, 0]
+        mock_process.stdout.fileno.return_value = 1
+        mock_process.stderr.fileno.return_value = 2
+        lines: list[str] = []
+
+        with (
+            patch("src.core.scanner_base.select.select", return_value=([1], [], [])),
+            patch(
+                "src.core.scanner_base.os.read",
+                side_effect=[b"/tmp/infected_\xff: Test FOUND\n", b"", b""],
+            ),
+        ):
+            stdout, _stderr, cancelled = stream_process_output(
+                mock_process, lambda: False, lines.append
+            )
+
+        assert cancelled is False
+        assert os.fsencode(stdout.split(":", 1)[0]) == b"/tmp/infected_\xff"
+        assert os.fsencode(lines[0].split(":", 1)[0]) == b"/tmp/infected_\xff"
+
     def test_stream_output_does_not_deadlock_on_large_stderr(self):
         """Regression test for issue #146: full scan hanging at ~72%.
 
@@ -371,6 +477,57 @@ class TestStreamProcessOutput:
         assert len(stderr) >= 1024 * 1024
         assert "x" in stderr
         # Process must have exited cleanly, not been killed by the test.
+        assert child.returncode == 0
+
+    def test_stream_output_cancellation_drains_tail_without_callback(self):
+        """Cancellation drains the child's final output without parsing it as progress."""
+        import sys
+        import threading
+
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-u",
+                "-c",
+                (
+                    "import os, signal, sys, time\n"
+                    "def stop(_signum, _frame):\n"
+                    " os.write(1, b'tail\\n')\n"
+                    " sys.exit(0)\n"
+                    "signal.signal(signal.SIGTERM, stop)\n"
+                    "os.write(1, b'ready\\n')\n"
+                    "time.sleep(60)\n"
+                ),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+            errors="surrogateescape",
+        )
+        lines: list[str] = []
+        timeout = threading.Timer(8.0, child.kill)
+        timeout.start()
+
+        try:
+            stdout, stderr, was_cancelled = stream_process_output(
+                child,
+                lambda: "ready" in lines,
+                lines.append,
+                poll_interval=0.05,
+            )
+        finally:
+            timeout.cancel()
+            timeout.join()
+            if child.poll() is None:
+                child.kill()
+            child.wait()
+            if child.stdout is not None:
+                child.stdout.close()
+            if child.stderr is not None:
+                child.stderr.close()
+
+        assert (stdout, stderr, was_cancelled) == ("ready\ntail\n", "", True)
+        assert lines == ["ready"]
         assert child.returncode == 0
 
     def test_stream_output_handles_stderr_eof_before_stdout(self):

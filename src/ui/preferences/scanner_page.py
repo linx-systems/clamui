@@ -27,7 +27,6 @@ except (TypeError, AttributeError):
 from ...core.clamav_config import megabytes_to_size_value, size_value_to_megabytes
 from ...core.clamav_detection import detect_clamd_conf_path
 from ...core.flatpak import (
-    format_flatpak_portal_path,
     get_clean_env,
     is_flatpak,
     is_portal_path,
@@ -50,6 +49,24 @@ from .base import (
     styled_prefix_icon,
     update_status_row,
 )
+
+_FILE_TYPE_SCAN_FIELDS = (
+    "ScanPE",
+    "ScanELF",
+    "ScanOLE2",
+    "ScanPDF",
+    "ScanHTML",
+    "ScanArchive",
+)
+_LOGGING_BOOLEAN_FIELDS = ("LogVerbose", "LogSyslog")
+
+
+def _collect_boolean_fields(widgets_dict: dict, updates: dict, fields: tuple[str, ...]) -> None:
+    """Collect available boolean fields as clamd yes/no directives."""
+    for key in fields:
+        value = get_widget_active(widgets_dict, key)
+        if value is not None:
+            updates[key] = "yes" if value else "no"
 
 
 class ScannerPage(PreferencesPageMixin):
@@ -107,6 +124,7 @@ class ScannerPage(PreferencesPageMixin):
             widgets_dict,
             settings_manager,
             temp_instance,
+            parent_window,
             config_path=config_path,
         )
 
@@ -114,15 +132,15 @@ class ScannerPage(PreferencesPageMixin):
         def _on_detect_clamd():
             detected = detect_clamd_conf_path()
             if detected:
-                path_row.set_subtitle(detected)
-                parent_window._clamd_conf_path = detected
-                parent_window._clamd_available = True
-                sm = getattr(parent_window, "_settings_manager", None)
-                if sm:
-                    sm.set("clamd_conf_path", detected)
-                parent_window._reload_clamd_config()
-                toast = Adw.Toast.new(_("Detected: {path}").format(path=detected))
-                parent_window.add_toast(toast)
+                ScannerPage._apply_config_selection(
+                    parent_window,
+                    path_row,
+                    "clamd_conf_path",
+                    "_clamd_conf_path",
+                    detected,
+                    detected,
+                    _("Detected: {path}").format(path=detected),
+                )
             else:
                 toast = Adw.Toast.new(_("No clamd.conf found in known locations"))
                 parent_window.add_toast(toast)
@@ -140,6 +158,19 @@ class ScannerPage(PreferencesPageMixin):
             on_detect=_on_detect_clamd,
             on_browse=_on_browse_clamd,
         )
+
+        if parent_window is not None:
+            read_button = Gtk.Button()
+            read_button.set_icon_name(resolve_icon_name("system-lock-screen-symbolic"))
+            read_button.add_css_class("flat")
+            read_button.set_tooltip_text(
+                _("Request administrator authorization to read a protected configuration file")
+            )
+            read_button.connect(
+                "clicked",
+                lambda _button: parent_window._request_config_authorized_read("clamd"),
+            )
+            path_row.add_suffix(read_button)
 
         if clamd_available:
             # Create file type scanning group
@@ -186,23 +217,25 @@ class ScannerPage(PreferencesPageMixin):
                 display_path = file_path
                 if is_flatpak() and is_portal_path(file_path):
                     resolved = resolve_portal_path(file_path)
-                    if resolved:
-                        stored_path = resolved
-                        display_path = resolved
-                    else:
-                        display_path = format_flatpak_portal_path(file_path)
+                    if not resolved:
+                        parent_window.add_toast(
+                            Adw.Toast.new(
+                                _("Selected configuration file is not accessible from the host")
+                            )
+                        )
+                        return
+                    stored_path = resolved
+                    display_path = resolved
 
-                path_row.set_subtitle(display_path)
-                setattr(parent_window, attr_name, stored_path)
-                if attr_name == "_clamd_conf_path":
-                    parent_window._clamd_available = True
-                sm = getattr(parent_window, "_settings_manager", None)
-                if sm:
-                    sm.set(settings_key, stored_path)
-                if attr_name == "_clamd_conf_path":
-                    parent_window._reload_clamd_config()
-                toast = Adw.Toast.new(_("Selected: {path}").format(path=display_path))
-                parent_window.add_toast(toast)
+                ScannerPage._apply_config_selection(
+                    parent_window,
+                    path_row,
+                    settings_key,
+                    attr_name,
+                    stored_path,
+                    display_path,
+                    _("Selected: {path}").format(path=display_path),
+                )
 
         # In Flatpak, /etc doesn't exist inside the sandbox.
         # The file chooser portal presents the host filesystem, but
@@ -251,11 +284,37 @@ class ScannerPage(PreferencesPageMixin):
             dialog.show()
 
     @staticmethod
+    def _apply_config_selection(
+        parent_window,
+        path_row,
+        settings_key,
+        attr_name,
+        stored_path,
+        display_path,
+        success_message,
+    ):
+        """Persist a configuration path before exposing it in the UI."""
+        settings_manager = getattr(parent_window, "_settings_manager", None)
+        if settings_manager and not settings_manager.set(settings_key, stored_path):
+            toast = Adw.Toast.new(_("Failed to save configuration file selection"))
+            parent_window.add_toast(toast)
+            return False
+
+        path_row.set_subtitle(display_path)
+        setattr(parent_window, attr_name, stored_path)
+        if attr_name == "_clamd_conf_path":
+            parent_window._clamd_available = True
+            parent_window._reload_clamd_config()
+        parent_window.add_toast(Adw.Toast.new(success_message))
+        return True
+
+    @staticmethod
     def _create_scan_backend_group(
         page: Adw.PreferencesPage,
         widgets_dict: dict,
         settings_manager,
         helper,
+        parent_window,
         config_path: str | None = None,
     ):
         """
@@ -277,6 +336,7 @@ class ScannerPage(PreferencesPageMixin):
             widgets_dict: Dictionary to store widget references
             settings_manager: SettingsManager for auto-saving backend selection
             helper: Helper instance with _create_permission_indicator method
+            parent_window: Preferences window that displays save-failure toasts
             config_path: Resolved clamd.conf path for daemon reachability checks
         """
         group = Adw.PreferencesGroup()
@@ -309,10 +369,12 @@ class ScannerPage(PreferencesPageMixin):
         # Set initial subtitle based on current selection
         ScannerPage._update_backend_subtitle(backend_row, backend_map.get(current_backend, 0))
 
-        # Connect to selection changes - pass settings_manager in lambda
+        # Connect to selection changes - pass persistence context in lambda
         backend_row.connect(
             "notify::selected",
-            lambda row, pspec: ScannerPage._on_backend_changed(row, settings_manager),
+            lambda row, pspec: ScannerPage._on_backend_changed(
+                row, settings_manager, parent_window
+            ),
         )
 
         widgets_dict["backend_row"] = backend_row
@@ -379,17 +441,17 @@ class ScannerPage(PreferencesPageMixin):
         """
         subtitles = {
             0: _(
-                "Recommended — Automatically uses daemon if available, falls back to clamscan for reliability"
+                "Recommended - Automatically uses daemon if available, falls back to clamscan for reliability"
             ),
             1: _(
-                "Fastest — Instant startup with in-memory database, requires clamd service running"
+                "Fastest - Instant startup with in-memory database, requires clamd service running"
             ),
-            2: _("Most compatible — Works anywhere, loads database each scan (3-10 sec startup)"),
+            2: _("Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"),
         }
         row.set_subtitle(subtitles.get(selected, subtitles[0]))
 
     @staticmethod
-    def _on_backend_changed(row: Adw.ComboRow, settings_manager):
+    def _on_backend_changed(row: Adw.ComboRow, settings_manager, parent_window):
         """
         Handle scan backend selection change.
 
@@ -398,14 +460,28 @@ class ScannerPage(PreferencesPageMixin):
         Args:
             row: The ComboRow that changed
             settings_manager: SettingsManager to save the selection
+            parent_window: Preferences window that displays save-failure toasts
         """
+        if getattr(row, "_scanner_backend_restoring", False) is True:
+            return
+
         backend_reverse_map = {0: "auto", 1: "daemon", 2: "clamscan"}
+        backend_map = {"auto": 0, "daemon": 1, "clamscan": 2}
         selected = row.get_selected()
         backend = backend_reverse_map.get(selected, "auto")
-        settings_manager.set("scan_backend", backend)
+        if settings_manager.set("scan_backend", backend):
+            ScannerPage._update_backend_subtitle(row, selected)
+            return
 
-        # Update subtitle to reflect the selected backend's characteristics
-        ScannerPage._update_backend_subtitle(row, selected)
+        persisted_backend = settings_manager.get("scan_backend", "auto")
+        persisted_selection = backend_map.get(persisted_backend, 0)
+        row._scanner_backend_restoring = True
+        try:
+            row.set_selected(persisted_selection)
+        finally:
+            row._scanner_backend_restoring = False
+        ScannerPage._update_backend_subtitle(row, persisted_selection)
+        parent_window.add_toast(Adw.Toast.new(_("Failed to save scan backend selection")))
 
     @staticmethod
     def _check_daemon_status_background(
@@ -491,37 +567,16 @@ class ScannerPage(PreferencesPageMixin):
     @staticmethod
     def _on_learn_more_clicked(parent_window):
         """
-        Open the scan backends documentation file.
-
-        Opens docs/SCAN_BACKENDS.md in the user's default application
-        (typically a web browser or text editor) using xdg-open.
+        Open the scan backends documentation in the user's default browser.
 
         Args:
             parent_window: Parent window to present error dialogs on
         """
         import subprocess
 
-        # Get the path to the documentation file
-        # From src/ui/preferences/scanner_page.py -> src/ui/preferences/ -> src/ui/ -> src/ -> project_root/
-        docs_path = Path(__file__).parent.parent.parent.parent / "docs" / "SCAN_BACKENDS.md"
-
-        # Check if file exists
-        if not docs_path.exists():
-            # Show error if documentation doesn't exist
-            ScannerPage._show_message_dialog(
-                parent_window,
-                _("Documentation Not Found"),
-                _(
-                    "The scan backends documentation file could not be found. "
-                    "It may have been moved or deleted."
-                ),
-            )
-            return
-
         try:
-            # Use xdg-open on Linux to open file in default application
             subprocess.Popen(
-                ["xdg-open", str(docs_path)],
+                ["xdg-open", "https://clamui.com/docs/reference/scan-backends/"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True,
@@ -788,7 +843,7 @@ class ScannerPage(PreferencesPageMixin):
 
         # Populate file type scanning switches. ClamAV enables all of these
         # by default when the key is absent from clamd.conf, so a missing key
-        # must show as ON — defaulting to off would write "ScanPE no" etc. on
+        # must show as ON - defaulting to off would write "ScanPE no" etc. on
         # the next save and silently disable executable/document scanning.
         for key in (
             "ScanPE",
@@ -836,10 +891,7 @@ class ScannerPage(PreferencesPageMixin):
         updates = {}
 
         # Collect file type scanning settings
-        for key in ("ScanPE", "ScanELF", "ScanOLE2", "ScanPDF", "ScanHTML", "ScanArchive"):
-            value = get_widget_active(widgets_dict, key)
-            if value is not None:
-                updates[key] = "yes" if value else "no"
+        _collect_boolean_fields(widgets_dict, updates, _FILE_TYPE_SCAN_FIELDS)
 
         # Collect performance settings
         for key in ("MaxFileSize", "MaxScanSize"):
@@ -857,10 +909,7 @@ class ScannerPage(PreferencesPageMixin):
         if log_file:
             updates["LogFile"] = log_file
 
-        for key in ("LogVerbose", "LogSyslog"):
-            value = get_widget_active(widgets_dict, key)
-            if value is not None:
-                updates[key] = "yes" if value else "no"
+        _collect_boolean_fields(widgets_dict, updates, _LOGGING_BOOLEAN_FIELDS)
 
         return updates
 

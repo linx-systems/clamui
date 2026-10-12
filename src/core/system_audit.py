@@ -32,7 +32,7 @@ from .clamav_detection import (
     check_clamd_connection,
     check_database_available,
 )
-from .flatpak import get_clean_env, is_flatpak, wrap_host_command
+from .flatpak import get_clean_env, is_flatpak, which_host_command, wrap_host_command
 from .i18n import _
 from .install_commands import InstallTarget, recommend_install_command
 from .keyring_manager import delete_portmaster_token, get_portmaster_token
@@ -72,7 +72,7 @@ class AuditCategory(Enum):
     DEEP_SCAN_ROOTKIT = "deep_scan_rootkit"
 
 
-# Reference URLs for security audit checks — official docs and guides
+# Reference URLs for security audit checks - official docs and guides
 _URLS = {
     "clamav": "https://docs.clamav.net/",
     "clamav_freshclam": "https://docs.clamav.net/manual/Usage/SignatureManagement.html",
@@ -90,7 +90,7 @@ _URLS = {
     "ssh_root_login": "https://man7.org/linux/man-pages/man5/sshd_config.5.html",
     "lynis": "https://cisofy.com/lynis/",
     "chkrootkit": "https://www.chkrootkit.org/",
-    "open_ports": "https://wiki.archlinux.org/title/Security#Network",
+    "open_ports": "https://wiki.archlinux.org/title/Security#Network_and_firewalls",
     "portmaster": "https://safing.io/portmaster/",
     "portmaster_install": "https://docs.safing.io/portmaster/install/linux",
     "portmaster_api": "https://docs.safing.io/portmaster/api",
@@ -206,9 +206,8 @@ def _check_systemd_service(service_name: str) -> tuple[bool, str]:
 
 
 def is_binary_installed(binary_name: str) -> bool:
-    """Check if a binary is available on the system (or host if Flatpak)."""
-    rc, _stdout, _stderr = _run_command(["which", binary_name])
-    return rc == 0
+    """Check whether a host command is available."""
+    return which_host_command(binary_name) is not None
 
 
 def _is_service_installed(service_name: str) -> bool:
@@ -216,7 +215,7 @@ def _is_service_installed(service_name: str) -> bool:
 
     systemctl is-active returns 'inactive' for BOTH 'installed but stopped'
     and 'not installed at all'. This function uses 'systemctl cat' to
-    distinguish — it returns 0 only if the unit file actually exists.
+    distinguish - it returns 0 only if the unit file actually exists.
     """
     rc, _stdout, _stderr = _run_command(["systemctl", "cat", service_name])
     return rc == 0
@@ -737,7 +736,7 @@ def _check_firewall_gui(section: AuditSectionResult) -> None:
             return
 
     install_command = recommend_install_command(InstallTarget.FIREWALL_GUI)
-    # No GUI found — informational only, not a warning
+    # No GUI found - informational only, not a warning
     section.checks.append(
         AuditCheckResult(
             name=_("Firewall Manager"),
@@ -999,7 +998,7 @@ def check_auto_updates() -> AuditSectionResult:
             )
             updates_found = True
 
-    # Check Fedora/RHEL dnf-automatic — only if dnf is present (Fedora/RHEL system)
+    # Check Fedora/RHEL dnf-automatic - only if dnf is present (Fedora/RHEL system)
     if not updates_found and is_binary_installed("dnf"):
         is_active, status = _check_systemd_service("dnf-automatic.timer")
         if is_active:
@@ -1073,7 +1072,7 @@ def check_intrusion_detection() -> AuditSectionResult:
 
     ids_found = False
 
-    # Check fail2ban — verify binary exists before claiming "installed"
+    # Check fail2ban - verify binary exists before claiming "installed"
     is_active, status = _check_systemd_service("fail2ban")
     if is_active:
         section.checks.append(
@@ -1099,7 +1098,7 @@ def check_intrusion_detection() -> AuditSectionResult:
         )
         ids_found = True
 
-    # Check CrowdSec — verify binary exists before claiming "installed"
+    # Check CrowdSec - verify binary exists before claiming "installed"
     is_active, status = _check_systemd_service("crowdsec")
     if is_active:
         section.checks.append(
@@ -1331,9 +1330,9 @@ def run_lynis_audit() -> AuditSectionResult:
         icon_name="system-run-symbolic",
     )
 
-    # Check if lynis is installed
-    rc, stdout, _stderr = _run_command(["which", "lynis"])
-    if rc != 0:
+    # Resolve once so a host administrative path is also used for pkexec.
+    lynis_path = which_host_command("lynis")
+    if lynis_path is None:
         section.checks.append(
             AuditCheckResult(
                 name=_("Lynis"),
@@ -1352,7 +1351,7 @@ def run_lynis_audit() -> AuditSectionResult:
             wrap_host_command(
                 [
                     "pkexec",
-                    "lynis",
+                    lynis_path,
                     "audit",
                     "system",
                     "--cronjob",
@@ -1468,9 +1467,9 @@ def run_rootkit_check() -> AuditSectionResult:
         icon_name="system-run-symbolic",
     )
 
-    # Check if chkrootkit is installed
-    rc, _stdout, _stderr = _run_command(["which", "chkrootkit"])
-    if rc != 0:
+    # Resolve once so a host administrative path is also used for pkexec.
+    chkrootkit_path = which_host_command("chkrootkit")
+    if chkrootkit_path is None:
         section.checks.append(
             AuditCheckResult(
                 name=_("chkrootkit"),
@@ -1486,7 +1485,7 @@ def run_rootkit_check() -> AuditSectionResult:
     # Run chkrootkit with pkexec in quiet mode
     try:
         result = subprocess.run(
-            wrap_host_command(["pkexec", "chkrootkit", "-q"]),
+            wrap_host_command(["pkexec", chkrootkit_path, "-q"]),
             capture_output=True,
             text=True,
             timeout=_DEEP_SCAN_TIMEOUT,
@@ -1527,7 +1526,7 @@ def run_rootkit_check() -> AuditSectionResult:
 
     # Abnormal termination (crash, missing helper, non-zero exit). chkrootkit
     # itself exits 0 even when it finds infections, so a non-zero code here
-    # means the scan did not complete — do not infer "no rootkits".
+    # means the scan did not complete - do not infer "no rootkits".
     if result.returncode != 0:
         stderr = sanitize_log_line(result.stderr.strip())
         detail = _("Rootkit scan could not be completed (exit {code})").format(
@@ -1592,7 +1591,7 @@ def run_rootkit_check() -> AuditSectionResult:
 # =============================================================================
 #
 # Portmaster is an optional Safing.io privacy filter. If it is not installed
-# and not running, this check returns a single SKIPPED row — SKIPPED has the
+# and not running, this check returns a single SKIPPED row - SKIPPED has the
 # lowest priority in _STATUS_PRIORITY, so the section contributes zero to the
 # FAIL/WARNING counts in the audit summary. The UI renders this section inside
 # a collapsed Gtk.Expander when nothing was detected.
@@ -1611,7 +1610,7 @@ def _portmaster_module_status_to_audit(status: str) -> AuditStatus:
 
 
 def check_portmaster() -> AuditSectionResult:
-    """Check Portmaster privacy filter status (optional — silent if not installed)."""
+    """Check Portmaster privacy filter status (optional - silent if not installed)."""
     section = AuditSectionResult(
         category=AuditCategory.PORTMASTER,
         title=_("Portmaster"),
@@ -1622,7 +1621,7 @@ def check_portmaster() -> AuditSectionResult:
     result = probe_portmaster(token=token)
 
     if result.modules_unauthorized:
-        # Stale token — drop it so the user gets a fresh prompt next time.
+        # Stale token - drop it so the user gets a fresh prompt next time.
         try:
             delete_portmaster_token()
         except Exception as e:
@@ -1679,7 +1678,7 @@ def check_portmaster() -> AuditSectionResult:
             AuditCheckResult(
                 name=_("Portmaster"),
                 status=AuditStatus.SKIPPED,
-                detail=_("Not detected — optional network monitor and application firewall"),
+                detail=_("Not detected - optional network monitor and application firewall"),
                 info_url=_URLS["portmaster_install"],
             )
         )

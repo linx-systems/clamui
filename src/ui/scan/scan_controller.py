@@ -230,12 +230,12 @@ class ScanController:
             def _finalize():
                 # Runs on the main thread: flipping to IDLE here (rather than
                 # on the worker thread) keeps is_scanning True until callers
-                # of start_scan — which is main-thread-only — can no longer
+                # of start_scan - which is main-thread-only - can no longer
                 # race a second worker against this one. Completion is
                 # delivered BEFORE the state change: state-change consumers
                 # (tray status, coordinator) read the current result, and
                 # firing IDLE first would hand them the previous scan's
-                # result (or None) — e.g. a "protected" tray icon right
+                # result (or None) - e.g. a "protected" tray icon right
                 # after threats were found.
                 self._state = ScanState.IDLE
                 if self._on_complete:

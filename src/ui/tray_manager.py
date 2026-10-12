@@ -7,7 +7,8 @@ which runs with GTK3 to avoid GTK4 version conflicts. Communication
 is done via JSON messages over stdin/stdout.
 
 For detailed architecture documentation including process boundaries, IPC protocol,
-threading model, and sequence diagrams, see: docs/architecture/tray-subprocess.md
+threading model, and sequence diagrams, see:
+https://clamui.com/docs/contributing/architecture/
 """
 
 import atexit
@@ -63,8 +64,8 @@ class TrayManager:
         self._state_lock = threading.Lock()
         self._running = False
         self._ready = False
+        self._available = False
         self._current_status = "protected"
-
         # Crash recovery state (UI-001).
         # _shutting_down distinguishes deliberate stop() from subprocess crash;
         # _respawn_count + _last_respawn_time implement a sliding-window
@@ -81,6 +82,7 @@ class TrayManager:
         self._on_quit: Callable[[], None] | None = None
         self._on_window_toggle: Callable[[], None] | None = None
         self._on_profile_select: Callable[[str], None] | None = None
+        self._on_availability_changed: Callable[[bool], None] | None = None
 
         # Profile state
         self._current_profile_id: str | None = None
@@ -270,7 +272,7 @@ class TrayManager:
         ``RESPAWN_WINDOW`` seconds).
 
         On deliberate shutdown (``_shutting_down`` set, or ``_running``
-        already False): does nothing — the caller of ``stop()`` is the
+        already False): does nothing - the caller of ``stop()`` is the
         owner of the ``_ready`` flag in that case.
         """
         import time
@@ -279,11 +281,15 @@ class TrayManager:
             shutting_down = self._shutting_down
             running = self._running
             if shutting_down or not running:
-                # Deliberate shutdown — leave _ready alone; stop() handles it.
+                # Deliberate shutdown - leave _ready alone; stop() handles it.
                 return
-            # Unexpected EOF (subprocess crashed). Reset _ready now.
+        became_unavailable = False
+        with self._state_lock:
+            became_unavailable = self._available
             self._ready = False
-
+            self._available = False
+        if became_unavailable:
+            GLib.idle_add(self._notify_availability, False)
         # Capture exit code for logging.
         exit_code: int | None = None
         if self._process is not None:
@@ -292,7 +298,7 @@ class TrayManager:
             except Exception:
                 logger.debug("Failed to poll tray subprocess for exit code", exc_info=True)
 
-        # poll() returning None means the child is still alive — the reader
+        # poll() returning None means the child is still alive - the reader
         # ended for another reason. Do NOT respawn, or we'd orphan a live child.
         if exit_code is None:
             logger.warning(
@@ -309,18 +315,18 @@ class TrayManager:
                 self._tray_down = True
                 logger.error(
                     "Tray subprocess crashed (exit_code=%s); circuit breaker "
-                    "engaged after %d respawns within %.0fs — giving up",
+                    "engaged after %d respawns within %.0fs - giving up",
                     exit_code,
                     self._respawn_count,
                     self.RESPAWN_WINDOW,
                 )
                 return
             if not window_open:
-                # Window expired — reset counter.
+                # Window expired - reset counter.
                 self._respawn_count = 0
             self._respawn_count += 1
             self._last_respawn_time = now
-            # Close the dead process's pipes before dropping the reference —
+            # Close the dead process's pipes before dropping the reference -
             # a crash-looping subprocess would otherwise leak three fds per
             # respawn. Then clear it so start() will spawn a new one.
             self._close_pipes()
@@ -415,6 +421,16 @@ class TrayManager:
             # does not race other main-thread _send_command writers.
             GLib.idle_add(self._resync_tray_state)
 
+        elif event == "available":
+            with self._state_lock:
+                self._available = True
+            GLib.idle_add(self._notify_availability, True)
+
+        elif event == "unavailable":
+            with self._state_lock:
+                self._available = False
+            GLib.idle_add(self._notify_availability, False)
+
         elif event == "pong":
             logger.debug("Received pong from tray service")
 
@@ -491,6 +507,15 @@ class TrayManager:
             logger.error(f"Failed to send command to tray service: {e}")
             return False
 
+    def _notify_availability(self, available: bool) -> bool:
+        """Deliver tray-host state changes on the GTK main loop."""
+        if self._on_availability_changed is not None:
+            try:
+                self._on_availability_changed(available)
+            except Exception:
+                logger.exception("Tray availability callback failed")
+        return False
+
     def set_action_callbacks(
         self,
         on_quick_scan: Callable[[], None] | None = None,
@@ -538,6 +563,10 @@ class TrayManager:
         """
         self._on_profile_select = on_select
         logger.debug("Profile select callback configured")
+
+    def set_availability_callback(self, on_changed: Callable[[bool], None]) -> None:
+        """Set the callback notified when a tray host registers or disappears."""
+        self._on_availability_changed = on_changed
 
     def update_status(self, status: str) -> None:
         """
@@ -590,6 +619,41 @@ class TrayManager:
         )
         logger.debug(f"Updated tray profiles: {len(profiles)} profiles")
 
+    def _wait_for_process_shutdown(self, process: subprocess.Popen) -> None:
+        """Wait for a tray subprocess, escalating only when needed."""
+        try:
+            process.wait(timeout=2.0)
+            return
+        except subprocess.TimeoutExpired:
+            logger.warning("Tray service didn't stop gracefully, terminating")
+
+        process.terminate()
+        try:
+            process.wait(timeout=1.0)
+        except subprocess.TimeoutExpired:
+            logger.warning("Tray service didn't terminate, killing")
+            process.kill()
+
+    def _stop_process(self, process: subprocess.Popen) -> None:
+        """Request tray shutdown and release its subprocess resources."""
+        try:
+            self._send_command({"action": "quit"})
+            self._wait_for_process_shutdown(process)
+        except Exception as e:
+            logger.error(f"Error stopping tray service: {e}")
+        finally:
+            # Explicitly close pipes to prevent ResourceWarning.
+            self._close_pipes()
+            self._process = None
+
+    def _mark_tray_unavailable(self) -> bool:
+        """Clear tray availability state and report whether it changed."""
+        with self._state_lock:
+            became_unavailable = self._available
+            self._ready = False
+            self._available = False
+        return became_unavailable
+
     def stop(self) -> None:
         """Stop the tray service subprocess."""
         with self._state_lock:
@@ -598,33 +662,12 @@ class TrayManager:
             self._shutting_down = True
             self._running = False
 
-        if self._process is not None:
-            try:
-                # Send quit command
-                self._send_command({"action": "quit"})
+        process = self._process
+        if process is not None:
+            self._stop_process(process)
 
-                # Wait for graceful shutdown
-                try:
-                    self._process.wait(timeout=2.0)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Tray service didn't stop gracefully, terminating")
-                    self._process.terminate()
-                    try:
-                        self._process.wait(timeout=1.0)
-                    except subprocess.TimeoutExpired:
-                        logger.warning("Tray service didn't terminate, killing")
-                        self._process.kill()
-
-            except Exception as e:
-                logger.error(f"Error stopping tray service: {e}")
-            finally:
-                # Explicitly close pipes to prevent ResourceWarning
-                self._close_pipes()
-                self._process = None
-
-        with self._state_lock:
-            self._ready = False
-        logger.info("Tray manager stopped")
+        if self._mark_tray_unavailable():
+            GLib.idle_add(self._notify_availability, False)
 
     def cleanup(self) -> None:
         """
@@ -641,12 +684,18 @@ class TrayManager:
         self._on_quit = None
         self._on_window_toggle = None
         self._on_profile_select = None
+        self._on_availability_changed = None
 
     @property
     def is_active(self) -> bool:
-        """Check if the tray service is running and ready."""
+        """Check whether a desktop tray host has accepted the service."""
+        return self.is_available
+
+    @property
+    def is_available(self) -> bool:
+        """Check whether the running tray service is registered with a host."""
         with self._state_lock:
-            return self._running and self._ready and self._process is not None
+            return self._running and self._ready and self._available and self._process is not None
 
     @property
     def is_library_available(self) -> bool:

@@ -38,17 +38,19 @@ class UpdateView(Gtk.Box):
     - Results display area
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, settings_manager=None, **kwargs):
         """
         Initialize the update view.
 
         Args:
-            **kwargs: Additional arguments passed to parent
+            settings_manager: Shared application settings, including the
+                selected host freshclam configuration.
+            **kwargs: Additional arguments passed to parent.
         """
         super().__init__(orientation=Gtk.Orientation.VERTICAL, **kwargs)
 
-        # Initialize updater
-        self._updater = FreshclamUpdater()
+        # Initialize updater with the app's selected configuration source.
+        self._updater = FreshclamUpdater(settings_manager=settings_manager)
 
         # Updating state
         self._is_updating = False

@@ -110,6 +110,20 @@ class TestRuntimeConfiguration:
         assert "sdk" in data, "Missing sdk field"
         assert "org.gnome.Sdk" in data["sdk"], "Should use GNOME SDK"
 
+    @pytest.mark.parametrize(
+        "manifest_name",
+        [
+            "io.github.linx_systems.ClamUI.yml",
+            "io.github.linx_systems.ClamUI.local.yml",
+        ],
+    )
+    def test_manifests_use_current_gnome_runtime(self, yaml_parser, manifest_name):
+        """Both production and local builds must use the same supported runtime."""
+        manifest = PROJECT_ROOT / "flathub" / manifest_name
+        data = yaml_parser.safe_load(manifest.read_text())
+
+        assert data["runtime-version"] == "51"
+
 
 class TestRequiredPermissions:
     """Tests for required Flatpak permissions."""
@@ -263,6 +277,23 @@ class TestGeneratedDependencies:
             assert isinstance(data, (list, dict)), "Dependencies should be list or dict"
         except json.JSONDecodeError as e:
             pytest.fail(f"Invalid JSON: {e}")
+
+    def test_runtime_deps_target_sdk_python_and_both_architectures(self):
+        """Generated binary wheels must match GNOME 51's Python 3.14 runtime."""
+        data = json.loads((PROJECT_ROOT / "flathub" / "python3-runtime-deps.json").read_text())
+        wheel_sources = [source for source in data["sources"] if "only-arches" in source]
+
+        assert {arch for source in wheel_sources for arch in source["only-arches"]} == {
+            "aarch64",
+            "x86_64",
+        }
+        assert {
+            arch
+            for source in wheel_sources
+            if "cp314" in source["url"]
+            for arch in source["only-arches"]
+        } == {"aarch64", "x86_64"}
+        assert "cairosvg" not in data["build-commands"][0]
 
     def test_build_deps_json_exists(self):
         """Test build dependencies JSON exists."""

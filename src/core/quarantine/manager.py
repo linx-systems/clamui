@@ -598,7 +598,7 @@ class QuarantineManager:
         if entry is None:
             return (False, _("Quarantine entry not found: {id}").format(id=entry_id))
 
-        # lstat() does not follow symlinks — a symlink in the quarantine dir
+        # lstat() does not follow symlinks - a symlink in the quarantine dir
         # would not be treated as a present regular file.
         try:
             st = os.lstat(entry.quarantine_path)
@@ -628,7 +628,7 @@ class QuarantineManager:
             removed_count = 0
 
             for entry in entries:
-                # lstat() does not follow symlinks — avoids a stale symlink in the
+                # lstat() does not follow symlinks - avoids a stale symlink in the
                 # quarantine dir masking a missing file.
                 try:
                     st = os.lstat(entry.quarantine_path)

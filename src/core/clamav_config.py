@@ -15,11 +15,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+from .. import __version__
 from .i18n import _
 from .privileged_paths import (
     PROTOCOL_VERSION,
     is_running_as_root,
     staging_root_for_uid,
+    validate_destination,
 )
 
 logger = logging.getLogger(__name__)
@@ -338,126 +340,131 @@ class ClamAVConfig:
         return result
 
 
-def parse_config(file_path: str) -> tuple[ClamAVConfig | None, str | None]:
+def _read_elevated_config_lines(
+    resolved_path: Path, original_path: str
+) -> tuple[list[str] | None, str | None]:
+    """Read configuration through the explicitly authorized helper."""
+    content, error = read_config_with_elevation(str(resolved_path))
+    if error or content is None:
+        return (None, error or f"Failed to read {original_path}")
+    return (content.splitlines(keepends=True), None)
+
+
+def _read_host_config_lines(
+    resolved_path: Path, original_path: str, *, authorize_read: bool
+) -> tuple[list[str] | None, str | None]:
+    """Read a system configuration file from the Flatpak host."""
+    from .clamav_detection import config_file_exists
+    from .flatpak import read_host_file
+
+    if not config_file_exists(str(resolved_path)):
+        return (None, f"Configuration file not found: {original_path}")
+
+    content, error = read_host_file(str(resolved_path))
+    if error or content is None:
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, error or f"Failed to read {original_path}")
+
+    raw_lines = content.splitlines(keepends=True)
+    logger.debug("Read config via flatpak-spawn: %s (%d lines)", original_path, len(raw_lines))
+    return (raw_lines, None)
+
+
+def _read_native_config_lines(
+    resolved_path: Path, original_path: str, *, authorize_read: bool
+) -> tuple[list[str] | None, str | None]:
+    """Read a directly accessible configuration file."""
+    if not resolved_path.exists():
+        return (None, f"Configuration file not found: {original_path}")
+
+    if not resolved_path.is_file():
+        return (None, f"Path is not a file: {original_path}")
+
+    if not os.access(resolved_path, os.R_OK):
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, f"Permission denied: Cannot read {original_path}")
+
+    try:
+        with open(resolved_path, encoding="utf-8") as file:
+            return (file.readlines(), None)
+    except UnicodeDecodeError:
+        try:
+            with open(resolved_path, encoding="latin-1") as file:
+                return (file.readlines(), None)
+        except Exception as error:
+            return (None, f"Error reading configuration file: {error!s}")
+    except PermissionError:
+        if authorize_read:
+            return _read_elevated_config_lines(resolved_path, original_path)
+        return (None, f"Permission denied: Cannot read {original_path}")
+    except OSError as error:
+        return (None, f"Error reading configuration file: {error!s}")
+
+
+def _parse_config_lines(resolved_path: Path, raw_lines: list[str]) -> ClamAVConfig:
+    """Build a configuration model from the acquired raw lines."""
+    config = ClamAVConfig(file_path=resolved_path, raw_lines=raw_lines)
+    for line_number, line in enumerate(raw_lines, start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        parts = stripped.split(None, 1)
+        key = parts[0]
+        value = parts[1] if len(parts) > 1 else ""
+        config.add_value(key, value, line_number)
+    return config
+
+
+def parse_config(
+    file_path: str, *, authorize_read: bool = False
+) -> tuple[ClamAVConfig | None, str | None]:
     """
     Parse a ClamAV configuration file.
 
     Reads and parses ClamAV config files (freshclam.conf, clamd.conf) which use
     a simple key-value format (not INI format, no sections).
 
-    Format:
-    - Key Value (separated by space, value is everything after first space)
-    - Lines starting with # are comments
-    - Empty lines are preserved
-    - Same key can appear multiple times (multi-value options)
+    ``authorize_read`` is only for an explicit user action in Preferences. It
+    permits an installed, allowlisted privileged helper to read a root-only
+    system config; ordinary loads never trigger authentication.
 
     Args:
         file_path: Path to the configuration file
+        authorize_read: Whether the user explicitly approved an elevated read
 
     Returns:
         Tuple of (config, error):
         - (ClamAVConfig, None) on success
         - (None, error_message) on failure
     """
-    # Validate file path
     if not file_path or not file_path.strip():
         return (None, "No configuration file path specified")
 
     try:
         resolved_path = Path(file_path).resolve()
-    except (OSError, RuntimeError) as e:
-        return (None, f"Invalid file path: {e!s}")
+    except (OSError, RuntimeError) as error:
+        return (None, f"Invalid file path: {error!s}")
 
-    # Determine if we need to read across the Flatpak sandbox boundary.
-    # System paths (/etc, /usr, /var, /opt) don't exist inside the sandbox,
-    # so we must use flatpak-spawn --host cat to read them from the host.
-    from .flatpak import is_flatpak, read_host_file
+    from .flatpak import is_flatpak
 
     use_host_read = is_flatpak() and any(
         str(resolved_path).startswith(prefix) for prefix in _SYSTEM_PATH_PREFIXES
     )
-
     if use_host_read:
-        # In Flatpak: use config_file_exists() which already handles
-        # flatpak-spawn --host test -f, then read via flatpak-spawn --host cat
-        from .clamav_detection import config_file_exists
-
-        if not config_file_exists(str(resolved_path)):
-            return (None, f"Configuration file not found: {file_path}")
-
-        content, error = read_host_file(str(resolved_path))
-        if error or content is None:
-            return (None, error or f"Failed to read {file_path}")
-
-        raw_lines = content.splitlines(keepends=True)
-        logger.debug("Read config via flatpak-spawn: %s (%d lines)", file_path, len(raw_lines))
+        raw_lines, error = _read_host_config_lines(
+            resolved_path, file_path, authorize_read=authorize_read
+        )
     else:
-        # Native path or user-writable path in Flatpak: direct file I/O
-        if not resolved_path.exists():
-            return (None, f"Configuration file not found: {file_path}")
+        raw_lines, error = _read_native_config_lines(
+            resolved_path, file_path, authorize_read=authorize_read
+        )
 
-        if not resolved_path.is_file():
-            return (None, f"Path is not a file: {file_path}")
-
-        if not os.access(resolved_path, os.R_OK):
-            return (None, f"Permission denied: Cannot read {file_path}")
-
-        try:
-            with open(resolved_path, encoding="utf-8") as f:
-                raw_lines = f.readlines()
-        except UnicodeDecodeError:
-            try:
-                with open(resolved_path, encoding="latin-1") as f:
-                    raw_lines = f.readlines()
-            except Exception as e:
-                return (None, f"Error reading configuration file: {e!s}")
-        except PermissionError:
-            return (None, f"Permission denied: Cannot read {file_path}")
-        except OSError as e:
-            return (None, f"Error reading configuration file: {e!s}")
-
-    # Create config object
-    config = ClamAVConfig(file_path=resolved_path, raw_lines=raw_lines)
-
-    # Parse each line
-    for line_number, line in enumerate(raw_lines, start=1):
-        # Strip trailing whitespace/newline but preserve leading whitespace for raw_lines
-        stripped = line.strip()
-
-        # Skip empty lines
-        if not stripped:
-            continue
-
-        # Skip comment lines
-        if stripped.startswith("#"):
-            continue
-
-        # ClamAV config files (clamd.conf/freshclam.conf) do not support inline
-        # comments; only whole-line comments (handled above). Treat the entire
-        # stripped line as content so values containing '#' are preserved.
-        content = stripped
-
-        # Parse key-value pair
-        # ClamAV format: Key Value (separated by first space)
-        parts = content.split(None, 1)  # Split on first whitespace
-
-        if len(parts) == 0:
-            # Empty after stripping (shouldn't happen, but handle it)
-            continue
-
-        key = parts[0]
-
-        # Value is everything after the key (may be empty for boolean-style options)
-        value = parts[1] if len(parts) > 1 else ""
-
-        # Add value to config (supports multi-value options)
-        config_value = ClamAVConfigValue(value=value, line_number=line_number)
-
-        if key not in config.values:
-            config.values[key] = []
-        config.values[key].append(config_value)
-
-    return (config, None)
+    if raw_lines is None:
+        return (None, error)
+    return (_parse_config_lines(resolved_path, raw_lines), None)
 
 
 # Configuration option type definitions
@@ -946,6 +953,9 @@ def _write_config_direct(file_path: Path, content: str) -> tuple[bool, str | Non
     """
     Write config content directly without privilege elevation.
 
+    Existing regular files retain their ownership and permissions. New
+    user-managed configurations are created with restrictive ``0o600`` mode.
+
     Args:
         file_path: Target path to write
         content: Serialized configuration content
@@ -954,9 +964,27 @@ def _write_config_direct(file_path: Path, content: str) -> tuple[bool, str | Non
         Tuple of (success, error_message)
     """
     try:
-        file_path.write_text(content, encoding="utf-8")
-        # Set reasonable permissions for user files
-        file_path.chmod(0o644)
+        try:
+            fd = os.open(str(file_path), os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        except FileNotFoundError:
+            fd = os.open(
+                str(file_path),
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                0o600,
+            )
+            is_new_file = True
+        else:
+            is_new_file = False
+
+        with os.fdopen(fd, "w", encoding="utf-8") as config_file:
+            config_stat = os.fstat(config_file.fileno())
+            if not stat.S_ISREG(config_stat.st_mode):
+                raise ValueError(f"Configuration is not a regular file: {file_path}")
+            if is_new_file:
+                os.fchmod(config_file.fileno(), 0o600)
+            else:
+                config_file.truncate(0)
+            config_file.write(content)
         return (True, None)
     except Exception as e:
         return (False, f"Failed to write config: {e!s}")
@@ -1056,6 +1084,87 @@ def privileged_writer_available() -> bool:
     return _get_privileged_writer_path() is not None
 
 
+def _privileged_helper_unavailable_message() -> str:
+    """Return the existing installation guidance for the trusted helper."""
+    if _running_in_flatpak():
+        package_name = f"clamui-privileged-helper_{__version__}_all.deb"
+        return _(
+            "ClamUI privileged helper not installed on the host. "
+            "The Flatpak sandbox cannot access protected system ClamAV "
+            "configuration files directly. Download the matching "
+            "'{package_name}' from the ClamUI releases page. On Debian/Ubuntu, "
+            "install it on the host with 'sudo apt install ./{package_name}'. "
+            "Other distributions do not currently have a supported ClamUI "
+            "privileged-helper package. Do not install it with 'sudo flatpak run': "
+            "Flatpak cannot install this helper on the host."
+        ).format(package_name=package_name)
+    return _(
+        "ClamUI privileged helper not installed. Run "
+        "'sudo clamui install-privileged-helper' on this host to install it "
+        "and enable protected system ClamAV configuration access."
+    )
+
+
+def read_config_with_elevation(file_path: str) -> tuple[str | None, str | None]:
+    """Explicitly read one allowlisted system config through the trusted helper."""
+    try:
+        config_path = validate_destination(Path(file_path))
+    except (TypeError, ValueError, OSError) as error:
+        return (None, _("Protected configuration path is not allowed: {error}").format(error=error))
+
+    helper_path = _get_privileged_writer_path()
+    if helper_path is None:
+        return (None, _privileged_helper_unavailable_message())
+
+    command = [
+        "pkexec",
+        helper_path,
+        f"--protocol={PROTOCOL_VERSION}",
+        "--read-config",
+        str(config_path),
+    ]
+    if _running_in_flatpak():
+        command = ["flatpak-spawn", "--host", *command]
+
+    try:
+        result = subprocess.run(command, capture_output=True, timeout=10, check=False)
+    except FileNotFoundError:
+        return (None, _("pkexec not found - cannot authorize configuration read"))
+    except subprocess.TimeoutExpired:
+        return (None, _("Timed out reading protected configuration"))
+    except OSError as error:
+        return (None, _("Failed to authorize configuration read: {error}").format(error=error))
+
+    if result.returncode != 0:
+        if result.returncode == 126:
+            return (None, _("Authentication was canceled. Configuration was not loaded."))
+        if result.returncode == 127:
+            return (None, _privileged_helper_unavailable_message())
+        if result.returncode == 4:
+            return (
+                None,
+                _(
+                    "Privileged helper rejected the request: protocol mismatch. "
+                    "Update the 'clamui-privileged-helper' package on the host."
+                ),
+            )
+        stderr = result.stderr
+        detail = (
+            stderr.decode("utf-8", errors="replace").strip()
+            if isinstance(stderr, bytes)
+            else str(stderr).strip()
+        )
+        return (None, _("Failed to read protected configuration: {error}").format(error=detail))
+
+    stdout = result.stdout
+    if isinstance(stdout, str):
+        return (stdout, None)
+    try:
+        return (stdout.decode("utf-8"), None)
+    except UnicodeDecodeError:
+        return (stdout.decode("latin-1"), None)
+
+
 def _make_staging_dir() -> Path:
     """
     Create a per-invocation staging directory with mode 0o700.
@@ -1116,9 +1225,11 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
         configs: Configuration objects to write.
 
     Returns:
-        Tuple of ``(success, error_message)``:
+        Tuple of ``(success, error_or_message)``:
 
         - ``(True, None)`` on success.
+        - ``(True, warning_message)`` if configuration was applied but staging
+          cleanup failed.
         - ``(False, error_message)`` on failure.
     """
     if not configs:
@@ -1150,21 +1261,21 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
         helper_path = _get_privileged_writer_path()
         if helper_path is None:
             if _running_in_flatpak():
+                package_name = f"clamui-privileged-helper_{__version__}_all.deb"
                 return (
                     False,
                     _(
                         "ClamUI privileged helper not installed on the host. "
                         "The Flatpak sandbox cannot write system ClamAV "
-                        "configuration files such as /etc/clamav/*.conf "
-                        "directly. Download the matching "
-                        "'clamui-privileged-helper_<version>_all.deb' from "
-                        "the ClamUI releases page and install it on the host "
-                        "with 'sudo apt install "
-                        "./clamui-privileged-helper_<version>_all.deb' (use "
-                        "the same version as the Flatpak). 'sudo flatpak run "
-                        "... install-privileged-helper' is not supported: the "
-                        "sandbox /usr is not the host /usr."
-                    ),
+                        "configuration files such as /etc/clamav/*.conf directly. "
+                        "Download the matching '{package_name}' from the ClamUI "
+                        "releases page. On Debian/Ubuntu, install it on the host with "
+                        "'sudo apt install ./{package_name}'. Other distributions do not "
+                        "currently have a supported ClamUI privileged-helper "
+                        "package, so Flatpak system configuration saving is "
+                        "unavailable there. Do not install it with 'sudo flatpak "
+                        "run': Flatpak cannot install this helper on the host."
+                    ).format(package_name=package_name),
                 )
             return (
                 False,
@@ -1266,14 +1377,18 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
             try:
                 shutil.rmtree(staging_dir)
             except OSError as cleanup_error:
-                return (
-                    False,
-                    _(
-                        "Configuration was applied, but ClamUI could not remove the staged "
-                        "copy at {path}: {error}. Verify that this directory is removed."
-                    ).format(path=staging_dir, error=cleanup_error),
+                logger.warning(
+                    "Configuration applied but staging cleanup failed for %s: %s",
+                    staging_dir,
+                    cleanup_error,
                 )
-            staging_dir = None
+                warning = _(
+                    "Configuration was applied, but staging cleanup failed for "
+                    "{staging_dir}: {cleanup_error}"
+                ).format(staging_dir=staging_dir, cleanup_error=cleanup_error)
+                return (True, warning)
+            else:
+                staging_dir = None
             return (True, None)
 
         finally:

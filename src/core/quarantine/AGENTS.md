@@ -1,54 +1,69 @@
-# quarantine/ — SQLite Quarantine Subsystem
+# `src/core/quarantine/` — quarantine storage
 
-Self-contained subsystem: database + file handler + connection pool + manager facade.
+Read the parent [`../AGENTS.md`](../AGENTS.md) first.
 
-Parent: [`../AGENTS.md`](../AGENTS.md)
+This package separates the public `QuarantineManager` facade, SQLite metadata, secure
+file handling, and an optional SQLite connection pool.
 
-## Structure
+## Navigation
 
-```
-quarantine/
-├── manager.py         # High-level API — quarantine, restore, delete, list
-├── database.py        # SQLite metadata storage (threat name, hash, timestamps)
-├── file_handler.py    # Secure file operations (move, encrypt, restore)
-└── connection_pool.py # SQLite connection pooling (thread-safe)
-```
+| Task | Start here |
+| --- | --- |
+| Quarantine, restore, delete, list, and orphan cleanup | `manager.py` |
+| Entry schema, migrations, and metadata queries | `database.py` |
+| File copying, hashing, restore-path validation, and deletion | `file_handler.py` |
+| SQLite connection lifetime and concurrency | `connection_pool.py` |
 
-## Architecture
+## API and threading
 
-```
-QuarantineManager (facade)
-├── QuarantineDatabase  — metadata CRUD (SQLite)
-├── SecureFileHandler   — file move/restore with integrity checks
-└── ConnectionPool      — thread-safe SQLite connections
-```
+Use `QuarantineManager` for user-facing operations that coordinate a file with its
+metadata. Its synchronous `quarantine_file`, `restore_file`, and `delete_file`
+methods return `QuarantineResult`; inspect `status`, `entry`, and `error_message`
+rather than inventing a parallel failure convention.
 
-- **Manager** orchestrates database + file operations in single transactions
-- **Database** stores: file path, threat name, SHA-256 hash, quarantine timestamp, original permissions
-- **FileHandler** moves files to `~/.local/share/clamui/quarantine/` with restricted permissions
-- **ConnectionPool** manages SQLite connections across threads (avoids "database is locked")
+The manager supplies asynchronous wrappers for quarantine, restore, delete, listing,
+and cleanup work. They use a daemon thread and deliver their callback through
+`GLib.idle_add()`. Keep GTK work out of the worker; the callback is the main-loop
+handoff for the synchronous operation's result.
 
-## Key Patterns
+## Storage and file safety
 
-- **SHA-256 integrity**: Hash computed on quarantine, verified on restore
-- **Atomic operations**: File move + DB insert in same logical transaction
-- **Thread safety**: `threading.Lock()` in manager, connection pool for DB
-- **Async pair**: `quarantine_file_async()` / `restore_file_async()` / `delete_file_async()` / `get_all_entries_async()` with `GLib.idle_add()` callbacks
-- **Permissions**: Quarantined files get `0o400` (owner read-only), quarantine dir gets `0o700`, DB file (and WAL/SHM) `0o600`
-- **Outcome codes**: `QuarantineStatus` enum — `SUCCESS`, `FILE_NOT_FOUND`, `PERMISSION_DENIED`, `DISK_FULL`, `DATABASE_ERROR`, `ALREADY_QUARANTINED`, `ENTRY_NOT_FOUND`, `RESTORE_DESTINATION_EXISTS`, `INVALID_RESTORE_PATH`, `ERROR`
-- **ConnectionPool**: WAL mode, default `pool_size=5`
+- The default quarantine directory is
+  `$XDG_DATA_HOME/clamui/quarantine` (falling back to `~/.local/share`); an explicit
+  manager argument takes precedence, otherwise the `quarantine_directory` setting
+  can select a custom directory. The default database is
+  `$XDG_DATA_HOME/clamui/quarantine.db`.
+- Quarantine copies the source bytes into a uniquely named quarantine file and then
+  unlinks the source. It is not encryption. It records a SHA-256 hash and verifies
+  that hash before restoration.
+- Preserve the fd-based `O_NOFOLLOW` operations, regular-file checks, and
+  quarantine/restore-path validation. These protect against symlink and
+  time-of-check/time-of-use attacks.
+- The handler creates/sets the quarantine directory to `0o700` and quarantined
+  files to `0o400`. SQLite setup attempts to restrict the database, WAL, and SHM
+  files to `0o600`; inability to apply those database permissions is logged rather
+  than made an unconditional operation failure.
 
-## Where to Look
+## Consistency and database concurrency
 
-| Task | Module | Notes |
-|------|--------|-------|
-| Add quarantine metadata | `database.py` | Add column + migration |
-| Change file storage | `file_handler.py` | Preserve SHA-256 verification |
-| Add batch operation | `manager.py` | Use existing lock pattern |
-| Fix "database locked" | `connection_pool.py` | Check pool size, timeout |
+File operations and SQLite metadata cannot share one atomic transaction. If adding
+metadata after a successful quarantine move fails, the manager attempts to restore
+the file. If metadata removal after a restore or delete fails, the operation reports
+a database error and leaves an orphaned row for cleanup. Preserve these outcomes;
+do not describe the file and database changes as a single transaction.
 
-## Anti-Patterns
+`QuarantineDatabase` enables a pool of three connections by default; passing zero
+uses a fresh connection per operation. `ConnectionPool` itself defaults to five
+connections, uses a queue and lock, configures SQLite with WAL and
+`check_same_thread=False`, and commits on normal context-manager exit or rolls back
+on an exception. WAL improves reader/writer concurrency but does not eliminate every
+SQLite error, so retain timeout and error handling.
 
-- **Direct DB access**: Always go through `QuarantineManager` — it coordinates file + DB ops
-- **Skipping hash verify**: Always verify SHA-256 before restore (integrity check)
-- **Missing permissions**: Quarantined files MUST be `0o400`, dir MUST be `0o700`, DB file MUST be `0o600`
+## Change safety
+
+- Preserve SHA-256 verification before restore and preserve the original permissions
+  only after the restore path passes validation.
+- Keep `QuarantineEntry` permission masking and database migrations compatible with
+  existing rows.
+- Close the manager when its owning service shuts down so pooled connections are
+  released.

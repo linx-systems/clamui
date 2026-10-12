@@ -1353,7 +1353,7 @@ class TestNotificationManagerNoAppDefense:
         manager = NotificationManager(settings_manager=settings)
         # No set_application called
 
-        # Direct _send call should not raise — should return False.
+        # Direct _send call should not raise - should return False.
         # Use mock.patch to avoid Gio side-effects in case the guard ever
         # fails and we accidentally reach Gio.Notification.new().
         with mock.patch("src.core.notification_manager.Gio"):

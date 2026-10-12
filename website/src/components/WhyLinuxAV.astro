@@ -2,19 +2,19 @@
 const qas = [
   {
     q: "Do I even need antivirus on Linux?",
-    a: "Desktop Linux malware is rare — but files don't stop at your laptop. If you share documents with Windows or macOS users, run a mail server, use Wine, mount network shares, or pull third-party installers, you're a vector whether or not you're a victim. ClamUI catches infected files before you forward them on.",
+    a: "Desktop Linux malware is rare - but files don't stop at your laptop. If you share documents with Windows or macOS users, run a mail server, use Wine, mount network shares, or pull third-party installers, you're a vector whether or not you're a victim. ClamUI catches infected files before you forward them on.",
   },
   {
     q: "Isn't ClamAV just a server tool?",
-    a: "ClamAV is an excellent engine shipped with most distros, but it's historically been CLI-only. ClamUI is a proper desktop interface around it: progress, profiles, quarantine, scheduled scans, file-manager integration — with none of the engine hidden from you.",
+    a: "ClamAV is an excellent engine available from many distros, but it's historically been CLI-first. ClamUI is a desktop interface around it: progress, profiles, quarantine, scheduled scans, and file-manager integration - with none of the engine hidden from you.",
   },
   {
     q: "Does this talk to the cloud?",
-    a: "No, not unless you explicitly enable the VirusTotal integration. Scanning, quarantine, and audit all run locally. Updates go to the official ClamAV mirrors via freshclam — the same source distro packages use.",
+    a: "Scanning, quarantine, and audit run locally. freshclam contacts official ClamAV mirrors to update signatures, and VirusTotal requests occur only when you opt in to that integration.",
   },
   {
     q: "How does this differ from another GUI I tried?",
-    a: "Three things: a system security audit beyond virus scanning, a SHA-256-verified quarantine with a proper restore path, and native Adwaita rendering on both GNOME and Plasma. It's designed as a Linux desktop app first, not a Windows AV port.",
+    a: "Three things: a system security audit beyond virus scanning, a SHA-256-verified quarantine with a proper restore path, and a GTK4/libadwaita Linux desktop interface. It's designed as a Linux desktop app first, not a Windows AV port.",
   },
 ];
 ---
@@ -24,7 +24,7 @@ const qas = [
     <span class="eyebrow">Honest answers</span>
     <h2 class="mt-3 section-title">Why antivirus on Linux?</h2>
     <p class="mt-4 lede">
-      The most common comment about desktop AV on Linux is that it's unnecessary. That's half true — and the other half is where ClamUI earns its place.
+      The most common comment about desktop AV on Linux is that it's unnecessary. That's half true - and the other half is where ClamUI earns its place.
     </p>
   </div>
 

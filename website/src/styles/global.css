@@ -136,7 +136,7 @@
   }
 
   /* Screenshots already include their own GNOME headerbar, so we only add
-     a light rounded border and shadow — no duplicated chrome. */
+     a light rounded border and shadow - no duplicated chrome. */
   .shot {
     @apply block w-full h-auto rounded-xl overflow-hidden border border-white/10 shadow-window;
   }
@@ -170,7 +170,7 @@
     @apply text-clam-amber;
   }
   .term-dim {
-    @apply text-white/40;
+    @apply text-white/55;
   }
 
   .btn-primary {
@@ -224,7 +224,7 @@
    3. Same for copy buttons (they sit on top of the always-dark terminals).
 
    Avoids `:not()` with complex selectors (Selectors-4), which older engines
-   drop as invalid — that would silently kill the whole light theme.
+   drop as invalid - that would silently kill the whole light theme.
    ────────────────────────────────────────────────────────────────────────── */
 html.light body {
   color: #1a2634;
@@ -307,7 +307,7 @@ html.light [class~="bg-white/[0.015]"] { background-color: #ffffff; }
 html.light [class~="bg-white/[0.04]"],
 html.light [class~="bg-white/[0.06]"] { background-color: rgba(15, 23, 33, 0.05); }
 
-/* 2. Terminal re-establishment — higher specificity wins over the blanket
+/* 2. Terminal re-establishment - higher specificity wins over the blanket
    overrides above, keeping the terminal dark in both themes. */
 html.light .term[class~="text-white"],
 html.light .term [class~="text-white"] { color: rgb(255, 255, 255); }
@@ -343,7 +343,7 @@ html.light .term [class~="bg-white/[0.015]"] { background-color: rgba(255, 255, 
 html.light .term [class~="bg-white/[0.04]"],
 html.light .term [class~="bg-white/[0.06]"] { background-color: rgba(255, 255, 255, 0.06); }
 
-/* Hero gradient text was white-tinted — use a darker palette on light bg */
+/* Hero gradient text was white-tinted - use a darker palette on light bg */
 html.light .hero-gradient-text {
   background-image: linear-gradient(to right, #2d5c3a, #0f1721, #1f6aa4);
 }
@@ -362,7 +362,7 @@ html.light .card [class~="bg-clam-forest/15"] {
   color: #2d5c3a;
 }
 
-/* Primary button — slightly deeper for AA contrast on light bg */
+/* Primary button - slightly deeper for AA contrast on light bg */
 html.light .btn-primary {
   background-color: #2d5c3a;
 }
@@ -370,7 +370,7 @@ html.light .btn-primary:hover {
   background-color: #224a2d;
 }
 
-/* 3. Copy buttons sit on top of the (always-dark) terminal — keep them
+/* 3. Copy buttons sit on top of the (always-dark) terminal - keep them
    light-on-dark in both modes. `[data-copy]` selectors beat the blanket
    `[class~="text-white/70"]` selectors on specificity. */
 html.light [data-copy] {

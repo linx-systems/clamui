@@ -757,12 +757,13 @@ class PreferencesPageMixin:
         folder_icon.set_margin_start(6)
         path_row.add_prefix(folder_icon)
 
-        # Add "Open folder" button as suffix
+        # Add an icon-only folder action so the selected path remains legible.
         open_folder_button = Gtk.Button()
-        open_folder_button.set_label(_("Open Folder"))
+        open_folder_button.set_icon_name(resolve_icon_name("folder-open-symbolic"))
         open_folder_button.set_valign(Gtk.Align.CENTER)
         open_folder_button.add_css_class("flat")
         open_folder_button.set_tooltip_text(_("Open containing folder in file manager"))
+        open_folder_button.update_property([Gtk.AccessibleProperty.LABEL], [_("Open Folder")])
 
         def _open_current_folder(_button):
             # Resolve from the row so Detect/Browse updates are respected.
@@ -783,20 +784,22 @@ class PreferencesPageMixin:
         # Optionally add Detect button
         if on_detect is not None:
             detect_button = Gtk.Button()
-            detect_button.set_label(_("Detect"))
+            detect_button.set_icon_name(resolve_icon_name("folder-saved-search-symbolic"))
             detect_button.set_valign(Gtk.Align.CENTER)
             detect_button.add_css_class("flat")
             detect_button.set_tooltip_text(_("Auto-detect configuration file location"))
+            detect_button.update_property([Gtk.AccessibleProperty.LABEL], [_("Detect")])
             detect_button.connect("clicked", lambda btn: on_detect())
             path_row.add_suffix(detect_button)
 
         # Optionally add Browse button
         if on_browse is not None:
             browse_button = Gtk.Button()
-            browse_button.set_label(_("Browse"))
+            browse_button.set_icon_name(resolve_icon_name("document-open-symbolic"))
             browse_button.set_valign(Gtk.Align.CENTER)
             browse_button.add_css_class("flat")
             browse_button.set_tooltip_text(_("Browse for configuration file"))
+            browse_button.update_property([Gtk.AccessibleProperty.LABEL], [_("Browse")])
             browse_button.connect("clicked", lambda btn: on_browse())
             path_row.add_suffix(browse_button)
 

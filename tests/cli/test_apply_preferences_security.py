@@ -10,23 +10,25 @@ can be exercised end-to-end without needing root.
 Coverage focus:
 
 - ``PKEXEC_UID`` env var must be present and parse to a valid UID.
-- The first positional argument must be ``--protocol=3``; anything else
+- The first positional argument must be ``--protocol=4``; anything else
   is rejected so an outdated caller cannot silently invoke a hardened helper
   with the old src/dst-only positional layout.
 - A staged source outside the per-invocation staging root is rejected
   *before* any destination is written.
 - A staged source that is a symlink (e.g. to ``/etc/shadow``) is refused
   by the ``O_NOFOLLOW`` open in the helper.
-- On the happy path the destination has mode 0o644 and matches the
-  staged content byte-for-byte.
+- On the happy path a newly created destination retains the restrictive
+  ``0o600`` mode from ``mkstemp`` and matches the staged content byte-for-byte.
 - Atomicity: if pair #2 fails validation, pair #1's destination must
   not be left in an inconsistent or half-written state.
 """
 
 from __future__ import annotations
 
+import io
 import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -163,9 +165,9 @@ class TestSourceMustNotBeSymlink:
 
 
 class TestHappyPath:
-    """A valid src/dst pair installs the destination with mode 0o644."""
+    """A valid src/dst pair installs a restrictive new configuration."""
 
-    def test_single_pair_installed_with_mode_0o644(self, monkeypatch, tmp_path):
+    def test_single_pair_installed_with_mode_0o600(self, monkeypatch, tmp_path):
         _set_pkexec_env(monkeypatch)
         staging = _make_staging(tmp_path)
         src = _stage_file(staging, "clamd.conf", "LogVerbose yes\n")
@@ -184,7 +186,43 @@ class TestHappyPath:
 
         assert exit_code == 0
         assert dest.read_text(encoding="utf-8") == "LogVerbose yes\n"
-        assert dest.stat().st_mode & 0o777 == 0o644
+        assert dest.stat().st_mode & 0o777 == 0o600
+
+    @pytest.mark.parametrize("mode", [0o600, 0o640])
+    def test_read_edit_save_preserves_existing_confidential_metadata(
+        self, monkeypatch, tmp_path, mode
+    ):
+        _set_pkexec_env(monkeypatch)
+        staging = _make_staging(tmp_path)
+        dest_dir = _make_allowed_dest_dir(tmp_path, "etc_clamav")
+        dest = dest_dir / "freshclam.conf"
+        dest.write_text("HTTPProxyPassword secret\nChecks 24\n", encoding="utf-8")
+        os.chmod(dest, mode)
+        original_stat = dest.stat()
+        src = _stage_file(staging, "freshclam.conf", "HTTPProxyPassword secret\nChecks 12\n")
+
+        _patch_allowlist_to_tmp(monkeypatch, dest_dir)
+        monkeypatch.setattr(apply_preferences, "_resolve_staging_root", lambda _uid: staging)
+        monkeypatch.setattr(
+            apply_preferences,
+            "_restart_units_for_destinations",
+            lambda _dests: None,
+        )
+        stdout = type("_Stdout", (), {"buffer": io.BytesIO()})()
+
+        with mock.patch.object(apply_preferences.sys, "stdout", stdout):
+            assert apply_preferences.main([PROTOCOL_TOKEN, "--read-config", str(dest)]) == 0
+        assert stdout.buffer.getvalue() == b"HTTPProxyPassword secret\nChecks 24\n"
+
+        assert apply_preferences.main([PROTOCOL_TOKEN, str(src), str(dest)]) == 0
+
+        replacement_stat = dest.stat()
+        assert dest.read_text(encoding="utf-8") == "HTTPProxyPassword secret\nChecks 12\n"
+        assert replacement_stat.st_mode & 0o777 == mode
+        assert (replacement_stat.st_uid, replacement_stat.st_gid) == (
+            original_stat.st_uid,
+            original_stat.st_gid,
+        )
 
     def test_parent_symlink_swap_uses_preflighted_canonical_destination(
         self, monkeypatch, tmp_path

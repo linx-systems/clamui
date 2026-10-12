@@ -290,6 +290,101 @@ class TestClamUIAppLifecycle:
         assert hasattr(app, "do_startup")
         assert callable(app.do_startup)
 
+    def test_start_minimized_waits_for_registered_tray_host(self, app):
+        """A spawned but unregistered tray must not hide the only window."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._tray_indicator.is_available = False
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+
+        app._on_tray_availability_changed(True)
+        window.hide_window.assert_called_once()
+        app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=False)
+
+    def test_start_minimized_does_not_hide_requested_scan(self, app):
+        """Opening scan targets must remain visible even when background startup is enabled."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+        app._initial_scan_paths = ["/tmp/requested-file"]
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch.object(app, "_process_initial_scan_paths"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+        app._tray_indicator.update_window_menu_label.assert_not_called()
+
+    def test_late_tray_registration_does_not_hide_after_a_later_activation(self, app):
+        """A later user activation cancels the pending startup hide."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = mock.MagicMock()
+        app._tray_indicator.is_available = False
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+            app.do_activate()
+
+        app._on_tray_availability_changed(True)
+        window.hide_window.assert_not_called()
+
+    def test_tray_disconnect_restores_hidden_window(self, app):
+        """Losing the registered tray host must not leave a headless app."""
+        window = mock.MagicMock()
+        window.is_visible.return_value = False
+        app.props = SimpleNamespace(active_window=window)
+        app._tray_indicator = mock.MagicMock()
+        app._start_minimized_pending = False
+
+        app._on_tray_availability_changed(False)
+
+        window.show_window.assert_called_once()
+        app._tray_indicator.update_window_menu_label.assert_called_once_with(visible=True)
+
+    def test_start_minimized_keeps_window_visible_without_tray(self, app):
+        """The window remains recoverable when no tray integration is available."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._scan_view = mock.MagicMock()
+        app._tray_indicator = None
+        app._settings_manager = mock.MagicMock()
+        app._settings_manager.get.return_value = True
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread"),
+        ):
+            app.do_activate()
+
+        window.present.assert_called_once()
+        window.hide_window.assert_not_called()
+
     def test_on_quit_handler_exists(self, app):
         """Test that the _on_quit handler method exists."""
         assert hasattr(app, "_on_quit")
@@ -454,6 +549,150 @@ class TestClamUIAppLifecycle:
         assert app._log_privacy_started_at is None
         assert app._log_privacy_banner_shown_at is None
         mock_window.set_activity_status.assert_called_once_with(None)
+
+
+class TestClamUIAppPrivilegedHelperPrompt:
+    """Tests for the non-blocking one-per-process startup helper prompt."""
+
+    def test_activation_queues_one_probe_after_presenting_window(self, app):
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._first_activation = False
+
+        with (
+            mock.patch.object(app, "_ensure_log_privacy_migration_monitor"),
+            mock.patch("src.app.threading.Thread") as thread_class,
+        ):
+            app.do_activate()
+            app.do_activate()
+
+        window.present.assert_called()
+        thread_class.assert_called_once()
+        target = thread_class.call_args.kwargs["target"]
+        assert target.__self__ is app
+        assert target.__func__ is app._check_privileged_helper_status_background.__func__
+        assert thread_class.call_args.kwargs["args"] == (window,)
+        assert thread_class.call_args.kwargs["daemon"] is True
+
+    def test_installable_status_invokes_presenter_once(self, app):
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = ""
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLABLE, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            assert app._on_privileged_helper_status_checked(window, status) is False
+            assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_called_once_with(
+            window,
+            on_dismissed=app._on_privileged_helper_prompt_dismissed,
+        )
+
+    def test_matching_skip_version_suppresses_installable_prompt(self, app):
+        from src import __version__
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = __version__
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLABLE, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_not_called()
+        assert app._privileged_helper_prompt_presented is False
+
+    def test_prior_version_skip_marker_allows_installable_prompt(self, app):
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = "previous-version"
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLABLE, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_called_once_with(
+            window,
+            on_dismissed=app._on_privileged_helper_prompt_dismissed,
+        )
+
+    def test_dismissal_persists_current_version(self, app):
+        from src import __version__
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = ""
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLABLE, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            app._on_privileged_helper_status_checked(window, status)
+            present_dialog.call_args.kwargs["on_dismissed"]()
+
+        settings_manager.set.assert_called_once_with(
+            "privileged_helper_prompt_skipped_version",
+            __version__,
+        )
+
+    def test_installed_status_does_not_prompt_or_write_empty_skip_marker(self, app):
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = ""
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLED, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_not_called()
+        settings_manager.set.assert_not_called()
+
+    def test_installed_status_clears_stale_skip_marker(self, app):
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = "previous-version"
+        app._settings_manager = settings_manager
+        status = PrivilegedHelperStatus(PrivilegedHelperState.INSTALLED, "helper.deb", "1.0")
+
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_not_called()
+        settings_manager.set.assert_called_once_with(
+            "privileged_helper_prompt_skipped_version",
+            "",
+        )
+
+    def test_non_installable_status_does_not_prompt(self, app):
+        from src.core.privileged_helper import PrivilegedHelperState, PrivilegedHelperStatus
+
+        window = mock.MagicMock()
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = ""
+        app._settings_manager = settings_manager
+        with mock.patch("src.app.present_privileged_helper_dialog") as present_dialog:
+            for state in (
+                PrivilegedHelperState.UNSUPPORTED,
+                PrivilegedHelperState.NOT_APPLICABLE,
+            ):
+                status = PrivilegedHelperStatus(state, "helper.deb", "1.0")
+                assert app._on_privileged_helper_status_checked(window, status) is False
+
+        present_dialog.assert_not_called()
 
 
 class TestClamUIAppQuickScanProfile:
@@ -1175,7 +1414,7 @@ class TestAppLifecycleDatabaseDir:
 
     def test_ensure_db_dir_does_not_raise_when_fallback_also_fails(self, app):
         """If both the XDG dir and the /var/lib/clamav fallback fail, startup must
-        not crash — ensure_clamav_database_dir should swallow the fallback OSError.
+        not crash - ensure_clamav_database_dir should swallow the fallback OSError.
         """
         from pathlib import Path
 
@@ -1268,6 +1507,48 @@ class TestClamUIAppVirusTotalScan:
         assert captured.get("parent") is app.props.active_window
         assert captured.get("presented") is True
 
+    def test_virustotal_request_uses_stored_key_without_setup_or_clamav(self, app):
+        """A CLI VirusTotal request with a key goes directly to VirusTotal."""
+        app._settings_manager = mock.MagicMock()
+        app._trigger_virustotal_scan = mock.MagicMock()
+        app._show_virustotal_setup_dialog = mock.MagicMock()
+
+        with mock.patch("src.core.keyring_manager.get_api_key", return_value="stored-key"):
+            app._handle_virustotal_scan_request("/tmp/sample")
+
+        app._trigger_virustotal_scan.assert_called_once_with("/tmp/sample", "stored-key")
+        app._show_virustotal_setup_dialog.assert_not_called()
+
+    def test_virustotal_setup_uses_callback_only_after_explicit_key_save(self, app):
+        """Cancelling setup has no callback, upload, or ClamAV fallback path."""
+        window = mock.MagicMock()
+        app.props = SimpleNamespace(active_window=window)
+        app._settings_manager = mock.MagicMock()
+        app._trigger_virustotal_scan = mock.MagicMock()
+        captured = {}
+
+        class FakeDialog:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+
+            def set_transient_for(self, parent):
+                captured["parent"] = parent
+
+            def present(self):
+                captured["presented"] = True
+
+        with mock.patch("src.ui.virustotal_setup_dialog.VirusTotalSetupDialog", FakeDialog):
+            app._show_virustotal_setup_dialog("/tmp/sample")
+
+        assert captured["settings_manager"] is app._settings_manager
+        assert captured["parent"] is window
+        assert captured["presented"] is True
+        assert "on_open_website" not in captured
+        app._trigger_virustotal_scan.assert_not_called()
+
+        captured["on_key_saved"]("saved-key")
+        app._trigger_virustotal_scan.assert_called_once_with("/tmp/sample", "saved-key")
+
 
 class TestClamUIAppInitialScanPaths:
     """Regression tests for forwarding CLI-provided scan targets to the UI."""
@@ -1318,12 +1599,12 @@ class TestClamUIAppInitialScanPaths:
         app._scan_view = mock_scan_view
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf"]
         app._initial_use_virustotal = True
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
 
         app._process_initial_scan_paths()
 
         mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
-        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         mock_scan_view._replace_selected_paths.assert_not_called()
         mock_scan_view._start_scan.assert_not_called()
 
@@ -1341,7 +1622,7 @@ class TestClamUIAppInitialScanPaths:
 
     def test_second_invocation_while_scanning_is_ignored_with_toast(self, app, mock_gtk_modules):
         """A second CLI/file-manager invocation during an active scan must not
-        touch the selection (the worker thread iterates it) — the request is
+        touch the selection (the worker thread iterates it) - the request is
         dropped and the user is told via a toast.
 
         Regression: _replace_selected_paths() cleared and repopulated the same
@@ -1409,14 +1690,14 @@ class TestClamUIAppInitialScanPaths:
         %F) must tell the user that only the first file is scanned."""
         mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
         app._initial_scan_paths = ["/tmp/a.pdf", "/tmp/b.pdf", "/tmp/c.pdf"]
         app._initial_use_virustotal = True
 
         app._process_initial_scan_paths()
 
         mock_scan_view._set_selected_path.assert_called_once_with("/tmp/a.pdf")
-        app._show_virustotal_setup_dialog.assert_called_once_with("/tmp/a.pdf")
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         app.props.active_window.add_toast.assert_called_once()
         toast_message = mock_gtk_modules["Adw"].Toast.new.call_args[0][0]
         assert "VirusTotal" in toast_message
@@ -1426,10 +1707,11 @@ class TestClamUIAppInitialScanPaths:
         """A single-file VirusTotal request needs no 'selections ignored' toast."""
         mock_scan_view = self._make_idle_scan_view()
         app._scan_view = mock_scan_view
-        app._show_virustotal_setup_dialog = mock.MagicMock()
+        app._handle_virustotal_scan_request = mock.MagicMock()
         app._initial_scan_paths = ["/tmp/a.pdf"]
         app._initial_use_virustotal = True
 
         app._process_initial_scan_paths()
 
+        app._handle_virustotal_scan_request.assert_called_once_with("/tmp/a.pdf")
         app.props.active_window.add_toast.assert_not_called()

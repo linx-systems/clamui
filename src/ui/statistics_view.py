@@ -1157,7 +1157,7 @@ class StatisticsView(Gtk.Box):
 
         if timeframe == self._current_timeframe:
             # Re-activation of the current selection (initial setup or the
-            # radio-guard above) — nothing new to load.
+            # radio-guard above) - nothing new to load.
             return
 
         # Update current timeframe and reload

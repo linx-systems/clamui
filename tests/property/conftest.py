@@ -2,9 +2,9 @@
 Hypothesis profile registration for ClamUI property tests.
 
 Profiles:
-    dev   — fast local iteration (default)
-    ci    — more examples, tolerant of slow targets
-    debug — minimal examples with verbose shrinking output
+    dev   - fast local iteration (default)
+    ci    - more examples, tolerant of slow targets
+    debug - minimal examples with verbose shrinking output
 
 Select via HYPOTHESIS_PROFILE env var.
 """

@@ -45,6 +45,7 @@ class TrayIndicator:
         )
         self._manager.set_window_toggle_callback(on_toggle=self._app._on_tray_window_toggle)
         self._manager.set_profile_select_callback(on_select=self._app._on_tray_profile_select)
+        self._manager.set_availability_callback(self._app._on_tray_availability_changed)
 
         if self._manager.start():
             logger.info("Tray indicator subprocess started")
@@ -52,6 +53,11 @@ class TrayIndicator:
             logger.warning("Failed to start tray indicator subprocess")
             self._manager = None
             raise RuntimeError("Tray subprocess failed to start")
+
+    @property
+    def is_available(self) -> bool:
+        """Whether a desktop tray host has registered this indicator."""
+        return self._manager is not None and self._manager.is_available
 
     @staticmethod
     def _normalize_profile_item(profile: object) -> dict[str, object] | None:

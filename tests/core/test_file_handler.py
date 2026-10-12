@@ -1159,7 +1159,7 @@ class TestUnlinkat:
         On Linux, O_NOFOLLOW|O_DIRECTORY applied to a symlink-to-directory
         raises ENOTDIR (the kernel refuses to treat the un-followed symlink
         as a directory) rather than ELOOP.  Both indicate the symlink was NOT
-        followed — either errno is acceptable here.
+        followed - either errno is acceptable here.
         """
         real_dir = tmp_path / "real"
         real_dir.mkdir()
@@ -1424,7 +1424,7 @@ class TestListQuarantinedFilesSecurity:
         real_file = quarantine_dir / "legit.txt"
         real_file.write_text("data")
 
-        # Plant a dead symlink (points to nothing) — lstat sees S_ISLNK, skipped
+        # Plant a dead symlink (points to nothing) - lstat sees S_ISLNK, skipped
         dead_link = quarantine_dir / "dead_link"
         dead_link.symlink_to(quarantine_dir / "nonexistent_target")
         try:

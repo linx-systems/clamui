@@ -564,6 +564,41 @@ class TestConfigLoading:
                         window._load_configs_io()
                         assert window._freshclam_load_error == "Parse error"
 
+    def test_load_configs_records_each_config_result_independently(
+        self,
+        mock_gi_modules,
+        mock_path_exists,
+        mock_scheduler,
+        mock_page_modules,
+    ):
+        """A clamd parse failure must not replace a loaded freshclam config."""
+        from src.ui.preferences.window import PreferencesWindow
+
+        freshclam_config = mock.MagicMock()
+        freshclam_config.values = {"DatabaseMirror": "database.example"}
+
+        with mock.patch(
+            "src.ui.preferences.window.parse_config",
+            side_effect=[(freshclam_config, None), (None, "Clamd parse error")],
+        ) as mock_parse:
+            with mock.patch.object(PreferencesWindow, "_setup_ui"):
+                with mock.patch("src.ui.preferences.window.threading.Thread"):
+                    with mock.patch.object(PreferencesWindow, "_populate_scheduled_fields"):
+                        window = PreferencesWindow()
+                        window._clamd_available = True
+                        window._load_configs_io()
+
+        assert window._freshclam_config is freshclam_config
+        assert window._freshclam_load_error is None
+        assert window._clamd_config is None
+        assert window._clamd_load_error == "Clamd parse error"
+        mock_parse.assert_has_calls(
+            [
+                mock.call(window._freshclam_conf_path),
+                mock.call(window._clamd_conf_path),
+            ]
+        )
+
 
 class TestFlatpakSupport:
     """Tests for Flatpak-specific functionality."""
@@ -1268,3 +1303,41 @@ class TestLazyPageCreation:
         # Should not raise
         window._ensure_page_created("nonexistent_page")
         assert "nonexistent_page" not in window._created_pages
+
+
+class TestAuthorizedConfigRead:
+    """Tests the explicit asynchronous privileged-read action."""
+
+    def test_request_reads_selected_freshclam_config_in_worker(self, mock_gi_modules):
+        from src.ui.preferences.window import PreferencesWindow
+
+        window = mock.MagicMock()
+        window._freshclam_conf_path = "/etc/freshclam.conf"
+        with mock.patch("src.ui.preferences.window.threading.Thread") as thread:
+            PreferencesWindow._request_config_authorized_read(window, "freshclam")
+
+        thread.assert_called_once_with(
+            target=window._authorized_config_read_background,
+            args=("freshclam", "/etc/freshclam.conf"),
+            daemon=True,
+        )
+
+    def test_worker_uses_explicit_authorization(self, mock_gi_modules):
+        from src.ui.preferences.window import PreferencesWindow
+
+        window = mock.MagicMock()
+        config = mock.MagicMock()
+        with (
+            mock.patch(
+                "src.ui.preferences.window.parse_config", return_value=(config, None)
+            ) as parse,
+            mock.patch("src.ui.preferences.window.GLib.idle_add") as idle_add,
+        ):
+            PreferencesWindow._authorized_config_read_background(
+                window, "clamd", "/etc/clamd.d/scan.conf"
+            )
+
+        parse.assert_called_once_with("/etc/clamd.d/scan.conf", authorize_read=True)
+        idle_add.assert_called_once_with(
+            window._apply_authorized_config_read, "clamd", config, None
+        )

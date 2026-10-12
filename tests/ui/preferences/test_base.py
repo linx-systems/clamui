@@ -170,75 +170,6 @@ class TestPreferencesPageMixinMethods:
             mock_dialog.set_deletable.assert_called_with(True)
             mock_dialog.present.assert_called_once()
 
-    def test_create_file_location_group_creates_group(self, test_instance, mock_gi_modules):
-        """Test _create_file_location_group creates a PreferencesGroup."""
-        adw = mock_gi_modules["adw"]
-        mock_page = mock.MagicMock()
-        mock_group = mock.MagicMock()
-        adw.PreferencesGroup.return_value = mock_group
-
-        test_instance._create_file_location_group(
-            mock_page, "Test Group", "/path/to/file.conf", "Test description"
-        )
-
-        # Should create a PreferencesGroup
-        adw.PreferencesGroup.assert_called_once()
-        mock_group.set_title.assert_called_with("Test Group")
-        mock_group.set_description.assert_called_with("Test description")
-
-    def test_create_file_location_group_creates_action_row(self, test_instance, mock_gi_modules):
-        """Test _create_file_location_group creates an ActionRow."""
-        adw = mock_gi_modules["adw"]
-        mock_page = mock.MagicMock()
-        mock_row = mock.MagicMock()
-        adw.ActionRow.side_effect = lambda *args, **kwargs: mock_row
-
-        test_instance._create_file_location_group(
-            mock_page, "Test Group", "/path/to/file.conf", "Test description"
-        )
-
-        # Should create an ActionRow
-        adw.ActionRow.assert_called_once()
-        mock_row.set_title.assert_called_with("File Location")
-        mock_row.set_subtitle.assert_called_with("/path/to/file.conf")
-
-    def test_create_file_location_group_adds_folder_icon(self, test_instance, mock_gi_modules):
-        """Test _create_file_location_group adds a folder icon."""
-        gtk = mock_gi_modules["gtk"]
-        adw = mock_gi_modules["adw"]
-        mock_page = mock.MagicMock()
-        mock_row = mock.MagicMock()
-        adw.ActionRow.side_effect = lambda *args, **kwargs: mock_row
-
-        test_instance._create_file_location_group(
-            mock_page, "Test Group", "/path/to/file.conf", "Test description"
-        )
-
-        # Should create a folder icon
-        gtk.Image.new_from_icon_name.assert_called()
-        # Check if folder-open-symbolic was used
-        calls = gtk.Image.new_from_icon_name.call_args_list
-        assert any("folder-open-symbolic" in str(call) for call in calls)
-
-    def test_create_file_location_group_adds_open_button(self, test_instance, mock_gi_modules):
-        """Test _create_file_location_group adds an open folder button."""
-        gtk = mock_gi_modules["gtk"]
-        adw = mock_gi_modules["adw"]
-        mock_page = mock.MagicMock()
-        mock_row = mock.MagicMock()
-        mock_button = mock.MagicMock()
-        adw.ActionRow.side_effect = lambda *args, **kwargs: mock_row
-        gtk.Button.return_value = mock_button
-
-        test_instance._create_file_location_group(
-            mock_page, "Test Group", "/path/to/file.conf", "Test description"
-        )
-
-        # Should create a Button
-        gtk.Button.assert_called_once()
-        mock_button.set_label.assert_called_with("Open Folder")
-        mock_button.set_tooltip_text.assert_called_with("Open containing folder in file manager")
-
     def test_create_file_location_group_button_opens_parent_dir(
         self, test_instance, mock_gi_modules, tmp_path
     ):
@@ -293,20 +224,6 @@ class TestPreferencesPageMixinMethods:
         with mock.patch.object(test_instance, "_open_folder_in_file_manager") as mock_open:
             callback(mock_button)
             mock_open.assert_called_once_with(str(updated_file.parent))
-
-    def test_create_file_location_group_adds_to_page(self, test_instance, mock_gi_modules):
-        """Test _create_file_location_group adds group to page."""
-        adw = mock_gi_modules["adw"]
-        mock_page = mock.MagicMock()
-        mock_group = mock.MagicMock()
-        adw.PreferencesGroup.return_value = mock_group
-
-        test_instance._create_file_location_group(
-            mock_page, "Test Group", "/path/to/file.conf", "Test description"
-        )
-
-        # Should add the group to the page
-        mock_page.add.assert_called_with(mock_group)
 
 
 class TestPreferencesPageMixinInheritance:

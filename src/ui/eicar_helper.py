@@ -4,7 +4,7 @@
 The EICAR test button writes the standard antivirus test pattern to a
 temporary file, scans it, and is supposed to clean it up on completion.
 On force-quit / crash / cancel paths the cleanup may be skipped, leaving
-the EICAR file in ``~/.cache/clamui/`` or ``/tmp/`` — the next normal
+the EICAR file in ``~/.cache/clamui/`` or ``/tmp/`` - the next normal
 scan of that directory then flags it as a real threat.
 
 This module factors the create / cleanup logic out of the GTK-heavy
@@ -24,7 +24,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # EICAR test string - industry-standard antivirus test pattern.
-# This is NOT malware — it's a safe, non-functional string recognised by
+# This is NOT malware - it's a safe, non-functional string recognised by
 # every AV engine for self-test purposes.
 EICAR_TEST_STRING = r"X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
 
@@ -56,7 +56,7 @@ def cleanup_eicar_path(path: str | None) -> None:
     """Best-effort removal of an EICAR temp file.
 
     Safe to call repeatedly, with empty strings, ``None``, or paths that
-    no longer exist. Errors are logged at debug level and swallowed —
+    no longer exist. Errors are logged at debug level and swallowed -
     cleanup must never raise.
     """
     if not path:
@@ -64,14 +64,14 @@ def cleanup_eicar_path(path: str | None) -> None:
     try:
         Path(path).unlink(missing_ok=True)
     except OSError as e:
-        # Permissions, busy file, etc. — never propagate from cleanup.
+        # Permissions, busy file, etc. - never propagate from cleanup.
         logger.debug("Failed to clean up EICAR file %r: %s", path, e)
 
 
 def register_eicar_atexit_cleanup(path: str | None):
     """Register an ``atexit`` handler to remove the EICAR file on exit.
 
-    Returns a zero-arg callable that unregisters the handler — call it
+    Returns a zero-arg callable that unregisters the handler - call it
     after a successful in-process cleanup to avoid a double-unlink on
     interpreter shutdown. Returns a no-op callable when ``path`` is
     falsy.

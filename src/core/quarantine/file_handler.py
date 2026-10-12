@@ -87,7 +87,7 @@ def _write_all(fd: int, block: bytes) -> None:
 
     os.write() may write fewer bytes than requested (e.g. when the disk
     fills mid-write). Silently accepting a short write would produce a
-    truncated file whose recorded SHA-256 never verifies — after the source
+    truncated file whose recorded SHA-256 never verifies - after the source
     is unlinked, the content would be unrecoverable.
     """
     view = memoryview(block)
@@ -545,7 +545,7 @@ class SecureFileHandler:
         source_path_obj = Path(source_path)
 
         with self._lock:
-            # Open source with O_NOFOLLOW — atomically rejects symlinks without a separate
+            # Open source with O_NOFOLLOW - atomically rejects symlinks without a separate
             # is_symlink() check, eliminating the TOCTOU window between check and open.
 
             try:
@@ -586,7 +586,7 @@ class SecureFileHandler:
             file_hash: str | None = None
 
             try:
-                # fstat through the open fd — no TOCTOU between open and stat.
+                # fstat through the open fd - no TOCTOU between open and stat.
                 try:
                     st = os.fstat(src_fd)
                 except OSError as e:
@@ -612,7 +612,7 @@ class SecureFileHandler:
                 file_size = st.st_size
                 original_permissions = st.st_mode & 0o777
 
-                # Ensure directory exists first — disk_usage() requires the path to exist
+                # Ensure directory exists first - disk_usage() requires the path to exist
                 # and must measure the correct filesystem.
                 dir_ok, dir_error = self._ensure_quarantine_dir()
                 if not dir_ok:
@@ -639,7 +639,7 @@ class SecureFileHandler:
                 quarantine_filename = self._generate_quarantine_filename(source_path_obj)
                 destination = self._quarantine_dir / quarantine_filename
 
-                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW — atomically creates and
+                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW - atomically creates and
                 # rejects any pre-existing path, eliminating the exists()-then-create TOCTOU.
                 dst_fd: int | None = None
                 dst_created = False
@@ -658,7 +658,7 @@ class SecureFileHandler:
                         sha256_hash.update(block)
                         _write_all(dst_fd, block)
                     os.fsync(dst_fd)
-                    # fchmod via fd before close — no path-based TOCTOU window, and
+                    # fchmod via fd before close - no path-based TOCTOU window, and
                     # bypasses umask so permissions are applied exactly as specified.
                     os.fchmod(dst_fd, self.QUARANTINE_FILE_PERMISSIONS)
                     os.close(dst_fd)
@@ -720,7 +720,7 @@ class SecureFileHandler:
                             error_message=f"Source file was replaced during quarantine; aborting: {source_path}",
                         )
                 except OSError:
-                    pass  # lstat failure: proceed — _unlinkat will raise ENOENT if gone
+                    pass  # lstat failure: proceed - _unlinkat will raise ENOENT if gone
 
                 # Unlink source while src_fd is still open (inode pinned) and via
                 # _unlinkat() so the name is resolved relative to an already-opened
@@ -817,7 +817,7 @@ class SecureFileHandler:
                     error_message=validation_error,
                 )
 
-            # Open quarantine file with O_NOFOLLOW — rejects symlinks atomically, gives a
+            # Open quarantine file with O_NOFOLLOW - rejects symlinks atomically, gives a
             # safe fd; eliminates exists()+is_file()+stat()+hash-open TOCTOU windows.
             try:
                 src_fd = os.open(quarantine_path_obj, os.O_RDONLY | os.O_NOFOLLOW)
@@ -903,7 +903,7 @@ class SecureFileHandler:
                         error_message=f"Error creating destination directory: {e}",
                     )
 
-                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW — atomically creates and
+                # Open destination with O_CREAT|O_EXCL|O_NOFOLLOW - atomically creates and
                 # rejects pre-existing paths (files and symlinks), eliminating both the
                 # exists()-then-write and is_symlink()-then-write TOCTOU windows.
                 dst_fd: int | None = None
@@ -923,7 +923,7 @@ class SecureFileHandler:
                         sha256_hash.update(block)
                         _write_all(dst_fd, block)
                     os.fsync(dst_fd)
-                    # fchmod via fd — no path-based window, bypasses umask.
+                    # fchmod via fd - no path-based window, bypasses umask.
                     os.fchmod(dst_fd, masked_permissions)
                     os.close(dst_fd)
                     dst_fd = None
@@ -1006,7 +1006,7 @@ class SecureFileHandler:
 
         try:
             for entry in self._quarantine_dir.iterdir():
-                # lstat() in one call — avoids the is_file()+stat() TOCTOU window and
+                # lstat() in one call - avoids the is_file()+stat() TOCTOU window and
                 # never follows symlinks, so stale/malicious symlinks are skipped cleanly.
                 try:
                     st = os.lstat(entry)
@@ -1063,7 +1063,7 @@ class SecureFileHandler:
                     error_message=validation_error,
                 )
 
-            # Open with O_NOFOLLOW — confirms the target is a real file (not a symlink) and
+            # Open with O_NOFOLLOW - confirms the target is a real file (not a symlink) and
             # captures size via fstat, eliminating the exists()+stat() TOCTOU window.
             try:
                 fd = os.open(quarantine_path_obj, os.O_RDONLY | os.O_NOFOLLOW)
@@ -1098,13 +1098,13 @@ class SecureFileHandler:
                 )
 
             # Keep fd open through the unlink so the inode is pinned during the
-            # operation — same rationale as move_to_quarantine.
+            # operation - same rationale as move_to_quarantine.
             file_size = 0
             try:
                 try:
                     st = os.fstat(fd)
                     file_size = st.st_size
-                    # fchmod via fd — no path-based window between stat and chmod.
+                    # fchmod via fd - no path-based window between stat and chmod.
                     with contextlib.suppress(OSError):
                         os.fchmod(fd, 0o000)
                 except OSError:

@@ -436,6 +436,19 @@ class TestThreatRow:
         assert row is not None
         _clear_src_modules()
 
+    def test_row_handles_surrogate_filename_for_display(self, mock_gi_modules):
+        """A raw filesystem path passes through the display sanitizer before GTK."""
+        ScanResultsDialog, *_ = _import_dialog_module(mock_gi_modules)
+        dialog = _create_dialog(ScanResultsDialog, _make_scan_result())
+        raw_path = "/tmp/infected_\udcff"
+
+        with patch("src.ui.scan_results_dialog.sanitize_surrogate_path") as sanitize:
+            row = dialog._create_threat_row(_make_threat(file_path=raw_path))
+
+        assert row is not None
+        assert any(call.args[0] == raw_path for call in sanitize.call_args_list)
+        _clear_src_modules()
+
     def test_row_uses_threat_name(self, mock_gi_modules):
         ScanResultsDialog, *_ = _import_dialog_module(mock_gi_modules)
         dialog = _create_dialog(ScanResultsDialog, _make_scan_result())
@@ -477,6 +490,20 @@ class TestSkippedFilesSection:
         dialog._create_skipped_files_section(parent)
 
         parent.append.assert_called_once()
+        _clear_src_modules()
+
+    def test_skipped_file_surrogate_is_sanitized_before_markup(self, mock_gi_modules):
+        ScanResultsDialog, *_ = _import_dialog_module(mock_gi_modules)
+        raw_path = "/tmp/skipped_\udcff"
+        dialog = _create_dialog(
+            ScanResultsDialog,
+            _make_scan_result(skipped_count=1, skipped_files=[raw_path]),
+        )
+
+        with patch("src.ui.scan_results_dialog.sanitize_surrogate_path") as sanitize:
+            dialog._create_skipped_files_section(MagicMock())
+
+        sanitize.assert_called_once_with(raw_path)
         _clear_src_modules()
 
     def test_truncates_long_list(self, mock_gi_modules):

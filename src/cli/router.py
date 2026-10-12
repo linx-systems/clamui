@@ -45,7 +45,7 @@ def cli_main() -> int:
     """
     parser = argparse.ArgumentParser(
         prog="clamui",
-        description=_("ClamUI — ClamAV antivirus management"),
+        description=_("ClamUI - ClamAV antivirus management"),
         epilog=_(
             "Run 'clamui <command> --help' for details on a specific command.\n"
             "Run 'clamui' without arguments to launch the graphical interface."

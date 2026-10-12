@@ -17,24 +17,19 @@ from typing import TYPE_CHECKING
 from gi.repository import GLib
 
 from .clamav_config import parse_config
+from .clamscan_parser import parse_clamscan_result
 from .log_manager import LogManager
 from .scanner_base import (
     cleanup_process,
-    collect_clamav_warnings,
     communicate_with_cancel_check,
     create_cancelled_result,
     create_error_result,
-    resolve_exit2_status,
     save_scan_log,
     stream_process_output,
     terminate_process_gracefully,
 )
 from .scanner_types import ScanProgress, ScanResult, ScanStatus, ThreatDetail
 from .settings_manager import SettingsManager
-from .threat_classifier import (
-    categorize_threat,
-    classify_threat_severity_str,
-)
 from .utils import (
     check_clamav_installed,
     check_clamd_connection,
@@ -93,6 +88,20 @@ def glob_to_regex(pattern: str) -> str:
     if not has_unescaped_anchor:
         regex = regex + "$"
     return regex
+
+
+def directory_glob_to_regex(pattern: str) -> str:
+    """Convert a directory exclusion glob to a ClamAV-compatible POSIX ERE.
+
+    A bare directory name is a path component, not an entire scan path. Match
+    it at the scan root or after any parent component, and require the next
+    character to be a separator or the end of the path. Path-like patterns
+    retain their existing whole-path glob semantics.
+    """
+    regex = glob_to_regex(pattern)
+    if "/" in pattern or "\\" in pattern:
+        return regex
+    return rf"(^|.*/){regex[1:-1]}(/|$)"
 
 
 def validate_pattern(pattern: str) -> bool:
@@ -409,7 +418,7 @@ class Scanner:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     encoding="utf-8",
-                    errors="replace",
+                    errors="surrogateescape",
                     env=get_clean_env(),
                 )
 
@@ -459,8 +468,16 @@ class Scanner:
                 self._save_scan_log(result, time.monotonic() - start_time)
                 return result
 
-            # Parse the results
-            result = self._parse_results(path, stdout, stderr, exit_code)
+            # The capped verbose-output buffer may omit ClamAV's terminal
+            # summary. Keep the live progress count as a fallback so a
+            # completed scan is not mistaken for an all-files-failed scan.
+            result = parse_clamscan_result(
+                path,
+                stdout,
+                stderr,
+                exit_code,
+                scanned_files_hint=progress_files_scanned,
+            )
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
@@ -477,11 +494,47 @@ class Scanner:
             self._save_scan_log(result, time.monotonic() - start_time)
             return result
 
+    def _collect_count_exclusions(
+        self, profile_exclusions: dict | None
+    ) -> tuple[list[str], list[str]]:
+        """Collect file and directory exclusions used during pre-counting."""
+        exclude_patterns: list[str] = []
+        exclude_dirs: list[str] = []
+
+        if self._settings_manager is not None:
+            exclusions = self._settings_manager.get("exclusion_patterns", [])
+            for exclusion in exclusions:
+                if not exclusion.get("enabled", True):
+                    continue
+                pattern = exclusion.get("pattern", "")
+                if not pattern:
+                    continue
+                if exclusion.get("type", "pattern") == "directory":
+                    exclude_dirs.append(pattern)
+                    continue
+                exclude_patterns.append(pattern)
+
+        if not profile_exclusions:
+            return exclude_patterns, exclude_dirs
+
+        for excl_path in profile_exclusions.get("paths", []):
+            if not excl_path:
+                continue
+            if excl_path.startswith("~"):
+                excl_path = str(Path(excl_path).expanduser())
+            exclude_dirs.append(excl_path)
+
+        for pattern in profile_exclusions.get("patterns", []):
+            if pattern:
+                exclude_patterns.append(pattern)
+
+        return exclude_patterns, exclude_dirs
+
     def _count_files(self, path: str, profile_exclusions: dict | None = None) -> int | None:
         """
         Pre-count files for progress calculation.
 
-        Uses os.scandir for fast counting, respecting exclusion patterns.
+        Uses os.walk for fast counting, respecting exclusion patterns.
 
         Args:
             path: Path to scan
@@ -507,37 +560,7 @@ class Scanner:
         if not scan_path.is_dir():
             return None
 
-        # Collect exclusion patterns
-        exclude_patterns: list[str] = []
-        exclude_dirs: list[str] = []
-
-        # Global exclusions from settings
-        if self._settings_manager is not None:
-            exclusions = self._settings_manager.get("exclusion_patterns", [])
-            for exclusion in exclusions:
-                if not exclusion.get("enabled", True):
-                    continue
-                pattern = exclusion.get("pattern", "")
-                if not pattern:
-                    continue
-                exclusion_type = exclusion.get("type", "pattern")
-                if exclusion_type == "directory":
-                    exclude_dirs.append(pattern)
-                else:
-                    exclude_patterns.append(pattern)
-
-        # Profile exclusions
-        if profile_exclusions:
-            for excl_path in profile_exclusions.get("paths", []):
-                if excl_path:
-                    if excl_path.startswith("~"):
-                        excl_path = str(Path(excl_path).expanduser())
-                    exclude_dirs.append(excl_path)
-
-            for pattern in profile_exclusions.get("patterns", []):
-                if pattern:
-                    exclude_patterns.append(pattern)
-
+        exclude_patterns, exclude_dirs = self._collect_count_exclusions(profile_exclusions)
         file_count = 0
 
         try:
@@ -562,7 +585,7 @@ class Scanner:
                     if not self._is_path_excluded(file_path, f, exclude_patterns, is_dir=False):
                         file_count += 1
         except (PermissionError, OSError):
-            # If we can't access the directory, return 0
+            # Return the count accumulated before the inaccessible directory.
             return file_count
 
         return file_count
@@ -822,8 +845,12 @@ class Scanner:
                 if not pattern:
                     continue
 
-                regex = glob_to_regex(pattern)
                 exclusion_type = exclusion.get("type", "pattern")
+                regex = (
+                    directory_glob_to_regex(pattern)
+                    if exclusion_type == "directory"
+                    else glob_to_regex(pattern)
+                )
 
                 if exclusion_type == "directory":
                     cmd.extend(["--exclude-dir", regex])
@@ -857,129 +884,6 @@ class Scanner:
 
         # Wrap with flatpak-spawn if running inside Flatpak sandbox
         return wrap_host_command(cmd)
-
-    def _parse_results(self, path: str, stdout: str, stderr: str, exit_code: int) -> ScanResult:
-        """
-        Parse clamscan output into a ScanResult.
-
-        ClamAV exit codes:
-        - 0: No virus found
-        - 1: Virus(es) found
-        - 2: Some error(s) occurred
-
-        Args:
-            path: The scanned path
-            stdout: Standard output from clamscan
-            stderr: Standard error from clamscan
-            exit_code: Process exit code
-
-        Returns:
-            Parsed ScanResult
-        """
-        infected_files = []
-        threat_details = []
-        skipped_files, nonfatal_warnings, hard_error_lines = collect_clamav_warnings(stdout, stderr)
-        scanned_files = 0
-        scanned_dirs = 0
-        infected_count = 0
-
-        # Parse stdout line by line
-        for line in stdout.splitlines():
-            line = line.strip()
-
-            # Regex pattern: "/path/to/file: ThreatName FOUND"
-            # Uses rsplit to handle colons in file paths (e.g., Windows C:\)
-            # Look for infected file lines (format: "/path/to/file: Virus.Name FOUND")
-            # Skip verbose "Scanning <path>" lines so a clean file whose name
-            # ends in "FOUND" is not misparsed as a detection (mirrors on_line).
-            if line.startswith("Scanning "):
-                continue
-
-            if line.endswith("FOUND"):
-                # Extract file path and threat name
-                # Format: "/path/to/file: ThreatName FOUND"
-                parts = line.rsplit(":", 1)
-                if len(parts) == 2:
-                    file_path = parts[0].strip()
-                    # Extract threat name (remove " FOUND" suffix)
-                    threat_part = parts[1].strip()
-                    threat_name = (
-                        threat_part.rsplit(" ", 1)[0].strip()
-                        if " FOUND" in threat_part
-                        else threat_part
-                    )
-
-                    infected_files.append(file_path)
-
-                    # Create ThreatDetail with classification
-                    threat_detail = ThreatDetail(
-                        file_path=file_path,
-                        threat_name=threat_name,
-                        category=categorize_threat(threat_name),
-                        severity=classify_threat_severity_str(threat_name),
-                    )
-                    threat_details.append(threat_detail)
-                    infected_count += 1
-
-            # Regex pattern for statistics: "Scanned files: 123"
-            # Captures numeric value after the label
-            # Look for individual summary lines from ClamAV output
-            # Format: "Scanned files: 10" or "Scanned directories: 1" or "Infected files: 0"
-            elif line.startswith("Scanned files:"):
-                match = re.search(r"Scanned files:\s*(\d+)", line)
-                if match:
-                    scanned_files = int(match.group(1))
-            elif line.startswith("Scanned directories:"):
-                match = re.search(r"Scanned directories:\s*(\d+)", line)
-                if match:
-                    scanned_dirs = int(match.group(1))
-
-        # Determine overall status based on exit code
-        warning_message = None
-        exit2_error_message = None
-        if infected_count > 0:
-            # Detections are authoritative: clamscan returns exit code 2 when it
-            # both finds a virus and hits an error (e.g. an unreadable file), so
-            # never let an error code mask a real threat.
-            status = ScanStatus.INFECTED
-            if exit_code == 2 and skipped_files:
-                warning_message = f"{len(skipped_files)} file(s) could not be accessed"
-        elif exit_code == 0:
-            status = ScanStatus.CLEAN
-        elif exit_code == 1:
-            status = ScanStatus.INFECTED
-        elif exit_code == 2:
-            status, warning_message, exit2_error_message = resolve_exit2_status(
-                stdout, scanned_files, hard_error_lines, skipped_files, nonfatal_warnings
-            )
-        else:
-            status = ScanStatus.ERROR
-
-        error_message = None
-        if status == ScanStatus.ERROR:
-            error_message = (
-                exit2_error_message
-                or stderr.strip()
-                or (hard_error_lines[0] if hard_error_lines else None)
-            )
-
-        return ScanResult(
-            status=status,
-            path=path,
-            stdout=stdout,
-            stderr=stderr,
-            exit_code=exit_code,
-            infected_files=infected_files,
-            scanned_files=scanned_files,
-            scanned_dirs=scanned_dirs,
-            infected_count=infected_count,
-            error_message=error_message,
-            threat_details=threat_details,
-            skipped_files=skipped_files,
-            skipped_count=len(skipped_files),
-            warning_message=warning_message,
-            nonfatal_warnings=nonfatal_warnings,
-        )
 
     def _save_scan_log(self, result: ScanResult, duration: float) -> None:
         """Save scan result to log."""

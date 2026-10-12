@@ -2010,6 +2010,22 @@ class LogManager:
                 return False
         return Path(path).exists()
 
+    def _read_daemon_config_content(self, conf_path: str) -> str | None:
+        """Read a clamd configuration file from the active host context."""
+        if is_flatpak():
+            result = subprocess.run(
+                ["flatpak-spawn", "--host", "cat", conf_path],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode != 0:
+                return None
+            return result.stdout
+
+        with open(conf_path, encoding="utf-8") as f:
+            return f.read()
+
     def get_daemon_log_path(self) -> str | None:
         """
         Find the clamd log file path.
@@ -2026,37 +2042,31 @@ class LogManager:
         # Also try to get from clamd.conf if it exists
         from .clamav_detection import detect_clamd_conf_path
 
-        detected = detect_clamd_conf_path()
-        clamd_conf_paths = [detected] if detected else []
+        conf_path = detect_clamd_conf_path()
+        if not conf_path or not self._file_exists_on_host(conf_path):
+            return None
 
-        for conf_path in clamd_conf_paths:
-            if self._file_exists_on_host(conf_path):
-                try:
-                    # Read config file (use host command in Flatpak)
-                    if is_flatpak():
-                        result = subprocess.run(
-                            ["flatpak-spawn", "--host", "cat", conf_path],
-                            capture_output=True,
-                            text=True,
-                            timeout=5,
-                        )
-                        if result.returncode != 0:
-                            continue
-                        config_content = result.stdout
-                    else:
-                        with open(conf_path, encoding="utf-8") as f:
-                            config_content = f.read()
+        try:
+            config_content = self._read_daemon_config_content(conf_path)
+            if config_content is None:
+                return None
 
-                    for line in config_content.splitlines():
-                        line = line.strip()
-                        if line.startswith("LogFile"):
-                            parts = line.split(None, 1)
-                            if len(parts) == 2:
-                                log_file = parts[1].strip()
-                                if self._file_exists_on_host(log_file):
-                                    return log_file
-                except (OSError, PermissionError, subprocess.SubprocessError):
+            for raw_line in config_content.splitlines():
+                line = raw_line.strip()
+                if not line.startswith("LogFile"):
                     continue
+
+                parts = line.split(None, 1)
+                if len(parts) != 2:
+                    continue
+
+                log_file = parts[1].strip()
+                if not self._file_exists_on_host(log_file):
+                    continue
+
+                return log_file
+        except (OSError, PermissionError, subprocess.SubprocessError):
+            return None
 
         return None
 

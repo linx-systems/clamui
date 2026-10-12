@@ -29,6 +29,7 @@ Example:
 
 import logging
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -48,12 +49,18 @@ from .core.clamav_config import (
 from .core.clamav_detection import resolve_clamd_conf_path
 from .core.i18n import _, ngettext
 from .core.notification_manager import NotificationManager
+from .core.privileged_helper import (
+    PrivilegedHelperState,
+    PrivilegedHelperStatus,
+    get_privileged_helper_status,
+)
 from .core.settings_manager import SettingsManager
 from .notification_dispatcher import NotificationDispatcher
 from .profiles.models import ScanProfile
 from .profiles.profile_manager import ProfileManager
 from .tray_integration import TrayIntegration
 from .ui.compat import open_paths_dialog, present_about_dialog
+from .ui.privileged_helper_dialog import present_privileged_helper_dialog
 from .ui.window import MainWindow
 from .view_coordinator import ViewCoordinator
 
@@ -63,6 +70,7 @@ LOG_PRIVACY_BANNER_DELAY_SECONDS = 1.0
 LOG_PRIVACY_BANNER_MIN_VISIBLE_SECONDS = 5.0
 LOG_PRIVACY_BANNER_POLL_INTERVAL_MS = 200
 CLAMD_SIZE_LIMIT_MIGRATION_KEY = "clamd_size_limit_unit_migration_done"
+PRIVILEGED_HELPER_PROMPT_SKIPPED_VERSION_KEY = "privileged_helper_prompt_skipped_version"
 
 
 class ClamUIApp(Adw.Application):
@@ -121,11 +129,15 @@ class ClamUIApp(Adw.Application):
         self._audit_view = None
         self._current_view = None
 
-        # Tray indicator (initialized in do_startup if available)
+        # Tray indicator is initialized in do_startup; a running subprocess is
+        # not yet proof that a desktop tray host accepted it.
         self._tray_indicator = None
-
-        # Track first activation for start-minimized functionality
+        self._start_minimized_pending = False
         self._first_activation = True
+
+        # Probe the Flatpak host helper after the first presented main window.
+        self._privileged_helper_probe_queued = False
+        self._privileged_helper_prompt_presented = False
 
         # Initial scan paths from CLI
         self._initial_scan_paths: list[str] = []
@@ -264,7 +276,7 @@ class ClamUIApp(Adw.Application):
         if self._update_view is None:
             from .ui.update_view import UpdateView
 
-            self._update_view = UpdateView()
+            self._update_view = UpdateView(settings_manager=self._settings_manager)
         return self._update_view
 
     @property
@@ -333,17 +345,32 @@ class ClamUIApp(Adw.Application):
             self._current_view = "scan"
 
         win.present()
+
+        if not self._privileged_helper_probe_queued:
+            self._privileged_helper_probe_queued = True
+            threading.Thread(
+                target=self._check_privileged_helper_status_background,
+                args=(win,),
+                daemon=True,
+            ).start()
         logger.debug("do_activate completed in %.1f ms", (time.monotonic() - t0) * 1000)
         self._ensure_log_privacy_migration_monitor()
 
         if self._first_activation:
             self._first_activation = False
             start_minimized = self.settings_manager.get("start_minimized", False)
-            if start_minimized:
-                if self._tray_indicator:
-                    win.hide()
-                else:
-                    logger.warning("start_minimized enabled but tray not available, showing window")
+            if start_minimized and not self._initial_scan_paths:
+                self._start_minimized_pending = self._tray_indicator is not None
+                if self._tray_indicator is None:
+                    logger.warning(
+                        "start_minimized enabled but tray subprocess unavailable, showing window"
+                    )
+                elif self._tray_indicator.is_available:
+                    self._on_tray_availability_changed(True)
+        else:
+            # A later activation is an explicit request to see the window, not
+            # a delayed startup request that may hide it when a watcher appears.
+            self._start_minimized_pending = False
 
         if self._initial_scan_paths:
             self._process_initial_scan_paths()
@@ -353,6 +380,50 @@ class ClamUIApp(Adw.Application):
         if self._startup_log_manager is None:
             self._startup_log_manager = self.log_manager
         return self._startup_log_manager
+
+    def _check_privileged_helper_status_background(self, window: MainWindow) -> None:
+        """Check host-helper availability without delaying activation."""
+        try:
+            status = get_privileged_helper_status()
+        except Exception:
+            logger.exception("Failed to check privileged helper status")
+            return
+        GLib.idle_add(self._on_privileged_helper_status_checked, window, status)
+
+    def _on_privileged_helper_prompt_dismissed(self) -> None:
+        """Remember that this version's optional helper prompt was dismissed."""
+        self._settings_manager.set(PRIVILEGED_HELPER_PROMPT_SKIPPED_VERSION_KEY, __version__)
+
+    def _on_privileged_helper_status_checked(
+        self, window: MainWindow, status: PrivilegedHelperStatus
+    ) -> bool:
+        """Present the one-per-process helper prompt when installation is supported."""
+        if status.state is PrivilegedHelperState.INSTALLED:
+            skipped_version = self._settings_manager.get(
+                PRIVILEGED_HELPER_PROMPT_SKIPPED_VERSION_KEY, ""
+            )
+            if skipped_version:
+                self._settings_manager.set(PRIVILEGED_HELPER_PROMPT_SKIPPED_VERSION_KEY, "")
+            return False
+
+        if (
+            self._privileged_helper_prompt_presented
+            or status.state is not PrivilegedHelperState.INSTALLABLE
+        ):
+            return False
+
+        if (
+            self._settings_manager.get(PRIVILEGED_HELPER_PROMPT_SKIPPED_VERSION_KEY, "")
+            == __version__
+        ):
+            return False
+
+        self._privileged_helper_prompt_presented = True
+        present_privileged_helper_dialog(
+            window,
+            on_dismissed=self._on_privileged_helper_prompt_dismissed,
+        )
+        return False
 
     def _format_log_privacy_status(self, processed_files: int, total_files: int) -> str:
         """Build the startup status text for persisted-log privacy migration."""
@@ -582,6 +653,31 @@ class ClamUIApp(Adw.Application):
         except Exception as e:
             logger.warning(f"Failed to initialize tray indicator: {e}")
 
+    def _on_tray_availability_changed(self, available: bool) -> bool:
+        """Keep the main window recoverable until a tray host registers it."""
+        win = self.props.active_window
+
+        if not available:
+            self._start_minimized_pending = False
+            if win is not None and not self._tray_integration._is_window_visible(win):
+                if hasattr(win, "show_window"):
+                    win.show_window()
+                else:
+                    win.present()
+                if self._tray_indicator is not None:
+                    self._tray_indicator.update_window_menu_label(visible=True)
+            return False
+
+        if not self._start_minimized_pending or self._initial_scan_paths:
+            return False
+
+        self._start_minimized_pending = False
+        if win is not None:
+            win.hide_window()
+            if self._tray_indicator is not None:
+                self._tray_indicator.update_window_menu_label(visible=False)
+        return False
+
     def _sync_profiles_to_tray(self, profiles: list) -> None:
         """Sync scan profiles to the tray menu."""
         if self._tray_indicator is None:
@@ -695,7 +791,7 @@ class ClamUIApp(Adw.Application):
             self._update_view._start_update()
 
     def _on_scan_file(self, action, param):
-        """Handle the scan-file action — open file/folder chooser, then show in scan view."""
+        """Handle the scan-file action - open file/folder chooser, then show in scan view."""
         win = self.props.active_window
         if not win:
             return
@@ -756,7 +852,7 @@ class ClamUIApp(Adw.Application):
             self._current_view = "quarantine"
 
     def _on_about(self, action, param):
-        """Handle about action — show about dialog."""
+        """Handle about action - show about dialog."""
         from .ui.utils import resolve_icon_name
 
         present_about_dialog(
@@ -873,6 +969,8 @@ class ClamUIApp(Adw.Application):
         """Store initial scan paths from CLI or file manager integration."""
         self._initial_scan_paths = file_paths
         self._initial_use_virustotal = use_virustotal
+        if file_paths:
+            self._start_minimized_pending = False
         self._process_initial_scan_paths()
 
     def _process_initial_scan_paths(self):
@@ -891,7 +989,7 @@ class ClamUIApp(Adw.Application):
             self._initial_scan_paths = []
             self._initial_use_virustotal = False
             self._show_window_toast(
-                _("A scan is already running — the new scan request was ignored")
+                _("A scan is already running - the new scan request was ignored")
             )
             return
 
@@ -900,27 +998,34 @@ class ClamUIApp(Adw.Application):
 
         use_vt = self._initial_use_virustotal
         self._initial_use_virustotal = False
+        self._start_minimized_pending = False
 
-        # Surface the scan UI so a second invocation does not start a scan
+        # A file-manager or CLI request is always deliberate and must remain
+        # visible, even if a watcher registers while the request is handled.
+        win = self.props.active_window
+        if win is not None:
+            if hasattr(win, "show_window"):
+                win.show_window()
+            else:
+                win.present()
+
+        # Surface scan UI so a second invocation does not start a scan
         # invisibly under whichever view is currently shown.
         self._view_coordinator.switch_to_view("scan", self.scan_view)
 
         if use_vt:
-            # VirusTotal scans a single file per request; only the first
-            # path is forwarded to the setup dialog and scan pipeline.
+            # VirusTotal scans only one file per request; only the first is
+            # sent, and the remainder are reported to the user.
             if len(paths) > 1:
-                ignored_count = len(paths) - 1
                 self._show_window_toast(
                     ngettext(
-                        "VirusTotal scans one file per request — "
-                        "{count} additional selection was ignored",
-                        "VirusTotal scans one file per request — "
-                        "{count} additional selections were ignored",
-                        ignored_count,
-                    ).format(count=ignored_count)
+                        "VirusTotal scans one file at a time; {count} selection was ignored.",
+                        "VirusTotal scans one file at a time; {count} selections were ignored.",
+                        len(paths) - 1,
+                    ).format(count=len(paths) - 1)
                 )
             self._scan_view._set_selected_path(paths[0])
-            self._show_virustotal_setup_dialog(paths[0])
+            self._handle_virustotal_scan_request(paths[0])
         else:
             # ClamAV scans every CLI-provided target (files and folders),
             # so populate the full selection before starting.
@@ -976,16 +1081,27 @@ class ClamUIApp(Adw.Application):
 
         threading.Thread(target=scan_thread, daemon=True).start()
 
-    def _show_virustotal_setup_dialog(self, file_path: str):
-        """Show the VirusTotal setup dialog."""
+    def _handle_virustotal_scan_request(self, file_path: str) -> None:
+        """Start VirusTotal with a stored key or ask for one explicitly."""
+        from .core import keyring_manager
+
+        api_key = keyring_manager.get_api_key(self._settings_manager)
+        if api_key:
+            self._trigger_virustotal_scan(file_path, api_key)
+        else:
+            self._show_virustotal_setup_dialog(file_path)
+
+    def _show_virustotal_setup_dialog(self, file_path: str) -> None:
+        """Show VirusTotal key setup without starting any fallback scan."""
         from .ui.virustotal_setup_dialog import VirusTotalSetupDialog
 
         win = self.props.active_window
-        if win:
-            dialog = VirusTotalSetupDialog(win)
-            dialog.connect(
-                "scan-requested", lambda d, key: self._trigger_virustotal_scan(file_path, key)
+        if win is not None:
+            dialog = VirusTotalSetupDialog(
+                settings_manager=self._settings_manager,
+                on_key_saved=lambda key: self._trigger_virustotal_scan(file_path, key),
             )
+            dialog.set_transient_for(win)
             dialog.present()
 
     def _show_virustotal_results_dialog(self, result):

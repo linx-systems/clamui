@@ -1,6 +1,7 @@
 # ClamUI Scanner Page Tests
 """Unit tests for the ScannerPage class."""
 
+from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -516,10 +517,11 @@ class TestScannerPageBackendSelection:
         mock_row = mock.MagicMock()
         mock_row.get_selected.return_value = 0
         mock_settings_manager = mock.MagicMock()
+        parent_window = mock.MagicMock()
 
         from src.ui.preferences.scanner_page import ScannerPage
 
-        ScannerPage._on_backend_changed(mock_row, mock_settings_manager)
+        ScannerPage._on_backend_changed(mock_row, mock_settings_manager, parent_window)
 
         # Should save "auto" to settings
         mock_settings_manager.set.assert_called_with("scan_backend", "auto")
@@ -529,10 +531,11 @@ class TestScannerPageBackendSelection:
         mock_row = mock.MagicMock()
         mock_row.get_selected.return_value = 1
         mock_settings_manager = mock.MagicMock()
+        parent_window = mock.MagicMock()
 
         from src.ui.preferences.scanner_page import ScannerPage
 
-        ScannerPage._on_backend_changed(mock_row, mock_settings_manager)
+        ScannerPage._on_backend_changed(mock_row, mock_settings_manager, parent_window)
 
         # Should save "daemon" to settings
         mock_settings_manager.set.assert_called_with("scan_backend", "daemon")
@@ -542,10 +545,11 @@ class TestScannerPageBackendSelection:
         mock_row = mock.MagicMock()
         mock_row.get_selected.return_value = 2
         mock_settings_manager = mock.MagicMock()
+        parent_window = mock.MagicMock()
 
         from src.ui.preferences.scanner_page import ScannerPage
 
-        ScannerPage._on_backend_changed(mock_row, mock_settings_manager)
+        ScannerPage._on_backend_changed(mock_row, mock_settings_manager, parent_window)
 
         # Should save "clamscan" to settings
         mock_settings_manager.set.assert_called_with("scan_backend", "clamscan")
@@ -555,14 +559,163 @@ class TestScannerPageBackendSelection:
         mock_row = mock.MagicMock()
         mock_row.get_selected.return_value = 0
         mock_settings_manager = mock.MagicMock()
+        parent_window = mock.MagicMock()
 
         from src.ui.preferences.scanner_page import ScannerPage
 
         with mock.patch.object(ScannerPage, "_update_backend_subtitle") as mock_update_subtitle:
-            ScannerPage._on_backend_changed(mock_row, mock_settings_manager)
+            ScannerPage._on_backend_changed(mock_row, mock_settings_manager, parent_window)
 
             # Should update subtitle
             mock_update_subtitle.assert_called_once_with(mock_row, 0)
+
+    def test_on_backend_changed_restores_persisted_selection_after_save_failure(
+        self, mock_gi_modules
+    ):
+        """A rejected backend save restores the persisted selection and reports the failure."""
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        mock_row = mock.MagicMock()
+        mock_row.get_selected.return_value = 1
+        mock_settings_manager = mock.MagicMock()
+        mock_settings_manager.set.return_value = False
+        mock_settings_manager.get.return_value = "clamscan"
+        parent_window = mock.MagicMock()
+        mock_row.set_selected.side_effect = lambda _selection: ScannerPage._on_backend_changed(
+            mock_row, mock_settings_manager, parent_window
+        )
+
+        with mock.patch.object(ScannerPage, "_update_backend_subtitle") as mock_update_subtitle:
+            ScannerPage._on_backend_changed(mock_row, mock_settings_manager, parent_window)
+
+        mock_settings_manager.set.assert_called_once_with("scan_backend", "daemon")
+        mock_row.set_selected.assert_called_once_with(2)
+        mock_update_subtitle.assert_called_once_with(mock_row, 2)
+        mock_gi_modules["adw"].Toast.new.assert_called_once_with(
+            "Failed to save scan backend selection"
+        )
+        parent_window.add_toast.assert_called_once()
+
+
+class TestScannerPageConfigSelectionPersistence:
+    """Tests that failed clamd.conf persistence leaves the loaded configuration intact."""
+
+    @staticmethod
+    def _parent_window(settings_manager):
+        parent_window = SimpleNamespace(
+            _settings_manager=settings_manager,
+            _clamd_conf_path="/etc/clamav/clamd.conf",
+            _clamd_available=True,
+            _clamd_config=object(),
+        )
+        parent_window._reload_clamd_config = mock.MagicMock()
+        parent_window.add_toast = mock.MagicMock()
+        return parent_window
+
+    def test_detected_path_save_failure_keeps_current_configuration(self, mock_gi_modules):
+        """A detected path is not exposed when saving it fails."""
+        from src.ui.preferences import scanner_page
+
+        settings_manager = mock.MagicMock()
+        settings_manager.get.return_value = "auto"
+        settings_manager.set.return_value = False
+        parent_window = self._parent_window(settings_manager)
+        loaded_config = parent_window._clamd_config
+        path_row = mock.MagicMock()
+
+        with (
+            mock.patch.object(
+                scanner_page._ScannerPageHelper,
+                "_create_file_location_group",
+                return_value=path_row,
+            ) as create_file_location_group,
+            mock.patch.object(scanner_page.threading, "Thread"),
+            mock.patch.object(
+                scanner_page, "detect_clamd_conf_path", return_value="/custom/clamd.conf"
+            ),
+        ):
+            scanner_page.ScannerPage.create_page(
+                "/etc/clamav/clamd.conf",
+                {},
+                settings_manager,
+                False,
+                parent_window,
+            )
+            create_file_location_group.call_args.kwargs["on_detect"]()
+
+        settings_manager.set.assert_called_once_with("clamd_conf_path", "/custom/clamd.conf")
+        path_row.set_subtitle.assert_not_called()
+        assert parent_window._clamd_conf_path == "/etc/clamav/clamd.conf"
+        assert parent_window._clamd_available is True
+        assert parent_window._clamd_config is loaded_config
+        parent_window._reload_clamd_config.assert_not_called()
+        mock_gi_modules["adw"].Toast.new.assert_called_once_with(
+            "Failed to save configuration file selection"
+        )
+
+    def test_browsed_path_save_failure_keeps_current_configuration(self, mock_gi_modules):
+        """A browsed path is not exposed when saving it fails."""
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        settings_manager = mock.MagicMock()
+        settings_manager.set.return_value = False
+        parent_window = self._parent_window(settings_manager)
+        loaded_config = parent_window._clamd_config
+        path_row = mock.MagicMock()
+        dialog = mock.MagicMock()
+        selected_file = mock.MagicMock()
+        selected_file.get_path.return_value = "/custom/clamd.conf"
+        dialog.open_finish.return_value = selected_file
+        dialog.open.side_effect = lambda _parent, _cancellable, callback: callback(dialog, object())
+        mock_gi_modules["gtk"].FileDialog.return_value = dialog
+
+        ScannerPage._browse_for_config(
+            parent_window, path_row, "clamd_conf_path", "_clamd_conf_path"
+        )
+        settings_manager.set.assert_called_once_with("clamd_conf_path", "/custom/clamd.conf")
+        path_row.set_subtitle.assert_not_called()
+        assert parent_window._clamd_conf_path == "/etc/clamav/clamd.conf"
+        assert parent_window._clamd_available is True
+        assert parent_window._clamd_config is loaded_config
+        parent_window._reload_clamd_config.assert_not_called()
+        mock_gi_modules["adw"].Toast.new.assert_called_once_with(
+            "Failed to save configuration file selection"
+        )
+
+    def test_unresolved_portal_path_keeps_current_configuration(self, mock_gi_modules):
+        """An unresolved portal path is neither persisted nor exposed."""
+        from src.ui.preferences import scanner_page
+
+        settings_manager = mock.MagicMock()
+        parent_window = self._parent_window(settings_manager)
+        loaded_config = parent_window._clamd_config
+        path_row = mock.MagicMock()
+        dialog = mock.MagicMock()
+        selected_file = mock.MagicMock()
+        selected_file.get_path.return_value = "/run/user/1000/doc/clamd.conf"
+        dialog.open_finish.return_value = selected_file
+        dialog.open.side_effect = lambda _parent, _cancellable, callback: callback(dialog, object())
+        mock_gi_modules["gtk"].FileDialog.return_value = dialog
+
+        with (
+            mock.patch.object(scanner_page, "is_flatpak", return_value=True),
+            mock.patch.object(scanner_page, "is_portal_path", return_value=True),
+            mock.patch.object(scanner_page, "resolve_portal_path", return_value=None),
+        ):
+            scanner_page.ScannerPage._browse_for_config(
+                parent_window, path_row, "clamd_conf_path", "_clamd_conf_path"
+            )
+
+        settings_manager.set.assert_not_called()
+        path_row.set_subtitle.assert_not_called()
+        assert parent_window._clamd_conf_path == "/etc/clamav/clamd.conf"
+        assert parent_window._clamd_available is True
+        assert parent_window._clamd_config is loaded_config
+        parent_window._reload_clamd_config.assert_not_called()
+        mock_gi_modules["adw"].Toast.new.assert_called_once_with(
+            "Selected configuration file is not accessible from the host"
+        )
+        parent_window.add_toast.assert_called_once()
 
 
 class TestScannerPageDaemonStatus:
@@ -752,31 +905,8 @@ class TestScannerPageAsyncDaemonCheck:
 class TestScannerPageLearnMore:
     """Tests for learn more documentation link."""
 
-    def test_on_learn_more_clicked_opens_documentation_when_exists(self, mock_gi_modules, tmp_path):
-        """Test _on_learn_more_clicked opens documentation when file exists."""
-        mock_parent_window = mock.MagicMock()
-
-        from src.ui.preferences.scanner_page import ScannerPage
-
-        # Mock the Path and exists check
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
-            with mock.patch("subprocess.Popen") as mock_popen:
-                # Make the docs path exist
-                mock_docs_path = mock.MagicMock()
-                mock_docs_path.exists.return_value = True
-                mock_docs_path.__str__.return_value = "/path/to/docs/SCAN_BACKENDS.md"
-                mock_path.return_value.parent.parent.parent.parent = mock.MagicMock()
-                mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                    mock_docs_path
-                )
-
-                ScannerPage._on_learn_more_clicked(mock_parent_window)
-
-                # Should open the file with xdg-open
-                mock_popen.assert_called_once()
-
-    def test_on_learn_more_clicked_shows_error_when_not_exists(self, mock_gi_modules):
-        """Test _on_learn_more_clicked shows error when documentation doesn't exist."""
+    def test_on_learn_more_clicked_shows_error_when_open_fails(self, mock_gi_modules):
+        """Test that a failed documentation launch shows an error."""
         adw = mock_gi_modules["adw"]
         mock_parent_window = mock.MagicMock()
         mock_dialog = mock.MagicMock()
@@ -784,56 +914,15 @@ class TestScannerPageLearnMore:
 
         from src.ui.preferences.scanner_page import ScannerPage
 
-        # Mock the Path and exists check
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
+        with mock.patch("subprocess.Popen") as mock_popen:
             with mock.patch.object(adw, "Window", mock_window_class):
-                # Make the docs path not exist
-                # Chain: Path(__file__).parent.parent.parent.parent / "docs" / "SCAN_BACKENDS.md"
-                mock_docs_path = mock.MagicMock()
-                mock_docs_path.exists.return_value = False
-                # Need to chain two __truediv__ calls
-                intermediate_mock = mock.MagicMock()
-                intermediate_mock.__truediv__.return_value = mock_docs_path
-                mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                    intermediate_mock
-                )
+                mock_popen.side_effect = Exception("Failed to open")
 
                 ScannerPage._on_learn_more_clicked(mock_parent_window)
 
-                # Should create and present Adw.Window-based error dialog
                 mock_window_class.assert_called_once()
                 mock_dialog.set_transient_for.assert_called_once_with(mock_parent_window)
                 mock_dialog.present.assert_called_once()
-
-    def test_on_learn_more_clicked_shows_error_when_open_fails(self, mock_gi_modules):
-        """Test _on_learn_more_clicked shows error when opening file fails."""
-        adw = mock_gi_modules["adw"]
-        mock_parent_window = mock.MagicMock()
-        mock_dialog = mock.MagicMock()
-        mock_window_class = mock.MagicMock(return_value=mock_dialog)
-
-        from src.ui.preferences.scanner_page import ScannerPage
-
-        with mock.patch("src.ui.preferences.scanner_page.Path") as mock_path:
-            with mock.patch("subprocess.Popen") as mock_popen:
-                with mock.patch.object(adw, "Window", mock_window_class):
-                    # Make the docs path exist
-                    mock_docs_path = mock.MagicMock()
-                    mock_docs_path.exists.return_value = True
-                    mock_path.return_value.parent.parent.parent.parent = mock.MagicMock()
-                    mock_path.return_value.parent.parent.parent.parent.__truediv__.return_value = (
-                        mock_docs_path
-                    )
-
-                    # Make Popen raise an exception
-                    mock_popen.side_effect = Exception("Failed to open")
-
-                    ScannerPage._on_learn_more_clicked(mock_parent_window)
-
-                    # Should create and present Adw.Window-based error dialog
-                    mock_window_class.assert_called_once()
-                    mock_dialog.set_transient_for.assert_called_once_with(mock_parent_window)
-                    mock_dialog.present.assert_called_once()
 
 
 class TestScannerPagePopulateFields:
@@ -1033,6 +1122,28 @@ class TestScannerPageCollectData:
         result = ScannerPage.collect_data(mock_widgets, True)
 
         assert isinstance(result, dict)
+
+    def test_collect_data_preserves_directive_order(self, mock_gi_modules, mock_widgets):
+        """Test collection preserves the clamd directive serialization order."""
+        from src.ui.preferences.scanner_page import ScannerPage
+
+        result = ScannerPage.collect_data(mock_widgets, True)
+
+        assert list(result) == [
+            "ScanPE",
+            "ScanELF",
+            "ScanOLE2",
+            "ScanPDF",
+            "ScanHTML",
+            "ScanArchive",
+            "MaxFileSize",
+            "MaxScanSize",
+            "MaxRecursion",
+            "MaxFiles",
+            "LogFile",
+            "LogVerbose",
+            "LogSyslog",
+        ]
 
     def test_collect_data_returns_empty_dict_when_clamd_unavailable(
         self, mock_gi_modules, mock_widgets

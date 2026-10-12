@@ -35,16 +35,16 @@ msgid "Select File or Folder"
 msgstr "Seleziona File o Cartella"
 
 #: src/app.py:894
-msgid "A scan is already running — the new scan request was ignored"
+msgid "A scan is already running - the new scan request was ignored"
 msgstr ""
 
 #: src/app.py:915
 #, python-brace-format
 msgid ""
-"VirusTotal scans one file per request — {count} additional selection was "
+"VirusTotal scans one file per request - {count} additional selection was "
 "ignored"
 msgid_plural ""
-"VirusTotal scans one file per request — {count} additional selections were "
+"VirusTotal scans one file per request - {count} additional selections were "
 "ignored"
 msgstr[0] ""
 msgstr[1] ""
@@ -94,8 +94,8 @@ msgid "Command to show help for"
 msgstr "Comando per cui mostrare l'aiuto"
 
 #: src/cli/help_cmd.py:100
-msgid "ClamUI — ClamAV antivirus management\n"
-msgstr "ClamUI — Gestione antivirus ClamAV\n"
+msgid "ClamUI - ClamAV antivirus management\n"
+msgstr "ClamUI - Gestione antivirus ClamAV\n"
 
 #: src/cli/help_cmd.py:101
 msgid "Usage:"
@@ -148,8 +148,8 @@ msgstr "Comando sconosciuto: {name}\n"
 
 #: src/cli/help_cmd.py:140
 #, python-brace-format
-msgid "clamui {name} — {summary}\n"
-msgstr "clamui {name} — {summary}\n"
+msgid "clamui {name} - {summary}\n"
+msgstr "clamui {name} - {summary}\n"
 
 #: src/cli/help_cmd.py:141
 msgid "Examples:"
@@ -518,8 +518,8 @@ msgid "Delete failed: {error}"
 msgstr "Eliminazione fallita: {error}"
 
 #: src/cli/router.py:48
-msgid "ClamUI — ClamAV antivirus management"
-msgstr "ClamUI — Gestione antivirus ClamAV"
+msgid "ClamUI - ClamAV antivirus management"
+msgstr "ClamUI - Gestione antivirus ClamAV"
 
 #: src/cli/router.py:50
 msgid ""
@@ -1909,7 +1909,7 @@ msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #: src/core/system_audit.py:1671
-msgid "Not detected — optional network monitor and application firewall"
+msgid "Not detected - optional network monitor and application firewall"
 msgstr ""
 
 #: src/core/system_audit.py:1680
@@ -1991,9 +1991,9 @@ msgid ""
 msgstr ""
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable — less secure)"
+msgid "Stored in settings file (keyring unavailable - less secure)"
 msgstr ""
-"Memorizzata nel file delle impostazioni (keyring non disponibile — meno "
+"Memorizzata nel file delle impostazioni (keyring non disponibile - meno "
 "sicuro)"
 
 #: src/core/keyring_manager.py:140
@@ -2751,7 +2751,7 @@ msgid "Running security check"
 msgstr ""
 
 #: src/ui/audit_view.py:255
-msgid "Portmaster — checking…"
+msgid "Portmaster - checking…"
 msgstr ""
 
 #: src/ui/audit_view.py:266
@@ -2793,11 +2793,11 @@ msgid "Scan for known rootkits using chkrootkit"
 msgstr ""
 
 #: src/ui/audit_view.py:552
-msgid "Portmaster — not detected (optional)"
+msgid "Portmaster - not detected (optional)"
 msgstr ""
 
 #: src/ui/audit_view.py:555
-msgid "Portmaster — could not probe"
+msgid "Portmaster - could not probe"
 msgstr ""
 
 #: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
@@ -4572,25 +4572,25 @@ msgstr "Informazioni sui backend di scansione"
 
 #: src/ui/preferences/scanner_page.py:382
 msgid ""
-"Recommended — Automatically uses daemon if available, falls back to clamscan "
+"Recommended - Automatically uses daemon if available, falls back to clamscan "
 "for reliability"
 msgstr ""
-"Consigliato — Usa automaticamente il demone se disponibile, ripiega su "
+"Consigliato - Usa automaticamente il demone se disponibile, ripiega su "
 "clamscan per affidabilità"
 
 #: src/ui/preferences/scanner_page.py:385
 msgid ""
-"Fastest — Instant startup with in-memory database, requires clamd service "
+"Fastest - Instant startup with in-memory database, requires clamd service "
 "running"
 msgstr ""
-"Più veloce — Avvio istantaneo con database in memoria, richiede il servizio "
+"Più veloce - Avvio istantaneo con database in memoria, richiede il servizio "
 "clamd in esecuzione"
 
 #: src/ui/preferences/scanner_page.py:387
 msgid ""
-"Most compatible — Works anywhere, loads database each scan (3-10 sec startup)"
+"Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
 msgstr ""
-"Più compatibile — Funziona ovunque, carica il database ad ogni scansione "
+"Più compatibile - Funziona ovunque, carica il database ad ogni scansione "
 "(3-10 sec avvio)"
 
 #: src/ui/preferences/scanner_page.py:461
@@ -4986,8 +4986,8 @@ msgstr "Torna alla navigazione"
 
 #: src/ui/preferences/window.py:534 src/ui/preferences/window.py:557
 #, python-brace-format
-msgid "Preferences — {page}"
-msgstr "Preferenze — {page}"
+msgid "Preferences - {page}"
+msgstr "Preferenze - {page}"
 
 #: src/ui/preferences/window.py:757
 #, fuzzy, python-brace-format
@@ -6723,8 +6723,8 @@ msgstr "Scanner desktop ClamAV"
 #~ "Nota: con clamd attivo, il file di test EICAR potrebbe essere pulito "
 #~ "prima di poter essere scansionato."
 
-#~ msgid "Target {current} of {total} — {pct}%"
-#~ msgstr "Target {current} di {total} — {pct}%"
+#~ msgid "Target {current} of {total} - {pct}%"
+#~ msgstr "Target {current} di {total} - {pct}%"
 
 #~ msgid "Scanned {scanned:,} / {total:,} files"
 #~ msgstr "Scansionati {scanned:,} / {total:,} file"

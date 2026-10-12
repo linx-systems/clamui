@@ -64,7 +64,7 @@ def _create_view(AuditView):
     view._is_first_run = True
     view._initial_load_done = False
 
-    # Section widget references (6 Tier 1 categories — ExpanderRows)
+    # Section widget references (6 Tier 1 categories - ExpanderRows)
     view._section_expanders = {}
     view._section_rows = {}
     view._section_status_icons = {}
@@ -486,7 +486,7 @@ class TestUpdateSectionUI:
             AuditStatus,
         ) = _import_all(mock_gi_modules)
         view = _create_view(AuditView)
-        # Don't populate sections — key won't exist
+        # Don't populate sections - key won't exist
 
         section = _make_section(AuditSectionResult, AuditCategory, AuditCheckResult, AuditStatus)
         result = view._update_section_ui(section)

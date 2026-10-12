@@ -1,8 +1,9 @@
-# Main Scan View
+# Modular Scan View Alternative
 """
-Main scan view composing profile selection, target selection, and scan control.
+Modular scan view alternative, not the active ClamUI screen.
 
-This is the composition root that wires together:
+`ClamUIApp` currently constructs `src/ui/scan_view.py:ScanView`; use this
+composition root only after a complete caller-wide cutover. It wires together:
 - ProfileSelector: Profile management
 - TargetSelector: Path selection
 - ScanController: Scan orchestration
@@ -47,9 +48,10 @@ except (TypeError, AttributeError):
 
 class ScanView(Gtk.Box):
     """
-    Main scan view - composition root.
+    Modular scan view alternative, not the active ClamUI screen.
 
-    Delegates to:
+    `ClamUIApp` currently constructs `src/ui/scan_view.py:ScanView`; use this
+    composition root only after a complete caller-wide cutover. Delegates to:
     - ProfileSelector: Profile management
     - TargetSelector: Path selection
     - ScanController: Scan orchestration

@@ -2,17 +2,17 @@
 const pillars = [
   {
     title: "Native to GNOME",
-    body: "GTK4 + libadwaita. Follows your system theme, your font size, your accent — not a repackaged Electron web app.",
+    body: "Built with GTK4 + libadwaita for a GNOME-style Linux desktop experience - not a repackaged Electron web app.",
     icon: "desktop",
   },
   {
-    title: "Zero telemetry",
-    body: "No analytics, no crash reporters, no metrics. VirusTotal is opt-in and API keys live in your system keyring.",
+    title: "Privacy by default",
+    body: "No product analytics, crash reporting, or metrics. VirusTotal is opt-in; keys use the system keyring by default.",
     icon: "shield",
   },
   {
     title: "Deep security toolbox",
-    body: "Beyond AV: firewall & MAC audit, rootkit heuristics, scheduled scans via systemd timers, on-access via clamonacc.",
+    body: "Beyond AV: layered system audits, scheduled scans, optional on-access scanning, and ClamAV configuration.",
     icon: "tools",
   },
   {
@@ -52,7 +52,7 @@ const pillars = [
               </svg>
             )}
           </div>
-          <h3 class="font-semibold text-white">{p.title}</h3>
+          <p class="font-semibold text-white">{p.title}</p>
           <p class="mt-1.5 text-sm text-white/65 leading-relaxed">{p.body}</p>
         </div>
       ))

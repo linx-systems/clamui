@@ -400,7 +400,7 @@ class VirusTotalClient:
 
             # The "X / Y" denominator must include every verdict bucket VT
             # reports (timeout, confirmed-timeout, failure, type-unsupported,
-            # undetected, harmless, …), not just the four common ones — engines
+            # undetected, harmless, …), not just the four common ones - engines
             # that timed out or could not process the file still ran, and
             # omitting them silently undercounts total_engines on real reports.
             total = sum(v for v in stats.values() if isinstance(v, int) and not isinstance(v, bool))

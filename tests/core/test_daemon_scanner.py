@@ -1,6 +1,7 @@
 # ClamUI Daemon Scanner Tests
 """Unit tests for the daemon scanner module."""
 
+import os
 import stat
 import subprocess
 from pathlib import Path
@@ -107,37 +108,14 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to verify it's called with force_host=True
-        with patch(
-            "src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x
-        ) as mock_wrap:
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True)
-            # Verify force_host=True is passed for daemon commands
-            mock_wrap.assert_called_once()
-            call_kwargs = mock_wrap.call_args[1]
-            assert call_kwargs.get("force_host") is True
 
-        # Now uses binary name directly (not full path from which_host_command)
         assert cmd[0] == "clamdscan"
         assert "--multiscan" in cmd
         assert "--fdpass" in cmd
         assert "-i" in cmd
         assert str(test_file) in cmd
-
-    def test_build_command_uses_force_host(self, tmp_path, daemon_scanner_class):
-        """Test _build_command uses force_host=True for Flatpak daemon communication."""
-        test_file = tmp_path / "test.txt"
-        test_file.write_text("test content")
-
-        scanner = daemon_scanner_class()
-
-        with patch(
-            "src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x
-        ) as mock_wrap:
-            scanner._build_command(str(test_file), recursive=True)
-            # Must use force_host=True so clamdscan talks to host's daemon
-            mock_wrap.assert_called_once()
-            assert mock_wrap.call_args[1].get("force_host") is True
 
     def test_build_command_force_stream_uses_stream_mode(self, tmp_path, daemon_scanner_class):
         """Test force_stream switches daemon scans to clamdscan --stream."""
@@ -146,7 +124,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True, force_stream=True)
 
         assert cmd[0] == "clamdscan"
@@ -163,7 +141,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class()
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(
                 str(test_file),
                 recursive=True,
@@ -191,7 +169,7 @@ class TestDaemonScannerBuildCommand:
 
         scanner = daemon_scanner_class(settings_manager=mock_settings)
 
-        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+        with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
             cmd = scanner._build_command(str(test_file), recursive=True)
 
         # clamdscan does NOT support --exclude options (they're silently ignored)
@@ -211,7 +189,7 @@ class TestDaemonScannerBuildCommand:
         with patch(
             "src.core.daemon_scanner.resolve_clamd_conf_path", return_value="/etc/clamd.d/scan.conf"
         ):
-            with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x, **kw: x):
+            with patch("src.core.daemon_scanner.wrap_host_command", side_effect=lambda x: x):
                 cmd = scanner._build_command(str(test_file), recursive=True)
 
         assert cmd[0] == "clamdscan"
@@ -380,6 +358,24 @@ Infected files: 0
 Total errors: 4
 """
         result = scanner._parse_results("/root", stdout, "", 2, file_count=4, dir_count=1)
+
+        assert result.status == scan_status_class.ERROR
+        assert result.error_message == "No files could be scanned"
+
+    def test_parse_results_exit2_message_beats_stderr_when_all_files_failed(
+        self, daemon_scanner_class, scan_status_class
+    ):
+        """The exit-2 diagnosis is more specific than a concurrent stderr message."""
+        scanner = daemon_scanner_class()
+
+        result = scanner._parse_results(
+            "/root",
+            "/root/secret.txt: Access denied. ERROR\n",
+            "Connection refused",
+            2,
+            file_count=1,
+            dir_count=0,
+        )
 
         assert result.status == scan_status_class.ERROR
         assert result.error_message == "No files could be scanned"
@@ -875,9 +871,253 @@ class TestDaemonScannerFilterExcludedThreats:
         assert filtered.status == scan_status_class.INFECTED
         assert filtered.infected_count == 1
 
+    def test_filter_migrates_legacy_strings_before_post_scan_filtering(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Malformed legacy values cannot stop a migrated pattern from filtering a threat."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.infected",
+                        42,
+                        None,
+                        {"pattern": ""},
+                        {"pattern": 99, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = daemon_scanner_class(settings_manager=SettingsManager(config_dir=config_dir))
+
+        from src.core.scanner import ScanResult, ThreatDetail
+
+        threat = ThreatDetail(
+            file_path="/home/user/excluded.infected",
+            threat_name="Eicar-Test-Signature",
+            category="Test",
+            severity="low",
+        )
+        result = ScanResult(
+            status=scan_status_class.INFECTED,
+            path="/home/user",
+            stdout="",
+            stderr="",
+            exit_code=1,
+            infected_files=[threat.file_path],
+            scanned_files=1,
+            scanned_dirs=0,
+            infected_count=1,
+            error_message=None,
+            threat_details=[threat],
+        )
+
+        filtered = scanner._filter_excluded_threats(result)
+
+        assert filtered.status == scan_status_class.CLEAN
+        assert filtered.infected_count == 0
+
 
 class TestDaemonScannerCountTargets:
     """Tests for DaemonScanner count_targets parameter."""
+
+    def test_count_targets_migrates_legacy_strings_before_filtering(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Migrated legacy strings filter daemon counts despite malformed adjacent values."""
+        import json
+
+        from src.core.settings_manager import SettingsManager
+
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        included = scan_dir / "included.txt"
+        excluded = scan_dir / "excluded.log"
+        included.write_text("included")
+        excluded.write_text("excluded")
+        config_dir = tmp_path / "config"
+        config_dir.mkdir()
+        (config_dir / "settings.json").write_text(
+            json.dumps(
+                {
+                    "exclusion_patterns": [
+                        "*.log",
+                        False,
+                        {"pattern": None},
+                        {"pattern": 42, "type": "file", "enabled": True},
+                    ]
+                }
+            )
+        )
+        scanner = daemon_scanner_class(settings_manager=SettingsManager(config_dir=config_dir))
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+
+        assert file_count == 1
+        assert directory_count == 1
+        assert file_paths == [str(included)]
+
+    @pytest.mark.parametrize("collect_paths", [False, True])
+    def test_count_targets_filters_combined_exclusion_scope(
+        self, tmp_path, daemon_scanner_class, collect_paths
+    ):
+        """Count only files left after global and profile exclusions."""
+        scan_dir = tmp_path / "scan"
+        names = (
+            "keep.txt",
+            "skip.log",
+            "nested/keep.py",
+            "nested/skip.bak",
+            "node_modules/dependency.js",
+            "profile-skip/secret.txt",
+        )
+        for name in names:
+            target = scan_dir / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("ordinary test data")
+
+        scanner = daemon_scanner_class()
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+        assert (file_count, directory_count) == (6, 4)
+        assert set(file_paths) == {str(scan_dir / name) for name in names}
+
+        settings_manager = MagicMock()
+        settings_manager.get.return_value = [
+            {"pattern": "node_modules", "type": "directory", "enabled": True},
+            {"pattern": "*.log", "type": "pattern", "enabled": True},
+            {"pattern": "*.txt", "type": "pattern", "enabled": False},
+        ]
+        scanner = daemon_scanner_class(settings_manager=settings_manager)
+        exclusions = {
+            "paths": [str(scan_dir / "profile-skip")],
+            "patterns": ["*.bak"],
+        }
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), exclusions, collect_paths
+        )
+
+        assert (file_count, directory_count) == (2, 2)
+        if collect_paths:
+            assert set(file_paths) == {
+                str(scan_dir / "keep.txt"),
+                str(scan_dir / "nested" / "keep.py"),
+            }
+        else:
+            assert file_paths is None
+
+    def test_count_targets_handles_empty_missing_and_explicit_file(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Keep empty, missing, and direct-file target behavior distinct."""
+        empty_dir = tmp_path / "empty"
+        empty_dir.mkdir()
+        selected_file = tmp_path / "selected.txt"
+        selected_file.write_text("selected")
+        settings_manager = MagicMock()
+        settings_manager.get.return_value = [
+            {"pattern": "*.txt", "type": "pattern", "enabled": True},
+        ]
+        scanner = daemon_scanner_class(settings_manager=settings_manager)
+
+        assert scanner._count_scan_targets(str(empty_dir), collect_paths=True) == (0, 0, [])
+        assert scanner._count_scan_targets(str(tmp_path / "missing"), collect_paths=True) == (
+            0,
+            0,
+            None,
+        )
+        assert scanner._count_scan_targets(str(selected_file), collect_paths=True) == (
+            1,
+            0,
+            [str(selected_file)],
+        )
+
+    def test_count_targets_discards_work_when_cancelled_before_first_walk_yield(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Cancellation before traversal starts returns no partial counts."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "keep.txt").write_text("ordinary test data")
+        scanner = daemon_scanner_class()
+        scanner._cancel_event.set()
+
+        assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, None)
+
+    def test_count_targets_discards_work_when_cancelled_after_one_directory(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """Cancellation during traversal discards counts already accumulated."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        def walk_then_cancel(_path):
+            yield str(scan_dir), ["nested"], ["keep.txt"]
+            scanner._cancel_event.set()
+            yield str(scan_dir / "nested"), [], ["nested.txt"]
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=walk_then_cancel):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, None)
+
+    def test_count_targets_preserves_partial_counts_after_walk_error(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """A traversal error retains work completed before the error."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        def walk_then_fail(_path):
+            yield str(scan_dir), ["nested"], ["keep.txt"]
+            raise OSError("child enumeration failed")
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=walk_then_fail):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (
+                1,
+                2,
+                [str(scan_dir / "keep.txt")],
+            )
+
+    def test_count_targets_returns_empty_collection_after_immediate_walk_error(
+        self, tmp_path, daemon_scanner_class
+    ):
+        """An error before traversal begins has no work to preserve."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        scanner = daemon_scanner_class()
+
+        with patch("src.core.daemon_scanner.os.walk", side_effect=OSError("walk failed")):
+            assert scanner._count_scan_targets(str(scan_dir), collect_paths=True) == (0, 0, [])
+
+    def test_count_targets_does_not_follow_directory_symlinks(self, tmp_path, daemon_scanner_class):
+        """Directory links count as retained entries without scanning their targets."""
+        scan_dir = tmp_path / "scan"
+        outside_dir = tmp_path / "outside"
+        scan_dir.mkdir()
+        outside_dir.mkdir()
+        kept_file = scan_dir / "keep.txt"
+        kept_file.write_text("ordinary test data")
+        (outside_dir / "outside.txt").write_text("outside test data")
+        (scan_dir / "linked-outside").symlink_to(outside_dir, target_is_directory=True)
+        scanner = daemon_scanner_class()
+
+        file_count, directory_count, file_paths = scanner._count_scan_targets(
+            str(scan_dir), collect_paths=True
+        )
+
+        assert (file_count, directory_count) == (1, 2)
+        assert file_paths == [str(kept_file)]
 
     def test_scan_sync_with_count_targets_true_counts_files(
         self, tmp_path, daemon_scanner_class, scan_status_class
@@ -949,6 +1189,144 @@ class TestDaemonScannerCountTargets:
         # Counts should be 0 when count_targets=False
         assert result.scanned_files == 0
         assert result.scanned_dirs == 0
+
+    @pytest.mark.parametrize(
+        ("count_targets", "has_callback", "has_exclusions"),
+        [
+            (True, False, False),
+            (False, False, False),
+            (True, True, False),
+            (False, True, False),
+            (True, False, True),
+            (False, False, True),
+            (True, True, True),
+            (False, True, True),
+        ],
+    )
+    def test_scan_sync_prepares_inputs_for_count_progress_and_exclusions(
+        self,
+        tmp_path,
+        daemon_scanner_class,
+        scan_status_class,
+        count_targets,
+        has_callback,
+        has_exclusions,
+    ):
+        """Progress or exclusions force a filtered file-list traversal."""
+        scan_dir = tmp_path / "scan"
+        included_file = scan_dir / "included" / "keep.txt"
+        excluded_file = scan_dir / "excluded" / "skip.txt"
+        included_file.parent.mkdir(parents=True)
+        excluded_file.parent.mkdir()
+        included_file.write_text("keep")
+        excluded_file.write_text("skip")
+
+        scanner = daemon_scanner_class()
+        profile_exclusions = (
+            {"paths": [str(excluded_file.parent)], "patterns": []} if has_exclusions else None
+        )
+        callback = MagicMock() if has_callback else None
+        captured: dict[str, Path | bytes] = {}
+        mock_process = MagicMock()
+        mock_process.communicate.return_value = ("", "")
+        mock_process.returncode = 0
+        mock_process.poll.return_value = 0
+        mock_process.stdout = None
+        mock_process.stderr = None
+
+        def start_process(command, **_kwargs):
+            if "--file-list" in command:
+                file_list_path = Path(command[command.index("--file-list") + 1])
+                captured["path"] = file_list_path
+                captured["contents"] = file_list_path.read_bytes()
+            return mock_process
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("subprocess.Popen", side_effect=start_process) as mock_popen,
+        ):
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions=profile_exclusions,
+                count_targets=count_targets,
+                progress_callback=callback,
+            )
+
+        requires_file_list = has_callback or has_exclusions
+        expected_files = 2 if not has_exclusions else 1
+        expected_dirs = 3 if not has_exclusions else 2
+        assert result.status == scan_status_class.CLEAN
+        assert result.scanned_files == (
+            expected_files if count_targets or requires_file_list else 0
+        )
+        assert result.scanned_dirs == (expected_dirs if count_targets or requires_file_list else 0)
+
+        command = mock_popen.call_args.args[0]
+        if not requires_file_list:
+            assert "--file-list" not in command
+            assert captured == {}
+            return
+
+        expected_paths = {os.fsencode(str(included_file))}
+        if not has_exclusions:
+            expected_paths.add(os.fsencode(str(excluded_file)))
+        assert set(captured["contents"].splitlines()) == expected_paths
+        assert not captured["path"].exists()
+
+    def test_scan_sync_skips_process_for_empty_retained_file_list(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """A traversal that retains no files returns CLEAN without starting clamdscan."""
+        scan_dir = tmp_path / "scan"
+        excluded_dir = scan_dir / "excluded"
+        excluded_dir.mkdir(parents=True)
+        (excluded_dir / "skip.txt").write_text("skip")
+        scanner = daemon_scanner_class()
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions={"paths": [str(excluded_dir)], "patterns": []},
+            )
+
+        assert result.status == scan_status_class.CLEAN
+        assert result.scanned_files == 0
+        assert result.scanned_dirs == 0
+        mock_popen.assert_not_called()
+
+    def test_scan_sync_cancels_during_input_preparation_without_starting_process(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Cancellation during the preparatory walk produces no subprocess."""
+        scan_dir = tmp_path / "scan"
+        nested_dir = scan_dir / "nested"
+        nested_dir.mkdir(parents=True)
+        (scan_dir / "first.txt").write_text("first")
+        (nested_dir / "second.txt").write_text("second")
+        scanner = daemon_scanner_class()
+        original_walk = os.walk
+
+        def walk_then_cancel(path):
+            walk_iterator = original_walk(path)
+            yield next(walk_iterator)
+            scanner.cancel()
+            yield from walk_iterator
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("src.core.daemon_scanner.os.walk", side_effect=walk_then_cancel),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            result = scanner.scan_sync(str(scan_dir), progress_callback=MagicMock())
+
+        assert result.status == scan_status_class.CANCELLED
+        mock_popen.assert_not_called()
 
     def test_scan_sync_count_targets_false_still_detects_infections(
         self, tmp_path, daemon_scanner_class, scan_status_class
@@ -1058,51 +1436,128 @@ class TestDaemonScannerCountTargets:
         assert call_args[0][0] == str(test_dir)  # path
         assert call_args[0][3] is False  # count_targets (4th positional arg)
 
-    def test_scan_sync_uses_file_list_when_exclusions_active_without_progress(
+    def test_scan_sync_writes_file_list_with_raw_filename_bytes(
         self, tmp_path, daemon_scanner_class, scan_status_class
     ):
-        """Daemon scans should use --file-list so exclusions shape the actual scan."""
-        test_dir = tmp_path / "scan_test"
-        included_dir = test_dir / "included"
-        excluded_dir = test_dir / "excluded"
-        included_dir.mkdir(parents=True)
-        excluded_dir.mkdir(parents=True)
-        included_file = included_dir / "keep.txt"
-        excluded_file = excluded_dir / "skip.txt"
-        included_file.write_text("keep")
-        excluded_file.write_text("skip")
+        """File lists preserve non-UTF-8 filename bytes for clamdscan."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        raw_file = os.fsencode(str(scan_dir)) + b"/corrupt_\xff"
+        file_descriptor = os.open(raw_file, os.O_WRONLY | os.O_CREAT, 0o600)
+        os.close(file_descriptor)
 
         scanner = daemon_scanner_class()
-        profile_exclusions = {"paths": [str(excluded_dir)], "patterns": []}
+        captured: dict[str, Path | bytes] = {}
+        mock_process = MagicMock()
+        mock_process.communicate.return_value = ("", "")
+        mock_process.returncode = 0
+        mock_process.poll.return_value = 0
+
+        def start_process(command, **_kwargs):
+            file_list_path = Path(command[command.index("--file-list") + 1])
+            captured["path"] = file_list_path
+            captured["contents"] = file_list_path.read_bytes()
+            return mock_process
 
         with (
-            patch("src.core.daemon_scanner.check_clamdscan_installed") as mock_installed,
-            patch("src.core.daemon_scanner.check_clamd_connection") as mock_connection,
-            patch("src.core.daemon_scanner.os.unlink"),
-            patch("subprocess.Popen") as mock_popen,
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("subprocess.Popen", side_effect=start_process),
         ):
-            mock_installed.return_value = (True, "ClamAV 1.0.0")
-            mock_connection.return_value = (True, "PONG")
-
-            mock_process = MagicMock()
-            mock_process.communicate.return_value = ("", "")
-            mock_process.returncode = 0
-            mock_popen.return_value = mock_process
-
             result = scanner.scan_sync(
-                str(test_dir),
-                profile_exclusions=profile_exclusions,
-                count_targets=True,
-                progress_callback=None,
+                str(scan_dir),
+                profile_exclusions={"paths": [str(scan_dir / "excluded")], "patterns": []},
             )
 
         assert result.status == scan_status_class.CLEAN
-        cmd = mock_popen.call_args[0][0]
-        assert "--file-list" in cmd
-        file_list_path = cmd[cmd.index("--file-list") + 1]
-        file_list_content = Path(file_list_path).read_text(encoding="utf-8")
-        assert str(included_file) in file_list_content
-        assert str(excluded_file) not in file_list_content
+        assert captured["contents"] == raw_file
+        assert not captured["path"].exists()
+
+    @pytest.mark.parametrize("failure_stage", ["popen", "communicate"])
+    def test_scan_sync_removes_file_list_after_execution_failure(
+        self, tmp_path, daemon_scanner_class, scan_status_class, failure_stage
+    ):
+        """Temporary file lists are removed when process startup or I/O fails."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "keep.txt").write_text("keep")
+        scanner = daemon_scanner_class()
+        captured: dict[str, Path] = {}
+        mock_process = MagicMock()
+        mock_process.poll.return_value = 0
+        mock_process.communicate.side_effect = OSError("communication failed")
+
+        def start_process(command, **_kwargs):
+            file_list_path = Path(command[command.index("--file-list") + 1])
+            captured["path"] = file_list_path
+            if failure_stage == "popen":
+                raise OSError("process startup failed")
+            return mock_process
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch("subprocess.Popen", side_effect=start_process),
+        ):
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions={"paths": [], "patterns": ["*.ignored"]},
+            )
+
+        assert result.status == scan_status_class.ERROR
+        assert not captured["path"].exists()
+
+    def test_scan_sync_rejects_newline_filename_in_file_list(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Newline-delimited clamd lists reject ambiguous filenames before scanning."""
+        scan_dir = tmp_path / "scan"
+        scan_dir.mkdir()
+        (scan_dir / "ambiguous\nname").touch()
+
+        scanner = daemon_scanner_class()
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch.object(scanner, "_save_scan_log"),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            result = scanner.scan_sync(
+                str(scan_dir),
+                profile_exclusions={"paths": [str(scan_dir / "excluded")], "patterns": []},
+            )
+
+        assert result.status == scan_status_class.ERROR
+        assert "newline" in result.error_message
+        mock_popen.assert_not_called()
+
+    def test_scan_sync_keeps_raw_detected_filename_for_quarantine(
+        self, tmp_path, daemon_scanner_class, scan_status_class
+    ):
+        """Detected paths retain their raw bytes instead of a replacement surrogate."""
+        raw_file = os.fsencode(str(tmp_path)) + b"/infected_\xff"
+        raw_path = os.fsdecode(raw_file)
+        scanner = daemon_scanner_class()
+
+        with (
+            patch("src.core.daemon_scanner.check_clamdscan_installed", return_value=(True, "ok")),
+            patch("src.core.daemon_scanner.check_clamd_connection", return_value=(True, "PONG")),
+            patch.object(scanner, "_save_scan_log"),
+            patch("subprocess.Popen") as mock_popen,
+        ):
+            mock_process = MagicMock()
+            mock_process.communicate.return_value = (
+                f"{raw_path}: Eicar-Test-Signature FOUND\n",
+                "",
+            )
+            mock_process.returncode = 1
+            mock_popen.return_value = mock_process
+
+            result = scanner.scan_sync(str(tmp_path), count_targets=False)
+
+        assert result.status == scan_status_class.INFECTED
+        assert os.fsencode(result.threat_details[0].file_path) == raw_file
+        assert mock_popen.call_args.kwargs["errors"] == "surrogateescape"
 
     def test_filter_excludes_profile_path_subdirectory(
         self, daemon_scanner_class, scan_status_class, tmp_path
@@ -1905,9 +2360,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to simulate Flatpak wrapping with force_host=True
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return ["flatpak-spawn", "--host"] + cmd
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):
@@ -1931,9 +2384,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # In native mode, wrap_host_command returns command unchanged
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return cmd  # Native mode: command unchanged
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):
@@ -1952,9 +2403,7 @@ class TestDaemonScannerFlatpakSupport:
 
         scanner = daemon_scanner_class()
 
-        # Mock wrap_host_command to add flatpak-spawn prefix with force_host=True
-        def mock_wrap(cmd, force_host=False):
-            assert force_host is True, "force_host must be True for daemon commands"
+        def mock_wrap(cmd):
             return ["flatpak-spawn", "--host"] + cmd
 
         with patch("src.core.daemon_scanner.wrap_host_command", side_effect=mock_wrap):

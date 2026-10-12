@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.4.1] - 2026-10-12
+
+### Added
+
+- Added a **Start in System Tray** preference for login/autostart workflows while keeping explicit file and folder scans visible. (#221)
+- Added Hungarian localization.
+- Added an in-app Flatpak flow for installing the matching `clamui-privileged-helper` on supported Debian-family hosts; it validates the release asset before requesting administrator authorization.
+- Added regression coverage for privileged configuration read failures, mixed direct/elevated saves, staging cleanup, and direct-write filesystem rejection.
+
+### Changed
+
+- Moved project documentation into the Starlight site at `/docs/`, retaining root release notes as canonical sources.
+- Updated Flatpak to GNOME 51/Python 3.14 and replaced the tray's CairoSVG dependency with GdkPixbuf/librsvg rasterization.
+- Simplified scanner output handling, daemon target counting, and ClamAV configuration parsing while preserving cancellation, exclusion scope, and explicit read-authorization behavior.
+- Simplified preference configuration saving/loading, tray shutdown, scan-output streaming, and symlink safety checks while preserving their existing behavior.
+- Clarified privileged-helper release asset validation without changing accepted metadata or security checks.
+- Separated modern and legacy About dialog setup and removed redundant GTK setter checks while retaining GTK 4.6/libadwaita 1.1 compatibility and presentation behavior.
+- Flattened daemon scan result parsing while preserving detection priority, skipped-file warnings, and error-message precedence.
+- Simplified daemon log discovery while preserving common-location priority, configured log fallback, and Flatpak host access.
+- Separated file-count exclusion preparation from traversal while preserving cancellation, partial counts, and symlink handling.
+- Separated daemon scan-input preparation and temporary file-list ownership from execution while preserving exclusions, progress, cancellation, and cleanup.
+- Consolidated scanner preference boolean collection without changing directive order, size units, or missing-widget handling.
+- Extracted stateless clamscan result parsing from the scanner lifecycle while preserving summary precedence, threat detection, and warning classification.
+
+### Fixed
+
+- Bundled GLib's desktop-launch helper in the AppImage so audit documentation links open on KDE and other non-Ubuntu host layouts. (#194)
+- Prevented large standalone full scans from being reported as failed when capped verbose output hid the final summary and only nonfatal ClamAV warnings remained. (#217)
+- Corrected Fedora `freshclam` installation guidance and made the availability probe independent of Fedora's root-only default configuration.
+- Preserved raw POSIX filename bytes for `clamscan`, daemon scans, and quarantine restore; reject newline-containing daemon file-list targets.
+- Used the installed scheduled-scan module path when generating Debian jobs.
+- Used the selected custom `freshclam.conf` for manual database updates.
+- Corrected tray-availability, VirusTotal setup, scan selection, and result-scroller behavior.
+- Kept Configuration File paths readable by using compact configuration-file actions in Scanner and Database preferences.
+- Rendered Mermaid diagrams in the documentation with light/dark theme support and a mobile-friendly tray architecture layout.
+- Fixed scanner-test package isolation so later Flatpak configuration tests patch the restored modules rather than stale package references.
+
+### Security
+
+- Hardened trusted helper discovery in system `sbin` directories and atomic configuration writes, with administrator reads and `0600` custom configs.
+
 ## [0.4.0] - 2026-08-23
 
 ### Added
@@ -24,8 +65,11 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.4.1...HEAD
 
+[0.4.1]: https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1
+
+[0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
 ## [0.3.0] - 2026-06-26
 
 ### Added

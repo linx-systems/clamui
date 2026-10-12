@@ -164,7 +164,7 @@ class TestAuditNotificationSuppressed:
         view._finalize_audit(report)
         mock_nm.notify_audit_complete.assert_called_once()
 
-        # Second run (refresh) — should NOT notify
+        # Second run (refresh) - should NOT notify
         mock_nm.reset_mock()
         view._finalize_audit(report)
         mock_nm.notify_audit_complete.assert_not_called()

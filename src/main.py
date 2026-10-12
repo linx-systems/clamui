@@ -64,14 +64,14 @@ def _apply_language_setting():
         if language and language != "auto":
             os.environ["LANGUAGE"] = language
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
-        pass  # No settings yet or invalid — use system default
+        pass  # No settings yet or invalid - use system default
 
 
 # Apply language override BEFORE i18n initializes gettext
 _apply_language_setting()
 
 # Initialize i18n before any translatable strings are used
-from .core.i18n import _  # noqa: F401 — initializes i18n at import time
+from .core.i18n import _  # noqa: F401 - initializes i18n at import time
 
 
 def _configure_logging():

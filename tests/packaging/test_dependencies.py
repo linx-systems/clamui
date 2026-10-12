@@ -81,6 +81,13 @@ class TestDebianControlVsPyproject:
             "Debian control missing python3-keyring dependency"
         )
 
+    def test_gdkpixbuf_svg_loader_dependencies(self):
+        """Debian must provide the native SVG loader and its GI binding."""
+        control_content = (PROJECT_ROOT / "debian" / "DEBIAN" / "control").read_text()
+
+        assert "gir1.2-gdkpixbuf-2.0" in control_content
+        assert "librsvg2-common" in control_content
+
 
 class TestMinimumVersionConstraints:
     """Tests for minimum version constraints."""
@@ -113,21 +120,13 @@ class TestMinimumVersionConstraints:
                 f"Dependency missing version constraint: {line}"
             )
 
-    def test_urllib3_has_cve_fix_version(self):
-        """Test urllib3 has CVE fix version (>= 2.6.3)."""
-        pyproject = PROJECT_ROOT / "pyproject.toml"
-        content = pyproject.read_text()
+    def test_urllib3_has_audit_fix_version(self):
+        """urllib3 must include the fixes for PYSEC-2026-4175/4176/4177."""
+        content = (PROJECT_ROOT / "pyproject.toml").read_text()
 
-        # urllib3>=2.6.3 is required for CVE fix
-        assert "urllib3" in content, "urllib3 dependency missing"
-
-        # Extract urllib3 version
         match = re.search(r"urllib3[><=]+([0-9.]+)", content)
-        if match:
-            version = match.group(1)
-            parts = [int(p) for p in version.split(".")]
-            # Should be >= 2.6.3
-            assert parts[0] >= 2, f"urllib3 version {version} too old for CVE fix"
+        assert match, "pyproject.toml missing urllib3 version constraint"
+        assert tuple(map(int, match.group(1).split("."))) >= (2, 8, 0)
 
 
 class TestFlatpakPinnedVersions:
@@ -191,3 +190,19 @@ class TestGirDependencies:
         # Should have python3-cairo or python3-gi-cairo
         has_cairo = "python3-cairo" in content or "python3-gi-cairo" in content
         assert has_cairo, "Debian control missing Cairo dependency"
+
+
+class TestAppImageDependencies:
+    """AppImage must let pip resolve the complete runtime dependency graph."""
+
+    def test_installs_direct_dependencies_with_transitives(self):
+        content = (PROJECT_ROOT / "appimage" / "build-appimage.sh").read_text()
+
+        assert "--no-deps" not in content
+        assert "cairosvg" not in content
+        for dependency in ("keyring", "matplotlib", "Pillow", "urllib3"):
+            assert dependency in content
+        assert "bundle_svg_loader" in content
+        assert "libpixbufloader-svg.so" in content
+        assert "librsvg-2.so.2" in content
+        assert "sys.version_info < (3, 11)" in content

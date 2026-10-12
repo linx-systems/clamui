@@ -69,6 +69,7 @@ class TestTrayManagerInit:
         assert manager._on_quit is None
         assert manager._on_window_toggle is None
         assert manager._on_profile_select is None
+        assert manager._on_availability_changed is None
 
     def test_init_not_running(self, mock_gtk_modules):
         """Test TrayManager starts as not running."""
@@ -283,6 +284,27 @@ class TestTrayManagerHandleMessage:
         assert status_cmds and status_cmds[0]["status"] == "scanning"
         assert any(c.get("action") == "update_profiles" for c in sent)
 
+    def test_host_availability_notifies_callback_after_registration(self, mock_gtk_modules):
+        """A ready child is unavailable until the watcher accepts its SNI item."""
+        from src.ui.tray_manager import TrayManager
+
+        manager = TrayManager()
+        manager._running = True
+        manager._process = mock.MagicMock()
+        availability = []
+        manager.set_availability_callback(availability.append)
+
+        manager._handle_message({"event": "ready"})
+        assert manager.is_available is False
+
+        manager._handle_message({"event": "available"})
+        assert manager.is_available is True
+        assert availability == [True]
+
+        manager._handle_message({"event": "unavailable"})
+        assert manager.is_available is False
+        assert availability == [True, False]
+
     def test_handle_pong_message(self, mock_gtk_modules):
         """Test handling pong message doesn't crash."""
         from src.ui.tray_manager import TrayManager
@@ -456,8 +478,8 @@ class TestTrayManagerProperties:
 
         assert manager.is_active is False
 
-    def test_is_active_true_when_running_and_ready(self, mock_gtk_modules):
-        """Test is_active is True when running and ready."""
+    def test_is_active_requires_watcher_registration(self, mock_gtk_modules):
+        """A ready subprocess is inactive until the tray host accepts it."""
         from src.ui.tray_manager import TrayManager
 
         manager = TrayManager()
@@ -465,6 +487,8 @@ class TestTrayManagerProperties:
         manager._process = mock.Mock()
         manager._ready = True
 
+        assert manager.is_active is False
+        manager._available = True
         assert manager.is_active is True
 
     def test_is_library_available_depends_on_process(self, mock_gtk_modules):
@@ -1384,6 +1408,27 @@ class TestTrayManagerEdgeCases:
         assert "Tray service didn't stop gracefully" in caplog.text
         assert "Tray service didn't terminate" in caplog.text
 
+    def test_stop_terminates_without_killing_after_second_wait_succeeds(self, mock_gtk_modules):
+        """Test the graceful timeout path stops after successful termination."""
+        import subprocess
+
+        from src.ui.tray_manager import TrayManager
+
+        manager = TrayManager()
+        mock_process = mock.Mock()
+        mock_process.wait.side_effect = [subprocess.TimeoutExpired("cmd", 2.0), None]
+        mock_process.stdin = mock.Mock()
+        mock_process.stdout = mock.Mock()
+        mock_process.stderr = mock.Mock()
+        manager._process = mock_process
+        manager._running = True
+
+        manager.stop()
+
+        mock_process.wait.assert_has_calls([mock.call(timeout=2.0), mock.call(timeout=1.0)])
+        mock_process.terminate.assert_called_once()
+        mock_process.kill.assert_not_called()
+
     def test_stop_handles_exception(self, mock_gtk_modules, caplog):
         """Test stop handles exceptions during shutdown."""
         import logging
@@ -1464,7 +1509,7 @@ class TestTrayManagerEdgeCases:
 
 
 class TestTrayManagerSubprocessCrashRecovery:
-    """Regression tests for UI-001 — silent tray subprocess crash detection.
+    """Regression tests for UI-001 - silent tray subprocess crash detection.
 
     Prior behavior: when the tray subprocess died (segfault, OOM, D-Bus loss)
     the stdout reader exited silently on EOF; ``_ready`` stayed True; ``is_active``
@@ -1496,7 +1541,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         mock_process.poll = mock.Mock(return_value=139)  # SIGSEGV
         manager._process = mock_process
 
-        # Don't actually respawn during this test — patch start() to noop
+        # Don't actually respawn during this test - patch start() to noop
         with mock.patch.object(manager, "start", return_value=True):
             manager._read_stdout()
 
@@ -1574,7 +1619,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         mock_start.assert_not_called()
 
     def test_respawn_count_resets_after_60_seconds(self, mock_gtk_modules):
-        """Respawn count window is 60s — older respawns shouldn't trip the breaker."""
+        """Respawn count window is 60s - older respawns shouldn't trip the breaker."""
         import time
         from io import StringIO
 
@@ -1596,7 +1641,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         with mock.patch.object(manager, "start", return_value=True) as mock_start:
             manager._read_stdout()
 
-        # Window expired — respawn should be allowed again.
+        # Window expired - respawn should be allowed again.
         mock_start.assert_called()
 
     def test_init_initializes_respawn_state(self, mock_gtk_modules):
@@ -1611,7 +1656,7 @@ class TestTrayManagerSubprocessCrashRecovery:
         assert manager._tray_down is False
 
     def test_no_respawn_when_process_still_alive(self, mock_gtk_modules):
-        """poll()==None means the child is still alive — must NOT respawn/orphan it."""
+        """poll()==None means the child is still alive - must NOT respawn/orphan it."""
         from src.ui.tray_manager import TrayManager
 
         manager = TrayManager()

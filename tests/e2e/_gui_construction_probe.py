@@ -85,6 +85,7 @@ def _probe_dialogs(app):
     from src.ui.database_missing_dialog import DatabaseMissingDialog
     from src.ui.file_manager_integration_dialog import FileManagerIntegrationDialog
     from src.ui.fullscreen_dialog import FullscreenLogDialog
+    from src.ui.privileged_helper_dialog import PrivilegedHelperDialog
     from src.ui.profile_dialogs import (
         DeleteProfileDialog,
         PatternEntryDialog,
@@ -113,6 +114,7 @@ def _probe_dialogs(app):
 
     _record("CloseBehaviorDialog", lambda: CloseBehaviorDialog(callback=_noop))
     _record("DatabaseMissingDialog", lambda: DatabaseMissingDialog(callback=_noop))
+    _record("PrivilegedHelperDialog", PrivilegedHelperDialog)
     _record(
         "FileManagerIntegrationDialog",
         lambda: FileManagerIntegrationDialog(settings_manager=sm, on_complete=_noop),
