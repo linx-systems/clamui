@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import pwd
 import re
@@ -21,9 +22,12 @@ import requests
 
 from .. import __version__
 from .clamav_config import privileged_writer_available
-from .flatpak import is_flatpak, which_host_command, wrap_host_command
+from .flatpak import is_flatpak, wrap_host_command
 from .i18n import _
 from .install_commands import DistroFamily, detect_distro_family
+from .sanitize import sanitize_log_text
+
+logger = logging.getLogger(__name__)
 
 _GITHUB_REPOSITORY = "linx-systems/clamui"
 _HELPER_PACKAGE = "clamui-privileged-helper"
@@ -477,7 +481,13 @@ def _read_debian_ar(path: Path) -> dict[str, bytes] | None:
 
 
 def _trusted_key_is_safe() -> bool:
-    """Accept only the bundled, immutable signing key as a regular safe file."""
+    """Accept only the bundled, immutable signing key as a regular safe file.
+
+    Ownership is deliberately not checked: the Flatpak sandbox maps only the
+    user's uid, so the key shows as 65534 (system install) or the user (user
+    install), never 0.  Substitution is caught by the pinned fingerprint, and
+    /app is read-only inside the sandbox.  See #242.
+    """
     try:
         key_stat = _TRUSTED_SIGNING_KEY.lstat()
     except OSError:
@@ -485,7 +495,6 @@ def _trusted_key_is_safe() -> bool:
     return (
         stat.S_ISREG(key_stat.st_mode)
         and not _TRUSTED_SIGNING_KEY.is_symlink()
-        and key_stat.st_uid == 0
         and not key_stat.st_mode & 0o022
     )
 
@@ -671,8 +680,22 @@ def _download_asset(cache_dir: Path, expected_size: int, expected_digest: str) -
 
 
 def _has_canonical_host_command(path: str) -> bool:
-    """Require the host resolver to return exactly the trusted command path."""
-    return which_host_command(Path(path).name) == path
+    """Require the exact absolute command to exist as an executable on the host.
+
+    PATH is deliberately not consulted: every caller runs the command by this
+    absolute path, so a pyenv, conda or venv ``python3`` earlier in the user's
+    PATH must not block installation.
+    """
+    try:
+        result = subprocess.run(
+            wrap_host_command(["/usr/bin/test", "-f", path, "-a", "-x", path]),
+            capture_output=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
 
 
 def _verify_deb_identity(path: Path) -> bool:
@@ -714,12 +737,10 @@ def _run_install(path: Path, expected_size: int, expected_digest: str) -> tuple[
     """
     if not _safe_regular_file(path):
         return (False, False)
-    if not (
-        _has_canonical_host_command("/usr/bin/pkexec")
-        and _has_canonical_host_command("/usr/bin/python3")
-        and _has_canonical_host_command("/usr/bin/apt-get")
-    ):
-        return (False, False)
+    for command in ("/usr/bin/pkexec", "/usr/bin/python3", "/usr/bin/apt-get"):
+        if not _has_canonical_host_command(command):
+            logger.warning("Helper install: host has no executable %s", command)
+            return (False, False)
     try:
         result = subprocess.run(
             wrap_host_command(
@@ -744,6 +765,12 @@ def _run_install(path: Path, expected_size: int, expected_digest: str) -> tuple[
         raise _HostProcessTimeout from error
     except OSError as error:
         raise _HostProcessError from error
+    if result.returncode != 0:
+        logger.warning(
+            "Helper install: elevated installer exited %d: %s",
+            result.returncode,
+            sanitize_log_text(result.stderr).strip(),
+        )
     return (result.returncode == 0, result.returncode in {126, 127})
 
 
