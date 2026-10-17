@@ -250,7 +250,9 @@ class ScanView(Gtk.Box):
 
         if result.status == ScanStatus.INFECTED:
             self._show_banner(
-                _("Scan complete - {count} threat(s) detected").format(count=result.infected_count),
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("Scan complete — {count} threat(s) detected").format(count=result.infected_count),
                 StatusLevel.WARNING,
             )
         elif result.status == ScanStatus.CLEAN:

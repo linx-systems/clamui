@@ -989,7 +989,9 @@ class ClamUIApp(Adw.Application):
             self._initial_scan_paths = []
             self._initial_use_virustotal = False
             self._show_window_toast(
-                _("A scan is already running - the new scan request was ignored")
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("A scan is already running — the new scan request was ignored")
             )
             return
 

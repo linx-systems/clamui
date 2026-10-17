@@ -230,6 +230,21 @@ ITEMS = [N_("Scan"), N_("Update")]  # Mark for extraction only
 label.set_text(_(item))
 ```
 
+**Translator comments** (need when string have dash, range, quote, markup, or command):
+
+```python
+_(
+    # Translators: the em dash separates two parts; use the dash and spacing usual in your language.
+    "Scan complete — No threats found"
+)
+```
+
+- Comment go line right above string literal, not above lone `_(` line, else xgettext drop it.
+- Write `—` `–` `…` direct, no `—` escape: old xgettext keep escape literal, msgid never match.
+- Em dash `—` for break, en dash `–` for range (`1–28`). No ` - ` or `--` as dash.
+- Quoted UI label: say must match that label translation. Quoted command/key/package: say no translate.
+- No `file(s)` fake plural; use `ngettext`.
+
 **Do NOT translate:**
 
 - Logger message (`logger.debug/info/warning/error`)

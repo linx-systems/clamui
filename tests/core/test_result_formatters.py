@@ -91,10 +91,10 @@ class TestFormatResultsAsText:
         assert "Status: INFECTED" in text
         assert "Threats Found: 2" in text
         assert "Detected Threats" in text
-        assert "[1] CRITICAL - Ransomware" in text
+        assert "[1] CRITICAL — Ransomware" in text
         assert "File: /home/user/Downloads/malware.exe" in text
         assert "Threat: Win.Ransomware.Locky" in text
-        assert "[2] HIGH - Trojan" in text
+        assert "[2] HIGH — Trojan" in text
         assert "File: /home/user/Downloads/suspicious.doc" in text
         assert "Threat: Win.Trojan.Agent" in text
 
@@ -174,11 +174,11 @@ class TestFormatResultsAsText:
 
         text = format_results_as_text(result, timestamp="2024-01-15 14:30:45")
 
-        assert "[1] HIGH - Trojan" in text
-        assert "[2] HIGH - Trojan" in text
-        assert "[3] HIGH - Trojan" in text
-        assert "[4] HIGH - Trojan" in text
-        assert "[5] HIGH - Trojan" in text
+        assert "[1] HIGH — Trojan" in text
+        assert "[2] HIGH — Trojan" in text
+        assert "[3] HIGH — Trojan" in text
+        assert "[4] HIGH — Trojan" in text
+        assert "[5] HIGH — Trojan" in text
 
     def test_format_results_as_text_severity_levels(self):
         """Test that all severity levels are formatted correctly."""
@@ -217,10 +217,10 @@ class TestFormatResultsAsText:
 
         text = format_results_as_text(result, timestamp="2024-01-15 14:30:45")
 
-        assert "CRITICAL - Ransomware" in text
-        assert "HIGH - Trojan" in text
-        assert "MEDIUM - Adware" in text
-        assert "LOW - Test" in text
+        assert "CRITICAL — Ransomware" in text
+        assert "HIGH — Trojan" in text
+        assert "MEDIUM — Adware" in text
+        assert "LOW — Test" in text
 
     def test_format_results_as_text_special_characters_in_path(self):
         """Test that special characters in paths are handled correctly."""
@@ -723,14 +723,14 @@ class TestCleanScanStatusMessage:
 
     def test_plain_message_without_warnings(self):
         result = self._create_clean_result()
-        assert clean_scan_status_message(result) == "Scan complete - No threats found"
+        assert clean_scan_status_message(result) == "Scan complete — No threats found"
 
     def test_skipped_files_render_count(self):
         result = self._create_clean_result(
             skipped_count=3, warning_message="3 file(s) could not be accessed"
         )
         message = clean_scan_status_message(result)
-        assert message == "Scan complete - No threats found (3 file(s) not accessible)"
+        assert message == "Scan complete — No threats found (3 file(s) not accessible)"
 
     def test_nonfatal_warning_never_renders_zero_files(self):
         """Regression: skipped_count == 0 with a warning must surface the
@@ -741,5 +741,5 @@ class TestCleanScanStatusMessage:
         message = clean_scan_status_message(result)
         assert "0 file(s)" not in message
         assert message == (
-            "Scan complete - No threats found (LibClamAV Warning: bytecode execution failed)"
+            "Scan complete — No threats found (LibClamAV Warning: bytecode execution failed)"
         )

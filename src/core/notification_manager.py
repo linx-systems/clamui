@@ -223,6 +223,7 @@ class NotificationManager:
         if is_clean:
             title = _("VirusTotal: No Threats")
             if file_name:
+                # Translators: use your language's quotation marks around {file_name}.
                 body = _("'{file_name}' appears safe (0/{total} detections)").format(
                     file_name=file_name, total=total_engines
                 )
@@ -232,6 +233,7 @@ class NotificationManager:
         else:
             title = _("VirusTotal: Threats Detected!")
             if file_name:
+                # Translators: use your language's quotation marks around {file_name}.
                 body = _("'{file_name}' flagged by {detections}/{total} engines").format(
                     file_name=file_name, detections=detections, total=total_engines
                 )

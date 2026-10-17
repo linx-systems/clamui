@@ -178,6 +178,7 @@ def run_export(args: argparse.Namespace) -> int:
 
     try:
         pm.export_profile(profile.id, args.file)
+        # Translators: use your language's quotation marks around {name}.
         print(_("Exported '{name}' to {file}").format(name=profile.name, file=args.file))
         return 0
     except (OSError, ValueError) as e:

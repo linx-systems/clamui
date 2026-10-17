@@ -1089,6 +1089,8 @@ def _privileged_helper_unavailable_message() -> str:
     if _running_in_flatpak():
         package_name = f"clamui-privileged-helper_{__version__}_all.deb"
         return _(
+            # Translators: keep the quoted file name and commands unchanged; you may use your
+            # language's quotation marks.
             "ClamUI privileged helper not installed on the host. "
             "The Flatpak sandbox cannot access protected system ClamAV "
             "configuration files directly. Download the matching "
@@ -1099,6 +1101,8 @@ def _privileged_helper_unavailable_message() -> str:
             "Flatpak cannot install this helper on the host."
         ).format(package_name=package_name)
     return _(
+        # Translators: keep the quoted command unchanged; you may use your language's quotation
+        # marks.
         "ClamUI privileged helper not installed. Run "
         "'sudo clamui install-privileged-helper' on this host to install it "
         "and enable protected system ClamAV configuration access."
@@ -1129,7 +1133,9 @@ def read_config_with_elevation(file_path: str) -> tuple[str | None, str | None]:
     try:
         result = subprocess.run(command, capture_output=True, timeout=10, check=False)
     except FileNotFoundError:
-        return (None, _("pkexec not found - cannot authorize configuration read"))
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        return (None, _("pkexec not found — cannot authorize configuration read"))
     except subprocess.TimeoutExpired:
         return (None, _("Timed out reading protected configuration"))
     except OSError as error:
@@ -1144,6 +1150,8 @@ def read_config_with_elevation(file_path: str) -> tuple[str | None, str | None]:
             return (
                 None,
                 _(
+                    # Translators: keep the quoted package name unchanged; you may use your
+                    # language's quotation marks.
                     "Privileged helper rejected the request: protocol mismatch. "
                     "Update the 'clamui-privileged-helper' package on the host."
                 ),
@@ -1265,6 +1273,8 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                 return (
                     False,
                     _(
+                        # Translators: keep the quoted file name and commands unchanged; you may use
+                        # your language's quotation marks.
                         "ClamUI privileged helper not installed on the host. "
                         "The Flatpak sandbox cannot write system ClamAV "
                         "configuration files such as /etc/clamav/*.conf directly. "
@@ -1280,6 +1290,8 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
             return (
                 False,
                 _(
+                    # Translators: keep the quoted command unchanged; you may use your language's
+                    # quotation marks.
                     "ClamUI privileged helper not installed. Run "
                     "'sudo clamui install-privileged-helper' on this host to "
                     "install it and enable saving system ClamAV "
@@ -1345,10 +1357,12 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                     return (
                         False,
                         _(
+                            # Translators: keep the quoted package name unchanged; you may use your
+                            # language's quotation marks.
                             "Could not obtain administrator authorization to apply "
                             "these changes. If you were not shown a password prompt, "
                             "the ClamUI polkit policy or privileged helper is likely "
-                            "not installed on this system -- install the "
+                            "not installed on this system. Install the "
                             "'clamui-privileged-helper' package (which provides "
                             "clamui-apply-preferences and its polkit policy) to "
                             "enable saving system configuration."
@@ -1366,6 +1380,8 @@ def write_configs_with_elevation(configs: list[ClamAVConfig]) -> tuple[bool, str
                     return (
                         False,
                         _(
+                            # Translators: keep the quoted package name unchanged; you may use your
+                            # language's quotation marks.
                             "Privileged helper rejected the request: protocol "
                             "mismatch. Update the 'clamui-privileged-helper' "
                             "package on the host."

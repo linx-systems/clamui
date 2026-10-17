@@ -94,7 +94,9 @@ class OnAccessPage(PreferencesPageMixin):
             group.set_title(_("Configuration Status"))
             row = Adw.ActionRow()
             row.set_title(_("On Access Configuration"))
-            row.set_subtitle(_("clamd.conf not found - On Access settings unavailable"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            row.set_subtitle(_("clamd.conf not found — On Access settings unavailable"))
             group.add(row)
             page.add(group)
 

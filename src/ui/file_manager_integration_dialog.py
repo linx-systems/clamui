@@ -133,6 +133,8 @@ class FileManagerIntegrationDialog(Adw.Window):
         info_group.set_title(_("Add Context Menu Actions"))
         info_group.set_description(
             _(
+                # Translators: 'Scan with ClamUI' is the file manager menu entry, which is not
+                # translated; keep it in English.
                 "ClamUI can add 'Scan with ClamUI' options to your file manager's "
                 "right-click menu. This makes it easy to scan files and folders "
                 "directly from your file browser."
@@ -213,7 +215,9 @@ class FileManagerIntegrationDialog(Adw.Window):
             row.set_active(True)
         elif integration.status == IntegrationStatus.PARTIAL:
             row.set_subtitle(
-                _("{description} (incomplete - needs repair)").format(
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("{description} (incomplete — needs repair)").format(
                     description=_(integration.description)
                 )
             )

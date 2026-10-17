@@ -100,6 +100,7 @@ class ScanInProgressDialog(Adw.Window):
         icon_title_box.append(warning_icon)
 
         title_label = Gtk.Label()
+        # Translators: keep the markup tags unchanged.
         title_label.set_markup(_("<b><big>Scan in Progress</big></b>"))
         title_label.set_halign(Gtk.Align.START)
         icon_title_box.append(title_label)

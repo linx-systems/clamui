@@ -566,6 +566,7 @@ class PreferencesPageMixin:
             if not os.path.isdir(folder_path):
                 self._show_simple_dialog(
                     _("Folder Not Found"),
+                    # Translators: use your language's quotation marks around {path}.
                     _("The folder '{path}' does not exist.").format(path=folder_path),
                 )
                 return
@@ -620,6 +621,7 @@ class PreferencesPageMixin:
         if not exists:
             self._show_simple_dialog(
                 _("Folder Not Found"),
+                # Translators: use your language's quotation marks around {path}.
                 _("The folder '{path}' does not exist.").format(path=folder_path),
             )
             return False

@@ -33,7 +33,7 @@ msgid "Select File or Folder"
 msgstr "Fájl vagy mappa kiválasztása"
 
 #: src/app.py:958
-msgid "A scan is already running - the new scan request was ignored"
+msgid "A scan is already running — the new scan request was ignored"
 msgstr "Már fut egy vizsgálat – az új vizsgálati kérés figyelmen kívül maradt"
 
 #: src/app.py:979
@@ -1073,10 +1073,11 @@ msgstr "A hitelesítés megszakítva. A beállítások módosításai nem lettek
 
 #: src/core/clamav_config.py:1240
 msgid ""
-"Could not obtain administrator authorization to apply these changes. If you were not shown a "
-"password prompt, the ClamUI polkit policy or privileged helper is likely not installed on "
-"this system -- install the 'clamui-privileged-helper' package (which provides clamui-apply-"
-"preferences and its polkit policy) to enable saving system configuration."
+"Could not obtain administrator authorization to apply these changes. If you "
+"were not shown a password prompt, the ClamUI polkit policy or privileged "
+"helper is likely not installed on this system. Install the "
+"'clamui-privileged-helper' package (which provides clamui-apply-preferences "
+"and its polkit policy) to enable saving system configuration."
 msgstr ""
 "Nem sikerült rendszergazdai jogosultságot szerezni ezen módosítások alkalmazásához. Ha nem "
 "jelent meg jelszókérő ablak, valószínűleg a ClamUI polkit-házirendje vagy a jogosultsággal "
@@ -1878,7 +1879,7 @@ msgid "Start the Portmaster service to enable network protection"
 msgstr "Indítsa el a Portmaster szolgáltatást a hálózati védelem engedélyezéséhez"
 
 #: src/core/system_audit.py:1682
-msgid "Not detected - optional network monitor and application firewall"
+msgid "Not detected — optional network monitor and application firewall"
 msgstr "Nem észlelhető – opcionális hálózatfigyelő és alkalmazástűzfal"
 
 #: src/core/system_audit.py:1691
@@ -1956,7 +1957,7 @@ msgstr ""
 "engedélyezze a beállításokban a nyílt szöveges tartalék módot (kevésbé biztonságos)."
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable - less secure)"
+msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr "A beállításfájlban tárolva (a kulcstartó nem érhető el – kevésbé biztonságos)"
 
 #: src/core/keyring_manager.py:140
@@ -2297,16 +2298,16 @@ msgstr "{count} fájl nem volt elérhető"
 
 #: src/core/result_formatters.py:55
 #, python-brace-format
-msgid "Scan complete - No threats found ({count} file(s) not accessible)"
+msgid "Scan complete — No threats found ({count} file(s) not accessible)"
 msgstr "Vizsgálat befejezve – nem található fenyegetés ({count} fájl nem volt elérhető)"
 
 #: src/core/result_formatters.py:59
 #, python-brace-format
-msgid "Scan complete - No threats found ({warning})"
+msgid "Scan complete — No threats found ({warning})"
 msgstr "Vizsgálat befejezve – nem található fenyegetés ({warning})"
 
 #: src/core/result_formatters.py:62
-msgid "Scan complete - No threats found"
+msgid "Scan complete — No threats found"
 msgstr "Vizsgálat befejezve – nem található fenyegetés"
 
 #: src/core/result_formatters.py:121
@@ -2339,7 +2340,7 @@ msgstr "Észlelt fenyegetések"
 
 #: src/core/result_formatters.py:147
 #, python-brace-format
-msgid "[{index}] {severity} - {category}"
+msgid "[{index}] {severity} — {category}"
 msgstr "[{index}] {severity} – {category}"
 
 #: src/core/result_formatters.py:151
@@ -2569,11 +2570,11 @@ msgstr "A frissítés ismeretlen hibával meghiúsult. A részletekért nézze m
 
 #: src/core/updater.py:1365
 #, python-brace-format
-msgid "Database update completed - {count} database(s) updated"
+msgid "Database update completed — {count} database(s) updated"
 msgstr "Az adatbázis-frissítés befejeződött – {count} adatbázis frissítve"
 
 #: src/core/updater.py:1369
-msgid "Database update completed - Already up to date"
+msgid "Database update completed — Already up to date"
 msgstr "Az adatbázis-frissítés befejeződött – már naprakész volt"
 
 #: src/core/updater.py:1371
@@ -2789,7 +2790,7 @@ msgid "Running security check"
 msgstr "Biztonsági ellenőrzés futtatása"
 
 #: src/ui/audit_view.py:255
-msgid "Portmaster - checking…"
+msgid "Portmaster — checking…"
 msgstr "Portmaster - ellenőrzés…"
 
 #: src/ui/audit_view.py:266
@@ -2827,11 +2828,11 @@ msgid "Scan for known rootkits using chkrootkit"
 msgstr "Ismert rootkitek keresése a chkrootkit segítségével"
 
 #: src/ui/audit_view.py:552
-msgid "Portmaster - not detected (optional)"
+msgid "Portmaster — not detected (optional)"
 msgstr "Portmaster - nem észlelhető (opcionális)"
 
 #: src/ui/audit_view.py:555
-msgid "Portmaster - could not probe"
+msgid "Portmaster — could not probe"
 msgstr "Portmaster - nem sikerült lekérdezni"
 
 #: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
@@ -2981,7 +2982,7 @@ msgid "Not installed"
 msgstr "Nincs telepítve"
 
 #: src/ui/components_view.py:560 src/ui/components_view.py:611
-msgid "Not installed - expand for setup instructions"
+msgid "Not installed — expand for setup instructions"
 msgstr "Nincs telepítve – bontsa ki a telepítési útmutatóért"
 
 #: src/ui/components_view.py:592 src/ui/logs_view.py:1269
@@ -3044,7 +3045,7 @@ msgid "Exported to {filename}"
 msgstr "Exportálva ide: {filename}"
 
 #: src/ui/file_export.py:257
-msgid "Permission denied - cannot write to selected location"
+msgid "Permission denied — cannot write to selected location"
 msgstr "Hozzáférés megtagadva – nem lehet írni a kiválasztott helyre"
 
 #: src/ui/file_export.py:258
@@ -3114,7 +3115,7 @@ msgstr "{description} (telepítve)"
 
 #: src/ui/file_manager_integration_dialog.py:216
 #, python-brace-format
-msgid "{description} (incomplete - needs repair)"
+msgid "{description} (incomplete — needs repair)"
 msgstr "{description} (hiányos – javítás szükséges)"
 
 #: src/ui/file_manager_integration_dialog.py:268
@@ -3697,8 +3698,8 @@ msgstr "Egyéni aláírás-adatbázisok"
 
 #: src/ui/preferences/database_page.py:484
 msgid ""
-"Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines - "
-"'DatabaseCustomURL' prefix auto-stripped."
+"Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
+"— 'DatabaseCustomURL' prefix auto-stripped."
 msgstr ""
 "Külső fél aláírás-URL-jei (pl. SecuriteInfo). Illessze be az URL-eket vagy beállítási "
 "sorokat – a „DatabaseCustomURL” előtag automatikusan eltávolításra kerül."
@@ -4229,7 +4230,7 @@ msgid "On Access Configuration"
 msgstr "Elérési vizsgálat beállításai"
 
 #: src/ui/preferences/onaccess_page.py:97
-msgid "clamd.conf not found - On Access settings unavailable"
+msgid "clamd.conf not found — On Access settings unavailable"
 msgstr "A clamd.conf nem található – az elérési vizsgálat beállításai nem érhetők el"
 
 #: src/ui/preferences/onaccess_page.py:118
@@ -4574,7 +4575,7 @@ msgid "ClamD Configuration"
 msgstr "ClamD-beállítás"
 
 #: src/ui/preferences/scanner_page.py:159
-msgid "clamd.conf not found - Scanner settings unavailable"
+msgid "clamd.conf not found — Scanner settings unavailable"
 msgstr "A clamd.conf nem található – a vizsgálóbeállítások nem érhetők el"
 
 #: src/ui/preferences/scanner_page.py:192
@@ -4625,19 +4626,24 @@ msgstr "A vizsgálati háttérrendszerekről"
 
 #: src/ui/preferences/scanner_page.py:413
 msgid ""
-"Recommended - Automatically uses daemon if available, falls back to clamscan for reliability"
+"Recommended — Automatically uses daemon if available, falls back to "
+"clamscan for reliability"
 msgstr ""
 "Ajánlott - Automatikusan a démont használja, ha elérhető, egyébként a megbízhatóság "
 "érdekében a clamscanre vált"
 
 #: src/ui/preferences/scanner_page.py:416
-msgid "Fastest - Instant startup with in-memory database, requires clamd service running"
+msgid ""
+"Fastest — Instant startup with in-memory database, requires clamd service "
+"running"
 msgstr ""
 "Leggyorsabb - Azonnali indítás memóriában tárolt adatbázissal, futó clamd szolgáltatást "
 "igényel"
 
 #: src/ui/preferences/scanner_page.py:418
-msgid "Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
+msgid ""
+"Most compatible — Works anywhere, loads database each scan (3–10 sec "
+"startup)"
 msgstr ""
 "Legkompatibilisebb - Mindenhol működik, minden vizsgálatkor betölti az adatbázist (3–10 mp "
 "indítás)"
@@ -4864,7 +4870,7 @@ msgid "Day of Month"
 msgstr "A hónap napja"
 
 #: src/ui/preferences/scheduled_page.py:154
-msgid "For monthly scans (1-28)"
+msgid "For monthly scans (1–28)"
 msgstr "Havi vizsgálatokhoz (1–28)"
 
 #: src/ui/preferences/scheduled_page.py:166
@@ -5029,7 +5035,7 @@ msgstr "Vissza a navigációhoz"
 
 #: src/ui/preferences/window.py:534 src/ui/preferences/window.py:557
 #, python-brace-format
-msgid "Preferences - {page}"
+msgid "Preferences — {page}"
 msgstr "Beállítások - {page}"
 
 #: src/ui/preferences/window.py:757
@@ -5537,7 +5543,7 @@ msgstr "Fenyegetés észlelve"
 
 #: src/ui/scan/scan_progress_widget.py:157
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%"
+msgid "Target {current} of {total} — {pct}%"
 msgstr "{current}/{total} cél - {pct}%"
 
 #: src/ui/scan/scan_progress_widget.py:162
@@ -5605,7 +5611,7 @@ msgstr "Vizsgálat közben nem adhatók hozzá célok"
 
 #: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2266
 #, python-brace-format
-msgid "Scan complete - {count} threat(s) detected"
+msgid "Scan complete — {count} threat(s) detected"
 msgstr "Vizsgálat befejezve – {count} fenyegetés észlelve"
 
 #: src/ui/scan/scan_view.py:260
@@ -5728,7 +5734,7 @@ msgstr "{threat_text} található"
 
 #: src/ui/scan_results_dialog.py:225
 #, python-brace-format
-msgid "Partial results - {threat_text} found"
+msgid "Partial results — {threat_text} found"
 msgstr "Részleges eredmények – {threat_text} található"
 
 #: src/ui/scan_results_dialog.py:228
@@ -5870,7 +5876,7 @@ msgid "Export Scan Results"
 msgstr "Vizsgálati eredmények exportálása"
 
 #: src/ui/scan_view.py:427
-msgid "Scan in progress - please wait until the current scan completes"
+msgid "Scan in progress — please wait until the current scan completes"
 msgstr "Vizsgálat folyamatban – várja meg, amíg a jelenlegi vizsgálat befejeződik"
 
 #: src/ui/scan_view.py:434
@@ -5950,7 +5956,7 @@ msgstr "A jelenlegi vizsgálat megszakítása"
 
 #: src/ui/scan_view.py:1499
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%{overflow}"
+msgid "Target {current} of {total} — {pct}%{overflow}"
 msgstr "{current}/{total} cél - {pct}%{overflow}"
 
 #: src/ui/scan_view.py:1508
@@ -5975,12 +5981,12 @@ msgstr "Az összes hátralévő vizsgálat megszakítása"
 
 #: src/ui/scan_view.py:1929
 #, python-brace-format
-msgid "Scanning {path} \\u2014 File count pending"
+msgid "Scanning {path} — File count pending"
 msgstr "{path} vizsgálata - fájlszám számítás alatt"
 
 #: src/ui/scan_view.py:1936
 #, python-brace-format
-msgid "Scanning {count} items \\u2014 File count pending"
+msgid "Scanning {count} items — File count pending"
 msgstr "{count} elem vizsgálata - fájlszám számítás alatt"
 
 #: src/ui/scan_view.py:1942
@@ -6192,7 +6198,7 @@ msgstr "Nem sikerült betölteni a statisztikai adatokat"
 
 #: src/ui/statistics_view.py:844
 #, python-brace-format
-msgid "{start_date} - {end_date}"
+msgid "{start_date} – {end_date}"
 msgstr "{start_date} – {end_date}"
 
 #: src/ui/statistics_view.py:849
@@ -6322,7 +6328,7 @@ msgstr "Kilépés"
 
 #: src/ui/tray_service.py:492
 #, python-brace-format
-msgid "ClamUI - {status}"
+msgid "ClamUI — {status}"
 msgstr "ClamUI – {status}"
 
 #: src/ui/update_view.py:93
@@ -6473,11 +6479,11 @@ msgid "UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"
 msgstr "FRISSÍTÉSI JELZÉS ELKÜLDVE A FRESHCLAM SZOLGÁLTATÁSNAK"
 
 #: src/ui/update_view.py:623
-msgid "UPDATE COMPLETE - DATABASE UPDATED"
+msgid "UPDATE COMPLETE — DATABASE UPDATED"
 msgstr "FRISSÍTÉS KÉSZ – AZ ADATBÁZIS FRISSÍTVE"
 
 #: src/ui/update_view.py:625
-msgid "UPDATE COMPLETE - ALREADY UP TO DATE"
+msgid "UPDATE COMPLETE — ALREADY UP TO DATE"
 msgstr "FRISSÍTÉS KÉSZ – MÁR NAPRAKÉSZ VOLT"
 
 #: src/ui/update_view.py:627

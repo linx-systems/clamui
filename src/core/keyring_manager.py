@@ -135,7 +135,9 @@ def set_api_key(
 
     if settings_manager.set("virustotal_api_key", api_key):
         logger.info("Stored VirusTotal API key in settings (plaintext fallback)")
-        return True, _("Stored in settings file (keyring unavailable - less secure)")
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        return True, _("Stored in settings file (keyring unavailable — less secure)")
 
     return False, _("Failed to save API key to settings")
 
@@ -293,7 +295,9 @@ def set_portmaster_token(
 
     if settings_manager.set(PM_SETTINGS_KEY, token):
         logger.info("Stored Portmaster token in settings (plaintext fallback)")
-        return True, _("Stored in settings file (keyring unavailable - less secure)")
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        return True, _("Stored in settings file (keyring unavailable — less secure)")
     return False, _("Failed to save Portmaster token to settings")
 
 

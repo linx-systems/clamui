@@ -254,7 +254,9 @@ class FileExportHelper:
             success_message = self._success_message
         else:
             success_message = _("Exported to {filename}").format(filename=filename)
-        permission_message = _("Permission denied - cannot write to selected location")
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        permission_message = _("Permission denied — cannot write to selected location")
         write_error_template = _("Error writing file: {error}")
         export_error_template = _("Error exporting file: {error}")
 

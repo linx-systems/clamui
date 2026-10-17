@@ -1411,6 +1411,8 @@ def run_lynis_audit() -> AuditSectionResult:
                 name=_("Hardening Index"),
                 status=status,
                 detail=_("Score: {score}/100").format(score=hardening_index),
+                # Translators: keep the quoted command unchanged; you may use your language's
+                # quotation marks.
                 recommendation=_("Run 'sudo lynis audit system' for detailed recommendations")
                 if status != AuditStatus.PASS
                 else None,
@@ -1678,7 +1680,9 @@ def check_portmaster() -> AuditSectionResult:
             AuditCheckResult(
                 name=_("Portmaster"),
                 status=AuditStatus.SKIPPED,
-                detail=_("Not detected - optional network monitor and application firewall"),
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                detail=_("Not detected — optional network monitor and application firewall"),
                 info_url=_URLS["portmaster_install"],
             )
         )

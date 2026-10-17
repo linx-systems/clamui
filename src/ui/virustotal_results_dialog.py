@@ -289,6 +289,7 @@ class VirusTotalResultsDialog(Adw.Window):
         if len(self._all_detections) > LARGE_RESULT_THRESHOLD:
             warning_label = Gtk.Label()
             warning_label.set_markup(
+                # Translators: keep the markup tags unchanged.
                 _("<small>Showing first {limit} of {total} detections</small>").format(
                     limit=INITIAL_DISPLAY_LIMIT,
                     total=len(self._all_detections),

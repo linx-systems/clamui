@@ -32,7 +32,7 @@ msgid "Select File or Folder"
 msgstr "选择文件或文件夹"
 
 #: src/app.py:894
-msgid "A scan is already running - the new scan request was ignored"
+msgid "A scan is already running — the new scan request was ignored"
 msgstr ""
 
 #: src/app.py:915
@@ -1051,9 +1051,9 @@ msgstr ""
 msgid ""
 "Could not obtain administrator authorization to apply these changes. If you "
 "were not shown a password prompt, the ClamUI polkit policy or privileged "
-"helper is likely not installed on this system -- install the 'clamui-"
-"privileged-helper' package (which provides clamui-apply-preferences and its "
-"polkit policy) to enable saving system configuration."
+"helper is likely not installed on this system. Install the "
+"'clamui-privileged-helper' package (which provides clamui-apply-preferences "
+"and its polkit policy) to enable saving system configuration."
 msgstr ""
 
 #: src/core/clamav_config.py:1246
@@ -1858,7 +1858,7 @@ msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #: src/core/system_audit.py:1671
-msgid "Not detected - optional network monitor and application firewall"
+msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
 #: src/core/system_audit.py:1680
@@ -1942,7 +1942,7 @@ msgstr ""
 "退方式（安全性较低）。"
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable - less secure)"
+msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr "已存储在设置文件中（密钥环不可用，安全性较低）"
 
 #: src/core/keyring_manager.py:140
@@ -2175,16 +2175,16 @@ msgstr "{n} 个文件无法被扫描"
 
 #: src/core/result_formatters.py:55
 #, python-brace-format
-msgid "Scan complete - No threats found ({count} file(s) not accessible)"
+msgid "Scan complete — No threats found ({count} file(s) not accessible)"
 msgstr "扫描完成 - 未发现威胁（{count} 个文件无法访问）"
 
 #: src/core/result_formatters.py:59
 #, fuzzy, python-brace-format
-msgid "Scan complete - No threats found ({warning})"
+msgid "Scan complete — No threats found ({warning})"
 msgstr "扫描完成 - 未发现威胁"
 
 #: src/core/result_formatters.py:62
-msgid "Scan complete - No threats found"
+msgid "Scan complete — No threats found"
 msgstr "扫描完成 - 未发现威胁"
 
 #: src/core/result_formatters.py:121
@@ -2217,7 +2217,7 @@ msgstr "检测到的威胁"
 
 #: src/core/result_formatters.py:147
 #, python-brace-format
-msgid "[{index}] {severity} - {category}"
+msgid "[{index}] {severity} — {category}"
 msgstr "[{index}] {severity} - {category}"
 
 #: src/core/result_formatters.py:151
@@ -2444,11 +2444,11 @@ msgstr "更新失败，出现未知错误。详情请查看日志。"
 
 #: src/core/updater.py:1365
 #, python-brace-format
-msgid "Database update completed - {count} database(s) updated"
+msgid "Database update completed — {count} database(s) updated"
 msgstr "数据库更新完成 - 已更新 {count} 个数据库"
 
 #: src/core/updater.py:1369
-msgid "Database update completed - Already up to date"
+msgid "Database update completed — Already up to date"
 msgstr "数据库更新完成 - 已是最新"
 
 #: src/core/updater.py:1371
@@ -2670,7 +2670,7 @@ msgid "Running security check"
 msgstr "正在运行安全检查"
 
 #: src/ui/audit_view.py:255
-msgid "Portmaster - checking…"
+msgid "Portmaster — checking…"
 msgstr ""
 
 #: src/ui/audit_view.py:266
@@ -2708,11 +2708,11 @@ msgid "Scan for known rootkits using chkrootkit"
 msgstr "使用 chkrootkit 扫描已知的 rootkit"
 
 #: src/ui/audit_view.py:552
-msgid "Portmaster - not detected (optional)"
+msgid "Portmaster — not detected (optional)"
 msgstr ""
 
 #: src/ui/audit_view.py:555
-msgid "Portmaster - could not probe"
+msgid "Portmaster — could not probe"
 msgstr ""
 
 #: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
@@ -2861,7 +2861,7 @@ msgid "Not installed"
 msgstr "未安装"
 
 #: src/ui/components_view.py:560 src/ui/components_view.py:611
-msgid "Not installed - expand for setup instructions"
+msgid "Not installed — expand for setup instructions"
 msgstr "未安装 - 展开以获取设置说明"
 
 #: src/ui/components_view.py:592 src/ui/logs_view.py:1269
@@ -2925,7 +2925,7 @@ msgid "Exported to {filename}"
 msgstr "已导出到 {filename}"
 
 #: src/ui/file_export.py:257
-msgid "Permission denied - cannot write to selected location"
+msgid "Permission denied — cannot write to selected location"
 msgstr "权限不够，无法向选定位置写入文件"
 
 #: src/ui/file_export.py:258
@@ -2997,7 +2997,7 @@ msgstr "{description}（installed）"
 
 #: src/ui/file_manager_integration_dialog.py:216
 #, python-brace-format
-msgid "{description} (incomplete - needs repair)"
+msgid "{description} (incomplete — needs repair)"
 msgstr "{description}（不完整，需要修复）"
 
 #: src/ui/file_manager_integration_dialog.py:268
@@ -3609,7 +3609,7 @@ msgstr "带自定义签名的数据库"
 #: src/ui/preferences/database_page.py:484
 msgid ""
 "Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
-"- 'DatabaseCustomURL' prefix auto-stripped."
+"— 'DatabaseCustomURL' prefix auto-stripped."
 msgstr ""
 "第三方签名 URL（例如 SecuriteInfo）。粘贴 URL 或配置行 - ‘DatabaseCustomURL’ "
 "前缀将自动去除。"
@@ -4137,7 +4137,7 @@ msgid "On Access Configuration"
 msgstr "实时扫描配置"
 
 #: src/ui/preferences/onaccess_page.py:97
-msgid "clamd.conf not found - On Access settings unavailable"
+msgid "clamd.conf not found — On Access settings unavailable"
 msgstr "未找到 clamd.conf - 实时扫描设置不可用"
 
 #: src/ui/preferences/onaccess_page.py:118
@@ -4399,7 +4399,7 @@ msgid "ClamD Configuration"
 msgstr "ClamD 配置"
 
 #: src/ui/preferences/scanner_page.py:159
-msgid "clamd.conf not found - Scanner settings unavailable"
+msgid "clamd.conf not found — Scanner settings unavailable"
 msgstr "未找到 clamd.conf - 扫描程序设置不可用"
 
 #: src/ui/preferences/scanner_page.py:283
@@ -4445,19 +4445,20 @@ msgstr "关于扫描后端"
 
 #: src/ui/preferences/scanner_page.py:382
 msgid ""
-"Recommended - Automatically uses daemon if available, falls back to clamscan "
-"for reliability"
+"Recommended — Automatically uses daemon if available, falls back to "
+"clamscan for reliability"
 msgstr "推荐--自动使用守护进程（如果可用），否则回退到 clamscan 以确保可靠性。"
 
 #: src/ui/preferences/scanner_page.py:385
 msgid ""
-"Fastest - Instant startup with in-memory database, requires clamd service "
+"Fastest — Instant startup with in-memory database, requires clamd service "
 "running"
 msgstr "最快--使用内存数据库即时启动，需要 clamd 服务运行"
 
 #: src/ui/preferences/scanner_page.py:387
 msgid ""
-"Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
+"Most compatible — Works anywhere, loads database each scan (3–10 sec "
+"startup)"
 msgstr "兼容性最强--哪里都能用，每次扫描都加载数据库（启动耗时3-10秒）"
 
 #: src/ui/preferences/scanner_page.py:461
@@ -4677,7 +4678,7 @@ msgid "Day of Month"
 msgstr "每月中的日期"
 
 #: src/ui/preferences/scheduled_page.py:154
-msgid "For monthly scans (1-28)"
+msgid "For monthly scans (1–28)"
 msgstr "每月扫描（1-28）"
 
 #: src/ui/preferences/scheduled_page.py:166
@@ -4850,7 +4851,7 @@ msgstr "返回导航"
 
 #: src/ui/preferences/window.py:534 src/ui/preferences/window.py:557
 #, python-brace-format
-msgid "Preferences - {page}"
+msgid "Preferences — {page}"
 msgstr "首选项 - {page}"
 
 #: src/ui/preferences/window.py:757
@@ -5314,7 +5315,7 @@ msgstr "检测到威胁"
 
 #: src/ui/scan/scan_progress_widget.py:157
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%"
+msgid "Target {current} of {total} — {pct}%"
 msgstr "第 {current}/{total} 个目标 - {pct}%"
 
 #: src/ui/scan/scan_progress_widget.py:162
@@ -5385,7 +5386,7 @@ msgstr "扫描过程中无法添加目标"
 
 #: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2266
 #, python-brace-format
-msgid "Scan complete - {count} threat(s) detected"
+msgid "Scan complete — {count} threat(s) detected"
 msgstr "扫描完成 - 发现 {count} 个威胁"
 
 #: src/ui/scan/scan_view.py:260
@@ -5507,7 +5508,7 @@ msgstr "已发现威胁 {threat_text}"
 
 #: src/ui/scan_results_dialog.py:225
 #, python-brace-format
-msgid "Partial results - {threat_text} found"
+msgid "Partial results — {threat_text} found"
 msgstr "部分结果 - 已发现威胁 {threat_text}"
 
 #: src/ui/scan_results_dialog.py:228
@@ -5648,7 +5649,7 @@ msgid "Export Scan Results"
 msgstr "导出扫描结果"
 
 #: src/ui/scan_view.py:427
-msgid "Scan in progress - please wait until the current scan completes"
+msgid "Scan in progress — please wait until the current scan completes"
 msgstr "扫描正在进行中 - 请等待当前扫描完成"
 
 #: src/ui/scan_view.py:434
@@ -5728,8 +5729,8 @@ msgstr "取消当前扫描"
 
 #: src/ui/scan_view.py:1499
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%{overflow}"
-msgstr "目标 {current} 个，共 {total} 个 \\u2014 {pct}%{overflow}"
+msgid "Target {current} of {total} — {pct}%{overflow}"
+msgstr "目标 {current} 个，共 {total} 个 — {pct}%{overflow}"
 
 #: src/ui/scan_view.py:1508
 #, python-brace-format
@@ -5752,12 +5753,12 @@ msgstr "取消全部剩下的扫描"
 
 #: src/ui/scan_view.py:1929
 #, python-brace-format
-msgid "Scanning {path} \\u2014 File count pending"
+msgid "Scanning {path} — File count pending"
 msgstr "正在扫描 {path} - 等待统计文件数"
 
 #: src/ui/scan_view.py:1936
 #, python-brace-format
-msgid "Scanning {count} items \\u2014 File count pending"
+msgid "Scanning {count} items — File count pending"
 msgstr "正在扫描 {count} 个项目 - 等待统计文件数"
 
 #: src/ui/scan_view.py:1942
@@ -5969,7 +5970,7 @@ msgstr "加载扫描统计数据失败"
 
 #: src/ui/statistics_view.py:844
 #, python-brace-format
-msgid "{start_date} - {end_date}"
+msgid "{start_date} – {end_date}"
 msgstr "{start_date} - {end_date}"
 
 #: src/ui/statistics_view.py:849
@@ -6097,7 +6098,7 @@ msgstr "退出"
 
 #: src/ui/tray_service.py:495
 #, python-brace-format
-msgid "ClamUI - {status}"
+msgid "ClamUI — {status}"
 msgstr "ClamUI - {status}"
 
 #: src/ui/update_view.py:93
@@ -6246,11 +6247,11 @@ msgid "UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"
 msgstr "已将更新信号发送到freshclam服务"
 
 #: src/ui/update_view.py:623
-msgid "UPDATE COMPLETE - DATABASE UPDATED"
+msgid "UPDATE COMPLETE — DATABASE UPDATED"
 msgstr "更新完成 - 数据库已更新"
 
 #: src/ui/update_view.py:625
-msgid "UPDATE COMPLETE - ALREADY UP TO DATE"
+msgid "UPDATE COMPLETE — ALREADY UP TO DATE"
 msgstr "更新完成 - 已是最新"
 
 #: src/ui/update_view.py:627

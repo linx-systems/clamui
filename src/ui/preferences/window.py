@@ -548,7 +548,9 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
 
         # Update title to reflect current page
         page_label = self._get_page_label(page_id)
-        self._title_label.set_label(_("Preferences - {page}").format(page=page_label))
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        self._title_label.set_label(_("Preferences — {page}").format(page=page_label))
 
         # If leaflet is folded, navigate to content
         if self._leaflet.get_folded():
@@ -571,7 +573,9 @@ class PreferencesWindow(Adw.Window, PreferencesPageMixin):
             selected_row = self._sidebar_list.get_selected_row()
             if selected_row and isinstance(selected_row, PreferencesSidebarRow):
                 page_label = self._get_page_label(selected_row.page_id)
-                self._title_label.set_label(_("Preferences - {page}").format(page=page_label))
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                self._title_label.set_label(_("Preferences — {page}").format(page=page_label))
 
     def _on_back_clicked(self, button):
         """Handle back button click to return to sidebar."""

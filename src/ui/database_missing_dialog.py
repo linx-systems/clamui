@@ -105,6 +105,7 @@ class DatabaseMissingDialog(Adw.Window):
 
         # Title label
         title_label = Gtk.Label()
+        # Translators: keep the markup tags unchanged.
         title_label.set_markup(_("<b>Virus Database Not Found</b>"))
         title_label.set_halign(Gtk.Align.CENTER)
         title_label.add_css_class("title-2")

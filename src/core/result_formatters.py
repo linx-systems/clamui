@@ -53,14 +53,19 @@ def clean_scan_status_message(result: "ScanResult") -> str:
         message when present. Never renders a bare "0 file(s)" phrase.
     """
     if result.skipped_count > 0:
-        return _("Scan complete - No threats found ({count} file(s) not accessible)").format(
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        return _("Scan complete — No threats found ({count} file(s) not accessible)").format(
             count=result.skipped_count
         )
     if result.warning_message:
-        return _("Scan complete - No threats found ({warning})").format(
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        return _("Scan complete — No threats found ({warning})").format(
             warning=result.warning_message
         )
-    return _("Scan complete - No threats found")
+    # Translators: the em dash separates two parts; use the dash and spacing usual in your language.
+    return _("Scan complete — No threats found")
 
 
 def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -> str:
@@ -146,7 +151,9 @@ def format_results_as_text(result: "ScanResult", timestamp: str | None = None) -
         for i, threat in enumerate(result.threat_details, 1):
             severity_upper = sanitize_surrogate_path(threat.severity).upper()
             lines.append(
-                _("[{index}] {severity} - {category}").format(
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("[{index}] {severity} — {category}").format(
                     index=i,
                     severity=severity_upper,
                     category=sanitize_surrogate_path(threat.category),

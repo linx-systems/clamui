@@ -841,6 +841,7 @@ class QuarantineView(Gtk.Box):
         """
         dialog = QuarantineConfirmDialog(
             heading=_("Restore Quarantined File?"),
+            # Translators: use your language's quotation marks around {threat}.
             body=_('This file was detected as "{threat}". It will be restored to {path}.').format(
                 threat=sanitize_surrogate_path(entry.threat_name or _("Unknown Threat")),
                 path=sanitize_surrogate_path(entry.original_path),
@@ -906,6 +907,7 @@ class QuarantineView(Gtk.Box):
         dialog = QuarantineConfirmDialog(
             heading=_("Permanently Delete File?"),
             body=_(
+                # Translators: use your language's quotation marks around {threat}.
                 'The quarantined file from {path} ("{threat}") will be permanently '
                 "deleted. This action cannot be undone."
             ).format(

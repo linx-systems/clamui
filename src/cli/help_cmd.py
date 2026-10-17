@@ -113,7 +113,9 @@ def _print_overview() -> None:
     print(_("  --json                   Machine-readable JSON output"))
     print(_("  -v, --verbose            Verbose output"))
     print(_("  -h, --help               Show help for any command\n"))
+    # Translators: keep the quoted command unchanged; you may use your language's quotation marks.
     print(_("Run 'clamui help <command>' for usage examples."))
+    # Translators: keep the quoted command unchanged; you may use your language's quotation marks.
     print(_("Run 'clamui' without arguments to launch the GUI."))
 
 
@@ -141,6 +143,7 @@ def _print_command_help(name: str) -> int:
     print(_("Examples:"))
     for example in info.get("examples", []):
         print(f"  $ {example}")
+    # Translators: keep the quoted command unchanged; you may use your language's quotation marks.
     print(_("\nRun 'clamui {name} --help' for full option reference.").format(name=name))
     return 0
 

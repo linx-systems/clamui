@@ -841,7 +841,9 @@ class StatisticsView(Gtk.Box):
 
                 start = datetime.fromisoformat(stats.start_date)
                 end = datetime.fromisoformat(stats.end_date)
-                date_range = _("{start_date} - {end_date}").format(
+                # Translators: the en dash marks a range; write ranges the way your language usually
+                # does.
+                date_range = _("{start_date} – {end_date}").format(
                     start_date=start.strftime("%b %d"),
                     end_date=end.strftime("%b %d, %Y"),
                 )

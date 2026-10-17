@@ -491,7 +491,9 @@ class TrayService:
     def _get_tooltip(self) -> str:
         """Get the tooltip text."""
         status_display = self._current_status.capitalize()
-        tooltip = _("ClamUI - {status}").format(status=status_display)
+        # Translators: the em dash separates two parts; use the dash and spacing usual in your
+        # language.
+        tooltip = _("ClamUI — {status}").format(status=status_display)
         if self._progress_label:
             tooltip += f" ({self._progress_label})"
         return tooltip

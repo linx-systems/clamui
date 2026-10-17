@@ -35,7 +35,7 @@ msgid "Select File or Folder"
 msgstr "Seleziona File o Cartella"
 
 #: src/app.py:894
-msgid "A scan is already running - the new scan request was ignored"
+msgid "A scan is already running — the new scan request was ignored"
 msgstr ""
 
 #: src/app.py:915
@@ -1063,9 +1063,9 @@ msgstr ""
 msgid ""
 "Could not obtain administrator authorization to apply these changes. If you "
 "were not shown a password prompt, the ClamUI polkit policy or privileged "
-"helper is likely not installed on this system -- install the 'clamui-"
-"privileged-helper' package (which provides clamui-apply-preferences and its "
-"polkit policy) to enable saving system configuration."
+"helper is likely not installed on this system. Install the "
+"'clamui-privileged-helper' package (which provides clamui-apply-preferences "
+"and its polkit policy) to enable saving system configuration."
 msgstr ""
 
 #: src/core/clamav_config.py:1246
@@ -1909,7 +1909,7 @@ msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #: src/core/system_audit.py:1671
-msgid "Not detected - optional network monitor and application firewall"
+msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
 #: src/core/system_audit.py:1680
@@ -1991,7 +1991,7 @@ msgid ""
 msgstr ""
 
 #: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable - less secure)"
+msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr ""
 "Memorizzata nel file delle impostazioni (keyring non disponibile - meno "
 "sicuro)"
@@ -2235,18 +2235,18 @@ msgstr "Impossibile scansionare {n} file"
 
 #: src/core/result_formatters.py:55
 #, python-brace-format
-msgid "Scan complete - No threats found ({count} file(s) not accessible)"
+msgid "Scan complete — No threats found ({count} file(s) not accessible)"
 msgstr ""
 "Scansione completata - Nessuna minaccia trovata ({count} file/i non "
 "accessibili)"
 
 #: src/core/result_formatters.py:59
 #, fuzzy, python-brace-format
-msgid "Scan complete - No threats found ({warning})"
+msgid "Scan complete — No threats found ({warning})"
 msgstr "Scansione completata - Nessuna minaccia trovata"
 
 #: src/core/result_formatters.py:62
-msgid "Scan complete - No threats found"
+msgid "Scan complete — No threats found"
 msgstr "Scansione completata - Nessuna minaccia trovata"
 
 #: src/core/result_formatters.py:121
@@ -2279,7 +2279,7 @@ msgstr "Minacce Rilevate"
 
 #: src/core/result_formatters.py:147
 #, python-brace-format
-msgid "[{index}] {severity} - {category}"
+msgid "[{index}] {severity} — {category}"
 msgstr "[{index}] {severity} - {category}"
 
 #: src/core/result_formatters.py:151
@@ -2523,11 +2523,11 @@ msgstr ""
 
 #: src/core/updater.py:1365
 #, python-brace-format
-msgid "Database update completed - {count} database(s) updated"
+msgid "Database update completed — {count} database(s) updated"
 msgstr "Aggiornamento database completato - {count} database aggiornati"
 
 #: src/core/updater.py:1369
-msgid "Database update completed - Already up to date"
+msgid "Database update completed — Already up to date"
 msgstr "Aggiornamento database completato - Già aggiornato"
 
 #: src/core/updater.py:1371
@@ -2751,7 +2751,7 @@ msgid "Running security check"
 msgstr ""
 
 #: src/ui/audit_view.py:255
-msgid "Portmaster - checking…"
+msgid "Portmaster — checking…"
 msgstr ""
 
 #: src/ui/audit_view.py:266
@@ -2793,11 +2793,11 @@ msgid "Scan for known rootkits using chkrootkit"
 msgstr ""
 
 #: src/ui/audit_view.py:552
-msgid "Portmaster - not detected (optional)"
+msgid "Portmaster — not detected (optional)"
 msgstr ""
 
 #: src/ui/audit_view.py:555
-msgid "Portmaster - could not probe"
+msgid "Portmaster — could not probe"
 msgstr ""
 
 #: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
@@ -2954,7 +2954,7 @@ msgid "Not installed"
 msgstr "Non installato"
 
 #: src/ui/components_view.py:560 src/ui/components_view.py:611
-msgid "Not installed - expand for setup instructions"
+msgid "Not installed — expand for setup instructions"
 msgstr "Non installato - espandi per istruzioni di configurazione"
 
 #: src/ui/components_view.py:592 src/ui/logs_view.py:1269
@@ -3019,7 +3019,7 @@ msgid "Exported to {filename}"
 msgstr "Esportato in {filename}"
 
 #: src/ui/file_export.py:257
-msgid "Permission denied - cannot write to selected location"
+msgid "Permission denied — cannot write to selected location"
 msgstr "Permesso negato - impossibile scrivere nella posizione selezionata"
 
 #: src/ui/file_export.py:258
@@ -3094,7 +3094,7 @@ msgstr "{description} (installato)"
 
 #: src/ui/file_manager_integration_dialog.py:216
 #, python-brace-format
-msgid "{description} (incomplete - needs repair)"
+msgid "{description} (incomplete — needs repair)"
 msgstr "{description} (incompleto - necessita riparazione)"
 
 #: src/ui/file_manager_integration_dialog.py:268
@@ -3719,7 +3719,7 @@ msgstr "Database Firme Personalizzati"
 #: src/ui/preferences/database_page.py:484
 msgid ""
 "Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
-"- 'DatabaseCustomURL' prefix auto-stripped."
+"— 'DatabaseCustomURL' prefix auto-stripped."
 msgstr ""
 "URL firme di terze parti (es., SecuriteInfo). Incolla URL o righe di config "
 "- prefisso 'DatabaseCustomURL' rimosso automaticamente."
@@ -4261,7 +4261,7 @@ msgid "On Access Configuration"
 msgstr "Configurazione All'Accesso"
 
 #: src/ui/preferences/onaccess_page.py:97
-msgid "clamd.conf not found - On Access settings unavailable"
+msgid "clamd.conf not found — On Access settings unavailable"
 msgstr "clamd.conf non trovato - Impostazioni All'Accesso non disponibili"
 
 #: src/ui/preferences/onaccess_page.py:118
@@ -4525,7 +4525,7 @@ msgid "ClamD Configuration"
 msgstr "Configurazione ClamD"
 
 #: src/ui/preferences/scanner_page.py:159
-msgid "clamd.conf not found - Scanner settings unavailable"
+msgid "clamd.conf not found — Scanner settings unavailable"
 msgstr "clamd.conf non trovato - Impostazioni Scanner non disponibili"
 
 #: src/ui/preferences/scanner_page.py:283
@@ -4572,15 +4572,15 @@ msgstr "Informazioni sui backend di scansione"
 
 #: src/ui/preferences/scanner_page.py:382
 msgid ""
-"Recommended - Automatically uses daemon if available, falls back to clamscan "
-"for reliability"
+"Recommended — Automatically uses daemon if available, falls back to "
+"clamscan for reliability"
 msgstr ""
 "Consigliato - Usa automaticamente il demone se disponibile, ripiega su "
 "clamscan per affidabilità"
 
 #: src/ui/preferences/scanner_page.py:385
 msgid ""
-"Fastest - Instant startup with in-memory database, requires clamd service "
+"Fastest — Instant startup with in-memory database, requires clamd service "
 "running"
 msgstr ""
 "Più veloce - Avvio istantaneo con database in memoria, richiede il servizio "
@@ -4588,7 +4588,8 @@ msgstr ""
 
 #: src/ui/preferences/scanner_page.py:387
 msgid ""
-"Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
+"Most compatible — Works anywhere, loads database each scan (3–10 sec "
+"startup)"
 msgstr ""
 "Più compatibile - Funziona ovunque, carica il database ad ogni scansione "
 "(3-10 sec avvio)"
@@ -4812,7 +4813,7 @@ msgid "Day of Month"
 msgstr "Giorno del Mese"
 
 #: src/ui/preferences/scheduled_page.py:154
-msgid "For monthly scans (1-28)"
+msgid "For monthly scans (1–28)"
 msgstr "Per scansioni mensili (1-28)"
 
 #: src/ui/preferences/scheduled_page.py:166
@@ -4986,7 +4987,7 @@ msgstr "Torna alla navigazione"
 
 #: src/ui/preferences/window.py:534 src/ui/preferences/window.py:557
 #, python-brace-format
-msgid "Preferences - {page}"
+msgid "Preferences — {page}"
 msgstr "Preferenze - {page}"
 
 #: src/ui/preferences/window.py:757
@@ -5456,8 +5457,8 @@ msgstr "Minacce rilevate"
 
 #: src/ui/scan/scan_progress_widget.py:157
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%"
-msgstr "Target {current} di {total} \\u2014 {pct}%"
+msgid "Target {current} of {total} — {pct}%"
+msgstr "Target {current} di {total} — {pct}%"
 
 #: src/ui/scan/scan_progress_widget.py:162
 #, python-brace-format
@@ -5530,7 +5531,7 @@ msgstr "Impossibile aggiungere target durante la scansione"
 
 #: src/ui/scan/scan_view.py:251 src/ui/scan_view.py:2266
 #, python-brace-format
-msgid "Scan complete - {count} threat(s) detected"
+msgid "Scan complete — {count} threat(s) detected"
 msgstr "Scansione completata - {count} minaccia/e rilevata/e"
 
 #: src/ui/scan/scan_view.py:260
@@ -5656,7 +5657,7 @@ msgstr "Trovate {threat_text}"
 
 #: src/ui/scan_results_dialog.py:225
 #, python-brace-format
-msgid "Partial results - {threat_text} found"
+msgid "Partial results — {threat_text} found"
 msgstr "Risultati parziali - {threat_text} trovata/e"
 
 #: src/ui/scan_results_dialog.py:228
@@ -5801,7 +5802,7 @@ msgid "Export Scan Results"
 msgstr "Esporta risultati scansione"
 
 #: src/ui/scan_view.py:427
-msgid "Scan in progress - please wait until the current scan completes"
+msgid "Scan in progress — please wait until the current scan completes"
 msgstr "Scansione in corso - attendi il completamento della scansione corrente"
 
 #: src/ui/scan_view.py:434
@@ -5888,8 +5889,8 @@ msgstr "Annulla la scansione corrente"
 
 #: src/ui/scan_view.py:1499
 #, fuzzy, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%{overflow}"
-msgstr "Target {current} di {total} \\u2014 {pct}%"
+msgid "Target {current} of {total} — {pct}%{overflow}"
+msgstr "Target {current} di {total} — {pct}%"
 
 #: src/ui/scan_view.py:1508
 #, fuzzy, python-brace-format
@@ -5913,13 +5914,13 @@ msgstr "Annulla tutte le scansioni rimanenti"
 
 #: src/ui/scan_view.py:1929
 #, python-brace-format
-msgid "Scanning {path} \\u2014 File count pending"
-msgstr "Scansione di {path} \\u2014 Conteggio file in attesa"
+msgid "Scanning {path} — File count pending"
+msgstr "Scansione di {path} — Conteggio file in attesa"
 
 #: src/ui/scan_view.py:1936
 #, python-brace-format
-msgid "Scanning {count} items \\u2014 File count pending"
-msgstr "Scansione di {count} elementi \\u2014 Conteggio file in attesa"
+msgid "Scanning {count} items — File count pending"
+msgstr "Scansione di {count} elementi — Conteggio file in attesa"
 
 #: src/ui/scan_view.py:1942
 #, python-brace-format
@@ -6130,7 +6131,7 @@ msgstr "Caricamento dati statistiche fallito"
 
 #: src/ui/statistics_view.py:844
 #, python-brace-format
-msgid "{start_date} - {end_date}"
+msgid "{start_date} – {end_date}"
 msgstr "{start_date} - {end_date}"
 
 #: src/ui/statistics_view.py:849
@@ -6261,7 +6262,7 @@ msgstr "Esci"
 
 #: src/ui/tray_service.py:495
 #, python-brace-format
-msgid "ClamUI - {status}"
+msgid "ClamUI — {status}"
 msgstr "ClamUI - {status}"
 
 #: src/ui/update_view.py:93
@@ -6415,11 +6416,11 @@ msgid "UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"
 msgstr "SEGNALE AGGIORNAMENTO INVIATO AL SERVIZIO FRESHCLAM"
 
 #: src/ui/update_view.py:623
-msgid "UPDATE COMPLETE - DATABASE UPDATED"
+msgid "UPDATE COMPLETE — DATABASE UPDATED"
 msgstr "AGGIORNAMENTO COMPLETATO - DATABASE AGGIORNATO"
 
 #: src/ui/update_view.py:625
-msgid "UPDATE COMPLETE - ALREADY UP TO DATE"
+msgid "UPDATE COMPLETE — ALREADY UP TO DATE"
 msgstr "AGGIORNAMENTO COMPLETATO - GIÀ AGGIORNATO"
 
 #: src/ui/update_view.py:627

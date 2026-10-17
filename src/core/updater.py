@@ -1379,11 +1379,15 @@ class FreshclamUpdater:
         """
         # Build summary based on update result
         if result.status == UpdateStatus.SUCCESS:
-            summary = _("Database update completed - {count} database(s) updated").format(
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            summary = _("Database update completed — {count} database(s) updated").format(
                 count=result.databases_updated
             )
         elif result.status == UpdateStatus.UP_TO_DATE:
-            summary = _("Database update completed - Already up to date")
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            summary = _("Database update completed — Already up to date")
         elif result.status == UpdateStatus.CANCELLED:
             summary = _("Database update cancelled")
         else:

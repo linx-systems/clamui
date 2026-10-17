@@ -187,7 +187,9 @@ class ScannerPage(PreferencesPageMixin):
             group.set_title(_("Configuration Status"))
             row = Adw.ActionRow()
             row.set_title(_("ClamD Configuration"))
-            row.set_subtitle(_("clamd.conf not found - Scanner settings unavailable"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            row.set_subtitle(_("clamd.conf not found — Scanner settings unavailable"))
             group.add(row)
             page.add(group)
 
@@ -441,12 +443,18 @@ class ScannerPage(PreferencesPageMixin):
         """
         subtitles = {
             0: _(
-                "Recommended - Automatically uses daemon if available, falls back to clamscan for reliability"
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                "Recommended — Automatically uses daemon if available, falls back to clamscan for reliability"
             ),
             1: _(
-                "Fastest - Instant startup with in-memory database, requires clamd service running"
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                "Fastest — Instant startup with in-memory database, requires clamd service running"
             ),
-            2: _("Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"),
+            # Translators: the em dash separates label and description, and the en dash marks the
+            # 3–10 range; use the dashes and spacing usual in your language.
+            2: _("Most compatible — Works anywhere, loads database each scan (3–10 sec startup)"),
         }
         row.set_subtitle(subtitles.get(selected, subtitles[0]))
 

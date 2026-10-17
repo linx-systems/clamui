@@ -436,7 +436,9 @@ class ScanView(Gtk.Box):
         # Reject drops during active scan
         if self._is_scanning:
             self._show_drop_error(
-                _("Scan in progress - please wait until the current scan completes")
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("Scan in progress — please wait until the current scan completes")
             )
             return False
 
@@ -885,6 +887,7 @@ class ScanView(Gtk.Box):
                     # Warn if no valid targets were found
                     if valid_count == 0:
                         self._show_toast(
+                            # Translators: use your language's quotation marks around {name}.
                             _("Profile '{name}' has no valid targets").format(
                                 name=self._selected_profile.name
                             )
@@ -1516,7 +1519,9 @@ class ScanView(Gtk.Box):
             overflow_suffix = " +" if progress.estimate_exceeded else ""
             if self._total_target_count > 1:
                 self._progress_label.set_text(
-                    _("Target {current} of {total} \u2014 {pct}%{overflow}").format(
+                    # Translators: the em dash separates two parts; use the dash and spacing usual
+                    # in your language.
+                    _("Target {current} of {total} — {pct}%{overflow}").format(
                         current=self._current_target_idx,
                         total=self._total_target_count,
                         pct=pct,
@@ -1955,16 +1960,18 @@ class ScanView(Gtk.Box):
                 display_path = sanitize_surrogate_path(display_path)
                 if show_live_progress:
                     self._progress_label.set_label(
-                        _("Scanning {path} \u2014 File count pending").format(path=display_path)
+                        # Translators: the em dash separates two parts; use the dash and spacing
+                        # usual in your language.
+                        _("Scanning {path} — File count pending").format(path=display_path)
                     )
                 else:
                     self._progress_label.set_label(_("Scanning {path}").format(path=display_path))
             else:
                 if show_live_progress:
                     self._progress_label.set_label(
-                        _("Scanning {count} items \u2014 File count pending").format(
-                            count=path_count
-                        )
+                        # Translators: the em dash separates two parts; use the dash and spacing
+                        # usual in your language.
+                        _("Scanning {count} items — File count pending").format(count=path_count)
                     )
                 else:
                     self._progress_label.set_label(
@@ -2293,7 +2300,9 @@ class ScanView(Gtk.Box):
         if result.status == ScanStatus.INFECTED:
             self._show_view_results(result.infected_count)
             self._set_status_message(
-                _("Scan complete - {count} threat(s) detected").format(count=result.infected_count),
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                _("Scan complete — {count} threat(s) detected").format(count=result.infected_count),
                 StatusLevel.WARNING,
             )
         elif result.status == ScanStatus.CLEAN:

@@ -816,6 +816,7 @@ class DeleteProfileDialog(Adw.Window):
         self._profile_name = profile_name
         self._heading = _("Delete Profile?")
         self._body = (
+            # Translators: use your language's quotation marks around {profile_name}.
             _('Are you sure you want to delete the profile "{profile_name}"?').format(
                 profile_name=profile_name
             )

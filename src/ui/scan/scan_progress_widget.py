@@ -155,7 +155,9 @@ class ScanProgressWidget(Gtk.Box):
             pct = int(progress.percentage)
             if multi_target:
                 self._status_label.set_text(
-                    _("Target {current} of {total} \u2014 {pct}%").format(
+                    # Translators: the em dash separates two parts; use the dash and spacing usual
+                    # in your language.
+                    _("Target {current} of {total} — {pct}%").format(
                         current=current_target, total=total_targets, pct=pct
                     )
                 )

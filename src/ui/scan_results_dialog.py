@@ -223,7 +223,9 @@ class ScanResultsDialog(Adw.Window):
                     self._scan_result.infected_count,
                 ).format(n=self._scan_result.infected_count)
                 expander.set_subtitle(
-                    _("Partial results - {threat_text} found").format(threat_text=threat_text)
+                    # Translators: the em dash separates two parts; use the dash and spacing usual
+                    # in your language.
+                    _("Partial results — {threat_text} found").format(threat_text=threat_text)
                 )
             else:
                 expander.set_subtitle(_("Partial results shown"))
@@ -354,6 +356,7 @@ class ScanResultsDialog(Adw.Window):
             warning_label = Gtk.Label()
             warning_label.set_markup(
                 _(
+                    # Translators: keep the markup tags unchanged.
                     "<b>Large result set:</b> Found {count} threats. Displaying first {limit}."
                 ).format(
                     count=len(self._all_threat_details),

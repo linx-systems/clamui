@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.4.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-10-15 18:41+0200\n"
+"POT-Creation-Date: 2026-10-16 23:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,11 +33,13 @@ msgstr[1] ""
 msgid "Select File or Folder"
 msgstr ""
 
-#: src/app.py:992
-msgid "A scan is already running - the new scan request was ignored"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/app.py:994
+msgid "A scan is already running — the new scan request was ignored"
 msgstr ""
 
-#: src/app.py:1022
+#: src/app.py:1024
 #, python-brace-format
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
@@ -125,29 +127,32 @@ msgstr ""
 msgid "  -h, --help               Show help for any command\n"
 msgstr ""
 
-#: src/cli/help_cmd.py:116
+#. Translators: keep the quoted command unchanged; you may use your language's quotation marks.
+#: src/cli/help_cmd.py:117
 msgid "Run 'clamui help <command>' for usage examples."
 msgstr ""
 
-#: src/cli/help_cmd.py:117
+#. Translators: keep the quoted command unchanged; you may use your language's quotation marks.
+#: src/cli/help_cmd.py:119
 msgid "Run 'clamui' without arguments to launch the GUI."
 msgstr ""
 
-#: src/cli/help_cmd.py:133
+#: src/cli/help_cmd.py:135
 #, python-brace-format
 msgid "Unknown command: {name}\n"
 msgstr ""
 
-#: src/cli/help_cmd.py:140
+#: src/cli/help_cmd.py:142
 #, python-brace-format
 msgid "clamui {name} - {summary}\n"
 msgstr ""
 
-#: src/cli/help_cmd.py:141
+#: src/cli/help_cmd.py:143
 msgid "Examples:"
 msgstr ""
 
-#: src/cli/help_cmd.py:144
+#. Translators: keep the quoted command unchanged; you may use your language's quotation marks.
+#: src/cli/help_cmd.py:147
 #, python-brace-format
 msgid ""
 "\n"
@@ -193,8 +198,8 @@ msgid ""
 "root. Try: sudo clamui install-privileged-helper"
 msgstr ""
 
-#: src/cli/install_helper.py:289 src/core/result_formatters.py:176
-#: src/ui/update_view.py:684
+#: src/cli/install_helper.py:289 src/core/result_formatters.py:183
+#: src/ui/update_view.py:692
 #, python-brace-format
 msgid "Error: {message}"
 msgstr ""
@@ -256,7 +261,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/cli/history_cmd.py:88 src/core/result_formatters.py:132
+#: src/cli/history_cmd.py:88 src/core/result_formatters.py:137
 msgid "Summary"
 msgstr ""
 
@@ -411,12 +416,13 @@ msgid ""
 "Options:"
 msgstr ""
 
-#: src/cli/profile_cmd.py:181
+#. Translators: use your language's quotation marks around {name}.
+#: src/cli/profile_cmd.py:182
 #, python-brace-format
 msgid "Exported '{name}' to {file}"
 msgstr ""
 
-#: src/cli/profile_cmd.py:202
+#: src/cli/profile_cmd.py:203
 #, python-brace-format
 msgid "Imported profile: {name}"
 msgstr ""
@@ -499,13 +505,15 @@ msgstr ""
 msgid "ClamUI - ClamAV antivirus management"
 msgstr ""
 
-#: src/cli/router.py:50
+#. Translators: keep the quoted commands unchanged; you may use your language's quotation
+#. marks.
+#: src/cli/router.py:52
 msgid ""
 "Run 'clamui <command> --help' for details on a specific command.\n"
 "Run 'clamui' without arguments to launch the graphical interface."
 msgstr ""
 
-#: src/cli/router.py:58
+#: src/cli/router.py:60
 msgid "commands"
 msgstr ""
 
@@ -528,7 +536,7 @@ msgid "Use a named scan profile for exclusions"
 msgstr ""
 
 #: src/cli/scan_cmd.py:63 src/cli/scheduled_scan.py:127
-#: src/ui/preferences/scheduled_page.py:182
+#: src/ui/preferences/scheduled_page.py:186
 msgid "Automatically quarantine detected threats"
 msgstr ""
 
@@ -768,12 +776,12 @@ msgstr ""
 msgid "Scan Duration: {duration:.1f} seconds"
 msgstr ""
 
-#: src/cli/scheduled_scan.py:503 src/core/result_formatters.py:134
+#: src/cli/scheduled_scan.py:503 src/core/result_formatters.py:139
 #, python-brace-format
 msgid "Files Scanned: {count}"
 msgstr ""
 
-#: src/cli/scheduled_scan.py:504 src/core/result_formatters.py:136
+#: src/cli/scheduled_scan.py:504 src/core/result_formatters.py:141
 #, python-brace-format
 msgid "Threats Found: {count}"
 msgstr ""
@@ -920,7 +928,7 @@ msgstr ""
 msgid "Scanned {count} files. System appears clean."
 msgstr ""
 
-#: src/notification_dispatcher.py:41 src/core/result_formatters.py:181
+#: src/notification_dispatcher.py:41 src/core/result_formatters.py:188
 #: src/ui/scan_results_dialog.py:218
 msgid "Scan Cancelled"
 msgstr ""
@@ -929,8 +937,8 @@ msgstr ""
 msgid "The scan was cancelled by the user."
 msgstr ""
 
-#: src/notification_dispatcher.py:44 src/core/result_formatters.py:171
-#: src/ui/scan_results_dialog.py:233 src/ui/virustotal_results_dialog.py:198
+#: src/notification_dispatcher.py:44 src/core/result_formatters.py:178
+#: src/ui/scan_results_dialog.py:235 src/ui/virustotal_results_dialog.py:198
 msgid "Scan Error"
 msgstr ""
 
@@ -976,7 +984,9 @@ msgstr ""
 msgid "No threats detected by VirusTotal"
 msgstr ""
 
-#: src/core/clamav_config.py:1092
+#. Translators: keep the quoted file name and commands unchanged; you may use your
+#. language's quotation marks.
+#: src/core/clamav_config.py:1094
 #, python-brace-format
 msgid ""
 "ClamUI privileged helper not installed on the host. The Flatpak sandbox "
@@ -988,47 +998,55 @@ msgid ""
 "install this helper on the host."
 msgstr ""
 
-#: src/core/clamav_config.py:1102
+#. Translators: keep the quoted command unchanged; you may use your language's quotation
+#. marks.
+#: src/core/clamav_config.py:1106
 msgid ""
 "ClamUI privileged helper not installed. Run 'sudo clamui install-privileged-"
 "helper' on this host to install it and enable protected system ClamAV "
 "configuration access."
 msgstr ""
 
-#: src/core/clamav_config.py:1113
+#: src/core/clamav_config.py:1117
 #, python-brace-format
 msgid "Protected configuration path is not allowed: {error}"
 msgstr ""
 
-#: src/core/clamav_config.py:1132
-msgid "pkexec not found - cannot authorize configuration read"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/clamav_config.py:1138
+msgid "pkexec not found — cannot authorize configuration read"
 msgstr ""
 
-#: src/core/clamav_config.py:1134
+#: src/core/clamav_config.py:1140
 msgid "Timed out reading protected configuration"
 msgstr ""
 
-#: src/core/clamav_config.py:1136
+#: src/core/clamav_config.py:1142
 #, python-brace-format
 msgid "Failed to authorize configuration read: {error}"
 msgstr ""
 
-#: src/core/clamav_config.py:1140
+#: src/core/clamav_config.py:1146
 msgid "Authentication was canceled. Configuration was not loaded."
 msgstr ""
 
-#: src/core/clamav_config.py:1147 src/core/clamav_config.py:1369
+#. Translators: keep the quoted package name unchanged; you may use your
+#. language's quotation marks.
+#: src/core/clamav_config.py:1155 src/core/clamav_config.py:1385
 msgid ""
 "Privileged helper rejected the request: protocol mismatch. Update the "
 "'clamui-privileged-helper' package on the host."
 msgstr ""
 
-#: src/core/clamav_config.py:1157
+#: src/core/clamav_config.py:1165
 #, python-brace-format
 msgid "Failed to read protected configuration: {error}"
 msgstr ""
 
-#: src/core/clamav_config.py:1268
+#. Translators: keep the quoted file name and commands unchanged; you may use
+#. your language's quotation marks.
+#: src/core/clamav_config.py:1278
 #, python-brace-format
 msgid ""
 "ClamUI privileged helper not installed on the host. The Flatpak sandbox "
@@ -1041,40 +1059,44 @@ msgid ""
 "install this helper on the host."
 msgstr ""
 
-#: src/core/clamav_config.py:1283
+#. Translators: keep the quoted command unchanged; you may use your language's
+#. quotation marks.
+#: src/core/clamav_config.py:1295
 msgid ""
 "ClamUI privileged helper not installed. Run 'sudo clamui install-privileged-"
 "helper' on this host to install it and enable saving system ClamAV "
 "configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1328
+#: src/core/clamav_config.py:1340
 msgid ""
 "The staging directory is not reachable by the privileged helper running on "
 "the host, so preferences cannot be applied from the Flatpak sandbox. A host-"
 "side ClamUI install is required to change system configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1342
+#: src/core/clamav_config.py:1354
 msgid "Authentication was canceled. Configuration changes were not applied."
 msgstr ""
 
-#: src/core/clamav_config.py:1348
+#. Translators: keep the quoted package name unchanged; you may use your
+#. language's quotation marks.
+#: src/core/clamav_config.py:1362
 msgid ""
 "Could not obtain administrator authorization to apply these changes. If you "
 "were not shown a password prompt, the ClamUI polkit policy or privileged "
-"helper is likely not installed on this system -- install the 'clamui-"
+"helper is likely not installed on this system. Install the 'clamui-"
 "privileged-helper' package (which provides clamui-apply-preferences and its "
 "polkit policy) to enable saving system configuration."
 msgstr ""
 
-#: src/core/clamav_config.py:1361
+#: src/core/clamav_config.py:1375
 msgid ""
 "Privileged helper rejected the request: missing PKEXEC_UID. The polkit "
 "policy may be misconfigured."
 msgstr ""
 
-#: src/core/clamav_config.py:1386
+#: src/core/clamav_config.py:1402
 #, python-brace-format
 msgid ""
 "Configuration was applied, but staging cleanup failed for {staging_dir}: "
@@ -1734,8 +1756,8 @@ msgstr ""
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr ""
 
-#: src/core/system_audit.py:1329 src/ui/audit_view.py:273
-#: src/ui/audit_view.py:308
+#: src/core/system_audit.py:1329 src/ui/audit_view.py:275
+#: src/ui/audit_view.py:310
 msgid "Lynis Security Audit"
 msgstr ""
 
@@ -1752,7 +1774,7 @@ msgid "Install Lynis for comprehensive security auditing"
 msgstr ""
 
 #: src/core/system_audit.py:1369 src/core/system_audit.py:1379
-#: src/core/system_audit.py:1391 src/core/system_audit.py:1423
+#: src/core/system_audit.py:1391 src/core/system_audit.py:1425
 msgid "Lynis Audit"
 msgstr ""
 
@@ -1765,7 +1787,7 @@ msgstr ""
 msgid "Failed to run Lynis: {error}"
 msgstr ""
 
-#: src/core/system_audit.py:1393 src/core/system_audit.py:1521
+#: src/core/system_audit.py:1393 src/core/system_audit.py:1523
 msgid "Authentication was cancelled"
 msgstr ""
 
@@ -1778,105 +1800,109 @@ msgstr ""
 msgid "Score: {score}/100"
 msgstr ""
 
-#: src/core/system_audit.py:1414
+#. Translators: keep the quoted command unchanged; you may use your language's
+#. quotation marks.
+#: src/core/system_audit.py:1416
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr ""
 
-#: src/core/system_audit.py:1425
+#: src/core/system_audit.py:1427
 #, python-brace-format
 msgid "Audit completed (exit code {code})"
 msgstr ""
 
-#: src/core/system_audit.py:1466 src/ui/audit_view.py:279
-#: src/ui/audit_view.py:311
+#: src/core/system_audit.py:1468 src/ui/audit_view.py:281
+#: src/ui/audit_view.py:313
 msgid "Rootkit Detection"
 msgstr ""
 
-#: src/core/system_audit.py:1475
+#: src/core/system_audit.py:1477
 msgid "chkrootkit"
 msgstr ""
 
-#: src/core/system_audit.py:1477
+#: src/core/system_audit.py:1479
 msgid "chkrootkit is not installed"
 msgstr ""
 
-#: src/core/system_audit.py:1478
+#: src/core/system_audit.py:1480
 msgid "Install chkrootkit for rootkit detection"
 msgstr ""
 
-#: src/core/system_audit.py:1497 src/core/system_audit.py:1507
-#: src/core/system_audit.py:1519 src/core/system_audit.py:1539
-#: src/core/system_audit.py:1559 src/core/system_audit.py:1579
+#: src/core/system_audit.py:1499 src/core/system_audit.py:1509
+#: src/core/system_audit.py:1521 src/core/system_audit.py:1541
+#: src/core/system_audit.py:1561 src/core/system_audit.py:1581
 msgid "Rootkit Scan"
 msgstr ""
 
-#: src/core/system_audit.py:1499
+#: src/core/system_audit.py:1501
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr ""
 
-#: src/core/system_audit.py:1509
+#: src/core/system_audit.py:1511
 #, python-brace-format
 msgid "Failed to run chkrootkit: {error}"
 msgstr ""
 
-#: src/core/system_audit.py:1532
+#: src/core/system_audit.py:1534
 #, python-brace-format
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 
-#: src/core/system_audit.py:1561
+#: src/core/system_audit.py:1563
 #, python-brace-format
 msgid "{count} potential rootkit(s) detected"
 msgstr ""
 
-#: src/core/system_audit.py:1562
+#: src/core/system_audit.py:1564
 msgid "Investigate the detected threats immediately"
 msgstr ""
 
-#: src/core/system_audit.py:1570
+#: src/core/system_audit.py:1572
 msgid "Finding"
 msgstr ""
 
-#: src/core/system_audit.py:1581
+#: src/core/system_audit.py:1583
 msgid "No rootkits detected"
 msgstr ""
 
-#: src/core/system_audit.py:1616 src/core/system_audit.py:1633
-#: src/core/system_audit.py:1668 src/core/system_audit.py:1679
-#: src/core/system_audit.py:1688 src/ui/audit_view.py:213
-#: src/ui/audit_view.py:558
+#: src/core/system_audit.py:1618 src/core/system_audit.py:1635
+#: src/core/system_audit.py:1670 src/core/system_audit.py:1681
+#: src/core/system_audit.py:1692 src/ui/audit_view.py:213
+#: src/ui/audit_view.py:564
 msgid "Portmaster"
 msgstr ""
 
-#: src/core/system_audit.py:1635
+#: src/core/system_audit.py:1637
 msgid "Portmaster is running and protecting connections"
 msgstr ""
 
-#: src/core/system_audit.py:1657
+#: src/core/system_audit.py:1659
 msgid "Module Status"
 msgstr ""
 
-#: src/core/system_audit.py:1659
+#: src/core/system_audit.py:1661
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 
-#: src/core/system_audit.py:1661
+#: src/core/system_audit.py:1663
 msgid "Authorize"
 msgstr ""
 
-#: src/core/system_audit.py:1670
+#: src/core/system_audit.py:1672
 msgid "Portmaster is installed but not running"
 msgstr ""
 
-#: src/core/system_audit.py:1671
+#: src/core/system_audit.py:1673
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
-#: src/core/system_audit.py:1681
-msgid "Not detected - optional network monitor and application firewall"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/core/system_audit.py:1685
+msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
-#: src/core/system_audit.py:1690
+#: src/core/system_audit.py:1694
 #, python-brace-format
 msgid "Could not probe Portmaster: {error}"
 msgstr ""
@@ -1940,7 +1966,7 @@ msgstr ""
 msgid "Failed to remove integration: {error}"
 msgstr ""
 
-#: src/core/keyring_manager.py:103 src/core/keyring_manager.py:229
+#: src/core/keyring_manager.py:103 src/core/keyring_manager.py:231
 msgid "API key cannot be empty"
 msgstr ""
 
@@ -1954,38 +1980,40 @@ msgid ""
 "enable the plaintext fallback in preferences (less secure)."
 msgstr ""
 
-#: src/core/keyring_manager.py:138 src/core/keyring_manager.py:296
-msgid "Stored in settings file (keyring unavailable - less secure)"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/keyring_manager.py:140 src/core/keyring_manager.py:300
+msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr ""
 
-#: src/core/keyring_manager.py:140
+#: src/core/keyring_manager.py:142
 msgid "Failed to save API key to settings"
 msgstr ""
 
-#: src/core/keyring_manager.py:210
+#: src/core/keyring_manager.py:212
 msgid "Not set"
 msgstr ""
 
-#: src/core/keyring_manager.py:232
+#: src/core/keyring_manager.py:234
 #, python-brace-format
 msgid "API key must be 64 characters (got {length})"
 msgstr ""
 
-#: src/core/keyring_manager.py:235
+#: src/core/keyring_manager.py:237
 msgid "API key must contain only hexadecimal characters"
 msgstr ""
 
-#: src/core/keyring_manager.py:272
+#: src/core/keyring_manager.py:274
 msgid "Token cannot be empty"
 msgstr ""
 
-#: src/core/keyring_manager.py:290
+#: src/core/keyring_manager.py:292
 msgid ""
 "System keyring is unavailable. To store the Portmaster token without a "
 "keyring, enable the plaintext fallback in preferences (less secure)."
 msgstr ""
 
-#: src/core/keyring_manager.py:297
+#: src/core/keyring_manager.py:301
 msgid "Failed to save Portmaster token to settings"
 msgstr ""
 
@@ -2196,106 +2224,108 @@ msgstr ""
 msgid "VirusTotal: No Threats"
 msgstr ""
 
-#: src/core/notification_manager.py:226
+#. Translators: use your language's quotation marks around {file_name}.
+#: src/core/notification_manager.py:227
 #, python-brace-format
 msgid "'{file_name}' appears safe (0/{total} detections)"
 msgstr ""
 
-#: src/core/notification_manager.py:230
+#: src/core/notification_manager.py:231
 #, python-brace-format
 msgid "File appears safe (0/{total} detections)"
 msgstr ""
 
-#: src/core/notification_manager.py:233
+#: src/core/notification_manager.py:234
 msgid "VirusTotal: Threats Detected!"
 msgstr ""
 
-#: src/core/notification_manager.py:235
+#. Translators: use your language's quotation marks around {file_name}.
+#: src/core/notification_manager.py:237
 #, python-brace-format
 msgid "'{file_name}' flagged by {detections}/{total} engines"
 msgstr ""
 
-#: src/core/notification_manager.py:239
+#: src/core/notification_manager.py:241
 #, python-brace-format
 msgid "File flagged by {detections}/{total} engines"
 msgstr ""
 
-#: src/core/notification_manager.py:264
+#: src/core/notification_manager.py:266
 msgid "VirusTotal Rate Limit"
 msgstr ""
 
-#: src/core/notification_manager.py:265
+#: src/core/notification_manager.py:267
 msgid "Too many requests. Try again in a minute or use the website."
 msgstr ""
 
-#: src/core/notification_manager.py:282
+#: src/core/notification_manager.py:284
 msgid "VirusTotal Not Configured"
 msgstr ""
 
-#: src/core/notification_manager.py:283
+#: src/core/notification_manager.py:285
 msgid "Add your API key in Preferences to scan with VirusTotal."
 msgstr ""
 
-#: src/core/notification_manager.py:307
+#: src/core/notification_manager.py:309
 msgid "Scanning Device"
 msgstr ""
 
-#: src/core/notification_manager.py:308
+#: src/core/notification_manager.py:310
 #, python-brace-format
 msgid "Scanning {device} ({path})"
 msgstr ""
 
-#: src/core/notification_manager.py:341
+#: src/core/notification_manager.py:343
 msgid "Device Scan Complete"
 msgstr ""
 
-#: src/core/notification_manager.py:344
+#: src/core/notification_manager.py:346
 #, python-brace-format
 msgid "{device}: No threats ({count} file scanned)"
 msgid_plural "{device}: No threats ({count} files scanned)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/core/notification_manager.py:349
+#: src/core/notification_manager.py:351
 #, python-brace-format
 msgid "{device}: No threats found"
 msgstr ""
 
-#: src/core/notification_manager.py:352
+#: src/core/notification_manager.py:354
 msgid "Device Scan: Threats Detected!"
 msgstr ""
 
-#: src/core/notification_manager.py:354
+#: src/core/notification_manager.py:356
 #, python-brace-format
 msgid "{device}: {infected} threat(s) found, {quarantined} quarantined"
 msgstr ""
 
-#: src/core/notification_manager.py:361
+#: src/core/notification_manager.py:363
 #, python-brace-format
 msgid "{device}: {count} infected file found"
 msgid_plural "{device}: {count} infected files found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/core/notification_manager.py:392
+#: src/core/notification_manager.py:394
 msgid "Security Audit Complete"
 msgstr ""
 
-#: src/core/notification_manager.py:396
+#: src/core/notification_manager.py:398
 #, python-brace-format
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/core/notification_manager.py:399
+#: src/core/notification_manager.py:401
 #, python-brace-format
 msgid "{count} warning"
 msgid_plural "{count} warnings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/core/notification_manager.py:401
+#: src/core/notification_manager.py:403
 #, python-brace-format
 msgid "Found {details}"
 msgstr ""
@@ -2335,92 +2365,99 @@ msgstr ""
 msgid "{count} file(s) could not be accessed"
 msgstr ""
 
-#: src/core/result_formatters.py:56
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/result_formatters.py:58
 #, python-brace-format
-msgid "Scan complete - No threats found ({count} file(s) not accessible)"
+msgid "Scan complete — No threats found ({count} file(s) not accessible)"
 msgstr ""
 
-#: src/core/result_formatters.py:60
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/result_formatters.py:64
 #, python-brace-format
-msgid "Scan complete - No threats found ({warning})"
+msgid "Scan complete — No threats found ({warning})"
 msgstr ""
 
-#: src/core/result_formatters.py:63
-msgid "Scan complete - No threats found"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your language.
+#: src/core/result_formatters.py:68
+msgid "Scan complete — No threats found"
 msgstr ""
 
-#: src/core/result_formatters.py:123
+#: src/core/result_formatters.py:128
 msgid "ClamUI Scan Report"
 msgstr ""
 
-#: src/core/result_formatters.py:125
+#: src/core/result_formatters.py:130
 #, python-brace-format
 msgid "Scan Date: {timestamp}"
 msgstr ""
 
-#: src/core/result_formatters.py:126
+#: src/core/result_formatters.py:131
 #, python-brace-format
 msgid "Scanned Path: {path}"
 msgstr ""
 
-#: src/core/result_formatters.py:127 src/ui/logs_view.py:788
+#: src/core/result_formatters.py:132 src/ui/logs_view.py:788
 #, python-brace-format
 msgid "Status: {status}"
 msgstr ""
 
-#: src/core/result_formatters.py:135
+#: src/core/result_formatters.py:140
 #, python-brace-format
 msgid "Directories Scanned: {count}"
 msgstr ""
 
-#: src/core/result_formatters.py:142 src/ui/scan_results_dialog.py:346
+#: src/core/result_formatters.py:147 src/ui/scan_results_dialog.py:348
 msgid "Detected Threats"
 msgstr ""
 
-#: src/core/result_formatters.py:149
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/core/result_formatters.py:156
 #, python-brace-format
-msgid "[{index}] {severity} - {category}"
+msgid "[{index}] {severity} — {category}"
 msgstr ""
 
-#: src/core/result_formatters.py:156
+#: src/core/result_formatters.py:163
 #, python-brace-format
 msgid "    File: {path}"
 msgstr ""
 
-#: src/core/result_formatters.py:159
+#: src/core/result_formatters.py:166
 #, python-brace-format
 msgid "    Threat: {name}"
 msgstr ""
 
-#: src/core/result_formatters.py:164
+#: src/core/result_formatters.py:171
 msgid "No Threats Detected"
 msgstr ""
 
-#: src/core/result_formatters.py:167
+#: src/core/result_formatters.py:174
 msgid "All scanned files are clean."
 msgstr ""
 
-#: src/core/result_formatters.py:184
+#: src/core/result_formatters.py:191
 msgid "The scan was cancelled before completion."
 msgstr ""
 
-#: src/core/result_formatters.py:229
+#: src/core/result_formatters.py:236
 msgid "File Path"
 msgstr ""
 
-#: src/core/result_formatters.py:229
+#: src/core/result_formatters.py:236
 msgid "Threat Name"
 msgstr ""
 
-#: src/core/result_formatters.py:229
+#: src/core/result_formatters.py:236
 msgid "Category"
 msgstr ""
 
-#: src/core/result_formatters.py:229
+#: src/core/result_formatters.py:236
 msgid "Severity"
 msgstr ""
 
-#: src/core/result_formatters.py:229
+#: src/core/result_formatters.py:236
 msgid "Timestamp"
 msgstr ""
 
@@ -2516,7 +2553,7 @@ msgstr ""
 msgid "Update cancelled by user"
 msgstr ""
 
-#: src/core/updater.py:1257 src/ui/update_view.py:663
+#: src/core/updater.py:1257 src/ui/update_view.py:671
 #, python-brace-format
 msgid "{database} until {cooldown}"
 msgstr ""
@@ -2598,35 +2635,39 @@ msgstr ""
 msgid "Update failed with an unknown error. Check the logs for details."
 msgstr ""
 
-#: src/core/updater.py:1382
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/updater.py:1384
 #, python-brace-format
-msgid "Database update completed - {count} database(s) updated"
+msgid "Database update completed — {count} database(s) updated"
 msgstr ""
 
-#: src/core/updater.py:1386
-msgid "Database update completed - Already up to date"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/core/updater.py:1390
+msgid "Database update completed — Already up to date"
 msgstr ""
 
-#: src/core/updater.py:1388
+#: src/core/updater.py:1392
 msgid "Database update cancelled"
 msgstr ""
 
-#: src/core/updater.py:1390
+#: src/core/updater.py:1394
 #, python-brace-format
 msgid "Database update failed: {error}"
 msgstr ""
 
-#: src/core/updater.py:1391 src/ui/preferences/save_page.py:467
-#: src/ui/preferences/window.py:839 src/ui/scan_results_dialog.py:235
-#: src/ui/scan_view.py:658 src/ui/scan_view.py:2308
+#: src/core/updater.py:1395 src/ui/preferences/save_page.py:467
+#: src/ui/preferences/window.py:843 src/ui/scan_results_dialog.py:237
+#: src/ui/scan_view.py:660 src/ui/scan_view.py:2317
 #: src/ui/virustotal_results_dialog.py:199
 msgid "Unknown error"
 msgstr ""
 
 #: src/core/virustotal.py:262 src/core/virustotal.py:316
 #: src/core/virustotal.py:478 src/core/virustotal.py:621
-#: src/core/virustotal.py:629 src/ui/scan/scan_view.py:259
-#: src/ui/scan_view.py:2304
+#: src/core/virustotal.py:629 src/ui/scan/scan_view.py:261
+#: src/ui/scan_view.py:2313
 msgid "Scan cancelled"
 msgstr ""
 
@@ -2775,14 +2816,14 @@ msgstr ""
 msgid "Remember my choice"
 msgstr ""
 
-#: src/ui/close_behavior_dialog.py:155 src/ui/database_missing_dialog.py:133
-#: src/ui/file_manager_integration_dialog.py:262 src/ui/logs_view.py:108
+#: src/ui/close_behavior_dialog.py:155 src/ui/database_missing_dialog.py:134
+#: src/ui/file_manager_integration_dialog.py:266 src/ui/logs_view.py:108
 #: src/ui/preferences/debug_page.py:747
 #: src/ui/preferences/virustotal_page.py:359 src/ui/profile_dialogs.py:123
-#: src/ui/profile_dialogs.py:724 src/ui/profile_dialogs.py:873
-#: src/ui/profile_dialogs.py:995 src/ui/quarantine_view.py:101
-#: src/ui/scan/scan_view.py:177 src/ui/scan_view.py:1281
-#: src/ui/scan_view.py:1935 src/ui/update_view.py:147
+#: src/ui/profile_dialogs.py:724 src/ui/profile_dialogs.py:874
+#: src/ui/profile_dialogs.py:996 src/ui/quarantine_view.py:101
+#: src/ui/scan/scan_view.py:177 src/ui/scan_view.py:1284
+#: src/ui/scan_view.py:1940 src/ui/update_view.py:149
 msgid "Cancel"
 msgstr ""
 
@@ -2795,8 +2836,8 @@ msgid "_Open"
 msgstr ""
 
 #: src/ui/compat.py:463 src/ui/compat.py:529 src/ui/file_export.py:192
-#: src/ui/preferences/database_page.py:376
-#: src/ui/preferences/scanner_page.py:273
+#: src/ui/preferences/database_page.py:382
+#: src/ui/preferences/scanner_page.py:275
 msgid "_Cancel"
 msgstr ""
 
@@ -2816,87 +2857,93 @@ msgstr ""
 msgid "Refresh Audit"
 msgstr ""
 
-#: src/ui/audit_view.py:237 src/ui/audit_view.py:786
+#: src/ui/audit_view.py:237 src/ui/audit_view.py:792
 #: src/ui/components_view.py:253 src/ui/logs_view.py:521
 #: src/ui/statistics_view.py:186
 msgid "Checking..."
 msgstr ""
 
-#: src/ui/audit_view.py:238 src/ui/audit_view.py:787
+#: src/ui/audit_view.py:238 src/ui/audit_view.py:793
 msgid "Running security check"
 msgstr ""
 
-#: src/ui/audit_view.py:255
-msgid "Portmaster - checking…"
-msgstr ""
-
-#: src/ui/audit_view.py:266
-msgid "Deep Scans"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/audit_view.py:257
+msgid "Portmaster — checking…"
 msgstr ""
 
 #: src/ui/audit_view.py:268
+msgid "Deep Scans"
+msgstr ""
+
+#: src/ui/audit_view.py:270
 msgid "Require administrator privileges and may take several minutes"
 msgstr ""
 
-#: src/ui/audit_view.py:273 src/ui/audit_view.py:279 src/ui/audit_view.py:308
-#: src/ui/audit_view.py:311
+#: src/ui/audit_view.py:275 src/ui/audit_view.py:281 src/ui/audit_view.py:310
+#: src/ui/audit_view.py:313
 msgid "Checking availability..."
 msgstr ""
 
-#: src/ui/audit_view.py:338 src/ui/audit_view.py:590
+#: src/ui/audit_view.py:340 src/ui/audit_view.py:596
 msgid "Learn more"
 msgstr ""
 
-#: src/ui/audit_view.py:350
+#: src/ui/audit_view.py:352
 msgid "Run"
 msgstr ""
 
-#: src/ui/audit_view.py:366
+#: src/ui/audit_view.py:368
 #, python-brace-format
 msgid "{tool} is not installed"
 msgstr ""
 
-#: src/ui/audit_view.py:466
+#: src/ui/audit_view.py:468
 msgid "Comprehensive system hardening analysis with scoring"
 msgstr ""
 
-#: src/ui/audit_view.py:475
+#: src/ui/audit_view.py:477
 msgid "Scan for known rootkits using chkrootkit"
 msgstr ""
 
-#: src/ui/audit_view.py:552
-msgid "Portmaster - not detected (optional)"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/audit_view.py:556
+msgid "Portmaster — not detected (optional)"
 msgstr ""
 
-#: src/ui/audit_view.py:555
-msgid "Portmaster - could not probe"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/audit_view.py:561
+msgid "Portmaster — could not probe"
 msgstr ""
 
-#: src/ui/audit_view.py:581 src/ui/preferences/debug_page.py:152
+#: src/ui/audit_view.py:587 src/ui/preferences/debug_page.py:152
 msgid "Open"
 msgstr ""
 
-#: src/ui/audit_view.py:654 src/ui/components_view.py:380
+#: src/ui/audit_view.py:660 src/ui/components_view.py:380
 #: src/ui/logs_view.py:401
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/ui/audit_view.py:738
+#: src/ui/audit_view.py:744
 #, python-brace-format
 msgid "{count} security issues need attention"
 msgstr ""
 
-#: src/ui/audit_view.py:740
+#: src/ui/audit_view.py:746
 #, python-brace-format
 msgid "{count} checks need review"
 msgstr ""
 
-#: src/ui/audit_view.py:742
+#: src/ui/audit_view.py:748
 #, python-brace-format
 msgid "{review} · {passed} passed"
 msgstr ""
 
-#: src/ui/audit_view.py:744
+#: src/ui/audit_view.py:750
 msgid "Audit complete"
 msgstr ""
 
@@ -2999,7 +3046,7 @@ msgstr ""
 msgid "Checking"
 msgstr ""
 
-#: src/ui/components_view.py:430 src/ui/preferences/scanner_page.py:405
+#: src/ui/components_view.py:430 src/ui/preferences/scanner_page.py:407
 msgid "Refresh Status"
 msgstr ""
 
@@ -3007,39 +3054,41 @@ msgstr ""
 msgid "Installed"
 msgstr ""
 
-#: src/ui/components_view.py:569 src/ui/components_view.py:620
+#: src/ui/components_view.py:569 src/ui/components_view.py:622
 #: src/ui/logs_view.py:1282
 msgid "Not installed"
 msgstr ""
 
-#: src/ui/components_view.py:570 src/ui/components_view.py:621
-msgid "Not installed - expand for setup instructions"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/components_view.py:572 src/ui/components_view.py:625
+msgid "Not installed — expand for setup instructions"
 msgstr ""
 
-#: src/ui/components_view.py:602 src/ui/logs_view.py:1269
+#: src/ui/components_view.py:604 src/ui/logs_view.py:1269
 msgid "Running"
 msgstr ""
 
-#: src/ui/components_view.py:603
+#: src/ui/components_view.py:605
 msgid "Daemon is running"
 msgstr ""
 
-#: src/ui/components_view.py:611 src/ui/logs_view.py:1276
+#: src/ui/components_view.py:613 src/ui/logs_view.py:1276
 msgid "Stopped"
 msgstr ""
 
-#: src/ui/components_view.py:612
+#: src/ui/components_view.py:614
 msgid "Daemon is installed but not running"
 msgstr ""
 
-#: src/ui/components_view.py:628 src/ui/logs_view.py:1297
+#: src/ui/components_view.py:632 src/ui/logs_view.py:1297
 #: src/ui/quarantine_view.py:791 src/ui/statistics_view.py:191
-#: src/ui/statistics_view.py:865 src/ui/statistics_view.py:894
+#: src/ui/statistics_view.py:867 src/ui/statistics_view.py:896
 msgid "Unknown"
 msgstr ""
 
-#: src/ui/components_view.py:629 src/ui/statistics_view.py:861
-#: src/ui/statistics_view.py:1049
+#: src/ui/components_view.py:633 src/ui/statistics_view.py:863
+#: src/ui/statistics_view.py:1051
 msgid "Unable to determine status"
 msgstr ""
 
@@ -3047,17 +3096,18 @@ msgstr ""
 msgid "Virus Database Required"
 msgstr ""
 
-#: src/ui/database_missing_dialog.py:108
+#. Translators: keep the markup tags unchanged.
+#: src/ui/database_missing_dialog.py:109
 msgid "<b>Virus Database Not Found</b>"
 msgstr ""
 
-#: src/ui/database_missing_dialog.py:117
+#: src/ui/database_missing_dialog.py:118
 msgid ""
 "ClamAV requires a virus database to scan files. The database needs to be "
 "downloaded before you can perform scans."
 msgstr ""
 
-#: src/ui/database_missing_dialog.py:138
+#: src/ui/database_missing_dialog.py:139
 msgid "Download Now"
 msgstr ""
 
@@ -3065,7 +3115,7 @@ msgstr ""
 msgid "Invalid file path selected"
 msgstr ""
 
-#: src/ui/file_export.py:245 src/ui/file_export.py:259
+#: src/ui/file_export.py:245 src/ui/file_export.py:261
 #, python-brace-format
 msgid "Error exporting file: {error}"
 msgstr ""
@@ -3075,25 +3125,27 @@ msgstr ""
 msgid "Exported to {filename}"
 msgstr ""
 
-#: src/ui/file_export.py:257
-msgid "Permission denied - cannot write to selected location"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/file_export.py:259
+msgid "Permission denied — cannot write to selected location"
 msgstr ""
 
-#: src/ui/file_export.py:258
+#: src/ui/file_export.py:260
 #, python-brace-format
 msgid "Error writing file: {error}"
 msgstr ""
 
-#: src/ui/file_export.py:301
+#: src/ui/file_export.py:303
 msgid "Text Files"
 msgstr ""
 
-#: src/ui/file_export.py:302
+#: src/ui/file_export.py:304
 msgid "CSV Files"
 msgstr ""
 
-#: src/ui/file_export.py:303 src/ui/profile_dialogs.py:1357
-#: src/ui/profile_dialogs.py:1411
+#: src/ui/file_export.py:305 src/ui/profile_dialogs.py:1358
+#: src/ui/profile_dialogs.py:1412
 msgid "JSON Files"
 msgstr ""
 
@@ -3106,74 +3158,78 @@ msgstr ""
 msgid "Add Context Menu Actions"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:136
+#. Translators: 'Scan with ClamUI' is the file manager menu entry, which is not
+#. translated; keep it in English.
+#: src/ui/file_manager_integration_dialog.py:138
 msgid ""
 "ClamUI can add 'Scan with ClamUI' options to your file manager's right-click "
 "menu. This makes it easy to scan files and folders directly from your file "
 "browser."
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:144
+#: src/ui/file_manager_integration_dialog.py:146
 msgid "What gets installed?"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:147
+#: src/ui/file_manager_integration_dialog.py:149
 msgid ""
 "Small configuration files are added to your user profile. No system files "
 "are modified."
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:162
+#: src/ui/file_manager_integration_dialog.py:164
 msgid "Available File Managers"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:163
+#: src/ui/file_manager_integration_dialog.py:165
 msgid "Select which file managers to integrate with:"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:180
+#: src/ui/file_manager_integration_dialog.py:182
 msgid "No supported file managers detected"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:181
+#: src/ui/file_manager_integration_dialog.py:183
 msgid "ClamUI supports Nemo, Nautilus, and Dolphin file managers."
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:211
+#: src/ui/file_manager_integration_dialog.py:213
 #, python-brace-format
 msgid "{description} (installed)"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:216
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/file_manager_integration_dialog.py:220
 #, python-brace-format
-msgid "{description} (incomplete - needs repair)"
+msgid "{description} (incomplete — needs repair)"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:268
+#: src/ui/file_manager_integration_dialog.py:272
 msgid "Apply"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:341
+#: src/ui/file_manager_integration_dialog.py:345
 #, python-brace-format
 msgid "{count} succeeded"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:342
+#: src/ui/file_manager_integration_dialog.py:346
 #, python-brace-format
 msgid "{count} failed"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:347
+#: src/ui/file_manager_integration_dialog.py:351
 #, python-brace-format
 msgid "{count} installed"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:349
+#: src/ui/file_manager_integration_dialog.py:353
 #, python-brace-format
 msgid "{count} removed"
 msgstr ""
 
-#: src/ui/file_manager_integration_dialog.py:351
+#: src/ui/file_manager_integration_dialog.py:355
 #, python-brace-format
 msgid "{count} repaired"
 msgstr ""
@@ -3269,7 +3325,7 @@ msgstr ""
 msgid "Export daemon logs to file"
 msgstr ""
 
-#: src/ui/logs_view.py:520 src/ui/preferences/scanner_page.py:385
+#: src/ui/logs_view.py:520 src/ui/preferences/scanner_page.py:387
 msgid "Daemon Status"
 msgstr ""
 
@@ -3346,7 +3402,7 @@ msgstr ""
 msgid "{minutes}m {seconds:.0f}s"
 msgstr ""
 
-#: src/ui/logs_view.py:839 src/ui/statistics_view.py:1089
+#: src/ui/logs_view.py:839 src/ui/statistics_view.py:1091
 #, python-brace-format
 msgid "{hours}h {minutes}m"
 msgstr ""
@@ -3356,7 +3412,7 @@ msgstr ""
 msgid "  Duration: {duration}"
 msgstr ""
 
-#: src/ui/logs_view.py:845 src/ui/scan_view.py:678 src/ui/update_view.py:641
+#: src/ui/logs_view.py:845 src/ui/scan_view.py:680 src/ui/update_view.py:649
 msgid "Summary:"
 msgstr ""
 
@@ -3463,56 +3519,57 @@ msgstr ""
 msgid "The path is not valid."
 msgstr ""
 
-#: src/ui/preferences/base.py:568 src/ui/preferences/base.py:622
+#: src/ui/preferences/base.py:568 src/ui/preferences/base.py:623
 msgid "Folder Not Found"
 msgstr ""
 
-#: src/ui/preferences/base.py:569 src/ui/preferences/base.py:623
+#. Translators: use your language's quotation marks around {path}.
+#: src/ui/preferences/base.py:570 src/ui/preferences/base.py:625
 #, python-brace-format
 msgid "The folder '{path}' does not exist."
 msgstr ""
 
-#: src/ui/preferences/base.py:582 src/ui/preferences/base.py:616
-#: src/ui/preferences/base.py:635
+#: src/ui/preferences/base.py:583 src/ui/preferences/base.py:617
+#: src/ui/preferences/base.py:637
 msgid "Error Opening Folder"
 msgstr ""
 
-#: src/ui/preferences/base.py:583 src/ui/preferences/base.py:617
-#: src/ui/preferences/base.py:636
+#: src/ui/preferences/base.py:584 src/ui/preferences/base.py:618
+#: src/ui/preferences/base.py:638
 #, python-brace-format
 msgid "Could not open folder: {error}"
 msgstr ""
 
-#: src/ui/preferences/base.py:687 src/ui/preferences/save_page.py:162
-#: src/ui/preferences/scanner_page.py:635
+#: src/ui/preferences/base.py:689 src/ui/preferences/save_page.py:162
+#: src/ui/preferences/scanner_page.py:643
 msgid "OK"
 msgstr ""
 
-#: src/ui/preferences/base.py:751
+#: src/ui/preferences/base.py:753
 msgid "File Location"
 msgstr ""
 
-#: src/ui/preferences/base.py:765
+#: src/ui/preferences/base.py:767
 msgid "Open containing folder in file manager"
 msgstr ""
 
-#: src/ui/preferences/base.py:766
+#: src/ui/preferences/base.py:768
 msgid "Open Folder"
 msgstr ""
 
-#: src/ui/preferences/base.py:790
+#: src/ui/preferences/base.py:792
 msgid "Auto-detect configuration file location"
 msgstr ""
 
-#: src/ui/preferences/base.py:791
+#: src/ui/preferences/base.py:793
 msgid "Detect"
 msgstr ""
 
-#: src/ui/preferences/base.py:801
+#: src/ui/preferences/base.py:803
 msgid "Browse for configuration file"
 msgstr ""
 
-#: src/ui/preferences/base.py:802
+#: src/ui/preferences/base.py:804
 msgid "Browse"
 msgstr ""
 
@@ -3602,7 +3659,9 @@ msgstr ""
 msgid "Configure Integration"
 msgstr ""
 
-#: src/ui/preferences/behavior_page.py:302
+#. Translators: 'Scan with ClamUI' is the file manager menu entry, which is not
+#. translated; keep it in English.
+#: src/ui/preferences/behavior_page.py:304
 msgid "Install or manage 'Scan with ClamUI' menu actions"
 msgstr ""
 
@@ -3610,243 +3669,251 @@ msgstr ""
 msgid "Free malware URL blocklist by abuse.ch, updated every minute"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:74
-#: src/ui/preferences/database_page.py:106
+#. Translators: 'Suggested' is a button label; use its translation and your language's
+#. quotation marks.
+#: src/ui/preferences/database_page.py:76
+#: src/ui/preferences/database_page.py:112
 msgid "No registration required. Click 'Suggested' above to add."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:82
+#: src/ui/preferences/database_page.py:84
 msgid "Millions of signatures for zero-day malware, phishing, and spam"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:84
+#: src/ui/preferences/database_page.py:86
 msgid ""
 "Free registration required at securiteinfo.com. URLs contain your personal "
 "API key."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:93
+#: src/ui/preferences/database_page.py:95
 msgid "Macro malware, phishing, scam, and spam signatures (hourly updates)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:95
+#. Translators: keep the quoted tool names unchanged; you may use your language's
+#. quotation marks.
+#: src/ui/preferences/database_page.py:99
 msgid ""
 "Requires 'fangfrisch' or 'clamav-unofficial-sigs' tool. Cannot be added as "
 "custom URL directly."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:105
+#: src/ui/preferences/database_page.py:109
 msgid "Hash-based signatures, web shell detection, and general malware"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:200
+#: src/ui/preferences/database_page.py:206
 msgid "Database Updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:223
+#: src/ui/preferences/database_page.py:229
 #: src/ui/preferences/scanner_page.py:142
 #, python-brace-format
 msgid "Detected: {path}"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:226
+#: src/ui/preferences/database_page.py:232
 msgid "No freshclam.conf found in known locations"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:240
+#: src/ui/preferences/database_page.py:246
 #: src/ui/preferences/scanner_page.py:155
 msgid "Configuration File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:242
+#: src/ui/preferences/database_page.py:248
 msgid "freshclam.conf location"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:252
+#: src/ui/preferences/database_page.py:258
 #: src/ui/preferences/scanner_page.py:167
 msgid ""
 "Request administrator authorization to read a protected configuration file"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:292
+#: src/ui/preferences/database_page.py:298
 msgid ""
 "Failed to save configuration selection. The previous file remains active."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:317
-#: src/ui/preferences/scanner_page.py:210
+#: src/ui/preferences/database_page.py:323
+#: src/ui/preferences/scanner_page.py:212
 msgid "Configuration files"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:340
-#: src/ui/preferences/scanner_page.py:237
+#: src/ui/preferences/database_page.py:346
+#: src/ui/preferences/scanner_page.py:239
 #, python-brace-format
 msgid "Selected: {path}"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:353
-#: src/ui/preferences/database_page.py:372
-#: src/ui/preferences/scanner_page.py:250
-#: src/ui/preferences/scanner_page.py:269
+#: src/ui/preferences/database_page.py:359
+#: src/ui/preferences/database_page.py:378
+#: src/ui/preferences/scanner_page.py:252
+#: src/ui/preferences/scanner_page.py:271
 msgid "Select Configuration File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:375
-#: src/ui/preferences/scanner_page.py:272
+#: src/ui/preferences/database_page.py:381
+#: src/ui/preferences/scanner_page.py:274
 msgid "_Select"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:407
+#: src/ui/preferences/database_page.py:413
 msgid "Paths"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:408
+#: src/ui/preferences/database_page.py:414
 msgid "Configure database and log file locations"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:413
+#: src/ui/preferences/database_page.py:419
 msgid "Database Directory"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:423
+#: src/ui/preferences/database_page.py:429
 msgid "Update Log File"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:433
+#: src/ui/preferences/database_page.py:439
 msgid "Notify ClamD Config"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:443
-#: src/ui/preferences/scanner_page.py:815
+#: src/ui/preferences/database_page.py:449
+#: src/ui/preferences/scanner_page.py:823
 msgid "Verbose Logging"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:444
+#: src/ui/preferences/database_page.py:450
 msgid "Enable detailed logging for database updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:450
-#: src/ui/preferences/scanner_page.py:822
+#: src/ui/preferences/database_page.py:456
+#: src/ui/preferences/scanner_page.py:830
 msgid "Syslog Logging"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:451
-#: src/ui/preferences/scanner_page.py:823
+#: src/ui/preferences/database_page.py:457
+#: src/ui/preferences/scanner_page.py:831
 msgid "Send log messages to system log"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:472
+#: src/ui/preferences/database_page.py:478
 msgid "Update Behavior"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:473
+#: src/ui/preferences/database_page.py:479
 msgid "Configure how often and where to check for updates"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:481
+#: src/ui/preferences/database_page.py:487
 msgid "Checks Per Day"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:482
+#: src/ui/preferences/database_page.py:488
 msgid "Number of update checks per day (0 to disable)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:493
+#: src/ui/preferences/database_page.py:499
 msgid "Database Mirror"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:521
+#: src/ui/preferences/database_page.py:527
 msgid "Custom Signature Databases"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:524
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language. Keep the config key 'DatabaseCustomURL' unchanged.
+#: src/ui/preferences/database_page.py:532
 msgid ""
 "Third-party signature URLs (e.g., SecuriteInfo). Paste URLs or config lines "
-"- 'DatabaseCustomURL' prefix auto-stripped."
+"— 'DatabaseCustomURL' prefix auto-stripped."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:536
+#: src/ui/preferences/database_page.py:544
 msgid "Add URL(s)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:537
+#: src/ui/preferences/database_page.py:545
 msgid "Paste URL or multi-line config block"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:547
+#: src/ui/preferences/database_page.py:555
 #: src/ui/preferences/exclusions_page.py:146 src/ui/profile_dialogs.py:729
 msgid "Add"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:548
+#: src/ui/preferences/database_page.py:556
 msgid "Add custom signature URL(s)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:556
+#: src/ui/preferences/database_page.py:564
 msgid "Suggested"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:558
+#: src/ui/preferences/database_page.py:566
 msgid "Add free community signature databases (URLhaus, InterServer)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:613
+#: src/ui/preferences/database_page.py:621
 msgid "Remove this URL"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:678
+#: src/ui/preferences/database_page.py:686
 msgid "Popular Signature Providers"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:681
+#: src/ui/preferences/database_page.py:689
 msgid ""
 "Third-party databases can significantly improve detection rates. Providers "
 "marked with a key icon require free registration."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:693
+#: src/ui/preferences/database_page.py:701
 msgid "Registration required"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:707
+#: src/ui/preferences/database_page.py:715
 msgid "Free registration required"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:717
+#: src/ui/preferences/database_page.py:725
 msgid "Tip: fangfrisch"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:720
+#. Translators: keep the quoted tool name unchanged; you may use your language's
+#. quotation marks.
+#: src/ui/preferences/database_page.py:730
 msgid ""
 "For SaneSecurity and other rsync-based providers, install the 'fangfrisch' "
 "tool which handles downloading and updating signatures automatically."
 msgstr ""
 
-#: src/ui/preferences/database_page.py:752
+#: src/ui/preferences/database_page.py:762
 msgid "Proxy Settings"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:753
+#: src/ui/preferences/database_page.py:763
 msgid "Configure HTTP proxy for database downloads (optional)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:758
+#: src/ui/preferences/database_page.py:768
 msgid "Proxy Server"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:771
+#: src/ui/preferences/database_page.py:781
 msgid "Proxy Port"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:772
+#: src/ui/preferences/database_page.py:782
 msgid "Proxy server port number (0 to disable)"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:783
+#: src/ui/preferences/database_page.py:793
 msgid "Proxy Username"
 msgstr ""
 
-#: src/ui/preferences/database_page.py:795
+#: src/ui/preferences/database_page.py:805
 msgid "Proxy Password"
 msgstr ""
 
@@ -4109,7 +4176,7 @@ msgstr ""
 msgid "This will permanently delete {count} log file(s) totaling {size}."
 msgstr ""
 
-#: src/ui/preferences/debug_page.py:736 src/ui/profile_dialogs.py:823
+#: src/ui/preferences/debug_page.py:736 src/ui/profile_dialogs.py:824
 msgid "This action cannot be undone."
 msgstr ""
 
@@ -4198,7 +4265,7 @@ msgid "Show desktop notifications for device scan events"
 msgstr ""
 
 #: src/ui/preferences/device_scan_page.py:234
-#: src/ui/preferences/scheduled_page.py:173
+#: src/ui/preferences/scheduled_page.py:177
 msgid "Skip on Battery"
 msgstr ""
 
@@ -4284,141 +4351,143 @@ msgstr ""
 msgid "On Access Configuration"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:97
-msgid "clamd.conf not found - On Access settings unavailable"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/preferences/onaccess_page.py:99
+msgid "clamd.conf not found — On Access settings unavailable"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:118
+#: src/ui/preferences/onaccess_page.py:120
 msgid "Monitored Paths"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:119
+#: src/ui/preferences/onaccess_page.py:121
 msgid "Directories to monitor. Comma-separated."
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:124
+#: src/ui/preferences/onaccess_page.py:126
 msgid "Include Paths"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:134
+#: src/ui/preferences/onaccess_page.py:136
 msgid "Exclude Paths"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:161
+#: src/ui/preferences/onaccess_page.py:163
 msgid "Behavior Settings"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:162
+#: src/ui/preferences/onaccess_page.py:164
 msgid "On-Access scanning behavior"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:167
+#: src/ui/preferences/onaccess_page.py:169
 msgid "Prevention Mode"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:168
+#: src/ui/preferences/onaccess_page.py:170
 msgid "Block access to infected files"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:174
+#: src/ui/preferences/onaccess_page.py:176
 msgid "Extra Scanning"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:175
+#: src/ui/preferences/onaccess_page.py:177
 msgid "Monitor file creation/moves via inotify"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:181
+#: src/ui/preferences/onaccess_page.py:183
 msgid "Deny on Error"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:182
+#: src/ui/preferences/onaccess_page.py:184
 msgid "Deny access when scan fails (requires Prevention)"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:188
+#: src/ui/preferences/onaccess_page.py:190
 msgid "Disable DDD"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:189
+#: src/ui/preferences/onaccess_page.py:191
 msgid "Disable Directory Descent Detection"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:212
+#: src/ui/preferences/onaccess_page.py:214
 msgid "Performance Settings"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:213
+#: src/ui/preferences/onaccess_page.py:215
 msgid "Scanning limits and performance"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:218
+#: src/ui/preferences/onaccess_page.py:220
 msgid "Max Threads"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:219
+#: src/ui/preferences/onaccess_page.py:221
 msgid "Maximum number of scanning threads"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:230
-#: src/ui/preferences/scanner_page.py:736
+#: src/ui/preferences/onaccess_page.py:232
+#: src/ui/preferences/scanner_page.py:744
 msgid "Max File Size (MB)"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:231
-#: src/ui/preferences/scanner_page.py:737
+#: src/ui/preferences/onaccess_page.py:233
+#: src/ui/preferences/scanner_page.py:745
 msgid "Maximum file size to scan (0 = unlimited)"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:242
+#: src/ui/preferences/onaccess_page.py:244
 msgid "Curl Timeout (seconds)"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:243
+#: src/ui/preferences/onaccess_page.py:245
 msgid "Timeout for remote scanning operations (0 = disabled)"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:254
+#: src/ui/preferences/onaccess_page.py:256
 msgid "Retry Attempts"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:255
+#: src/ui/preferences/onaccess_page.py:257
 msgid "Number of retry attempts when scan fails"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:285
+#: src/ui/preferences/onaccess_page.py:287
 msgid "Scan Loop Prevention"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:286
+#: src/ui/preferences/onaccess_page.py:288
 msgid "CRITICAL: Set at least one to prevent infinite loops"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:291
+#: src/ui/preferences/onaccess_page.py:293
 msgid "Required Configuration"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:292
+#: src/ui/preferences/onaccess_page.py:294
 msgid "Exclude clamav user or UID to prevent scan loops"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:303
+#: src/ui/preferences/onaccess_page.py:305
 msgid "Exclude Username"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:313
+#: src/ui/preferences/onaccess_page.py:315
 msgid "Exclude User ID"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:314
+#: src/ui/preferences/onaccess_page.py:316
 msgid "User ID to exclude from On-Access scanning"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:325
+#: src/ui/preferences/onaccess_page.py:327
 msgid "Exclude Root User"
 msgstr ""
 
-#: src/ui/preferences/onaccess_page.py:326
+#: src/ui/preferences/onaccess_page.py:328
 msgid "Exclude root (UID 0) from On-Access scanning"
 msgstr ""
 
@@ -4574,198 +4643,206 @@ msgstr ""
 msgid "ClamD Configuration"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:190
-msgid "clamd.conf not found - Scanner settings unavailable"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/preferences/scanner_page.py:192
+msgid "clamd.conf not found — Scanner settings unavailable"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:223
+#: src/ui/preferences/scanner_page.py:225
 msgid "Selected configuration file is not accessible from the host"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:299
+#: src/ui/preferences/scanner_page.py:301
 msgid "Failed to save configuration file selection"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:343
-#: src/ui/preferences/scanner_page.py:362
+#: src/ui/preferences/scanner_page.py:345
+#: src/ui/preferences/scanner_page.py:364
 msgid "Scan Backend"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:349
+#: src/ui/preferences/scanner_page.py:351
 msgid ""
 "Select how ClamUI performs scans. Daemon runs on host via flatpak-spawn. "
 "Auto-saved."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:353
+#: src/ui/preferences/scanner_page.py:355
 msgid "Select how ClamUI performs scans. Auto-saved."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:358
+#: src/ui/preferences/scanner_page.py:360
 msgid "Auto (prefer daemon)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:359
+#: src/ui/preferences/scanner_page.py:361
 msgid "ClamAV Daemon (clamd)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:360
+#: src/ui/preferences/scanner_page.py:362
 msgid "Standalone Scanner (clamscan)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:387
-#: src/ui/preferences/scanner_page.py:390
+#: src/ui/preferences/scanner_page.py:389
+#: src/ui/preferences/scanner_page.py:392
 msgid "Checking daemon connection..."
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:420
+#: src/ui/preferences/scanner_page.py:422
 msgid "Documentation"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:421
+#: src/ui/preferences/scanner_page.py:423
 msgid "About scan backends"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:444
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/preferences/scanner_page.py:448
 msgid ""
-"Recommended - Automatically uses daemon if available, falls back to clamscan "
+"Recommended — Automatically uses daemon if available, falls back to clamscan "
 "for reliability"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:447
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/preferences/scanner_page.py:453
 msgid ""
-"Fastest - Instant startup with in-memory database, requires clamd service "
+"Fastest — Instant startup with in-memory database, requires clamd service "
 "running"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:449
+#. Translators: the em dash separates label and description, and the en dash marks the
+#. 3–10 range; use the dashes and spacing usual in your language.
+#: src/ui/preferences/scanner_page.py:457
 msgid ""
-"Most compatible - Works anywhere, loads database each scan (3-10 sec startup)"
+"Most compatible — Works anywhere, loads database each scan (3–10 sec startup)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:484
+#: src/ui/preferences/scanner_page.py:492
 msgid "Failed to save scan backend selection"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:537
+#: src/ui/preferences/scanner_page.py:545
 msgid "Daemon available"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:538
+#: src/ui/preferences/scanner_page.py:546
 #, python-brace-format
 msgid "Not available: {message}"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:589
+#: src/ui/preferences/scanner_page.py:597
 msgid "Error Opening Documentation"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:590
+#: src/ui/preferences/scanner_page.py:598
 #, python-brace-format
 msgid "Could not open documentation file: {error}"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:665
+#: src/ui/preferences/scanner_page.py:673
 msgid "File Type Scanning"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:666
+#: src/ui/preferences/scanner_page.py:674
 msgid "Enable or disable scanning for specific file types"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:671
+#: src/ui/preferences/scanner_page.py:679
 msgid "Scan PE Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:672
+#: src/ui/preferences/scanner_page.py:680
 msgid "Scan Windows/DOS executable files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:678
+#: src/ui/preferences/scanner_page.py:686
 msgid "Scan ELF Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:679
+#: src/ui/preferences/scanner_page.py:687
 msgid "Scan Unix/Linux executable files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:685
+#: src/ui/preferences/scanner_page.py:693
 msgid "Scan OLE2 Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:686
+#: src/ui/preferences/scanner_page.py:694
 msgid "Scan Microsoft Office documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:692
+#: src/ui/preferences/scanner_page.py:700
 msgid "Scan PDF Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:693
+#: src/ui/preferences/scanner_page.py:701
 msgid "Scan PDF documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:699
+#: src/ui/preferences/scanner_page.py:707
 msgid "Scan HTML Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:700
+#: src/ui/preferences/scanner_page.py:708
 msgid "Scan HTML documents"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:706
+#: src/ui/preferences/scanner_page.py:714
 msgid "Scan Archive Files"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:707
+#: src/ui/preferences/scanner_page.py:715
 msgid "Scan compressed archives (ZIP, RAR, etc.)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:730
+#: src/ui/preferences/scanner_page.py:738
 msgid "Performance and Limits"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:731
+#: src/ui/preferences/scanner_page.py:739
 msgid "Configure scanning limits and performance settings"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:748
+#: src/ui/preferences/scanner_page.py:756
 msgid "Max Scan Size (MB)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:749
+#: src/ui/preferences/scanner_page.py:757
 msgid "Maximum total scan size (0 = unlimited)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:760
+#: src/ui/preferences/scanner_page.py:768
 msgid "Max Archive Recursion"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:761
+#: src/ui/preferences/scanner_page.py:769
 msgid "Maximum recursion depth for archives"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:773
+#: src/ui/preferences/scanner_page.py:781
 msgid "Max Files in Archive"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:774
+#: src/ui/preferences/scanner_page.py:782
 msgid "Maximum number of files to scan in archive (0 = unlimited)"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:801
+#: src/ui/preferences/scanner_page.py:809
 msgid "Logging"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:802
+#: src/ui/preferences/scanner_page.py:810
 msgid "Configure logging options for the scanner"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:807
+#: src/ui/preferences/scanner_page.py:815
 msgid "Log File Path"
 msgstr ""
 
-#: src/ui/preferences/scanner_page.py:816
+#: src/ui/preferences/scanner_page.py:824
 msgid "Enable detailed scanner logging"
 msgstr ""
 
@@ -4777,95 +4854,99 @@ msgstr ""
 msgid "Scheduled Scans Configuration"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:100
+#. Translators: 'Save &amp; Apply' is a button label; use its translation, keep '&amp;' as
+#. the markup for '&', and use your language's quotation marks.
+#: src/ui/preferences/scheduled_page.py:102
 msgid "Configure automatic scanning. Save with 'Save &amp; Apply'."
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:104
+#: src/ui/preferences/scheduled_page.py:106
 msgid "Enable Scheduled Scans"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:105
+#: src/ui/preferences/scheduled_page.py:107
 msgid "Run automatic scans at specified intervals"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:113
+#: src/ui/preferences/scheduled_page.py:115
 msgid "Hourly"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:114
+#: src/ui/preferences/scheduled_page.py:116
 msgid "Daily"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:115
+#: src/ui/preferences/scheduled_page.py:117
 msgid "Weekly"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:116
+#: src/ui/preferences/scheduled_page.py:118
 msgid "Monthly"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:119
+#: src/ui/preferences/scheduled_page.py:121
 msgid "Scan Frequency"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:125
+#: src/ui/preferences/scheduled_page.py:127
 msgid "Scan Time (24-hour format, e.g. 02:00)"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:135
+#: src/ui/preferences/scheduled_page.py:137
 msgid "Monday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:136
+#: src/ui/preferences/scheduled_page.py:138
 msgid "Tuesday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:137
+#: src/ui/preferences/scheduled_page.py:139
 msgid "Wednesday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:138
+#: src/ui/preferences/scheduled_page.py:140
 msgid "Thursday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:139
+#: src/ui/preferences/scheduled_page.py:141
 msgid "Friday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:140
+#: src/ui/preferences/scheduled_page.py:142
 msgid "Saturday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:141
+#: src/ui/preferences/scheduled_page.py:143
 msgid "Sunday"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:146
+#: src/ui/preferences/scheduled_page.py:148
 msgid "Day of Week"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:147
+#: src/ui/preferences/scheduled_page.py:149
 msgid "For weekly scans"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:153
+#: src/ui/preferences/scheduled_page.py:155
 msgid "Day of Month"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:154
-msgid "For monthly scans (1-28)"
+#. Translators: the en dash marks a range; write ranges the way your language usually
+#. does.
+#: src/ui/preferences/scheduled_page.py:158
+msgid "For monthly scans (1–28)"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:166
+#: src/ui/preferences/scheduled_page.py:170
 msgid "Scan Targets (comma-separated paths)"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:174
+#: src/ui/preferences/scheduled_page.py:178
 msgid "Don't run scheduled scans when on battery power"
 msgstr ""
 
-#: src/ui/preferences/scheduled_page.py:181
+#: src/ui/preferences/scheduled_page.py:185
 msgid "Auto-Quarantine"
 msgstr ""
 
@@ -4990,8 +5071,8 @@ msgstr ""
 msgid "Failed to delete API key"
 msgstr ""
 
-#: src/ui/preferences/virustotal_page.py:385 src/ui/profile_dialogs.py:878
-#: src/ui/quarantine_view.py:820 src/ui/quarantine_view.py:915
+#: src/ui/preferences/virustotal_page.py:385 src/ui/profile_dialogs.py:879
+#: src/ui/quarantine_view.py:820 src/ui/quarantine_view.py:917
 msgid "Delete"
 msgstr ""
 
@@ -5024,22 +5105,26 @@ msgstr ""
 msgid "Back to navigation"
 msgstr ""
 
-#: src/ui/preferences/window.py:551 src/ui/preferences/window.py:574
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/preferences/window.py:553 src/ui/preferences/window.py:578
 #, python-brace-format
-msgid "Preferences - {page}"
+msgid "Preferences — {page}"
 msgstr ""
 
-#: src/ui/preferences/window.py:766
+#: src/ui/preferences/window.py:770
 #, python-brace-format
 msgid "Failed to load {file}: {error}"
 msgstr ""
 
-#: src/ui/preferences/window.py:838
+#: src/ui/preferences/window.py:842
 #, python-brace-format
 msgid "Could not load configuration with administrator authorization: {error}"
 msgstr ""
 
-#: src/ui/preferences/window.py:857
+#: src/ui/preferences/window.py:861
 #, python-brace-format
 msgid "Loaded {file} with administrator authorization"
 msgstr ""
@@ -5115,7 +5200,7 @@ msgstr ""
 
 #: src/ui/profile_dialogs.py:192 src/ui/profile_dialogs.py:591
 #: src/ui/scan/target_selector.py:78 src/ui/scan/target_selector.py:233
-#: src/ui/scan_view.py:946 src/ui/scan_view.py:1239
+#: src/ui/scan_view.py:949 src/ui/scan_view.py:1242
 msgid "Scan Targets"
 msgstr ""
 
@@ -5131,7 +5216,7 @@ msgstr ""
 msgid "Add file"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:994
+#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:997
 msgid "No targets added"
 msgstr ""
 
@@ -5196,12 +5281,12 @@ msgstr ""
 msgid "Pattern"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1030
+#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1033
 msgid "Remove"
 msgstr ""
 
 #: src/ui/profile_dialogs.py:589 src/ui/scan/target_selector.py:239
-#: src/ui/scan_view.py:1245
+#: src/ui/scan_view.py:1248
 #, python-brace-format
 msgid "Scan Targets ({count})"
 msgstr ""
@@ -5223,120 +5308,121 @@ msgstr ""
 msgid "Delete Profile?"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:819
+#. Translators: use your language's quotation marks around {profile_name}.
+#: src/ui/profile_dialogs.py:820
 #, python-brace-format
 msgid "Are you sure you want to delete the profile \"{profile_name}\"?"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:937
+#: src/ui/profile_dialogs.py:938
 msgid "Restore Default Profiles?"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:940
+#: src/ui/profile_dialogs.py:941
 msgid ""
 "This will reset Quick Scan, Full Scan, and Home Folder profiles to their "
 "original settings. Any changes you made to these profiles will be lost."
 msgstr ""
 
-#: src/ui/profile_dialogs.py:945
+#: src/ui/profile_dialogs.py:946
 msgid "Your custom profiles will not be affected."
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1000 src/ui/quarantine_view.py:813
+#: src/ui/profile_dialogs.py:1001 src/ui/quarantine_view.py:813
 msgid "Restore"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1070
+#: src/ui/profile_dialogs.py:1071
 msgid "Manage Profiles"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1089
+#: src/ui/profile_dialogs.py:1090
 msgid "Restore default profiles"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1096
+#: src/ui/profile_dialogs.py:1097
 msgid "Import profile from file"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1103
+#: src/ui/profile_dialogs.py:1104
 msgid "Create new profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1121
+#: src/ui/profile_dialogs.py:1122
 msgid "Scan Profiles"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1122
+#: src/ui/profile_dialogs.py:1123
 msgid "Select a profile to edit or use for scanning"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1131
+#: src/ui/profile_dialogs.py:1132
 msgid "No profiles available"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1132
+#: src/ui/profile_dialogs.py:1133
 msgid "Click the + button to create a new profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1193
+#: src/ui/profile_dialogs.py:1194
 #, python-brace-format
 msgid "{count} target"
 msgid_plural "{count} targets"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/profile_dialogs.py:1199
+#: src/ui/profile_dialogs.py:1200
 msgid "Default profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1217
+#: src/ui/profile_dialogs.py:1218
 msgid "Use this profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1226
+#: src/ui/profile_dialogs.py:1227
 msgid "Edit profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1234
+#: src/ui/profile_dialogs.py:1235
 msgid "Delete profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1238
+#: src/ui/profile_dialogs.py:1239
 msgid "Cannot delete default profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1249
+#: src/ui/profile_dialogs.py:1250
 msgid "Export profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1362
+#: src/ui/profile_dialogs.py:1363
 msgid "Export Profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1382
+#: src/ui/profile_dialogs.py:1383
 #, python-brace-format
 msgid "Failed to export profile: {error}"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1384
+#: src/ui/profile_dialogs.py:1385
 msgid "Profile exported"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1416
+#: src/ui/profile_dialogs.py:1417
 msgid "Import Profile"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1433
+#: src/ui/profile_dialogs.py:1434
 #, python-brace-format
 msgid "Failed to import profile: {error}"
 msgstr ""
 
-#: src/ui/profile_dialogs.py:1435
+#: src/ui/profile_dialogs.py:1436
 msgid "Profile imported"
 msgstr ""
 
-#: src/ui/quarantine_view.py:241 src/ui/scan_view.py:2429
-#: src/ui/update_view.py:175
+#: src/ui/quarantine_view.py:241 src/ui/scan_view.py:2438
+#: src/ui/update_view.py:177
 msgid "Dismiss"
 msgstr ""
 
@@ -5431,8 +5517,8 @@ msgid_plural "{count} items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/quarantine_view.py:759 src/ui/quarantine_view.py:845
-#: src/ui/quarantine_view.py:913
+#: src/ui/quarantine_view.py:759 src/ui/quarantine_view.py:846
+#: src/ui/quarantine_view.py:915
 msgid "Unknown Threat"
 msgstr ""
 
@@ -5450,132 +5536,136 @@ msgstr ""
 msgid "Restore Quarantined File?"
 msgstr ""
 
-#: src/ui/quarantine_view.py:844
+#. Translators: use your language's quotation marks around {threat}.
+#: src/ui/quarantine_view.py:845
 #, python-brace-format
 msgid "This file was detected as \"{threat}\". It will be restored to {path}."
 msgstr ""
 
-#: src/ui/quarantine_view.py:848
+#: src/ui/quarantine_view.py:849
 msgid "Restore Anyway"
 msgstr ""
 
-#: src/ui/quarantine_view.py:873
+#: src/ui/quarantine_view.py:874
 msgid "File restored successfully"
 msgstr ""
 
-#: src/ui/quarantine_view.py:882
+#: src/ui/quarantine_view.py:883
 msgid "File restored, but the database entry could not be removed"
 msgstr ""
 
-#: src/ui/quarantine_view.py:889
+#: src/ui/quarantine_view.py:890
 msgid "Failed to restore file"
 msgstr ""
 
-#: src/ui/quarantine_view.py:907
+#: src/ui/quarantine_view.py:908
 msgid "Permanently Delete File?"
 msgstr ""
 
-#: src/ui/quarantine_view.py:909
+#. Translators: use your language's quotation marks around {threat}.
+#: src/ui/quarantine_view.py:911
 #, python-brace-format
 msgid ""
 "The quarantined file from {path} (\"{threat}\") will be permanently deleted. "
 "This action cannot be undone."
 msgstr ""
 
-#: src/ui/quarantine_view.py:940
+#: src/ui/quarantine_view.py:942
 msgid "File deleted successfully"
 msgstr ""
 
-#: src/ui/quarantine_view.py:949
+#: src/ui/quarantine_view.py:951
 msgid "File deleted, but the database entry could not be removed"
 msgstr ""
 
-#: src/ui/quarantine_view.py:956
+#: src/ui/quarantine_view.py:958
 msgid "Failed to delete file"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:745
+#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:747
 msgid "Scan Profile"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:750
+#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:752
 msgid "Profile"
 msgstr ""
 
 #: src/ui/scan/profile_selector.py:65 src/ui/scan/profile_selector.py:103
-#: src/ui/scan_view.py:756 src/ui/scan_view.py:841
+#: src/ui/scan_view.py:758 src/ui/scan_view.py:843
 msgid "No Profile (Manual)"
 msgstr ""
 
-#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:768
+#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:770
 msgid "Manage profiles"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:49 src/ui/scan_view.py:1307
+#: src/ui/scan/scan_progress_widget.py:49 src/ui/scan_view.py:1310
 msgid "Scan Progress"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:63 src/ui/scan/scan_view.py:294
-#: src/ui/scan_view.py:1321
+#: src/ui/scan/scan_progress_widget.py:63 src/ui/scan/scan_view.py:296
+#: src/ui/scan_view.py:1324
 msgid "Scanning..."
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:73 src/ui/scan_view.py:1331
+#: src/ui/scan/scan_progress_widget.py:73 src/ui/scan_view.py:1334
 msgid "Currently scanning"
 msgstr ""
 
 #: src/ui/scan/scan_progress_widget.py:74
-#: src/ui/scan/scan_progress_widget.py:119 src/ui/scan_view.py:1332
-#: src/ui/scan_view.py:1977
+#: src/ui/scan/scan_progress_widget.py:119 src/ui/scan_view.py:1335
+#: src/ui/scan_view.py:1984
 msgid "Waiting for scan data..."
 msgstr ""
 
 #: src/ui/scan/scan_progress_widget.py:84
-#: src/ui/scan/scan_progress_widget.py:122 src/ui/scan_view.py:1343
-#: src/ui/scan_view.py:1982
+#: src/ui/scan/scan_progress_widget.py:122 src/ui/scan_view.py:1346
+#: src/ui/scan_view.py:1989
 msgid "Scanned 0 files"
 msgstr ""
 
 #: src/ui/scan/scan_progress_widget.py:94 src/ui/scan_results_dialog.py:213
-#: src/ui/scan_view.py:1353 src/ui/statistics_view.py:294
+#: src/ui/scan_view.py:1356 src/ui/statistics_view.py:294
 msgid "Threats Detected"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:158
+#. Translators: the em dash separates two parts; use the dash and spacing usual
+#. in your language.
+#: src/ui/scan/scan_progress_widget.py:160
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%"
+msgid "Target {current} of {total} — {pct}%"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:163
+#: src/ui/scan/scan_progress_widget.py:165
 #, python-brace-format
 msgid "Scanning... {pct}%"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:176
-#: src/ui/scan/scan_progress_widget.py:196 src/ui/scan_view.py:1565
-#: src/ui/scan_view.py:1585
+#: src/ui/scan/scan_progress_widget.py:178
+#: src/ui/scan/scan_progress_widget.py:198 src/ui/scan_view.py:1570
+#: src/ui/scan_view.py:1590
 #, python-brace-format
 msgid "Scanned {scanned} / {total} files"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:183
-#: src/ui/scan/scan_progress_widget.py:204 src/ui/scan_view.py:1548
-#: src/ui/scan_view.py:1572 src/ui/scan_view.py:1593
+#: src/ui/scan/scan_progress_widget.py:185
+#: src/ui/scan/scan_progress_widget.py:206 src/ui/scan_view.py:1553
+#: src/ui/scan_view.py:1577 src/ui/scan_view.py:1598
 #, python-brace-format
 msgid "Scanned {scanned} files"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:188 src/ui/scan_view.py:1554
-#: src/ui/scan_view.py:1577
+#: src/ui/scan/scan_progress_widget.py:190 src/ui/scan_view.py:1559
+#: src/ui/scan_view.py:1582
 #, python-brace-format
 msgid "Target {current} of {total} ({cumulative} total)"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:216 src/ui/scan_view.py:1603
+#: src/ui/scan/scan_progress_widget.py:218 src/ui/scan_view.py:1608
 msgid "Unknown threat"
 msgstr ""
 
-#: src/ui/scan/scan_progress_widget.py:240 src/ui/scan_view.py:1631
+#: src/ui/scan/scan_progress_widget.py:242 src/ui/scan_view.py:1636
 #, python-brace-format
 msgid "Threats Detected ({n})"
 msgid_plural "Threats Detected ({n})"
@@ -5587,24 +5677,24 @@ msgstr[1] ""
 msgid "View Results ({n})"
 msgstr ""
 
-#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1722
-#: src/ui/scan_view.py:1747
+#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1727
+#: src/ui/scan_view.py:1752
 msgid "View Results"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:163 src/ui/scan_view.py:1264
+#: src/ui/scan/scan_view.py:163 src/ui/scan_view.py:1267
 msgid "Start Scan"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:1273
+#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:1276
 msgid "EICAR Test"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:171 src/ui/scan_view.py:2396
+#: src/ui/scan/scan_view.py:171 src/ui/scan_view.py:2405
 msgid "Run a scan with EICAR test file to verify antivirus detection"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:194 src/ui/scan_view.py:2422
+#: src/ui/scan/scan_view.py:194 src/ui/scan_view.py:2431
 #, python-brace-format
 msgid "Backend: {name}"
 msgstr ""
@@ -5613,32 +5703,34 @@ msgstr ""
 msgid "Cannot add targets while scanning"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:253 src/ui/scan_view.py:2296
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/scan/scan_view.py:255 src/ui/scan_view.py:2305
 #, python-brace-format
-msgid "Scan complete - {count} threat(s) detected"
+msgid "Scan complete — {count} threat(s) detected"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:262
+#: src/ui/scan/scan_view.py:264
 #, python-brace-format
 msgid "Scan error: {error}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:275 src/ui/scan_view.py:1786
+#: src/ui/scan/scan_view.py:277 src/ui/scan_view.py:1791
 msgid "Please select a file or folder to scan"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:308 src/ui/scan_view.py:2244
+#: src/ui/scan/scan_view.py:310 src/ui/scan_view.py:2251
 #, python-brace-format
 msgid "Target {current} of {total}: {path}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:313 src/ui/scan_view.py:1961
-#: src/ui/scan_view.py:2241
+#: src/ui/scan/scan_view.py:315 src/ui/scan_view.py:1968
+#: src/ui/scan_view.py:2248
 #, python-brace-format
 msgid "Scanning {path}"
 msgstr ""
 
-#: src/ui/scan/scan_view.py:336 src/ui/scan_view.py:1898
+#: src/ui/scan/scan_view.py:338 src/ui/scan_view.py:1903
 #, python-brace-format
 msgid "Failed to create EICAR test file: {error}"
 msgstr ""
@@ -5648,15 +5740,15 @@ msgid "Remove target"
 msgstr ""
 
 #: src/ui/scan/target_selector.py:79 src/ui/scan/target_selector.py:234
-#: src/ui/scan_view.py:947 src/ui/scan_view.py:1240
+#: src/ui/scan_view.py:950 src/ui/scan_view.py:1243
 msgid "Drop files here or click Add"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:956
+#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:959
 msgid "Add files"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:964
+#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:967
 msgid "Add folders"
 msgstr ""
 
@@ -5664,7 +5756,7 @@ msgstr ""
 msgid "No targets selected"
 msgstr ""
 
-#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1242
+#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1245
 msgid "Scan Target (1)"
 msgstr ""
 
@@ -5672,25 +5764,26 @@ msgstr ""
 msgid "Scan in Progress"
 msgstr ""
 
-#: src/ui/scan_in_progress_dialog.py:103
+#. Translators: keep the markup tags unchanged.
+#: src/ui/scan_in_progress_dialog.py:104
 msgid "<b><big>Scan in Progress</big></b>"
 msgstr ""
 
-#: src/ui/scan_in_progress_dialog.py:113
+#: src/ui/scan_in_progress_dialog.py:114
 msgid ""
 "A virus scan is currently running. If you close now, the scan will be "
 "cancelled and any partial results will be lost."
 msgstr ""
 
-#: src/ui/scan_in_progress_dialog.py:124
+#: src/ui/scan_in_progress_dialog.py:125
 msgid "Do you want to cancel the scan and close?"
 msgstr ""
 
-#: src/ui/scan_in_progress_dialog.py:136
+#: src/ui/scan_in_progress_dialog.py:137
 msgid "Keep Scanning"
 msgstr ""
 
-#: src/ui/scan_in_progress_dialog.py:141
+#: src/ui/scan_in_progress_dialog.py:142
 msgid "Cancel Scan and Close"
 msgstr ""
 
@@ -5702,7 +5795,7 @@ msgstr ""
 msgid "Copy results to clipboard"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:136 src/ui/scan_results_dialog.py:636
+#: src/ui/scan_results_dialog.py:136 src/ui/scan_results_dialog.py:639
 #, python-brace-format
 msgid "Quarantine {n} Threat"
 msgid_plural "Quarantine All ({n})"
@@ -5735,296 +5828,308 @@ msgstr[1] ""
 msgid "{threat_text} found"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:226
+#. Translators: the em dash separates two parts; use the dash and spacing usual
+#. in your language.
+#: src/ui/scan_results_dialog.py:228
 #, python-brace-format
-msgid "Partial results - {threat_text} found"
+msgid "Partial results — {threat_text} found"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:229
+#: src/ui/scan_results_dialog.py:231
 msgid "Partial results shown"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:251
+#: src/ui/scan_results_dialog.py:253
 msgid "Files scanned:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:254
+#: src/ui/scan_results_dialog.py:256
 msgid "Directories:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:259
+#: src/ui/scan_results_dialog.py:261
 msgid "Threats found:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:264
+#: src/ui/scan_results_dialog.py:266
 msgid "Not accessible:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:269
+#: src/ui/scan_results_dialog.py:271
 msgid "Error:"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:299
+#: src/ui/scan_results_dialog.py:301
 msgid "Files Not Accessible"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:303
+#: src/ui/scan_results_dialog.py:305
 msgid "Permission Denied"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:307
+#: src/ui/scan_results_dialog.py:309
 #, python-brace-format
 msgid "{n} file could not be scanned"
 msgid_plural "{n} files could not be scanned"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:335
+#: src/ui/scan_results_dialog.py:337
 #, python-brace-format
 msgid "... and {count} more"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:357
+#. Translators: keep the markup tags unchanged.
+#: src/ui/scan_results_dialog.py:360
 #, python-brace-format
 msgid ""
 "<b>Large result set:</b> Found {count} threats. Displaying first {limit}."
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:410 src/ui/virustotal_results_dialog.py:344
+#: src/ui/scan_results_dialog.py:413 src/ui/virustotal_results_dialog.py:345
 #, python-brace-format
 msgid "Show {count} more"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:473 src/ui/sidebar.py:31
+#: src/ui/scan_results_dialog.py:476 src/ui/sidebar.py:31
 msgid "Quarantine"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:481
+#: src/ui/scan_results_dialog.py:484
 msgid "Exclude"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:484
+#: src/ui/scan_results_dialog.py:487
 msgid "Add file path to exclusion list"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:490
+#: src/ui/scan_results_dialog.py:493
 msgid "Copy Path"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:507
+#: src/ui/scan_results_dialog.py:510
 msgid "Quarantined"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:517
+#: src/ui/scan_results_dialog.py:520
 #, python-brace-format
 msgid "Quarantined: {name}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:523
+#: src/ui/scan_results_dialog.py:526
 #, python-brace-format
 msgid "Failed: {error}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:532
+#: src/ui/scan_results_dialog.py:535
 msgid "Cannot access settings"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:543 src/ui/scan_results_dialog.py:558
+#: src/ui/scan_results_dialog.py:546 src/ui/scan_results_dialog.py:561
 msgid "Excluded"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:546
+#: src/ui/scan_results_dialog.py:549
 msgid "Path already in exclusion list"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:563
+#: src/ui/scan_results_dialog.py:566
 #, python-brace-format
 msgid "Added to exclusions: {name}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:570
+#: src/ui/scan_results_dialog.py:573
 #, python-brace-format
 msgid "Copied: {path}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:578
+#: src/ui/scan_results_dialog.py:581
 msgid "Quarantining..."
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:611
+#: src/ui/scan_results_dialog.py:614
 #, python-brace-format
 msgid "Quarantined {n} threat"
 msgid_plural "Quarantined {n} threats"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_results_dialog.py:618
+#: src/ui/scan_results_dialog.py:621
 #, python-brace-format
 msgid "Quarantined {success}, failed {failed}"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:649
+#: src/ui/scan_results_dialog.py:652
 msgid "No results to export"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:658
+#: src/ui/scan_results_dialog.py:661
 msgid "Results copied to clipboard"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:659 src/ui/virustotal_results_dialog.py:458
+#: src/ui/scan_results_dialog.py:662 src/ui/virustotal_results_dialog.py:459
 msgid "Failed to copy results"
 msgstr ""
 
-#: src/ui/scan_results_dialog.py:667
+#: src/ui/scan_results_dialog.py:670
 msgid "Export Scan Results"
 msgstr ""
 
-#: src/ui/scan_view.py:439
-msgid "Scan in progress - please wait until the current scan completes"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/scan_view.py:441
+msgid "Scan in progress — please wait until the current scan completes"
 msgstr ""
 
-#: src/ui/scan_view.py:446
+#: src/ui/scan_view.py:448
 msgid "No files were dropped"
 msgstr ""
 
-#: src/ui/scan_view.py:466
+#: src/ui/scan_view.py:468
 msgid "Unable to accept dropped files"
 msgstr ""
 
-#: src/ui/scan_view.py:527 src/ui/scan_view.py:720
+#: src/ui/scan_view.py:529 src/ui/scan_view.py:722
 msgid "Scan details"
 msgstr ""
 
-#: src/ui/scan_view.py:528
+#: src/ui/scan_view.py:530
 msgid "Detailed scan output appears here when available"
 msgstr ""
 
-#: src/ui/scan_view.py:537
+#: src/ui/scan_view.py:539
 msgid "Copy details"
 msgstr ""
 
-#: src/ui/scan_view.py:545
+#: src/ui/scan_view.py:547
 msgid "View details fullscreen"
 msgstr ""
 
-#: src/ui/scan_view.py:684
+#: src/ui/scan_view.py:686
 msgid "Error output:"
 msgstr ""
 
-#: src/ui/scan_view.py:690
+#: src/ui/scan_view.py:692
 msgid "Scan output:"
 msgstr ""
 
-#: src/ui/scan_view.py:707
+#: src/ui/scan_view.py:709
 msgid "Scan details copied to clipboard"
 msgstr ""
 
-#: src/ui/scan_view.py:708
+#: src/ui/scan_view.py:710
 msgid "Failed to copy scan details"
 msgstr ""
 
-#: src/ui/scan_view.py:710
+#: src/ui/scan_view.py:712
 msgid ""
 "Scan details are too large to copy. Use fullscreen to inspect the full "
 "output."
 msgstr ""
 
-#: src/ui/scan_view.py:888
+#. Translators: use your language's quotation marks around {name}.
+#: src/ui/scan_view.py:891
 #, python-brace-format
 msgid "Profile '{name}' has no valid targets"
 msgstr ""
 
-#: src/ui/scan_view.py:972
+#: src/ui/scan_view.py:975
 msgid "Clear all"
 msgstr ""
 
-#: src/ui/scan_view.py:995
+#: src/ui/scan_view.py:998
 msgid "Drop files here or click Add Files/Folders"
 msgstr ""
 
-#: src/ui/scan_view.py:1072
+#: src/ui/scan_view.py:1075
 msgid "Select Files to Scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1094
+#: src/ui/scan_view.py:1097
 msgid "Select Folders to Scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1265
+#: src/ui/scan_view.py:1268
 msgid "Start Scan (F5)"
 msgstr ""
 
-#: src/ui/scan_view.py:1282 src/ui/scan_view.py:1936
+#: src/ui/scan_view.py:1285 src/ui/scan_view.py:1941
 msgid "Cancel the current scan"
 msgstr ""
 
-#: src/ui/scan_view.py:1519
+#. Translators: the em dash separates two parts; use the dash and spacing usual
+#. in your language.
+#: src/ui/scan_view.py:1524
 #, python-brace-format
-msgid "Target {current} of {total} \\u2014 {pct}%{overflow}"
+msgid "Target {current} of {total} — {pct}%{overflow}"
 msgstr ""
 
-#: src/ui/scan_view.py:1528
+#: src/ui/scan_view.py:1533
 #, python-brace-format
 msgid "Scanning... {pct}%{overflow}"
 msgstr ""
 
-#: src/ui/scan_view.py:1739
+#: src/ui/scan_view.py:1744
 #, python-brace-format
 msgid "View Results ({n} Threat)"
 msgid_plural "View Results ({n} Threats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/scan_view.py:1816
+#: src/ui/scan_view.py:1821
 msgid "Virus database is not available"
 msgstr ""
 
-#: src/ui/scan_view.py:1932
+#: src/ui/scan_view.py:1937
 msgid "Cancel All"
 msgstr ""
 
-#: src/ui/scan_view.py:1933
+#: src/ui/scan_view.py:1938
 msgid "Cancel all remaining scans"
 msgstr ""
 
-#: src/ui/scan_view.py:1958
-#, python-brace-format
-msgid "Scanning {path} \\u2014 File count pending"
-msgstr ""
-
+#. Translators: the em dash separates two parts; use the dash and spacing
+#. usual in your language.
 #: src/ui/scan_view.py:1965
 #, python-brace-format
-msgid "Scanning {count} items \\u2014 File count pending"
+msgid "Scanning {path} — File count pending"
 msgstr ""
 
-#: src/ui/scan_view.py:1971
+#. Translators: the em dash separates two parts; use the dash and spacing
+#. usual in your language.
+#: src/ui/scan_view.py:1974
+#, python-brace-format
+msgid "Scanning {count} items — File count pending"
+msgstr ""
+
+#: src/ui/scan_view.py:1978
 #, python-brace-format
 msgid "Scanning {count} items"
 msgstr ""
 
-#: src/ui/scan_view.py:2312 src/ui/scan_view.py:2366
+#: src/ui/scan_view.py:2321 src/ui/scan_view.py:2375
 #, python-brace-format
 msgid "Scan error: {detail}"
 msgstr ""
 
-#: src/ui/scan_view.py:2319 src/ui/scan_view.py:2369
+#: src/ui/scan_view.py:2328 src/ui/scan_view.py:2378
 msgid "Detailed scan error output"
 msgstr ""
 
-#: src/ui/scan_view.py:2320
+#: src/ui/scan_view.py:2329
 msgid "Detailed ClamAV output from the latest failed scan"
 msgstr ""
 
-#: src/ui/scan_view.py:2331
+#: src/ui/scan_view.py:2340
 #, python-brace-format
 msgid "Scan completed with status: {status}"
 msgstr ""
 
-#: src/ui/scan_view.py:2370
+#: src/ui/scan_view.py:2379
 msgid "Detailed application error output from the latest failed scan"
 msgstr ""
 
-#: src/ui/scan_view.py:2428
+#: src/ui/scan_view.py:2437
 msgid "Ready to scan"
 msgstr ""
 
@@ -6064,7 +6169,7 @@ msgstr ""
 msgid "Last Scan"
 msgstr ""
 
-#: src/ui/statistics_view.py:201 src/ui/statistics_view.py:940
+#: src/ui/statistics_view.py:201 src/ui/statistics_view.py:942
 msgid "No scans recorded"
 msgstr ""
 
@@ -6096,7 +6201,7 @@ msgstr ""
 msgid "Scan Statistics"
 msgstr ""
 
-#: src/ui/statistics_view.py:261 src/ui/statistics_view.py:853
+#: src/ui/statistics_view.py:261 src/ui/statistics_view.py:855
 msgid "Aggregated metrics for the selected timeframe"
 msgstr ""
 
@@ -6204,108 +6309,110 @@ msgstr ""
 msgid "Failed to load statistics data"
 msgstr ""
 
-#: src/ui/statistics_view.py:844
+#. Translators: the en dash marks a range; write ranges the way your language usually
+#. does.
+#: src/ui/statistics_view.py:846
 #, python-brace-format
-msgid "{start_date} - {end_date}"
+msgid "{start_date} – {end_date}"
 msgstr ""
 
-#: src/ui/statistics_view.py:849
+#: src/ui/statistics_view.py:851
 #, python-brace-format
 msgid "Statistics for: {date_range}"
 msgstr ""
 
-#: src/ui/statistics_view.py:856
+#: src/ui/statistics_view.py:858
 msgid "Aggregated metrics for all time"
 msgstr ""
 
-#: src/ui/statistics_view.py:878
+#: src/ui/statistics_view.py:880
 msgid "Protected"
 msgstr ""
 
-#: src/ui/statistics_view.py:884
+#: src/ui/statistics_view.py:886
 msgid "At Risk"
 msgstr ""
 
-#: src/ui/statistics_view.py:888
+#: src/ui/statistics_view.py:890
 msgid "Unprotected"
 msgstr ""
 
-#: src/ui/statistics_view.py:909
+#: src/ui/statistics_view.py:911
 msgid "less than an hour ago"
 msgstr ""
 
-#: src/ui/statistics_view.py:913
+#: src/ui/statistics_view.py:915
 #, python-brace-format
 msgid "{hours} hour ago"
 msgid_plural "{hours} hours ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/statistics_view.py:920
+#: src/ui/statistics_view.py:922
 #, python-brace-format
 msgid "{days} day ago"
 msgid_plural "{days} days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/statistics_view.py:927
+#: src/ui/statistics_view.py:929
 #, python-brace-format
 msgid "{weeks} week ago"
 msgid_plural "{weeks} weeks ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/statistics_view.py:933
+#: src/ui/statistics_view.py:935
 #, python-brace-format
 msgid "{time} ({age})"
 msgstr ""
 
-#: src/ui/statistics_view.py:952
+#: src/ui/statistics_view.py:954
 msgid "No scan history yet"
 msgstr ""
 
-#: src/ui/statistics_view.py:953
+#: src/ui/statistics_view.py:955
 msgid "Run your first scan to see statistics and protection status"
 msgstr ""
 
-#: src/ui/statistics_view.py:973 src/ui/statistics_view.py:1038
+#: src/ui/statistics_view.py:975 src/ui/statistics_view.py:1040
 msgid "Unable to load statistics"
 msgstr ""
 
-#: src/ui/statistics_view.py:996
+#: src/ui/statistics_view.py:998
 msgid "Try refreshing or check that ClamAV is installed correctly"
 msgstr ""
 
-#: src/ui/statistics_view.py:1017
+#: src/ui/statistics_view.py:1019
 msgid "No scan history available"
 msgstr ""
 
-#: src/ui/statistics_view.py:1021
+#: src/ui/statistics_view.py:1023
 msgid "No Data"
 msgstr ""
 
-#: src/ui/statistics_view.py:1026
+#: src/ui/statistics_view.py:1028
 msgid "Run a scan to see statistics"
 msgstr ""
 
-#: src/ui/statistics_view.py:1028
+#: src/ui/statistics_view.py:1030
 msgid "Run your first scan to see statistics here"
 msgstr ""
 
-#: src/ui/statistics_view.py:1051
+#: src/ui/statistics_view.py:1053
 msgid "Error"
 msgstr ""
 
-#: src/ui/statistics_view.py:1054
+#: src/ui/statistics_view.py:1056
 msgid "Could not load scan history"
 msgstr ""
 
-#: src/ui/statistics_view.py:1081
+#: src/ui/statistics_view.py:1083
 #, python-brace-format
 msgid "{seconds}s"
 msgstr ""
 
-#: src/ui/statistics_view.py:1085
+#: src/ui/statistics_view.py:1087
 #, python-brace-format
 msgid "{minutes}m {seconds}s"
 msgstr ""
@@ -6334,9 +6441,11 @@ msgstr ""
 msgid "Quit"
 msgstr ""
 
-#: src/ui/tray_service.py:494
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/tray_service.py:496
 #, python-brace-format
-msgid "ClamUI - {status}"
+msgid "ClamUI — {status}"
 msgstr ""
 
 #: src/ui/update_view.py:95
@@ -6351,205 +6460,213 @@ msgstr ""
 msgid "Virus Definitions"
 msgstr ""
 
-#: src/ui/update_view.py:103
+#. Translators: 'Update Database' is a button label; use its translation and your language's
+#. quotation marks.
+#: src/ui/update_view.py:105
 msgid "Click 'Update Database' to download the latest virus signatures"
 msgstr ""
 
-#: src/ui/update_view.py:122 src/ui/update_view.py:538
+#: src/ui/update_view.py:124 src/ui/update_view.py:542
 msgid "Update Database"
 msgstr ""
 
-#: src/ui/update_view.py:123
+#: src/ui/update_view.py:125
 msgid "Update Database (F6)"
 msgstr ""
 
-#: src/ui/update_view.py:134
+#: src/ui/update_view.py:136
 msgid "Force Update"
 msgstr ""
 
-#: src/ui/update_view.py:137
+#: src/ui/update_view.py:139
 msgid ""
 "Force update: Backs up local databases, deletes them, then downloads fresh "
 "copies from mirrors. Automatically restores from backup if update fails."
 msgstr ""
 
-#: src/ui/update_view.py:164
+#: src/ui/update_view.py:166
 msgid "Update Results"
 msgstr ""
 
-#: src/ui/update_view.py:165
+#: src/ui/update_view.py:167
 msgid "Results will appear here after updating"
 msgstr ""
 
-#: src/ui/update_view.py:198
+#: src/ui/update_view.py:200
 msgid "No update results yet."
 msgstr ""
 
-#: src/ui/update_view.py:200
+#. Translators: 'Update Database' is a button label; use its translation and your
+#. language's quotation marks.
+#: src/ui/update_view.py:204
 msgid "Click 'Update Database' to download the latest virus definitions."
 msgstr ""
 
-#: src/ui/update_view.py:228
+#: src/ui/update_view.py:232
 msgid "Checking freshclam..."
 msgstr ""
 
-#: src/ui/update_view.py:246
+#: src/ui/update_view.py:250
 msgid "Checking service..."
 msgstr ""
 
-#: src/ui/update_view.py:266 src/ui/update_view.py:378
+#: src/ui/update_view.py:270 src/ui/update_view.py:382
 #, python-brace-format
 msgid "freshclam: {version}"
 msgstr ""
 
-#: src/ui/update_view.py:281 src/ui/update_view.py:390
+#: src/ui/update_view.py:285 src/ui/update_view.py:394
 msgid "freshclam not found"
 msgstr ""
 
-#: src/ui/update_view.py:286 src/ui/update_view.py:395
+#: src/ui/update_view.py:290 src/ui/update_view.py:399
 msgid "freshclam not installed"
 msgstr ""
 
-#: src/ui/update_view.py:290 src/ui/update_view.py:432
+#: src/ui/update_view.py:294 src/ui/update_view.py:436
 msgid "Service: N/A"
 msgstr ""
 
-#: src/ui/update_view.py:328
+#: src/ui/update_view.py:332
 msgid "Error checking freshclam status"
 msgstr ""
 
-#: src/ui/update_view.py:423
+#: src/ui/update_view.py:427
 msgid "Service: Active"
 msgstr ""
 
-#: src/ui/update_view.py:429
+#: src/ui/update_view.py:433
 msgid "Service: Stopped"
 msgstr ""
 
-#: src/ui/update_view.py:435
+#: src/ui/update_view.py:439
 msgid "Service: Manual Mode"
 msgstr ""
 
-#: src/ui/update_view.py:494
+#: src/ui/update_view.py:498
 msgid "Force updating virus database..."
 msgstr ""
 
-#: src/ui/update_view.py:497
+#: src/ui/update_view.py:501
 msgid ""
 "Backing up local databases, then deleting them to force fresh downloads from "
 "mirrors."
 msgstr ""
 
-#: src/ui/update_view.py:500
+#: src/ui/update_view.py:504
 msgid "Previous databases will be restored if the update fails."
 msgstr ""
 
-#: src/ui/update_view.py:502 src/ui/update_view.py:508
+#: src/ui/update_view.py:506 src/ui/update_view.py:512
 msgid "Please wait, this may take a few minutes."
 msgstr ""
 
-#: src/ui/update_view.py:506
+#: src/ui/update_view.py:510
 msgid "Updating virus database..."
 msgstr ""
 
-#: src/ui/update_view.py:528
+#: src/ui/update_view.py:532
 msgid "Updating..."
 msgstr ""
 
-#: src/ui/update_view.py:592
+#: src/ui/update_view.py:596
 msgid "Update signal sent to freshclam service"
 msgstr ""
 
-#: src/ui/update_view.py:596
+#: src/ui/update_view.py:600
 #, python-brace-format
 msgid "Database updated successfully ({count} database updated)"
 msgid_plural "Database updated successfully ({count} databases updated)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ui/update_view.py:603
+#: src/ui/update_view.py:607
 msgid "Database is already up to date"
 msgstr ""
 
-#: src/ui/update_view.py:606
+#: src/ui/update_view.py:610
 msgid "Update cancelled"
 msgstr ""
 
-#: src/ui/update_view.py:609
+#: src/ui/update_view.py:613
 msgid "Update error occurred"
 msgstr ""
 
-#: src/ui/update_view.py:623
+#: src/ui/update_view.py:627
 msgid "UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"
 msgstr ""
 
-#: src/ui/update_view.py:625
-msgid "UPDATE COMPLETE - DATABASE UPDATED"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in
+#. your language.
+#: src/ui/update_view.py:631
+msgid "UPDATE COMPLETE — DATABASE UPDATED"
 msgstr ""
 
-#: src/ui/update_view.py:627
-msgid "UPDATE COMPLETE - ALREADY UP TO DATE"
+#. Translators: the em dash separates two parts; use the dash and spacing usual in your
+#. language.
+#: src/ui/update_view.py:635
+msgid "UPDATE COMPLETE — ALREADY UP TO DATE"
 msgstr ""
 
-#: src/ui/update_view.py:629
+#: src/ui/update_view.py:637
 msgid "UPDATE CANCELLED"
 msgstr ""
 
-#: src/ui/update_view.py:631
+#: src/ui/update_view.py:639
 msgid "UPDATE PARTIALLY COMPLETE"
 msgstr ""
 
-#: src/ui/update_view.py:633
+#: src/ui/update_view.py:641
 msgid "UPDATE RATE LIMITED"
 msgstr ""
 
-#: src/ui/update_view.py:635
+#: src/ui/update_view.py:643
 msgid "UPDATE ERROR"
 msgstr ""
 
-#: src/ui/update_view.py:642
+#: src/ui/update_view.py:650
 #, python-brace-format
 msgid "  Status: {status}"
 msgstr ""
 
-#: src/ui/update_view.py:643
+#: src/ui/update_view.py:651
 #, python-brace-format
 msgid "  Method: {method}"
 msgstr ""
 
-#: src/ui/update_view.py:645
+#: src/ui/update_view.py:653
 #, python-brace-format
 msgid "  Databases updated: {count}"
 msgstr ""
 
-#: src/ui/update_view.py:648
+#: src/ui/update_view.py:656
 #, python-brace-format
 msgid "  Updated databases: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:654
+#: src/ui/update_view.py:662
 #, python-brace-format
 msgid "  Already current: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:671
+#: src/ui/update_view.py:679
 #, python-brace-format
 msgid "  Rate limited: {databases}"
 msgstr ""
 
-#: src/ui/update_view.py:677
+#: src/ui/update_view.py:685
 msgid "Note: The freshclam service is handling the update in the background."
 msgstr ""
 
-#: src/ui/update_view.py:678
+#: src/ui/update_view.py:686
 msgid "Check service logs for detailed progress:"
 msgstr ""
 
-#: src/ui/update_view.py:690
+#: src/ui/update_view.py:698
 msgid "freshclam Output:"
 msgstr ""
 
-#: src/ui/update_view.py:696
+#: src/ui/update_view.py:704
 msgid "Error Output:"
 msgstr ""
 
@@ -6643,30 +6760,31 @@ msgstr ""
 msgid "Detection Details"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:292
+#. Translators: keep the markup tags unchanged.
+#: src/ui/virustotal_results_dialog.py:293
 #, python-brace-format
 msgid "<small>Showing first {limit} of {total} detections</small>"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:414
+#: src/ui/virustotal_results_dialog.py:415
 #: src/ui/virustotal_setup_dialog.py:243 src/ui/virustotal_setup_dialog.py:314
 msgid "Failed to open browser"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:419
+#: src/ui/virustotal_results_dialog.py:420
 msgid "File path copied"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:421
-#: src/ui/virustotal_results_dialog.py:428
+#: src/ui/virustotal_results_dialog.py:422
+#: src/ui/virustotal_results_dialog.py:429
 msgid "Failed to copy"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:426
+#: src/ui/virustotal_results_dialog.py:427
 msgid "SHA256 hash copied"
 msgstr ""
 
-#: src/ui/virustotal_results_dialog.py:456
+#: src/ui/virustotal_results_dialog.py:457
 msgid "Results copied to clipboard as JSON"
 msgstr ""
 

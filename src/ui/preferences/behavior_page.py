@@ -299,6 +299,8 @@ class BehaviorPage(PreferencesPageMixin):
 
         row = create_navigation_row(
             title=_("Configure Integration"),
+            # Translators: 'Scan with ClamUI' is the file manager menu entry, which is not
+            # translated; keep it in English.
             subtitle=_("Install or manage 'Scan with ClamUI' menu actions"),
             icon_name="system-file-manager-symbolic",
         )

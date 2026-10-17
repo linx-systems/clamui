@@ -97,6 +97,8 @@ class ScheduledPage(PreferencesPageMixin):
         """
         group = Adw.PreferencesGroup()
         group.set_title(_("Scheduled Scans Configuration"))
+        # Translators: 'Save &amp; Apply' is a button label; use its translation, keep '&amp;' as
+        # the markup for '&', and use your language's quotation marks.
         group.set_description(_("Configure automatic scanning. Save with 'Save &amp; Apply'."))
 
         # Enable scheduled scans switch
@@ -151,7 +153,9 @@ class ScheduledPage(PreferencesPageMixin):
         # Day of month spinner (for monthly scans)
         day_of_month_row, day_of_month_spin = create_spin_row(
             title=_("Day of Month"),
-            subtitle=_("For monthly scans (1-28)"),
+            # Translators: the en dash marks a range; write ranges the way your language usually
+            # does.
+            subtitle=_("For monthly scans (1–28)"),
             min_val=1,
             max_val=28,
             step=1,

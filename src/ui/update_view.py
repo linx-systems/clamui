@@ -100,6 +100,8 @@ class UpdateView(Gtk.Box):
         # Info row explaining the update process
         info_row = Adw.ActionRow()
         info_row.set_title(_("Virus Definitions"))
+        # Translators: 'Update Database' is a button label; use its translation and your language's
+        # quotation marks.
         info_row.set_subtitle(_("Click 'Update Database' to download the latest virus signatures"))
         add_row_icon(info_row, "software-update-available-symbolic")
 
@@ -197,6 +199,8 @@ class UpdateView(Gtk.Box):
         buffer.set_text(
             _("No update results yet.")
             + "\n\n"
+            # Translators: 'Update Database' is a button label; use its translation and your
+            # language's quotation marks.
             + _("Click 'Update Database' to download the latest virus definitions.")
         )
 
@@ -622,9 +626,13 @@ class UpdateView(Gtk.Box):
             if is_service_update:
                 lines.append(_("UPDATE SIGNAL SENT TO FRESHCLAM SERVICE"))
             else:
-                lines.append(_("UPDATE COMPLETE - DATABASE UPDATED"))
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                lines.append(_("UPDATE COMPLETE — DATABASE UPDATED"))
         elif result.status == UpdateStatus.UP_TO_DATE:
-            lines.append(_("UPDATE COMPLETE - ALREADY UP TO DATE"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            lines.append(_("UPDATE COMPLETE — ALREADY UP TO DATE"))
         elif result.status == UpdateStatus.CANCELLED:
             lines.append(_("UPDATE CANCELLED"))
         elif has_rate_limits and has_partial_progress:

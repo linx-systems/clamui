@@ -252,7 +252,9 @@ class AuditView(Gtk.Box):
                 # default-open when detected). _update_section_ui flips the
                 # expanded state after the check completes.
                 expander = Gtk.Expander()
-                expander.set_label(_("Portmaster - checking…"))
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language.
+                expander.set_label(_("Portmaster — checking…"))
                 expander.set_expanded(True)
                 expander.set_child(group)
                 self._portmaster_expander = expander
@@ -549,10 +551,14 @@ class AuditView(Gtk.Box):
         if expander is None:
             return
         if result.overall_status == AuditStatus.SKIPPED:
-            expander.set_label(_("Portmaster - not detected (optional)"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            expander.set_label(_("Portmaster — not detected (optional)"))
             expander.set_expanded(False)
         elif result.overall_status == AuditStatus.UNKNOWN:
-            expander.set_label(_("Portmaster - could not probe"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            expander.set_label(_("Portmaster — could not probe"))
             expander.set_expanded(False)
         else:
             expander.set_label(_("Portmaster"))

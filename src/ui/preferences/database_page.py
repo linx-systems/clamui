@@ -71,6 +71,8 @@ THIRD_PARTY_PROVIDERS = [
         "name": "URLhaus",
         "icon": "security-high-symbolic",
         "description": N_("Free malware URL blocklist by abuse.ch, updated every minute"),
+        # Translators: 'Suggested' is a button label; use its translation and your language's
+        # quotation marks.
         "detail": N_("No registration required. Click 'Suggested' above to add."),
         "url": "https://urlhaus.abuse.ch/api/",
         "free": True,
@@ -92,6 +94,8 @@ THIRD_PARTY_PROVIDERS = [
         "icon": "security-medium-symbolic",
         "description": N_("Macro malware, phishing, scam, and spam signatures (hourly updates)"),
         "detail": N_(
+            # Translators: keep the quoted tool names unchanged; you may use your language's
+            # quotation marks.
             "Requires 'fangfrisch' or 'clamav-unofficial-sigs' tool. "
             "Cannot be added as custom URL directly."
         ),
@@ -103,6 +107,8 @@ THIRD_PARTY_PROVIDERS = [
         "name": "InterServer",
         "icon": "security-medium-symbolic",
         "description": N_("Hash-based signatures, web shell detection, and general malware"),
+        # Translators: 'Suggested' is a button label; use its translation and your language's
+        # quotation marks.
         "detail": N_("No registration required. Click 'Suggested' above to add."),
         "url": "http://sigs.interserver.net",
         "free": True,
@@ -521,8 +527,10 @@ class DatabasePage(PreferencesPageMixin):
         group.set_title(_("Custom Signature Databases"))
         group.set_description(
             _(
+                # Translators: the em dash separates two parts; use the dash and spacing usual in
+                # your language. Keep the config key 'DatabaseCustomURL' unchanged.
                 "Third-party signature URLs (e.g., SecuriteInfo). "
-                "Paste URLs or config lines - 'DatabaseCustomURL' prefix auto-stripped."
+                "Paste URLs or config lines — 'DatabaseCustomURL' prefix auto-stripped."
             )
         )
         group.set_header_suffix(helper._create_permission_indicator())
@@ -717,6 +725,8 @@ class DatabasePage(PreferencesPageMixin):
         tip_row.set_title(_("Tip: fangfrisch"))
         tip_row.set_subtitle(
             _(
+                # Translators: keep the quoted tool name unchanged; you may use your language's
+                # quotation marks.
                 "For SaneSecurity and other rsync-based providers, install the "
                 "'fangfrisch' tool which handles downloading and updating "
                 "signatures automatically."

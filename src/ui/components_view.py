@@ -567,7 +567,9 @@ class ComponentsView(Gtk.Box):
             status_icon.set_from_icon_name(resolve_icon_name("dialog-warning-symbolic"))
             set_status_class(status_icon, StatusLevel.WARNING)
             status_label.set_text(_("Not installed"))
-            expander.set_subtitle(_("Not installed - expand for setup instructions"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            expander.set_subtitle(_("Not installed — expand for setup instructions"))
 
             # Show installation guide and enable expander for not installed components
             guide_row = self._guide_rows.get(component_id)
@@ -618,7 +620,9 @@ class ComponentsView(Gtk.Box):
             status_icon.set_from_icon_name(resolve_icon_name("dialog-warning-symbolic"))
             set_status_class(status_icon, StatusLevel.WARNING)
             status_label.set_text(_("Not installed"))
-            expander.set_subtitle(_("Not installed - expand for setup instructions"))
+            # Translators: the em dash separates two parts; use the dash and spacing usual in your
+            # language.
+            expander.set_subtitle(_("Not installed — expand for setup instructions"))
             # Show guide and enable expansion for not installed daemon
             if guide_row:
                 guide_row.set_visible(True)
