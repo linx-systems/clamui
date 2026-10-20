@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       sign:
-        description: "Sign packages with GPG"
+        description: "Sign Debian packages and AppImage with GPG"
         type: boolean
         default: false
 

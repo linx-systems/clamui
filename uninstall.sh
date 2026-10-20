@@ -1,76 +1,54 @@
 #!/bin/sh
-# ClamUI Uninstallation Script
-# Removes ClamUI and all installed files from the system
-#
-# Usage: ./uninstall.sh [OPTIONS]
-#
-# Options:
-#   --system    Uninstall system-wide installation (requires root privileges)
-#   --help      Show this help message
+# ClamUI local-install uninstaller. Distribution-managed installations must be
+# removed with their package manager so package ownership and the polkit helper
+# remain consistent.
 
-set -e
+set -eu
 
-# Colors for output (only if terminal supports it)
 if [ -t 1 ]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[1;33m'
     BLUE='\033[0;34m'
-    NC='\033[0m' # No Color
+    GREEN='\033[0;32m'
+    YELLOW='\033[0;33m'
+    RED='\033[0;31m'
+    NC='\033[0m'
 else
-    RED=''
+    BLUE=''
     GREEN=''
     YELLOW=''
-    BLUE=''
+    RED=''
     NC=''
 fi
 
-# Logging functions
-log_info() {
-    printf "${BLUE}[INFO]${NC} %s\n" "$1"
-}
+log_info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+log_success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+log_warning() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+log_error() { printf "${RED}[ERROR]${NC} %s\n" "$1" >&2; }
 
-log_success() {
-    printf "${GREEN}[OK]${NC} %s\n" "$1"
-}
-
-log_warning() {
-    printf "${YELLOW}[WARN]${NC} %s\n" "$1"
-}
-
-log_error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1" >&2
-}
-
-# Show usage information
 show_help() {
-    cat << 'EOF'
-ClamUI Uninstallation Script
+    cat <<'EOF'
+ClamUI local-install uninstaller
 
 Usage: ./uninstall.sh [OPTIONS]
 
 Options:
-    --system    Uninstall system-wide installation (requires root)
-    --help      Show this help message
+    --system    Remove a manually installed /usr/local ClamUI application
+                 (requires root). Do not use for distribution packages.
+    --help       Show this help message
 
-By default, uninstalls from user-local directories (~/.local/share/).
-No root privileges required for user-local uninstallation.
+This removes only ClamUI executables and desktop/file-manager integration
+installed in the selected local prefix. It never removes settings, profiles,
+logs, quarantine data, scan history, or other user data.
 
-This script will remove:
-    - Desktop entry (application menu)
-    - Application icon
-    - Nemo file manager action (context menu)
-    - ClamUI virtual environment and wrapper script
+For Flatpak, run: flatpak uninstall io.github.linx_systems.ClamUI
+For a Debian or other distribution package, use that distribution's package
+manager. This script deliberately does not remove the system privileged helper.
 EOF
 }
 
-# Parse command line arguments
 SYSTEM_INSTALL=0
 for arg in "$@"; do
     case "$arg" in
-        --system)
-            SYSTEM_INSTALL=1
-            ;;
+        --system) SYSTEM_INSTALL=1 ;;
         --help|-h)
             show_help
             exit 0
@@ -83,226 +61,89 @@ for arg in "$@"; do
     esac
 done
 
-# Set installation directories based on mode
 if [ "$SYSTEM_INSTALL" = "1" ]; then
     if [ "$(id -u)" != "0" ]; then
-        log_error "System-wide uninstallation requires root privileges."
-        log_info "Please run with: sudo ./uninstall.sh --system"
+        log_error "System local uninstallation requires root privileges."
+        log_info "Run: sudo ./uninstall.sh --system"
         exit 1
     fi
-    SHARE_DIR="/usr/share"
-    BIN_DIR="/usr/local/bin"
-    log_info "Uninstalling system-wide from $SHARE_DIR"
+    PREFIX=/usr/local
+    SHARE_DIR=/usr/local/share
+    NAUTILUS_SCRIPTS_DIR=''
 else
-    XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-    SHARE_DIR="$XDG_DATA_HOME"
-    BIN_DIR="$HOME/.local/bin"
-    log_info "Uninstalling from user directory: $SHARE_DIR"
+    PREFIX="${HOME}/.local"
+    SHARE_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}"
+    NAUTILUS_SCRIPTS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/nautilus/scripts"
 fi
 
-# XDG directory paths
-DESKTOP_DIR="$SHARE_DIR/applications"
-ICON_DIR="$SHARE_DIR/icons/hicolor/scalable/apps"
-NEMO_ACTION_DIR="$SHARE_DIR/nemo/actions"
-NAUTILUS_SCRIPTS_DIR="$HOME/.local/share/nautilus/scripts"
-DOLPHIN_SERVICES_DIR="$SHARE_DIR/kservices5/ServiceMenus"
+BIN_DIR="${PREFIX}/bin"
+DESKTOP_DIR="${SHARE_DIR}/applications"
+ICON_THEME_DIR="${SHARE_DIR}/icons/hicolor"
+NEMO_ACTION_DIR="${SHARE_DIR}/nemo/actions"
+DOLPHIN_KIO_DIR="${SHARE_DIR}/kio/servicemenus"
+DOLPHIN_LEGACY_DIR="${SHARE_DIR}/kservices5/ServiceMenus"
+FILES_REMOVED=0
 
-#
-# Uninstallation Functions
-#
-
-# Uninstall ClamUI Python package and virtual environment
-uninstall_python_package() {
-    log_info "=== Uninstalling ClamUI Python Package ==="
-    echo
-
-    # Set up virtual environment location (same as install.sh)
-    if [ "$SYSTEM_INSTALL" = "1" ]; then
-        VENV_DIR="/usr/local/share/clamui/venv"
-        CLAMUI_DIR="/usr/local/share/clamui"
-    else
-        VENV_DIR="$SHARE_DIR/clamui/venv"
-        CLAMUI_DIR="$SHARE_DIR/clamui"
+remove_file() {
+    if [ -e "$1" ] || [ -L "$1" ]; then
+        rm -f -- "$1"
+        log_success "Removed: $1"
+        FILES_REMOVED=$((FILES_REMOVED + 1))
     fi
-
-    # Remove the wrapper script
-    WRAPPER_SCRIPT="$BIN_DIR/clamui"
-    if [ -f "$WRAPPER_SCRIPT" ]; then
-        log_info "Removing wrapper script..."
-        rm -f "$WRAPPER_SCRIPT"
-        log_success "Removed: $WRAPPER_SCRIPT"
-    else
-        log_info "Wrapper script not found: $WRAPPER_SCRIPT"
-    fi
-
-    # Remove the virtual environment
-    if [ -d "$VENV_DIR" ]; then
-        log_info "Removing virtual environment..."
-        rm -rf "$VENV_DIR"
-        log_success "Removed: $VENV_DIR"
-    else
-        log_info "Virtual environment not found: $VENV_DIR"
-    fi
-
-    # Remove the clamui directory if empty
-    if [ -d "$CLAMUI_DIR" ]; then
-        # Check if directory is empty
-        if [ -z "$(ls -A "$CLAMUI_DIR" 2>/dev/null)" ]; then
-            log_info "Removing empty clamui directory..."
-            rmdir "$CLAMUI_DIR" 2>/dev/null || true
-            log_success "Removed: $CLAMUI_DIR"
-        else
-            log_info "Clamui directory not empty, keeping: $CLAMUI_DIR"
-        fi
-    fi
-
-    echo
-    log_success "ClamUI Python package uninstalled!"
-    return 0
 }
 
-# Remove XDG files (desktop entry, icon, nemo action)
-remove_xdg_files() {
-    log_info "=== Removing XDG Files ==="
-    echo
-
-    FILES_REMOVED=0
-
-    # Remove desktop entry
-    DESKTOP_FILE="$DESKTOP_DIR/io.github.linx_systems.ClamUI.desktop"
-    if [ -f "$DESKTOP_FILE" ]; then
-        log_info "Removing desktop entry..."
-        rm -f "$DESKTOP_FILE"
-        log_success "Removed: $DESKTOP_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "Desktop entry not found: $DESKTOP_FILE"
-    fi
-
-    # Remove application icons (SVG and PNG)
-    SVG_ICON_FILE="$ICON_DIR/io.github.linx_systems.ClamUI.svg"
-    if [ -f "$SVG_ICON_FILE" ]; then
-        log_info "Removing SVG icon..."
-        rm -f "$SVG_ICON_FILE"
-        log_success "Removed: $SVG_ICON_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "SVG icon not found: $SVG_ICON_FILE"
-    fi
-
-    PNG_ICON_FILE="$ICON_DIR/io.github.linx_systems.ClamUI.png"
-    if [ -f "$PNG_ICON_FILE" ]; then
-        log_info "Removing PNG icon..."
-        rm -f "$PNG_ICON_FILE"
-        log_success "Removed: $PNG_ICON_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "PNG icon not found: $PNG_ICON_FILE"
-    fi
-
-    # Remove Nemo file manager actions
-    NEMO_FILE="$NEMO_ACTION_DIR/io.github.linx_systems.ClamUI.nemo_action"
-    if [ -f "$NEMO_FILE" ]; then
-        log_info "Removing Nemo action..."
-        rm -f "$NEMO_FILE"
-        log_success "Removed: $NEMO_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "Nemo action not found: $NEMO_FILE"
-    fi
-
-    # Remove VirusTotal Nemo action
-    NEMO_VT_FILE="$NEMO_ACTION_DIR/io.github.linx_systems.ClamUI-virustotal.nemo_action"
-    if [ -f "$NEMO_VT_FILE" ]; then
-        log_info "Removing VirusTotal Nemo action..."
-        rm -f "$NEMO_VT_FILE"
-        log_success "Removed: $NEMO_VT_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "VirusTotal Nemo action not found: $NEMO_VT_FILE"
-    fi
-
-    # Remove Nautilus scripts
-    NAUTILUS_VT_SCRIPT="$NAUTILUS_SCRIPTS_DIR/Scan with VirusTotal"
-    if [ -f "$NAUTILUS_VT_SCRIPT" ]; then
-        log_info "Removing Nautilus VirusTotal script..."
-        rm -f "$NAUTILUS_VT_SCRIPT"
-        log_success "Removed: $NAUTILUS_VT_SCRIPT"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "Nautilus script not found: $NAUTILUS_VT_SCRIPT"
-    fi
-
-    # Remove Dolphin service menus
-    DOLPHIN_VT_FILE="$DOLPHIN_SERVICES_DIR/io.github.linx_systems.ClamUI-virustotal.desktop"
-    if [ -f "$DOLPHIN_VT_FILE" ]; then
-        log_info "Removing Dolphin VirusTotal service menu..."
-        rm -f "$DOLPHIN_VT_FILE"
-        log_success "Removed: $DOLPHIN_VT_FILE"
-        FILES_REMOVED=$((FILES_REMOVED + 1))
-    else
-        log_info "Dolphin service menu not found: $DOLPHIN_VT_FILE"
-    fi
-
-    # Update desktop database if available
-    if command -v update-desktop-database >/dev/null 2>&1; then
-        log_info "Updating desktop database..."
-        if update-desktop-database "$DESKTOP_DIR" 2>/dev/null; then
-            log_success "Desktop database updated"
-        else
-            log_warning "Could not update desktop database (non-fatal)"
-        fi
-    fi
-
-    # Update icon cache if available
-    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-        log_info "Updating icon cache..."
-        if gtk-update-icon-cache -f -t "$SHARE_DIR/icons/hicolor" 2>/dev/null; then
-            log_success "Icon cache updated"
-        else
-            log_warning "Could not update icon cache (non-fatal)"
-        fi
-    fi
-
-    # Rebuild KDE service cache if available
-    if command -v kbuildsycoca5 >/dev/null 2>&1; then
-        log_info "Rebuilding KDE service cache..."
-        kbuildsycoca5 --noincremental 2>/dev/null || true
-        log_success "KDE service cache rebuilt"
-    elif command -v kbuildsycoca6 >/dev/null 2>&1; then
-        log_info "Rebuilding KDE6 service cache..."
-        kbuildsycoca6 --noincremental 2>/dev/null || true
-        log_success "KDE6 service cache rebuilt"
-    fi
-
-    echo
-    if [ "$FILES_REMOVED" -gt 0 ]; then
-        log_success "XDG files removed successfully! ($FILES_REMOVED files)"
-    else
-        log_info "No XDG files found to remove"
-    fi
-    return 0
+remove_binaries() {
+    log_info "Removing native ClamUI executables from ${BIN_DIR}"
+    remove_file "${BIN_DIR}/clamui"
+    remove_file "${BIN_DIR}/clamui-cli"
+    remove_file "${BIN_DIR}/clamui-scheduled-scan"
 }
 
-#
-# Main Execution
-#
+remove_desktop_integration() {
+    log_info "Removing ClamUI desktop and file-manager integration"
+    remove_file "${DESKTOP_DIR}/io.github.linx_systems.ClamUI.desktop"
+    remove_file "${ICON_THEME_DIR}/scalable/apps/io.github.linx_systems.ClamUI.svg"
+    remove_file "${ICON_THEME_DIR}/128x128/apps/io.github.linx_systems.ClamUI.png"
+    remove_file "${NEMO_ACTION_DIR}/io.github.linx_systems.ClamUI.nemo_action"
+    remove_file "${NEMO_ACTION_DIR}/io.github.linx_systems.ClamUI-virustotal.nemo_action"
+    remove_file "${DOLPHIN_KIO_DIR}/io.github.linx_systems.ClamUI.service.desktop"
+    remove_file "${DOLPHIN_KIO_DIR}/io.github.linx_systems.ClamUI-virustotal.desktop"
+    remove_file "${DOLPHIN_LEGACY_DIR}/io.github.linx_systems.ClamUI.service.desktop"
+    remove_file "${DOLPHIN_LEGACY_DIR}/io.github.linx_systems.ClamUI-virustotal.desktop"
+
+    if [ -n "$NAUTILUS_SCRIPTS_DIR" ]; then
+        remove_file "${NAUTILUS_SCRIPTS_DIR}/Scan with ClamUI"
+        remove_file "${NAUTILUS_SCRIPTS_DIR}/Scan with VirusTotal"
+    fi
+}
+
+refresh_desktop_caches() {
+    if command -v update-desktop-database >/dev/null 2>&1 && [ -d "$DESKTOP_DIR" ]; then
+        update-desktop-database "$DESKTOP_DIR" >/dev/null 2>&1 || log_warning "Could not update the desktop database"
+    fi
+    if command -v gtk-update-icon-cache >/dev/null 2>&1 && [ -d "$ICON_THEME_DIR" ]; then
+        gtk-update-icon-cache -f -t "$ICON_THEME_DIR" >/dev/null 2>&1 || log_warning "Could not update the icon cache"
+    fi
+    if command -v kbuildsycoca6 >/dev/null 2>&1; then
+        kbuildsycoca6 --noincremental >/dev/null 2>&1 || log_warning "Could not rebuild the KDE 6 service cache"
+    elif command -v kbuildsycoca5 >/dev/null 2>&1; then
+        kbuildsycoca5 --noincremental >/dev/null 2>&1 || log_warning "Could not rebuild the KDE 5 service cache"
+    fi
+}
 
 main() {
-    echo
-    log_info "=== ClamUI Uninstaller ==="
-    echo
+    log_info "Removing a local native ClamUI installation"
+    remove_binaries
+    remove_desktop_integration
+    refresh_desktop_caches
 
-    # Remove XDG files (desktop entry, icon, nemo action)
-    remove_xdg_files
-
-    # Uninstall the Python package
-    uninstall_python_package
-
-    log_success "=== ClamUI Uninstallation Complete ==="
-    echo
-    log_info "ClamUI has been removed from your system."
-    log_info "You may need to log out and back in for changes to take effect."
+    if [ "$FILES_REMOVED" -eq 0 ]; then
+        log_info "No ClamUI files were found in the selected local prefix."
+    else
+        log_success "Removed ${FILES_REMOVED} ClamUI file(s)."
+    fi
+    log_info "Your ClamUI settings and data were retained."
+    log_info "Remove a Flatpak or distribution package with its package manager."
 }
 
-main "$@"
+main

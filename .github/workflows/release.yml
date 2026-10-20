@@ -6,11 +6,10 @@ on:
       - "v*"
 
 jobs:
-  # Build the Debian artifacts (full clamui + matching privileged-helper) on
-  # tag pushes.  Secrets are inherited so the reusable build workflow can sign
-  # the packages with GPG.
   build-deb:
     uses: ./.github/workflows/build-deb.yml
+    with:
+      sign: true
     secrets: inherit
 
   release:
@@ -31,20 +30,19 @@ jobs:
       - name: Read release notes
         id: notes
         run: |
-          NOTES=$(sed '/^$/d' RELEASE_NOTES.md | tail -n +2)
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "notes<<EOF"
+            tail -n +2 RELEASE_NOTES.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create draft release
         uses: softprops/action-gh-release@v3
         with:
           draft: true
           body: ${{ steps.notes.outputs.notes }}
-          # Attach both .deb artifacts; the privileged-helper package is the
-          # stable host artifact Flatpak users install once.
           files: |
-            debs/clamui_*_all.deb
-            debs/clamui-privileged-helper_*_all.deb
+            debs/clamui_*_amd64.deb
+            debs/clamui-privileged-helper_*_amd64.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

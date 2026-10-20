@@ -13,7 +13,7 @@ ClamUI aims to acknowledge reports within 48 hours. Security updates currently t
 
 Report issues such as command injection, path handling, privilege escalation, arbitrary file access, authentication/credential exposure, denial of service, or unsafe ClamAV command execution. Do not report ClamAV detection quality to ClamUI; report it to the ClamAV project. Product feature requests belong in public issues.
 
-Areas of particular interest include ClamAV command execution, path validation and filesystem operations, quarantine storage and restoration, privileged configuration helpers, scheduled tasks, API/keyring handling, Flatpak host-command boundaries, and tray IPC. Include the smallest safe proof of concept and avoid accessing data or services beyond what demonstrates the issue.
+Areas of particular interest include ClamAV command execution, path validation and filesystem operations, quarantine storage and restoration, privileged configuration helpers, scheduled tasks, API/keyring handling, Flatpak host-command boundaries, the allowlisted Tauri request/event boundary, and native SNI/DBusMenu integration. Include the smallest safe proof of concept and avoid accessing data or services beyond what demonstrates the issue.
 
 ## Security practices
 

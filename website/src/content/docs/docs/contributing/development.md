@@ -1,243 +1,163 @@
 ---
 title: Development and packaging
-description: Set up ClamUI, test a change, work with packages, and maintain the docs site.
+description: Set up the Rust core, Tauri desktop, packages, tests, and docs site.
 ---
 
 ## Prerequisites
 
-ClamUI supports Python 3.11+, GTK 4.6+, and libadwaita 1.1+. Source `PyGObject>=3.56.3` needs GLib 2.80+, so stock Ubuntu/Pop!_OS 22.04 (GLib 2.72) cannot satisfy the current source dependency floor even though the UI remains compatible with their GTK/libadwaita floor. Use Flatpak or a newer development host there.
+ClamUI has a headless Rust core (`crates/clamui-core`) and a Tauri 2 desktop (`desktop/src-tauri`) with a React/TypeScript frontend (`desktop/`). The desktop needs the Linux WebKitGTK **4.1** API and GTK 3 development libraries. Python is not an application build or runtime dependency.
 
 ### Debian or Ubuntu
 
 ```bash
-sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 libadwaita-1-dev libgirepository-2.0-dev libcairo2-dev pkg-config python3-dev libjpeg-dev zlib1g-dev clamav gir1.2-dbusmenu-0.4
+sudo apt update
+sudo apt install build-essential pkg-config libssl-dev libgtk-3-dev \
+  libwebkit2gtk-4.1-dev librsvg2-dev libxdo-dev curl wget file \
+  flatpak-builder
 ```
 
-### Fedora
+Install current stable Rust with `rustup` and Bun using your distribution package manager or their official installers. Confirm the tools before continuing:
 
 ```bash
-sudo dnf install python3-gobject python3-gobject-devel gtk4 libadwaita gobject-introspection-devel cairo-gobject-devel clamav libdbusmenu
+rustc --version
+cargo --version
+bun --version
 ```
 
-### Arch Linux
+Flatpak builds use the GNOME Platform/SDK 51. Before a local Flatpak build, install the SDK extensions declared by the manifest:
 
 ```bash
-sudo pacman -S python-gobject gtk4 libadwaita clamav libdbusmenu-glib
+flatpak install flathub org.gnome.Sdk//51 \
+  org.freedesktop.Sdk.Extension.node24//26.08 \
+  org.freedesktop.Sdk.Extension.rust-stable//26.08
 ```
 
-Use `libgirepository1.0-dev` rather than `libgirepository-2.0-dev` on Ubuntu releases before 24.04.
-
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/) before creating the environment:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Open a new shell if the installer changes your `PATH`.
+Native release artifacts must be built on the Ubuntu 22.04-compatible baseline used by CI to retain the intended glibc floor. A local build on a newer distribution does **not** establish that the artifact supports Ubuntu 22.04 or another older host.
 
 ## Work on the app
 
-```bash
-git clone https://github.com/linx-systems/clamui.git
-cd clamui
-uv sync --locked --extra dev
-uv run clamui
-uv run clamui /path/to/file-or-folder
-uv run clamui scan /path/to/file
-uv run clamui quarantine list
-uv run clamui profile list
-uv run clamui status
-uv run clamui history
-uv run clamui help
-uv run clamui-scheduled-scan --help
-```
-
-Use relative imports inside `src/`; absolute `src.*` imports break installed packages. User-facing strings need gettext marking, and GTK/UI work must return to the main loop through `GLib.idle_add()`. Read the repository's [AI and contributor guide](https://github.com/linx-systems/clamui/blob/master/AGENTS.md) for detailed conventions.
-
-The native-host-only `sudo clamui install-privileged-helper` installs the root-owned preference helper and polkit policy. Do not run it inside Flatpak; install the matching helper package on the host instead.
-
-## Save and scan workflow ownership
-
-`src/core/preferences_save.py` owns **Save & Apply** proposal validation and
-persistence. The preferences window supplies current configuration state;
-`SavePage` collects widget values and prepares a detached proposal on the GTK
-thread. The worker applies that proposal without reading live widgets or window
-state. Its result identifies which configs are durable, even if later settings
-or scheduler work fails. The GTK completion commits each config only if its
-selected path still matches the click-time state, then presents the outcome.
-Keep privileged writes in the existing ClamAV config writer; the workflow is not
-an atomic transaction across all destinations.
-
-`src/core/scan_result_interpreter.py` interprets both **clamscan** and
-**clamdscan** output. Shared detection and result rules live here, not in scan
-execution. The two entry points retain distinct evidence: standalone summary
-counts and progress fallback, versus daemon pre-counts and genuine error replies.
-Keep subprocess lifecycle, cancellation, and host execution in the scanner
-modules.
-
-Exercise these value-level interfaces with
-`tests/core/test_preferences_save.py` and
-`tests/core/test_scan_result_interpreter.py`; retain scanner execution and GTK
-completion coverage for their integration.
-
-## Maintain local Repowise architecture guidance
-
-Repowise indexes and configuration live in the ignored `.repowise/` directory. They are local machine state, so do not commit them or put provider credentials in them. After creating or recovering a local index, restore this guidance block in the root `.repowise/config.yaml` before generating architecture prose:
-
-```yaml
-generation_context:
-  token_budget: 8000
-  files:
-    repo_overview:
-      - src/ui/scan/AGENTS.md
-      - src/app.py
-    onboarding/getting_started:
-      - src/ui/scan/AGENTS.md
-      - src/app.py
-    onboarding/key_concepts:
-      - src/ui/scan/AGENTS.md
-      - src/app.py
-    onboarding/how_it_works:
-      - src/ui/scan/AGENTS.md
-      - src/app.py
-    onboarding/active_landscape:
-      - src/ui/scan/AGENTS.md
-      - src/app.py
-```
-
-The indexed guidance records the current boundary: `src/ui/scan_view.py:ScanView`,
-created by `ClamUIApp.scan_view` in `src/app.py`, is the active desktop scan
-screen. `src/ui/scan/` is a modular alternative; its `ScanCoordinator` and
-`ScanController` are not constructed by the current application route.
-
-For an approved repair with the Claude CLI provider, first inspect the local
-generation plan:
+From the repository root, install the locked frontend dependencies and start Tauri:
 
 ```bash
-repowise generate --page repo_overview:clamui --cascade none --provider claude_cli --model claude-haiku-4-5 --dry-run
+bun --cwd desktop install --frozen-lockfile
+bun run --cwd desktop tauri dev
 ```
 
-`claude_cli` uses the Claude subscription rather than a local Ollama model.
-Only after the plan has been reviewed and the subscription use has explicit
-approval, write the page:
+Use the Tauri command for desktop development; do not substitute direct `cargo run`. Tauri development uses its configured `build.devUrl`, while the native custom-protocol production binary embeds `frontendDist`.
+
+The GUI runs through Tauri/WebKitGTK. For the headless core CLI, use the native binary directly; this route must not initialize a WebKit window:
 
 ```bash
-repowise generate --page repo_overview:clamui --cascade none --provider claude_cli --model claude-haiku-4-5 --yes
+cargo run -p clamui-core --bin clamui-cli -- help
+cargo run -p clamui-core --bin clamui-cli -- scan --help
+cargo run -p clamui-core --bin clamui-scheduled-scan -- --dry-run
 ```
 
-Repowise records the selected guidance in the generated page metadata under
-`source_evidence`; for the overview, confirm that it lists both
-`src/ui/scan/AGENTS.md` and `src/app.py` as included. This grounding makes the
-fact available on later regeneration, but generated prose still requires
-review: an LLM cannot be guaranteed to reproduce every fact perfectly.
+The `clamui` command preserves seven subcommands: `scan`, `quarantine`, `profile`, `status`, `history`, `help`, and `install-privileged-helper`. Keep their flags, JSON/text output, standard streams, and exit semantics compatible. `clamui-scheduled-scan` remains a separate executable.
 
-To pin a correction while prose is being regenerated, use the dashboard API's
-`PATCH /api/pages/lookup/notes?page_id=<page-id>` endpoint with
-`human_notes`. The note survives model regeneration and is returned by the
-dashboard page APIs. It is not a retrieval guarantee: MCP `get_context`
-includes it only for file pages, while `get_overview` and search do not expose
-it. Keep the source guidance above as the durable correction.
+The CLI accepts conventional bundled scan flags and compatible attached `history` arguments. Use `--` before a target whose name looks like an option, for example `clamui scan -- --virustotal`; this keeps it a scan target rather than treating it as a flag.
 
-## Restore local Repowise semantic search
-
-Both the root repository and `website/` have separate ignored Repowise state.
-In each local `.repowise/config.yaml`, set:
-
-```yaml
-embedder: ollama
-embedding_model: embeddinggemma
-```
-
-In each corresponding ignored `.repowise/.env`, set the local embedding
-connection values:
-
-```dotenv
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_EMBEDDING_MODEL=embeddinggemma
-OLLAMA_EMBEDDING_DIMS=768
-```
-
-With Ollama and `embeddinggemma` available locally, rebuild both vector stores
-from the repository root:
+The installed command surface is:
 
 ```bash
-repowise reindex . --embedder ollama
-repowise reindex website --embedder ollama
+clamui scan /path/to/target
+clamui quarantine list --json
+clamui profile list --json
+clamui status --json
+clamui history --limit 20 --json
+clamui help scan
+sudo clamui install-privileged-helper
+clamui-scheduled-scan --dry-run
 ```
 
-Reindexing embeds existing pages locally and does not generate prose. Restart
-the Repowise MCP server and dashboard after reindexing so they reconnect to the
-updated local semantic indexes.
-
-## Validate before a pull request
+`install-privileged-helper` is for a native host only. Its real installation requires root and stages the co-bundled compiled helper with its canonical polkit policy. The Flatpak rejects this host command: use the matching published host helper package and its separate in-app signed installer instead. Contributors can use the hidden advanced staging mode without elevation in an owned temporary directory:
 
 ```bash
-uv run ruff check .
-uv run ruff format --check .
-pytest
-pytest --cov=src --cov-report=term-missing
-./scripts/hooks/install-hooks.sh
+stage_dir="$(mktemp -d)"
+clamui install-privileged-helper --prefix "$stage_dir"
 ```
 
-Tests mirror source beneath `tests/`; `tests/conftest.py` provides GTK fixtures. The project targets 50% total coverage, 80%+ for core/profiles, and 70%+ for UI. CI tests Python 3.11–3.14 and retains an Ubuntu 22.04/libadwaita 1.1 compatibility job.
+### Debugging
+
+Use structured Rust logging while starting the desktop:
+
+```bash
+RUST_LOG=clamui=debug bun run --cwd desktop tauri dev
+```
+
+Use the Tauri/WebKit developer tools for frontend state and the terminal for Rust/core diagnostics. Never replace native IPC with a browser filesystem, shell, or process permission. The only frontend request boundary is Tauri's allowlisted `request` command and `clamui-event` event stream.
+
+### Data compatibility
+
+Work against the existing XDG layouts, never ad-hoc project-local data:
+
+```text
+$XDG_CONFIG_HOME/clamui/settings.json
+$XDG_CONFIG_HOME/clamui/profiles.json
+$XDG_DATA_HOME/clamui/logs/
+$XDG_DATA_HOME/clamui/quarantine.db
+$XDG_DATA_HOME/clamui/quarantine/
+$XDG_DATA_HOME/clamui/debug/
+```
+
+The Flatpak equivalents live beneath `~/.var/app/io.github.linx_systems.ClamUI/`. Preserve atomic settings writes, unknown settings keys, existing JSON/SQLite schemas, privacy migrations, restrictive file modes, and profile/import compatibility. The core must remain GTK-widget and Tauri independent so these behaviors also work through the CLI.
+
+### Host and privilege boundaries
+
+ClamUI uses host `clamscan` and `freshclam`; daemon mode also uses host `clamd` and `clamdscan`. Under Flatpak, calls cross the explicit `flatpak-spawn --host` boundary. Do not bundle or emulate ClamAV.
+
+Protected configuration changes use the authenticated protocol-v4 helper at `/usr/bin/clamui-apply-preferences` and the `io.github.linx_systems.ClamUI.policy` polkit policy. Preserve its allowlists, `PKEXEC_UID` validation, exit codes, and compatibility with an already-installed helper. The helper is native Rust, not a Python wrapper. A Flatpak cannot install host files; unavailable trust or authorization must fail without changes.
+
+## Test before a pull request
+
+Run the applicable checks from the repository root:
+
+```bash
+bun run --cwd desktop check
+bun run --cwd desktop build
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+```
+
+Exercise the real CLI and persisted compatibility fixtures in addition to unit tests. Test clean, EICAR, cancellation, scheduling dry-run, privileged-helper rejection, and compatible CLI output. For desktop work, manually verify Tauri startup, navigation, events, native dialogs, tray behavior, and file-argument forwarding.
+
+The current migration proof exercised 122 Rust workspace tests and strict Clippy, actual Tauri, AppImage, and Flatpak EICAR scans through the host bridge, prior XDG JSON/SQLite/keyring compatibility, and the desktop's 1.114 MB copy and 18.55 MB ZIP-export paths. It is not a zero-regression guarantee and does not claim exercised protected host writes, VirusTotal uploads, physical-device hardware, Wayland, or aarch64 CI.
 
 ## Packaging boundaries
 
-Flatpak builds against GNOME 51, whose native Python runtime is 3.14; generated Flatpak wheel sources target `314-x86_64` and `314-aarch64`. This bundled runtime is independent of the host GTK/Python stack. Flatpak and AppImage carry Python and GUI dependencies but **never ClamAV**: all formats use host `clamscan`, `freshclam`, and optionally `clamd`/`clamdscan`. The full Debian application package requires host Python 3.11+ (stock Debian 12+ or Ubuntu 24.04+); use Flatpak on Ubuntu/Pop!_OS 22.04. Flatpak host calls and configuration at the selected distribution-specific paths remain explicit boundaries. The Debian application and matching privileged-helper packages must be version-matched.
+ClamUI preserves Debian, Flatpak, and x86_64 AppImage distribution formats. Packaging sources live in [`debian/`](https://github.com/linx-systems/clamui/tree/master/debian), [`flathub/`](https://github.com/linx-systems/clamui/tree/master/flathub), and [`appimage/`](https://github.com/linx-systems/clamui/tree/master/appimage). Use their checked-in manifests and scripts rather than recreating package logic locally.
 
-Build paths and package metadata live in [`flathub/`](https://github.com/linx-systems/clamui/tree/master/flathub), [`appimage/`](https://github.com/linx-systems/clamui/tree/master/appimage), and [`debian/`](https://github.com/linx-systems/clamui/tree/master/debian). Use their checked-in scripts and manifests rather than duplicating package logic.
+A Debian release is a version- and architecture-matched pair: the application package and `clamui-privileged-helper` package. The pair ships native Rust binaries and the canonical polkit policy; it must not carry a Python app runtime. Flatpak targets GNOME 51 for x86_64 and aarch64. AppImage remains x86_64. Every format retains the host ClamAV boundary.
 
-Install `flatpak-builder` from your distribution. On Debian or Ubuntu:
-
-```bash
-sudo apt install flatpak-builder
-```
-
-After [setting up Flathub](/docs/installation/#flatpak), install the matching SDK and runtime:
+Build with the maintained packaging entry points:
 
 ```bash
-flatpak install flathub org.gnome.Sdk//51 org.gnome.Platform//51
-```
-
-Build package artifacts from the repository root:
-
-```bash
-flatpak-builder --user --install --force-clean build-dir flathub/io.github.linx_systems.ClamUI.local.yml
-./appimage/build-appimage.sh
 ./debian/build-deb.sh
+# Package the three binaries built on the Ubuntu 22.04-compatible baseline.
+CLAMUI_ARTIFACT_DIR=/absolute/path/to/ubuntu22/target/release ./debian/build-deb.sh dist
+flatpak-builder --user --install --force-clean build-dir flathub/io.github.linx_systems.ClamUI.local.yml
+UPDATE_INFORMATION='gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64.AppImage.zsync' ./appimage/build-appimage.sh
 ```
 
-The Flatpak local manifest intentionally sources the working tree; its production manifest sources the pinned release. AppImage builds need Ubuntu 24.04+ GTK/libadwaita packages, Python, `wget`, and FUSE to run the artifact. Debian builds require `dpkg-deb` and `fakeroot` and produce both version-matched `.deb` files.
+`debian/build-deb.sh` is the authoritative Debian entry point: it produces the application/helper pair and stages the policy and scheduled-scan payload. `CLAMUI_ARTIFACT_DIR` must contain executable `clamui`, `clamui-scheduled-scan`, and `clamui-apply-preferences` binaries from the baseline build. The AppImage build produces `ClamUI-<VERSION>-x86_64.AppImage` and its `.zsync` metadata. Flatpak production builds use the locked Cargo and Bun source manifests; the local manifest intentionally builds the checkout.
 
-## Update the application icon
-
-`icons/io.github.linx_systems.ClamUI.svg` is the source icon; `icons/io.github.linx_systems.ClamUI.png` is its checked-in 128×128 rendering. When the SVG changes, regenerate and commit both files once. Builds install the committed PNG and never convert it.
-
-```bash
-rsvg-convert --width=128 --height=128 --output=icons/io.github.linx_systems.ClamUI.png icons/io.github.linx_systems.ClamUI.svg
-```
-
-On Debian or Ubuntu, install the converter separately:
-
-```bash
-sudo apt install librsvg2-bin
-```
+Before publishing, inspect package payloads for the right architecture, native command names, helper/policy paths, and absence of a Python application runtime. Build compatibility still requires proof from the baseline environment and target package/OS; do not infer it from this development guide.
 
 ## Write documentation
 
-The website's Starlight documentation source is `website/src/content/docs/docs/`; add a focused Markdown/MDX page there, use root-relative `/docs/.../` links, and update the Starlight sidebar in `website/astro.config.mjs`. Keep root `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` as short GitHub discoverability pointers, not parallel manuals. `CHANGELOG.md` and `RELEASE_NOTES.md` remain release inputs and are rendered by MDX imports rather than copied.
+The Starlight source is `website/src/content/docs/docs/`. Reuse the existing focused pages, use root-relative `/docs/.../` links, and keep the existing sidebar structure unless navigation truly changes. Root `README.md` and `CONTRIBUTING.md` are short discovery pointers; `CHANGELOG.md` and `RELEASE_NOTES.md` remain canonical release sources rendered by MDX imports.
 
-The project chose Starlight inside the existing Astro site at `/docs/` for stock navigation, search, and code-copy UI without a separate CMS, server, or search service. Website commands:
+Website commands:
 
 ```bash
-cd website
-bun install --frozen-lockfile
-bunx playwright install --with-deps chromium
-bun run dev
-bun run check
-bun run build
+bun --cwd website install --frozen-lockfile
+bun run --cwd website check
+bun run --cwd website build
 ```
 
-Keep `pagefind` and `@pagefind/default-ui` pinned to 1.4.0. Pagefind 1.5 workers use root-relative URLs that fail in `WorkerGlobalScope` on static hosts. Lift the pin only after browser search passes both a direct docs load and the marketing-to-docs navigation path.
+Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
 
-Do not edit generated `website/public/` asset copies; the website scripts synchronize root icons and screenshots. Keep release documentation sourced from the root files.
+## Update the application icon
+
+`icons/io.github.linx_systems.ClamUI.svg` is the source icon; `icons/io.github.linx_systems.ClamUI.png` is its checked-in 128×128 rendering. When the SVG changes, regenerate and commit both files once. Builds install the committed PNG and never convert it at runtime.

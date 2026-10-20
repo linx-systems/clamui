@@ -1,6 +1,18 @@
 # ClamUI v0.4.1
 
+> **Historical release notes.** This page records the v0.4.1 Python/PyGObject release. It is not a release announcement for the Rust/Tauri migration and does not claim that migration artifacts, target operating systems, or package formats have been externally verified. For current installation and development instructions, use the [documentation](https://clamui.com/docs/installation/) and [development guide](https://clamui.com/docs/contributing/development/).
+
+## Current Rust/Tauri migration validation
+
+The current migration proof exercised 122 Rust workspace tests and strict Clippy; host-bridge EICAR scans through the Tauri desktop, AppImage, and Flatpak; prior XDG JSON, SQLite, and keyring compatibility; and the desktop's 1.114 MB copy and 18.55 MB ZIP-export paths.
+
+This is not a zero-regression guarantee and does not claim exercised protected host writes, VirusTotal uploads, physical-device hardware, Wayland, aarch64 CI, or external package/operating-system verification. Live helper onboarding requires matching newly published, signed Rust release assets; a source build or older helper is not host-write authorization.
+
 Hungarian localization, easier Flatpak host-helper setup, tray startup, and reliability fixes for scanning, host integration, and packaged builds.
+
+## Current source catalog policy
+
+- The active Rust/Tauri source and packages restore the full `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` locale set. Localized historical scan-summary recognition is retained as bounded embedded Rust data, not as shipped, selectable, or synchronized archive catalogs.
 
 ## Highlights
 
@@ -47,10 +59,6 @@ flatpak install flathub io.github.linx_systems.ClamUI
 
 **GitHub Release**: Download `clamui_0.4.1_all.deb` or the `clamui-x86_64.flatpak` / `clamui-aarch64.flatpak` bundle from the [Releases page](https://github.com/linx-systems/clamui/releases/tag/v0.4.1). On Debian/Ubuntu, install the matching `clamui-privileged-helper_0.4.1_all.deb` when changing protected host ClamAV configuration.
 
-**From source**:
-```bash
-git clone https://github.com/linx-systems/clamui.git
-cd clamui && uv sync && uv run clamui
-```
+**From source**: The v0.4.1 source workflow was retired with the Rust/Tauri migration. Follow the current [development guide](https://clamui.com/docs/contributing/development/) instead of using legacy Python commands.
 
 See the [full commit log](https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1) for all changes.

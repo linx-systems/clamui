@@ -1,0 +1,42 @@
+[package]
+name = "clamui-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+build = "build.rs"
+
+[lib]
+name = "clamui_core"
+path = "src/lib.rs"
+
+[dependencies]
+base64.workspace = true
+chrono.workspace = true
+clap.workspace = true
+signal-hook.workspace = true
+csv.workspace = true
+fs2.workspace = true
+gio.workspace = true
+glib.workspace = true
+globset.workspace = true
+hex.workspace = true
+libc.workspace = true
+log.workspace = true
+percent-encoding.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+rusqlite.workspace = true
+semver.workspace = true
+serde.workspace = true
+secret-service.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+url.workspace = true
+uuid.workspace = true
+walkdir.workspace = true
+zip.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

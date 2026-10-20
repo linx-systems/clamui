@@ -29,6 +29,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Install pinned Flatpak SDK extensions
+        run: |
+          set -euo pipefail
+          flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-info --user flathub org.freedesktop.Sdk.Extension.node24//26.08 >/dev/null
+          flatpak remote-info --user flathub org.freedesktop.Sdk.Extension.rust-stable//26.08 >/dev/null
+          flatpak install --user --noninteractive flathub \
+            org.freedesktop.Sdk.Extension.node24//26.08 \
+            org.freedesktop.Sdk.Extension.rust-stable//26.08
+
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
