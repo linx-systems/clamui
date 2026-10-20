@@ -2,7 +2,9 @@
 # Copyright (C) 2026 ClamUI Contributors
 # This file is distributed under the same license as the ClamUI package.
 # John Erling Blad <jeblad@gmail.com>, 2026.
-# ClaudeAI (Opus 5.5), 2026.
+# ClaudeAI (Opus 5.5), 2026: drafted the translation; every string was reviewed
+# and corrected by John Erling Blad, who is responsible for it. Listed here for
+# transparency, not in translator-credits.
 #
 # Glossary (follow Bokmålsordboka, https://ordbokene.no):
 #   scan (verb) = skanne, imperative «skann», past «skannet»
@@ -59,7 +61,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.4.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-10-16 23:41+0200\n"
+"POT-Creation-Date: 2026-10-20 01:42+0200\n"
 "PO-Revision-Date: 2026-10-17 12:00+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: Norwegian Bokmål\n"
@@ -69,28 +71,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/app.py:431
+#: src/app.py:432
 msgid "Updating stored logs for privacy"
 msgstr "Oppdaterer lagrede logger av personvernhensyn"
 
-#: src/app.py:434
+#: src/app.py:435
 #, python-brace-format
 msgid "Updating stored log for privacy ({processed}/{total})"
 msgid_plural "Updating stored logs for privacy ({processed}/{total})"
 msgstr[0] "Oppdaterer lagret logg av personvernhensyn ({processed}/{total})"
 msgstr[1] "Oppdaterer lagrede logger av personvernhensyn ({processed}/{total})"
 
-#: src/app.py:801
+#: src/app.py:802
 msgid "Select File or Folder"
 msgstr "Velg fil eller mappe"
 
+#. Translators: replace with your name(s) and optionally <email> or a URL, one
+#. translator per line. Leave untranslated if you don't want to be credited.
+#: src/app.py:861
+msgid "translator-credits"
+msgstr "John Erling Blad https://github.com/jeblad"
+
+#: src/app.py:868
+msgid "A graphical interface for ClamAV antivirus"
+msgstr "Et grafisk grensesnitt for antivirusprogrammet ClamAV"
+
 #. Translators: the em dash separates two parts; use the dash and spacing usual in
 #. your language.
-#: src/app.py:994
+#: src/app.py:1002
 msgid "A scan is already running — the new scan request was ignored"
 msgstr "En skanning pågår allerede – den nye forespørselen ble ignorert"
 
-#: src/app.py:1024
+#: src/app.py:1032
 #, python-brace-format
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
@@ -863,7 +875,8 @@ msgstr "  Kunne ikke settes i karantene: {count} fil(er)"
 #: src/cli/scheduled_scan.py:467
 #, python-brace-format
 msgid "Scheduled scan found {infected} threat(s), {quarantined} quarantined"
-msgstr "Planlagt skanning fant {infected} trussel(er), {quarantined} satt i karantene"
+msgstr ""
+"Planlagt skanning fant {infected} trussel(er), {quarantined} satt i karantene"
 
 #: src/cli/scheduled_scan.py:473
 #, python-brace-format
@@ -926,7 +939,8 @@ msgstr "Feil ({target})"
 #: src/cli/scheduled_scan.py:584 src/core/notification_manager.py:180
 #, python-brace-format
 msgid "{infected} infected file(s) found, {quarantined} quarantined"
-msgstr "{infected} fil(er) med infeksjon funnet, {quarantined} satt i karantene"
+msgstr ""
+"{infected} fil(er) med infeksjon funnet, {quarantined} satt i karantene"
 
 #: src/cli/scheduled_scan.py:589
 #, python-brace-format
@@ -1220,8 +1234,7 @@ msgstr ""
 #: src/core/clamav_config.py:1354
 msgid "Authentication was canceled. Configuration changes were not applied."
 msgstr ""
-"Autentisering ble avbrutt. Endringene i konfigurasjonen ble ikke tatt i "
-"bruk."
+"Autentisering ble avbrutt. Endringene i konfigurasjonen ble ikke tatt i bruk."
 
 #. Translators: keep the quoted package name unchanged; you may use your
 #. language's quotation marks.
@@ -1412,8 +1425,8 @@ msgid ""
 "daemon backend or grant this user read access through your system's ClamAV "
 "configuration."
 msgstr ""
-"Virusdatabasefilene finnes, men denne brukeren kan ikke lese dem. Bruk ClamAV-"
-"tjenesten som skannemotor, eller gi brukeren lesetilgang via ClamAV-"
+"Virusdatabasefilene finnes, men denne brukeren kan ikke lese dem. Bruk "
+"ClamAV-tjenesten som skannemotor, eller gi brukeren lesetilgang via ClamAV-"
 "konfigurasjonen på systemet."
 
 #: src/core/clamav_detection.py:418
@@ -2014,8 +2027,7 @@ msgstr "Kunne ikke kjøre chkrootkit: {error}"
 #: src/core/system_audit.py:1534
 #, python-brace-format
 msgid "Rootkit scan could not be completed (exit {code})"
-msgstr ""
-"Skanningen etter rootkits kunne ikke fullføres (feilkode {code})"
+msgstr "Skanningen etter rootkits kunne ikke fullføres (feilkode {code})"
 
 #: src/core/system_audit.py:1563
 #, python-brace-format
@@ -2156,8 +2168,7 @@ msgstr ""
 #: src/core/keyring_manager.py:140 src/core/keyring_manager.py:300
 msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr ""
-"Lagret i innstillingsfilen (nøkkelringen er utilgjengelig – mindre "
-"sikkert)"
+"Lagret i innstillingsfilen (nøkkelringen er utilgjengelig – mindre sikkert)"
 
 #: src/core/keyring_manager.py:142
 msgid "Failed to save API key to settings"
@@ -2185,9 +2196,8 @@ msgid ""
 "System keyring is unavailable. To store the Portmaster token without a "
 "keyring, enable the plaintext fallback in preferences (less secure)."
 msgstr ""
-"Nøkkelringen på systemet er utilgjengelig. For å lagre Portmaster-"
-"tokenet uten nøkkelring, slå på lagring i ren tekst i brukervalgene (mindre "
-"sikkert)."
+"Nøkkelringen på systemet er utilgjengelig. For å lagre Portmaster-tokenet "
+"uten nøkkelring, slå på lagring i ren tekst i brukervalgene (mindre sikkert)."
 
 #: src/core/keyring_manager.py:301
 msgid "Failed to save Portmaster token to settings"
@@ -2197,7 +2207,7 @@ msgstr "Kunne ikke lagre Portmaster-tokenet i innstillingene"
 msgid "Unknown Device"
 msgstr "Ukjent enhet"
 
-#: src/core/privileged_helper.py:273
+#: src/core/privileged_helper.py:277
 msgid ""
 "The host helper was found, but its installed package version could not be "
 "verified."
@@ -2205,14 +2215,14 @@ msgstr ""
 "Hjelperen på vertssystemet ble funnet, men versjonen av den installerte "
 "pakken kunne ikke bekreftes."
 
-#: src/core/privileged_helper.py:280
+#: src/core/privileged_helper.py:284
 msgid ""
 "The privileged helper is only installed automatically for Flatpak ClamUI."
 msgstr ""
 "Den privilegerte hjelperen installeres bare automatisk for ClamUI som "
 "Flatpak."
 
-#: src/core/privileged_helper.py:286
+#: src/core/privileged_helper.py:290
 msgid ""
 "Automatic privileged-helper installation is currently supported only on "
 "Debian-family hosts."
@@ -2220,19 +2230,19 @@ msgstr ""
 "Automatisk installasjon av den privilegerte hjelperen støttes foreløpig bare "
 "på vertssystemer i Debian-familien."
 
-#: src/core/privileged_helper.py:755
+#: src/core/privileged_helper.py:782
 msgid "The privileged helper is already installed."
 msgstr "Den privilegerte hjelperen er allerede installert."
 
-#: src/core/privileged_helper.py:760
+#: src/core/privileged_helper.py:787
 msgid "The privileged helper cannot be installed automatically here."
 msgstr "Den privilegerte hjelperen kan ikke installeres automatisk her."
 
-#: src/core/privileged_helper.py:768
+#: src/core/privileged_helper.py:795
 msgid "Timed out while checking the ClamUI release."
 msgstr "Tidsavbrudd ved kontroll av ClamUI-utgivelsen."
 
-#: src/core/privileged_helper.py:773
+#: src/core/privileged_helper.py:800
 msgid ""
 "Could not contact GitHub to check the ClamUI release. Check your connection "
 "and try again."
@@ -2240,15 +2250,15 @@ msgstr ""
 "Fikk ikke kontakt med GitHub for å kontrollere ClamUI-utgivelsen. Kontroller "
 "tilkoblingen og prøv igjen."
 
-#: src/core/privileged_helper.py:777
+#: src/core/privileged_helper.py:804
 msgid "The matching ClamUI helper release could not be verified."
 msgstr "Den tilsvarende utgivelsen av ClamUI-hjelperen kunne ikke bekreftes."
 
-#: src/core/privileged_helper.py:787
+#: src/core/privileged_helper.py:814
 msgid "Timed out while downloading the privileged helper. Try again."
 msgstr "Tidsavbrudd ved nedlasting av den privilegerte hjelperen. Prøv igjen."
 
-#: src/core/privileged_helper.py:792
+#: src/core/privileged_helper.py:819
 msgid ""
 "Could not download the privileged helper. Check your connection and try "
 "again."
@@ -2256,59 +2266,59 @@ msgstr ""
 "Kunne ikke laste ned den privilegerte hjelperen. Kontroller tilkoblingen og "
 "prøv igjen."
 
-#: src/core/privileged_helper.py:795
+#: src/core/privileged_helper.py:822
 msgid "The downloaded privileged helper could not be verified."
 msgstr "Den nedlastede privilegerte hjelperen kunne ikke bekreftes."
 
-#: src/core/privileged_helper.py:801
+#: src/core/privileged_helper.py:828
 msgid "The downloaded privileged helper has an unexpected package identity."
 msgstr "Den nedlastede privilegerte hjelperen har en uventet pakkeidentitet."
 
-#: src/core/privileged_helper.py:806
+#: src/core/privileged_helper.py:833
 msgid ""
 "The downloaded privileged helper does not have a valid ClamUI signature."
 msgstr ""
 "Den nedlastede privilegerte hjelperen har ikke en gyldig ClamUI-signatur."
 
-#: src/core/privileged_helper.py:812
+#: src/core/privileged_helper.py:839
 msgid "Authorization was cancelled. The privileged helper was not installed."
 msgstr ""
 "Godkjenning ble avbrutt. Den privilegerte hjelperen ble ikke installert."
 
-#: src/core/privileged_helper.py:818
+#: src/core/privileged_helper.py:845
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""
 "Installasjonen av den privilegerte hjelperen mislyktes. Prøv igjen eller "
 "installer den manuelt."
 
-#: src/core/privileged_helper.py:826
+#: src/core/privileged_helper.py:853
 msgid ""
 "The privileged helper was installed but is still unavailable. Restart ClamUI "
 "and try again."
 msgstr ""
-"Den privilegerte hjelperen ble installert, men er fortsatt "
-"utilgjengelig. Start ClamUI på nytt og prøv igjen."
+"Den privilegerte hjelperen ble installert, men er fortsatt utilgjengelig. "
+"Start ClamUI på nytt og prøv igjen."
 
-#: src/core/privileged_helper.py:830
+#: src/core/privileged_helper.py:857
 msgid "The privileged helper was installed successfully."
 msgstr "Den privilegerte hjelperen er installert."
 
-#: src/core/privileged_helper.py:835
+#: src/core/privileged_helper.py:862
 msgid ""
 "Timed out while verifying or installing the privileged helper. Try again."
 msgstr ""
 "Tidsavbrudd ved kontroll eller installasjon av den privilegerte hjelperen. "
 "Prøv igjen."
 
-#: src/core/privileged_helper.py:840
+#: src/core/privileged_helper.py:867
 msgid ""
 "Could not run the host package-management tools. Install the helper manually."
 msgstr ""
 "Kunne ikke kjøre pakkeverktøyene på vertssystemet. Installer hjelperen "
 "manuelt."
 
-#: src/core/privileged_helper.py:851
+#: src/core/privileged_helper.py:878
 msgid "Privileged-helper installation is already in progress."
 msgstr "Installasjon av den privilegerte hjelperen pågår allerede."
 
@@ -2508,7 +2518,8 @@ msgstr "Skanning av enhet: trusler oppdaget!"
 #: src/core/notification_manager.py:356
 #, python-brace-format
 msgid "{device}: {infected} threat(s) found, {quarantined} quarantined"
-msgstr "{device}: {infected} trussel(er) funnet, {quarantined} satt i karantene"
+msgstr ""
+"{device}: {infected} trussel(er) funnet, {quarantined} satt i karantene"
 
 #: src/core/notification_manager.py:363
 #, python-brace-format
@@ -2823,8 +2834,8 @@ msgstr "Oppdateringen er midlertidig begrenset for: {details}."
 #: src/core/updater.py:1323
 msgid "Update rate limited by mirror. Please wait a few minutes and try again."
 msgstr ""
-"Nedlastingsserveren har midlertidig begrenset oppdateringen. Vent noen minutter og prøv "
-"igjen."
+"Nedlastingsserveren har midlertidig begrenset oppdateringen. Vent noen "
+"minutter og prøv igjen."
 
 #: src/core/updater.py:1328
 msgid ""
@@ -2836,11 +2847,15 @@ msgstr ""
 
 #: src/core/updater.py:1334
 msgid "ClamAV mirror is currently unavailable. Please try again later."
-msgstr "Nedlastingsserveren til ClamAV er utilgjengelig akkurat nå. Prøv igjen senere."
+msgstr ""
+"Nedlastingsserveren til ClamAV er utilgjengelig akkurat nå. Prøv igjen "
+"senere."
 
 #: src/core/updater.py:1340
 msgid "SSL/TLS certificate error. The mirror may have configuration issues."
-msgstr "Sikkerhetssertifikatet til nedlastingsserveren er ugyldig. Serveren kan ha feil i konfigurasjonen."
+msgstr ""
+"Sikkerhetssertifikatet til nedlastingsserveren er ugyldig. Serveren kan ha "
+"feil i konfigurasjonen."
 
 #: src/core/updater.py:1344
 msgid "Connection timed out. Please check your network connection."
@@ -2896,7 +2911,7 @@ msgstr "Oppdatering av databasen mislyktes: {error}"
 
 #: src/core/updater.py:1395 src/ui/preferences/save_page.py:467
 #: src/ui/preferences/window.py:843 src/ui/scan_results_dialog.py:237
-#: src/ui/scan_view.py:660 src/ui/scan_view.py:2317
+#: src/ui/scan_view.py:674 src/ui/scan_view.py:2467
 #: src/ui/virustotal_results_dialog.py:199
 msgid "Unknown error"
 msgstr "Ukjent feil"
@@ -2904,7 +2919,7 @@ msgstr "Ukjent feil"
 #: src/core/virustotal.py:262 src/core/virustotal.py:316
 #: src/core/virustotal.py:478 src/core/virustotal.py:621
 #: src/core/virustotal.py:629 src/ui/scan/scan_view.py:261
-#: src/ui/scan_view.py:2313
+#: src/ui/scan_view.py:2463
 msgid "Scan cancelled"
 msgstr "Skanning avbrutt"
 
@@ -3060,8 +3075,8 @@ msgstr "Husk valget mitt"
 #: src/ui/preferences/virustotal_page.py:359 src/ui/profile_dialogs.py:123
 #: src/ui/profile_dialogs.py:724 src/ui/profile_dialogs.py:874
 #: src/ui/profile_dialogs.py:996 src/ui/quarantine_view.py:101
-#: src/ui/scan/scan_view.py:177 src/ui/scan_view.py:1284
-#: src/ui/scan_view.py:1940 src/ui/update_view.py:149
+#: src/ui/scan/scan_view.py:177 src/ui/scan_view.py:1298
+#: src/ui/scan_view.py:2082 src/ui/update_view.py:149
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3069,17 +3084,17 @@ msgstr "Avbryt"
 msgid "Confirm"
 msgstr "Bekreft"
 
-#: src/ui/compat.py:462
+#: src/ui/compat.py:483
 msgid "_Open"
 msgstr "_Åpne"
 
-#: src/ui/compat.py:463 src/ui/compat.py:529 src/ui/file_export.py:192
+#: src/ui/compat.py:484 src/ui/compat.py:550 src/ui/file_export.py:192
 #: src/ui/preferences/database_page.py:382
 #: src/ui/preferences/scanner_page.py:275
 msgid "_Cancel"
 msgstr "_Avbryt"
 
-#: src/ui/compat.py:528 src/ui/file_export.py:191
+#: src/ui/compat.py:549 src/ui/file_export.py:191
 msgid "_Save"
 msgstr "_Lagre"
 
@@ -3240,8 +3255,8 @@ msgid ""
 "config-file=/etc/clamd.d/scan.conf --ping 3"
 msgstr ""
 "På Fedora bruker ClamUI /etc/clamd.d/scan.conf. Hvis tjenesten kjører, men "
-"likevel er utilgjengelig, kontroller tilgangene til socketen og test "
-"med: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+"likevel er utilgjengelig, kontroller tilgangene til socketen og test med: "
+"clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
 
 #: src/ui/components_view.py:171
 msgid "ClamAV Components"
@@ -3668,7 +3683,7 @@ msgstr "{hours} t {minutes} min"
 msgid "  Duration: {duration}"
 msgstr "  Varighet: {duration}"
 
-#: src/ui/logs_view.py:845 src/ui/scan_view.py:680 src/ui/update_view.py:649
+#: src/ui/logs_view.py:845 src/ui/scan_view.py:694 src/ui/update_view.py:649
 msgid "Summary:"
 msgstr "Sammendrag:"
 
@@ -3853,8 +3868,8 @@ msgid ""
 "System tray is not available. Window behavior settings require a system tray "
 "to be active."
 msgstr ""
-"Varslingsområdet er utilgjengelig. Innstillingene for vindusoppførsel "
-"krever et aktivt varslingsområde."
+"Varslingsområdet er utilgjengelig. Innstillingene for vindusoppførsel krever "
+"et aktivt varslingsområde."
 
 #: src/ui/preferences/behavior_page.py:124
 msgid "Configure what happens when closing the window"
@@ -4641,8 +4656,7 @@ msgstr "Konfigurasjon av sanntidsskanning"
 #: src/ui/preferences/onaccess_page.py:99
 msgid "clamd.conf not found — On Access settings unavailable"
 msgstr ""
-"Fant ikke clamd.conf – innstillingene for sanntidsskanning er "
-"utilgjengelige"
+"Fant ikke clamd.conf – innstillingene for sanntidsskanning er utilgjengelige"
 
 #: src/ui/preferences/onaccess_page.py:120
 msgid "Monitored Paths"
@@ -5032,8 +5046,8 @@ msgstr ""
 msgid ""
 "Most compatible — Works anywhere, loads database each scan (3–10 sec startup)"
 msgstr ""
-"Mest kompatibel – virker overalt, laster databasen ved hver skanning (3–10 "
-"sekunders oppstart)"
+"Mest kompatibel – virker overalt, laster databasen ved hver skanning (3–"
+"10 sekunders oppstart)"
 
 #: src/ui/preferences/scanner_page.py:492
 msgid "Failed to save scan backend selection"
@@ -5522,7 +5536,7 @@ msgstr "Beskrivelse"
 
 #: src/ui/profile_dialogs.py:192 src/ui/profile_dialogs.py:591
 #: src/ui/scan/target_selector.py:78 src/ui/scan/target_selector.py:233
-#: src/ui/scan_view.py:949 src/ui/scan_view.py:1242
+#: src/ui/scan_view.py:963 src/ui/scan_view.py:1256
 msgid "Scan Targets"
 msgstr "Skannemål"
 
@@ -5538,7 +5552,7 @@ msgstr "Legg til mappe"
 msgid "Add file"
 msgstr "Legg til fil"
 
-#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:997
+#: src/ui/profile_dialogs.py:222 src/ui/scan_view.py:1011
 msgid "No targets added"
 msgstr "Ingen mål er lagt til"
 
@@ -5603,12 +5617,12 @@ msgstr "Sti"
 msgid "Pattern"
 msgstr "Mønster"
 
-#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1033
+#: src/ui/profile_dialogs.py:531 src/ui/scan_view.py:1047
 msgid "Remove"
 msgstr "Fjern"
 
 #: src/ui/profile_dialogs.py:589 src/ui/scan/target_selector.py:239
-#: src/ui/scan_view.py:1248
+#: src/ui/scan_view.py:1262
 #, python-brace-format
 msgid "Scan Targets ({count})"
 msgstr "Skannemål ({count})"
@@ -5747,7 +5761,7 @@ msgstr "Kunne ikke importere profilen: {error}"
 msgid "Profile imported"
 msgstr "Profilen er importert"
 
-#: src/ui/quarantine_view.py:241 src/ui/scan_view.py:2438
+#: src/ui/quarantine_view.py:241 src/ui/scan_view.py:2588
 #: src/ui/update_view.py:177
 msgid "Dismiss"
 msgstr "Lukk"
@@ -5911,50 +5925,50 @@ msgstr "Filen er slettet, men oppføringen i databasen kunne ikke fjernes"
 msgid "Failed to delete file"
 msgstr "Kunne ikke slette filen"
 
-#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:747
+#: src/ui/scan/profile_selector.py:50 src/ui/scan_view.py:761
 msgid "Scan Profile"
 msgstr "Skanneprofil"
 
-#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:752
+#: src/ui/scan/profile_selector.py:61 src/ui/scan_view.py:766
 msgid "Profile"
 msgstr "Profil"
 
 #: src/ui/scan/profile_selector.py:65 src/ui/scan/profile_selector.py:103
-#: src/ui/scan_view.py:758 src/ui/scan_view.py:843
+#: src/ui/scan_view.py:772 src/ui/scan_view.py:857
 msgid "No Profile (Manual)"
 msgstr "Ingen profil (manuelt)"
 
-#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:770
+#: src/ui/scan/profile_selector.py:75 src/ui/scan_view.py:784
 msgid "Manage profiles"
 msgstr "Administrer profiler"
 
-#: src/ui/scan/scan_progress_widget.py:49 src/ui/scan_view.py:1310
+#: src/ui/scan/scan_progress_widget.py:49 src/ui/scan_view.py:1324
 msgid "Scan Progress"
 msgstr "Skannefremdrift"
 
 #: src/ui/scan/scan_progress_widget.py:63 src/ui/scan/scan_view.py:296
-#: src/ui/scan_view.py:1324
+#: src/ui/scan_view.py:1338
 msgid "Scanning..."
 msgstr "Skanner…"
 
-#: src/ui/scan/scan_progress_widget.py:73 src/ui/scan_view.py:1334
+#: src/ui/scan/scan_progress_widget.py:73 src/ui/scan_view.py:1348
 msgid "Currently scanning"
 msgstr "Skanner nå"
 
 #: src/ui/scan/scan_progress_widget.py:74
-#: src/ui/scan/scan_progress_widget.py:119 src/ui/scan_view.py:1335
-#: src/ui/scan_view.py:1984
+#: src/ui/scan/scan_progress_widget.py:119 src/ui/scan_view.py:1349
+#: src/ui/scan_view.py:2126
 msgid "Waiting for scan data..."
 msgstr "Venter på skannedata…"
 
 #: src/ui/scan/scan_progress_widget.py:84
-#: src/ui/scan/scan_progress_widget.py:122 src/ui/scan_view.py:1346
-#: src/ui/scan_view.py:1989
+#: src/ui/scan/scan_progress_widget.py:122 src/ui/scan_view.py:1360
+#: src/ui/scan_view.py:2131
 msgid "Scanned 0 files"
 msgstr "Skannet 0 filer"
 
 #: src/ui/scan/scan_progress_widget.py:94 src/ui/scan_results_dialog.py:213
-#: src/ui/scan_view.py:1356 src/ui/statistics_view.py:294
+#: src/ui/scan_view.py:1370 src/ui/statistics_view.py:294
 msgid "Threats Detected"
 msgstr "Trusler oppdaget"
 
@@ -5971,30 +5985,26 @@ msgid "Scanning... {pct}%"
 msgstr "Skanner… {pct} %"
 
 #: src/ui/scan/scan_progress_widget.py:178
-#: src/ui/scan/scan_progress_widget.py:198 src/ui/scan_view.py:1570
-#: src/ui/scan_view.py:1590
+#: src/ui/scan/scan_progress_widget.py:198 src/ui/scan_view.py:1743
+#: src/ui/scan_view.py:1763
 #, python-brace-format
 msgid "Scanned {scanned} / {total} files"
 msgstr "Skannet {scanned} av {total} filer"
 
 #: src/ui/scan/scan_progress_widget.py:185
-#: src/ui/scan/scan_progress_widget.py:206 src/ui/scan_view.py:1553
-#: src/ui/scan_view.py:1577 src/ui/scan_view.py:1598
+#: src/ui/scan/scan_progress_widget.py:206 src/ui/scan_view.py:1726
+#: src/ui/scan_view.py:1750 src/ui/scan_view.py:1771
 #, python-brace-format
 msgid "Scanned {scanned} files"
 msgstr "Skannet {scanned} filer"
 
-#: src/ui/scan/scan_progress_widget.py:190 src/ui/scan_view.py:1559
-#: src/ui/scan_view.py:1582
+#: src/ui/scan/scan_progress_widget.py:190 src/ui/scan_view.py:1732
+#: src/ui/scan_view.py:1755
 #, python-brace-format
 msgid "Target {current} of {total} ({cumulative} total)"
 msgstr "Mål {current} av {total} ({cumulative} totalt)"
 
-#: src/ui/scan/scan_progress_widget.py:218 src/ui/scan_view.py:1608
-msgid "Unknown threat"
-msgstr "Ukjent trussel"
-
-#: src/ui/scan/scan_progress_widget.py:242 src/ui/scan_view.py:1636
+#: src/ui/scan/scan_progress_widget.py:237 src/ui/scan_view.py:1801
 #, python-brace-format
 msgid "Threats Detected ({n})"
 msgid_plural "Threats Detected ({n})"
@@ -6006,24 +6016,24 @@ msgstr[1] "Trusler oppdaget ({n})"
 msgid "View Results ({n})"
 msgstr "Vis resultater ({n})"
 
-#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1727
-#: src/ui/scan_view.py:1752
+#: src/ui/scan/scan_results_widget.py:48 src/ui/scan_view.py:1868
+#: src/ui/scan_view.py:1893
 msgid "View Results"
 msgstr "Vis resultater"
 
-#: src/ui/scan/scan_view.py:163 src/ui/scan_view.py:1267
+#: src/ui/scan/scan_view.py:163 src/ui/scan_view.py:1281
 msgid "Start Scan"
 msgstr "Start skanning"
 
-#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:1276
+#: src/ui/scan/scan_view.py:169 src/ui/scan_view.py:1290
 msgid "EICAR Test"
 msgstr "EICAR-test"
 
-#: src/ui/scan/scan_view.py:171 src/ui/scan_view.py:2405
+#: src/ui/scan/scan_view.py:171 src/ui/scan_view.py:2555
 msgid "Run a scan with EICAR test file to verify antivirus detection"
 msgstr "Skann EICAR-testfilen for å kontrollere at virusoppdagelsen virker"
 
-#: src/ui/scan/scan_view.py:194 src/ui/scan_view.py:2431
+#: src/ui/scan/scan_view.py:194 src/ui/scan_view.py:2581
 #, python-brace-format
 msgid "Backend: {name}"
 msgstr "Skannemotor: {name}"
@@ -6034,7 +6044,7 @@ msgstr "Kan ikke legge til mål mens skanningen pågår"
 
 #. Translators: the em dash separates two parts; use the dash and spacing usual in
 #. your language.
-#: src/ui/scan/scan_view.py:255 src/ui/scan_view.py:2305
+#: src/ui/scan/scan_view.py:255 src/ui/scan_view.py:2455
 #, python-brace-format
 msgid "Scan complete — {count} threat(s) detected"
 msgstr "Skanning fullført – {count} trussel(er) oppdaget"
@@ -6044,22 +6054,22 @@ msgstr "Skanning fullført – {count} trussel(er) oppdaget"
 msgid "Scan error: {error}"
 msgstr "Skannefeil: {error}"
 
-#: src/ui/scan/scan_view.py:277 src/ui/scan_view.py:1791
+#: src/ui/scan/scan_view.py:277 src/ui/scan_view.py:1932
 msgid "Please select a file or folder to scan"
 msgstr "Velg en fil eller mappe som skal skannes"
 
-#: src/ui/scan/scan_view.py:310 src/ui/scan_view.py:2251
+#: src/ui/scan/scan_view.py:310 src/ui/scan_view.py:2401
 #, python-brace-format
 msgid "Target {current} of {total}: {path}"
 msgstr "Mål {current} av {total}: {path}"
 
-#: src/ui/scan/scan_view.py:315 src/ui/scan_view.py:1968
-#: src/ui/scan_view.py:2248
+#: src/ui/scan/scan_view.py:315 src/ui/scan_view.py:2110
+#: src/ui/scan_view.py:2398
 #, python-brace-format
 msgid "Scanning {path}"
 msgstr "Skanner {path}"
 
-#: src/ui/scan/scan_view.py:338 src/ui/scan_view.py:1903
+#: src/ui/scan/scan_view.py:338 src/ui/scan_view.py:2044
 #, python-brace-format
 msgid "Failed to create EICAR test file: {error}"
 msgstr "Kunne ikke lage EICAR-testfilen: {error}"
@@ -6069,15 +6079,15 @@ msgid "Remove target"
 msgstr "Fjern mål"
 
 #: src/ui/scan/target_selector.py:79 src/ui/scan/target_selector.py:234
-#: src/ui/scan_view.py:950 src/ui/scan_view.py:1243
+#: src/ui/scan_view.py:964 src/ui/scan_view.py:1257
 msgid "Drop files here or click Add"
 msgstr "Slipp filer her eller klikk «Legg til»"
 
-#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:959
+#: src/ui/scan/target_selector.py:94 src/ui/scan_view.py:973
 msgid "Add files"
 msgstr "Legg til filer"
 
-#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:967
+#: src/ui/scan/target_selector.py:101 src/ui/scan_view.py:981
 msgid "Add folders"
 msgstr "Legg til mapper"
 
@@ -6085,7 +6095,7 @@ msgstr "Legg til mapper"
 msgid "No targets selected"
 msgstr "Ingen mål er valgt"
 
-#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1245
+#: src/ui/scan/target_selector.py:236 src/ui/scan_view.py:1259
 msgid "Scan Target (1)"
 msgstr "Skannemål (1)"
 
@@ -6309,51 +6319,51 @@ msgstr "Eksporter skanneresultater"
 
 #. Translators: the em dash separates two parts; use the dash and spacing usual in
 #. your language.
-#: src/ui/scan_view.py:441
+#: src/ui/scan_view.py:455
 msgid "Scan in progress — please wait until the current scan completes"
 msgstr "Skanning pågår – vent til den nåværende skanningen er ferdig"
 
-#: src/ui/scan_view.py:448
+#: src/ui/scan_view.py:462
 msgid "No files were dropped"
 msgstr "Ingen filer ble sluppet"
 
-#: src/ui/scan_view.py:468
+#: src/ui/scan_view.py:482
 msgid "Unable to accept dropped files"
 msgstr "Kan ikke ta imot filene som ble sluppet"
 
-#: src/ui/scan_view.py:529 src/ui/scan_view.py:722
+#: src/ui/scan_view.py:543 src/ui/scan_view.py:736
 msgid "Scan details"
 msgstr "Skannedetaljer"
 
-#: src/ui/scan_view.py:530
+#: src/ui/scan_view.py:544
 msgid "Detailed scan output appears here when available"
 msgstr "Detaljert skanneutdata vises her når den er tilgjengelig"
 
-#: src/ui/scan_view.py:539
+#: src/ui/scan_view.py:553
 msgid "Copy details"
 msgstr "Kopier detaljer"
 
-#: src/ui/scan_view.py:547
+#: src/ui/scan_view.py:561
 msgid "View details fullscreen"
 msgstr "Vis detaljer i fullskjerm"
 
-#: src/ui/scan_view.py:686
+#: src/ui/scan_view.py:700
 msgid "Error output:"
 msgstr "Feilutdata:"
 
-#: src/ui/scan_view.py:692
+#: src/ui/scan_view.py:706
 msgid "Scan output:"
 msgstr "Skanneutdata:"
 
-#: src/ui/scan_view.py:709
+#: src/ui/scan_view.py:723
 msgid "Scan details copied to clipboard"
 msgstr "Skannedetaljene er kopiert til utklippstavlen"
 
-#: src/ui/scan_view.py:710
+#: src/ui/scan_view.py:724
 msgid "Failed to copy scan details"
 msgstr "Kunne ikke kopiere skannedetaljene"
 
-#: src/ui/scan_view.py:712
+#: src/ui/scan_view.py:726
 msgid ""
 "Scan details are too large to copy. Use fullscreen to inspect the full "
 "output."
@@ -6362,109 +6372,109 @@ msgstr ""
 "utdataen."
 
 #. Translators: use your language's quotation marks around {name}.
-#: src/ui/scan_view.py:891
+#: src/ui/scan_view.py:905
 #, python-brace-format
 msgid "Profile '{name}' has no valid targets"
 msgstr "Profilen «{name}» har ingen gyldige mål"
 
-#: src/ui/scan_view.py:975
+#: src/ui/scan_view.py:989
 msgid "Clear all"
 msgstr "Fjern alle"
 
-#: src/ui/scan_view.py:998
+#: src/ui/scan_view.py:1012
 msgid "Drop files here or click Add Files/Folders"
 msgstr "Slipp filer her eller klikk «Legg til filer/mapper»"
 
-#: src/ui/scan_view.py:1075
+#: src/ui/scan_view.py:1089
 msgid "Select Files to Scan"
 msgstr "Velg filer som skal skannes"
 
-#: src/ui/scan_view.py:1097
+#: src/ui/scan_view.py:1111
 msgid "Select Folders to Scan"
 msgstr "Velg mapper som skal skannes"
 
-#: src/ui/scan_view.py:1268
+#: src/ui/scan_view.py:1282
 msgid "Start Scan (F5)"
 msgstr "Start skanning (F5)"
 
-#: src/ui/scan_view.py:1285 src/ui/scan_view.py:1941
+#: src/ui/scan_view.py:1299 src/ui/scan_view.py:2083
 msgid "Cancel the current scan"
 msgstr "Avbryt den pågående skanningen"
 
 #. Translators: the em dash separates two parts; use the dash and spacing usual
 #. in your language.
-#: src/ui/scan_view.py:1524
+#: src/ui/scan_view.py:1697
 #, python-brace-format
 msgid "Target {current} of {total} — {pct}%{overflow}"
 msgstr "Mål {current} av {total} – {pct} %{overflow}"
 
-#: src/ui/scan_view.py:1533
+#: src/ui/scan_view.py:1706
 #, python-brace-format
 msgid "Scanning... {pct}%{overflow}"
 msgstr "Skanner… {pct} %{overflow}"
 
-#: src/ui/scan_view.py:1744
+#: src/ui/scan_view.py:1885
 #, python-brace-format
 msgid "View Results ({n} Threat)"
 msgid_plural "View Results ({n} Threats)"
 msgstr[0] "Vis resultater ({n} trussel)"
 msgstr[1] "Vis resultater ({n} trusler)"
 
-#: src/ui/scan_view.py:1821
+#: src/ui/scan_view.py:1962
 msgid "Virus database is not available"
 msgstr "Virusdatabasen er utilgjengelig"
 
-#: src/ui/scan_view.py:1937
+#: src/ui/scan_view.py:2079
 msgid "Cancel All"
 msgstr "Avbryt alle"
 
-#: src/ui/scan_view.py:1938
+#: src/ui/scan_view.py:2080
 msgid "Cancel all remaining scans"
 msgstr "Avbryt alle gjenværende skanninger"
 
 #. Translators: the em dash separates two parts; use the dash and spacing
 #. usual in your language.
-#: src/ui/scan_view.py:1965
+#: src/ui/scan_view.py:2107
 #, python-brace-format
 msgid "Scanning {path} — File count pending"
 msgstr "Skanner {path} – antall filer beregnes"
 
 #. Translators: the em dash separates two parts; use the dash and spacing
 #. usual in your language.
-#: src/ui/scan_view.py:1974
+#: src/ui/scan_view.py:2116
 #, python-brace-format
 msgid "Scanning {count} items — File count pending"
 msgstr "Skanner {count} elementer – antall filer beregnes"
 
-#: src/ui/scan_view.py:1978
+#: src/ui/scan_view.py:2120
 #, python-brace-format
 msgid "Scanning {count} items"
 msgstr "Skanner {count} elementer"
 
-#: src/ui/scan_view.py:2321 src/ui/scan_view.py:2375
+#: src/ui/scan_view.py:2471 src/ui/scan_view.py:2525
 #, python-brace-format
 msgid "Scan error: {detail}"
 msgstr "Skannefeil: {detail}"
 
-#: src/ui/scan_view.py:2328 src/ui/scan_view.py:2378
+#: src/ui/scan_view.py:2478 src/ui/scan_view.py:2528
 msgid "Detailed scan error output"
 msgstr "Detaljert feilutdata fra skanningen"
 
-#: src/ui/scan_view.py:2329
+#: src/ui/scan_view.py:2479
 msgid "Detailed ClamAV output from the latest failed scan"
 msgstr "Detaljert utdata fra ClamAV for den siste mislykkede skanningen"
 
-#: src/ui/scan_view.py:2340
+#: src/ui/scan_view.py:2490
 #, python-brace-format
 msgid "Scan completed with status: {status}"
 msgstr "Skanning fullført med status: {status}"
 
-#: src/ui/scan_view.py:2379
+#: src/ui/scan_view.py:2529
 msgid "Detailed application error output from the latest failed scan"
 msgstr ""
 "Detaljert feilutdata fra programmet for den siste mislykkede skanningen"
 
-#: src/ui/scan_view.py:2437
+#: src/ui/scan_view.py:2587
 msgid "Ready to scan"
 msgstr "Klar til å skanne"
 
@@ -6819,8 +6829,8 @@ msgid ""
 "copies from mirrors. Automatically restores from backup if update fails."
 msgstr ""
 "Tvungen oppdatering: Tar sikkerhetskopi av de lokale databasene, sletter dem "
-"og laster ned nye kopier fra nedlastingsserverne. Gjenoppretter automatisk fra "
-"sikkerhetskopien hvis oppdateringen mislykkes."
+"og laster ned nye kopier fra nedlastingsserverne. Gjenoppretter automatisk "
+"fra sikkerhetskopien hvis oppdateringen mislykkes."
 
 #: src/ui/update_view.py:166
 msgid "Update Results"
@@ -7192,3 +7202,6 @@ msgstr "Om ClamUI"
 #: src/ui/window.py:641
 msgid "ClamAV Desktop Scanner"
 msgstr "ClamAV-skanner for skrivebordet"
+
+#~ msgid "Unknown threat"
+#~ msgstr "Ukjent trussel"
