@@ -142,6 +142,42 @@ UPDATE_INFORMATION='gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64
 
 `debian/build-deb.sh` is the authoritative Debian entry point: it produces the application/helper pair and stages the policy and scheduled-scan payload. `CLAMUI_ARTIFACT_DIR` must contain executable `clamui`, `clamui-scheduled-scan`, and `clamui-apply-preferences` binaries from the baseline build. The AppImage build produces `ClamUI-<VERSION>-x86_64.AppImage` and its `.zsync` metadata. Flatpak production builds use the locked Cargo and Bun source manifests; the local manifest intentionally builds the checkout.
 
+### Immutable Flatpak release packaging
+
+An official Rust Flatpak submission requires exactly three checked-in packaging inputs: a canonical YAML whose application source is a concrete public Git URL and full commit pin, `flathub/cargo-sources.json`, and `flathub/bun-sources.json`. The two source manifests must be generated from the settled `Cargo.lock` and the paired `desktop/bun.lock`/`desktop/yarn.lock`; do not hand-edit their checksums or retain legacy Python source JSON as a Rust packaging input.
+
+The product lockfile remains `desktop/bun.lock`. Before generation, intentionally export its paired Yarn lockfile after settling frontend dependencies:
+
+```bash
+( cd desktop && bun install --frozen-lockfile --yarn )
+```
+
+Run the generator from a clean checkout whose intended source commit is already public and whose lockfiles match that commit. It requires `flatpak-cargo-generator.py` plus `flatpak-node-generator` (the node generator requires Python 3.11+):
+
+```bash
+release_commit="$(git rev-parse HEAD)"
+scripts/generate-flatpak-sources.sh \
+  --release-url https://github.com/linx-systems/clamui.git \
+  --release-commit "$release_commit" \
+  --release-output flathub/io.github.linx_systems.ClamUI.release.yml
+```
+
+This rewrites both checked-in source JSON files and writes the Git-pinned release manifest explicitly. Review all three files together: the generated manifest replaces the complete checkout `dir` source block, including its exclusions, with the URL and exact commit while retaining the other source entries and JSON includes. This produces release packaging input; it does not publish an application release or claim that the Rust/Tauri migration is on Flathub.
+
+Build that generated manifest locally only in a fresh directory below the checkout, so Builder state, the build directory, and exported repository stay on the same filesystem and are owned by you:
+
+```bash
+mkdir -p target
+flatpak_release_dir="$(mktemp -d "$PWD/target/flatpak-release.XXXXXX")"
+flatpak-builder --user --arch="$(flatpak --default-arch)" \
+  --state-dir="$flatpak_release_dir/state" \
+  --repo="$flatpak_release_dir/repo" \
+  "$flatpak_release_dir/build" \
+  flathub/io.github.linx_systems.ClamUI.release.yml
+```
+
+This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture.
+
 Before publishing, inspect package payloads for the right architecture, native command names, helper/policy paths, and absence of a Python application runtime. Build compatibility still requires proof from the baseline environment and target package/OS; do not infer it from this development guide.
 
 ## Write documentation

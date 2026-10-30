@@ -131,22 +131,9 @@ mv "$work_dir/bun-sources.json" "$FLATHUB_DIR/bun-sources.json"
 
 if [ -n "$release_url" ]; then
     release_tmp="$work_dir/release-manifest.yml"
-    awk -v url="$release_url" -v commit="$release_commit" '
-        $0 == "      - type: dir" {
-            getline source_path
-            if (source_path == "        path: ..") {
-                print "      - type: git"
-                print "        url: " url
-                print "        commit: " commit
-                next
-            }
-            print "      - type: dir"
-            print source_path
-            next
-        }
-        { print }
-    ' "$CHECKOUT_MANIFEST" > "$release_tmp"
-    grep -Fq "        commit: $release_commit" "$release_tmp" || die "failed to materialize exact release source commit"
+    awk -v url="$release_url" -v commit="$release_commit" \
+        -f "$SCRIPT_DIR/flatpak-release-source.awk" \
+        < "$CHECKOUT_MANIFEST" > "$release_tmp"
     mkdir -p "$(dirname -- "$release_output")"
     mv "$release_tmp" "$release_output"
     printf 'generated release manifest: %s\n' "$release_output"
