@@ -181,17 +181,26 @@ impl ConfigDocument {
         updated
     }
 
-    fn normalize_size_units(&mut self) {
+    fn normalize_size_units(&mut self) -> bool {
+        let mut changed = false;
         for directive in CLAMD_SIZE_DIRECTIVES {
-            let Some(entries) = self.values.get(directive).cloned() else {
+            let Some(entries) = self.values.get(directive) else {
                 continue;
             };
+            if !entries.iter().any(|value| {
+                let trimmed = value.trim();
+                trimmed.parse::<u64>().is_ok_and(|size| size > 0)
+            }) {
+                continue;
+            }
             let normalized = entries
-                .into_iter()
-                .map(|value| normalize_size_value(&value))
-                .collect::<Vec<_>>();
+                .iter()
+                .map(|value| normalize_size_value(value))
+                .collect();
             self.apply_entries(directive, normalized);
+            changed = true;
         }
+        changed
     }
 
     fn apply_entries(&mut self, key: &str, entries: Vec<String>) {
@@ -325,22 +334,25 @@ fn load(ctx: &Context, args: Value) -> AppResult<Value> {
         .or_else(|| detected_path(kind));
     let Some(path) = path else {
         return Ok(
-            json!({"kind": kind.as_str(), "path": Value::Null, "values": {}, "readable": false, "error": crate::i18n::translate(ctx, "Configuration file not found")}),
+            json!({"kind": kind.as_str(), "path": Value::Null, "values": {}, "readable": false, "needs_size_unit_migration": false, "error": crate::i18n::translate(ctx, "Configuration file not found")}),
         );
     };
     let path = absolute_path(&path)?;
     match read_config_bytes(ctx, &path) {
         Ok(bytes) => {
             let mut document = ConfigDocument::parse(&bytes);
-            if kind.resolved_kind() == ConfigKind::Clamd {
-                document.normalize_size_units();
-            }
+            let needs_size_unit_migration = if kind.resolved_kind() == ConfigKind::Clamd {
+                document.normalize_size_units()
+            } else {
+                false
+            };
             Ok(json!({
                 "kind": kind.as_str(),
                 "path": path,
                 "values": document.values_json(),
                 "readable": true,
                 "encoding": document.encoding,
+                "needs_size_unit_migration": needs_size_unit_migration,
             }))
         }
         Err(error) => Ok(json!({
@@ -348,6 +360,7 @@ fn load(ctx: &Context, args: Value) -> AppResult<Value> {
             "path": path,
             "values": {},
             "readable": false,
+            "needs_size_unit_migration": false,
             "error": error,
         })),
     }
@@ -361,12 +374,13 @@ fn read_authorized(ctx: &Context, args: Value) -> AppResult<Value> {
     let document = ConfigDocument::parse(&bytes);
     cache_authorized_document(path.clone(), document.clone());
     let mut display_document = document;
-    display_document.normalize_size_units();
+    let needs_size_unit_migration = display_document.normalize_size_units();
     Ok(json!({
         "path": path,
         "values": display_document.values_json(),
         "readable": true,
         "encoding": display_document.encoding,
+        "needs_size_unit_migration": needs_size_unit_migration,
         "authorized": true,
     }))
 }

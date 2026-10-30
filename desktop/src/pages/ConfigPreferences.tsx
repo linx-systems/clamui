@@ -12,6 +12,7 @@ type ConfigDocument = {
   baselinePath: string;
   values: ConfigValues;
   baseline: ConfigValues;
+  needsSizeUnitMigration: boolean;
   readable: boolean;
   error?: string;
 };
@@ -20,6 +21,7 @@ type LoadResult = {
   kind?: ConfigKind;
   path?: string;
   values?: ConfigValues;
+  needs_size_unit_migration?: boolean;
   readable?: boolean;
   error?: string;
 };
@@ -361,6 +363,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
       baselinePath: baselinePath ?? loaded.path ?? path ?? "",
       values: cloneValues(loaded.values ?? EMPTY_VALUES),
       baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
+      needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
       readable: loaded.readable ?? false,
       error: loaded.error,
     };
@@ -453,6 +456,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
         baselinePath: document.baselinePath,
         values: cloneValues(loaded.values ?? EMPTY_VALUES),
         baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
+        needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
         readable: loaded.readable ?? true,
         error: loaded.error,
       };
@@ -510,7 +514,11 @@ export default function ConfigPreferences({ section }: { section: string }) {
       baseline: cloneValues(clamd.baseline),
     };
     const scheduleSnapshot = { ...schedule, schedule_targets: [...schedule.schedule_targets] };
-    const configs = [freshclamSnapshot, clamdSnapshot].filter((document): document is ConfigDocument => Boolean(document && (!valuesEqual(document.values, document.baseline) || document.path !== document.baselinePath)));
+    const configs = [freshclamSnapshot, clamdSnapshot].filter((document): document is ConfigDocument => Boolean(document && (
+      !valuesEqual(document.values, document.baseline)
+      || document.path !== document.baselinePath
+      || (document.kind === "clamd" && document.needsSizeUnitMigration)
+    )));
     const unselected = configs.find((document) => !document.path);
     if (unselected) {
       const message = _("Choose a configuration file before applying its changes.");
@@ -556,24 +564,35 @@ export default function ConfigPreferences({ section }: { section: string }) {
         ...(scheduleChanged ? { schedule: scheduleSnapshot } : {}),
       });
       const written = new Set((result.configs ?? []).filter((config) => config.written).map((config) => config.kind));
+      const persisted = new Set((result.configs ?? [])
+        .filter((config) => config.changed && config.written)
+        .map((config) => config.kind));
       const durablePathKeys = new Set(result.config_paths?.durable_keys ?? []);
       const freshclamPathDurable = durablePathKeys.has("freshclam_conf_path");
       const clamdPathDurable = durablePathKeys.has("clamd_conf_path");
-      if (freshclamSnapshot && (written.has("freshclam") || (freshclamPathDurable && freshclamSnapshot.path !== freshclamSnapshot.baselinePath))) {
-        setFreshclam((current) => current ? {
-          ...current,
-          baselinePath: freshclamPathDurable && freshclamSnapshot.path !== freshclamSnapshot.baselinePath
-            ? freshclamSnapshot.path : current.baselinePath,
-          baseline: written.has("freshclam") ? cloneValues(freshclamSnapshot.values) : current.baseline,
-        } : current);
+      if (freshclamSnapshot && (written.has("freshclam") || freshclamPathDurable)) {
+        setFreshclam((current) => {
+          if (!current) return current;
+          const wroteCurrentDocument = written.has("freshclam") && current.path === freshclamSnapshot.path;
+          return {
+            ...current,
+            baselinePath: freshclamPathDurable ? freshclamSnapshot.path : current.baselinePath,
+            baseline: wroteCurrentDocument ? cloneValues(freshclamSnapshot.values) : current.baseline,
+          };
+        });
       }
-      if (clamdSnapshot && (written.has("clamd") || (clamdPathDurable && clamdSnapshot.path !== clamdSnapshot.baselinePath))) {
-        setClamd((current) => current ? {
-          ...current,
-          baselinePath: clamdPathDurable && clamdSnapshot.path !== clamdSnapshot.baselinePath
-            ? clamdSnapshot.path : current.baselinePath,
-          baseline: written.has("clamd") ? cloneValues(clamdSnapshot.values) : current.baseline,
-        } : current);
+      if (clamdSnapshot && (written.has("clamd") || clamdPathDurable)) {
+        setClamd((current) => {
+          if (!current) return current;
+          const wroteCurrentDocument = written.has("clamd") && current.path === clamdSnapshot.path;
+          const persistedCurrentDocument = persisted.has("clamd") && current.path === clamdSnapshot.path;
+          return {
+            ...current,
+            baselinePath: clamdPathDurable ? clamdSnapshot.path : current.baselinePath,
+            baseline: wroteCurrentDocument ? cloneValues(clamdSnapshot.values) : current.baseline,
+            needsSizeUnitMigration: persistedCurrentDocument ? false : current.needsSizeUnitMigration,
+          };
+        });
       }
       const scheduleWritten = result.schedule?.written === true || result.schedule?.success === true
         || (result.durable_groups ?? []).some((group) => group === "scheduled_preferences" || group === "schedule");

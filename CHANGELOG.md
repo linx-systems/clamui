@@ -39,6 +39,9 @@
 
 ### Fixed
 
+- Fixed pending Clamd size-unit repairs being omitted when normalized values matched the displayed baseline; reads and startup remain non-writing and do not request elevation.
+- Restored persisted debug-log size and backup-retention settings on every write, with safe fallbacks for unusable values.
+- Fixed locked Bun dependency installation in local source and Debian package builds with Bun 1.3.14.
 - Consolidated known privileged-helper trust failures into one localized, actionable recovery dialog instead of duplicate raw error notifications.
 - Checked Flatpak helper availability at the canonical host path and sanitized privileged-helper diagnostics before presentation while preserving useful paths and redacting secrets.
 

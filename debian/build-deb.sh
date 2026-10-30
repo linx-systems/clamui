@@ -123,7 +123,7 @@ build_artifacts() {
     fi
 
     log_info "Installing locked Bun dependencies and building the frontend"
-    bun --cwd "$PROJECT_ROOT/desktop" install --frozen-lockfile
+    ( cd "$PROJECT_ROOT/desktop" && bun install --frozen-lockfile )
     ( cd "$PROJECT_ROOT/desktop" && bun run build )
 
     log_info "Building release Rust binaries"

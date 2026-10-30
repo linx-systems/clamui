@@ -38,7 +38,7 @@ sudo dnf install gettext
 # Arch Linux
 sudo pacman -S gettext
 
-bun --cwd desktop install --frozen-lockfile
+( cd desktop && bun install --frozen-lockfile )
 ./scripts/update-pot.sh
 ./scripts/update-pot.sh --check
 ```

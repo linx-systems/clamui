@@ -26,7 +26,7 @@ const tabs = [
     label: "From source",
     sub: "Rust + Bun",
     desc: "Requires Rust, Bun, WebKitGTK 4.1, and GTK 3. Build release artifacts on the Ubuntu 22.04-compatible baseline.",
-    code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\nbun --cwd desktop install --frozen-lockfile\nbun run --cwd desktop tauri dev",
+    code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\n( cd desktop && bun install --frozen-lockfile )\nbun run --cwd desktop tauri dev",
   },
 ];
 ---

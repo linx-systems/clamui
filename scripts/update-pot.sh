@@ -7,7 +7,7 @@
 #
 # Prerequisites:
 #   sudo apt install gettext
-#   bun --cwd desktop install --frozen-lockfile
+#   (cd desktop && bun install --frozen-lockfile)
 #
 # Bun and the desktop's locked development dependencies provide the TypeScript
 # compiler used only for frontend message extraction.

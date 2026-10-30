@@ -3,7 +3,9 @@ use clamui_core::{logs, Context, Paths};
 use serde_json::{json, Value};
 use std::{
     fs,
-    io::{Cursor, Read},
+    io::{Cursor, Read, Write},
+    os::unix::fs::PermissionsExt,
+    path::Path,
 };
 use tempfile::TempDir;
 
@@ -17,6 +19,32 @@ fn context() -> (TempDir, Context) {
     })
     .expect("context");
     (temp, context)
+}
+
+fn fill_debug_log(path: &Path, content: &str, size: u64) {
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(path)
+        .expect("debug log");
+    file.write_all(content.as_bytes())
+        .expect("debug log content");
+    file.set_len(size).expect("debug log size");
+}
+
+fn backup_names(dir: &Path) -> Vec<String> {
+    let mut names = fs::read_dir(dir)
+        .expect("debug directory")
+        .filter_map(Result::ok)
+        .filter_map(|entry| entry.file_name().into_string().ok())
+        .filter(|name| {
+            name.strip_prefix("clamui.log.").is_some_and(|suffix| {
+                !suffix.is_empty() && suffix.bytes().all(|byte| byte.is_ascii_digit())
+            })
+        })
+        .collect::<Vec<_>>();
+    names.sort();
+    names
 }
 
 #[test]
@@ -283,6 +311,175 @@ fn statistics_respects_timeframe_boundaries_and_reports_real_trends() {
     assert_eq!(stats["protection_status"]["level"], "protected");
     assert_eq!(stats["last_scan"]["type"], "scan");
 }
+#[test]
+fn debug_rotation_honors_persisted_size_and_retention() {
+    let (_temp, context) = context();
+    context
+        .update_settings(json!({
+            "debug_log_level": "DEBUG",
+            "debug_log_max_size_mb": 2,
+            "debug_log_max_files": 1,
+        }))
+        .expect("debug settings");
+    logs::write_debug(&context, "DEBUG", "test", "initial migration").expect("initial debug write");
+
+    let debug_dir = context.paths.data_dir.join("debug");
+    let current = debug_dir.join("clamui.log");
+    fill_debug_log(&current, "first retained generation\n", 2 * 1024 * 1024);
+
+    logs::write_debug(&context, "DEBUG", "test", "second generation")
+        .expect("rotating debug write");
+
+    let backup = debug_dir.join("clamui.log.1");
+    assert_eq!(backup_names(&debug_dir), vec!["clamui.log.1"]);
+    assert!(fs::read_to_string(&backup)
+        .expect("retained debug backup")
+        .starts_with("first retained generation\n"));
+    assert!(fs::read_to_string(&current)
+        .expect("current debug log")
+        .contains("second generation"));
+    assert_eq!(
+        fs::metadata(&current)
+            .expect("current debug permissions")
+            .permissions()
+            .mode()
+            & 0o777,
+        0o600
+    );
+    assert_eq!(
+        fs::metadata(&backup)
+            .expect("backup debug permissions")
+            .permissions()
+            .mode()
+            & 0o777,
+        0o600
+    );
+}
+
+#[test]
+fn debug_rotation_applies_changed_settings_and_discards_excess_backups() {
+    let (_temp, context) = context();
+    context
+        .update_settings(json!({
+            "debug_log_level": "DEBUG",
+            "debug_log_max_size_mb": 5,
+            "debug_log_max_files": 3,
+        }))
+        .expect("initial debug settings");
+    logs::write_debug(&context, "DEBUG", "test", "initial migration").expect("initial debug write");
+
+    let debug_dir = context.paths.data_dir.join("debug");
+    let current = debug_dir.join("clamui.log");
+    fill_debug_log(&current, "before settings change\n", 2 * 1024 * 1024);
+    fs::write(debug_dir.join("clamui.log.1"), "stale first backup\n").expect("first stale backup");
+    fs::write(debug_dir.join("clamui.log.2"), "stale second backup\n")
+        .expect("second stale backup");
+
+    context
+        .update_settings(json!({
+            "debug_log_max_size_mb": 2,
+            "debug_log_max_files": 1,
+        }))
+        .expect("changed debug settings");
+    logs::write_debug(&context, "DEBUG", "test", "after settings change")
+        .expect("rotating debug write");
+
+    let backup = debug_dir.join("clamui.log.1");
+    assert_eq!(backup_names(&debug_dir), vec!["clamui.log.1"]);
+    assert!(fs::read_to_string(&backup)
+        .expect("retained debug backup")
+        .starts_with("before settings change\n"));
+    assert!(fs::read_to_string(&current)
+        .expect("current debug log")
+        .contains("after settings change"));
+}
+
+#[test]
+fn debug_rotation_uses_safe_defaults_for_unusable_values() {
+    let (_temp, context) = context();
+    context
+        .update_settings(json!({
+            "debug_log_level": "DEBUG",
+            "debug_log_max_size_mb": u64::MAX,
+            "debug_log_max_files": 0,
+        }))
+        .expect("invalid debug settings");
+    logs::write_debug(&context, "DEBUG", "test", "initial migration").expect("initial debug write");
+
+    let debug_dir = context.paths.data_dir.join("debug");
+    let current = debug_dir.join("clamui.log");
+    fill_debug_log(&current, "default-size generation\n", 5 * 1024 * 1024);
+    fs::write(debug_dir.join("clamui.log.1"), "existing first backup\n")
+        .expect("first existing backup");
+    fs::write(debug_dir.join("clamui.log.2"), "existing second backup\n")
+        .expect("second existing backup");
+
+    logs::write_debug(&context, "DEBUG", "test", "after invalid settings")
+        .expect("safe fallback debug write");
+
+    assert_eq!(
+        backup_names(&debug_dir),
+        vec!["clamui.log.1", "clamui.log.2", "clamui.log.3"]
+    );
+    assert!(fs::read_to_string(debug_dir.join("clamui.log.1"))
+        .expect("latest debug backup")
+        .starts_with("default-size generation\n"));
+    assert!(fs::read_to_string(debug_dir.join("clamui.log.3"))
+        .expect("oldest debug backup")
+        .starts_with("existing second backup\n"));
+}
+
+#[test]
+fn debug_rotation_handles_enormous_retention_without_extra_work() {
+    let (_temp, context) = context();
+    context
+        .update_settings(json!({
+            "debug_log_level": "DEBUG",
+            "debug_log_max_size_mb": u64::MAX,
+            "debug_log_max_files": 0,
+        }))
+        .expect("invalid debug settings");
+    logs::write_debug(&context, "DEBUG", "test", "initial migration").expect("initial debug write");
+
+    let debug_dir = context.paths.data_dir.join("debug");
+    let current = debug_dir.join("clamui.log");
+    fill_debug_log(&current, "default-size generation\n", 5 * 1024 * 1024);
+    fs::write(debug_dir.join("clamui.log.1"), "existing first backup\n")
+        .expect("first existing backup");
+    fs::write(debug_dir.join("clamui.log.2"), "existing second backup\n")
+        .expect("second existing backup");
+
+    logs::write_debug(&context, "DEBUG", "test", "after invalid settings")
+        .expect("safe fallback debug write");
+    assert_eq!(
+        backup_names(&debug_dir),
+        vec!["clamui.log.1", "clamui.log.2", "clamui.log.3"]
+    );
+
+    context
+        .update_settings(json!({"debug_log_max_files": u64::MAX}))
+        .expect("enormous debug retention");
+    fill_debug_log(&current, "enormous-retention generation\n", 5 * 1024 * 1024);
+    logs::write_debug(&context, "DEBUG", "test", "after enormous retention")
+        .expect("bounded debug rotation");
+
+    assert_eq!(
+        backup_names(&debug_dir),
+        vec![
+            "clamui.log.1",
+            "clamui.log.2",
+            "clamui.log.3",
+            "clamui.log.4"
+        ]
+    );
+    assert!(fs::read_to_string(debug_dir.join("clamui.log.1"))
+        .expect("latest enormous-retention backup")
+        .starts_with("enormous-retention generation\n"));
+    assert!(fs::read_to_string(debug_dir.join("clamui.log.4"))
+        .expect("oldest enormous-retention backup")
+        .starts_with("existing second backup\n"));
+}
+
 #[test]
 fn debug_archive_contains_only_redacted_rotating_log_content() {
     let (_temp, context) = context();

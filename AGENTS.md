@@ -25,7 +25,7 @@ Toolchain manifests are the source of truth. Typical local commands are:
 cargo test --workspace --locked
 cargo fmt --check --all
 cargo clippy --workspace --all-targets -- -D warnings
-bun --cwd desktop install --frozen-lockfile
+( cd desktop && bun install --frozen-lockfile )
 bun run --cwd desktop check
 bun run --cwd desktop build
 bun run --cwd desktop tauri dev

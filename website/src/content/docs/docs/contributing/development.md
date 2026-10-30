@@ -39,7 +39,7 @@ Native release artifacts must be built on the Ubuntu 22.04-compatible baseline u
 From the repository root, install the locked frontend dependencies and start Tauri:
 
 ```bash
-bun --cwd desktop install --frozen-lockfile
+( cd desktop && bun install --frozen-lockfile )
 bun run --cwd desktop tauri dev
 ```
 

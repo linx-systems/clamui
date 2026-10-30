@@ -19,7 +19,7 @@ const PRIVACY_VERSION: &str = "1";
 const DEBUG_FILE: &str = "clamui.log";
 const MAX_HISTORY: usize = 10_000;
 const DEBUG_MAX_BYTES: u64 = 5 * 1024 * 1024;
-const DEBUG_BACKUPS: usize = 3;
+const DEBUG_BACKUPS: u64 = 3;
 
 static FILES_SCANNED: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:\b(\d+)\s*files?\s*scanned\b|\bscanned\s*:?\s*(\d+)\s*files?\b|\bfiles\s*:\s*(\d+)|\b(\d+)\s*files?\b)")
@@ -160,12 +160,12 @@ fn public_entry(mut entry: Value) -> Value {
     entry
 }
 
-/// Append a redacted diagnostic line. Settings are read on every call, so a
-/// persisted debug-level change applies to all subsequent writes immediately.
+/// Append a redacted diagnostic line. Settings are read on every call, so
+/// persisted debug logging changes apply to all subsequent writes immediately.
 pub fn write_debug(ctx: &Context, level: &str, target: &str, message: &str) -> AppResult<()> {
     let level = level.to_ascii_uppercase();
-    let configured = ctx
-        .settings()?
+    let settings = ctx.settings()?;
+    let configured = settings
         .get("debug_log_level")
         .and_then(Value::as_str)
         .unwrap_or("WARNING")
@@ -173,6 +173,7 @@ pub fn write_debug(ctx: &Context, level: &str, target: &str, message: &str) -> A
     if level_rank(&level) < level_rank(&configured) {
         return Ok(());
     }
+    let (max_bytes, backups) = debug_rotation_settings(&settings);
     let dir = debug_dir(ctx);
     fs::create_dir_all(&dir).map_err(|error| format!("creating debug directory: {error}"))?;
     restrict_dir(&dir)?;
@@ -184,7 +185,7 @@ pub fn write_debug(ctx: &Context, level: &str, target: &str, message: &str) -> A
         private_line(target),
         private_text(message).replace(['\n', '\r'], " ")
     );
-    rotate_debug(&dir, line.len() as u64)?;
+    rotate_debug(&dir, line.len() as u64, max_bytes, backups)?;
     let path = dir.join(DEBUG_FILE);
     let mut file = fs::OpenOptions::new()
         .create(true)
@@ -1175,19 +1176,51 @@ fn migrate_debug(dir: &Path) -> AppResult<()> {
     )
 }
 
-fn rotate_debug(dir: &Path, incoming_bytes: u64) -> AppResult<()> {
+fn debug_rotation_settings(settings: &Value) -> (u64, u64) {
+    let max_bytes = settings
+        .get("debug_log_max_size_mb")
+        .and_then(Value::as_u64)
+        .filter(|size_mb| *size_mb > 0)
+        .and_then(|size_mb| size_mb.checked_mul(1024 * 1024))
+        .unwrap_or(DEBUG_MAX_BYTES);
+    let backups = settings
+        .get("debug_log_max_files")
+        .and_then(Value::as_u64)
+        .filter(|backups| *backups > 0)
+        .unwrap_or(DEBUG_BACKUPS);
+    (max_bytes, backups)
+}
+
+fn rotate_debug(dir: &Path, incoming_bytes: u64, max_bytes: u64, backups: u64) -> AppResult<()> {
     let current = dir.join(DEBUG_FILE);
     if fs::metadata(&current)
-        .map(|metadata| metadata.len().saturating_add(incoming_bytes) > DEBUG_MAX_BYTES)
+        .map(|metadata| metadata.len().saturating_add(incoming_bytes) > max_bytes)
         .unwrap_or(false)
     {
-        let oldest = dir.join(format!("{DEBUG_FILE}.{DEBUG_BACKUPS}"));
-        let _ = fs::remove_file(oldest);
-        for index in (1..DEBUG_BACKUPS).rev() {
-            let from = dir.join(format!("{DEBUG_FILE}.{index}"));
-            let to = dir.join(format!("{DEBUG_FILE}.{}", index + 1));
-            if from.exists() {
-                fs::rename(from, to).map_err(|error| error.to_string())?;
+        let prefix = format!("{DEBUG_FILE}.");
+        let mut retained = fs::read_dir(dir)
+            .map_err(|error| format!("reading debug logs: {error}"))?
+            .filter_map(Result::ok)
+            .filter_map(|entry| {
+                let path = entry.path();
+                let suffix = path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .and_then(|name| name.strip_prefix(&prefix))?;
+                if suffix.is_empty() || !suffix.bytes().all(|byte| byte.is_ascii_digit()) {
+                    return None;
+                }
+                let index = suffix.parse::<u64>().ok()?;
+                (index > 0).then_some((index, path))
+            })
+            .collect::<Vec<_>>();
+        retained.sort_unstable_by_key(|entry| std::cmp::Reverse(entry.0));
+        for (index, path) in retained {
+            if index >= backups {
+                let _ = fs::remove_file(path);
+            } else {
+                fs::rename(path, dir.join(format!("{DEBUG_FILE}.{}", index + 1)))
+                    .map_err(|error| error.to_string())?;
             }
         }
         fs::rename(&current, dir.join(format!("{DEBUG_FILE}.1")))

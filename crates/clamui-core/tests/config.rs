@@ -105,11 +105,16 @@ fn load_uses_latin1_fallback_without_losing_directive_values() {
 }
 
 #[test]
-fn clamd_load_interprets_legacy_bare_size_limits_as_megabytes() {
+fn clamd_size_unit_repair_is_reported_and_persisted_by_explicit_apply() {
     let fixture = TestContext::new();
     let path = fixture.config("clamd.conf");
     fs::create_dir_all(&fixture.root).expect("root");
-    fs::write(&path, "MaxFileSize 10\nMaxScanSize 0\n").expect("config fixture");
+    let original = "# Retain this comment\nFutureClamavOption retained\nMaxFileSize 10\nMaxScanSize 25\nOnAccessMaxFileSize 0\n";
+    fs::write(&path, original).expect("config fixture");
+    fixture
+        .context
+        .update_settings(json!({"clamd_size_limit_unit_migration_done": true}))
+        .expect("seed obsolete migration flag");
 
     let loaded = dispatch(
         &fixture.context,
@@ -118,8 +123,82 @@ fn clamd_load_interprets_legacy_bare_size_limits_as_megabytes() {
     )
     .expect("load");
 
+    assert_eq!(loaded["needs_size_unit_migration"], true);
     assert_eq!(loaded["values"]["MaxFileSize"], json!(["10M"]));
-    assert_eq!(loaded["values"]["MaxScanSize"], json!(["0"]));
+    assert_eq!(loaded["values"]["MaxScanSize"], json!(["25M"]));
+    assert_eq!(loaded["values"]["OnAccessMaxFileSize"], json!(["0"]));
+    assert_eq!(
+        fs::read_to_string(&path).expect("load does not modify configuration"),
+        original
+    );
+
+    let applied = dispatch(
+        &fixture.context,
+        "apply",
+        json!({
+            "configs": [{
+                "kind": "clamd",
+                "path": path,
+                "values": loaded["values"]
+            }]
+        }),
+    )
+    .expect("explicit apply");
+    assert_eq!(applied["status"], "applied");
+    assert_eq!(applied["configs"][0]["changed"], true);
+    assert_eq!(applied["configs"][0]["written"], true);
+    assert_eq!(
+        fs::read_to_string(&path).expect("repaired configuration"),
+        "# Retain this comment\nFutureClamavOption retained\nMaxFileSize 10M\nMaxScanSize 25M\nOnAccessMaxFileSize 0\n"
+    );
+
+    let reloaded = dispatch(
+        &fixture.context,
+        "load",
+        json!({"kind": "clamd", "path": path}),
+    )
+    .expect("reload");
+    assert_eq!(reloaded["needs_size_unit_migration"], false);
+}
+
+#[test]
+fn clamd_load_marks_only_positive_bare_size_limits_for_repair() {
+    let fixture = TestContext::new();
+    let normalized_path = fixture.config("normalized.conf");
+    let unreadable_path = fixture.config("directory.conf");
+    let missing_path = fixture.config("missing.conf");
+    fs::create_dir_all(&fixture.root).expect("root");
+    fs::write(
+        &normalized_path,
+        "MaxFileSize 0\nMaxScanSize 10K\nOnAccessMaxFileSize invalid\n",
+    )
+    .expect("normalized config fixture");
+    fs::create_dir(&unreadable_path).expect("unreadable config fixture");
+
+    let normalized = dispatch(
+        &fixture.context,
+        "load",
+        json!({"kind": "clamd", "path": normalized_path}),
+    )
+    .expect("normalized load");
+    assert_eq!(normalized["needs_size_unit_migration"], false);
+    assert_eq!(normalized["values"]["MaxFileSize"], json!(["0"]));
+    assert_eq!(normalized["values"]["MaxScanSize"], json!(["10K"]));
+    assert_eq!(
+        normalized["values"]["OnAccessMaxFileSize"],
+        json!(["invalid"])
+    );
+
+    for path in [unreadable_path, missing_path] {
+        let loaded = dispatch(
+            &fixture.context,
+            "load",
+            json!({"kind": "clamd", "path": path}),
+        )
+        .expect("unreadable or missing load response");
+        assert_eq!(loaded["readable"], false);
+        assert_eq!(loaded["needs_size_unit_migration"], false);
+    }
 }
 
 #[test]

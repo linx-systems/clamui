@@ -85,7 +85,7 @@ The AppImage packages ClamUI but still uses host ClamAV. A `.zsync` file may be 
 Follow the [development prerequisites](/docs/contributing/development/#prerequisites), then run the desktop application from the repository root:
 
 ```bash
-bun --cwd desktop install --frozen-lockfile
+( cd desktop && bun install --frozen-lockfile )
 bun run --cwd desktop tauri dev
 ```
 

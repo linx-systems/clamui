@@ -64,7 +64,7 @@ if [ "$SKIP_CHECKS" = false ]; then
 fi
 
 printf 'Syncing locked Bun dependencies...\n'
-bun --cwd "$PROJECT_ROOT/desktop" install --frozen-lockfile
+( cd "$PROJECT_ROOT/desktop" && bun install --frozen-lockfile )
 
 if [ "$DEPS_ONLY" = true ]; then
     exit 0

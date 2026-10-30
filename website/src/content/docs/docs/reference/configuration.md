@@ -37,10 +37,14 @@ The settings file is an object. ClamUI merges missing defaults, preserves unknow
 | `show_live_progress` | `true` | Detailed scan progress |
 | `quarantine_directory` | `""` | Optional payload directory override |
 | `debug_log_level` | `"WARNING"` | `DEBUG`, `INFO`, `WARNING`, or `ERROR` |
+| `debug_log_max_size_mb` | `5` | Positive whole MiB per active debug log; zero, missing, invalid, or overflowing values use 5 MiB |
+| `debug_log_max_files` | `3` | Positive whole numbered-backup count; zero, missing, or invalid values use 3 |
 | `virustotal_api_key` | `null` | Compatibility field; the system keyring is preferred |
 | `allow_plaintext_api_key_fallback` | `false` | Explicitly permits less-private fallback storage |
 
 VirusTotal API keys are not returned to the frontend in settings data. Do not submit private files or hashes that you are not authorized to share.
+
+When a valid size is reached, the active debug log rotates and retains the configured number of numbered backups. Existing persisted retention settings are applied on every debug-log write.
 
 ## Scheduled scans and exclusions
 
@@ -93,6 +97,8 @@ Built-in defaults are Quick Scan, Full Scan, and Home Folder. Their IDs are gene
 **Database**, **Scanner**, and **On-Access** Preferences target host `freshclam.conf` and `clamd.conf`, including from Flatpak. They never write sandbox copies. The native `/usr/bin/clamui-apply-preferences` helper and `io.github.linx_systems.ClamUI.policy` authorize only allowlisted host configurations through the compatible protocol-v4 boundary. The in-app onboarding flow may report a ready helper only after validating a matching newly published, signed Rust release asset; source builds and older helpers do not supply that authorization. Missing trust, invalid input, or denied authorization fails closed without changing host configuration.
 
 **Save & Apply** validates the snapshot captured when you click it. Configuration files, schedule settings, and timer/cron changes are not one atomic operation: later failures can leave earlier groups durable. Review each reported durable group and failure before retrying.
+
+When ClamUI reads legacy Clamd size-unit values, it normalizes them in memory and marks the raw configuration for pending repair. Reading or startup never writes the host configuration or requests elevation. **Save & Apply** carries that repair even if the displayed values match the baseline; only a successful repair clears it, while a failed apply or a new-path draft remains safe to review and retry.
 
 Database options include `DatabaseDirectory`, `UpdateLogFile`, `NotifyClamd`, `LogVerbose`, `LogSyslog`, `Checks`, `DatabaseMirror`, repeatable `DatabaseCustomURL`, and HTTP proxy fields. Scanner options include `ScanPE`, `ScanELF`, `ScanOLE2`, `ScanPDF`, `ScanHTML`, `ScanArchive`, `MaxFileSize`, `MaxScanSize`, `MaxRecursion`, `MaxFiles`, `LogFile`, `LogVerbose`, and `LogSyslog`. On-access options retain the existing include, exclude, prevention, extra-scanning, thread, size, timeout, retry, and UID directives.
 
