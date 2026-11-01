@@ -4,6 +4,7 @@
 ### Fixed
 
 - Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+- Corrected website copy to describe the v0.5.0 native Rust/Tauri desktop runtime and its system GTK 3 and WebKitGTK 4.1 dependencies.
 
 
 ## [0.5.0] - 2026-11-01
