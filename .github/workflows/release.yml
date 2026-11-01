@@ -47,7 +47,7 @@ jobs:
           {
             echo "notes<<EOF"
             tail -n +2 RELEASE_NOTES.md
-            echo "EOF"
+            printf '\nEOF\n'
           } >> "$GITHUB_OUTPUT"
 
       - name: Create draft release
