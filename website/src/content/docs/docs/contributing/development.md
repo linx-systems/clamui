@@ -34,7 +34,7 @@ flatpak install --user --arch="$(flatpak --default-arch)" flathub \
   org.freedesktop.Sdk.Extension.rust-stable//26.08
 ```
 
-The Rust/Tauri source for the v0.5.0 release is on `master`; the `v0.4.1` tag preserves the historical Python release. Clone `master`:
+The Rust/Tauri source for the v0.5.1 release is on `master`; the `v0.4.1` tag preserves the historical Python release. Clone `master`:
 
 ```bash
 git clone https://github.com/linx-systems/clamui.git
@@ -220,7 +220,7 @@ flatpak-builder --user --arch="$(flatpak --default-arch)" \
   flathub/io.github.linx_systems.ClamUI.release.yml
 ```
 
-This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before a Flathub submission, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub review and publication process. GitHub v0.5.0 bundles and matching signed helper packages do not by themselves update Flathub; the live Flathub store remains the Python 0.4.1 release until that separate rollout. The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call.
+This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before a Flathub submission, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub review and publication process. GitHub v0.5.1 bundles and matching signed helper packages do not by themselves update Flathub; the live Flathub store remains the Python 0.4.1 release until that separate rollout. The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call.
 
 Before publishing, inspect package payloads for the right architecture, native command names, helper/policy paths, and absence of a Python application runtime. Build compatibility still requires proof from the baseline environment and target package/OS; do not infer it from this development guide.
 

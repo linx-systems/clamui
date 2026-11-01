@@ -7,11 +7,11 @@ description: Verify published native release artifacts and maintain the signing 
 
 Download artifacts only from the [official releases page](https://github.com/linx-systems/clamui/releases) or repository. Do not install a package when cryptographic verification fails. Verify the files actually published for the release; this guide does not itself establish availability or operating-system compatibility.
 
-These checks validate downloaded v0.5.0 release artifacts; they do not make a local build, CI artifact, or older release into an installer asset. The v0.5.0 Rust/Tauri source is on `master`; the `v0.4.1` tag is the historical Python release. A helper repair requires an exact signed package published for that application's release and host architecture. A trusted already-installed protocol-v4 helper remains compatible and does not need replacement solely because the application was built from source.
+These checks validate downloaded v0.5.1 release artifacts; they do not make a local build, CI artifact, or older release into an installer asset. The v0.5.1 Rust/Tauri source is on `master`; the `v0.4.1` tag is the historical Python release. A helper repair requires an exact signed package published for that application's release and host architecture. A trusted already-installed protocol-v4 helper remains compatible and does not need replacement solely because the application was built from source.
 
 ### AppImage
 
-The GitHub v0.5.0 AppImage is `ClamUI-0.5.0-x86_64.AppImage`; its `.zsync` metadata is `ClamUI-0.5.0-x86_64.AppImage.zsync`. Confirm that the downloaded filename matches the release asset. Do **not** run `--appimage-signature`: it executes the untrusted AppImage and only prints its signature. AppImageKit's continuous release does not publish a `validate` binary. Build the official validator from [the pinned AppImageKit source](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d) using its [upstream build documentation](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d#building).
+The GitHub v0.5.1 AppImage is `ClamUI-0.5.1-x86_64.AppImage`; its `.zsync` metadata is `ClamUI-0.5.1-x86_64.AppImage.zsync`. Confirm that the downloaded filename matches the release asset. Do **not** run `--appimage-signature`: it executes the untrusted AppImage and only prints its signature. AppImageKit's continuous release does not publish a `validate` binary. Build the official validator from [the pinned AppImageKit source](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d) using its [upstream build documentation](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d#building).
 
 Install a C/C++ compiler, CMake, Git, `pkg-config`, GObject/GLib, Cairo, OpenSSL, GPGME, libgcrypt, zlib, FUSE development headers, and `mksquashfs` development/runtime packages from the host distribution. The verification commands also require GNU binutils (`readelf` and `objcopy`), GnuPG, and bubblewrap. Then build only `validate` from the pinned revision:
 
@@ -27,7 +27,7 @@ Verify a downloaded artifact without executing it. This uses a disposable `objco
 
 ```bash
 set -euo pipefail
-APPIMAGE="$(realpath ClamUI-0.5.0-x86_64.AppImage)"
+APPIMAGE="$(realpath ClamUI-0.5.1-x86_64.AppImage)"
 VALIDATE="$(realpath build/src/validate)"
 VALIDATOR_LIBRARY_PATH="${VALIDATOR_LIBRARY_PATH:-}"
 EXPECTED_FINGERPRINT=037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
@@ -72,16 +72,16 @@ bwrap --unshare-all --die-with-parent --new-session \
 LC_ALL=C grep -F 'Good signature from' "$VALIDATE_LOG" >/dev/null
 ```
 
-Both the sandboxed validator and the positive `Good signature from` diagnostic are required; an exit status alone, an embedded signature section, or the absence of an error is not verification. Treat a missing declared signature or failed verification as a reason not to install the AppImage. Do not substitute a historical 0.4.1 Python AppImage for v0.5.0.
+Both the sandboxed validator and the positive `Good signature from` diagnostic are required; an exit status alone, an embedded signature section, or the absence of an error is not verification. Treat a missing declared signature or failed verification as a reason not to install the AppImage. Do not substitute a historical 0.4.1 Python AppImage for v0.5.1.
 
 ### Debian packages
 
-The v0.5.0 Debian release is an architecture-specific application and helper pair:
+The v0.5.1 Debian release is an architecture-specific application and helper pair:
 
 ```bash
 DEB_ARCH="$(dpkg --print-architecture)"
-APP="clamui_0.5.0_${DEB_ARCH}.deb"
-HELPER="clamui-privileged-helper_0.5.0_${DEB_ARCH}.deb"
+APP="clamui_0.5.1_${DEB_ARCH}.deb"
+HELPER="clamui-privileged-helper_0.5.1_${DEB_ARCH}.deb"
 test -f "$APP" && test -f "$HELPER"
 curl -fsSLo signing-key.asc https://raw.githubusercontent.com/linx-systems/clamui/master/signing-key.asc
 EXPECTED_FINGERPRINT=037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
@@ -91,17 +91,17 @@ gpg --import signing-key.asc
 dpkg-sig --verify "$APP" "$HELPER"
 ```
 
-A valid verification reports `GOODSIG` for the expected fingerprint. An `_gpgbuilder` member alone is not authentication. A `BADSIG` result is a failed verification: do not install either package. The v0.5.0 packages use xz-compressed `control` and `data` archives so standard `dpkg-sig` verification reports `GOODSIG`; never bypass signature verification after a failure.
+A valid verification reports `GOODSIG` for the expected fingerprint. An `_gpgbuilder` member alone is not authentication. A `BADSIG` result is a failed verification: do not install either package. The v0.5.1 packages use xz-compressed `control` and `data` archives so standard `dpkg-sig` verification reports `GOODSIG`; never bypass signature verification after a failure.
 
 The helper package supplies the native `/usr/bin/clamui-apply-preferences` executable and canonical polkit policy. Its presence does not authorize a package whose signature, version, or architecture does not match.
 
 ### Fedora RPM packages
 
-The v0.5.0 helper RPM release-asset names are `clamui-privileged-helper-0.5.0-1.x86_64.rpm` and `clamui-privileged-helper-0.5.0-1.aarch64.rpm`, each with an adjacent `.rpm.asc`. Verify a matching downloaded asset only after it is attached to the GitHub release. The RPM does not contain the ClamUI GUI or ClamAV. Use a temporary GPG home and RPM database so verification does not alter your user or system trust stores:
+The v0.5.1 helper RPM release-asset names are `clamui-privileged-helper-0.5.1-1.x86_64.rpm` and `clamui-privileged-helper-0.5.1-1.aarch64.rpm`, each with an adjacent `.rpm.asc`. Verify a matching downloaded asset only after it is attached to the GitHub release. The RPM does not contain the ClamUI GUI or ClamAV. Use a temporary GPG home and RPM database so verification does not alter your user or system trust stores:
 
 ```bash
 set -euo pipefail
-VERSION=0.5.0
+VERSION=0.5.1
 ARCH="$(rpm --eval '%{_arch}')"
 case "$ARCH" in x86_64|aarch64) ;; *) echo "Unsupported ClamUI helper RPM architecture: $ARCH" >&2; exit 1 ;; esac
 RPM="clamui-privileged-helper-${VERSION}-1.${ARCH}.rpm"
@@ -154,7 +154,7 @@ systemctl reboot
 
 ### Flathub and GitHub Flatpak bundles
 
-Flathub signs each Flatpak it publishes as part of its installation infrastructure. Its current ClamUI store package is the historical Python 0.4.1 release; that repository signature does not cover the separate GitHub v0.5.0 bundles `clamui-x86_64.flatpak` and `clamui-aarch64.flatpak`. Download those bundles only from the v0.5.0 GitHub release and confirm their exact release-asset names before installation.
+Flathub signs each Flatpak it publishes as part of its installation infrastructure. Its current ClamUI store package is the historical Python 0.4.1 release; that repository signature does not cover the separate GitHub v0.5.1 bundles `clamui-x86_64.flatpak` and `clamui-aarch64.flatpak`. Download those bundles only from the v0.5.1 GitHub release and confirm their exact release-asset names before installation.
 
 ## Maintainers: configure signing
 
