@@ -50,7 +50,7 @@
 - Fixed generation of immutable Flatpak release manifests when the checkout source block contains `skip:` entries.
 - Fixed pending Clamd size-unit repairs being omitted when normalized values matched the displayed baseline; reads and startup remain non-writing and do not request elevation.
 - Restored persisted debug-log size and backup-retention settings on every write, with safe fallbacks for unusable values.
-- Fixed locked Bun dependency installation in local source and Debian package builds with Bun 1.3.14.
+- Fixed locked Bun dependency installation in local source, Debian, and AppImage package builds with Bun 1.3.14; clean Debian CI runners now install the gettext catalog tools required by the package builder.
 - Fixed inconsistent button padding and spacing in the debug-log deletion confirmation dialog.
 - Fixed daemon scans aborting on filenames containing carriage returns or newlines; these files are scanned separately through open file descriptors while retaining exclusions, original detection paths, progress, and partial results. (#264)
 - Fixed uneven spacing between linked and plain-text contributor names in About.
