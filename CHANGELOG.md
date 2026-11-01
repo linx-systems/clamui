@@ -1,11 +1,19 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.5.1] - 2026-11-01
 ### Fixed
 
-- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
-- Corrected website copy to describe the v0.5.0 native Rust/Tauri desktop runtime and its system GTK 3 and WebKitGTK 4.1 dependencies.
+- Fixed Flatpak helper-installation and configuration-staging lookups to validate and run the host's trusted `getent`, retaining authoritative passwd homes and executable ownership and permission checks.
+- Fixed Flatpak helper-package verification to resolve and execute trusted checksum and GnuPG tools on the host, preserving pinned signatures and signed archive-member checks.
+- Fixed helper-installation errors clipping long diagnostics and unbroken paths; complete messages now wrap and remain selectable within the scrolling dialog.
+- Fixed Flathub manifest lint compatibility by relying on Flatpak's default application D-Bus permissions instead of redundantly declaring ClamUI's own bus name.
 
+### Maintenance
+
+- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+- Corrected website copy to describe the native Rust/Tauri desktop runtime and its system GTK 3 and WebKitGTK 4.1 dependencies.
 
 ## [0.5.0] - 2026-11-01
 
@@ -159,8 +167,9 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
 
+[0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0

@@ -59,9 +59,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ClamUI 0.5.0\n"
+"Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-01 11:44+0100\n"
+"POT-Creation-Date: 2026-11-01 21:11+0100\n"
 "PO-Revision-Date: 2026-10-17 12:00+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: Norwegian Bokmål\n"
@@ -1456,60 +1456,60 @@ msgstr ""
 "ClamUI skal nå kunne lagre ClamAV-konfigurasjonen på systemet."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:774
+#: crates/clamui-core/src/privileged.rs:982
 msgid "Authorization was cancelled while {operation}."
 msgstr "Autorisasjonen ble kansellert mens {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:780
+#: crates/clamui-core/src/privileged.rs:988
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "Den privilegerte hjelperen er utilgjengelig mens {operation}."
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:786
+#: crates/clamui-core/src/privileged.rs:994
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr "Den privilegerte hjelperen avviste PKEXEC_UID mens {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:792
+#: crates/clamui-core/src/privileged.rs:1000
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr ""
 "Den privilegerte hjelperen rapporterte en protokollfeil mens {operation}."
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:798
+#: crates/clamui-core/src/privileged.rs:1006
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr ""
 "Den privilegerte hjelperen mislyktes under {operation} (avslutningskode "
 "{code}): {detail}."
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:806
+#: crates/clamui-core/src/privileged.rs:1014
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr ""
 "Den privilegerte hjelperen mislyktes under {operation} (avslutningskode "
 "{code})."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:813
+#: crates/clamui-core/src/privileged.rs:1021
 msgid "The privileged helper was terminated while {operation}."
 msgstr "Den privilegerte hjelperen ble avsluttet mens {operation}."
 
-#: crates/clamui-core/src/privileged.rs:872
+#: crates/clamui-core/src/privileged.rs:1080
 msgid "Applying configuration"
 msgstr "Bruker konfigurasjon"
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:874
+#: crates/clamui-core/src/privileged.rs:1082
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr "{message} En eller flere tidligere erstatninger kan ha lyktes."
 
-#: crates/clamui-core/src/privileged.rs:1116
+#: crates/clamui-core/src/privileged.rs:1324
 msgid "Reading configuration"
 msgstr "Leser konfigurasjon"
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2634
+#: crates/clamui-core/src/privileged.rs:2836
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""

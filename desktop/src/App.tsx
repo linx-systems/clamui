@@ -1067,7 +1067,7 @@ export default function App(): ReactNode {
           )}</p>
         </> : null}
         {helperInstalling ? <p className="notice" role="status">{_("Installing privileged helper…")}</p> : null}
-        {helperError ? <p className="error" role="alert">{helperError}</p> : null}
+        {helperError ? <p className="error helper-install-error" role="alert">{helperError}</p> : null}
         <div className="dialog-actions"><button className="button" type="button" disabled={helperInstalling} onClick={() => void dismissOnboarding()}>{_("Not now")}</button>{helperStatus?.installable ? <button className="button primary" type="button" disabled={helperInstalling} onClick={() => void installHelper()}>{helperInstalling ? _("Installing…") : helperError ? _("Try Again") : _("Install Helper")}</button> : <button className="button primary" type="button" onClick={() => { setOnboardingOpen(false); selectPage("preferences"); }}>{_("Open Preferences")}</button>}</div>
       </Modal> : null}
     </div>
