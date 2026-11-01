@@ -47,6 +47,7 @@
 - Compared the public CLI against an exact legacy Python revision in an isolated HOME/XDG environment, and exercised a native Nemo action plus native Nautilus scripts against the running application. Nautilus and Dolphin GUIs were unavailable.
 
 ### Fixed
+- Fixed native Debian package compatibility with standard `dpkg-sig` 0.13 verification by uniformly compressing control and data archives with xz instead of the unsupported default zstd.
 - Fixed generation of immutable Flatpak release manifests when the checkout source block contains `skip:` entries.
 - Fixed pending Clamd size-unit repairs being omitted when normalized values matched the displayed baseline; reads and startup remain non-writing and do not request elevation.
 - Restored persisted debug-log size and backup-retention settings on every write, with safe fallbacks for unusable values.

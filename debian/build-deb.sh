@@ -253,7 +253,8 @@ stage_control_files() {
 build_package() {
     local output="$OUTPUT_DIR/$DEB_FILENAME"
     rm -f "$output"
-    dpkg-deb --root-owner-group --build "$BUILD_DIR" "$output"
+    # dpkg-sig 0.13 rejects the default zstd members; package both archives as xz.
+    dpkg-deb --root-owner-group --uniform-compression -Zxz --build "$BUILD_DIR" "$output"
     log_info "Built $output"
 }
 
