@@ -11,18 +11,68 @@ These checks validate downloaded v0.5.0 release artifacts; they do not make a lo
 
 ### AppImage
 
-The GitHub v0.5.0 AppImage is `ClamUI-0.5.0-x86_64.AppImage`; its `.zsync` metadata is `ClamUI-0.5.0-x86_64.AppImage.zsync`. Confirm that the downloaded filename matches the release asset. If the release declares an embedded AppImage signature, verify it before running the file:
+The GitHub v0.5.0 AppImage is `ClamUI-0.5.0-x86_64.AppImage`; its `.zsync` metadata is `ClamUI-0.5.0-x86_64.AppImage.zsync`. Confirm that the downloaded filename matches the release asset. Do **not** run `--appimage-signature`: it executes the untrusted AppImage and only prints its signature. AppImageKit's continuous release does not publish a `validate` binary. Build the official validator from [the pinned AppImageKit source](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d) using its [upstream build documentation](https://github.com/AppImage/AppImageKit/tree/5735cc5bed206497cddfbd2a75e1982c2606c35d#building).
+
+Install a C/C++ compiler, CMake, Git, `pkg-config`, GObject/GLib, Cairo, OpenSSL, GPGME, libgcrypt, zlib, FUSE development headers, and `mksquashfs` development/runtime packages from the host distribution. The verification commands also require GNU binutils (`readelf` and `objcopy`), GnuPG, and bubblewrap. Then build only `validate` from the pinned revision:
 
 ```bash
-APPIMAGE=ClamUI-0.5.0-x86_64.AppImage
-test -f "$APPIMAGE"
-./"$APPIMAGE" --appimage-signature
-wget https://github.com/AppImage/AppImageKit/releases/download/continuous/validate-x86_64.AppImage
-chmod +x validate-x86_64.AppImage
-./validate-x86_64.AppImage "$APPIMAGE"
+git clone https://github.com/AppImage/AppImageKit.git
+git -C AppImageKit checkout 5735cc5bed206497cddfbd2a75e1982c2606c35d
+git -C AppImageKit submodule update --init --depth 1
+cmake -S AppImageKit -B build -DUSE_SYSTEM_MKSQUASHFS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target validate --parallel 2
 ```
 
-Treat a missing declared signature or a failed verification as a reason not to install the AppImage. Do not substitute a historical 0.4.1 Python AppImage for v0.5.0.
+Verify a downloaded artifact without executing it. This uses a disposable `objcopy` output, a private keyring, and a private `/tmp` because the upstream validator writes there. It also rejects the validator's historical zero-exit contiguity error. If a locally built validator has staged shared-library dependencies outside normal linker paths, set `VALIDATOR_LIBRARY_PATH` to that absolute directory before running the check.
+
+```bash
+set -euo pipefail
+APPIMAGE="$(realpath ClamUI-0.5.0-x86_64.AppImage)"
+VALIDATE="$(realpath build/src/validate)"
+VALIDATOR_LIBRARY_PATH="${VALIDATOR_LIBRARY_PATH:-}"
+EXPECTED_FINGERPRINT=037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
+test -f "$APPIMAGE" && test -x "$VALIDATE"
+command -v readelf >/dev/null && command -v objcopy >/dev/null
+command -v gpg >/dev/null && command -v bwrap >/dev/null
+objcopy --version | grep -F 'GNU objcopy' >/dev/null
+readelf -W -S "$APPIMAGE" | grep -F '.sha256_sig' >/dev/null
+readelf -W -S "$APPIMAGE" | grep -F '.sig_key' >/dev/null
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+SIG_KEY="$WORK/embedded-signing-key.asc"
+OBJ_COPY="$WORK/objcopy-output"
+GNUPGHOME="$WORK/gnupg"
+VALIDATE_LOG="$WORK/validate.log"
+install -d -m 0700 "$GNUPGHOME" "$WORK/bin"
+BEFORE_SHA256="$(sha256sum "$APPIMAGE")"
+objcopy --dump-section ".sig_key=$SIG_KEY" "$APPIMAGE" "$OBJ_COPY"
+rm -f "$OBJ_COPY"
+test "$(sha256sum "$APPIMAGE")" = "$BEFORE_SHA256"
+test -s "$SIG_KEY"
+
+KEY_RECORDS="$WORK/embedded-key-records"
+PRIMARY_FINGERPRINTS_FILE="$WORK/primary-fingerprints"
+gpg --batch --no-options --homedir "$GNUPGHOME" --show-keys --with-colons "$SIG_KEY" >"$KEY_RECORDS"
+awk -F: '$1 == "pub" { primary = 1; next } primary && $1 == "fpr" { print $10; primary = 0 }' \
+  "$KEY_RECORDS" >"$PRIMARY_FINGERPRINTS_FILE"
+mapfile -t PRIMARY_FINGERPRINTS < "$PRIMARY_FINGERPRINTS_FILE"
+test "${#PRIMARY_FINGERPRINTS[@]}" -eq 1
+test "${PRIMARY_FINGERPRINTS[0]}" = "$EXPECTED_FINGERPRINT"
+gpg --batch --no-options --homedir "$GNUPGHOME" --import "$SIG_KEY"
+ln -s "$(command -v gpg)" "$WORK/bin/gpg2" # validate invokes gpg2 by name
+
+bwrap --unshare-all --die-with-parent --new-session \
+  --ro-bind / / --proc /proc --dev /dev --tmpfs /tmp \
+  --bind "$WORK" "$WORK" --chdir "$WORK" \
+  --setenv GNUPGHOME "$GNUPGHOME" --setenv LC_ALL C \
+  --setenv PATH "$WORK/bin:/usr/bin:/bin" \
+  --setenv LD_LIBRARY_PATH "$VALIDATOR_LIBRARY_PATH" \
+  "$VALIDATE" "$APPIMAGE" >"$VALIDATE_LOG" 2>&1
+LC_ALL=C grep -F 'Good signature from' "$VALIDATE_LOG" >/dev/null
+```
+
+Both the sandboxed validator and the positive `Good signature from` diagnostic are required; an exit status alone, an embedded signature section, or the absence of an error is not verification. Treat a missing declared signature or failed verification as a reason not to install the AppImage. Do not substitute a historical 0.4.1 Python AppImage for v0.5.0.
 
 ### Debian packages
 
@@ -41,7 +91,7 @@ gpg --import signing-key.asc
 dpkg-sig --verify "$APP" "$HELPER"
 ```
 
-A valid verification reports `GOODSIG` for the expected fingerprint. An `_gpgbuilder` member alone is not authentication. Some `dpkg-sig` verifier/toolchain combinations report `BADSIG`; use a verifier that reports `GOODSIG` for the imported ClamUI key instead of installing unverified artifacts.
+A valid verification reports `GOODSIG` for the expected fingerprint. An `_gpgbuilder` member alone is not authentication. A `BADSIG` result is a failed verification: do not install either package. The v0.5.0 packages use xz-compressed `control` and `data` archives so standard `dpkg-sig` verification reports `GOODSIG`; never bypass signature verification after a failure.
 
 The helper package supplies the native `/usr/bin/clamui-apply-preferences` executable and canonical polkit policy. Its presence does not authorize a package whose signature, version, or architecture does not match.
 

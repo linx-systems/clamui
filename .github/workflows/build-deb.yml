@@ -103,7 +103,12 @@ jobs:
           dpkg-sig --sign builder -k "${{ steps.gpg.outputs.fingerprint }}" "${debs[@]}"
 
           for deb in "${debs[@]}"; do
-            ar t "$deb" | grep -qx '_gpgbuilder'
+            verification="$(dpkg-sig --verify "$deb")" || {
+              printf '%s\n' "$verification" >&2
+              exit 1
+            }
+            printf '%s\n' "$verification"
+            grep -q "^GOODSIG _gpgbuilder ${{ steps.gpg.outputs.fingerprint }} " <<< "$verification"
           done
 
       - name: Upload Debian package artifacts
