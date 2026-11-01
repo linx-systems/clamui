@@ -32,6 +32,8 @@ wheels/
 *.egg
 *.manifest
 *.spec
+# RPM packaging specs are source files, not generated bundles.
+!/rpm/*.spec
 pip-log.txt
 pip-delete-this-directory.txt
 pypi_cache

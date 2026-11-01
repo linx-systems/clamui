@@ -2,12 +2,20 @@
 
 ## [Unreleased]
 
+### TODO
+
+- [ ] Publish the matching signed Fedora helper RPMs and `.rpm.asc` files for `x86_64` and `aarch64` with the next release so automatic helper installation can complete on Fedora. The published v0.4.1 release does not yet include these assets.
+
 ### Changed
+- Clarified the separation between the published v0.4.1 Python/PyGObject release notes and unreleased Rust/Tauri development, directing current source and Flatpak guidance to the website without implying migration publication or release-generator readiness.
 
 - Added a separate snapshot-only **Network** sidebar for current TCP/UDP listeners and connections, endpoint copying, filtering, and permission-aware process attribution; it neither monitors traffic nor changes the advisory Audit or deep-scan workflows.
 - Added explicit browser-only VirusTotal IP-report confirmation with a conservative public-IP policy; private, special-purpose, scoped, and wildcard endpoints stay disabled and no port or process data is shared.
 - Expanded the advisory firewall audit with independent UFW, firewalld, nftables, IPv4/IPv6 iptables, and supported management-interface inventory while keeping host inspection read-only and non-interactive.
 - Moved Save & Apply proposal validation and persistence into a GTK-free workflow, with click-time snapshots and explicit durable outcomes for partial failures.
+- Added **See Configuration** to failed **Save & Apply** reports. It displays the frozen exact native ClamAV configuration attempted for each full target path, with separate copy actions for safe manual recovery; it never applies files or bypasses helper trust, and warns that a helper failure can follow partial writes.
+- Added an explicit **Install Helper** offer for a missing privileged helper on supported Debian-family native, source, AppImage, and Flatpak installs; it verifies the matching signed release package before graphical Polkit authorization, preserves safe manual repair for untrusted or unsupported cases, and requires an explicit Save retry after installation.
+- Added Fedora helper-only RPM support for explicit native and Flatpak-host recovery: matching signed published RPM and `.asc` assets are required, with DNF handling mutable hosts and guarded `rpm-ostree` handling Atomic desktops.
 - Consolidated standalone and daemon scan-result interpretation while retaining backend-specific counting and error semantics.
 - Strengthened property-based tests for log redaction, Unicode preservation, filesystem and symlink validation, scheduled-command quoting, and threat-classification precedence.
 - Rendered website Mermaid diagrams into accessible light and dark SVGs at build time, removing the Mermaid JavaScript payload from documentation pages.
@@ -42,8 +50,15 @@
 - Fixed pending Clamd size-unit repairs being omitted when normalized values matched the displayed baseline; reads and startup remain non-writing and do not request elevation.
 - Restored persisted debug-log size and backup-retention settings on every write, with safe fallbacks for unusable values.
 - Fixed locked Bun dependency installation in local source and Debian package builds with Bun 1.3.14.
+- Fixed inconsistent button padding and spacing in the debug-log deletion confirmation dialog.
+- Fixed daemon scans aborting on filenames containing carriage returns or newlines; these files are scanned separately through open file descriptors while retaining exclusions, original detection paths, progress, and partial results. (#264)
+- Fixed uneven spacing between linked and plain-text contributor names in About.
+
 - Consolidated known privileged-helper trust failures into one localized, actionable recovery dialog instead of duplicate raw error notifications.
 - Checked Flatpak helper availability at the canonical host path and sanitized privileged-helper diagnostics before presentation while preserving useful paths and redacting secrets.
+- Distinguished a missing canonical system helper from an existing untrusted helper and provided actionable supported recovery; blocked protected writes remain unapplied and pending settings drafts can be retried after repair.
+- Fixed Flatpak recognition of a trusted, same-version protocol-v4 Debian `all` helper already installed at the canonical path; it no longer treats it as missing or requests a nonexistent architecture-specific release asset.
+- Wrapped settings-save diagnostics and toast messages so long errors remain readable without horizontal overflow.
 
 - Prevented delayed Save & Apply completion from replacing a newly selected configuration file with the previous save target.
 - Preserved literal backslashes before percent signs in cron scan targets and command arguments instead of letting cron interpret them as an input separator.

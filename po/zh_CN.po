@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.1.6\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-10-20 10:39+0200\n"
+"POT-Creation-Date: 2026-11-01 11:44+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -16,6 +16,202 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Lokalize 23.08.5\n"
+
+#: crates/clamui-core/src/audit/firewall.rs:53
+msgid "Firewall manager overlap"
+msgstr "防火墙管理器并存"
+
+#: crates/clamui-core/src/audit/firewall.rs:54
+msgid ""
+"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
+"was not evaluated."
+msgstr ""
+"UFW 已启用，同时 Firewalld 持有其 D-Bus 名称；未评估两者规则之间的相互影响。"
+
+#: crates/clamui-core/src/audit/firewall.rs:157
+msgid "UFW Firewall"
+msgstr "UFW 防火墙"
+
+#: crates/clamui-core/src/audit/firewall.rs:162
+msgid ""
+"UFW is active; the default incoming policy is deny. Listed rules may allow "
+"exceptions."
+msgstr "UFW 已启用；默认入站策略为丢弃。列出的规则可能会例外放行部分流量。"
+
+#: crates/clamui-core/src/audit/firewall.rs:169
+msgid ""
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
+msgstr "UFW 已启用；默认入站策略为拒绝。列出的规则可能会例外放行部分流量。"
+
+#: crates/clamui-core/src/audit/firewall.rs:176
+msgid "UFW is active; the default incoming policy is deny."
+msgstr "UFW 已启用；默认入站策略为丢弃。"
+
+#: crates/clamui-core/src/audit/firewall.rs:180
+msgid "UFW is active; the default incoming policy is reject."
+msgstr "UFW 已启用；默认入站策略为拒绝。"
+
+#: crates/clamui-core/src/audit/firewall.rs:184
+msgid "UFW is active, but the default incoming policy allows traffic."
+msgstr "UFW 已启用，但默认入站策略允许流量通过。"
+
+#: crates/clamui-core/src/audit/firewall.rs:191
+msgid "UFW is active, but its default incoming policy could not be verified."
+msgstr "UFW 已启用，但无法验证其默认入站策略。"
+
+#: crates/clamui-core/src/audit/firewall.rs:195
+msgid "UFW reports inactive."
+msgstr "UFW 报告状态为未启用。"
+
+#: crates/clamui-core/src/audit/firewall.rs:196
+msgid "UFW status could not be inspected safely."
+msgstr "无法安全地检查 UFW 状态。"
+
+#: crates/clamui-core/src/audit/firewall.rs:234
+msgid "Firewalld"
+msgstr "Firewalld"
+
+#: crates/clamui-core/src/audit/firewall.rs:236
+msgid ""
+"Firewalld owns its D-Bus name; readiness and firewall policy were not "
+"queried."
+msgstr "Firewalld 持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
+
+#: crates/clamui-core/src/audit/firewall.rs:240
+msgid ""
+"No Firewalld D-Bus owner was observed; this does not establish kernel "
+"firewall policy."
+msgstr "未检测到 Firewalld 的 D-Bus 名称所有者；不能据此判定内核的防火墙策略。"
+
+#: crates/clamui-core/src/audit/firewall.rs:244
+msgid ""
+"Firewalld ownership could not be verified; readiness and firewall policy "
+"were not queried."
+msgstr ""
+"无法确认 Firewalld 是否持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
+
+#: crates/clamui-core/src/audit/firewall.rs:259
+msgid "firewall-cmd"
+msgstr "firewall-cmd"
+
+#: crates/clamui-core/src/audit/firewall.rs:264
+msgid "firewall-cmd is installed; it was not executed."
+msgstr "firewall-cmd 已安装；未执行该命令。"
+
+#: crates/clamui-core/src/audit/firewall.rs:270
+msgid "firewall-cmd could not be confirmed without executing it."
+msgstr "在不执行 firewall-cmd 的前提下，未能确认其是否已安装。"
+
+#: crates/clamui-core/src/audit/firewall.rs:408
+msgid "nftables (native rules)"
+msgstr "nftables（原生规则）"
+
+#: crates/clamui-core/src/audit/firewall.rs:410
+msgid ""
+"nftables has restrictive default input policies for IPv4 and IPv6; "
+"individual rules may allow exceptions."
+msgstr ""
+"nftables 对 IPv4 和 IPv6 均采用限制性的默认入站策略；个别规则可能会例外放行部"
+"分流量。"
+
+#: crates/clamui-core/src/audit/firewall.rs:414
+msgid ""
+"nftables reports a permissive default input policy; remaining coverage may "
+"be incomplete"
+msgstr "nftables 报告其默认入站策略为宽松策略；其余部分的策略覆盖可能不完整"
+
+#: crates/clamui-core/src/audit/firewall.rs:418
+msgid ""
+"nftables input policy coverage could not be verified for both IPv4 and IPv6"
+msgstr "无法验证 nftables 的入站策略是否同时覆盖 IPv4 和 IPv6"
+
+#: crates/clamui-core/src/audit/firewall.rs:478
+msgid "iptables (IPv4)"
+msgstr "iptables（IPv4）"
+
+#: crates/clamui-core/src/audit/firewall.rs:480
+msgid ""
+"iptables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"iptables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
+
+#: crates/clamui-core/src/audit/firewall.rs:484
+msgid "iptables has a permissive INPUT default policy"
+msgstr "iptables 的 INPUT 默认策略为宽松策略"
+
+#: crates/clamui-core/src/audit/firewall.rs:485
+msgid "iptables INPUT policy could not be verified"
+msgstr "无法验证 iptables 的 INPUT 策略"
+
+#: crates/clamui-core/src/audit/firewall.rs:491
+msgid "iptables (IPv6)"
+msgstr "iptables（IPv6）"
+
+#: crates/clamui-core/src/audit/firewall.rs:493
+msgid ""
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"ip6tables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
+
+#: crates/clamui-core/src/audit/firewall.rs:497
+msgid "ip6tables has a permissive INPUT default policy"
+msgstr "ip6tables 的 INPUT 默认策略为宽松策略"
+
+#: crates/clamui-core/src/audit/firewall.rs:498
+msgid "ip6tables INPUT policy could not be verified"
+msgstr "无法验证 ip6tables 的 INPUT 策略"
+
+#: crates/clamui-core/src/audit/firewall.rs:508
+msgid "Gufw"
+msgstr "Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:510
+msgid "Gufw is available."
+msgstr "Gufw 可用。"
+
+#: crates/clamui-core/src/audit/firewall.rs:512
+msgid ""
+"Gufw was not confirmed; this optional inventory does not affect firewall "
+"policy analysis."
+msgstr "未能确认 Gufw 是否可用；此项可选的软件盘点不会影响防火墙策略分析。"
+
+#: crates/clamui-core/src/audit/firewall.rs:519
+msgid "Open Gufw"
+msgstr "打开 Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:525
+msgid "Firewall Config"
+msgstr "防火墙配置"
+
+#: crates/clamui-core/src/audit/firewall.rs:530
+msgid "Firewall Config is available."
+msgstr "Firewall Config 可用。"
+
+#: crates/clamui-core/src/audit/firewall.rs:533
+msgid ""
+"Firewall Config was not confirmed; this optional inventory does not affect "
+"firewall policy analysis."
+msgstr ""
+"未确认 Firewall Config 是否可用；此项可选的组件检查不影响防火墙策略分析。"
+
+#: crates/clamui-core/src/audit/firewall.rs:540
+msgid "Open Firewall Config"
+msgstr "打开 Firewall Config"
+
+#: crates/clamui-core/src/audit/firewall.rs:578
+msgid "Plasma Firewall"
+msgstr "Plasma Firewall"
+
+#: crates/clamui-core/src/audit/firewall.rs:583
+msgid "Plasma Firewall is installed; it manages an existing firewall backend."
+msgstr "已安装 Plasma Firewall；它用于管理现有的防火墙后端。"
+
+#: crates/clamui-core/src/audit/firewall.rs:592
+msgid "Plasma Firewall was not confirmed; it is only a management module."
+msgstr "未确认 Plasma Firewall 是否可用；它只是一个管理模块。"
 
 #: crates/clamui-core/src/audit.rs:293
 msgid "ClamAV is not installed"
@@ -340,202 +536,6 @@ msgstr[0] "检测到 {count} 个疑似 rootkit"
 msgid "Investigate the detected threats immediately"
 msgstr "请立即调查检测到的威胁"
 
-#: crates/clamui-core/src/audit/firewall.rs:53
-msgid "Firewall manager overlap"
-msgstr "防火墙管理器并存"
-
-#: crates/clamui-core/src/audit/firewall.rs:54
-msgid ""
-"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
-"was not evaluated."
-msgstr ""
-"UFW 已启用，同时 Firewalld 持有其 D-Bus 名称；未评估两者规则之间的相互影响。"
-
-#: crates/clamui-core/src/audit/firewall.rs:157
-msgid "UFW Firewall"
-msgstr "UFW 防火墙"
-
-#: crates/clamui-core/src/audit/firewall.rs:162
-msgid ""
-"UFW is active; the default incoming policy is deny. Listed rules may allow "
-"exceptions."
-msgstr "UFW 已启用；默认入站策略为丢弃。列出的规则可能会例外放行部分流量。"
-
-#: crates/clamui-core/src/audit/firewall.rs:169
-msgid ""
-"UFW is active; the default incoming policy is reject. Listed rules may allow "
-"exceptions."
-msgstr "UFW 已启用；默认入站策略为拒绝。列出的规则可能会例外放行部分流量。"
-
-#: crates/clamui-core/src/audit/firewall.rs:176
-msgid "UFW is active; the default incoming policy is deny."
-msgstr "UFW 已启用；默认入站策略为丢弃。"
-
-#: crates/clamui-core/src/audit/firewall.rs:180
-msgid "UFW is active; the default incoming policy is reject."
-msgstr "UFW 已启用；默认入站策略为拒绝。"
-
-#: crates/clamui-core/src/audit/firewall.rs:184
-msgid "UFW is active, but the default incoming policy allows traffic."
-msgstr "UFW 已启用，但默认入站策略允许流量通过。"
-
-#: crates/clamui-core/src/audit/firewall.rs:191
-msgid "UFW is active, but its default incoming policy could not be verified."
-msgstr "UFW 已启用，但无法验证其默认入站策略。"
-
-#: crates/clamui-core/src/audit/firewall.rs:195
-msgid "UFW reports inactive."
-msgstr "UFW 报告状态为未启用。"
-
-#: crates/clamui-core/src/audit/firewall.rs:196
-msgid "UFW status could not be inspected safely."
-msgstr "无法安全地检查 UFW 状态。"
-
-#: crates/clamui-core/src/audit/firewall.rs:234
-msgid "Firewalld"
-msgstr "Firewalld"
-
-#: crates/clamui-core/src/audit/firewall.rs:236
-msgid ""
-"Firewalld owns its D-Bus name; readiness and firewall policy were not "
-"queried."
-msgstr "Firewalld 持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
-
-#: crates/clamui-core/src/audit/firewall.rs:240
-msgid ""
-"No Firewalld D-Bus owner was observed; this does not establish kernel "
-"firewall policy."
-msgstr "未检测到 Firewalld 的 D-Bus 名称所有者；不能据此判定内核的防火墙策略。"
-
-#: crates/clamui-core/src/audit/firewall.rs:244
-msgid ""
-"Firewalld ownership could not be verified; readiness and firewall policy "
-"were not queried."
-msgstr ""
-"无法确认 Firewalld 是否持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
-
-#: crates/clamui-core/src/audit/firewall.rs:259
-msgid "firewall-cmd"
-msgstr "firewall-cmd"
-
-#: crates/clamui-core/src/audit/firewall.rs:264
-msgid "firewall-cmd is installed; it was not executed."
-msgstr "firewall-cmd 已安装；未执行该命令。"
-
-#: crates/clamui-core/src/audit/firewall.rs:270
-msgid "firewall-cmd could not be confirmed without executing it."
-msgstr "在不执行 firewall-cmd 的前提下，未能确认其是否已安装。"
-
-#: crates/clamui-core/src/audit/firewall.rs:408
-msgid "nftables (native rules)"
-msgstr "nftables（原生规则）"
-
-#: crates/clamui-core/src/audit/firewall.rs:410
-msgid ""
-"nftables has restrictive default input policies for IPv4 and IPv6; "
-"individual rules may allow exceptions."
-msgstr ""
-"nftables 对 IPv4 和 IPv6 均采用限制性的默认入站策略；个别规则可能会例外放行部"
-"分流量。"
-
-#: crates/clamui-core/src/audit/firewall.rs:414
-msgid ""
-"nftables reports a permissive default input policy; remaining coverage may "
-"be incomplete"
-msgstr "nftables 报告其默认入站策略为宽松策略；其余部分的策略覆盖可能不完整"
-
-#: crates/clamui-core/src/audit/firewall.rs:418
-msgid ""
-"nftables input policy coverage could not be verified for both IPv4 and IPv6"
-msgstr "无法验证 nftables 的入站策略是否同时覆盖 IPv4 和 IPv6"
-
-#: crates/clamui-core/src/audit/firewall.rs:478
-msgid "iptables (IPv4)"
-msgstr "iptables（IPv4）"
-
-#: crates/clamui-core/src/audit/firewall.rs:480
-msgid ""
-"iptables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-"iptables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
-
-#: crates/clamui-core/src/audit/firewall.rs:484
-msgid "iptables has a permissive INPUT default policy"
-msgstr "iptables 的 INPUT 默认策略为宽松策略"
-
-#: crates/clamui-core/src/audit/firewall.rs:485
-msgid "iptables INPUT policy could not be verified"
-msgstr "无法验证 iptables 的 INPUT 策略"
-
-#: crates/clamui-core/src/audit/firewall.rs:491
-msgid "iptables (IPv6)"
-msgstr "iptables（IPv6）"
-
-#: crates/clamui-core/src/audit/firewall.rs:493
-msgid ""
-"ip6tables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-"ip6tables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
-
-#: crates/clamui-core/src/audit/firewall.rs:497
-msgid "ip6tables has a permissive INPUT default policy"
-msgstr "ip6tables 的 INPUT 默认策略为宽松策略"
-
-#: crates/clamui-core/src/audit/firewall.rs:498
-msgid "ip6tables INPUT policy could not be verified"
-msgstr "无法验证 ip6tables 的 INPUT 策略"
-
-#: crates/clamui-core/src/audit/firewall.rs:508
-msgid "Gufw"
-msgstr "Gufw"
-
-#: crates/clamui-core/src/audit/firewall.rs:510
-msgid "Gufw is available."
-msgstr "Gufw 可用。"
-
-#: crates/clamui-core/src/audit/firewall.rs:512
-msgid ""
-"Gufw was not confirmed; this optional inventory does not affect firewall "
-"policy analysis."
-msgstr "未能确认 Gufw 是否可用；此项可选的软件盘点不会影响防火墙策略分析。"
-
-#: crates/clamui-core/src/audit/firewall.rs:519
-msgid "Open Gufw"
-msgstr "打开 Gufw"
-
-#: crates/clamui-core/src/audit/firewall.rs:525
-msgid "Firewall Config"
-msgstr "防火墙配置"
-
-#: crates/clamui-core/src/audit/firewall.rs:530
-msgid "Firewall Config is available."
-msgstr "Firewall Config 可用。"
-
-#: crates/clamui-core/src/audit/firewall.rs:533
-msgid ""
-"Firewall Config was not confirmed; this optional inventory does not affect "
-"firewall policy analysis."
-msgstr ""
-"未确认 Firewall Config 是否可用；此项可选的组件检查不影响防火墙策略分析。"
-
-#: crates/clamui-core/src/audit/firewall.rs:540
-msgid "Open Firewall Config"
-msgstr "打开 Firewall Config"
-
-#: crates/clamui-core/src/audit/firewall.rs:578
-msgid "Plasma Firewall"
-msgstr "Plasma Firewall"
-
-#: crates/clamui-core/src/audit/firewall.rs:583
-msgid "Plasma Firewall is installed; it manages an existing firewall backend."
-msgstr "已安装 Plasma Firewall；它用于管理现有的防火墙后端。"
-
-#: crates/clamui-core/src/audit/firewall.rs:592
-msgid "Plasma Firewall was not confirmed; it is only a management module."
-msgstr "未确认 Plasma Firewall 是否可用；它只是一个管理模块。"
-
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
 #: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
 #: crates/clamui-core/src/cli.rs:459 crates/clamui-core/src/cli.rs:499
@@ -791,7 +791,7 @@ msgstr "用法：clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "没有已隔离的文件。"
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:773
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
 msgid "ID"
 msgstr "ID"
 
@@ -1038,15 +1038,15 @@ msgstr "加载历史记录失败：{error}"
 msgid "No scan history found."
 msgstr "未找到扫描历史记录。"
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:783
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
 msgid "Type"
 msgstr "类型"
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:788
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
 msgid "Status"
 msgstr "状态"
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:807
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
 msgid "Summary"
 msgstr "摘要"
 
@@ -1062,63 +1062,63 @@ msgstr[0] "显示 {shown} 条记录，共 {total} 条。使用 --limit 查看更
 msgid "Usage: clamui install-privileged-helper"
 msgstr "用法：clamui install-privileged-helper"
 
-#: crates/clamui-core/src/config.rs:309 crates/clamui-core/src/config.rs:328
+#: crates/clamui-core/src/config.rs:319 crates/clamui-core/src/config.rs:338
 msgid "Configuration file not found"
 msgstr "未找到配置文件"
 
-#: crates/clamui-core/src/config.rs:388
+#: crates/clamui-core/src/config.rs:403
 msgid "Invalid scheduled scan configuration: {error}"
 msgstr "定时扫描配置无效：{error}"
 
-#: crates/clamui-core/src/config.rs:451 crates/clamui-core/src/config.rs:512
+#: crates/clamui-core/src/config.rs:462 crates/clamui-core/src/config.rs:520
 msgid "Not attempted because an earlier direct configuration write failed"
 msgstr "由于此前直接写入配置失败，未尝试执行"
 
-#: crates/clamui-core/src/config.rs:492
+#: crates/clamui-core/src/config.rs:500
 msgid "Protected configuration write failed"
 msgstr "写入受保护配置失败"
 
-#: crates/clamui-core/src/config.rs:565
+#: crates/clamui-core/src/config.rs:575
 msgid "Cannot save configuration paths: {error}"
 msgstr "无法保存配置路径：{error}"
 
-#: crates/clamui-core/src/config.rs:595 crates/clamui-core/src/config.rs:629
+#: crates/clamui-core/src/config.rs:605 crates/clamui-core/src/config.rs:639
 msgid "Cannot save scheduled scan preferences: {error}"
 msgstr "无法保存定时扫描首选项：{error}"
 
-#: crates/clamui-core/src/config.rs:608 crates/clamui-core/src/config.rs:617
+#: crates/clamui-core/src/config.rs:618 crates/clamui-core/src/config.rs:627
 msgid "Failed to apply scheduled scan configuration: {error}"
 msgstr "应用定时扫描配置失败：{error}"
 
-#: crates/clamui-core/src/config.rs:681
+#: crates/clamui-core/src/config.rs:701
 msgid "Configuration path appears more than once: {path}"
 msgstr "配置路径重复出现：{path}"
 
-#: crates/clamui-core/src/config.rs:689
+#: crates/clamui-core/src/config.rs:709
 msgid "Configuration kinds sharing {setting} must use the same path"
 msgstr "共享 {setting} 的配置类型必须使用相同的路径"
 
-#: crates/clamui-core/src/config.rs:700
+#: crates/clamui-core/src/config.rs:720
 msgid "Cannot prepare {path}: {error}"
 msgstr "无法准备 {path}：{error}"
 
-#: crates/clamui-core/src/config.rs:768
+#: crates/clamui-core/src/config.rs:810
 msgid "Cannot read {path}: {error}"
 msgstr "无法读取 {path}：{error}"
 
-#: crates/clamui-core/src/config.rs:778
+#: crates/clamui-core/src/config.rs:820
 msgid "Configuration is not a regular file: {path}"
 msgstr "配置文件不是普通文件：{path}"
 
-#: crates/clamui-core/src/config.rs:784
+#: crates/clamui-core/src/config.rs:826
 msgid "Cannot create {path}: {error}"
 msgstr "无法创建 {path}：{error}"
 
-#: crates/clamui-core/src/config.rs:793
+#: crates/clamui-core/src/config.rs:835
 msgid "Cannot write {path}: {error}"
 msgstr "无法写入 {path}：{error}"
 
-#: crates/clamui-core/src/config.rs:892
+#: crates/clamui-core/src/config.rs:934
 msgid ""
 "On-Access scanning requires at least one loop-prevention exclusion: Exclude "
 "Username, Exclude User ID, or Exclude Root User"
@@ -1126,35 +1126,35 @@ msgstr ""
 "访问时扫描至少需要一项防循环排除规则：排除用户名、排除用户 ID 或排除 root 用"
 "户"
 
-#: crates/clamui-core/src/config.rs:917
+#: crates/clamui-core/src/config.rs:959
 msgid "{key}: invalid boolean value: {value}"
 msgstr "{key}：无效的布尔值：{value}"
 
-#: crates/clamui-core/src/config.rs:946
+#: crates/clamui-core/src/config.rs:988
 msgid "{key}: value {value} is below minimum {minimum}"
 msgstr "{key}：值 {value} 小于最小值 {minimum}"
 
-#: crates/clamui-core/src/config.rs:954
+#: crates/clamui-core/src/config.rs:996
 msgid "{key}: value {value} exceeds maximum {maximum}"
 msgstr "{key}：值 {value} 超过最大值 {maximum}"
 
-#: crates/clamui-core/src/config.rs:963
+#: crates/clamui-core/src/config.rs:1005
 msgid "{key}: not a valid integer: {value}"
 msgstr "{key}：无效的整数：{value}"
 
-#: crates/clamui-core/src/config.rs:972
+#: crates/clamui-core/src/config.rs:1014
 msgid "{key}: size must start with a number: {value}"
 msgstr "{key}：大小值必须以数字开头：{value}"
 
-#: crates/clamui-core/src/config.rs:989
+#: crates/clamui-core/src/config.rs:1031
 msgid "{key}: path cannot be empty"
 msgstr "{key}：路径不能为空"
 
-#: crates/clamui-core/src/config.rs:1004
+#: crates/clamui-core/src/config.rs:1046
 msgid "{key}: string value cannot be empty"
 msgstr "{key}：字符串值不能为空"
 
-#: crates/clamui-core/src/config.rs:1015
+#: crates/clamui-core/src/config.rs:1057
 msgid "{key}: URL must start with http(s)://, ftp(s)://, or file://"
 msgstr "{key}：URL 必须以 http(s)://、ftp(s):// 或 file:// 开头"
 
@@ -1198,66 +1198,66 @@ msgid ""
 "distribution."
 msgstr "未安装 {binary}。请为您使用的发行版安装所需的 ClamAV 软件包。"
 
-#: crates/clamui-core/src/logs.rs:766
+#: crates/clamui-core/src/logs.rs:767
 msgid "SCAN LOG"
 msgstr "扫描日志"
 
-#: crates/clamui-core/src/logs.rs:768
+#: crates/clamui-core/src/logs.rs:769
 msgid "UPDATE LOG"
 msgstr "更新日志"
 
-#: crates/clamui-core/src/logs.rs:778
+#: crates/clamui-core/src/logs.rs:779
 msgid "Timestamp"
 msgstr "时间戳"
 
-#: crates/clamui-core/src/logs.rs:793
+#: crates/clamui-core/src/logs.rs:794
 msgid "Duration"
 msgstr "耗时"
 
-#: crates/clamui-core/src/logs.rs:801
+#: crates/clamui-core/src/logs.rs:802
 msgid "Full Output"
 msgstr "完整输出"
 
-#: crates/clamui-core/src/logs.rs:832
+#: crates/clamui-core/src/logs.rs:833
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} 秒"
 
-#: crates/clamui-core/src/logs.rs:1062
+#: crates/clamui-core/src/logs.rs:1063
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "扫描完成"
 
-#: crates/clamui-core/src/logs.rs:1065
+#: crates/clamui-core/src/logs.rs:1066
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "发现 {count} 个威胁{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1075
+#: crates/clamui-core/src/logs.rs:1076
 msgid "Threats Detected"
 msgstr "检测到威胁"
 
-#: crates/clamui-core/src/logs.rs:1080
+#: crates/clamui-core/src/logs.rs:1081
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "扫描已取消"
 
-#: crates/clamui-core/src/logs.rs:1083
+#: crates/clamui-core/src/logs.rs:1084
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "扫描出错"
 
-#: crates/clamui-core/src/logs.rs:1094
+#: crates/clamui-core/src/logs.rs:1095
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "已扫描：{count} 个文件"
 
-#: crates/clamui-core/src/logs.rs:1101
+#: crates/clamui-core/src/logs.rs:1102
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} 个目录"
 
-#: crates/clamui-core/src/logs.rs:1112
+#: crates/clamui-core/src/logs.rs:1113
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "发现威胁：{count} 个"
@@ -1307,60 +1307,6 @@ msgstr "无法获取网络套接字列表。请检查系统套接字工具是否
 msgid "Not running as Flatpak"
 msgstr "未以 Flatpak 方式运行"
 
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:575
-msgid "Authorization was cancelled while {operation}."
-msgstr "{operation}时，授权被取消。"
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:581
-msgid "The privileged helper is unavailable while {operation}."
-msgstr "{operation}时，特权助手不可用。"
-
-#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:587
-msgid "The privileged helper rejected PKEXEC_UID while {operation}."
-msgstr "{operation}时，特权助手拒绝了 PKEXEC_UID。"
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:593
-msgid "The privileged helper reported a protocol mismatch while {operation}."
-msgstr "{operation}时，特权助手报告协议不匹配。"
-
-#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:599
-msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
-msgstr "{operation}时，特权助手执行失败（退出码 {code}）：{detail}。"
-
-#. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:607
-msgid "The privileged helper failed while {operation} (exit {code})."
-msgstr "{operation}时，特权助手执行失败（退出码 {code}）。"
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:614
-msgid "The privileged helper was terminated while {operation}."
-msgstr "{operation}时，特权助手被终止。"
-
-#: crates/clamui-core/src/privileged.rs:673
-msgid "Applying configuration"
-msgstr "应用配置"
-
-#. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:675
-msgid "{message} One or more earlier replacements may have succeeded."
-msgstr "{message} 此前可能已有替换操作成功。"
-
-#: crates/clamui-core/src/privileged.rs:917
-msgid "Reading configuration"
-msgstr "读取配置"
-
-#. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:1821
-msgid ""
-"The privileged-helper installation failed. Try again or install it manually."
-msgstr "特权助手安装失败。请重试或手动安装。"
-
 #. Translators: keep "Flatpak" and "clamui-privileged-helper" unchanged.
 #: crates/clamui-core/src/privileged/cli_install.rs:26
 msgid ""
@@ -1393,6 +1339,60 @@ msgid ""
 msgstr ""
 "已将特权辅助程序安装到 {bin}，并将 polkit 策略安装到 {policy}。现在应该可以"
 "在 ClamUI 中保存系统级 ClamAV 配置了。"
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:774
+msgid "Authorization was cancelled while {operation}."
+msgstr "{operation}时，授权被取消。"
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:780
+msgid "The privileged helper is unavailable while {operation}."
+msgstr "{operation}时，特权助手不可用。"
+
+#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
+#: crates/clamui-core/src/privileged.rs:786
+msgid "The privileged helper rejected PKEXEC_UID while {operation}."
+msgstr "{operation}时，特权助手拒绝了 PKEXEC_UID。"
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:792
+msgid "The privileged helper reported a protocol mismatch while {operation}."
+msgstr "{operation}时，特权助手报告协议不匹配。"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:798
+msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
+msgstr "{operation}时，特权助手执行失败（退出码 {code}）：{detail}。"
+
+#. Translators: keep the {operation} and numeric {code} placeholders.
+#: crates/clamui-core/src/privileged.rs:806
+msgid "The privileged helper failed while {operation} (exit {code})."
+msgstr "{operation}时，特权助手执行失败（退出码 {code}）。"
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:813
+msgid "The privileged helper was terminated while {operation}."
+msgstr "{operation}时，特权助手被终止。"
+
+#: crates/clamui-core/src/privileged.rs:872
+msgid "Applying configuration"
+msgstr "应用配置"
+
+#. Translators: keep {message}; it is the complete preceding helper error.
+#: crates/clamui-core/src/privileged.rs:874
+msgid "{message} One or more earlier replacements may have succeeded."
+msgstr "{message} 此前可能已有替换操作成功。"
+
+#: crates/clamui-core/src/privileged.rs:1116
+msgid "Reading configuration"
+msgstr "读取配置"
+
+#. Translators: "privileged-helper" identifies the ClamUI helper component.
+#: crates/clamui-core/src/privileged.rs:2634
+msgid ""
+"The privileged-helper installation failed. Try again or install it manually."
+msgstr "特权助手安装失败。请重试或手动安装。"
 
 #: crates/clamui-core/src/profiles.rs:240
 #: crates/clamui-core/src/profiles.rs:311
@@ -1522,37 +1522,37 @@ msgstr "无法隔离 {path}：{error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "文件哈希值不匹配 — 文件可能已损坏"
 
-#: crates/clamui-core/src/scanner.rs:272
+#: crates/clamui-core/src/scanner.rs:383
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "未在宿主机的标准位置找到 ClamAV 数据库文件"
 
-#: crates/clamui-core/src/scanner.rs:1432
+#: crates/clamui-core/src/scanner.rs:1808
 msgid "Scan cancelled by user"
 msgstr "用户已取消扫描"
 
-#: crates/clamui-core/src/scanner.rs:1434
+#: crates/clamui-core/src/scanner.rs:1810
 msgid "No files could be scanned"
 msgstr "未能扫描任何文件"
 
-#: crates/clamui-core/src/scanner.rs:1438
+#: crates/clamui-core/src/scanner.rs:1814
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "扫描目标不存在或包含无效的 NUL 字节"
 
-#: crates/clamui-core/src/scanner.rs:1445
+#: crates/clamui-core/src/scanner.rs:1821
 msgid "Scan target is not a regular file or directory"
 msgstr "扫描目标不是普通文件或目录"
 
-#: crates/clamui-core/src/scanner.rs:1459
+#: crates/clamui-core/src/scanner.rs:1835
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "无法访问 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1472
+#: crates/clamui-core/src/scanner.rs:1848
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "无法读取 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1491
+#: crates/clamui-core/src/scanner.rs:1867
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -1929,310 +1929,6 @@ msgstr "导出"
 msgid "Open"
 msgstr "打开"
 
-#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:534
-#: desktop/src/pages/Scan.tsx:536
-msgid "Scan"
-msgstr "扫描"
-
-#: desktop/src/App.tsx:114 desktop/src/pages/Database.tsx:263
-#: desktop/src/pages/Preferences.tsx:15
-msgid "Database"
-msgstr "数据库"
-
-#: desktop/src/App.tsx:116 desktop/src/pages/Logs.tsx:360
-msgid "Logs"
-msgstr "日志"
-
-#: desktop/src/App.tsx:118
-msgid "Components"
-msgstr "组件"
-
-#: desktop/src/App.tsx:122 desktop/src/pages/Statistics.tsx:223
-msgid "Statistics"
-msgstr "统计信息"
-
-#: desktop/src/App.tsx:124
-msgid "Audit"
-msgstr "审计"
-
-#: desktop/src/App.tsx:126
-msgid "Network"
-msgstr "网络"
-
-#: desktop/src/App.tsx:128 desktop/src/App.tsx:809 desktop/src/App.tsx:897
-#: desktop/src/pages/Preferences.tsx:117
-msgid "Preferences"
-msgstr "首选项"
-
-#: desktop/src/App.tsx:130
-msgid "Profiles"
-msgstr "配置方案"
-
-#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:281
-#: desktop/src/pages/Results.tsx:282
-msgid "Results"
-msgstr "结果"
-
-#: desktop/src/App.tsx:273 desktop/src/pages/ConfigPreferences.tsx:484
-msgid "Could not open link"
-msgstr "无法打开链接"
-
-#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:353 desktop/src/App.tsx:368 desktop/src/App.tsx:386
-#: desktop/src/pages/Scan.tsx:322
-msgid "Scan in progress — wait for it to finish before changing targets"
-msgstr "正在扫描——请等待扫描完成后再更改扫描目标"
-
-#: desktop/src/App.tsx:428
-msgid "The privileged-helper installation returned an invalid status."
-msgstr "安装特权辅助程序时返回了无效状态。"
-
-#: desktop/src/App.tsx:433
-msgid "The privileged helper was installed successfully."
-msgstr "特权辅助程序已成功安装。"
-
-#: desktop/src/App.tsx:435
-msgid ""
-"The privileged helper is still unavailable. Try again or install it manually."
-msgstr "特权辅助程序仍不可用。请重试或手动安装。"
-
-#: desktop/src/App.tsx:702
-msgid "The privileged-helper status returned an invalid response."
-msgstr "查询特权辅助程序状态时返回了无效响应。"
-
-#: desktop/src/App.tsx:807
-msgid "Back"
-msgstr "返回"
-
-#: desktop/src/App.tsx:832
-msgid "Scan File or Folder"
-msgstr "扫描文件或文件夹"
-
-#: desktop/src/App.tsx:839
-msgid "Choose scan targets"
-msgstr "选择扫描目标"
-
-#: desktop/src/App.tsx:849
-msgid "Scan Files"
-msgstr "扫描文件"
-
-#: desktop/src/App.tsx:853
-msgid "Scan Folders"
-msgstr "扫描文件夹"
-
-#: desktop/src/App.tsx:860
-msgid "Scan System (Quick Scan)"
-msgstr "扫描系统（快速扫描）"
-
-#: desktop/src/App.tsx:867 desktop/src/App.tsx:868
-msgid "Menu"
-msgstr "菜单"
-
-#: desktop/src/App.tsx:887
-msgid "Application menu"
-msgstr "应用程序菜单"
-
-#: desktop/src/App.tsx:900
-msgid "About"
-msgstr "关于"
-
-#: desktop/src/App.tsx:913
-msgid "Main navigation"
-msgstr "主导航"
-
-#: desktop/src/App.tsx:914
-msgid "Views"
-msgstr "视图"
-
-#: desktop/src/App.tsx:933 desktop/src/pages/Quarantine.tsx:203
-msgid "Dismiss"
-msgstr "关闭"
-
-#: desktop/src/App.tsx:940
-msgid "About ClamUI"
-msgstr "关于 ClamUI"
-
-#: desktop/src/App.tsx:941
-msgid "A native desktop interface for ClamAV."
-msgstr "ClamAV 的原生桌面界面。"
-
-#: desktop/src/App.tsx:943
-msgid "Version"
-msgstr "版本"
-
-#: desktop/src/App.tsx:944 desktop/src/pages/SettingsPreferences.tsx:226
-#: desktop/src/pages/SettingsPreferences.tsx:227
-msgid "Language"
-msgstr "语言"
-
-#: desktop/src/App.tsx:945
-msgid "License"
-msgstr "许可证"
-
-#: desktop/src/App.tsx:948
-msgid "Project website"
-msgstr "项目网站"
-
-#: desktop/src/App.tsx:949
-msgid "Issue tracker"
-msgstr "问题跟踪器"
-
-#: desktop/src/App.tsx:951
-msgid "Could not load contributor credits: {error}"
-msgstr "无法加载贡献者鸣谢：{error}"
-
-#: desktop/src/App.tsx:956
-msgid "Contributors"
-msgstr "贡献者"
-
-#: desktop/src/App.tsx:965
-msgid "Translator credits"
-msgstr "翻译者鸣谢"
-
-#: desktop/src/App.tsx:968
-msgid "Loading contributor credits…"
-msgstr "正在加载贡献者鸣谢…"
-
-#: desktop/src/App.tsx:970
-msgid "Close ClamUI?"
-msgstr "关闭 ClamUI？"
-
-#: desktop/src/App.tsx:971
-msgid ""
-"Choose whether to keep ClamUI available in the system tray or quit it "
-"completely."
-msgstr "选择将 ClamUI 保留在系统托盘中，或完全退出。"
-
-#: desktop/src/App.tsx:972 desktop/src/pages/Scan.tsx:186
-msgid "Remember my choice"
-msgstr "记住我的选择"
-
-#: desktop/src/App.tsx:973 desktop/src/App.tsx:977
-#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
-#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
-#: desktop/src/pages/SettingsPreferences.tsx:367
-#: desktop/src/pages/SettingsPreferences.tsx:456
-msgid "Cancel"
-msgstr "取消"
-
-#: desktop/src/App.tsx:973
-msgid "Minimize to tray"
-msgstr "最小化到系统托盘"
-
-#: desktop/src/App.tsx:975
-msgid "Scan in Progress"
-msgstr "正在扫描"
-
-#: desktop/src/App.tsx:976
-msgid "A scan is still running. Cancelling it may leave partial results."
-msgstr "扫描仍在进行。取消扫描可能会导致结果不完整。"
-
-#: desktop/src/App.tsx:977
-msgid "Keep Scanning"
-msgstr "继续扫描"
-
-#: desktop/src/App.tsx:977
-msgid "Cancel Scan and Close"
-msgstr "取消扫描并关闭"
-
-#: desktop/src/App.tsx:977 desktop/src/HelperTrustErrorDialog.tsx:67
-#: desktop/src/Modal.tsx:110 desktop/src/pages/SettingsPreferences.tsx:256
-msgid "Close"
-msgstr "关闭"
-
-#: desktop/src/App.tsx:979
-msgid "Install Privileged Helper"
-msgstr "安装特权辅助程序"
-
-#: desktop/src/App.tsx:980
-msgid ""
-"ClamUI needs its matching privileged helper to save system configuration."
-msgstr "ClamUI 需要配套的特权辅助程序才能保存系统配置。"
-
-#: desktop/src/App.tsx:981
-msgid "Installing privileged helper…"
-msgstr "正在安装特权辅助程序…"
-
-#: desktop/src/App.tsx:983
-msgid "Not now"
-msgstr "暂不"
-
-#: desktop/src/App.tsx:983
-msgid "Installing…"
-msgstr "正在安装…"
-
-#: desktop/src/App.tsx:983
-msgid "Try Again"
-msgstr "重试"
-
-#: desktop/src/App.tsx:983
-msgid "Install Helper"
-msgstr "安装辅助程序"
-
-#: desktop/src/App.tsx:983
-msgid "Open Preferences"
-msgstr "打开首选项"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
-msgid "Could not open documentation: {error}"
-msgstr "无法打开文档：{error}"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:40
-msgid "Protected settings are blocked"
-msgstr "已阻止访问受保护的设置"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:45
-msgid ""
-"ClamUI blocked this operation because its system helper is missing or is not "
-"securely installed."
-msgstr "ClamUI 已阻止此操作，因为其系统辅助程序缺失或安装不符合安全要求。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:46
-msgid ""
-"The helper provides administrator-authorized access to protected ClamAV "
-"settings."
-msgstr "该辅助程序用于在管理员授权下访问受保护的 ClamAV 设置。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:50
-msgid "Helper location"
-msgstr "辅助程序位置"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:53
-msgid ""
-"The helper must be an executable file owned by root, not a symbolic link, "
-"and other users must not be able to change it."
-msgstr ""
-"辅助程序必须是归 root 所有的可执行文件，不能是符号链接，且其他用户不得拥有修"
-"改权限。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:54
-msgid "How to fix it"
-msgstr "修复方法"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:56
-msgid "Reinstall the matching helper from the same trusted ClamUI release."
-msgstr "从同一可信的 ClamUI 发布版本中重新安装配套的辅助程序。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:57
-msgid "Then return to Preferences and repeat the action."
-msgstr "然后返回“首选项”并重试该操作。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:59
-msgid ""
-"Do not change the permissions of an unknown executable to bypass this check."
-msgstr "请勿更改未知可执行文件的权限以绕过此检查。"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:61
-msgid "Technical details"
-msgstr "技术详情"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:66
-msgid "Open repair instructions"
-msgstr "打开修复说明"
-
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
 msgstr "贡献者鸣谢响应无效。"
@@ -2248,6 +1944,388 @@ msgstr "仅 HTTP(S) 地址可通过外部应用打开"
 #: desktop/src/api.ts:190
 msgid "Choose a file or folder first"
 msgstr "请先选择文件或文件夹"
+
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
+#: desktop/src/pages/Scan.tsx:536
+msgid "Scan"
+msgstr "扫描"
+
+#: desktop/src/App.tsx:120 desktop/src/pages/Database.tsx:263
+#: desktop/src/pages/Preferences.tsx:15
+msgid "Database"
+msgstr "数据库"
+
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+msgid "Logs"
+msgstr "日志"
+
+#: desktop/src/App.tsx:124
+msgid "Components"
+msgstr "组件"
+
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+msgid "Statistics"
+msgstr "统计信息"
+
+#: desktop/src/App.tsx:130
+msgid "Audit"
+msgstr "审计"
+
+#: desktop/src/App.tsx:132
+msgid "Network"
+msgstr "网络"
+
+#: desktop/src/App.tsx:134 desktop/src/App.tsx:874 desktop/src/App.tsx:962
+#: desktop/src/pages/Preferences.tsx:117
+msgid "Preferences"
+msgstr "首选项"
+
+#: desktop/src/App.tsx:136
+msgid "Profiles"
+msgstr "配置方案"
+
+#: desktop/src/App.tsx:138 desktop/src/pages/Results.tsx:281
+#: desktop/src/pages/Results.tsx:282
+msgid "Results"
+msgstr "结果"
+
+#: desktop/src/App.tsx:310 desktop/src/pages/ConfigPreferences.tsx:535
+msgid "Could not open link"
+msgstr "无法打开链接"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
+#: desktop/src/pages/Scan.tsx:322
+msgid "Scan in progress — wait for it to finish before changing targets"
+msgstr "正在扫描——请等待扫描完成后再更改扫描目标"
+
+#: desktop/src/App.tsx:469
+msgid "The privileged-helper installation returned an invalid status."
+msgstr "安装特权辅助程序时返回了无效状态。"
+
+#: desktop/src/App.tsx:476
+msgid "The privileged helper was installed successfully."
+msgstr "特权辅助程序已成功安装。"
+
+#: desktop/src/App.tsx:478
+msgid ""
+"The privileged helper is still unavailable. Try again or install it manually."
+msgstr "特权辅助程序仍不可用。请重试或手动安装。"
+
+#: desktop/src/App.tsx:767
+msgid "The privileged-helper status returned an invalid response."
+msgstr "查询特权辅助程序状态时返回了无效响应。"
+
+#: desktop/src/App.tsx:872
+msgid "Back"
+msgstr "返回"
+
+#: desktop/src/App.tsx:897
+msgid "Scan File or Folder"
+msgstr "扫描文件或文件夹"
+
+#: desktop/src/App.tsx:904
+msgid "Choose scan targets"
+msgstr "选择扫描目标"
+
+#: desktop/src/App.tsx:914
+msgid "Scan Files"
+msgstr "扫描文件"
+
+#: desktop/src/App.tsx:918
+msgid "Scan Folders"
+msgstr "扫描文件夹"
+
+#: desktop/src/App.tsx:925
+msgid "Scan System (Quick Scan)"
+msgstr "扫描系统（快速扫描）"
+
+#: desktop/src/App.tsx:932 desktop/src/App.tsx:933
+msgid "Menu"
+msgstr "菜单"
+
+#: desktop/src/App.tsx:952
+msgid "Application menu"
+msgstr "应用程序菜单"
+
+#: desktop/src/App.tsx:965
+msgid "About"
+msgstr "关于"
+
+#: desktop/src/App.tsx:978
+msgid "Main navigation"
+msgstr "主导航"
+
+#: desktop/src/App.tsx:979
+msgid "Views"
+msgstr "视图"
+
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+msgid "Dismiss"
+msgstr "关闭"
+
+#: desktop/src/App.tsx:1021
+msgid "About ClamUI"
+msgstr "关于 ClamUI"
+
+#: desktop/src/App.tsx:1022
+msgid "A native desktop interface for ClamAV."
+msgstr "ClamAV 的原生桌面界面。"
+
+#: desktop/src/App.tsx:1024
+msgid "Version"
+msgstr "版本"
+
+#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:226
+#: desktop/src/pages/SettingsPreferences.tsx:227
+msgid "Language"
+msgstr "语言"
+
+#: desktop/src/App.tsx:1026
+msgid "License"
+msgstr "许可证"
+
+#: desktop/src/App.tsx:1029
+msgid "Project website"
+msgstr "项目网站"
+
+#: desktop/src/App.tsx:1030
+msgid "Issue tracker"
+msgstr "问题跟踪器"
+
+#: desktop/src/App.tsx:1032
+msgid "Could not load contributor credits: {error}"
+msgstr "无法加载贡献者鸣谢：{error}"
+
+#: desktop/src/App.tsx:1037
+msgid "Contributors"
+msgstr "贡献者"
+
+#: desktop/src/App.tsx:1046
+msgid "Translator credits"
+msgstr "翻译者鸣谢"
+
+#: desktop/src/App.tsx:1049
+msgid "Loading contributor credits…"
+msgstr "正在加载贡献者鸣谢…"
+
+#: desktop/src/App.tsx:1051
+msgid "Close ClamUI?"
+msgstr "关闭 ClamUI？"
+
+#: desktop/src/App.tsx:1052
+msgid ""
+"Choose whether to keep ClamUI available in the system tray or quit it "
+"completely."
+msgstr "选择将 ClamUI 保留在系统托盘中，或完全退出。"
+
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+msgid "Remember my choice"
+msgstr "记住我的选择"
+
+#: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
+#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
+#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
+#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid "Cancel"
+msgstr "取消"
+
+#: desktop/src/App.tsx:1054
+msgid "Minimize to tray"
+msgstr "最小化到系统托盘"
+
+#: desktop/src/App.tsx:1056
+msgid "Scan in Progress"
+msgstr "正在扫描"
+
+#: desktop/src/App.tsx:1057
+msgid "A scan is still running. Cancelling it may leave partial results."
+msgstr "扫描仍在进行。取消扫描可能会导致结果不完整。"
+
+#: desktop/src/App.tsx:1058
+msgid "Keep Scanning"
+msgstr "继续扫描"
+
+#: desktop/src/App.tsx:1058
+msgid "Cancel Scan and Close"
+msgstr "取消扫描并关闭"
+
+#: desktop/src/App.tsx:1058 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
+#: desktop/src/pages/SettingsPreferences.tsx:256
+msgid "Close"
+msgstr "关闭"
+
+#: desktop/src/App.tsx:1060
+msgid "Install Privileged Helper"
+msgstr "安装特权辅助程序"
+
+#: desktop/src/App.tsx:1061
+msgid ""
+"ClamUI needs its matching privileged helper to save system configuration."
+msgstr "ClamUI 需要配套的特权辅助程序才能保存系统配置。"
+
+#: desktop/src/App.tsx:1063 desktop/src/HelperTrustErrorDialog.tsx:52
+msgid "Installing the helper requires administrator authorization."
+msgstr "安装该辅助程序需要管理员授权。"
+
+#. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
+#: desktop/src/App.tsx:1064 desktop/src/HelperTrustErrorDialog.tsx:53
+msgid ""
+"On Fedora with DNF, installation also adds the ClamUI signing key to the "
+"system RPM keyring."
+msgstr ""
+"在使用 DNF 的 Fedora 上，安装还会将 ClamUI 签名密钥添加到系统 RPM 密钥环中。"
+
+#: desktop/src/App.tsx:1069 desktop/src/HelperTrustErrorDialog.tsx:76
+msgid "Installing privileged helper…"
+msgstr "正在安装特权辅助程序…"
+
+#: desktop/src/App.tsx:1071
+msgid "Not now"
+msgstr "暂不"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Installing…"
+msgstr "正在安装…"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Try Again"
+msgstr "重试"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Install Helper"
+msgstr "安装辅助程序"
+
+#: desktop/src/App.tsx:1071
+msgid "Open Preferences"
+msgstr "打开首选项"
+
+#: desktop/src/ConfigurationRecovery.tsx:67
+msgid "Configuration from failed save attempt"
+msgstr "来自失败保存尝试的配置"
+
+#: desktop/src/ConfigurationRecovery.tsx:69
+msgid ""
+"These are the configuration contents from the failed save attempt. Some "
+"files may already have changed. Check each target before replacing its "
+"content."
+msgstr ""
+"这些是失败保存尝试中的配置内容。某些文件可能已经更改。请在替换每个目标的内容"
+"前进行检查。"
+
+#: desktop/src/ConfigurationRecovery.tsx:70
+msgid ""
+"Configuration contents may include sensitive values. Copy and store them "
+"carefully."
+msgstr "配置内容可能包含敏感值。请谨慎复制和存储。"
+
+#: desktop/src/ConfigurationRecovery.tsx:79
+msgid "Configuration path copied to clipboard"
+msgstr "配置路径已复制到剪贴板"
+
+#: desktop/src/ConfigurationRecovery.tsx:80
+msgid "Could not copy configuration path."
+msgstr "无法复制配置路径。"
+
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:225
+msgid "Copy Path"
+msgstr "复制路径"
+
+#: desktop/src/ConfigurationRecovery.tsx:84
+msgid "Configuration content copied to clipboard"
+msgstr "配置内容已复制到剪贴板"
+
+#: desktop/src/ConfigurationRecovery.tsx:85
+msgid "Could not copy configuration content."
+msgstr "无法复制配置内容。"
+
+#: desktop/src/ConfigurationRecovery.tsx:86
+msgid "Copy Content"
+msgstr "复制内容"
+
+#: desktop/src/ConfigurationRecovery.tsx:89
+msgid "Configuration content"
+msgstr "配置内容"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
+msgid "Could not open documentation: {error}"
+msgstr "无法打开文档：{error}"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:40
+msgid "Protected settings are blocked"
+msgstr "已阻止访问受保护的设置"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:46
+msgid ""
+"ClamUI could not save protected settings because its system helper is not "
+"installed."
+msgstr "ClamUI 无法保存受保护的设置，因为其系统辅助程序未安装。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:47
+msgid ""
+"ClamUI blocked this operation because its system helper is missing or is not "
+"securely installed."
+msgstr "ClamUI 已阻止此操作，因为其系统辅助程序缺失或安装不符合安全要求。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:48
+msgid ""
+"The helper provides administrator-authorized access to protected ClamAV "
+"settings."
+msgstr "该辅助程序用于在管理员授权下访问受保护的 ClamAV 设置。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:59
+msgid "Helper location"
+msgstr "辅助程序位置"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:62
+msgid ""
+"The helper must be an executable file owned by root, not a symbolic link, "
+"and other users must not be able to change it."
+msgstr ""
+"辅助程序必须是归 root 所有的可执行文件，不能是符号链接，且其他用户不得拥有修"
+"改权限。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:63
+msgid "How to fix it"
+msgstr "修复方法"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:66
+msgid "Install the matching helper from the same trusted ClamUI release."
+msgstr "从同一可信的 ClamUI 发布版本中安装配套的辅助程序。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:67
+msgid "Reinstall the matching helper from the same trusted ClamUI release."
+msgstr "从同一可信的 ClamUI 发布版本中重新安装配套的辅助程序。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:68
+msgid "Then return to Preferences and repeat the action."
+msgstr "然后返回“首选项”并重试该操作。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:70
+msgid ""
+"Do not change the permissions of an unknown executable to bypass this check."
+msgstr "请勿更改未知可执行文件的权限以绕过此检查。"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:72
+#: desktop/src/pages/ConfigPreferences.tsx:876
+msgid "Technical details"
+msgstr "技术详情"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:79
+msgid "Open repair instructions"
+msgstr "打开修复说明"
+
+#. Translators: This button opens the failed native configuration snapshot.
+#: desktop/src/HelperTrustErrorDialog.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:880
+msgid "See Configuration"
+msgstr "查看配置"
 
 #: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62
 msgid "Clean"
@@ -2617,72 +2695,72 @@ msgstr "适用于受支持发行版的命令："
 msgid "Copied"
 msgstr "已复制"
 
-#: desktop/src/pages/ConfigPreferences.tsx:71
+#: desktop/src/pages/ConfigPreferences.tsx:76
 msgid "Monday"
 msgstr "星期一"
 
-#: desktop/src/pages/ConfigPreferences.tsx:72
+#: desktop/src/pages/ConfigPreferences.tsx:77
 msgid "Tuesday"
 msgstr "星期二"
 
-#: desktop/src/pages/ConfigPreferences.tsx:73
+#: desktop/src/pages/ConfigPreferences.tsx:78
 msgid "Wednesday"
 msgstr "星期三"
 
-#: desktop/src/pages/ConfigPreferences.tsx:74
+#: desktop/src/pages/ConfigPreferences.tsx:79
 msgid "Thursday"
 msgstr "星期四"
 
-#: desktop/src/pages/ConfigPreferences.tsx:75
+#: desktop/src/pages/ConfigPreferences.tsx:80
 msgid "Friday"
 msgstr "星期五"
 
-#: desktop/src/pages/ConfigPreferences.tsx:76
+#: desktop/src/pages/ConfigPreferences.tsx:81
 msgid "Saturday"
 msgstr "星期六"
 
-#: desktop/src/pages/ConfigPreferences.tsx:77
+#: desktop/src/pages/ConfigPreferences.tsx:82
 msgid "Sunday"
 msgstr "星期日"
 
-#: desktop/src/pages/ConfigPreferences.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:85
 msgid "Hourly"
 msgstr "每小时"
 
-#: desktop/src/pages/ConfigPreferences.tsx:81
+#: desktop/src/pages/ConfigPreferences.tsx:86
 msgid "Daily"
 msgstr "每天"
 
-#: desktop/src/pages/ConfigPreferences.tsx:82
+#: desktop/src/pages/ConfigPreferences.tsx:87
 msgid "Weekly"
 msgstr "每周"
 
-#: desktop/src/pages/ConfigPreferences.tsx:83
+#: desktop/src/pages/ConfigPreferences.tsx:88
 msgid "Monthly"
 msgstr "每月"
 
-#: desktop/src/pages/ConfigPreferences.tsx:196
+#: desktop/src/pages/ConfigPreferences.tsx:201
 msgid "No configuration file selected"
 msgstr "未选择配置文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:203
+#: desktop/src/pages/ConfigPreferences.tsx:208
 msgid "The file is not currently readable."
 msgstr "目前无法读取此文件。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:206
+#: desktop/src/pages/ConfigPreferences.tsx:211
 msgid "Detect"
 msgstr "检测"
 
-#: desktop/src/pages/ConfigPreferences.tsx:207
+#: desktop/src/pages/ConfigPreferences.tsx:212
 msgid "Browse"
 msgstr "浏览"
 
-#: desktop/src/pages/ConfigPreferences.tsx:208
+#: desktop/src/pages/ConfigPreferences.tsx:213
 msgid "Authorize read"
 msgstr "授权读取"
 
 #. Translators: Save & Apply and Authorize read are button labels; use their translations.
-#: desktop/src/pages/ConfigPreferences.tsx:211
+#: desktop/src/pages/ConfigPreferences.tsx:216
 msgid ""
 "Selecting a file keeps the path in this pending proposal. Save & Apply "
 "persists it only after the complete proposal is valid. Authorization is "
@@ -2691,14 +2769,14 @@ msgstr ""
 "选择文件后，路径会暂存于当前待应用的配置方案中。只有整个方案通过验证后，“保存"
 "并应用”才会保存该路径。仅当您主动选择“授权读取”时，才会请求授权。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:289
-#: desktop/src/pages/ConfigPreferences.tsx:336
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:341
 #: desktop/src/pages/SettingsPreferences.tsx:323
 msgid "Add"
 msgstr "添加"
 
-#: desktop/src/pages/ConfigPreferences.tsx:294
-#: desktop/src/pages/ConfigPreferences.tsx:340
+#: desktop/src/pages/ConfigPreferences.tsx:299
+#: desktop/src/pages/ConfigPreferences.tsx:345
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
 #: desktop/src/pages/SettingsPreferences.tsx:253
@@ -2706,174 +2784,175 @@ msgid "Remove"
 msgstr "移除"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:322
+#: desktop/src/pages/ConfigPreferences.tsx:327
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "请输入 http、https、ftp、ftps 或 file 协议的链接。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:334
+#: desktop/src/pages/ConfigPreferences.tsx:339
 msgid "Add URLs"
 msgstr "添加链接"
 
 #. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:410
+#: desktop/src/pages/ConfigPreferences.tsx:446
 msgid "Configuration file selection is pending Save & Apply."
 msgstr "所选配置文件将在点击“保存并应用”后生效。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:422
+#: desktop/src/pages/ConfigPreferences.tsx:458
 msgid "No configuration file was found."
 msgstr "未找到配置文件。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:436
+#: desktop/src/pages/ConfigPreferences.tsx:472
 msgid "Select a .conf configuration file."
 msgstr "请选择一个 .conf 配置文件。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:461
+#: desktop/src/pages/ConfigPreferences.tsx:508
 msgid "Configuration loaded with administrator authorization."
 msgstr "已通过管理员授权加载配置。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:494
+#: desktop/src/pages/ConfigPreferences.tsx:545
 msgid "Scan backend saved."
 msgstr "扫描后端设置已保存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:516
+#: desktop/src/pages/ConfigPreferences.tsx:578
 msgid "Choose a configuration file before applying its changes."
 msgstr "请先选择配置文件，再应用更改。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:528
+#: desktop/src/pages/ConfigPreferences.tsx:590
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
 msgstr ""
 "访问时扫描需要指定要排除的用户名、UID 或 root 用户，以防止扫描陷入循环。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:536
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:598
+#: desktop/src/pages/ConfigPreferences.tsx:688
 msgid "No changes to apply."
 msgstr "没有需要应用的更改。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:547
+#: desktop/src/pages/ConfigPreferences.tsx:613
 msgid "Configuration validation failed."
 msgstr "配置验证失败。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:688
 msgid "Configuration saved and applied."
 msgstr "配置已保存并应用。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:688
+#: desktop/src/pages/ConfigPreferences.tsx:705
 msgid "Some changes could not be applied."
 msgstr "部分更改未能应用。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:592
+#: desktop/src/pages/ConfigPreferences.tsx:689
 msgid "Saved groups"
 msgstr "已保存的组"
 
-#: desktop/src/pages/ConfigPreferences.tsx:608
+#: desktop/src/pages/ConfigPreferences.tsx:714
 msgid "Checking scanner status…"
 msgstr "正在检查扫描器状态…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:610
+#: desktop/src/pages/ConfigPreferences.tsx:716
 msgid "Daemon connected"
 msgstr "已连接到守护进程"
 
-#: desktop/src/pages/ConfigPreferences.tsx:611
+#: desktop/src/pages/ConfigPreferences.tsx:717
 msgid "Scanner available"
 msgstr "扫描器可用"
 
-#: desktop/src/pages/ConfigPreferences.tsx:611
+#: desktop/src/pages/ConfigPreferences.tsx:717
 msgid "Scanner unavailable"
 msgstr "扫描器不可用"
 
-#: desktop/src/pages/ConfigPreferences.tsx:621
+#: desktop/src/pages/ConfigPreferences.tsx:727
 msgid "Scan PE Files"
 msgstr "扫描 PE 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:622
+#: desktop/src/pages/ConfigPreferences.tsx:728
 msgid "Scan ELF Files"
 msgstr "扫描 ELF 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:623
+#: desktop/src/pages/ConfigPreferences.tsx:729
 msgid "Scan OLE2 Files"
 msgstr "扫描 OLE2 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:624
+#: desktop/src/pages/ConfigPreferences.tsx:730
 msgid "Scan PDF Files"
 msgstr "扫描 PDF 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:625
+#: desktop/src/pages/ConfigPreferences.tsx:731
 msgid "Scan HTML Files"
 msgstr "扫描 HTML 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:626
+#: desktop/src/pages/ConfigPreferences.tsx:732
 msgid "Scan Archive Files"
 msgstr "扫描归档文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:632
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "Database Updates"
 msgstr "病毒库更新"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:633
+#: desktop/src/pages/ConfigPreferences.tsx:739
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:637
+#: desktop/src/pages/ConfigPreferences.tsx:743
 msgid "Paths"
 msgstr "路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:638
+#: desktop/src/pages/ConfigPreferences.tsx:744
 msgid "Database Directory"
 msgstr "病毒库目录"
 
-#: desktop/src/pages/ConfigPreferences.tsx:639
+#: desktop/src/pages/ConfigPreferences.tsx:745
 msgid "Update Log File"
 msgstr "更新日志文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:640
+#: desktop/src/pages/ConfigPreferences.tsx:746
 msgid "PID File"
 msgstr "PID 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:641
+#: desktop/src/pages/ConfigPreferences.tsx:747
 msgid "Notify ClamD Config"
 msgstr "通知 ClamD 时使用的配置文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:642
+#: desktop/src/pages/ConfigPreferences.tsx:748
 msgid "Log timestamps"
 msgstr "记录日志时间戳"
 
-#: desktop/src/pages/ConfigPreferences.tsx:643
+#: desktop/src/pages/ConfigPreferences.tsx:749
 msgid "Verbose logging"
 msgstr "记录详细日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:644
+#: desktop/src/pages/ConfigPreferences.tsx:750
 msgid "Syslog logging"
 msgstr "记录到系统日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:646
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "Update Behavior"
 msgstr "更新行为"
 
-#: desktop/src/pages/ConfigPreferences.tsx:647
+#: desktop/src/pages/ConfigPreferences.tsx:753
 msgid "Checks per day"
 msgstr "每日检查次数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:647
+#: desktop/src/pages/ConfigPreferences.tsx:753
 msgid "0 disables automatic checks."
 msgstr "设为 0 可禁用自动检查。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:648
+#: desktop/src/pages/ConfigPreferences.tsx:754
 msgid "Database Mirror"
 msgstr "病毒库镜像服务器"
 
-#: desktop/src/pages/ConfigPreferences.tsx:650
+#: desktop/src/pages/ConfigPreferences.tsx:756
 msgid "Custom Signature Databases"
 msgstr "自定义特征库"
 
-#: desktop/src/pages/ConfigPreferences.tsx:652
+#: desktop/src/pages/ConfigPreferences.tsx:758
 msgid "Suggested"
 msgstr "推荐"
 
 #. Translators: Suggested and Save & Apply are button labels; use their translations. Keep URLhaus and InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:653
+#: desktop/src/pages/ConfigPreferences.tsx:759
 msgid ""
 "Suggested adds URLhaus and three InterServer databases to this draft. Save & "
 "Apply is still required."
@@ -2882,7 +2961,7 @@ msgstr ""
 "击“保存并应用”。"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:657
+#: desktop/src/pages/ConfigPreferences.tsx:763
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -2890,27 +2969,27 @@ msgstr ""
 "支持的网址协议：http、https、ftp、ftps 和 file。请将提供商的每个网址粘贴为单"
 "独的条目。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:662
+#: desktop/src/pages/ConfigPreferences.tsx:768
 msgid "Signature Providers"
 msgstr "特征库提供商"
 
-#: desktop/src/pages/ConfigPreferences.tsx:663
+#: desktop/src/pages/ConfigPreferences.tsx:769
 msgid "Free malware URL blocklist; no registration required."
 msgstr "免费的恶意软件网址拦截列表；无需注册。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:663
-#: desktop/src/pages/ConfigPreferences.tsx:664
-#: desktop/src/pages/ConfigPreferences.tsx:668
-#: desktop/src/pages/ConfigPreferences.tsx:669
+#: desktop/src/pages/ConfigPreferences.tsx:769
+#: desktop/src/pages/ConfigPreferences.tsx:770
+#: desktop/src/pages/ConfigPreferences.tsx:774
+#: desktop/src/pages/ConfigPreferences.tsx:775
 msgid "Open provider"
 msgstr "访问提供商网站"
 
-#: desktop/src/pages/ConfigPreferences.tsx:664
+#: desktop/src/pages/ConfigPreferences.tsx:770
 msgid "Registration is required; URLs include your personal API key."
 msgstr "需要注册；网址中包含您的个人 API 密钥。"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:665
+#: desktop/src/pages/ConfigPreferences.tsx:771
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -2918,183 +2997,183 @@ msgstr ""
 "请使用 fangfrisch 或 clamav-unofficial-sigs；此提供商不提供可直接添加的自定义"
 "网址。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:669
+#: desktop/src/pages/ConfigPreferences.tsx:775
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr "社区提供的哈希、网页后门和通用恶意软件特征库。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:671
+#: desktop/src/pages/ConfigPreferences.tsx:777
 msgid "Proxy Settings"
 msgstr "代理设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:672
+#: desktop/src/pages/ConfigPreferences.tsx:778
 msgid "Proxy Server"
 msgstr "代理服务器"
 
-#: desktop/src/pages/ConfigPreferences.tsx:673
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "Proxy Port"
 msgstr "代理端口"
 
-#: desktop/src/pages/ConfigPreferences.tsx:673
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "0 disables the proxy port."
 msgstr "设为 0 可禁用代理端口。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:674
+#: desktop/src/pages/ConfigPreferences.tsx:780
 msgid "Proxy Username"
 msgstr "代理用户名"
 
-#: desktop/src/pages/ConfigPreferences.tsx:675
+#: desktop/src/pages/ConfigPreferences.tsx:781
 msgid "Proxy Password"
 msgstr "代理密码"
 
-#: desktop/src/pages/ConfigPreferences.tsx:680
+#: desktop/src/pages/ConfigPreferences.tsx:786
 msgid "Scanner Settings"
 msgstr "扫描器设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Scan Backend"
 msgstr "扫描后端"
 
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Auto (prefer daemon)"
 msgstr "自动（优先使用守护进程）"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV 守护进程（clamd）"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:685
+#: desktop/src/pages/ConfigPreferences.tsx:791
 msgid "Standalone Scanner (clamscan)"
 msgstr "独立扫描器（clamscan）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:689
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Daemon Status"
 msgstr "守护进程状态"
 
-#: desktop/src/pages/ConfigPreferences.tsx:689
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Refresh Status"
 msgstr "刷新状态"
 
-#: desktop/src/pages/ConfigPreferences.tsx:690
+#: desktop/src/pages/ConfigPreferences.tsx:796
 msgid "Documentation"
 msgstr "文档"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:692
-#: desktop/src/pages/ConfigPreferences.tsx:713
+#: desktop/src/pages/ConfigPreferences.tsx:798
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:696
+#: desktop/src/pages/ConfigPreferences.tsx:802
 msgid "File Type Scanning"
 msgstr "文件类型扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:699
+#: desktop/src/pages/ConfigPreferences.tsx:805
 msgid "Performance and Limits"
 msgstr "性能与限制"
 
-#: desktop/src/pages/ConfigPreferences.tsx:700
-#: desktop/src/pages/ConfigPreferences.tsx:726
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "Max File Size (MB)"
 msgstr "最大文件大小（兆字节）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:700
-#: desktop/src/pages/ConfigPreferences.tsx:701
-#: desktop/src/pages/ConfigPreferences.tsx:703
-#: desktop/src/pages/ConfigPreferences.tsx:726
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:807
+#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "0 means unlimited."
 msgstr "0 表示无限制。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:701
+#: desktop/src/pages/ConfigPreferences.tsx:807
 msgid "Max Scan Size (MB)"
 msgstr "最大扫描大小（兆字节）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:702
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Max Archive Recursion"
 msgstr "压缩包最大递归深度"
 
-#: desktop/src/pages/ConfigPreferences.tsx:703
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Max Files in Archive"
 msgstr "压缩包内最大文件数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:705
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "Logging"
 msgstr "日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:706
+#: desktop/src/pages/ConfigPreferences.tsx:812
 msgid "Log File Path"
 msgstr "日志文件路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:707
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Verbose Logging"
 msgstr "详细日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:707
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Syslog Logging"
 msgstr "系统日志记录"
 
-#: desktop/src/pages/ConfigPreferences.tsx:712
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "On-Access Scanning"
 msgstr "访问时扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:717
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Monitored Paths"
 msgstr "监控路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:718
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Include Paths"
 msgstr "包含路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:719
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "Exclude Paths"
 msgstr "排除路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:721
+#: desktop/src/pages/ConfigPreferences.tsx:827
 msgid "Behavior Settings"
 msgstr "行为设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Prevention Mode"
 msgstr "防护模式"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Extra Scanning"
 msgstr "附加扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Deny on Error"
 msgstr "出错时拒绝访问"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Disable DDD"
 msgstr "禁用 DDD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:724
+#: desktop/src/pages/ConfigPreferences.tsx:830
 msgid "Performance Settings"
 msgstr "性能设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:725
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Max Threads"
 msgstr "最大线程数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:727
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Curl Timeout (seconds)"
 msgstr "Curl 超时（秒）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:727
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "0 disables the timeout."
 msgstr "设为 0 可禁用超时。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:728
+#: desktop/src/pages/ConfigPreferences.tsx:834
 msgid "Retry Attempts"
 msgstr "重试次数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:730
+#: desktop/src/pages/ConfigPreferences.tsx:836
 msgid "Scan Loop Prevention"
 msgstr "防止循环扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:731
+#: desktop/src/pages/ConfigPreferences.tsx:837
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3102,94 +3181,94 @@ msgstr ""
 "必须至少设置一项用于防止循环扫描的排除规则。请排除 clamav 服务账户、其 UID "
 "或 root 用户，以防止递归扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:732
+#: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Exclude Username"
 msgstr "排除的用户名"
 
-#: desktop/src/pages/ConfigPreferences.tsx:733
+#: desktop/src/pages/ConfigPreferences.tsx:839
 msgid "Exclude User ID"
 msgstr "排除的用户编号"
 
-#: desktop/src/pages/ConfigPreferences.tsx:734
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Exclude Root User"
 msgstr "排除超级用户"
 
-#: desktop/src/pages/ConfigPreferences.tsx:739
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "Scheduled Scans"
 msgstr "计划扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:740
+#: desktop/src/pages/ConfigPreferences.tsx:846
 msgid "Schedule"
 msgstr "计划"
 
-#: desktop/src/pages/ConfigPreferences.tsx:741
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Enable Scheduled Scans"
 msgstr "启用计划扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:742
+#: desktop/src/pages/ConfigPreferences.tsx:848
 msgid "Scan Frequency"
 msgstr "扫描频率"
 
-#: desktop/src/pages/ConfigPreferences.tsx:743
+#: desktop/src/pages/ConfigPreferences.tsx:849
 msgid "Scan Time (24-hour)"
 msgstr "扫描时间（24 小时制）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Day of Week"
 msgstr "每周扫描日"
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Used for weekly scans."
 msgstr "用于每周扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Day of Month"
 msgstr "每月扫描日"
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Used for monthly scans."
 msgstr "用于每月扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:746
+#: desktop/src/pages/ConfigPreferences.tsx:852
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
 msgid "Scan Targets"
 msgstr "扫描目标"
 
-#: desktop/src/pages/ConfigPreferences.tsx:747
+#: desktop/src/pages/ConfigPreferences.tsx:853
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
 msgstr ""
 "尚未配置扫描目标。计划扫描将使用您的主目录，但不会将其保存为显式指定的目标。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:748
+#: desktop/src/pages/ConfigPreferences.tsx:854
 #: desktop/src/pages/SettingsPreferences.tsx:345
 msgid "Skip on Battery"
 msgstr "使用电池时跳过"
 
-#: desktop/src/pages/ConfigPreferences.tsx:748
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Do not start scheduled scans while on battery power."
 msgstr "使用电池供电时，不启动计划扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:749
+#: desktop/src/pages/ConfigPreferences.tsx:855
 msgid "Auto-Quarantine"
 msgstr "自动隔离"
 
-#: desktop/src/pages/ConfigPreferences.tsx:749
+#: desktop/src/pages/ConfigPreferences.tsx:855
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "自动隔离计划扫描发现的威胁。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:754
-#: desktop/src/pages/ConfigPreferences.tsx:764
+#: desktop/src/pages/ConfigPreferences.tsx:860
+#: desktop/src/pages/ConfigPreferences.tsx:870
 msgid "Save & Apply"
 msgstr "保存并应用"
 
-#: desktop/src/pages/ConfigPreferences.tsx:755
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Apply Configuration"
 msgstr "应用配置"
 
 #. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:756
+#: desktop/src/pages/ConfigPreferences.tsx:862
 msgid ""
 "All edited forms are captured at the moment you click Save & Apply. Every "
 "configured file is validated before any write or authorization request."
@@ -3198,7 +3277,7 @@ msgstr ""
 "之前，会先验证所有已配置的文件。"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:760
+#: desktop/src/pages/ConfigPreferences.tsx:866
 msgid ""
 "Scanner and On-Access changes share one clamd.conf proposal; neither form "
 "can overwrite the other's detached changes."
@@ -3206,7 +3285,7 @@ msgstr ""
 "扫描器和访问时扫描的更改会合并为同一份 clamd.conf 修改方案；两个表单都无法覆"
 "盖对方单独保留的更改。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:764
+#: desktop/src/pages/ConfigPreferences.tsx:870
 #: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
 msgid "Saving…"
 msgstr "正在保存…"
@@ -4404,10 +4483,6 @@ msgstr "已排除"
 #: desktop/src/pages/Results.tsx:196
 msgid "Exclude"
 msgstr "排除"
-
-#: desktop/src/pages/Results.tsx:196 desktop/src/pages/Results.tsx:225
-msgid "Copy Path"
-msgstr "复制路径"
 
 #: desktop/src/pages/Results.tsx:197 desktop/src/pages/Results.tsx:228
 msgid "Show {count} more"

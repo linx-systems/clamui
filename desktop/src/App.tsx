@@ -12,7 +12,13 @@ import {
   type NativeEvent,
   type Credits,
 } from "./api";
-import { HelperTrustErrorDialog, isHelperTrustError } from "./HelperTrustErrorDialog";
+import {
+  ConfigurationRecoveryDialog,
+  ConfigurationRecoveryProvider,
+  type ManualConfiguration,
+} from "./ConfigurationRecovery";
+import { HelperTrustErrorDialog } from "./HelperTrustErrorDialog";
+import { helperTrustFailure, isHelperTrustError } from "./helperTrustError";
 import { Icon, type IconName } from "./Icon";
 import { _, activeCatalog } from "./i18n";
 import { Modal } from "./Modal";
@@ -224,6 +230,8 @@ export default function App(): ReactNode {
   const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(["scan"]));
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [helperTrustError, setHelperTrustError] = useState<string | null>(null);
+  const [recoveryConfigurations, setRecoveryConfigurations] = useState<readonly ManualConfiguration[] | null>(null);
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [aboutCredits, setAboutCredits] = useState<Credits | null>(null);
   const [aboutCreditsError, setAboutCreditsError] = useState<string | null>(null);
@@ -233,6 +241,7 @@ export default function App(): ReactNode {
   const [activity, setActivity] = useState<string | null>(null);
   const [scanJobId, setScanJobId] = useState<string | null>(null);
   const scanJobIdRef = useRef<string | null>(null);
+  const helperInstallInFlightRef = useRef(false);
   const [openMenu, setOpenMenu] = useState<"application" | "targets" | null>(null);
   const targetMenuRef = useRef<HTMLDivElement>(null);
   const applicationMenuRef = useRef<HTMLDivElement>(null);
@@ -245,8 +254,36 @@ export default function App(): ReactNode {
   const [helperStatus, setHelperStatus] = useState<HelperStatus | null>(null);
   const [helperInstalling, setHelperInstalling] = useState(false);
   const [helperError, setHelperError] = useState<string | null>(null);
+  const clearConfigurationRecovery = useCallback((): void => {
+    setRecoveryOpen(false);
+    setRecoveryConfigurations(null);
+  }, []);
+  const openConfigurationRecovery = useCallback((configurations: readonly ManualConfiguration[]): void => {
+    if (configurations.length === 0) {
+      return;
+    }
+    setRecoveryConfigurations(configurations);
+    setRecoveryOpen(true);
+  }, []);
+  const helperFailedWithConfiguration = useCallback((rawError: string, configurations: readonly ManualConfiguration[]): void => {
+    setHelperError(null);
+    setHelperStatus(null);
+    setOnboardingOpen(false);
+    setRecoveryConfigurations(configurations.length > 0 ? configurations : null);
+    setRecoveryOpen(false);
+    setHelperTrustError(rawError);
+  }, []);
+  const configurationRecoveryActions = useMemo(() => ({
+    open: openConfigurationRecovery,
+    helperFailed: helperFailedWithConfiguration,
+    clear: clearConfigurationRecovery,
+  }), [clearConfigurationRecovery, helperFailedWithConfiguration, openConfigurationRecovery]);
   const showToast = useCallback((message: string, type: Toast["type"]): void => {
     if (type === "error" && isHelperTrustError(message)) {
+      setHelperError(null);
+      setHelperStatus(null);
+      setOnboardingOpen(false);
+      clearConfigurationRecovery();
       setHelperTrustError(message);
       return;
     }
@@ -255,7 +292,7 @@ export default function App(): ReactNode {
     window.setTimeout(() => {
       setToasts((current) => current.filter((item) => item.id !== toast.id));
     }, 6000);
-  }, []);
+  }, [clearConfigurationRecovery]);
 
   const openAbout = useCallback((): void => {
     setAboutCredits(null);
@@ -420,6 +457,10 @@ export default function App(): ReactNode {
   }, [focusMenuItem]);
 
   const installHelper = useCallback(async (): Promise<void> => {
+    if (helperInstallInFlightRef.current) {
+      return;
+    }
+    helperInstallInFlightRef.current = true;
     setHelperInstalling(true);
     setHelperError(null);
     try {
@@ -429,6 +470,8 @@ export default function App(): ReactNode {
       }
       setHelperStatus(result);
       if (result.installed) {
+        setHelperError(null);
+        setHelperTrustError(null);
         setOnboardingOpen(false);
         notify(_("The privileged helper was installed successfully."), "success");
       } else {
@@ -437,6 +480,7 @@ export default function App(): ReactNode {
     } catch (error) {
       setHelperError(error instanceof Error ? error.message : String(error));
     } finally {
+      helperInstallInFlightRef.current = false;
       setHelperInstalling(false);
     }
   }, []);
@@ -452,6 +496,27 @@ export default function App(): ReactNode {
     }
     setOnboardingOpen(false);
   }, [helperStatus]);
+
+  useEffect(() => {
+    if (!helperTrustError || helperTrustFailure(helperTrustError) !== "missing") {
+      return;
+    }
+    let disposed = false;
+    void request<unknown>("privileged.status")
+      .then((value) => {
+        if (!disposed) {
+          setHelperStatus(helperStatusFrom(value));
+        }
+      })
+      .catch(() => {
+        if (!disposed) {
+          setHelperStatus(null);
+        }
+      });
+    return () => {
+      disposed = true;
+    };
+  }, [helperTrustError]);
 
   useEffect(() => {
     if (!aboutOpen) {
@@ -929,14 +994,30 @@ export default function App(): ReactNode {
           </nav>
         </aside>
       ) : null}
-      <main className="main-content">
-        {activity ? <div className="activity-banner notice" role="status"><span>{activity}</span><button className="button" type="button" onClick={() => setActivity(null)}>{_("Dismiss")}</button></div> : null}
-        <div className="page-scroll">{renderedPages}</div>
-      </main>
+      <ConfigurationRecoveryProvider actions={configurationRecoveryActions}>
+        <main className="main-content">
+          {activity ? <div className="activity-banner notice" role="status"><span>{activity}</span><button className="button" type="button" onClick={() => setActivity(null)}>{_("Dismiss")}</button></div> : null}
+          <div className="page-scroll">{renderedPages}</div>
+        </main>
+      </ConfigurationRecoveryProvider>
       <div className="toast-region" role="status" aria-live="polite">
         {toasts.map((toast) => <div className={toastClass(toast.type)} key={toast.id}>{toast.message}</div>)}
       </div>
-      {helperTrustError ? <HelperTrustErrorDialog rawError={helperTrustError} onClose={() => setHelperTrustError(null)} /> : null}
+      {recoveryOpen && recoveryConfigurations ? <ConfigurationRecoveryDialog
+        configurations={recoveryConfigurations}
+        onClose={() => setRecoveryOpen(false)}
+      /> : helperTrustError ? <HelperTrustErrorDialog
+        rawError={helperTrustError}
+        canInstall={helperStatus?.installed === false && helperStatus.installable === true}
+        installing={helperInstalling}
+        installError={helperError}
+        onInstall={() => void installHelper()}
+        onSeeConfiguration={recoveryConfigurations ? () => {
+          setHelperTrustError(null);
+          setRecoveryOpen(true);
+        } : undefined}
+        onClose={() => setHelperTrustError(null)}
+      /> : null}
       {aboutOpen ? <Modal className="about-dialog" title={_("About ClamUI")} onClose={() => setAboutOpen(false)}>
         <p>{_("A native desktop interface for ClamAV.")}</p>
         <dl className="about-details">
@@ -976,8 +1057,15 @@ export default function App(): ReactNode {
         {scanJobId ? <p>{_("A scan is still running. Cancelling it may leave partial results.")}</p> : null}
         <div className="dialog-actions"><button className="button" type="button" onClick={() => setScanCloseOpen(false)}>{scanJobId ? _("Keep Scanning") : _("Cancel")}</button><button className={scanJobId ? "button danger" : "button"} type="button" onClick={() => void cancelScanAndClose()}>{scanJobId ? _("Cancel Scan and Close") : _("Close")}</button></div>
       </Modal> : null}
-      {onboardingOpen ? <Modal title={_("Install Privileged Helper")} busy={helperInstalling} onClose={() => void dismissOnboarding()}>
+      {onboardingOpen && !helperTrustError ? <Modal title={_("Install Privileged Helper")} busy={helperInstalling} onClose={() => void dismissOnboarding()}>
         <p>{helperStatus?.detail ?? _("ClamUI needs its matching privileged helper to save system configuration.")}</p>
+        {helperStatus?.installable ? <>
+          <p>{_("Installing the helper requires administrator authorization.")}</p>
+          <p>{_(
+            // Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
+            "On Fedora with DNF, installation also adds the ClamUI signing key to the system RPM keyring.",
+          )}</p>
+        </> : null}
         {helperInstalling ? <p className="notice" role="status">{_("Installing privileged helper…")}</p> : null}
         {helperError ? <p className="error" role="alert">{helperError}</p> : null}
         <div className="dialog-actions"><button className="button" type="button" disabled={helperInstalling} onClick={() => void dismissOnboarding()}>{_("Not now")}</button>{helperStatus?.installable ? <button className="button primary" type="button" disabled={helperInstalling} onClick={() => void installHelper()}>{helperInstalling ? _("Installing…") : helperError ? _("Try Again") : _("Install Helper")}</button> : <button className="button primary" type="button" onClick={() => { setOnboardingOpen(false); selectPage("preferences"); }}>{_("Open Preferences")}</button>}</div>

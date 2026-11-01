@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       sign:
-        description: "Sign Debian packages and AppImage with GPG"
+        description: "Sign Debian, RPM, and AppImage packages with GPG"
         type: boolean
         default: false
 
@@ -14,6 +14,12 @@ permissions:
 jobs:
   build-deb:
     uses: ./.github/workflows/build-deb.yml
+    with:
+      sign: ${{ inputs.sign }}
+    secrets: inherit
+
+  build-rpm:
+    uses: ./.github/workflows/build-rpm.yml
     with:
       sign: ${{ inputs.sign }}
     secrets: inherit

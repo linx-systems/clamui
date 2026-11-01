@@ -435,6 +435,34 @@ p.success {
   padding: 8px 10px;
 }
 
+.preferences-save-report,
+.preferences-save-report-content,
+.preferences-save-report-message,
+.preferences-save-report-details,
+.preferences-save-report-details pre {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.preferences-save-report {
+  align-items: flex-start;
+}
+
+.preferences-save-report-content {
+  flex: 1 1 auto;
+}
+
+.preferences-save-report-message,
+.preferences-save-report-details,
+.preferences-save-report-details pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.preferences-save-report-details pre {
+  font: 12px/1.45 ui-monospace, "Cascadia Mono", "Noto Sans Mono", monospace;
+}
+
 .notice,
 .status-banner {
   border-color: #9cc0ea;
@@ -1601,9 +1629,12 @@ button.log-row:hover:not(:disabled),
 }
 
 .toast {
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius-group);
   padding: 9px 10px;
+  overflow-wrap: anywhere;
   background: var(--surface);
   color: var(--fg);
   box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
@@ -1659,6 +1690,14 @@ dialog.modal-dialog.helper-trust-error-dialog {
   min-height: 0;
   overflow: auto;
   padding-inline: 1px;
+}
+
+.helper-trust-error-dialog > [role="alert"] {
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .helper-trust-error-intro {
@@ -1745,11 +1784,90 @@ dialog.modal-dialog.helper-trust-error-dialog {
   padding-top: 12px;
 }
 
+dialog.modal-dialog.configuration-recovery-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(900px, calc(100vw - 32px));
+  max-height: min(700px, calc(100vh - 32px));
+  overflow: hidden;
+}
+
+.configuration-recovery-dialog > .dialog-header,
+.configuration-recovery-dialog > .configuration-recovery-actions { flex: 0 0 auto; }
+
+.configuration-recovery-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-inline: 1px;
+}
+
+.configuration-recovery-caution {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0;
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-control);
+  padding: 8px 10px;
+  background: var(--control-bg);
+}
+
+.configuration-recovery-caution .ui-icon { flex: 0 0 auto; margin-top: 1px; color: var(--warning); }
+
+.configuration-recovery-files {
+  display: grid;
+  gap: 12px;
+}
+
+.configuration-recovery-file {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 10px;
+  background: var(--group-bg);
+}
+
+.configuration-recovery-file-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.configuration-recovery-file-header code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.configuration-recovery-file textarea {
+  min-height: 160px;
+  max-height: 360px;
+  resize: vertical;
+  color: var(--fg);
+  font: 12px/1.45 ui-monospace, "Cascadia Mono", "Noto Sans Mono", monospace;
+  white-space: pre;
+}
+
+.configuration-recovery-actions {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
 @media (max-width: 520px) {
   dialog.modal-dialog.helper-trust-error-dialog {
     width: calc(100vw - 20px);
     max-height: calc(100vh - 20px);
   }
+  dialog.modal-dialog.configuration-recovery-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .configuration-recovery-file-header { flex-direction: column; }
 
   .helper-trust-error-intro { grid-template-columns: minmax(0, 1fr); }
   .helper-trust-error-actions > .button { flex: 1 1 100%; }
@@ -1789,10 +1907,11 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
 .about-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
 .about-section > h3 { margin: 0 0 6px; }
 .about-credit-list { columns: 2 240px; margin: 0; padding-inline-start: 20px; }
-.about-credit-list > li { break-inside: avoid; overflow-wrap: anywhere; }
+.about-credit-list > li { break-inside: avoid; overflow-wrap: anywhere; padding-block: 2px; }
 .about-link {
   border: 0;
   padding: 0;
+  min-height: 0;
   background: transparent;
   color: var(--accent);
   cursor: pointer;

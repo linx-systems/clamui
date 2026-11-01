@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.4.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-10-20 10:39+0200\n"
+"POT-Creation-Date: 2026-11-01 11:44+0100\n"
 "PO-Revision-Date: 2026-10-20 10:21+0200\n"
 "Last-Translator: ClamUI Contributors\n"
 "Language-Team: English\n"
@@ -15,6 +15,220 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: crates/clamui-core/src/audit/firewall.rs:53
+msgid "Firewall manager overlap"
+msgstr "Firewall manager overlap"
+
+#: crates/clamui-core/src/audit/firewall.rs:54
+msgid ""
+"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
+"was not evaluated."
+msgstr ""
+"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
+"was not evaluated."
+
+#: crates/clamui-core/src/audit/firewall.rs:157
+msgid "UFW Firewall"
+msgstr "UFW Firewall"
+
+#: crates/clamui-core/src/audit/firewall.rs:162
+msgid ""
+"UFW is active; the default incoming policy is deny. Listed rules may allow "
+"exceptions."
+msgstr ""
+"UFW is active; the default incoming policy is deny. Listed rules may allow "
+"exceptions."
+
+#: crates/clamui-core/src/audit/firewall.rs:169
+msgid ""
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
+msgstr ""
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
+
+#: crates/clamui-core/src/audit/firewall.rs:176
+msgid "UFW is active; the default incoming policy is deny."
+msgstr "UFW is active; the default incoming policy is deny."
+
+#: crates/clamui-core/src/audit/firewall.rs:180
+msgid "UFW is active; the default incoming policy is reject."
+msgstr "UFW is active; the default incoming policy is reject."
+
+#: crates/clamui-core/src/audit/firewall.rs:184
+msgid "UFW is active, but the default incoming policy allows traffic."
+msgstr "UFW is active, but the default incoming policy allows traffic."
+
+#: crates/clamui-core/src/audit/firewall.rs:191
+msgid "UFW is active, but its default incoming policy could not be verified."
+msgstr "UFW is active, but its default incoming policy could not be verified."
+
+#: crates/clamui-core/src/audit/firewall.rs:195
+msgid "UFW reports inactive."
+msgstr "UFW reports inactive."
+
+#: crates/clamui-core/src/audit/firewall.rs:196
+msgid "UFW status could not be inspected safely."
+msgstr "UFW status could not be inspected safely."
+
+#: crates/clamui-core/src/audit/firewall.rs:234
+msgid "Firewalld"
+msgstr "Firewalld"
+
+#: crates/clamui-core/src/audit/firewall.rs:236
+msgid ""
+"Firewalld owns its D-Bus name; readiness and firewall policy were not "
+"queried."
+msgstr ""
+"Firewalld owns its D-Bus name; readiness and firewall policy were not "
+"queried."
+
+#: crates/clamui-core/src/audit/firewall.rs:240
+msgid ""
+"No Firewalld D-Bus owner was observed; this does not establish kernel "
+"firewall policy."
+msgstr ""
+"No Firewalld D-Bus owner was observed; this does not establish kernel "
+"firewall policy."
+
+#: crates/clamui-core/src/audit/firewall.rs:244
+msgid ""
+"Firewalld ownership could not be verified; readiness and firewall policy "
+"were not queried."
+msgstr ""
+"Firewalld ownership could not be verified; readiness and firewall policy "
+"were not queried."
+
+#: crates/clamui-core/src/audit/firewall.rs:259
+msgid "firewall-cmd"
+msgstr "firewall-cmd"
+
+#: crates/clamui-core/src/audit/firewall.rs:264
+msgid "firewall-cmd is installed; it was not executed."
+msgstr "firewall-cmd is installed; it was not executed."
+
+#: crates/clamui-core/src/audit/firewall.rs:270
+msgid "firewall-cmd could not be confirmed without executing it."
+msgstr "firewall-cmd could not be confirmed without executing it."
+
+#: crates/clamui-core/src/audit/firewall.rs:408
+msgid "nftables (native rules)"
+msgstr "nftables (native rules)"
+
+#: crates/clamui-core/src/audit/firewall.rs:410
+msgid ""
+"nftables has restrictive default input policies for IPv4 and IPv6; "
+"individual rules may allow exceptions."
+msgstr ""
+"nftables has restrictive default input policies for IPv4 and IPv6; "
+"individual rules may allow exceptions."
+
+#: crates/clamui-core/src/audit/firewall.rs:414
+msgid ""
+"nftables reports a permissive default input policy; remaining coverage may "
+"be incomplete"
+msgstr ""
+"nftables reports a permissive default input policy; remaining coverage may "
+"be incomplete"
+
+#: crates/clamui-core/src/audit/firewall.rs:418
+msgid ""
+"nftables input policy coverage could not be verified for both IPv4 and IPv6"
+msgstr ""
+"nftables input policy coverage could not be verified for both IPv4 and IPv6"
+
+#: crates/clamui-core/src/audit/firewall.rs:478
+msgid "iptables (IPv4)"
+msgstr "iptables (IPv4)"
+
+#: crates/clamui-core/src/audit/firewall.rs:480
+msgid ""
+"iptables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"iptables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+
+#: crates/clamui-core/src/audit/firewall.rs:484
+msgid "iptables has a permissive INPUT default policy"
+msgstr "iptables has a permissive INPUT default policy"
+
+#: crates/clamui-core/src/audit/firewall.rs:485
+msgid "iptables INPUT policy could not be verified"
+msgstr "iptables INPUT policy could not be verified"
+
+#: crates/clamui-core/src/audit/firewall.rs:491
+msgid "iptables (IPv6)"
+msgstr "iptables (IPv6)"
+
+#: crates/clamui-core/src/audit/firewall.rs:493
+msgid ""
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+
+#: crates/clamui-core/src/audit/firewall.rs:497
+msgid "ip6tables has a permissive INPUT default policy"
+msgstr "ip6tables has a permissive INPUT default policy"
+
+#: crates/clamui-core/src/audit/firewall.rs:498
+msgid "ip6tables INPUT policy could not be verified"
+msgstr "ip6tables INPUT policy could not be verified"
+
+#: crates/clamui-core/src/audit/firewall.rs:508
+msgid "Gufw"
+msgstr "Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:510
+msgid "Gufw is available."
+msgstr "Gufw is available."
+
+#: crates/clamui-core/src/audit/firewall.rs:512
+msgid ""
+"Gufw was not confirmed; this optional inventory does not affect firewall "
+"policy analysis."
+msgstr ""
+"Gufw was not confirmed; this optional inventory does not affect firewall "
+"policy analysis."
+
+#: crates/clamui-core/src/audit/firewall.rs:519
+msgid "Open Gufw"
+msgstr "Open Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:525
+msgid "Firewall Config"
+msgstr "Firewall Config"
+
+#: crates/clamui-core/src/audit/firewall.rs:530
+msgid "Firewall Config is available."
+msgstr "Firewall Config is available."
+
+#: crates/clamui-core/src/audit/firewall.rs:533
+msgid ""
+"Firewall Config was not confirmed; this optional inventory does not affect "
+"firewall policy analysis."
+msgstr ""
+"Firewall Config was not confirmed; this optional inventory does not affect "
+"firewall policy analysis."
+
+#: crates/clamui-core/src/audit/firewall.rs:540
+msgid "Open Firewall Config"
+msgstr "Open Firewall Config"
+
+#: crates/clamui-core/src/audit/firewall.rs:578
+msgid "Plasma Firewall"
+msgstr "Plasma Firewall"
+
+#: crates/clamui-core/src/audit/firewall.rs:583
+msgid "Plasma Firewall is installed; it manages an existing firewall backend."
+msgstr "Plasma Firewall is installed; it manages an existing firewall backend."
+
+#: crates/clamui-core/src/audit/firewall.rs:592
+msgid "Plasma Firewall was not confirmed; it is only a management module."
+msgstr "Plasma Firewall was not confirmed; it is only a management module."
 
 #: crates/clamui-core/src/audit.rs:293
 msgid "ClamAV is not installed"
@@ -344,220 +558,6 @@ msgstr[1] "{count} potential rootkits detected"
 msgid "Investigate the detected threats immediately"
 msgstr "Investigate the detected threats immediately"
 
-#: crates/clamui-core/src/audit/firewall.rs:53
-msgid "Firewall manager overlap"
-msgstr "Firewall manager overlap"
-
-#: crates/clamui-core/src/audit/firewall.rs:54
-msgid ""
-"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
-"was not evaluated."
-msgstr ""
-"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
-"was not evaluated."
-
-#: crates/clamui-core/src/audit/firewall.rs:157
-msgid "UFW Firewall"
-msgstr "UFW Firewall"
-
-#: crates/clamui-core/src/audit/firewall.rs:162
-msgid ""
-"UFW is active; the default incoming policy is deny. Listed rules may allow "
-"exceptions."
-msgstr ""
-"UFW is active; the default incoming policy is deny. Listed rules may allow "
-"exceptions."
-
-#: crates/clamui-core/src/audit/firewall.rs:169
-msgid ""
-"UFW is active; the default incoming policy is reject. Listed rules may allow "
-"exceptions."
-msgstr ""
-"UFW is active; the default incoming policy is reject. Listed rules may allow "
-"exceptions."
-
-#: crates/clamui-core/src/audit/firewall.rs:176
-msgid "UFW is active; the default incoming policy is deny."
-msgstr "UFW is active; the default incoming policy is deny."
-
-#: crates/clamui-core/src/audit/firewall.rs:180
-msgid "UFW is active; the default incoming policy is reject."
-msgstr "UFW is active; the default incoming policy is reject."
-
-#: crates/clamui-core/src/audit/firewall.rs:184
-msgid "UFW is active, but the default incoming policy allows traffic."
-msgstr "UFW is active, but the default incoming policy allows traffic."
-
-#: crates/clamui-core/src/audit/firewall.rs:191
-msgid "UFW is active, but its default incoming policy could not be verified."
-msgstr "UFW is active, but its default incoming policy could not be verified."
-
-#: crates/clamui-core/src/audit/firewall.rs:195
-msgid "UFW reports inactive."
-msgstr "UFW reports inactive."
-
-#: crates/clamui-core/src/audit/firewall.rs:196
-msgid "UFW status could not be inspected safely."
-msgstr "UFW status could not be inspected safely."
-
-#: crates/clamui-core/src/audit/firewall.rs:234
-msgid "Firewalld"
-msgstr "Firewalld"
-
-#: crates/clamui-core/src/audit/firewall.rs:236
-msgid ""
-"Firewalld owns its D-Bus name; readiness and firewall policy were not "
-"queried."
-msgstr ""
-"Firewalld owns its D-Bus name; readiness and firewall policy were not "
-"queried."
-
-#: crates/clamui-core/src/audit/firewall.rs:240
-msgid ""
-"No Firewalld D-Bus owner was observed; this does not establish kernel "
-"firewall policy."
-msgstr ""
-"No Firewalld D-Bus owner was observed; this does not establish kernel "
-"firewall policy."
-
-#: crates/clamui-core/src/audit/firewall.rs:244
-msgid ""
-"Firewalld ownership could not be verified; readiness and firewall policy "
-"were not queried."
-msgstr ""
-"Firewalld ownership could not be verified; readiness and firewall policy "
-"were not queried."
-
-#: crates/clamui-core/src/audit/firewall.rs:259
-msgid "firewall-cmd"
-msgstr "firewall-cmd"
-
-#: crates/clamui-core/src/audit/firewall.rs:264
-msgid "firewall-cmd is installed; it was not executed."
-msgstr "firewall-cmd is installed; it was not executed."
-
-#: crates/clamui-core/src/audit/firewall.rs:270
-msgid "firewall-cmd could not be confirmed without executing it."
-msgstr "firewall-cmd could not be confirmed without executing it."
-
-#: crates/clamui-core/src/audit/firewall.rs:408
-msgid "nftables (native rules)"
-msgstr "nftables (native rules)"
-
-#: crates/clamui-core/src/audit/firewall.rs:410
-msgid ""
-"nftables has restrictive default input policies for IPv4 and IPv6; "
-"individual rules may allow exceptions."
-msgstr ""
-"nftables has restrictive default input policies for IPv4 and IPv6; "
-"individual rules may allow exceptions."
-
-#: crates/clamui-core/src/audit/firewall.rs:414
-msgid ""
-"nftables reports a permissive default input policy; remaining coverage may "
-"be incomplete"
-msgstr ""
-"nftables reports a permissive default input policy; remaining coverage may "
-"be incomplete"
-
-#: crates/clamui-core/src/audit/firewall.rs:418
-msgid ""
-"nftables input policy coverage could not be verified for both IPv4 and IPv6"
-msgstr ""
-"nftables input policy coverage could not be verified for both IPv4 and IPv6"
-
-#: crates/clamui-core/src/audit/firewall.rs:478
-msgid "iptables (IPv4)"
-msgstr "iptables (IPv4)"
-
-#: crates/clamui-core/src/audit/firewall.rs:480
-msgid ""
-"iptables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-"iptables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-
-#: crates/clamui-core/src/audit/firewall.rs:484
-msgid "iptables has a permissive INPUT default policy"
-msgstr "iptables has a permissive INPUT default policy"
-
-#: crates/clamui-core/src/audit/firewall.rs:485
-msgid "iptables INPUT policy could not be verified"
-msgstr "iptables INPUT policy could not be verified"
-
-#: crates/clamui-core/src/audit/firewall.rs:491
-msgid "iptables (IPv6)"
-msgstr "iptables (IPv6)"
-
-#: crates/clamui-core/src/audit/firewall.rs:493
-msgid ""
-"ip6tables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-"ip6tables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-
-#: crates/clamui-core/src/audit/firewall.rs:497
-msgid "ip6tables has a permissive INPUT default policy"
-msgstr "ip6tables has a permissive INPUT default policy"
-
-#: crates/clamui-core/src/audit/firewall.rs:498
-msgid "ip6tables INPUT policy could not be verified"
-msgstr "ip6tables INPUT policy could not be verified"
-
-#: crates/clamui-core/src/audit/firewall.rs:508
-msgid "Gufw"
-msgstr "Gufw"
-
-#: crates/clamui-core/src/audit/firewall.rs:510
-msgid "Gufw is available."
-msgstr "Gufw is available."
-
-#: crates/clamui-core/src/audit/firewall.rs:512
-msgid ""
-"Gufw was not confirmed; this optional inventory does not affect firewall "
-"policy analysis."
-msgstr ""
-"Gufw was not confirmed; this optional inventory does not affect firewall "
-"policy analysis."
-
-#: crates/clamui-core/src/audit/firewall.rs:519
-msgid "Open Gufw"
-msgstr "Open Gufw"
-
-#: crates/clamui-core/src/audit/firewall.rs:525
-msgid "Firewall Config"
-msgstr "Firewall Config"
-
-#: crates/clamui-core/src/audit/firewall.rs:530
-msgid "Firewall Config is available."
-msgstr "Firewall Config is available."
-
-#: crates/clamui-core/src/audit/firewall.rs:533
-msgid ""
-"Firewall Config was not confirmed; this optional inventory does not affect "
-"firewall policy analysis."
-msgstr ""
-"Firewall Config was not confirmed; this optional inventory does not affect "
-"firewall policy analysis."
-
-#: crates/clamui-core/src/audit/firewall.rs:540
-msgid "Open Firewall Config"
-msgstr "Open Firewall Config"
-
-#: crates/clamui-core/src/audit/firewall.rs:578
-msgid "Plasma Firewall"
-msgstr "Plasma Firewall"
-
-#: crates/clamui-core/src/audit/firewall.rs:583
-msgid "Plasma Firewall is installed; it manages an existing firewall backend."
-msgstr "Plasma Firewall is installed; it manages an existing firewall backend."
-
-#: crates/clamui-core/src/audit/firewall.rs:592
-msgid "Plasma Firewall was not confirmed; it is only a management module."
-msgstr "Plasma Firewall was not confirmed; it is only a management module."
-
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
 #: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
 #: crates/clamui-core/src/cli.rs:459 crates/clamui-core/src/cli.rs:499
@@ -822,7 +822,7 @@ msgstr "Usage: clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "No quarantined files."
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:773
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
 msgid "ID"
 msgstr "ID"
 
@@ -1071,15 +1071,15 @@ msgstr "Failed to load history: {error}"
 msgid "No scan history found."
 msgstr "No scan history found."
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:783
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
 msgid "Type"
 msgstr "Type"
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:788
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
 msgid "Status"
 msgstr "Status"
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:807
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
 msgid "Summary"
 msgstr "Summary"
 
@@ -1096,63 +1096,63 @@ msgstr[1] "Showing {shown} of {total} entries. Use --limit to see more."
 msgid "Usage: clamui install-privileged-helper"
 msgstr "Usage: clamui install-privileged-helper"
 
-#: crates/clamui-core/src/config.rs:309 crates/clamui-core/src/config.rs:328
+#: crates/clamui-core/src/config.rs:319 crates/clamui-core/src/config.rs:338
 msgid "Configuration file not found"
 msgstr "Configuration file not found"
 
-#: crates/clamui-core/src/config.rs:388
+#: crates/clamui-core/src/config.rs:403
 msgid "Invalid scheduled scan configuration: {error}"
 msgstr "Invalid scheduled scan configuration: {error}"
 
-#: crates/clamui-core/src/config.rs:451 crates/clamui-core/src/config.rs:512
+#: crates/clamui-core/src/config.rs:462 crates/clamui-core/src/config.rs:520
 msgid "Not attempted because an earlier direct configuration write failed"
 msgstr "Not attempted because an earlier direct configuration write failed"
 
-#: crates/clamui-core/src/config.rs:492
+#: crates/clamui-core/src/config.rs:500
 msgid "Protected configuration write failed"
 msgstr "Protected configuration write failed"
 
-#: crates/clamui-core/src/config.rs:565
+#: crates/clamui-core/src/config.rs:575
 msgid "Cannot save configuration paths: {error}"
 msgstr "Cannot save configuration paths: {error}"
 
-#: crates/clamui-core/src/config.rs:595 crates/clamui-core/src/config.rs:629
+#: crates/clamui-core/src/config.rs:605 crates/clamui-core/src/config.rs:639
 msgid "Cannot save scheduled scan preferences: {error}"
 msgstr "Cannot save scheduled scan preferences: {error}"
 
-#: crates/clamui-core/src/config.rs:608 crates/clamui-core/src/config.rs:617
+#: crates/clamui-core/src/config.rs:618 crates/clamui-core/src/config.rs:627
 msgid "Failed to apply scheduled scan configuration: {error}"
 msgstr "Failed to apply scheduled scan configuration: {error}"
 
-#: crates/clamui-core/src/config.rs:681
+#: crates/clamui-core/src/config.rs:701
 msgid "Configuration path appears more than once: {path}"
 msgstr "Configuration path appears more than once: {path}"
 
-#: crates/clamui-core/src/config.rs:689
+#: crates/clamui-core/src/config.rs:709
 msgid "Configuration kinds sharing {setting} must use the same path"
 msgstr "Configuration kinds sharing {setting} must use the same path"
 
-#: crates/clamui-core/src/config.rs:700
+#: crates/clamui-core/src/config.rs:720
 msgid "Cannot prepare {path}: {error}"
 msgstr "Cannot prepare {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:768
+#: crates/clamui-core/src/config.rs:810
 msgid "Cannot read {path}: {error}"
 msgstr "Cannot read {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:778
+#: crates/clamui-core/src/config.rs:820
 msgid "Configuration is not a regular file: {path}"
 msgstr "Configuration is not a regular file: {path}"
 
-#: crates/clamui-core/src/config.rs:784
+#: crates/clamui-core/src/config.rs:826
 msgid "Cannot create {path}: {error}"
 msgstr "Cannot create {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:793
+#: crates/clamui-core/src/config.rs:835
 msgid "Cannot write {path}: {error}"
 msgstr "Cannot write {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:892
+#: crates/clamui-core/src/config.rs:934
 msgid ""
 "On-Access scanning requires at least one loop-prevention exclusion: Exclude "
 "Username, Exclude User ID, or Exclude Root User"
@@ -1160,35 +1160,35 @@ msgstr ""
 "On-Access scanning requires at least one loop-prevention exclusion: Exclude "
 "Username, Exclude User ID, or Exclude Root User"
 
-#: crates/clamui-core/src/config.rs:917
+#: crates/clamui-core/src/config.rs:959
 msgid "{key}: invalid boolean value: {value}"
 msgstr "{key}: invalid boolean value: {value}"
 
-#: crates/clamui-core/src/config.rs:946
+#: crates/clamui-core/src/config.rs:988
 msgid "{key}: value {value} is below minimum {minimum}"
 msgstr "{key}: value {value} is below minimum {minimum}"
 
-#: crates/clamui-core/src/config.rs:954
+#: crates/clamui-core/src/config.rs:996
 msgid "{key}: value {value} exceeds maximum {maximum}"
 msgstr "{key}: value {value} exceeds maximum {maximum}"
 
-#: crates/clamui-core/src/config.rs:963
+#: crates/clamui-core/src/config.rs:1005
 msgid "{key}: not a valid integer: {value}"
 msgstr "{key}: not a valid integer: {value}"
 
-#: crates/clamui-core/src/config.rs:972
+#: crates/clamui-core/src/config.rs:1014
 msgid "{key}: size must start with a number: {value}"
 msgstr "{key}: size must start with a number: {value}"
 
-#: crates/clamui-core/src/config.rs:989
+#: crates/clamui-core/src/config.rs:1031
 msgid "{key}: path cannot be empty"
 msgstr "{key}: path cannot be empty"
 
-#: crates/clamui-core/src/config.rs:1004
+#: crates/clamui-core/src/config.rs:1046
 msgid "{key}: string value cannot be empty"
 msgstr "{key}: string value cannot be empty"
 
-#: crates/clamui-core/src/config.rs:1015
+#: crates/clamui-core/src/config.rs:1057
 msgid "{key}: URL must start with http(s)://, ftp(s)://, or file://"
 msgstr "{key}: URL must start with http(s)://, ftp(s)://, or file://"
 
@@ -1234,70 +1234,70 @@ msgstr ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
 
-#: crates/clamui-core/src/logs.rs:766
+#: crates/clamui-core/src/logs.rs:767
 msgid "SCAN LOG"
 msgstr "SCAN LOG"
 
-#: crates/clamui-core/src/logs.rs:768
+#: crates/clamui-core/src/logs.rs:769
 msgid "UPDATE LOG"
 msgstr "UPDATE LOG"
 
-#: crates/clamui-core/src/logs.rs:778
+#: crates/clamui-core/src/logs.rs:779
 msgid "Timestamp"
 msgstr "Timestamp"
 
-#: crates/clamui-core/src/logs.rs:793
+#: crates/clamui-core/src/logs.rs:794
 msgid "Duration"
 msgstr "Duration"
 
-#: crates/clamui-core/src/logs.rs:801
+#: crates/clamui-core/src/logs.rs:802
 msgid "Full Output"
 msgstr "Full Output"
 
-#: crates/clamui-core/src/logs.rs:832
+#: crates/clamui-core/src/logs.rs:833
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} second"
 msgstr[1] "{count} seconds"
 
-#: crates/clamui-core/src/logs.rs:1062
+#: crates/clamui-core/src/logs.rs:1063
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "Scan Complete"
 
-#: crates/clamui-core/src/logs.rs:1065
+#: crates/clamui-core/src/logs.rs:1066
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "Found {count} threat{suffix}"
 msgstr[1] "Found {count} threats{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1075
+#: crates/clamui-core/src/logs.rs:1076
 msgid "Threats Detected"
 msgstr "Threats Detected"
 
-#: crates/clamui-core/src/logs.rs:1080
+#: crates/clamui-core/src/logs.rs:1081
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "Scan Cancelled"
 
-#: crates/clamui-core/src/logs.rs:1083
+#: crates/clamui-core/src/logs.rs:1084
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "Scan Error"
 
-#: crates/clamui-core/src/logs.rs:1094
+#: crates/clamui-core/src/logs.rs:1095
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "Scanned: {count} file"
 msgstr[1] "Scanned: {count} files"
 
-#: crates/clamui-core/src/logs.rs:1101
+#: crates/clamui-core/src/logs.rs:1102
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} directory"
 msgstr[1] "{count} directories"
 
-#: crates/clamui-core/src/logs.rs:1112
+#: crates/clamui-core/src/logs.rs:1113
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Threat found: {count}"
@@ -1353,62 +1353,6 @@ msgstr ""
 msgid "Not running as Flatpak"
 msgstr "Not running as Flatpak"
 
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:575
-msgid "Authorization was cancelled while {operation}."
-msgstr "Authorization was cancelled while {operation}."
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:581
-msgid "The privileged helper is unavailable while {operation}."
-msgstr "The privileged helper is unavailable while {operation}."
-
-#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:587
-msgid "The privileged helper rejected PKEXEC_UID while {operation}."
-msgstr "The privileged helper rejected PKEXEC_UID while {operation}."
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:593
-msgid "The privileged helper reported a protocol mismatch while {operation}."
-msgstr "The privileged helper reported a protocol mismatch while {operation}."
-
-#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:599
-msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
-msgstr ""
-"The privileged helper failed while {operation} (exit {code}): {detail}."
-
-#. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:607
-msgid "The privileged helper failed while {operation} (exit {code})."
-msgstr "The privileged helper failed while {operation} (exit {code})."
-
-#. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:614
-msgid "The privileged helper was terminated while {operation}."
-msgstr "The privileged helper was terminated while {operation}."
-
-#: crates/clamui-core/src/privileged.rs:673
-msgid "Applying configuration"
-msgstr "Applying configuration"
-
-#. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:675
-msgid "{message} One or more earlier replacements may have succeeded."
-msgstr "{message} One or more earlier replacements may have succeeded."
-
-#: crates/clamui-core/src/privileged.rs:917
-msgid "Reading configuration"
-msgstr "Reading configuration"
-
-#. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:1821
-msgid ""
-"The privileged-helper installation failed. Try again or install it manually."
-msgstr ""
-"The privileged-helper installation failed. Try again or install it manually."
-
 #. Translators: keep "Flatpak" and "clamui-privileged-helper" unchanged.
 #: crates/clamui-core/src/privileged/cli_install.rs:26
 msgid ""
@@ -1442,6 +1386,62 @@ msgid ""
 msgstr ""
 "Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
 "system ClamAV configuration from ClamUI should now work."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:774
+msgid "Authorization was cancelled while {operation}."
+msgstr "Authorization was cancelled while {operation}."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:780
+msgid "The privileged helper is unavailable while {operation}."
+msgstr "The privileged helper is unavailable while {operation}."
+
+#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
+#: crates/clamui-core/src/privileged.rs:786
+msgid "The privileged helper rejected PKEXEC_UID while {operation}."
+msgstr "The privileged helper rejected PKEXEC_UID while {operation}."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:792
+msgid "The privileged helper reported a protocol mismatch while {operation}."
+msgstr "The privileged helper reported a protocol mismatch while {operation}."
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:798
+msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
+msgstr ""
+"The privileged helper failed while {operation} (exit {code}): {detail}."
+
+#. Translators: keep the {operation} and numeric {code} placeholders.
+#: crates/clamui-core/src/privileged.rs:806
+msgid "The privileged helper failed while {operation} (exit {code})."
+msgstr "The privileged helper failed while {operation} (exit {code})."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:813
+msgid "The privileged helper was terminated while {operation}."
+msgstr "The privileged helper was terminated while {operation}."
+
+#: crates/clamui-core/src/privileged.rs:872
+msgid "Applying configuration"
+msgstr "Applying configuration"
+
+#. Translators: keep {message}; it is the complete preceding helper error.
+#: crates/clamui-core/src/privileged.rs:874
+msgid "{message} One or more earlier replacements may have succeeded."
+msgstr "{message} One or more earlier replacements may have succeeded."
+
+#: crates/clamui-core/src/privileged.rs:1116
+msgid "Reading configuration"
+msgstr "Reading configuration"
+
+#. Translators: "privileged-helper" identifies the ClamUI helper component.
+#: crates/clamui-core/src/privileged.rs:2634
+msgid ""
+"The privileged-helper installation failed. Try again or install it manually."
+msgstr ""
+"The privileged-helper installation failed. Try again or install it manually."
 
 #: crates/clamui-core/src/profiles.rs:240
 #: crates/clamui-core/src/profiles.rs:311
@@ -1573,39 +1573,39 @@ msgstr "Cannot quarantine {path}: {error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "File hash mismatch — file may be corrupted"
 
-#: crates/clamui-core/src/scanner.rs:272
+#: crates/clamui-core/src/scanner.rs:383
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "No ClamAV database files were found in standard host locations"
 
-#: crates/clamui-core/src/scanner.rs:1432
+#: crates/clamui-core/src/scanner.rs:1808
 msgid "Scan cancelled by user"
 msgstr "Scan cancelled by user"
 
-#: crates/clamui-core/src/scanner.rs:1434
+#: crates/clamui-core/src/scanner.rs:1810
 msgid "No files could be scanned"
 msgstr "No files could be scanned"
 
-#: crates/clamui-core/src/scanner.rs:1438
+#: crates/clamui-core/src/scanner.rs:1814
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "Scan target does not exist or contains an invalid NUL byte"
 
-#: crates/clamui-core/src/scanner.rs:1445
+#: crates/clamui-core/src/scanner.rs:1821
 msgid "Scan target is not a regular file or directory"
 msgstr "Scan target is not a regular file or directory"
 
-#: crates/clamui-core/src/scanner.rs:1459
+#: crates/clamui-core/src/scanner.rs:1835
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "{count} file could not be accessed"
 msgstr[1] "{count} files could not be accessed"
 
-#: crates/clamui-core/src/scanner.rs:1472
+#: crates/clamui-core/src/scanner.rs:1848
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "{count} file could not be read"
 msgstr[1] "{count} files could not be read"
 
-#: crates/clamui-core/src/scanner.rs:1491
+#: crates/clamui-core/src/scanner.rs:1867
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -1996,319 +1996,6 @@ msgstr "Export"
 msgid "Open"
 msgstr "Open"
 
-#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:534
-#: desktop/src/pages/Scan.tsx:536
-msgid "Scan"
-msgstr "Scan"
-
-#: desktop/src/App.tsx:114 desktop/src/pages/Database.tsx:263
-#: desktop/src/pages/Preferences.tsx:15
-msgid "Database"
-msgstr "Database"
-
-#: desktop/src/App.tsx:116 desktop/src/pages/Logs.tsx:360
-msgid "Logs"
-msgstr "Logs"
-
-#: desktop/src/App.tsx:118
-msgid "Components"
-msgstr "Components"
-
-#: desktop/src/App.tsx:122 desktop/src/pages/Statistics.tsx:223
-msgid "Statistics"
-msgstr "Statistics"
-
-#: desktop/src/App.tsx:124
-msgid "Audit"
-msgstr "Audit"
-
-#: desktop/src/App.tsx:126
-msgid "Network"
-msgstr "Network"
-
-#: desktop/src/App.tsx:128 desktop/src/App.tsx:809 desktop/src/App.tsx:897
-#: desktop/src/pages/Preferences.tsx:117
-msgid "Preferences"
-msgstr "Preferences"
-
-#: desktop/src/App.tsx:130
-msgid "Profiles"
-msgstr "Profiles"
-
-#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:281
-#: desktop/src/pages/Results.tsx:282
-msgid "Results"
-msgstr "Results"
-
-#: desktop/src/App.tsx:273 desktop/src/pages/ConfigPreferences.tsx:484
-msgid "Could not open link"
-msgstr "Could not open link"
-
-#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:353 desktop/src/App.tsx:368 desktop/src/App.tsx:386
-#: desktop/src/pages/Scan.tsx:322
-msgid "Scan in progress — wait for it to finish before changing targets"
-msgstr "Scan in progress — wait for it to finish before changing targets"
-
-#: desktop/src/App.tsx:428
-msgid "The privileged-helper installation returned an invalid status."
-msgstr "The privileged-helper installation returned an invalid status."
-
-#: desktop/src/App.tsx:433
-msgid "The privileged helper was installed successfully."
-msgstr "The privileged helper was installed successfully."
-
-#: desktop/src/App.tsx:435
-msgid ""
-"The privileged helper is still unavailable. Try again or install it manually."
-msgstr ""
-"The privileged helper is still unavailable. Try again or install it manually."
-
-#: desktop/src/App.tsx:702
-msgid "The privileged-helper status returned an invalid response."
-msgstr "The privileged-helper status returned an invalid response."
-
-#: desktop/src/App.tsx:807
-msgid "Back"
-msgstr "Back"
-
-#: desktop/src/App.tsx:832
-msgid "Scan File or Folder"
-msgstr "Scan File or Folder"
-
-#: desktop/src/App.tsx:839
-msgid "Choose scan targets"
-msgstr "Choose scan targets"
-
-#: desktop/src/App.tsx:849
-msgid "Scan Files"
-msgstr "Scan Files"
-
-#: desktop/src/App.tsx:853
-msgid "Scan Folders"
-msgstr "Scan Folders"
-
-#: desktop/src/App.tsx:860
-msgid "Scan System (Quick Scan)"
-msgstr "Scan System (Quick Scan)"
-
-#: desktop/src/App.tsx:867 desktop/src/App.tsx:868
-msgid "Menu"
-msgstr "Menu"
-
-#: desktop/src/App.tsx:887
-msgid "Application menu"
-msgstr "Application menu"
-
-#: desktop/src/App.tsx:900
-msgid "About"
-msgstr "About"
-
-#: desktop/src/App.tsx:913
-msgid "Main navigation"
-msgstr "Main navigation"
-
-#: desktop/src/App.tsx:914
-msgid "Views"
-msgstr "Views"
-
-#: desktop/src/App.tsx:933 desktop/src/pages/Quarantine.tsx:203
-msgid "Dismiss"
-msgstr "Dismiss"
-
-#: desktop/src/App.tsx:940
-msgid "About ClamUI"
-msgstr "About ClamUI"
-
-#: desktop/src/App.tsx:941
-msgid "A native desktop interface for ClamAV."
-msgstr "A native desktop interface for ClamAV."
-
-#: desktop/src/App.tsx:943
-msgid "Version"
-msgstr "Version"
-
-#: desktop/src/App.tsx:944 desktop/src/pages/SettingsPreferences.tsx:226
-#: desktop/src/pages/SettingsPreferences.tsx:227
-msgid "Language"
-msgstr "Language"
-
-#: desktop/src/App.tsx:945
-msgid "License"
-msgstr "License"
-
-#: desktop/src/App.tsx:948
-msgid "Project website"
-msgstr "Project website"
-
-#: desktop/src/App.tsx:949
-msgid "Issue tracker"
-msgstr "Issue tracker"
-
-#: desktop/src/App.tsx:951
-msgid "Could not load contributor credits: {error}"
-msgstr "Could not load contributor credits: {error}"
-
-#: desktop/src/App.tsx:956
-msgid "Contributors"
-msgstr "Contributors"
-
-#: desktop/src/App.tsx:965
-msgid "Translator credits"
-msgstr "Translator credits"
-
-#: desktop/src/App.tsx:968
-msgid "Loading contributor credits…"
-msgstr "Loading contributor credits…"
-
-#: desktop/src/App.tsx:970
-msgid "Close ClamUI?"
-msgstr "Close ClamUI?"
-
-#: desktop/src/App.tsx:971
-msgid ""
-"Choose whether to keep ClamUI available in the system tray or quit it "
-"completely."
-msgstr ""
-"Choose whether to keep ClamUI available in the system tray or quit it "
-"completely."
-
-#: desktop/src/App.tsx:972 desktop/src/pages/Scan.tsx:186
-msgid "Remember my choice"
-msgstr "Remember my choice"
-
-#: desktop/src/App.tsx:973 desktop/src/App.tsx:977
-#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
-#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
-#: desktop/src/pages/SettingsPreferences.tsx:367
-#: desktop/src/pages/SettingsPreferences.tsx:456
-msgid "Cancel"
-msgstr "Cancel"
-
-#: desktop/src/App.tsx:973
-msgid "Minimize to tray"
-msgstr "Minimize to tray"
-
-#: desktop/src/App.tsx:975
-msgid "Scan in Progress"
-msgstr "Scan in Progress"
-
-#: desktop/src/App.tsx:976
-msgid "A scan is still running. Cancelling it may leave partial results."
-msgstr "A scan is still running. Cancelling it may leave partial results."
-
-#: desktop/src/App.tsx:977
-msgid "Keep Scanning"
-msgstr "Keep Scanning"
-
-#: desktop/src/App.tsx:977
-msgid "Cancel Scan and Close"
-msgstr "Cancel Scan and Close"
-
-#: desktop/src/App.tsx:977 desktop/src/HelperTrustErrorDialog.tsx:67
-#: desktop/src/Modal.tsx:110 desktop/src/pages/SettingsPreferences.tsx:256
-msgid "Close"
-msgstr "Close"
-
-#: desktop/src/App.tsx:979
-msgid "Install Privileged Helper"
-msgstr "Install Privileged Helper"
-
-#: desktop/src/App.tsx:980
-msgid ""
-"ClamUI needs its matching privileged helper to save system configuration."
-msgstr ""
-"ClamUI needs its matching privileged helper to save system configuration."
-
-#: desktop/src/App.tsx:981
-msgid "Installing privileged helper…"
-msgstr "Installing privileged helper…"
-
-#: desktop/src/App.tsx:983
-msgid "Not now"
-msgstr "Not now"
-
-#: desktop/src/App.tsx:983
-msgid "Installing…"
-msgstr "Installing…"
-
-#: desktop/src/App.tsx:983
-msgid "Try Again"
-msgstr "Try Again"
-
-#: desktop/src/App.tsx:983
-msgid "Install Helper"
-msgstr "Install Helper"
-
-#: desktop/src/App.tsx:983
-msgid "Open Preferences"
-msgstr "Open Preferences"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
-msgid "Could not open documentation: {error}"
-msgstr "Could not open documentation: {error}"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:40
-msgid "Protected settings are blocked"
-msgstr "Protected settings are blocked"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:45
-msgid ""
-"ClamUI blocked this operation because its system helper is missing or is not "
-"securely installed."
-msgstr ""
-"ClamUI blocked this operation because its system helper is missing or is not "
-"securely installed."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:46
-msgid ""
-"The helper provides administrator-authorized access to protected ClamAV "
-"settings."
-msgstr ""
-"The helper provides administrator-authorized access to protected ClamAV "
-"settings."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:50
-msgid "Helper location"
-msgstr "Helper location"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:53
-msgid ""
-"The helper must be an executable file owned by root, not a symbolic link, "
-"and other users must not be able to change it."
-msgstr ""
-"The helper must be an executable file owned by root, not a symbolic link, "
-"and other users must not be able to change it."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:54
-msgid "How to fix it"
-msgstr "How to fix it"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:56
-msgid "Reinstall the matching helper from the same trusted ClamUI release."
-msgstr "Reinstall the matching helper from the same trusted ClamUI release."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:57
-msgid "Then return to Preferences and repeat the action."
-msgstr "Then return to Preferences and repeat the action."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:59
-msgid ""
-"Do not change the permissions of an unknown executable to bypass this check."
-msgstr ""
-"Do not change the permissions of an unknown executable to bypass this check."
-
-#: desktop/src/HelperTrustErrorDialog.tsx:61
-msgid "Technical details"
-msgstr "Technical details"
-
-#: desktop/src/HelperTrustErrorDialog.tsx:66
-msgid "Open repair instructions"
-msgstr "Open repair instructions"
-
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
 msgstr "The contributor credits response was invalid."
@@ -2324,6 +2011,403 @@ msgstr "Only HTTP(S) addresses may be opened externally"
 #: desktop/src/api.ts:190
 msgid "Choose a file or folder first"
 msgstr "Choose a file or folder first"
+
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
+#: desktop/src/pages/Scan.tsx:536
+msgid "Scan"
+msgstr "Scan"
+
+#: desktop/src/App.tsx:120 desktop/src/pages/Database.tsx:263
+#: desktop/src/pages/Preferences.tsx:15
+msgid "Database"
+msgstr "Database"
+
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+msgid "Logs"
+msgstr "Logs"
+
+#: desktop/src/App.tsx:124
+msgid "Components"
+msgstr "Components"
+
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+msgid "Statistics"
+msgstr "Statistics"
+
+#: desktop/src/App.tsx:130
+msgid "Audit"
+msgstr "Audit"
+
+#: desktop/src/App.tsx:132
+msgid "Network"
+msgstr "Network"
+
+#: desktop/src/App.tsx:134 desktop/src/App.tsx:874 desktop/src/App.tsx:962
+#: desktop/src/pages/Preferences.tsx:117
+msgid "Preferences"
+msgstr "Preferences"
+
+#: desktop/src/App.tsx:136
+msgid "Profiles"
+msgstr "Profiles"
+
+#: desktop/src/App.tsx:138 desktop/src/pages/Results.tsx:281
+#: desktop/src/pages/Results.tsx:282
+msgid "Results"
+msgstr "Results"
+
+#: desktop/src/App.tsx:310 desktop/src/pages/ConfigPreferences.tsx:535
+msgid "Could not open link"
+msgstr "Could not open link"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
+#: desktop/src/pages/Scan.tsx:322
+msgid "Scan in progress — wait for it to finish before changing targets"
+msgstr "Scan in progress — wait for it to finish before changing targets"
+
+#: desktop/src/App.tsx:469
+msgid "The privileged-helper installation returned an invalid status."
+msgstr "The privileged-helper installation returned an invalid status."
+
+#: desktop/src/App.tsx:476
+msgid "The privileged helper was installed successfully."
+msgstr "The privileged helper was installed successfully."
+
+#: desktop/src/App.tsx:478
+msgid ""
+"The privileged helper is still unavailable. Try again or install it manually."
+msgstr ""
+"The privileged helper is still unavailable. Try again or install it manually."
+
+#: desktop/src/App.tsx:767
+msgid "The privileged-helper status returned an invalid response."
+msgstr "The privileged-helper status returned an invalid response."
+
+#: desktop/src/App.tsx:872
+msgid "Back"
+msgstr "Back"
+
+#: desktop/src/App.tsx:897
+msgid "Scan File or Folder"
+msgstr "Scan File or Folder"
+
+#: desktop/src/App.tsx:904
+msgid "Choose scan targets"
+msgstr "Choose scan targets"
+
+#: desktop/src/App.tsx:914
+msgid "Scan Files"
+msgstr "Scan Files"
+
+#: desktop/src/App.tsx:918
+msgid "Scan Folders"
+msgstr "Scan Folders"
+
+#: desktop/src/App.tsx:925
+msgid "Scan System (Quick Scan)"
+msgstr "Scan System (Quick Scan)"
+
+#: desktop/src/App.tsx:932 desktop/src/App.tsx:933
+msgid "Menu"
+msgstr "Menu"
+
+#: desktop/src/App.tsx:952
+msgid "Application menu"
+msgstr "Application menu"
+
+#: desktop/src/App.tsx:965
+msgid "About"
+msgstr "About"
+
+#: desktop/src/App.tsx:978
+msgid "Main navigation"
+msgstr "Main navigation"
+
+#: desktop/src/App.tsx:979
+msgid "Views"
+msgstr "Views"
+
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+msgid "Dismiss"
+msgstr "Dismiss"
+
+#: desktop/src/App.tsx:1021
+msgid "About ClamUI"
+msgstr "About ClamUI"
+
+#: desktop/src/App.tsx:1022
+msgid "A native desktop interface for ClamAV."
+msgstr "A native desktop interface for ClamAV."
+
+#: desktop/src/App.tsx:1024
+msgid "Version"
+msgstr "Version"
+
+#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:226
+#: desktop/src/pages/SettingsPreferences.tsx:227
+msgid "Language"
+msgstr "Language"
+
+#: desktop/src/App.tsx:1026
+msgid "License"
+msgstr "License"
+
+#: desktop/src/App.tsx:1029
+msgid "Project website"
+msgstr "Project website"
+
+#: desktop/src/App.tsx:1030
+msgid "Issue tracker"
+msgstr "Issue tracker"
+
+#: desktop/src/App.tsx:1032
+msgid "Could not load contributor credits: {error}"
+msgstr "Could not load contributor credits: {error}"
+
+#: desktop/src/App.tsx:1037
+msgid "Contributors"
+msgstr "Contributors"
+
+#: desktop/src/App.tsx:1046
+msgid "Translator credits"
+msgstr "Translator credits"
+
+#: desktop/src/App.tsx:1049
+msgid "Loading contributor credits…"
+msgstr "Loading contributor credits…"
+
+#: desktop/src/App.tsx:1051
+msgid "Close ClamUI?"
+msgstr "Close ClamUI?"
+
+#: desktop/src/App.tsx:1052
+msgid ""
+"Choose whether to keep ClamUI available in the system tray or quit it "
+"completely."
+msgstr ""
+"Choose whether to keep ClamUI available in the system tray or quit it "
+"completely."
+
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+msgid "Remember my choice"
+msgstr "Remember my choice"
+
+#: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
+#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
+#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
+#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid "Cancel"
+msgstr "Cancel"
+
+#: desktop/src/App.tsx:1054
+msgid "Minimize to tray"
+msgstr "Minimize to tray"
+
+#: desktop/src/App.tsx:1056
+msgid "Scan in Progress"
+msgstr "Scan in Progress"
+
+#: desktop/src/App.tsx:1057
+msgid "A scan is still running. Cancelling it may leave partial results."
+msgstr "A scan is still running. Cancelling it may leave partial results."
+
+#: desktop/src/App.tsx:1058
+msgid "Keep Scanning"
+msgstr "Keep Scanning"
+
+#: desktop/src/App.tsx:1058
+msgid "Cancel Scan and Close"
+msgstr "Cancel Scan and Close"
+
+#: desktop/src/App.tsx:1058 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
+#: desktop/src/pages/SettingsPreferences.tsx:256
+msgid "Close"
+msgstr "Close"
+
+#: desktop/src/App.tsx:1060
+msgid "Install Privileged Helper"
+msgstr "Install Privileged Helper"
+
+#: desktop/src/App.tsx:1061
+msgid ""
+"ClamUI needs its matching privileged helper to save system configuration."
+msgstr ""
+"ClamUI needs its matching privileged helper to save system configuration."
+
+#: desktop/src/App.tsx:1063 desktop/src/HelperTrustErrorDialog.tsx:52
+msgid "Installing the helper requires administrator authorization."
+msgstr "Installing the helper requires administrator authorization."
+
+#. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
+#: desktop/src/App.tsx:1064 desktop/src/HelperTrustErrorDialog.tsx:53
+msgid ""
+"On Fedora with DNF, installation also adds the ClamUI signing key to the "
+"system RPM keyring."
+msgstr ""
+"On Fedora with DNF, installation also adds the ClamUI signing key to the "
+"system RPM keyring."
+
+#: desktop/src/App.tsx:1069 desktop/src/HelperTrustErrorDialog.tsx:76
+msgid "Installing privileged helper…"
+msgstr "Installing privileged helper…"
+
+#: desktop/src/App.tsx:1071
+msgid "Not now"
+msgstr "Not now"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Installing…"
+msgstr "Installing…"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Try Again"
+msgstr "Try Again"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Install Helper"
+msgstr "Install Helper"
+
+#: desktop/src/App.tsx:1071
+msgid "Open Preferences"
+msgstr "Open Preferences"
+
+#: desktop/src/ConfigurationRecovery.tsx:67
+msgid "Configuration from failed save attempt"
+msgstr "Configuration from failed save attempt"
+
+#: desktop/src/ConfigurationRecovery.tsx:69
+msgid ""
+"These are the configuration contents from the failed save attempt. Some "
+"files may already have changed. Check each target before replacing its "
+"content."
+msgstr ""
+"These are the configuration contents from the failed save attempt. Some "
+"files may already have changed. Check each target before replacing its "
+"content."
+
+#: desktop/src/ConfigurationRecovery.tsx:70
+msgid ""
+"Configuration contents may include sensitive values. Copy and store them "
+"carefully."
+msgstr ""
+"Configuration contents may include sensitive values. Copy and store them "
+"carefully."
+
+#: desktop/src/ConfigurationRecovery.tsx:79
+msgid "Configuration path copied to clipboard"
+msgstr "Configuration path copied to clipboard"
+
+#: desktop/src/ConfigurationRecovery.tsx:80
+msgid "Could not copy configuration path."
+msgstr "Could not copy configuration path."
+
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:225
+msgid "Copy Path"
+msgstr "Copy Path"
+
+#: desktop/src/ConfigurationRecovery.tsx:84
+msgid "Configuration content copied to clipboard"
+msgstr "Configuration content copied to clipboard"
+
+#: desktop/src/ConfigurationRecovery.tsx:85
+msgid "Could not copy configuration content."
+msgstr "Could not copy configuration content."
+
+#: desktop/src/ConfigurationRecovery.tsx:86
+msgid "Copy Content"
+msgstr "Copy Content"
+
+#: desktop/src/ConfigurationRecovery.tsx:89
+msgid "Configuration content"
+msgstr "Configuration content"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
+msgid "Could not open documentation: {error}"
+msgstr "Could not open documentation: {error}"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:40
+msgid "Protected settings are blocked"
+msgstr "Protected settings are blocked"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:46
+msgid ""
+"ClamUI could not save protected settings because its system helper is not "
+"installed."
+msgstr ""
+"ClamUI could not save protected settings because its system helper is not "
+"installed."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:47
+msgid ""
+"ClamUI blocked this operation because its system helper is missing or is not "
+"securely installed."
+msgstr ""
+"ClamUI blocked this operation because its system helper is missing or is not "
+"securely installed."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:48
+msgid ""
+"The helper provides administrator-authorized access to protected ClamAV "
+"settings."
+msgstr ""
+"The helper provides administrator-authorized access to protected ClamAV "
+"settings."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:59
+msgid "Helper location"
+msgstr "Helper location"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:62
+msgid ""
+"The helper must be an executable file owned by root, not a symbolic link, "
+"and other users must not be able to change it."
+msgstr ""
+"The helper must be an executable file owned by root, not a symbolic link, "
+"and other users must not be able to change it."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:63
+msgid "How to fix it"
+msgstr "How to fix it"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:66
+msgid "Install the matching helper from the same trusted ClamUI release."
+msgstr "Install the matching helper from the same trusted ClamUI release."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:67
+msgid "Reinstall the matching helper from the same trusted ClamUI release."
+msgstr "Reinstall the matching helper from the same trusted ClamUI release."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:68
+msgid "Then return to Preferences and repeat the action."
+msgstr "Then return to Preferences and repeat the action."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:70
+msgid ""
+"Do not change the permissions of an unknown executable to bypass this check."
+msgstr ""
+"Do not change the permissions of an unknown executable to bypass this check."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:72
+#: desktop/src/pages/ConfigPreferences.tsx:876
+msgid "Technical details"
+msgstr "Technical details"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:79
+msgid "Open repair instructions"
+msgstr "Open repair instructions"
+
+#. Translators: This button opens the failed native configuration snapshot.
+#: desktop/src/HelperTrustErrorDialog.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:880
+msgid "See Configuration"
+msgstr "See Configuration"
 
 #: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62
 msgid "Clean"
@@ -2701,72 +2785,72 @@ msgstr "Commands for supported distributions:"
 msgid "Copied"
 msgstr "Copied"
 
-#: desktop/src/pages/ConfigPreferences.tsx:71
+#: desktop/src/pages/ConfigPreferences.tsx:76
 msgid "Monday"
 msgstr "Monday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:72
+#: desktop/src/pages/ConfigPreferences.tsx:77
 msgid "Tuesday"
 msgstr "Tuesday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:73
+#: desktop/src/pages/ConfigPreferences.tsx:78
 msgid "Wednesday"
 msgstr "Wednesday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:74
+#: desktop/src/pages/ConfigPreferences.tsx:79
 msgid "Thursday"
 msgstr "Thursday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:75
+#: desktop/src/pages/ConfigPreferences.tsx:80
 msgid "Friday"
 msgstr "Friday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:76
+#: desktop/src/pages/ConfigPreferences.tsx:81
 msgid "Saturday"
 msgstr "Saturday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:77
+#: desktop/src/pages/ConfigPreferences.tsx:82
 msgid "Sunday"
 msgstr "Sunday"
 
-#: desktop/src/pages/ConfigPreferences.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:85
 msgid "Hourly"
 msgstr "Hourly"
 
-#: desktop/src/pages/ConfigPreferences.tsx:81
+#: desktop/src/pages/ConfigPreferences.tsx:86
 msgid "Daily"
 msgstr "Daily"
 
-#: desktop/src/pages/ConfigPreferences.tsx:82
+#: desktop/src/pages/ConfigPreferences.tsx:87
 msgid "Weekly"
 msgstr "Weekly"
 
-#: desktop/src/pages/ConfigPreferences.tsx:83
+#: desktop/src/pages/ConfigPreferences.tsx:88
 msgid "Monthly"
 msgstr "Monthly"
 
-#: desktop/src/pages/ConfigPreferences.tsx:196
+#: desktop/src/pages/ConfigPreferences.tsx:201
 msgid "No configuration file selected"
 msgstr "No configuration file selected"
 
-#: desktop/src/pages/ConfigPreferences.tsx:203
+#: desktop/src/pages/ConfigPreferences.tsx:208
 msgid "The file is not currently readable."
 msgstr "The file is not currently readable."
 
-#: desktop/src/pages/ConfigPreferences.tsx:206
+#: desktop/src/pages/ConfigPreferences.tsx:211
 msgid "Detect"
 msgstr "Detect"
 
-#: desktop/src/pages/ConfigPreferences.tsx:207
+#: desktop/src/pages/ConfigPreferences.tsx:212
 msgid "Browse"
 msgstr "Browse"
 
-#: desktop/src/pages/ConfigPreferences.tsx:208
+#: desktop/src/pages/ConfigPreferences.tsx:213
 msgid "Authorize read"
 msgstr "Authorize read"
 
 #. Translators: Save & Apply and Authorize read are button labels; use their translations.
-#: desktop/src/pages/ConfigPreferences.tsx:211
+#: desktop/src/pages/ConfigPreferences.tsx:216
 msgid ""
 "Selecting a file keeps the path in this pending proposal. Save & Apply "
 "persists it only after the complete proposal is valid. Authorization is "
@@ -2776,14 +2860,14 @@ msgstr ""
 "persists it only after the complete proposal is valid. Authorization is "
 "requested only when you explicitly choose Authorize read."
 
-#: desktop/src/pages/ConfigPreferences.tsx:289
-#: desktop/src/pages/ConfigPreferences.tsx:336
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:341
 #: desktop/src/pages/SettingsPreferences.tsx:323
 msgid "Add"
 msgstr "Add"
 
-#: desktop/src/pages/ConfigPreferences.tsx:294
-#: desktop/src/pages/ConfigPreferences.tsx:340
+#: desktop/src/pages/ConfigPreferences.tsx:299
+#: desktop/src/pages/ConfigPreferences.tsx:345
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
 #: desktop/src/pages/SettingsPreferences.tsx:253
@@ -2791,40 +2875,40 @@ msgid "Remove"
 msgstr "Remove"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:322
+#: desktop/src/pages/ConfigPreferences.tsx:327
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Enter an http, https, ftp, ftps, or file URL."
 
-#: desktop/src/pages/ConfigPreferences.tsx:334
+#: desktop/src/pages/ConfigPreferences.tsx:339
 msgid "Add URLs"
 msgstr "Add URLs"
 
 #. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:410
+#: desktop/src/pages/ConfigPreferences.tsx:446
 msgid "Configuration file selection is pending Save & Apply."
 msgstr "Configuration file selection is pending Save & Apply."
 
-#: desktop/src/pages/ConfigPreferences.tsx:422
+#: desktop/src/pages/ConfigPreferences.tsx:458
 msgid "No configuration file was found."
 msgstr "No configuration file was found."
 
-#: desktop/src/pages/ConfigPreferences.tsx:436
+#: desktop/src/pages/ConfigPreferences.tsx:472
 msgid "Select a .conf configuration file."
 msgstr "Select a .conf configuration file."
 
-#: desktop/src/pages/ConfigPreferences.tsx:461
+#: desktop/src/pages/ConfigPreferences.tsx:508
 msgid "Configuration loaded with administrator authorization."
 msgstr "Configuration loaded with administrator authorization."
 
-#: desktop/src/pages/ConfigPreferences.tsx:494
+#: desktop/src/pages/ConfigPreferences.tsx:545
 msgid "Scan backend saved."
 msgstr "Scan backend saved."
 
-#: desktop/src/pages/ConfigPreferences.tsx:516
+#: desktop/src/pages/ConfigPreferences.tsx:578
 msgid "Choose a configuration file before applying its changes."
 msgstr "Choose a configuration file before applying its changes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:528
+#: desktop/src/pages/ConfigPreferences.tsx:590
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -2832,134 +2916,135 @@ msgstr ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
 
-#: desktop/src/pages/ConfigPreferences.tsx:536
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:598
+#: desktop/src/pages/ConfigPreferences.tsx:688
 msgid "No changes to apply."
 msgstr "No changes to apply."
 
-#: desktop/src/pages/ConfigPreferences.tsx:547
+#: desktop/src/pages/ConfigPreferences.tsx:613
 msgid "Configuration validation failed."
 msgstr "Configuration validation failed."
 
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:688
 msgid "Configuration saved and applied."
 msgstr "Configuration saved and applied."
 
-#: desktop/src/pages/ConfigPreferences.tsx:591
+#: desktop/src/pages/ConfigPreferences.tsx:688
+#: desktop/src/pages/ConfigPreferences.tsx:705
 msgid "Some changes could not be applied."
 msgstr "Some changes could not be applied."
 
-#: desktop/src/pages/ConfigPreferences.tsx:592
+#: desktop/src/pages/ConfigPreferences.tsx:689
 msgid "Saved groups"
 msgstr "Saved groups"
 
-#: desktop/src/pages/ConfigPreferences.tsx:608
+#: desktop/src/pages/ConfigPreferences.tsx:714
 msgid "Checking scanner status…"
 msgstr "Checking scanner status…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:610
+#: desktop/src/pages/ConfigPreferences.tsx:716
 msgid "Daemon connected"
 msgstr "Daemon connected"
 
-#: desktop/src/pages/ConfigPreferences.tsx:611
+#: desktop/src/pages/ConfigPreferences.tsx:717
 msgid "Scanner available"
 msgstr "Scanner available"
 
-#: desktop/src/pages/ConfigPreferences.tsx:611
+#: desktop/src/pages/ConfigPreferences.tsx:717
 msgid "Scanner unavailable"
 msgstr "Scanner unavailable"
 
-#: desktop/src/pages/ConfigPreferences.tsx:621
+#: desktop/src/pages/ConfigPreferences.tsx:727
 msgid "Scan PE Files"
 msgstr "Scan PE Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:622
+#: desktop/src/pages/ConfigPreferences.tsx:728
 msgid "Scan ELF Files"
 msgstr "Scan ELF Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:623
+#: desktop/src/pages/ConfigPreferences.tsx:729
 msgid "Scan OLE2 Files"
 msgstr "Scan OLE2 Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:624
+#: desktop/src/pages/ConfigPreferences.tsx:730
 msgid "Scan PDF Files"
 msgstr "Scan PDF Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:625
+#: desktop/src/pages/ConfigPreferences.tsx:731
 msgid "Scan HTML Files"
 msgstr "Scan HTML Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:626
+#: desktop/src/pages/ConfigPreferences.tsx:732
 msgid "Scan Archive Files"
 msgstr "Scan Archive Files"
 
-#: desktop/src/pages/ConfigPreferences.tsx:632
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "Database Updates"
 msgstr "Database Updates"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:633
+#: desktop/src/pages/ConfigPreferences.tsx:739
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:637
+#: desktop/src/pages/ConfigPreferences.tsx:743
 msgid "Paths"
 msgstr "Paths"
 
-#: desktop/src/pages/ConfigPreferences.tsx:638
+#: desktop/src/pages/ConfigPreferences.tsx:744
 msgid "Database Directory"
 msgstr "Database Directory"
 
-#: desktop/src/pages/ConfigPreferences.tsx:639
+#: desktop/src/pages/ConfigPreferences.tsx:745
 msgid "Update Log File"
 msgstr "Update Log File"
 
-#: desktop/src/pages/ConfigPreferences.tsx:640
+#: desktop/src/pages/ConfigPreferences.tsx:746
 msgid "PID File"
 msgstr "PID File"
 
-#: desktop/src/pages/ConfigPreferences.tsx:641
+#: desktop/src/pages/ConfigPreferences.tsx:747
 msgid "Notify ClamD Config"
 msgstr "Notify ClamD Config"
 
-#: desktop/src/pages/ConfigPreferences.tsx:642
+#: desktop/src/pages/ConfigPreferences.tsx:748
 msgid "Log timestamps"
 msgstr "Log timestamps"
 
-#: desktop/src/pages/ConfigPreferences.tsx:643
+#: desktop/src/pages/ConfigPreferences.tsx:749
 msgid "Verbose logging"
 msgstr "Verbose logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:644
+#: desktop/src/pages/ConfigPreferences.tsx:750
 msgid "Syslog logging"
 msgstr "Syslog logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:646
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "Update Behavior"
 msgstr "Update Behavior"
 
-#: desktop/src/pages/ConfigPreferences.tsx:647
+#: desktop/src/pages/ConfigPreferences.tsx:753
 msgid "Checks per day"
 msgstr "Checks per day"
 
-#: desktop/src/pages/ConfigPreferences.tsx:647
+#: desktop/src/pages/ConfigPreferences.tsx:753
 msgid "0 disables automatic checks."
 msgstr "0 disables automatic checks."
 
-#: desktop/src/pages/ConfigPreferences.tsx:648
+#: desktop/src/pages/ConfigPreferences.tsx:754
 msgid "Database Mirror"
 msgstr "Database Mirror"
 
-#: desktop/src/pages/ConfigPreferences.tsx:650
+#: desktop/src/pages/ConfigPreferences.tsx:756
 msgid "Custom Signature Databases"
 msgstr "Custom Signature Databases"
 
-#: desktop/src/pages/ConfigPreferences.tsx:652
+#: desktop/src/pages/ConfigPreferences.tsx:758
 msgid "Suggested"
 msgstr "Suggested"
 
 #. Translators: Suggested and Save & Apply are button labels; use their translations. Keep URLhaus and InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:653
+#: desktop/src/pages/ConfigPreferences.tsx:759
 msgid ""
 "Suggested adds URLhaus and three InterServer databases to this draft. Save & "
 "Apply is still required."
@@ -2968,7 +3053,7 @@ msgstr ""
 "Apply is still required."
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:657
+#: desktop/src/pages/ConfigPreferences.tsx:763
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -2976,27 +3061,27 @@ msgstr ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
 
-#: desktop/src/pages/ConfigPreferences.tsx:662
+#: desktop/src/pages/ConfigPreferences.tsx:768
 msgid "Signature Providers"
 msgstr "Signature Providers"
 
-#: desktop/src/pages/ConfigPreferences.tsx:663
+#: desktop/src/pages/ConfigPreferences.tsx:769
 msgid "Free malware URL blocklist; no registration required."
 msgstr "Free malware URL blocklist; no registration required."
 
-#: desktop/src/pages/ConfigPreferences.tsx:663
-#: desktop/src/pages/ConfigPreferences.tsx:664
-#: desktop/src/pages/ConfigPreferences.tsx:668
-#: desktop/src/pages/ConfigPreferences.tsx:669
+#: desktop/src/pages/ConfigPreferences.tsx:769
+#: desktop/src/pages/ConfigPreferences.tsx:770
+#: desktop/src/pages/ConfigPreferences.tsx:774
+#: desktop/src/pages/ConfigPreferences.tsx:775
 msgid "Open provider"
 msgstr "Open provider"
 
-#: desktop/src/pages/ConfigPreferences.tsx:664
+#: desktop/src/pages/ConfigPreferences.tsx:770
 msgid "Registration is required; URLs include your personal API key."
 msgstr "Registration is required; URLs include your personal API key."
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:665
+#: desktop/src/pages/ConfigPreferences.tsx:771
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3004,183 +3089,183 @@ msgstr ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
 
-#: desktop/src/pages/ConfigPreferences.tsx:669
+#: desktop/src/pages/ConfigPreferences.tsx:775
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr "Community hash, web-shell, and general malware signature databases."
 
-#: desktop/src/pages/ConfigPreferences.tsx:671
+#: desktop/src/pages/ConfigPreferences.tsx:777
 msgid "Proxy Settings"
 msgstr "Proxy Settings"
 
-#: desktop/src/pages/ConfigPreferences.tsx:672
+#: desktop/src/pages/ConfigPreferences.tsx:778
 msgid "Proxy Server"
 msgstr "Proxy Server"
 
-#: desktop/src/pages/ConfigPreferences.tsx:673
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "Proxy Port"
 msgstr "Proxy Port"
 
-#: desktop/src/pages/ConfigPreferences.tsx:673
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "0 disables the proxy port."
 msgstr "0 disables the proxy port."
 
-#: desktop/src/pages/ConfigPreferences.tsx:674
+#: desktop/src/pages/ConfigPreferences.tsx:780
 msgid "Proxy Username"
 msgstr "Proxy Username"
 
-#: desktop/src/pages/ConfigPreferences.tsx:675
+#: desktop/src/pages/ConfigPreferences.tsx:781
 msgid "Proxy Password"
 msgstr "Proxy Password"
 
-#: desktop/src/pages/ConfigPreferences.tsx:680
+#: desktop/src/pages/ConfigPreferences.tsx:786
 msgid "Scanner Settings"
 msgstr "Scanner Settings"
 
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Scan Backend"
 msgstr "Scan Backend"
 
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Auto (prefer daemon)"
 msgstr "Auto (prefer daemon)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:682
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV Daemon (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:685
+#: desktop/src/pages/ConfigPreferences.tsx:791
 msgid "Standalone Scanner (clamscan)"
 msgstr "Standalone Scanner (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:689
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Daemon Status"
 msgstr "Daemon Status"
 
-#: desktop/src/pages/ConfigPreferences.tsx:689
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Refresh Status"
 msgstr "Refresh Status"
 
-#: desktop/src/pages/ConfigPreferences.tsx:690
+#: desktop/src/pages/ConfigPreferences.tsx:796
 msgid "Documentation"
 msgstr "Documentation"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:692
-#: desktop/src/pages/ConfigPreferences.tsx:713
+#: desktop/src/pages/ConfigPreferences.tsx:798
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:696
+#: desktop/src/pages/ConfigPreferences.tsx:802
 msgid "File Type Scanning"
 msgstr "File Type Scanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:699
+#: desktop/src/pages/ConfigPreferences.tsx:805
 msgid "Performance and Limits"
 msgstr "Performance and Limits"
 
-#: desktop/src/pages/ConfigPreferences.tsx:700
-#: desktop/src/pages/ConfigPreferences.tsx:726
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "Max File Size (MB)"
 msgstr "Max File Size (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:700
-#: desktop/src/pages/ConfigPreferences.tsx:701
-#: desktop/src/pages/ConfigPreferences.tsx:703
-#: desktop/src/pages/ConfigPreferences.tsx:726
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:807
+#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "0 means unlimited."
 msgstr "0 means unlimited."
 
-#: desktop/src/pages/ConfigPreferences.tsx:701
+#: desktop/src/pages/ConfigPreferences.tsx:807
 msgid "Max Scan Size (MB)"
 msgstr "Max Scan Size (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:702
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Max Archive Recursion"
 msgstr "Max Archive Recursion"
 
-#: desktop/src/pages/ConfigPreferences.tsx:703
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Max Files in Archive"
 msgstr "Max Files in Archive"
 
-#: desktop/src/pages/ConfigPreferences.tsx:705
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "Logging"
 msgstr "Logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:706
+#: desktop/src/pages/ConfigPreferences.tsx:812
 msgid "Log File Path"
 msgstr "Log File Path"
 
-#: desktop/src/pages/ConfigPreferences.tsx:707
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Verbose Logging"
 msgstr "Verbose Logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:707
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Syslog Logging"
 msgstr "Syslog Logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:712
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "On-Access Scanning"
 msgstr "On-Access Scanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:717
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Monitored Paths"
 msgstr "Monitored Paths"
 
-#: desktop/src/pages/ConfigPreferences.tsx:718
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Include Paths"
 msgstr "Include Paths"
 
-#: desktop/src/pages/ConfigPreferences.tsx:719
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "Exclude Paths"
 msgstr "Exclude Paths"
 
-#: desktop/src/pages/ConfigPreferences.tsx:721
+#: desktop/src/pages/ConfigPreferences.tsx:827
 msgid "Behavior Settings"
 msgstr "Behavior Settings"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Prevention Mode"
 msgstr "Prevention Mode"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Extra Scanning"
 msgstr "Extra Scanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Deny on Error"
 msgstr "Deny on Error"
 
-#: desktop/src/pages/ConfigPreferences.tsx:722
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Disable DDD"
 msgstr "Disable DDD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:724
+#: desktop/src/pages/ConfigPreferences.tsx:830
 msgid "Performance Settings"
 msgstr "Performance Settings"
 
-#: desktop/src/pages/ConfigPreferences.tsx:725
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Max Threads"
 msgstr "Max Threads"
 
-#: desktop/src/pages/ConfigPreferences.tsx:727
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Curl Timeout (seconds)"
 msgstr "Curl Timeout (seconds)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:727
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "0 disables the timeout."
 msgstr "0 disables the timeout."
 
-#: desktop/src/pages/ConfigPreferences.tsx:728
+#: desktop/src/pages/ConfigPreferences.tsx:834
 msgid "Retry Attempts"
 msgstr "Retry Attempts"
 
-#: desktop/src/pages/ConfigPreferences.tsx:730
+#: desktop/src/pages/ConfigPreferences.tsx:836
 msgid "Scan Loop Prevention"
 msgstr "Scan Loop Prevention"
 
-#: desktop/src/pages/ConfigPreferences.tsx:731
+#: desktop/src/pages/ConfigPreferences.tsx:837
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3188,60 +3273,60 @@ msgstr ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
 
-#: desktop/src/pages/ConfigPreferences.tsx:732
+#: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Exclude Username"
 msgstr "Exclude Username"
 
-#: desktop/src/pages/ConfigPreferences.tsx:733
+#: desktop/src/pages/ConfigPreferences.tsx:839
 msgid "Exclude User ID"
 msgstr "Exclude User ID"
 
-#: desktop/src/pages/ConfigPreferences.tsx:734
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Exclude Root User"
 msgstr "Exclude Root User"
 
-#: desktop/src/pages/ConfigPreferences.tsx:739
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "Scheduled Scans"
 msgstr "Scheduled Scans"
 
-#: desktop/src/pages/ConfigPreferences.tsx:740
+#: desktop/src/pages/ConfigPreferences.tsx:846
 msgid "Schedule"
 msgstr "Schedule"
 
-#: desktop/src/pages/ConfigPreferences.tsx:741
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Enable Scheduled Scans"
 msgstr "Enable Scheduled Scans"
 
-#: desktop/src/pages/ConfigPreferences.tsx:742
+#: desktop/src/pages/ConfigPreferences.tsx:848
 msgid "Scan Frequency"
 msgstr "Scan Frequency"
 
-#: desktop/src/pages/ConfigPreferences.tsx:743
+#: desktop/src/pages/ConfigPreferences.tsx:849
 msgid "Scan Time (24-hour)"
 msgstr "Scan Time (24-hour)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Day of Week"
 msgstr "Day of Week"
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Used for weekly scans."
 msgstr "Used for weekly scans."
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Day of Month"
 msgstr "Day of Month"
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Used for monthly scans."
 msgstr "Used for monthly scans."
 
-#: desktop/src/pages/ConfigPreferences.tsx:746
+#: desktop/src/pages/ConfigPreferences.tsx:852
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
 msgid "Scan Targets"
 msgstr "Scan Targets"
 
-#: desktop/src/pages/ConfigPreferences.tsx:747
+#: desktop/src/pages/ConfigPreferences.tsx:853
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3249,34 +3334,34 @@ msgstr ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
 
-#: desktop/src/pages/ConfigPreferences.tsx:748
+#: desktop/src/pages/ConfigPreferences.tsx:854
 #: desktop/src/pages/SettingsPreferences.tsx:345
 msgid "Skip on Battery"
 msgstr "Skip on Battery"
 
-#: desktop/src/pages/ConfigPreferences.tsx:748
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Do not start scheduled scans while on battery power."
 
-#: desktop/src/pages/ConfigPreferences.tsx:749
+#: desktop/src/pages/ConfigPreferences.tsx:855
 msgid "Auto-Quarantine"
 msgstr "Auto-Quarantine"
 
-#: desktop/src/pages/ConfigPreferences.tsx:749
+#: desktop/src/pages/ConfigPreferences.tsx:855
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "Automatically quarantine threats found by scheduled scans."
 
-#: desktop/src/pages/ConfigPreferences.tsx:754
-#: desktop/src/pages/ConfigPreferences.tsx:764
+#: desktop/src/pages/ConfigPreferences.tsx:860
+#: desktop/src/pages/ConfigPreferences.tsx:870
 msgid "Save & Apply"
 msgstr "Save & Apply"
 
-#: desktop/src/pages/ConfigPreferences.tsx:755
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Apply Configuration"
 msgstr "Apply Configuration"
 
 #. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:756
+#: desktop/src/pages/ConfigPreferences.tsx:862
 msgid ""
 "All edited forms are captured at the moment you click Save & Apply. Every "
 "configured file is validated before any write or authorization request."
@@ -3285,7 +3370,7 @@ msgstr ""
 "configured file is validated before any write or authorization request."
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:760
+#: desktop/src/pages/ConfigPreferences.tsx:866
 msgid ""
 "Scanner and On-Access changes share one clamd.conf proposal; neither form "
 "can overwrite the other's detached changes."
@@ -3293,7 +3378,7 @@ msgstr ""
 "Scanner and On-Access changes share one clamd.conf proposal; neither form "
 "can overwrite the other's detached changes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:764
+#: desktop/src/pages/ConfigPreferences.tsx:870
 #: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
 msgid "Saving…"
 msgstr "Saving…"
@@ -4519,10 +4604,6 @@ msgstr "Excluded"
 #: desktop/src/pages/Results.tsx:196
 msgid "Exclude"
 msgstr "Exclude"
-
-#: desktop/src/pages/Results.tsx:196 desktop/src/pages/Results.tsx:225
-msgid "Copy Path"
-msgstr "Copy Path"
 
 #: desktop/src/pages/Results.tsx:197 desktop/src/pages/Results.tsx:228
 msgid "Show {count} more"

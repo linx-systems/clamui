@@ -528,14 +528,14 @@ pub fn database_status(config_path: Option<&str>) -> Value {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Distro {
+pub(crate) enum Distro {
     Debian,
     Fedora,
     FedoraAtomic,
     Arch,
 }
 
-fn distro() -> Option<Distro> {
+pub(crate) fn distro() -> Option<Distro> {
     let source = read_host_file("/etc/os-release").ok()?;
     let values = source
         .lines()

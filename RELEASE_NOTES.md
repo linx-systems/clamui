@@ -1,18 +1,20 @@
 # ClamUI v0.4.1
 
-> **Historical release notes.** This page records the v0.4.1 Python/PyGObject release. It is not a release announcement for the Rust/Tauri migration and does not claim that migration artifacts, target operating systems, or package formats have been externally verified. For current installation and development instructions, use the [documentation](https://clamui.com/docs/installation/) and [development guide](https://clamui.com/docs/contributing/development/).
+> **Published v0.4.1 release notes (Python/PyGObject).** The **Published v0.4.1 release details** section and its subsections apply only to the published v0.4.1 Python/PyGObject release. They do not announce, publish, or verify Rust/Tauri migration artifacts, target operating systems, or package formats.
+>
+> **Unreleased Rust/Tauri migration.** Current Rust/Tauri development is on the [`migration/rust-tauri`](https://github.com/linx-systems/clamui/tree/migration/rust-tauri) branch, not the published v0.4.1 release. Use the [installation documentation](https://clamui.com/docs/installation/) and [development guide](https://clamui.com/docs/contributing/development/) for its current installation and source-build instructions.
 
-## Current Rust/Tauri migration validation
+## Unreleased Rust/Tauri migration validation
 
-The current migration proof exercised 122 Rust workspace tests and strict Clippy; host-bridge EICAR scans through the Tauri desktop, AppImage, and Flatpak; prior XDG JSON, SQLite, and keyring compatibility; and the desktop's 1.114 MB copy and 18.55 MB ZIP-export paths.
+The development-branch migration proof exercised 122 Rust workspace tests and strict Clippy; host-bridge EICAR scans through the Tauri desktop, AppImage, and Flatpak; prior XDG JSON, SQLite, and keyring compatibility; and the desktop's 1.114 MB copy and 18.55 MB ZIP-export paths.
 
 This is not a zero-regression guarantee and does not claim exercised protected host writes, VirusTotal uploads, physical-device hardware, Wayland, aarch64 CI, or external package/operating-system verification. Live helper onboarding requires matching newly published, signed Rust release assets; a source build or older helper is not host-write authorization.
 
-Hungarian localization, easier Flatpak host-helper setup, tray startup, and reliability fixes for scanning, host integration, and packaged builds.
-
-## Current source catalog policy
+## Unreleased Rust/Tauri source catalog policy
 
 - The active Rust/Tauri source and packages restore the full `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` locale set. Localized historical scan-summary recognition is retained as bounded embedded Rust data, not as shipped, selectable, or synchronized archive catalogs.
+
+## Published v0.4.1 release details
 
 ## Highlights
 

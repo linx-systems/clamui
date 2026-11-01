@@ -12,12 +12,14 @@ A modern Linux desktop interface for ClamAV, built with Rust, Tauri, and a React
 
 </div>
 
-## Install
+## Published stable release
 
 ```bash
 flatpak install flathub io.github.linx_systems.ClamUI
 flatpak run io.github.linx_systems.ClamUI
 ```
+
+These commands install the published Python 0.4.1 release. They do not install the Rust/Tauri development checkout.
 
 Every package format uses **host** ClamAV. Install host `clamscan` and `freshclam`; daemon scans also require host `clamd` and `clamdscan`.
 
@@ -26,7 +28,7 @@ Every package format uses **host** ClamAV. Install host `clamscan` and `freshcla
 sudo apt install clamav clamav-freshclam
 ```
 
-ClamUI's desktop is a Tauri/WebKitGTK application. It has a Rust core, native StatusNotifierItem tray integration, and no Python application runtime or tray subprocess. Protected host ClamAV configuration remains behind the version-matched `clamui-apply-preferences` helper and polkit policy.
+The Rust/Tauri development checkout uses WebKitGTK, a native StatusNotifierItem tray, and no Python application runtime or tray subprocess. It is not yet published to Flathub or as v0.4.1 release assets. Protected host ClamAV configuration remains behind the version-matched `clamui-apply-preferences` helper and polkit policy.
 
 - [Installation](https://clamui.com/docs/installation/)
 - [First scan](https://clamui.com/docs/getting-started/)

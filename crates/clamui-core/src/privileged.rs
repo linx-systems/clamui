@@ -69,7 +69,7 @@ case "$mode" in ???) writable=${mode#?};; ????) writable=${mode#??};; *) exit 3;
 case "$writable" in *[2367]*) exit 3;; esac
 [ "$(/usr/bin/stat -c %s -- "$src")" = "$size" ] || exit 3
 stage=$(/usr/bin/mktemp -d /var/tmp/clamui-helper.XXXXXX) || exit 4
-trap 'rm -rf -- "$stage"' EXIT HUP INT TERM
+trap '/usr/bin/rm -rf -- "$stage"' EXIT HUP INT TERM
 /usr/bin/chmod 700 -- "$stage"
 target=$stage/helper.deb
 # dd's nofollow/nonblock open is the root-side descriptor trust boundary.
@@ -85,6 +85,111 @@ set +e
 status=$?
 exit "$status"
 "#;
+
+// RPM helper packages have an embedded RPM signature and an independently
+// published detached signature. The latter is verified against this compiled
+// key before the RPM key is imported or either installer is invoked.
+const FIRST_RPM_INSTALL_SCRIPT: &str = concat!(
+    r#"set -efu
+src=$1 size=$2 digest=$3 version=$4 arch=$5 signature=$6 signature_size=$7 signature_digest=$8 backend=$9
+case "$size:$signature_size" in *[!0-9:]*|:*|*::*) exit 2;; esac
+case "$digest:$signature_digest" in *[!0123456789abcdef:]*|:*|*::*) exit 2;; esac
+[ "${#digest}" -eq 64 ] && [ "${#signature_digest}" -eq 64 ] || exit 2
+case "$version" in ''|*[!0-9A-Za-z.+:~_-]*) exit 2;; esac
+case "$arch" in x86_64|aarch64) ;; *) exit 2;; esac
+case "$backend" in dnf|atomic) ;; *) exit 2;; esac
+uid=${PKEXEC_UID-}
+case "$uid" in ''|0|*[!0-9]*) exit 2;; esac
+[ "$size" -gt 0 ] && [ "$size" -le 67108864 ] || exit 2
+[ "$signature_size" -gt 0 ] && [ "$signature_size" -le 262144 ] || exit 2
+for source in "$src" "$signature"; do
+  [ -f "$source" ] && [ ! -L "$source" ] || exit 3
+  [ "$(/usr/bin/stat -c %u -- "$source")" = "$uid" ] || exit 3
+  mode=$(/usr/bin/stat -c %a -- "$source")
+  case "$mode" in ???) writable=${mode#?};; ????) writable=${mode#??};; *) exit 3;; esac
+  case "$writable" in *[2367]*) exit 3;; esac
+done
+[ "$(/usr/bin/stat -c %s -- "$src")" = "$size" ] || exit 3
+[ "$(/usr/bin/stat -c %s -- "$signature")" = "$signature_size" ] || exit 3
+stage=$(/usr/bin/mktemp -d /var/tmp/clamui-helper.XXXXXX) || exit 4
+trap '/usr/bin/rm -rf -- "$stage"' EXIT HUP INT TERM
+/usr/bin/chmod 700 -- "$stage"
+target=$stage/helper.rpm
+target_signature=$stage/helper.rpm.asc
+# dd's nofollow/nonblock open is the root-side descriptor trust boundary.
+/usr/bin/timeout 300 /usr/bin/dd if="$src" of="$target" bs=1 count="$size" iflag=nofollow,nonblock conv=fsync status=none || exit 4
+/usr/bin/timeout 300 /usr/bin/dd if="$signature" of="$target_signature" bs=1 count="$signature_size" iflag=nofollow,nonblock conv=fsync status=none || exit 4
+[ "$(/usr/bin/stat -c %s -- "$target")" = "$size" ] || exit 4
+[ "$(/usr/bin/stat -c %s -- "$target_signature")" = "$signature_size" ] || exit 4
+[ "$(/usr/bin/sha256sum -- "$target" | /usr/bin/cut -d' ' -f1)" = "$digest" ] || exit 4
+[ "$(/usr/bin/sha256sum -- "$target_signature" | /usr/bin/cut -d' ' -f1)" = "$signature_digest" ] || exit 4
+fields=$(/usr/bin/timeout 300 /usr/bin/rpm --query --queryformat '%{NAME}\n%{EPOCHNUM}\n%{VERSION}\n%{RELEASE}\n%{ARCH}\n' --package "$target") || exit 5
+[ "$fields" = "clamui-privileged-helper
+0
+$version
+1
+$arch" ] || exit 5
+gnupg=$stage/gnupg
+/usr/bin/mkdir -m 700 -- "$gnupg"
+key=$stage/clamui-signing-key.asc
+/usr/bin/cat > "$key" <<'CLAMUI_PINNED_KEY'
+"#,
+    include_str!("../../../signing-key.asc"),
+    r#"
+CLAMUI_PINNED_KEY
+gpg=
+for candidate in /usr/bin/gpg2 /usr/bin/gpg; do
+  if [ -f "$candidate" ] && [ ! -L "$candidate" ] && [ -x "$candidate" ] && [ "$(/usr/bin/stat -c %u -- "$candidate")" = 0 ]; then
+    gpg=$candidate
+    break
+  fi
+done
+[ -n "$gpg" ] || exit 6
+key_listing=$("$gpg" --batch --no-options --homedir "$gnupg" --with-colons --import-options show-only --dry-run --import "$key") || exit 6
+key_count=0
+primary_fingerprint=
+while IFS=: read -r kind _ _ _ _ _ _ _ _ fingerprint _; do
+  case "$kind" in
+    pub) key_count=$((key_count + 1));;
+    fpr) [ -n "$primary_fingerprint" ] || primary_fingerprint=$fingerprint;;
+  esac
+done <<CLAMUI_KEY_LISTING
+$key_listing
+CLAMUI_KEY_LISTING
+[ "$key_count" -eq 1 ] && [ "$primary_fingerprint" = 037273A518BE90BA6EA27B3CDEF2A3E473DE1E26 ] || exit 6
+"$gpg" --batch --no-options --homedir "$gnupg" --import "$key" || exit 6
+status=$("$gpg" --batch --no-options --homedir "$gnupg" --status-fd=1 --verify "$target_signature" "$target" 2>/dev/null) || exit 6
+case "$status" in *"[GNUPG:] VALIDSIG 037273A518BE90BA6EA27B3CDEF2A3E473DE1E26 "*) ;; *) exit 6;; esac
+rpmdb=$stage/rpmdb
+/usr/bin/mkdir -m 700 -- "$rpmdb"
+/usr/bin/rpmkeys --dbpath "$rpmdb" --define '_keyring rpmdb' --define '_pkgverify_level all' --import "$key" || exit 6
+/usr/bin/rpmkeys --dbpath "$rpmdb" --define '_keyring rpmdb' --define '_pkgverify_level all' --checksig -- "$target" || exit 6
+case "$backend" in
+  dnf)
+    /usr/bin/rpm --import "$key" || exit 7
+    set +e
+    /usr/bin/timeout 300 /usr/bin/dnf --setopt=localpkg_gpgcheck=1 install -y "$target"
+    status=$?
+    ;;
+  atomic)
+    /usr/bin/timeout 30 /usr/bin/rpm-ostree status --pending-exit-77 >/dev/null || exit 8
+    set +e
+    /usr/bin/rpm --query -- clamui-privileged-helper >/dev/null 2>&1
+    package_status=$?
+    set -e
+    [ "$package_status" -eq 1 ] || exit 8
+    set +e
+    /usr/bin/timeout 300 /usr/bin/rpm-ostree install -y --apply-live "$target"
+    status=$?
+    [ "$status" -eq 0 ] || exit "$status"
+    /usr/bin/timeout 30 /usr/bin/systemctl try-restart polkit.service || exit 9
+    /usr/bin/timeout 30 /usr/bin/pkaction --action-id io.github.linx_systems.clamui.apply-preferences >/dev/null || exit 9
+    status=0
+    ;;
+esac
+exit "$status"
+"#,
+);
 
 // The only low-level operations here are scoped nonblocking pipe setup and
 // polling for owned child output. The passwd database is queried through the
@@ -250,14 +355,33 @@ fn safe_metadata(path: &Path) -> AppResult<std::fs::Metadata> {
         .map_err(|error| format!("cannot inspect {}: {error}", path.display()))
 }
 
-fn root_owned_regular(path: &Path, executable: bool) -> bool {
-    let Ok(metadata) = safe_metadata(path) else {
-        return false;
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum RootOwnedRegularError {
+    Missing,
+    Untrusted,
+}
+
+fn root_owned_regular_trust(path: &Path, executable: bool) -> Result<(), RootOwnedRegularError> {
+    let metadata = match fs::symlink_metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            return Err(RootOwnedRegularError::Missing);
+        }
+        Err(_) => return Err(RootOwnedRegularError::Untrusted),
     };
-    metadata.file_type().is_file()
+    if metadata.file_type().is_file()
         && metadata.uid() == 0
         && metadata.mode() & 0o022 == 0
         && (!executable || metadata.mode() & 0o100 != 0)
+    {
+        Ok(())
+    } else {
+        Err(RootOwnedRegularError::Untrusted)
+    }
+}
+
+fn root_owned_regular(path: &Path, executable: bool) -> bool {
+    root_owned_regular_trust(path, executable).is_ok()
 }
 
 fn root_owned_directory(path: &Path) -> bool {
@@ -299,10 +423,17 @@ pub fn trusted_helper_path() -> AppResult<PathBuf> {
         }
         return Err("the canonical host privileged helper is unavailable".to_owned());
     }
-    if !root_owned_regular(&canonical, true) {
-        return Err(
-            "the canonical privileged helper is not a root-owned immutable executable".to_owned(),
-        );
+    match root_owned_regular_trust(&canonical, true) {
+        Ok(()) => {}
+        Err(RootOwnedRegularError::Missing) => {
+            return Err("the canonical privileged helper is missing".to_owned());
+        }
+        Err(RootOwnedRegularError::Untrusted) => {
+            return Err(
+                "the canonical privileged helper is not a root-owned immutable executable"
+                    .to_owned(),
+            );
+        }
     }
     if has_elf_magic(&canonical) {
         return Ok(canonical);
@@ -317,6 +448,74 @@ pub fn trusted_helper_path() -> AppResult<PathBuf> {
         );
     }
     Ok(canonical)
+}
+
+#[cfg(test)]
+mod helper_trust_tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn root_owned_regular_trust_distinguishes_missing_path() {
+        let root = TempDir::new().expect("create helper trust root");
+        let helper = root.path().join("clamui-apply-preferences");
+
+        assert_eq!(
+            root_owned_regular_trust(&helper, true),
+            Err(RootOwnedRegularError::Missing)
+        );
+        assert!(!root_owned_regular(&helper, true));
+    }
+
+    #[test]
+    fn root_owned_regular_trust_rejects_dangling_symlink() {
+        let root = TempDir::new().expect("create helper trust root");
+        let helper = root.path().join("clamui-apply-preferences");
+        std::os::unix::fs::symlink(root.path().join("missing-target"), &helper)
+            .expect("create dangling helper link");
+
+        assert_eq!(
+            root_owned_regular_trust(&helper, true),
+            Err(RootOwnedRegularError::Untrusted)
+        );
+        assert!(!root_owned_regular(&helper, true));
+    }
+
+    #[test]
+    fn root_owned_regular_trust_rejects_group_writable_file() {
+        let root = TempDir::new().expect("create helper trust root");
+        let helper = root.path().join("clamui-apply-preferences");
+        std::fs::write(&helper, b"helper").expect("create helper fixture");
+        std::fs::set_permissions(
+            &helper,
+            <std::fs::Permissions as std::os::unix::fs::PermissionsExt>::from_mode(0o720),
+        )
+        .expect("make helper group writable");
+
+        assert_eq!(
+            root_owned_regular_trust(&helper, true),
+            Err(RootOwnedRegularError::Untrusted)
+        );
+        assert!(!root_owned_regular(&helper, true));
+    }
+
+    #[test]
+    fn root_owned_regular_trust_rejects_non_executable_file() {
+        let root = TempDir::new().expect("create helper trust root");
+        let helper = root.path().join("clamui-apply-preferences");
+        std::fs::write(&helper, b"helper").expect("create helper fixture");
+        std::fs::set_permissions(
+            &helper,
+            <std::fs::Permissions as std::os::unix::fs::PermissionsExt>::from_mode(0o600),
+        )
+        .expect("remove helper execute bit");
+
+        assert_eq!(
+            root_owned_regular_trust(&helper, true),
+            Err(RootOwnedRegularError::Untrusted)
+        );
+        assert!(!root_owned_regular(&helper, true));
+    }
 }
 
 fn open_read_nofollow(path: &Path) -> AppResult<File> {
@@ -1259,8 +1458,79 @@ fn dpkg_architecture() -> AppResult<String> {
     Ok(architecture)
 }
 
-fn package_name(architecture: &str) -> String {
-    format!("{HELPER_PACKAGE}_{}_{}.deb", app_version(), architecture)
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum HelperBackend {
+    Debian,
+    FedoraDnf,
+    FedoraAtomic,
+}
+
+impl HelperBackend {
+    fn package_extension(self) -> &'static str {
+        match self {
+            Self::Debian => "deb",
+            Self::FedoraDnf | Self::FedoraAtomic => "rpm",
+        }
+    }
+
+    fn rpm(self) -> bool {
+        !matches!(self, Self::Debian)
+    }
+
+    fn root_installer(self) -> &'static str {
+        match self {
+            Self::Debian => "debian",
+            Self::FedoraDnf => "dnf",
+            Self::FedoraAtomic => "atomic",
+        }
+    }
+}
+
+fn debian_host() -> bool {
+    host_command("/usr/bin/dpkg", &["--version"]).is_ok_and(|output| output.status.success())
+}
+
+fn helper_backend() -> Option<HelperBackend> {
+    match crate::host::distro() {
+        Some(crate::host::Distro::Debian) => Some(HelperBackend::Debian),
+        Some(crate::host::Distro::Fedora) => Some(HelperBackend::FedoraDnf),
+        Some(crate::host::Distro::FedoraAtomic) => Some(HelperBackend::FedoraAtomic),
+        Some(crate::host::Distro::Arch) => None,
+        None => debian_host().then_some(HelperBackend::Debian),
+    }
+}
+
+fn backend_available(backend: HelperBackend) -> bool {
+    let (program, args): (&str, &[&str]) = match backend {
+        HelperBackend::Debian => ("/usr/bin/dpkg", &["--version"]),
+        HelperBackend::FedoraDnf => ("/usr/bin/dnf", &["--version"]),
+        HelperBackend::FedoraAtomic => ("/usr/bin/rpm-ostree", &["--version"]),
+    };
+    host_command(program, args).is_ok_and(|output| output.status.success())
+}
+
+fn rpm_architecture() -> AppResult<String> {
+    let output = host_command("/usr/bin/rpm", &["--eval", "%{_arch}"])?;
+    if !output.status.success() {
+        return Err("cannot determine RPM architecture".to_owned());
+    }
+    match String::from_utf8_lossy(&output.stdout).trim() {
+        "x86_64" => Ok("x86_64".to_owned()),
+        "aarch64" => Ok("aarch64".to_owned()),
+        _ => Err("RPM architecture is unsupported for the privileged helper".to_owned()),
+    }
+}
+
+fn backend_architecture(backend: HelperBackend) -> AppResult<String> {
+    match backend {
+        HelperBackend::Debian => dpkg_architecture(),
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => rpm_architecture(),
+    }
+}
+
+fn package_identity_matches(fields: &[&str], architecture: &str) -> bool {
+    let version = app_version();
+    fields == [HELPER_PACKAGE, version.as_str(), architecture]
 }
 
 fn verify_deb_identity(path: &Path, architecture: &str) -> AppResult<()> {
@@ -1276,11 +1546,41 @@ fn verify_deb_identity(path: &Path, architecture: &str) -> AppResult<()> {
     if !output.status.success() {
         return Err("cannot inspect helper package identity".to_owned());
     }
-    let version = app_version();
     let decoded = String::from_utf8_lossy(&output.stdout);
     let fields: Vec<_> = decoded.lines().collect();
-    if fields != [HELPER_PACKAGE, version.as_str(), architecture] {
+    if !package_identity_matches(&fields, architecture) {
         return Err("helper package identity, version, or architecture is unexpected".to_owned());
+    }
+    Ok(())
+}
+
+fn rpm_package_identity_matches(fields: &[&str], architecture: &str) -> bool {
+    let version = app_version();
+    fields == [HELPER_PACKAGE, "0", version.as_str(), "1", architecture]
+}
+
+fn verify_rpm_identity(path: &Path, architecture: &str) -> AppResult<()> {
+    let path_text = path.to_string_lossy().into_owned();
+    let output = host_command(
+        "/usr/bin/rpm",
+        &[
+            "--query",
+            "--queryformat",
+            "%{NAME}\n%{EPOCHNUM}\n%{VERSION}\n%{RELEASE}\n%{ARCH}\n",
+            "--package",
+            &path_text,
+        ],
+    )?;
+    if !output.status.success() {
+        return Err("cannot inspect helper RPM identity".to_owned());
+    }
+    let decoded = String::from_utf8_lossy(&output.stdout);
+    let fields: Vec<_> = decoded.lines().collect();
+    if !rpm_package_identity_matches(&fields, architecture) {
+        return Err(
+            "helper RPM identity, epoch, version, release, or architecture is unexpected"
+                .to_owned(),
+        );
     }
     Ok(())
 }
@@ -1431,6 +1731,13 @@ fn signed_members_match(signature: &str, members: &BTreeMap<String, Vec<u8>>) ->
     Ok(())
 }
 
+fn has_pinned_signature(status: &[u8]) -> bool {
+    String::from_utf8_lossy(status).lines().any(|line| {
+        line.starts_with("[GNUPG:] VALIDSIG ")
+            && line.split_whitespace().nth(2) == Some(PINNED_SIGNING_FINGERPRINT)
+    })
+}
+
 fn verify_deb_signature(path: &Path) -> AppResult<()> {
     let members = read_deb_members(path)?;
     let signature = members
@@ -1503,18 +1810,193 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
         if !verify_status.success() {
             return Err("helper package signature is invalid".to_owned());
         }
-        if !String::from_utf8_lossy(&verified_stderr)
-            .lines()
-            .any(|line| {
-                line.starts_with("[GNUPG:] VALIDSIG ")
-                    && line.split_whitespace().nth(2) == Some(PINNED_SIGNING_FINGERPRINT)
-            })
-        {
+        if !has_pinned_signature(&verified_stderr) {
             return Err("helper package signature uses an unexpected signing key".to_owned());
         }
         signed_members_match(&String::from_utf8_lossy(&verified_stdout), &members)
     })();
     let _ = fs::remove_dir_all(home);
+    outcome
+}
+
+fn write_pinned_signing_key(path: &Path) -> AppResult<()> {
+    let mut key_file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .mode(0o600)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+        .map_err(|error| format!("cannot create pinned signing key file: {error}"))?;
+    key_file
+        .write_all(PINNED_SIGNING_KEY)
+        .map_err(|error| format!("cannot write pinned signing key: {error}"))?;
+    key_file
+        .sync_all()
+        .map_err(|error| format!("cannot sync pinned signing key: {error}"))
+}
+
+fn host_gpg() -> AppResult<&'static str> {
+    ["/usr/bin/gpg2", "/usr/bin/gpg"]
+        .into_iter()
+        .find(|program| {
+            host_command(program, &["--version"]).is_ok_and(|output| output.status.success())
+        })
+        .ok_or_else(|| "GnuPG is unavailable for helper signature verification".to_owned())
+}
+
+fn verify_pinned_key_material(gpg: &str, key_path: &Path) -> AppResult<()> {
+    let home = key_path
+        .parent()
+        .ok_or_else(|| "compiled signing key has no private keyring parent".to_owned())?
+        .to_string_lossy()
+        .into_owned();
+    let key_text = key_path.to_string_lossy().into_owned();
+    let (status, output, _) = host_bounded_output(
+        gpg,
+        &[
+            "--batch",
+            "--no-options",
+            "--homedir",
+            &home,
+            "--with-colons",
+            "--import-options",
+            "show-only",
+            "--dry-run",
+            "--import",
+            &key_text,
+        ],
+        MAX_HELPER_METADATA_BYTES,
+        Duration::from_secs(30),
+    )?;
+    let decoded = String::from_utf8_lossy(&output);
+    let mut primary = None;
+    let mut public_keys = 0usize;
+    let mut awaiting_primary_fingerprint = false;
+    for line in decoded.lines() {
+        let fields: Vec<_> = line.split(':').collect();
+        match fields.first().copied() {
+            Some("pub") => {
+                public_keys += 1;
+                awaiting_primary_fingerprint = true;
+            }
+            Some("fpr") if awaiting_primary_fingerprint => {
+                primary = fields.get(9).copied();
+                awaiting_primary_fingerprint = false;
+            }
+            _ => {}
+        }
+    }
+    if !status.success() || public_keys != 1 || primary != Some(PINNED_SIGNING_FINGERPRINT) {
+        return Err(
+            "compiled ClamUI signing key does not have the pinned primary fingerprint".to_owned(),
+        );
+    }
+    Ok(())
+}
+
+fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<()> {
+    let temporary_root = package
+        .parent()
+        .ok_or_else(|| "helper RPM has no parent directory".to_owned())?;
+    let home = unique_directory(temporary_root, "clamui-rpm-gpg")?;
+    let key_path = home.join("clamui-signing-key.asc");
+    let outcome = (|| -> AppResult<()> {
+        write_pinned_signing_key(&key_path)?;
+        let gpg = host_gpg()?;
+        verify_pinned_key_material(gpg, &key_path)?;
+        let home_text = home.to_string_lossy().into_owned();
+        let key_text = key_path.to_string_lossy().into_owned();
+        let signature_text = signature.to_string_lossy().into_owned();
+        let package_text = package.to_string_lossy().into_owned();
+        let (import_status, _, _) = host_bounded_output(
+            gpg,
+            &[
+                "--batch",
+                "--no-options",
+                "--homedir",
+                &home_text,
+                "--import",
+                &key_text,
+            ],
+            MAX_HELPER_METADATA_BYTES,
+            Duration::from_secs(30),
+        )?;
+        if !import_status.success() {
+            return Err("cannot import ClamUI signing key".to_owned());
+        }
+        let (verify_status, _, verified_stderr) = host_bounded_output(
+            gpg,
+            &[
+                "--batch",
+                "--no-options",
+                "--homedir",
+                &home_text,
+                "--status-fd=2",
+                "--verify",
+                &signature_text,
+                &package_text,
+            ],
+            MAX_HELPER_METADATA_BYTES,
+            Duration::from_secs(30),
+        )?;
+        if !verify_status.success() {
+            return Err("helper RPM detached signature is invalid".to_owned());
+        }
+        if !has_pinned_signature(&verified_stderr) {
+            return Err("helper RPM detached signature uses an unexpected signing key".to_owned());
+        }
+        Ok(())
+    })();
+    let _ = fs::remove_dir_all(home);
+    outcome
+}
+
+fn verify_rpm_embedded_signature(package: &Path) -> AppResult<()> {
+    let temporary_root = package
+        .parent()
+        .ok_or_else(|| "helper RPM has no parent directory".to_owned())?;
+    let database = unique_directory(temporary_root, "clamui-rpmdb")?;
+    let key_path = database.join("clamui-signing-key.asc");
+    let outcome = (|| -> AppResult<()> {
+        write_pinned_signing_key(&key_path)?;
+        let database_text = database.to_string_lossy().into_owned();
+        let key_text = key_path.to_string_lossy().into_owned();
+        let package_text = package.to_string_lossy().into_owned();
+        let options = [
+            "--dbpath",
+            &database_text,
+            "--define",
+            "_keyring rpmdb",
+            "--define",
+            "_pkgverify_level all",
+        ];
+        let mut import = options.to_vec();
+        import.extend(["--import", &key_text]);
+        let (import_status, _, _) = host_bounded_output(
+            "/usr/bin/rpmkeys",
+            &import,
+            MAX_HELPER_METADATA_BYTES,
+            Duration::from_secs(30),
+        )?;
+        if !import_status.success() {
+            return Err(
+                "cannot import the pinned signing key into the private RPM keyring".to_owned(),
+            );
+        }
+        let mut check = options.to_vec();
+        check.extend(["--checksig", "--", &package_text]);
+        let (check_status, _, _) = host_bounded_output(
+            "/usr/bin/rpmkeys",
+            &check,
+            MAX_HELPER_METADATA_BYTES,
+            Duration::from_secs(30),
+        )?;
+        if !check_status.success() {
+            return Err("helper RPM embedded signature or digest is invalid".to_owned());
+        }
+        Ok(())
+    })();
+    let _ = fs::remove_dir_all(database);
     outcome
 }
 
@@ -1563,7 +2045,21 @@ pub fn run_helper(args: &[String]) -> i32 {
     }
 }
 
-fn installed_version_matches(architecture: &str) -> AppResult<bool> {
+fn installed_deb_package_identity_matches<'a>(
+    mut fields: impl Iterator<Item = &'a str>,
+    host_architecture: &str,
+) -> bool {
+    let version = app_version();
+    fields.next() == Some("ii ")
+        && fields.next() == Some(version.as_str())
+        && matches!(
+            fields.next(),
+            Some(architecture) if architecture == host_architecture || architecture == "all"
+        )
+        && fields.next().is_none()
+}
+
+fn installed_version_matches(host_architecture: &str) -> AppResult<bool> {
     let output = host_command(
         "/usr/bin/dpkg-query",
         &[
@@ -1572,53 +2068,217 @@ fn installed_version_matches(architecture: &str) -> AppResult<bool> {
             HELPER_PACKAGE,
         ],
     )?;
-    let version = app_version();
     let decoded = String::from_utf8_lossy(&output.stdout);
-    let fields: Vec<_> = decoded.lines().collect();
-    Ok(output.status.success() && fields == ["ii ", version.as_str(), architecture])
+    Ok(output.status.success()
+        && installed_deb_package_identity_matches(decoded.lines(), host_architecture))
 }
 
-fn debian_host() -> bool {
-    host_command("/usr/bin/dpkg", &["--version"]).is_ok_and(|output| output.status.success())
+fn installed_rpm_version_matches(host_architecture: &str) -> AppResult<bool> {
+    let output = host_command(
+        "/usr/bin/rpm",
+        &[
+            "--query",
+            "--queryformat",
+            "%{NAME}\n%{EPOCHNUM}\n%{VERSION}\n%{RELEASE}\n%{ARCH}\n",
+            HELPER_PACKAGE,
+        ],
+    )?;
+    let decoded = String::from_utf8_lossy(&output.stdout);
+    let fields: Vec<_> = decoded.lines().collect();
+    Ok(output.status.success() && rpm_package_identity_matches(&fields, host_architecture))
+}
+
+fn installed_backend_version_matches(
+    backend: HelperBackend,
+    host_architecture: &str,
+) -> AppResult<bool> {
+    match backend {
+        HelperBackend::Debian => installed_version_matches(host_architecture),
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => {
+            installed_rpm_version_matches(host_architecture)
+        }
+    }
+}
+
+fn atomic_deployments_ready(deployments: &[Value]) -> bool {
+    deployments
+        .first()
+        .and_then(|deployment| deployment.get("booted"))
+        .and_then(Value::as_bool)
+        == Some(true)
+        && !deployments.iter().any(|deployment| {
+            deployment.get("staged").and_then(Value::as_bool) == Some(true)
+                || deployment
+                    .get("pending-base-checksum")
+                    .and_then(Value::as_str)
+                    .is_some_and(|checksum| !checksum.is_empty())
+        })
+}
+
+fn atomic_host_ready() -> AppResult<bool> {
+    let (status, stdout, _) = host_bounded_output(
+        "/usr/bin/rpm-ostree",
+        &["status", "--json", "--pending-exit-77"],
+        MAX_HELPER_METADATA_BYTES,
+        Duration::from_secs(30),
+    )?;
+    if status.code() == Some(77) {
+        return Ok(false);
+    }
+    if !status.success() {
+        return Err("cannot inspect rpm-ostree deployment state".to_owned());
+    }
+    let deployment_status: Value = serde_json::from_slice(&stdout)
+        .map_err(|_| "rpm-ostree returned invalid deployment status".to_owned())?;
+    let deployments = deployment_status
+        .get("deployments")
+        .and_then(Value::as_array)
+        .ok_or_else(|| "rpm-ostree returned invalid deployment status".to_owned())?;
+    Ok(atomic_deployments_ready(deployments))
+}
+
+fn atomic_helper_package_absent() -> AppResult<bool> {
+    let output = host_command("/usr/bin/rpm", &["--query", HELPER_PACKAGE])?;
+    match output.status.code() {
+        Some(1) => Ok(true),
+        Some(0) => Ok(false),
+        _ => Err("cannot determine whether the Atomic helper package is installed".to_owned()),
+    }
+}
+
+fn helper_backend_available(backend: HelperBackend) -> bool {
+    backend_available(backend)
+        && (backend != HelperBackend::FedoraAtomic
+            || (atomic_host_ready().is_ok_and(|ready| ready)
+                && atomic_helper_package_absent().is_ok_and(|absent| absent)))
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum CanonicalHelperState {
+    Missing,
+    Untrusted,
+}
+
+fn missing_native_helper_state() -> CanonicalHelperState {
+    match root_owned_regular_trust(Path::new(HELPER_PATH), true) {
+        Err(RootOwnedRegularError::Missing) => CanonicalHelperState::Missing,
+        Ok(()) | Err(RootOwnedRegularError::Untrusted) => CanonicalHelperState::Untrusted,
+    }
+}
+
+fn helper_install_policy(
+    flatpak_host: bool,
+    backend: Option<HelperBackend>,
+    state: CanonicalHelperState,
+) -> bool {
+    backend.is_some() && (flatpak_host || state == CanonicalHelperState::Missing)
+}
+
+fn helper_installable(
+    flatpak_host: bool,
+    backend: Option<HelperBackend>,
+    state: CanonicalHelperState,
+) -> bool {
+    helper_install_policy(flatpak_host, backend, state)
+        && backend.is_some_and(helper_backend_available)
+}
+
+fn unavailable_helper_status(
+    version: String,
+    state: CanonicalHelperState,
+    detail: String,
+) -> PrivilegedHelperStatus {
+    PrivilegedHelperStatus {
+        state: if state == CanonicalHelperState::Missing {
+            "unsupported".to_owned()
+        } else {
+            "untrusted".to_owned()
+        },
+        package_name: HELPER_PACKAGE.to_owned(),
+        version,
+        detail: Some(detail),
+        installed: false,
+        installable: false,
+        needs_onboarding: true,
+    }
 }
 
 pub fn status() -> PrivilegedHelperStatus {
     let version = app_version();
+    let backend = helper_backend();
     match trusted_helper_path() {
-        Ok(_) => match dpkg_architecture().and_then(|arch| installed_version_matches(&arch)) {
-            Ok(true) => PrivilegedHelperStatus {
-                state: "installed".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                detail: None, installed: true, installable: false, needs_onboarding: false,
-            },
-            Ok(false) if flatpak() => PrivilegedHelperStatus {
-                state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                detail: None, installed: false, installable: true, needs_onboarding: true,
-            },
-            Ok(false) => PrivilegedHelperStatus {
-                state: "outdated".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                detail: Some("The host helper package version does not match this ClamUI version.".to_owned()),
-                installed: false, installable: false, needs_onboarding: true,
-            },
-            Err(_) => PrivilegedHelperStatus {
-                state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                detail: Some("The host helper was found, but its installed package version could not be verified.".to_owned()),
-                installed: false, installable: false, needs_onboarding: true,
-            },
-        },
-        Err(_) if !flatpak() => PrivilegedHelperStatus {
-            state: "not_applicable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-            detail: Some("The privileged helper is only installed automatically for Flatpak ClamUI.".to_owned()),
-            installed: false, installable: false, needs_onboarding: false,
-        },
-        Err(_) if !debian_host() => PrivilegedHelperStatus {
-            state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-            detail: Some("Automatic privileged-helper installation is currently supported only on Debian-family hosts.".to_owned()),
-            installed: false, installable: false, needs_onboarding: true,
-        },
-        Err(_) => PrivilegedHelperStatus {
-            state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-            detail: None, installed: false, installable: true, needs_onboarding: true,
-        },
+        Ok(_) => {
+            let package_matches = backend
+                .filter(|backend| backend_available(*backend))
+                .ok_or_else(|| "the host package manager is unavailable".to_owned())
+                .and_then(|backend| {
+                    backend_architecture(backend).and_then(|architecture| {
+                        installed_backend_version_matches(backend, &architecture)
+                    })
+                });
+            match package_matches {
+                Ok(true) => PrivilegedHelperStatus {
+                    state: "installed".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
+                    detail: None, installed: true, installable: false, needs_onboarding: false,
+                },
+                Ok(false) if flatpak() && backend.is_some_and(helper_backend_available) => PrivilegedHelperStatus {
+                    state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
+                    detail: None, installed: false, installable: true, needs_onboarding: true,
+                },
+                Ok(false) => PrivilegedHelperStatus {
+                    state: "outdated".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
+                    detail: Some("The host helper package version does not match this ClamUI version.".to_owned()),
+                    installed: false, installable: false, needs_onboarding: true,
+                },
+                Err(_) => PrivilegedHelperStatus {
+                    state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
+                    detail: Some("The host helper was found, but its installed package version could not be verified.".to_owned()),
+                    installed: false, installable: false, needs_onboarding: true,
+                },
+            }
+        }
+        Err(detail) => {
+            let flatpak_host = flatpak();
+            let state = if flatpak_host {
+                CanonicalHelperState::Missing
+            } else {
+                missing_native_helper_state()
+            };
+            if helper_installable(flatpak_host, backend, state) {
+                PrivilegedHelperStatus {
+                    state: "installable".to_owned(),
+                    package_name: HELPER_PACKAGE.to_owned(),
+                    version,
+                    detail: None,
+                    installed: false,
+                    installable: true,
+                    needs_onboarding: true,
+                }
+            } else if backend == Some(HelperBackend::FedoraAtomic)
+                && !atomic_host_ready().is_ok_and(|ready| ready)
+            {
+                unavailable_helper_status(
+                    version,
+                    state,
+                    "The Atomic host has pending deployment changes or cannot be inspected. Complete or repair them manually before installing the privileged helper.".to_owned(),
+                )
+            } else if backend == Some(HelperBackend::FedoraAtomic)
+                && atomic_helper_package_absent().is_ok_and(|absent| !absent)
+            {
+                unavailable_helper_status(
+                    version,
+                    state,
+                    "The Atomic host already has a privileged-helper RPM. Repair or upgrade it manually; ClamUI only performs new add-only live installations.".to_owned(),
+                )
+            } else if backend.is_none() && state == CanonicalHelperState::Missing {
+                unavailable_helper_status(
+                    version,
+                    state,
+                    "Automatic privileged-helper installation is currently supported only on Debian and Fedora hosts.".to_owned(),
+                )
+            } else {
+                unavailable_helper_status(version, state, detail)
+            }
+        }
     }
 }
 
@@ -1672,75 +2332,215 @@ fn download_bounded(url: &str, destination: &Path, limit: usize) -> AppResult<()
     result
 }
 
-fn release_asset() -> AppResult<(u64, String, String)> {
-    let release = format!(
-        "https://api.github.com/repos/linx-systems/clamui/releases/tags/v{}",
+#[derive(Debug)]
+struct HelperSignature {
+    size: u64,
+    digest: String,
+    url: String,
+}
+
+#[derive(Debug)]
+struct HelperAsset {
+    size: u64,
+    digest: String,
+    url: String,
+    architecture: String,
+    signature: Option<HelperSignature>,
+}
+
+fn unique_asset_named<'a>(assets: &'a [Value], name: &str) -> AppResult<Option<&'a Value>> {
+    let mut matched = assets
+        .iter()
+        .filter(|asset| asset.get("name").and_then(Value::as_str) == Some(name));
+    let first = matched.next();
+    if matched.next().is_some() {
+        return Err("release metadata has ambiguous matching helper assets".to_owned());
+    }
+    Ok(first)
+}
+
+fn release_asset_metadata(
+    asset: &Value,
+    expected_name: &str,
+    max_size: u64,
+    content_types: &[&str],
+) -> AppResult<(u64, String, String)> {
+    let expected_url = format!(
+        "https://github.com/linx-systems/clamui/releases/download/v{}/{expected_name}",
         app_version()
     );
+    let size = asset
+        .get("size")
+        .and_then(Value::as_u64)
+        .filter(|size| *size > 0 && *size <= max_size)
+        .ok_or_else(|| "matching helper asset has invalid size".to_owned())?;
+    if asset.get("state").and_then(Value::as_str) != Some("uploaded")
+        || !content_types.contains(
+            &asset
+                .get("content_type")
+                .and_then(Value::as_str)
+                .unwrap_or_default(),
+        )
+        || asset.get("browser_download_url").and_then(Value::as_str) != Some(expected_url.as_str())
+    {
+        return Err("matching helper asset metadata is invalid".to_owned());
+    }
+    let digest = asset
+        .get("digest")
+        .and_then(Value::as_str)
+        .and_then(|digest| digest.strip_prefix("sha256:"))
+        .filter(|digest| hex_digest(digest))
+        .ok_or_else(|| "matching helper asset has no SHA-256 digest".to_owned())?
+        .to_owned();
+    Ok((size, digest, expected_url))
+}
+
+fn rpm_asset_name(version: &str, architecture: &str) -> String {
+    format!("{HELPER_PACKAGE}-{version}-1.{architecture}.rpm")
+}
+
+fn valid_release_asset(
+    asset: &Value,
+    backend: HelperBackend,
+    architecture: &str,
+) -> AppResult<HelperAsset> {
+    let version = app_version();
+    let expected_name = match backend {
+        HelperBackend::Debian => format!("{HELPER_PACKAGE}_{version}_{architecture}.deb"),
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => {
+            rpm_asset_name(&version, architecture)
+        }
+    };
+    let content_types = match backend {
+        HelperBackend::Debian => &["application/x-debian-package"][..],
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => &[
+            "application/x-rpm",
+            "application/x-redhat-package-manager",
+            "application/octet-stream",
+        ][..],
+    };
+    let (size, digest, url) = release_asset_metadata(
+        asset,
+        &expected_name,
+        MAX_HELPER_PACKAGE_BYTES,
+        content_types,
+    )?;
+    Ok(HelperAsset {
+        size,
+        digest,
+        url,
+        architecture: architecture.to_owned(),
+        signature: None,
+    })
+}
+
+fn select_release_asset(
+    release: &Value,
+    backend: HelperBackend,
+    host_architecture: &str,
+) -> AppResult<HelperAsset> {
+    let version = app_version();
+    if release.get("tag_name").and_then(Value::as_str) != Some(&format!("v{version}"))
+        || release.get("draft").and_then(Value::as_bool) != Some(false)
+        || release.get("prerelease").and_then(Value::as_bool) != Some(false)
+        || release
+            .get("published_at")
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+            .is_none()
+    {
+        return Err("release metadata does not describe the exact published version".to_owned());
+    }
+    let assets = release
+        .get("assets")
+        .and_then(Value::as_array)
+        .ok_or_else(|| "release metadata has no assets".to_owned())?;
+    let exact_name = match backend {
+        HelperBackend::Debian => format!("{HELPER_PACKAGE}_{version}_{host_architecture}.deb"),
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => {
+            rpm_asset_name(&version, host_architecture)
+        }
+    };
+    if let Some(asset) = unique_asset_named(assets, &exact_name)? {
+        let mut selected = valid_release_asset(asset, backend, host_architecture)?;
+        if backend.rpm() {
+            let signature_name = format!("{exact_name}.asc");
+            let signature_asset = unique_asset_named(assets, &signature_name)?
+                .ok_or_else(|| "release metadata has no detached RPM signature".to_owned())?;
+            let (size, digest, url) = release_asset_metadata(
+                signature_asset,
+                &signature_name,
+                MAX_HELPER_METADATA_BYTES as u64,
+                &[
+                    "application/pgp-signature",
+                    "application/pgp-keys",
+                    "application/octet-stream",
+                ],
+            )?;
+            selected.signature = Some(HelperSignature { size, digest, url });
+        }
+        return Ok(selected);
+    }
+    if backend != HelperBackend::Debian {
+        return Err("release metadata has no exact RPM helper asset".to_owned());
+    }
+    let all_name = format!("{HELPER_PACKAGE}_{version}_all.deb");
+    let asset = unique_asset_named(assets, &all_name)?
+        .ok_or_else(|| "release metadata has no compatible helper asset".to_owned())?;
+    valid_release_asset(asset, backend, "all")
+}
+
+fn release_asset(backend: HelperBackend) -> AppResult<HelperAsset> {
+    let version = app_version();
+    let release =
+        format!("https://api.github.com/repos/linx-systems/clamui/releases/tags/v{version}");
     let directory = unique_directory(&env::temp_dir(), "clamui-release")?;
     let temp = directory.join("release.json");
-    let result = (|| -> AppResult<(u64, String, String)> {
+    let result = (|| -> AppResult<HelperAsset> {
         download_bounded(&release, &temp, MAX_HELPER_METADATA_BYTES)?;
         let metadata =
             fs::read(&temp).map_err(|error| format!("cannot read release metadata: {error}"))?;
         let release: Value = serde_json::from_slice(&metadata)
             .map_err(|_| "release metadata is not valid JSON".to_owned())?;
-        if release.get("tag_name").and_then(Value::as_str) != Some(&format!("v{}", app_version()))
-            || release.get("draft").and_then(Value::as_bool) != Some(false)
-            || release.get("prerelease").and_then(Value::as_bool) != Some(false)
-            || release
-                .get("published_at")
-                .and_then(Value::as_str)
-                .filter(|value| !value.is_empty())
-                .is_none()
-        {
-            return Err(
-                "release metadata does not describe the exact published version".to_owned(),
-            );
-        }
-        let architecture = dpkg_architecture()?;
-        let expected_name = package_name(&architecture);
-        let expected_url = format!(
-            "https://github.com/linx-systems/clamui/releases/download/v{}/{expected_name}",
-            app_version()
-        );
-        let matches = release
-            .get("assets")
-            .and_then(Value::as_array)
-            .ok_or_else(|| "release metadata has no assets".to_owned())?
-            .iter()
-            .filter(|asset| {
-                asset.get("name").and_then(Value::as_str) == Some(expected_name.as_str())
-            })
-            .collect::<Vec<_>>();
-        if matches.len() != 1 {
-            return Err("release metadata has no unique matching helper asset".to_owned());
-        }
-        let asset = matches[0];
-        let size = asset
-            .get("size")
-            .and_then(Value::as_u64)
-            .filter(|size| *size > 0 && *size <= MAX_HELPER_PACKAGE_BYTES)
-            .ok_or_else(|| "matching helper asset has invalid size".to_owned())?;
-        if asset.get("state").and_then(Value::as_str) != Some("uploaded")
-            || asset.get("content_type").and_then(Value::as_str)
-                != Some("application/x-debian-package")
-            || asset.get("browser_download_url").and_then(Value::as_str)
-                != Some(expected_url.as_str())
-        {
-            return Err("matching helper asset metadata is invalid".to_owned());
-        }
-        let digest = asset
-            .get("digest")
-            .and_then(Value::as_str)
-            .and_then(|digest| digest.strip_prefix("sha256:"))
-            .filter(|digest| hex_digest(digest))
-            .ok_or_else(|| "matching helper asset has no SHA-256 digest".to_owned())?
-            .to_owned();
-        Ok((size, digest, expected_url))
+        let architecture = backend_architecture(backend)?;
+        select_release_asset(&release, backend, &architecture)
     })();
     let _ = fs::remove_dir_all(directory);
     result
+}
+
+fn first_install_command(backend: HelperBackend) -> Command {
+    let mut command = if flatpak() {
+        let mut command = Command::new("flatpak-spawn");
+        command.args(["--host", "/usr/bin/pkexec"]);
+        command
+    } else {
+        Command::new("/usr/bin/pkexec")
+    };
+    let script = match backend {
+        HelperBackend::Debian => FIRST_INSTALL_SCRIPT,
+        HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => FIRST_RPM_INSTALL_SCRIPT,
+    };
+    command.args(["/bin/sh", "-c", script, "clamui-first-install"]);
+    command
+}
+
+fn download_verified_asset(
+    url: &str,
+    destination: &Path,
+    size: u64,
+    digest: &str,
+) -> AppResult<()> {
+    download_bounded(url, destination, size as usize)?;
+    if fs::metadata(destination)
+        .map_err(|error| format!("cannot inspect helper package: {error}"))?
+        .len()
+        != size
+        || sha256_file(destination)? != digest
+    {
+        return Err("downloaded helper package did not pass digest verification".to_owned());
+    }
+    Ok(())
 }
 
 fn install_matching_helper() -> AppResult<PrivilegedHelperStatus> {
@@ -1753,44 +2553,57 @@ fn install_matching_helper() -> AppResult<PrivilegedHelperStatus> {
             "the privileged helper cannot be installed automatically here".to_owned()
         }));
     }
-    let (size, digest, url) = release_asset()?;
+    let backend = helper_backend()
+        .filter(|backend| helper_backend_available(*backend))
+        .ok_or_else(|| "the selected helper installer is unavailable".to_owned())?;
+    let asset = release_asset(backend)?;
     let uid = current_uid();
     let root = helper_download_root_for_uid(uid)?;
     private_directory(&root, uid)?;
     let directory = unique_directory(&root, "install")?;
-    let package = directory.join("helper.deb");
+    let package = directory.join(format!("helper.{}", backend.package_extension()));
+    let signature = directory.join("helper.rpm.asc");
     let result = (|| -> AppResult<PrivilegedHelperStatus> {
-        download_bounded(&url, &package, size as usize)?;
-        if fs::metadata(&package)
-            .map_err(|error| format!("cannot inspect helper package: {error}"))?
-            .len()
-            != size
-            || sha256_file(&package)? != digest
-        {
-            return Err("downloaded helper package did not pass digest verification".to_owned());
+        download_verified_asset(&asset.url, &package, asset.size, &asset.digest)?;
+        match backend {
+            HelperBackend::Debian => {
+                verify_deb_identity(&package, &asset.architecture)?;
+                verify_deb_signature(&package)?;
+            }
+            HelperBackend::FedoraDnf | HelperBackend::FedoraAtomic => {
+                let signature_asset = asset
+                    .signature
+                    .as_ref()
+                    .ok_or_else(|| "release metadata has no detached RPM signature".to_owned())?;
+                download_verified_asset(
+                    &signature_asset.url,
+                    &signature,
+                    signature_asset.size,
+                    &signature_asset.digest,
+                )?;
+                verify_rpm_identity(&package, &asset.architecture)?;
+                verify_rpm_detached_signature(&package, &signature)?;
+                verify_rpm_embedded_signature(&package)?;
+            }
         }
-        let architecture = dpkg_architecture()?;
-        verify_deb_identity(&package, &architecture)?;
-        verify_deb_signature(&package)?;
         // v4 helpers intentionally know only config reads/writes. Every
         // first-install and version-mismatch package upgrade therefore uses
         // the same fixed, authenticated bootstrap rather than inventing an
         // incompatible helper subprotocol.
-        let mut command = Command::new("flatpak-spawn");
-        command.args([
-            "--host",
-            "pkexec",
-            "/bin/sh",
-            "-c",
-            FIRST_INSTALL_SCRIPT,
-            "clamui-first-install",
-        ]);
+        let mut command = first_install_command(backend);
         command
             .arg(&package)
-            .arg(size.to_string())
-            .arg(&digest)
+            .arg(asset.size.to_string())
+            .arg(&asset.digest)
             .arg(app_version())
-            .arg(&architecture);
+            .arg(&asset.architecture);
+        if let Some(signature_asset) = asset.signature.as_ref() {
+            command
+                .arg(&signature)
+                .arg(signature_asset.size.to_string())
+                .arg(&signature_asset.digest)
+                .arg(backend.root_installer());
+        }
         let output = command
             .output()
             .map_err(|error| format!("cannot launch root package installer: {error}"))?;
@@ -1828,6 +2641,368 @@ pub fn dispatch(ctx: &Context, action: &str, _args: Value) -> AppResult<Value> {
             serde_json::to_value(status).map_err(|error| error.to_string())
         }
         _ => Err(format!("unknown privileged action: {action}")),
+    }
+}
+
+#[cfg(test)]
+mod rpm_bootstrap_tests {
+    use super::*;
+    use std::fs;
+    use std::os::unix::fs::{MetadataExt, PermissionsExt};
+    use std::process::Command;
+    use tempfile::TempDir;
+
+    #[test]
+    #[ignore = "requires a built signed helper RPM and Fedora rpm/gpg tools"]
+    fn rpm_bootstrap_rejects_invalid_signature() {
+        let uid = current_uid();
+        assert_ne!(uid, 0, "RPM bootstrap rejection test must run unprivileged");
+        let built_rpm = env::var_os("CLAMUI_TEST_HELPER_RPM")
+            .expect("CLAMUI_TEST_HELPER_RPM must identify the built helper RPM");
+        let root = TempDir::new().expect("create private RPM bootstrap test directory");
+        fs::set_permissions(root.path(), fs::Permissions::from_mode(0o700))
+            .expect("secure RPM bootstrap test directory");
+        let package = root.path().join("helper.rpm");
+        fs::copy(&built_rpm, &package).expect("stage built helper RPM read-only");
+        fs::set_permissions(&package, fs::Permissions::from_mode(0o600))
+            .expect("secure staged helper RPM");
+        let signature = root.path().join("helper.rpm.asc");
+        fs::write(&signature, b"not a detached ClamUI helper RPM signature\n")
+            .expect("write invalid detached signature");
+        fs::set_permissions(&signature, fs::Permissions::from_mode(0o600))
+            .expect("secure invalid detached signature");
+
+        let package_metadata = fs::metadata(&package).expect("inspect staged helper RPM");
+        let signature_metadata = fs::metadata(&signature).expect("inspect invalid signature");
+        assert_eq!(
+            package_metadata.uid(),
+            uid,
+            "staged RPM must be caller-owned"
+        );
+        assert_eq!(
+            package_metadata.mode() & 0o777,
+            0o600,
+            "staged RPM must pass the root bootstrap mode gate"
+        );
+        assert_eq!(
+            signature_metadata.uid(),
+            uid,
+            "invalid signature must be caller-owned"
+        );
+        assert_eq!(
+            signature_metadata.mode() & 0o777,
+            0o600,
+            "invalid signature must pass the root bootstrap mode gate"
+        );
+
+        let architecture = rpm_architecture().expect("determine RPM architecture");
+        verify_rpm_identity(&package, &architecture)
+            .expect("CI-provided helper RPM must match this build identity");
+        let package_size = package_metadata.len();
+        let signature_size = signature_metadata.len();
+        let package_digest = sha256_file(&package).expect("hash staged helper RPM");
+        let signature_digest = sha256_file(&signature).expect("hash invalid signature");
+        let status = Command::new("/bin/sh")
+            .args(["-c", FIRST_RPM_INSTALL_SCRIPT, "clamui-rpm-bootstrap-test"])
+            .arg(&package)
+            .arg(package_size.to_string())
+            .arg(&package_digest)
+            .arg(app_version())
+            .arg(&architecture)
+            .arg(&signature)
+            .arg(signature_size.to_string())
+            .arg(&signature_digest)
+            .arg("dnf")
+            .env("PKEXEC_UID", uid.to_string())
+            .status()
+            .expect("run production RPM bootstrap transaction");
+        assert_eq!(
+            status.code(),
+            Some(6),
+            "an invalid detached signature must fail before RPM key import or installation"
+        );
+    }
+}
+
+#[cfg(test)]
+mod helper_install_policy_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn release(assets: Vec<Value>) -> Value {
+        json!({
+            "tag_name": format!("v{}", app_version()),
+            "draft": false,
+            "prerelease": false,
+            "published_at": "2026-10-20T00:00:00Z",
+            "assets": assets,
+        })
+    }
+
+    fn asset(name: String, content_type: &str) -> Value {
+        let version = app_version();
+        json!({
+            "name": name.clone(),
+            "size": 10_446,
+            "state": "uploaded",
+            "content_type": content_type,
+            "browser_download_url":
+                format!("https://github.com/linx-systems/clamui/releases/download/v{version}/{}", name),
+            "digest": format!("sha256:{}", "a".repeat(64)),
+        })
+    }
+
+    fn deb_asset(architecture: &str) -> Value {
+        asset(
+            format!("{HELPER_PACKAGE}_{}_{architecture}.deb", app_version()),
+            "application/x-debian-package",
+        )
+    }
+
+    fn rpm_asset(architecture: &str) -> Value {
+        asset(
+            rpm_asset_name(&app_version(), architecture),
+            "application/x-rpm",
+        )
+    }
+
+    fn rpm_signature(architecture: &str) -> Value {
+        asset(
+            format!("{}.asc", rpm_asset_name(&app_version(), architecture)),
+            "application/pgp-signature",
+        )
+    }
+
+    #[test]
+    fn automatic_install_policy_allows_only_supported_missing_or_flatpak_helpers() {
+        for backend in [
+            HelperBackend::Debian,
+            HelperBackend::FedoraDnf,
+            HelperBackend::FedoraAtomic,
+        ] {
+            assert!(helper_install_policy(
+                false,
+                Some(backend),
+                CanonicalHelperState::Missing
+            ));
+            assert!(helper_install_policy(
+                true,
+                Some(backend),
+                CanonicalHelperState::Untrusted
+            ));
+            assert!(!helper_install_policy(
+                false,
+                Some(backend),
+                CanonicalHelperState::Untrusted
+            ));
+        }
+        assert!(!helper_install_policy(
+            false,
+            None,
+            CanonicalHelperState::Missing
+        ));
+    }
+
+    #[test]
+    fn selects_exact_debian_asset_before_compatible_all_asset() {
+        let selected = select_release_asset(
+            &release(vec![deb_asset("all"), deb_asset("amd64")]),
+            HelperBackend::Debian,
+            "amd64",
+        )
+        .expect("select exact asset");
+
+        assert_eq!(selected.architecture, "amd64");
+        assert!(selected.url.ends_with("_amd64.deb"));
+    }
+
+    #[test]
+    fn retains_debian_all_compatibility_when_exact_asset_is_absent() {
+        let selected = select_release_asset(
+            &release(vec![deb_asset("all")]),
+            HelperBackend::Debian,
+            "amd64",
+        )
+        .expect("select all asset");
+
+        assert_eq!(selected.architecture, "all");
+        assert!(selected.url.ends_with("_all.deb"));
+    }
+
+    #[test]
+    fn rejects_invalid_preferred_debian_asset_without_falling_back_to_all() {
+        let mut invalid_exact = deb_asset("amd64");
+        invalid_exact["digest"] = json!("sha256:not-a-digest");
+        let error = select_release_asset(
+            &release(vec![invalid_exact, deb_asset("all")]),
+            HelperBackend::Debian,
+            "amd64",
+        )
+        .expect_err("invalid preferred asset must not fall back");
+
+        assert!(error.contains("SHA-256"));
+    }
+
+    #[test]
+    fn selects_rpm_only_with_exact_asset_and_detached_signature() {
+        let selected = select_release_asset(
+            &release(vec![rpm_asset("x86_64"), rpm_signature("x86_64")]),
+            HelperBackend::FedoraDnf,
+            "x86_64",
+        )
+        .expect("select RPM and detached signature");
+
+        assert_eq!(selected.architecture, "x86_64");
+        assert!(selected.url.ends_with("-1.x86_64.rpm"));
+        assert!(selected
+            .signature
+            .as_ref()
+            .expect("detached signature")
+            .url
+            .ends_with("-1.x86_64.rpm.asc"));
+    }
+
+    #[test]
+    fn accepts_the_release_uploader_detached_signature_mime_type() {
+        let mut signature = rpm_signature("x86_64");
+        signature["content_type"] = json!("application/pgp-keys");
+        assert!(
+            select_release_asset(
+                &release(vec![rpm_asset("x86_64"), signature]),
+                HelperBackend::FedoraDnf,
+                "x86_64",
+            )
+            .is_ok(),
+            "the release uploader labels .asc assets as application/pgp-keys"
+        );
+    }
+
+    #[test]
+    fn rejects_wrong_architecture_or_unsigned_rpm_without_fallback() {
+        let foreign = select_release_asset(
+            &release(vec![rpm_asset("aarch64"), rpm_signature("aarch64")]),
+            HelperBackend::FedoraDnf,
+            "x86_64",
+        )
+        .expect_err("foreign architecture must not be selected");
+        assert!(foreign.contains("exact RPM"));
+
+        let unsigned = select_release_asset(
+            &release(vec![rpm_asset("x86_64")]),
+            HelperBackend::FedoraAtomic,
+            "x86_64",
+        )
+        .expect_err("unsigned RPM must not be selected");
+        assert!(unsigned.contains("detached RPM signature"));
+    }
+
+    #[test]
+    fn rejects_ambiguous_or_mismatched_rpm_metadata() {
+        let ambiguous = select_release_asset(
+            &release(vec![
+                rpm_asset("x86_64"),
+                rpm_asset("x86_64"),
+                rpm_signature("x86_64"),
+            ]),
+            HelperBackend::FedoraDnf,
+            "x86_64",
+        )
+        .expect_err("duplicate RPM must fail closed");
+        assert!(ambiguous.contains("ambiguous"));
+
+        let mut invalid_signature = rpm_signature("x86_64");
+        invalid_signature["content_type"] = json!("text/plain");
+        assert!(
+            select_release_asset(
+                &release(vec![rpm_asset("x86_64"), invalid_signature]),
+                HelperBackend::FedoraDnf,
+                "x86_64",
+            )
+            .is_err(),
+            "unexpected detached-signature MIME type must not be selectable"
+        );
+    }
+
+    #[test]
+    fn atomic_add_only_policy_accepts_healthy_history_and_rejects_pending_or_unknown_state() {
+        assert!(atomic_deployments_ready(&[
+            json!({"booted": true}),
+            json!({"booted": false}),
+        ]));
+        assert!(!atomic_deployments_ready(&[
+            json!({"booted": false}),
+            json!({"booted": true}),
+        ]));
+        assert!(!atomic_deployments_ready(&[json!({
+            "booted": true,
+            "staged": true,
+        })]));
+        assert!(!atomic_deployments_ready(&[]));
+        assert!(!atomic_deployments_ready(&[json!({})]));
+    }
+
+    #[test]
+    fn package_identity_requires_exact_rpm_nevra() {
+        let version = app_version();
+        assert!(rpm_package_identity_matches(
+            &[HELPER_PACKAGE, "0", version.as_str(), "1", "x86_64"],
+            "x86_64"
+        ));
+        assert!(!rpm_package_identity_matches(
+            &[HELPER_PACKAGE, "0", version.as_str(), "2", "x86_64"],
+            "x86_64"
+        ));
+        assert!(!rpm_package_identity_matches(
+            &[HELPER_PACKAGE, "1", version.as_str(), "1", "x86_64"],
+            "x86_64"
+        ));
+        assert!(!rpm_package_identity_matches(
+            &[HELPER_PACKAGE, "0", version.as_str(), "1", "aarch64"],
+            "x86_64"
+        ));
+    }
+}
+
+#[cfg(test)]
+mod installed_deb_package_tests {
+    use super::*;
+
+    #[test]
+    fn installed_debian_package_identity_accepts_native_and_all_architectures() {
+        let version = app_version();
+        assert!(installed_deb_package_identity_matches(
+            ["ii ", version.as_str(), "amd64"].into_iter(),
+            "amd64"
+        ));
+        assert!(installed_deb_package_identity_matches(
+            ["ii ", version.as_str(), "all"].into_iter(),
+            "amd64"
+        ));
+    }
+
+    #[test]
+    fn installed_debian_package_identity_rejects_invalid_status_version_or_architecture() {
+        let version = app_version();
+        assert!(!installed_deb_package_identity_matches(
+            ["ii ", "unexpected-version", "amd64"].into_iter(),
+            "amd64"
+        ));
+        assert!(!installed_deb_package_identity_matches(
+            ["ii ", version.as_str(), "aarch64"].into_iter(),
+            "amd64"
+        ));
+        assert!(!installed_deb_package_identity_matches(
+            ["rc ", version.as_str(), "amd64"].into_iter(),
+            "amd64"
+        ));
+        assert!(!installed_deb_package_identity_matches(
+            ["ii ", version.as_str()].into_iter(),
+            "amd64"
+        ));
+        assert!(!installed_deb_package_identity_matches(
+            ["ii ", version.as_str(), "amd64", "unexpected-field"].into_iter(),
+            "amd64"
+        ));
     }
 }
 

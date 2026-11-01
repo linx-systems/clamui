@@ -12,8 +12,14 @@ jobs:
       sign: true
     secrets: inherit
 
+  build-rpm:
+    uses: ./.github/workflows/build-rpm.yml
+    with:
+      sign: true
+    secrets: inherit
+
   release:
-    needs: build-deb
+    needs: [build-deb, build-rpm]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,6 +32,13 @@ jobs:
         with:
           name: debian-packages
           path: debs
+
+      - name: Download RPM helper package artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: rpm-package-*
+          merge-multiple: true
+          path: rpms
 
       - name: Read release notes
         id: notes
@@ -44,5 +57,7 @@ jobs:
           files: |
             debs/clamui_*_amd64.deb
             debs/clamui-privileged-helper_*_amd64.deb
+            rpms/clamui-privileged-helper-*.rpm
+            rpms/clamui-privileged-helper-*.rpm.asc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
