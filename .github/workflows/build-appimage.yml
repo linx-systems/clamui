@@ -79,7 +79,7 @@ jobs:
 
       - name: Build AppImage
         env:
-          UPDATE_INFORMATION: ${{ startsWith(github.ref, 'refs/tags/') && 'gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64.AppImage.zsync' || '' }}
+          UPDATE_INFORMATION: ${{ (startsWith(github.ref, 'refs/tags/') || inputs.sign == true) && 'gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64.AppImage.zsync' || '' }}
         run: ./appimage/build-appimage.sh
 
       - name: Smoke-test native AppImage
@@ -114,7 +114,7 @@ jobs:
           test "${#appimage[@]}" -eq 1
           "./${appimage[0]}" --appimage-extract
           sign_args=(--sign --sign-key "${{ steps.gpg.outputs.fingerprint }}")
-          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') || inputs.sign == true }}" == "true" ]]; then
             sign_args+=(-u "gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64.AppImage.zsync")
           fi
           "${APPIMAGETOOL}" "${sign_args[@]}" squashfs-root/ "${appimage[0]}"
@@ -127,4 +127,5 @@ jobs:
           path: |
             ClamUI-*-x86_64.AppImage
             ClamUI-*-x86_64.AppImage.zsync
+          if-no-files-found: error
           retention-days: 7

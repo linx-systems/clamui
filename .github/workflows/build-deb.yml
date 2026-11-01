@@ -28,12 +28,23 @@ permissions:
 
 jobs:
   build-deb:
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-22.04
+          - architecture: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           submodules: recursive
+
+      - name: Verify runner architecture
+        run: test "$(dpkg --print-architecture)" = "${{ matrix.architecture }}"
 
       - name: Install native build dependencies
         run: |
@@ -76,8 +87,10 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
+          arch="${{ matrix.architecture }}"
           debs=()
-          for pattern in 'dist/clamui_*_amd64.deb' 'dist/clamui-privileged-helper_*_amd64.deb'; do
+          for package in clamui clamui-privileged-helper; do
+            pattern="dist/${package}_*_${arch}.deb"
             matches=( $pattern )
             if [ "${#matches[@]}" -ne 1 ]; then
               echo "Expected exactly one match for $pattern, found ${#matches[@]}" >&2
@@ -95,8 +108,9 @@ jobs:
       - name: Upload Debian package artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: debian-packages
+          name: debian-packages-${{ matrix.architecture }}
           path: |
-            dist/clamui_*_amd64.deb
-            dist/clamui-privileged-helper_*_amd64.deb
+            dist/clamui_*_${{ matrix.architecture }}.deb
+            dist/clamui-privileged-helper_*_${{ matrix.architecture }}.deb
+          if-no-files-found: error
           retention-days: 7

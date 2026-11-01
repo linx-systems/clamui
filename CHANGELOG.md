@@ -2,12 +2,13 @@
 
 ## [Unreleased]
 
-### TODO
-
-- [ ] Publish the matching signed Fedora helper RPMs and `.rpm.asc` files for `x86_64` and `aarch64` with the next release so automatic helper installation can complete on Fedora. The published v0.4.1 release does not yet include these assets.
+## [0.5.0] - 2026-11-01
 
 ### Changed
-- Clarified the separation between the published v0.4.1 Python/PyGObject release notes and unreleased Rust/Tauri development, directing current source and Flatpak guidance to the website without implying migration publication or release-generator readiness.
+
+- Updated the release documentation for the v0.5.0 Rust/Tauri package set and its deployment boundaries: GitHub release assets and the separate Flathub store rollout remain distinct.
+
+- Updated `ctutils` to 0.4.4, `rustls-webpki` to 0.103.16, `webpki-roots` to 1.0.10, `zip` to 9.2.1, and Vite to 6.4.5 for identified dependency advisories; removed the unused archive-codec/zstd dependency chain. This does not assert prior application exploitability, ZIP-extraction reachability, or complete audit coverage.
 
 - Added a separate snapshot-only **Network** sidebar for current TCP/UDP listeners and connections, endpoint copying, filtering, and permission-aware process attribution; it neither monitors traffic nor changes the advisory Audit or deep-scan workflows.
 - Added explicit browser-only VirusTotal IP-report confirmation with a conservative public-IP policy; private, special-purpose, scoped, and wildcard endpoints stay disabled and no port or process data is shared.
@@ -152,10 +153,10 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.0...HEAD
 
+[0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1
-
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
 ## [0.3.0] - 2026-06-26
 

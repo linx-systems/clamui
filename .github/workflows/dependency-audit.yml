@@ -26,7 +26,7 @@ jobs:
         run: cargo install cargo-audit --locked
 
       - name: Audit locked Rust dependencies
-        run: cargo audit --locked
+        run: cargo audit
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2

@@ -30,7 +30,8 @@ jobs:
       - name: Download Debian package artifacts
         uses: actions/download-artifact@v8
         with:
-          name: debian-packages
+          pattern: debian-packages-*
+          merge-multiple: true
           path: debs
 
       - name: Download RPM helper package artifacts
@@ -57,6 +58,8 @@ jobs:
           files: |
             debs/clamui_*_amd64.deb
             debs/clamui-privileged-helper_*_amd64.deb
+            debs/clamui_*_arm64.deb
+            debs/clamui-privileged-helper_*_arm64.deb
             rpms/clamui-privileged-helper-*.rpm
             rpms/clamui-privileged-helper-*.rpm.asc
         env:

@@ -34,10 +34,10 @@ flatpak install --user --arch="$(flatpak --default-arch)" flathub \
   org.freedesktop.Sdk.Extension.rust-stable//26.08
 ```
 
-The Rust/Tauri tree is currently development source on `migration/rust-tauri`, not the released stable application: public `master` and `v0.4.1` still contain the Python release. Clone the development branch explicitly:
+The Rust/Tauri source for the v0.5.0 release is on `master`; the `v0.4.1` tag preserves the historical Python release. Clone `master`:
 
 ```bash
-git clone --branch migration/rust-tauri --single-branch https://github.com/linx-systems/clamui.git
+git clone https://github.com/linx-systems/clamui.git
 cd clamui
 ```
 
@@ -79,7 +79,7 @@ sudo clamui install-privileged-helper
 clamui-scheduled-scan --dry-run
 ```
 
-`install-privileged-helper` is the manual native/source-host path. Its real installation requires root and stages the co-bundled compiled helper with its canonical polkit policy; retain it for unavailable or unpublished development releases on **mutable** hosts. On supported Debian-family and Fedora hosts, a missing helper in native packages, AppImages, source builds, or Flatpak may show explicit in-app setup from the local capability check. Automatic setup can complete only with an exact matching signed published package; before graphical Polkit authorization, it validates that package's signature, identity, version, size, digest, and compatible architecture, otherwise failing safely without authorization. Debian alone can use its signed same-version architecture-independent fallback. Fedora Atomic contributors must use verified RPM layering and reboot for manual repair, never this source installer against immutable `/usr`. The Flatpak rejects this host command, so do not use `sudo flatpak`.
+`install-privileged-helper` is the manual native/source-host path. Its real installation requires root and stages the co-bundled compiled helper with its canonical polkit policy; retain it for **mutable** source hosts. On supported Debian-family and Fedora hosts, a missing helper in native packages, AppImages, source builds, or Flatpak may show explicit in-app setup from the local capability check. Automatic setup requires an exact matching signed published package; before graphical Polkit authorization, it validates that package's signature, identity, version, size, digest, and compatible architecture, otherwise failing safely without authorization. Debian alone can use its signed same-version architecture-independent fallback only when the release explicitly provides it and no exact-architecture helper exists. Fedora Atomic contributors must use verified RPM layering and reboot for manual repair, never this source installer against immutable `/usr`. The Flatpak rejects this host command, so do not use `sudo flatpak`.
 
 For source-host development, build only the headless binaries, then use the non-privileged staging mode in a directory you own:
 
@@ -144,11 +144,11 @@ Recorded migration evidence includes Rust workspace tests and strict Clippy, rea
 
 ## Packaging boundaries
 
-ClamUI preserves Debian, Flatpak, and x86_64 AppImage distribution formats. The Rust/Tauri packaging sources on the development branch live in [`debian/`](https://github.com/linx-systems/clamui/tree/migration/rust-tauri/debian), [`flathub/`](https://github.com/linx-systems/clamui/tree/migration/rust-tauri/flathub), and [`appimage/`](https://github.com/linx-systems/clamui/tree/migration/rust-tauri/appimage). Use their checked-in manifests and scripts rather than recreating package logic locally. An unpublished local checkout may additionally contain `rpm/` helper work; it is not part of the pushed `migration/rust-tauri` branch.
+ClamUI preserves Debian, Flatpak, and x86_64 AppImage distribution formats. The Rust/Tauri packaging sources on `master` live in [`debian/`](https://github.com/linx-systems/clamui/tree/master/debian), [`flathub/`](https://github.com/linx-systems/clamui/tree/master/flathub), [`appimage/`](https://github.com/linx-systems/clamui/tree/master/appimage), and [`rpm/`](https://github.com/linx-systems/clamui/tree/master/rpm). Use their checked-in manifests and scripts rather than recreating package logic locally.
 
-A Debian release is a version- and architecture-matched application/helper pair. Flatpak declares GNOME 51 and dependencies for `x86_64` and `aarch64`, but a local build validates only its native architecture. AppImage remains x86_64. Every format retains the host ClamAV boundary.
+A Debian release is a version- and architecture-matched application/helper pair. Flatpak declares GNOME 51 and dependencies for `x86_64` and `aarch64`, but a local build validates only its native architecture. AppImage remains x86_64. Fedora RPMs are helper-only. Every format retains the host ClamAV boundary.
 
-Build with the maintained native packaging entry points present on the development branch:
+Build with the maintained native packaging entry points:
 
 ```bash
 ./debian/build-deb.sh
@@ -157,16 +157,14 @@ CLAMUI_ARTIFACT_DIR=/absolute/path/to/ubuntu22/target/release ./debian/build-deb
 UPDATE_INFORMATION='gh-releases-zsync|linx-systems|clamui|latest|ClamUI-*-x86_64.AppImage.zsync' ./appimage/build-appimage.sh
 ```
 
-### Unpublished local RPM helper work
-
-Only a checkout that already contains the unpublished `rpm/` directory can run these helper-only commands:
+### Fedora helper RPM packaging
 
 ```bash
 ./rpm/build-privileged-helper-rpm.sh dist
 CLAMUI_ARTIFACT_DIR=/absolute/path/to/ubuntu22/target/release CLAMUI_RPM_ARCH=x86_64 ./rpm/build-privileged-helper-rpm.sh dist
 ```
 
-The scripts can produce local `x86_64` or `aarch64` helper artifacts when built for the matching target; they contain the Rust helper and canonical policy, not the GUI or ClamAV. A local RPM is unsigned and is not an eligible installer asset. Only a matching signed RPM published with its detached signature can be used by the in-app Fedora installer; an older package does not prove compatibility with this development source. The RPM builder requires Cargo, `readelf` from `binutils`, and the `rpm`/`rpmbuild` package tools; a local source compilation also needs the usual Rust C toolchain, `pkg-config`, and GLib development files. It builds only the helper, so it needs neither Python nor the Bun/Tauri GUI toolchain. `CLAMUI_ARTIFACT_DIR`, `CARGO_TARGET_DIR`, and `CARGO_BUILD_TARGET` select a prebuilt or nondefault Cargo artifact; `CLAMUI_RPM_ARCH` asserts `x86_64` or `aarch64` against the helper ELF. The RPM automation may be configured for additional architectures, but configuration or an unpublished local artifact is not release verification.
+The scripts can produce local `x86_64` or `aarch64` helper artifacts when built for the matching target; they contain the Rust helper and canonical policy, not the GUI or ClamAV. A local RPM is unsigned and is not an eligible installer asset. Only a matching signed RPM published with its detached signature can be used by the in-app Fedora installer. The RPM builder requires Cargo, `readelf` from `binutils`, and the `rpm`/`rpmbuild` package tools; a local source compilation also needs the usual Rust C toolchain, `pkg-config`, and GLib development files. It builds only the helper, so it needs neither Python nor the Bun/Tauri GUI toolchain. `CLAMUI_ARTIFACT_DIR`, `CARGO_TARGET_DIR`, and `CARGO_BUILD_TARGET` select a prebuilt or nondefault Cargo artifact; `CLAMUI_RPM_ARCH` asserts `x86_64` or `aarch64` against the helper ELF.
 
 `debian/build-deb.sh` is the authoritative Debian entry point: it produces the application/helper pair and stages the policy and scheduled-scan payload. `CLAMUI_ARTIFACT_DIR` must contain executable `clamui`, `clamui-scheduled-scan`, and `clamui-apply-preferences` binaries from the baseline build. The AppImage build produces `ClamUI-<VERSION>-x86_64.AppImage` and its `.zsync` metadata.
 
@@ -208,7 +206,7 @@ scripts/generate-flatpak-sources.sh \
   --release-output flathub/io.github.linx_systems.ClamUI.release.yml
 ```
 
-This rewrites both checked-in source JSON files and writes the Git-pinned release manifest explicitly. Review all three files together: the generated manifest replaces the complete checkout `dir` source block, including its exclusions, with the URL and exact commit while retaining the other source entries and JSON includes. This produces release packaging input; it does not publish an application release or claim that the Rust/Tauri migration is on Flathub.
+This rewrites both checked-in source JSON files and writes the Git-pinned release manifest explicitly. Review all three files together: the generated manifest replaces the complete checkout `dir` source block, including its exclusions, with the URL and exact commit while retaining the other source entries and JSON includes. This produces GitHub Flatpak release packaging input and a candidate Flathub submission manifest; it does not update the live Flathub store.
 
 Build that generated manifest locally only in a fresh directory below the checkout, so Builder state, the build directory, and exported repository stay on the same filesystem and are owned by you:
 
@@ -222,7 +220,7 @@ flatpak-builder --user --arch="$(flatpak --default-arch)" \
   flathub/io.github.linx_systems.ClamUI.release.yml
 ```
 
-This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before any release, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub/release publication process. Automatic privileged-helper setup remains separately gated on matching signed published helper packages for the release and architecture (including Fedora RPM and `.rpm.asc` assets); neither those assets nor a public Rust/Tauri Flathub migration are claimed here. The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call; pushing `migration/rust-tauri` alone does not trigger it.
+This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before a Flathub submission, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub review and publication process. GitHub v0.5.0 bundles and matching signed helper packages do not by themselves update Flathub; the live Flathub store remains the Python 0.4.1 release until that separate rollout. The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call.
 
 Before publishing, inspect package payloads for the right architecture, native command names, helper/policy paths, and absence of a Python application runtime. Build compatibility still requires proof from the baseline environment and target package/OS; do not infer it from this development guide.
 
