@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+
+- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+
 
 ## [0.5.0] - 2026-11-01
 
