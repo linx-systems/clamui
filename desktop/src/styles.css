@@ -459,6 +459,15 @@ p.success {
   overflow-wrap: anywhere;
 }
 
+p.helper-install-error {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 .preferences-save-report-details pre {
   font: 12px/1.45 ui-monospace, "Cascadia Mono", "Noto Sans Mono", monospace;
 }
