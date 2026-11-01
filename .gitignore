@@ -126,6 +126,8 @@ refs
 
 # Rust / Tauri
 target/
+# Local verification artifacts stay on this machine.
+/target/verification/
 desktop/src-tauri/target/
 desktop/src-tauri/gen/
 desktop/.tauri/
