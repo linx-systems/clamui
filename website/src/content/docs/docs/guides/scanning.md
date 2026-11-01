@@ -5,7 +5,7 @@ description: Select targets, interpret results, and test detection safely.
 
 ## Start a scan
 
-In **Scan**, add files or folders, select a saved profile, or drag local targets into the window. Folders scan recursively. Invalid, missing, inaccessible, or protected targets are rejected before the scan begins.
+In **Scan**, choose **File** or **Folder** in the header to add a target, select a saved profile, or drag local targets into the window. Choose **Quick Scan** there to scan `~/Downloads`; the application menu contains the window's common actions. Folders scan recursively. Invalid, missing, inaccessible, or protected targets are rejected before the scan begins.
 
 For one-off integrations, launch with paths:
 
@@ -30,9 +30,15 @@ Headless use is available through `clamui scan`; run `clamui scan --help` for th
 
 ## Results and detections
 
-ClamUI displays clean, infected, or error results with a file path and ClamAV detection name. Severity badges are guidance derived from detection names, not proof of actual malware behavior. Treat critical/high detections urgently; for uncertain, low, or heuristic detections, quarantine first and investigate.
+ClamUI displays clean, infected, error, or cancelled results with a file path and ClamAV detection name. A cancelled scan keeps the partial result collected before cancellation. Severity badges are guidance derived from detection names, not proof of actual malware behavior. Treat critical/high detections urgently; for uncertain, low, or heuristic detections, quarantine first and investigate.
 
 **Quarantine** copies the file to owner-only storage, hashes it with SHA-256, and verifies that hash when restoring. It is safer than deleting immediately. See [quarantine](/docs/guides/quarantine/).
+
+Open **Scan Details** for an expanded result view. Choose **Copy** to place the displayed details on the clipboard.
+
+The **Scan Details** dialog keeps focus inside it: use `Tab` and `Shift+Tab` to move between **Copy** and **Close**. `Escape` closes it and returns focus to its **Fullscreen** opener.
+
+When notifications are enabled and permitted by the desktop, a completed scan sends a native notification. Use its **Show Scan** action to return to the scan results.
 
 ## Test with EICAR
 

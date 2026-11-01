@@ -9,31 +9,34 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   audit:
-    permissions:
-      contents: read
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: Audit locked Rust dependencies
+        run: cargo audit
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          python-version: "3.12"
+          bun-version: "1.3.14"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.2.0
+      - name: Verify locked frontend dependencies
+        working-directory: desktop
+        run: bun install --frozen-lockfile
 
-      - name: Verify locked dependencies
-        run: uv lock --check
-
-      - name: Export locked dependencies for audit
-        run: |
-          uv export --locked --all-groups --format requirements.txt \
-            --no-hashes --no-emit-local \
-            -o requirements-audit.txt
-
-      - name: Audit dependencies for known CVEs
-        run: uvx pip-audit --desc --format markdown -r requirements-audit.txt
+      - name: Audit frontend dependencies
+        working-directory: desktop
+        run: bun audit

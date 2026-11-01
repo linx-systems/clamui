@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ClamUI",
+  "version": "0.5.0",
+  "identifier": "io.github.linx-systems.ClamUI",
+  "build": {
+    "beforeDevCommand": { "script": "bun run --cwd desktop dev", "cwd": "../.." },
+    "beforeBuildCommand": { "script": "bun run --cwd desktop build", "cwd": "../.." },
+    "devUrl": "http://127.0.0.1:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "enableGTKAppId": true,
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self' tauri: asset:; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+      "capabilities": ["main-capability"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["appimage"],
+    "icon": ["../../icons/io.github.linx_systems.ClamUI.png"],
+    "category": "Utility",
+    "shortDescription": "ClamAV desktop scanner",
+    "longDescription": "A graphical interface for the host-installed ClamAV antivirus tools."
+  }
+}

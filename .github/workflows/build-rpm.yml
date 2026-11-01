@@ -1,0 +1,164 @@
+name: Build RPM Helper Package
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      sign:
+        description: "Sign the RPM package(s) with GPG"
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      sign:
+        description: "Sign the RPM package(s) with GPG"
+        type: boolean
+        default: false
+    secrets:
+      GPG_PRIVATE_KEY:
+        required: false
+      GPG_PASSPHRASE:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-rpm:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-22.04
+          - arch: aarch64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Install core helper build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            binutils \
+            build-essential \
+            ca-certificates \
+            gnupg \
+            libglib2.0-dev \
+            pkg-config \
+            rpm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build RPM helper package
+        env:
+          CLAMUI_RPM_ARCH: ${{ matrix.arch }}
+        run: ./rpm/build-privileged-helper-rpm.sh dist
+
+      - name: Verify RPM bootstrap rejects an invalid detached signature
+        env:
+          RPM_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          rpms=( "dist/clamui-privileged-helper-"*-1."$RPM_ARCH".rpm )
+          test "${#rpms[@]}" -eq 1
+          export CLAMUI_TEST_HELPER_RPM="$(realpath "${rpms[0]}")"
+          cargo test --release -p clamui-core rpm_bootstrap_rejects_invalid_signature -- --ignored
+
+      - name: Import GPG key
+        if: startsWith(github.ref, 'refs/tags/') || inputs.sign == true
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        id: gpg
+
+      - name: Sign and verify RPM helper package
+        if: startsWith(github.ref, 'refs/tags/') || inputs.sign == true
+        env:
+          EXPECTED_FINGERPRINT: 037273A518BE90BA6EA27B3CDEF2A3E473DE1E26
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          RPM_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+
+          public_fingerprint="$(gpg --batch --show-keys --with-colons signing-key.asc | grep '^fpr:' | head -n 1 | cut -d: -f10)"
+          test "$public_fingerprint" = "$EXPECTED_FINGERPRINT"
+          imported_fingerprint="$(gpg --batch --with-colons --fingerprint "$EXPECTED_FINGERPRINT" | grep '^fpr:' | head -n 1 | cut -d: -f10)"
+          test "$imported_fingerprint" = "$EXPECTED_FINGERPRINT"
+
+          shopt -s nullglob
+          rpms=( "dist/clamui-privileged-helper-"*-1."$RPM_ARCH".rpm )
+          test "${#rpms[@]}" -eq 1
+          rpm="${rpms[0]}"
+
+          signing_dir="$(mktemp -d)"
+          trap 'rm -rf "$signing_dir"' EXIT
+          : > "$signing_dir/passphrase-cache"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+            --local-user "$EXPECTED_FINGERPRINT" \
+            --output "$signing_dir/passphrase-cache.gpg" \
+            --sign "$signing_dir/passphrase-cache" 3<<<"$GPG_PASSPHRASE"
+          rpmsign --addsign \
+            --define "_gpg_name $EXPECTED_FINGERPRINT" \
+            --define "__gpg /usr/bin/gpg" \
+            --define "_gpg_digest_algo sha256" \
+            "$rpm"
+
+          rpmdb="$(mktemp -d)"
+          trap 'rm -rf "$signing_dir" "$rpmdb"' EXIT
+          rpm --dbpath "$rpmdb" --define '_keyring rpmdb' --initdb
+          rpm --dbpath "$rpmdb" --define '_keyring rpmdb' --define '_pkgverify_level all' --import signing-key.asc
+          signature_check="$(rpm --dbpath "$rpmdb" --define '_keyring rpmdb' --define '_pkgverify_level all' --checksig --verbose "$rpm")"
+          case "$signature_check" in
+            *"Signature"*"OK"*) ;;
+            *)
+              echo "Embedded RPM signature verification did not report a valid signature." >&2
+              exit 1
+              ;;
+          esac
+
+          mapfile -t metadata < <(rpm --query --package --queryformat '%{NAME}\n%{VERSION}\n%{RELEASE}\n%{EPOCH}\n%{ARCH}\n' "$rpm")
+          test "${#metadata[@]}" -eq 5
+          test "${metadata[0]}" = "clamui-privileged-helper"
+          expected_version="$(grep -E '^version[[:space:]]*=' Cargo.toml | head -n 1)"
+          expected_version="${expected_version#*=}"
+          expected_version="${expected_version//[[:space:]]/}"
+          expected_version="${expected_version#\"}"
+          expected_version="${expected_version%\"}"
+          test "${metadata[1]}" = "$expected_version"
+          test "${metadata[2]}" = "1"
+          test "${metadata[3]}" = "0"
+          test "${metadata[4]}" = "$RPM_ARCH"
+
+          gpg --batch --yes --armor --pinentry-mode loopback --passphrase-fd 3 \
+            --local-user "$EXPECTED_FINGERPRINT" \
+            --output "$rpm.asc" --detach-sign "$rpm" 3<<<"$GPG_PASSPHRASE"
+          detached_status="$(gpg --batch --status-fd 1 --verify "$rpm.asc" "$rpm" 2>/dev/null)"
+          case "$detached_status" in
+            *"[GNUPG:] VALIDSIG $EXPECTED_FINGERPRINT "*) ;;
+            *)
+              echo "Detached RPM signature verification did not match the pinned fingerprint." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Upload RPM helper package artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: rpm-package-${{ matrix.arch }}
+          path: |
+            dist/clamui-privileged-helper-*-1.${{ matrix.arch }}.rpm
+            dist/clamui-privileged-helper-*-1.${{ matrix.arch }}.rpm.asc
+          if-no-files-found: error
+          retention-days: 7

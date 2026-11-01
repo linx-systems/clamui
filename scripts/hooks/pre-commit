@@ -1,76 +1,37 @@
 #!/bin/bash
-# Git pre-commit hook: Check for absolute src.* imports
+# Git pre-commit hook for the Rust core and TypeScript desktop application.
 #
-# Absolute src.* imports break when ClamUI is installed as a Debian package
-# because the package installs to /usr/lib/python3/dist-packages/clamui/
-# (not src/). Use relative imports instead.
-#
-# To install this hook:
-#   ln -sf ../../scripts/hooks/pre-commit .git/hooks/pre-commit
-#
-# Or run:
-#   ./scripts/hooks/install-hooks.sh
+# Install with ./scripts/hooks/install-hooks.sh.
 
-set -e
+set -euo pipefail
 
-# Colors for output (only if terminal supports it)
-if [ -t 1 ]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    NC='\033[0m'
-else
-    RED=''
-    GREEN=''
-    NC=''
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+cd "$REPO_ROOT"
+
+mapfile -t STAGED_FILES < <(git diff --cached --name-only --diff-filter=ACMR)
+
+has_rust_source=false
+has_frontend_source=false
+for file in "${STAGED_FILES[@]}"; do
+    case "$file" in
+        *.rs)
+            has_rust_source=true
+            ;;
+        desktop/*.ts|desktop/*.tsx|desktop/**/*.ts|desktop/**/*.tsx|desktop/package.json|desktop/bun.lock|desktop/tsconfig*.json)
+            has_frontend_source=true
+            ;;
+    esac
+done
+
+if "$has_rust_source"; then
+    echo "Checking Rust formatting..."
+    cargo fmt --check --all
 fi
 
-# Get the repository root
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-
-# Check for absolute src.* imports in staged Python files
-check_absolute_imports() {
-    local has_errors=0
-
-    # Get list of staged Python files in src/
-    staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^src/.*\.py$' || true)
-
-    if [ -z "$staged_files" ]; then
-        # No Python files staged, nothing to check
-        return 0
-    fi
-
-    # Check each staged file for absolute imports
-    for file in $staged_files; do
-        if [ -f "$REPO_ROOT/$file" ]; then
-            # Check staged content (not working directory)
-            matches=$(git show ":$file" 2>/dev/null | grep -nE "^(from|import) src\." || true)
-            if [ -n "$matches" ]; then
-                if [ "$has_errors" -eq 0 ]; then
-                    printf "${RED}ERROR: Found absolute src.* imports (will break when installed as package)${NC}\n" >&2
-                    printf "\n" >&2
-                fi
-                printf "${RED}$file:${NC}\n" >&2
-                echo "$matches" | while read -r line; do
-                    printf "  $line\n" >&2
-                done
-                printf "\n" >&2
-                has_errors=1
-            fi
-        fi
-    done
-
-    if [ "$has_errors" -eq 1 ]; then
-        printf "${RED}Fix: Use relative imports instead:${NC}\n" >&2
-        printf "  from ..core.module import X    (parent package)\n" >&2
-        printf "  from .module import X          (same package)\n" >&2
-        printf "\n" >&2
-        printf "See CLAUDE.md 'Import Conventions' section for details.\n" >&2
-        return 1
-    fi
-
-    printf "${GREEN}No absolute src.* imports found.${NC}\n"
-    return 0
-}
-
-# Run the check
-check_absolute_imports
+if "$has_frontend_source"; then
+    echo "Type-checking TypeScript frontend..."
+    (
+        cd desktop
+        bun run check
+    )
+fi

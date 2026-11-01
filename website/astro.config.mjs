@@ -1,22 +1,24 @@
 import { defineConfig } from "astro/config";
+import { satteri } from "@astrojs/markdown-satteri";
 import starlight from "@astrojs/starlight";
-import mermaid from "astro-mermaid";
 import tailwindcss from "@tailwindcss/vite";
+import { mermaidSatteriPlugin } from "./scripts/mermaid-satteri.mjs";
 
 export default defineConfig({
   site: "https://clamui.com",
   base: "/",
   output: "static",
   compressHTML: true,
-  integrations: [
-    mermaid({
-      theme: "default",
-      autoTheme: true,
-      enableLog: false,
-      mermaidConfig: {
-        securityLevel: "strict",
-      },
+  markdown: {
+    syntaxHighlight: {
+      type: "shiki",
+      excludeLangs: ["math", "mermaid"],
+    },
+    processor: satteri({
+      hastPlugins: [mermaidSatteriPlugin],
     }),
+  },
+  integrations: [
     starlight({
       title: "ClamUI Documentation",
       description: "Install, use, configure, and contribute to ClamUI.",
@@ -80,6 +82,7 @@ export default defineConfig({
         processedDirs: [".."],
       },
       customCss: ["./src/styles/starlight.css"],
+      routeMiddleware: "./src/starlight-route-data.ts",
     }),
   ],
   vite: {

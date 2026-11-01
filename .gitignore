@@ -1,16 +1,19 @@
-# Python
+# Generated frontend and website assets
+desktop/dist/
+website/dist/
+
+# Local Python utilities and external tooling
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
-# Virtual environments
 .venv/
 venv/
 ENV/
 env/
+.cache/
 
-# Distribution / packaging
+# Python packaging and installer tooling
 .Python
 build/
 develop-eggs/
@@ -27,28 +30,31 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# PyInstaller
 *.manifest
 *.spec
-
-# Installer logs
+# RPM packaging specs are source files, not generated bundles.
+!/rpm/*.spec
 pip-log.txt
 pip-delete-this-directory.txt
+pypi_cache
+nosetests.xml
+*.cover
+*.py,cover
+coverage.json
+pytest*
+build-appimage-tools/
+build-appimage-temp/
 
-# Unit test / coverage reports
-htmlcov/
+# External Python test and analysis tools
 .tox/
 .nox/
 .coverage
 .coverage.*
-.cache
-nosetests.xml
+htmlcov/
 coverage.xml
-*.cover
-*.py,cover
 .hypothesis/
 .pytest_cache/
+
 
 # Translations (compiled .mo files are build artifacts)
 *.mo
@@ -69,6 +75,8 @@ Thumbs.db
 .auto-claude/
 .auto-claude-status
 .claude_settings.json
+.claude/
+.tldr
 .codex
 .worktrees/
 .idea
@@ -82,11 +90,6 @@ repo/
 *.deb
 build-deb-temp/
 
-.claude/
-pypi_cache
-.tldr
-coverage.json
-build-appimage-tools/
 
 squashfs-root/
 .opencodeignore
@@ -115,9 +118,21 @@ refs
 .zshrc
 .mcp.json
 
-pytest*
 .omp
 
 # Repowise local indexes and caches
 .repowise/
 .repowise-workspace/
+
+# Rust / Tauri
+target/
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/.tauri/
+
+# Bun / Vite
+desktop/node_modules/
+desktop/.vite/
+*.tsbuildinfo
+
+.repowise-workspace.yaml

@@ -2,12 +2,15 @@
 title: Review logs and history
 description: Inspect scan and update records, daemon output, and exports.
 ---
+Open **Logs** and select **Historical Logs**. Entries are newest first and the initial view loads up to 100 entries with pagination. Each has an operation type, status, target, timestamp, duration, summary, and full output. Timestamps in visible details use the application's localized display format; this does not change the canonical raw timestamp data used by **Copy** or text, CSV, and JSON exports.
 
-Open **Logs** and select **Historical Logs**. Entries are newest first and initially paginate in groups of 25. Each has an operation type, status, target, timestamp, duration, summary, and full output.
+The footer beneath the list shows how many loaded records have been revealed. **Load More** reveals the next 20 records; **Show All** reveals the whole currently loaded set, up to 100 records. These controls sit outside the list's own scroll area. Hover an action icon to read its label.
+
+The status icon at the right of each record retains its existing status color. Hover it for the localized status name; assistive technology receives the same label.
 
 ## Work with records
 
-Select an entry to copy it or export it as text, CSV, or JSON. **Export all** writes only the currently loaded entries, so choose **Show All** before an archive export. `clean`, `infected`, `error`, and update outcomes describe the recorded ClamAV operation; scheduled scans can be inferred from their regular timestamps.
+Select an entry to copy it or export it as text, CSV, or JSON. **Copy** and all export formats retain the canonical raw timestamp data rather than the localized display date. **Export all** uses the complete historical-log set, not only the visible page. CSV contains timestamp, type, status, path, summary, and duration; JSON also contains IDs and details. `clean`, `infected`, `error`, and update outcomes describe the recorded ClamAV operation; scheduled scans are marked in the stored record.
 
 Use the CLI for scripts:
 

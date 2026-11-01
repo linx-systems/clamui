@@ -13,6 +13,22 @@
   --sl-color-accent-high: #2d5c3a;
 }
 
+.mermaid-diagram > svg {
+  margin-inline: auto;
+}
+
+.mermaid-diagram > svg[data-mermaid-theme="dark"] {
+  display: none;
+}
+
+:root[data-theme="dark"] .mermaid-diagram > svg[data-mermaid-theme="light"] {
+  display: none;
+}
+
+:root[data-theme="dark"] .mermaid-diagram > svg[data-mermaid-theme="dark"] {
+  display: block;
+}
+
 @media (max-width: 25rem) {
   .site-title {
     font-size: var(--sl-text-base);

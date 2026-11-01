@@ -2,18 +2,19 @@ Package: clamui
 Version: VERSION
 Section: utils
 Priority: optional
-Architecture: all
-Depends: python3 (>= 3.11), python3-gi, python3-gi-cairo, python3-cairo, gir1.2-gtk-4.0, gir1.2-adw-1, gir1.2-gdkpixbuf-2.0, librsvg2-common, clamav, pkexec | policykit-1, python3-requests, python3-urllib3, python3-keyring, python3-matplotlib, python3-psutil, python3-pil, clamui-privileged-helper (= VERSION)
+Architecture: ARCHITECTURE
+Depends: clamav, clamav-freshclam, libwebkit2gtk-4.1-0, libgtk-3-0, pkexec | policykit-1, clamui-privileged-helper (= VERSION)
 Maintainer: ClamUI Contributors <clamui@rooki.xyz>
 Homepage: https://github.com/linx-systems/clamui
-Description: Modern graphical interface for ClamAV antivirus scanner
- ClamUI is a modern Linux desktop application that provides a graphical
- user interface for the ClamAV antivirus command-line tool.
+Description: Native desktop interface for the ClamAV antivirus scanner
+ ClamUI is a Rust/Tauri desktop application that provides a graphical
+ interface for the host-provided ClamAV antivirus command-line tools.
  .
  Features:
-  - Easy-to-use GTK4/libadwaita interface
   - Scan files and directories for malware
   - View and manage scan results
-  - Desktop integration with notifications
+  - Desktop and file-manager integration
+  - Native WebKitGTK and GTK3 runtime integration
  .
- This package requires ClamAV to be installed for scanning functionality.
+ This package requires host ClamAV tools and signatures for scanning and
+ updates. Daemon scanning is available when the host clamd service is present.

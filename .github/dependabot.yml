@@ -1,11 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: "uv"
+  - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "pip"
-    directory: "/flathub"
+  - package-ecosystem: "npm"
+    directory: "/desktop"
     schedule:
       interval: "weekly"
   - package-ecosystem: "npm"

@@ -1,6 +1,6 @@
 # ClamUI Website
 
-[ClamUI](https://github.com/linx-systems/clamui)'s marketing site and documentation, published at **https://clamui.com**. It uses Astro, Tailwind CSS, and Starlight at `/docs/`; GitHub Pages deploys the static output through `.github/workflows/deploy-website.yml`.
+[ClamUI](https://clamui.com)'s marketing site and documentation, published at **https://clamui.com**. It uses Astro, Tailwind CSS, and Starlight at `/docs/`; GitHub Pages deploys the static output through `.github/workflows/deploy-website.yml`.
 
 ## Work locally
 

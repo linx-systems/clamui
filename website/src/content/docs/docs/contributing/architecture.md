@@ -1,60 +1,74 @@
 ---
-title: Tray subprocess architecture
-description: Why and how ClamUI isolates StatusNotifierItem integration.
+title: Rust/Tauri desktop and tray architecture
+description: How ClamUI separates its headless Rust core, Tauri UI, and native SNI tray.
 ---
 
-ClamUI keeps the GTK4/libadwaita application and the tray service in separate processes. The main process stays usable if the tray crashes; the tray service is GTK-independent and communicates through newline-delimited JSON on stdin/stdout.
+ClamUI is a Rust core plus a Tauri 2 desktop application with a React/TypeScript frontend. The core owns scanning, persistence, scheduling, host integration, and privilege-sensitive behavior; it has no Tauri or GTK widget dependency. The desktop owns WebKitGTK presentation, native dialogs, single-instance forwarding, and the pure-Rust StatusNotifierItem (SNI) tray.
+
+On Linux, GTK application identity opt-in is enabled with the canonical public ID `io.github.linx_systems.ClamUI`, preserving the official desktop-file and logo association. It is separate from Tauri's private bundle identifier.
 
 ```mermaid
 flowchart TB
-  accTitle: ClamUI tray subprocess architecture
-  accDescr: ClamUIApp connects to TrayIntegration and TrayIndicator. TrayIndicator delegates to TrayManager, which exchanges JSON over standard input and output with the GTK-independent TrayService. TrayService uses TrayIconGenerator.
-  App[ClamUIApp] --> Integration[TrayIntegration]
-  App --> Indicator[TrayIndicator]
-  Indicator --> Manager[TrayManager]
-  Manager <-->|JSON stdin/stdout| Service[TrayService]
-  Service --> Icons[TrayIconGenerator]
+  accTitle: ClamUI Rust/Tauri architecture
+  accDescr: A React frontend makes allowlisted requests to the Tauri native runtime, which calls the headless Rust core. Core events return over one event stream. The native runtime also owns in-process SNI and DBusMenu tray integration.
+  UI[React / TypeScript frontend] -->|request operation + JSON args| Runtime[Tauri native runtime]
+  Runtime -->|allowlisted core dispatch| Core[clamui-core]
+  Core -->|Event event + data| Runtime
+  Runtime -->|clamui-event| UI
+  Runtime --> Tray[Pure-Rust SNI + DBusMenu]
+  Tray -->|quick scan / update / profile / quit| Runtime
 ```
 
 ## Responsibilities
 
 | Component | Responsibility |
 | --- | --- |
-| [`src/app.py`](https://github.com/linx-systems/clamui/blob/master/src/app.py) | Application lifecycle and tray callbacks |
-| [`src/tray_integration.py`](https://github.com/linx-systems/clamui/blob/master/src/tray_integration.py) | Menu action logic and device-scan events |
-| [`src/ui/tray_indicator.py`](https://github.com/linx-systems/clamui/blob/master/src/ui/tray_indicator.py) | Compatibility wrapper that wires callbacks |
-| [`src/ui/tray_manager.py`](https://github.com/linx-systems/clamui/blob/master/src/ui/tray_manager.py) | Subprocess lifecycle, validated IPC, GLib handoff |
-| [`src/ui/tray_service.py`](https://github.com/linx-systems/clamui/blob/master/src/ui/tray_service.py) | GIO SNI and DBusMenu service |
-| [`src/ui/tray_icons.py`](https://github.com/linx-systems/clamui/blob/master/src/ui/tray_icons.py) | 22px status icons: Pillow badge composition with lazy SVG rasterization through GdkPixbuf's librsvg loader; no GTK dependency |
+| `crates/clamui-core` | Headless domain dispatch, XDG persistence, ClamAV host commands, scheduler, quarantine, i18n, and helper protocol |
+| `desktop/src-tauri` | Tauri commands, event bridge, native dialogs, safe external/path opening, single instance, lifecycle, and SNI tray |
+| `desktop/src` | React pages, navigation, i18n rendering, notifications, and typed frontend API |
+| `/usr/bin/clamui-apply-preferences` | Native privileged helper implementing the authenticated protocol-v4 host-configuration boundary |
 
-`TrayManager` launches `TrayService` with `sys.executable`, reads stdout/stderr on background threads, and schedules GTK-visible state changes with `GLib.idle_add()`. Shared manager state uses a lock. Shutdown sends `quit`, allows two seconds, then terminates/kills only if necessary.
+## Localization and credits
 
-## D-Bus and icons
+`po/LINGUAS` names the nine shipped gettext catalogs: `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN`. The Rust core supplies the selected catalog and its plural rule to the CLI, tray, and frontend; catalog extraction, loading, and packaging have no Python runtime dependency.
 
-`TrayService` registers `/StatusNotifierItem` with the session watcher through GIO and exports DBusMenu at `/MenuBar`. It probes x, KDE, and freedesktop watcher names. `TrayIconGenerator` rasterizes SVG bases lazily through GdkPixbuf's librsvg loader and composes status badges with Pillow. Custom icon PNGs are published through `IconPixmap`/`AttentionIconPixmap` first; theme icon names are fallback only. This prevents sandboxed hosts from failing icon-name lookup. Status values are `protected`, `warning`, `scanning`, and `threat`; there is no paused state.
+The root [`AUTHORS`](https://github.com/linx-systems/clamui/blob/master/AUTHORS) file is the canonical contributor list. The Rust build embeds it so every package can render About contributor credits offline, in the file's exact order. About shows translator credits only when the active catalog contains genuine contributor names; the literal `translator-credits` message is not a credit.
 
-## IPC contract and limits
+## Request and event boundary
 
-Each command has an `action` key:
+The frontend has one asynchronous request path:
 
-| Action | Required payload |
-| --- | --- |
-| `update_status` | `status` |
-| `update_progress` | `percentage` from 0–100; 0 clears the label |
-| `update_window_visible` | `visible` |
-| `update_profiles` | `profiles`, optional `current_profile_id` |
-| `quit`, `ping` | none |
+```ts
+request<T>(operation: string, args?: Record<string, unknown>): Promise<T>
+```
 
-Each service response has an `event` key:
+The native `request` command routes only allowlisted core operations. There is no frontend filesystem, shell, process, arbitrary command, remote-navigation, or generic IPC permission. Operations use names such as `scanner.scan`, `updater.update`, `quarantine.restore`, and `settings.update`.
 
-| Event | Payload |
-| --- | --- |
-| `ready`, `pong`, `available`, `unavailable` | none |
-| `menu_action` | `action`: `toggle_window`, `quick_scan`, `full_scan`, `update`, `quit`, or `select_profile`; the last also has `profile_id` |
-| `error` | `message` |
+All runtime notifications share one event shape and one channel:
 
-Messages must be single-line JSON objects. The manager limits incoming messages to 1 MB, a nesting depth of 10, and object-shaped top levels. The service independently limits stdin command lines to 64 KB and drops invalid or non-object JSON. Never update GLib/D-Bus state directly from a reader thread.
+```ts
+type ClamUIEvent = { event: string; data: unknown }
+// Tauri event channel: "clamui-event"
+```
 
-## Troubleshoot development
+Important scan and update events include `scan-progress`, `scan-complete`, `update-progress`, and `update-complete`. The frontend must unsubscribe listeners when unmounted. Long-running requests execute off the Tauri UI thread; cancellation is scoped to the operation ID and never cancels an unrelated scan.
 
-Set `CLAMUI_DEBUG=1`, confirm an SNI watcher and `libdbusmenu`, and inspect JSON transport before changing UI code. GNOME needs an AppIndicator/SNI extension. See [tray use](/docs/guides/tray/) for end-user setup.
+## Native tray
+
+The tray is an **in-process pure-Rust** SNI/DBusMenu implementation. It does not start a Python service, does not use a newline-delimited stdin/stdout protocol, and does not depend on `libdbusmenu` or a GTK tray binding.
+
+It publishes the standard StatusNotifierItem and DBusMenu endpoints when a watcher is available. Its menu preserves the live actions: show or hide the window, Quick Scan, Full Scan, saved-profile selection, database update, and Quit. Tray status follows normal/protected, warning, scanning, and threat states. In the normal protected state, the SNI payload carries the bundled official logo rather than asking the host icon theme to find it; that tray payload is separate from the main window's desktop association. If the desktop has no SNI watcher, ClamUI remains fully usable and does not hide a requested file/folder scan window.
+
+GNOME normally needs [AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) or another SNI watcher; KDE Plasma, Cinnamon, MATE, and Budgie commonly provide one.
+
+## Desktop lifecycle
+
+The native runtime processes CLI arguments before GUI initialization. The seven `clamui` subcommands and `clamui --help` remain headless. For GUI launches, the single-instance handler forwards the working directory, decoded `file://` paths, and multiple selected files. Normal file launches scan every path; `--virustotal` uses only the first file and makes ignored extras visible to the user.
+
+The desktop exposes only native helper commands for choosing paths, saving exports, copying text, opening an explicitly requested existing path, opening approved external URLs, closing the app, and reading startup state. It enforces a strict content-security policy and rejects webview/new-window navigation.
+
+## Host and security boundaries
+
+ClamAV remains a host-owned engine and database. Flatpak invokes host tools through `flatpak-spawn --host`; no package format bundles or pretends to replace ClamAV. The core's private, bounded host-probe runner is reused for read-only host inspections such as Audit checks and the Network socket snapshot, rather than exposing shell or process execution to the frontend. Protected host configuration uses the validated Rust helper, polkit, explicit destination allowlists, and `PKEXEC_UID` ownership checks. The protocol stays compatible with a trusted already-installed v4 helper during upgrades.
+
+Core persistence stays compatible with the current XDG JSON and SQLite layouts. See [configuration](/docs/reference/configuration/) for locations and [development](/docs/contributing/development/) for the full validation and packaging workflow.

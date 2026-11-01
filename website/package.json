@@ -17,9 +17,7 @@
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.5",
-    "astro": "^7.3.5",
-    "astro-mermaid": "2.1.0",
-    "mermaid": "^11.17.2"
+    "astro": "^7.3.5"
   },
   "overrides": {
     "@pagefind/default-ui": "1.4.0",
@@ -27,8 +25,12 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@astrojs/markdown-satteri": "0.4.2",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.2",
+    "mermaid-isomorphic": "3.1.0",
+    "playwright": "1.64.1",
+    "satteri": "0.10.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }

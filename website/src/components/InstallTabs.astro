@@ -3,30 +3,30 @@ const tabs = [
   {
     id: "flatpak",
     label: "Flatpak",
-    sub: "Recommended",
-    desc: "Sandboxed UI that calls host ClamAV through flatpak-spawn --host. On supported Debian-family hosts, host-setting saves use a version-matched trusted helper.",
-    code: "flatpak install flathub io.github.linx_systems.ClamUI\nflatpak run io.github.linx_systems.ClamUI",
+    sub: "GitHub bundle",
+    desc: "After the v0.5.0 GitHub bundles are attached, choose the x86_64 or aarch64 asset. The Flathub store remains on the Python 0.4.1 release until its separate rollout. All Flatpaks call host ClamAV through flatpak-spawn --host.",
+    code: "# Choose clamui-x86_64.flatpak or clamui-aarch64.flatpak\nflatpak install --user ./clamui-x86_64.flatpak\nflatpak run io.github.linx_systems.ClamUI",
   },
   {
     id: "deb",
     label: "Debian / Ubuntu",
     sub: ".deb",
-    desc: "Install the matching architecture-independent app and privileged-helper packages together.",
-    code: "# Download both files from one release, then install the current version:\nVERSION=0.4.1\nsudo apt install \"./clamui_${VERSION}_all.deb\" \"./clamui-privileged-helper_${VERSION}_all.deb\"",
+    desc: "Download and verify the matching v0.5.0 application and privileged-helper packages for your architecture before installing.",
+    code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.5.0_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.5.0_${DEB_ARCH}.deb\"",
   },
   {
     id: "appimage",
     label: "AppImage",
     sub: "Portable",
-    desc: "Single-file UI bundle that uses ClamAV installed on the host.",
-    code: "VERSION=0.4.1\nchmod +x \"ClamUI-${VERSION}-x86_64.AppImage\"\n\"./ClamUI-${VERSION}-x86_64.AppImage\"",
+    desc: "After it is attached to GitHub Releases, use the v0.5.0 x86_64 UI bundle. It uses host ClamAV.",
+    code: "chmod +x ClamUI-0.5.0-x86_64.AppImage\n./ClamUI-0.5.0-x86_64.AppImage",
   },
   {
     id: "source",
     label: "From source",
-    sub: "uv",
-    desc: "Requires Python 3.11+, GTK 4.6+, libadwaita 1.1+, and uv. Stock Ubuntu/Pop!_OS 22.04 needs a newer-GLib development environment.",
-    code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\n./scripts/local-run.sh",
+    sub: "Rust + Bun dev",
+    desc: "The current source is on master. Requires Rust, Bun, WebKitGTK 4.1, and GTK 3; build native release artifacts on the Ubuntu 22.04-compatible baseline.",
+    code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\n( cd desktop && bun install --frozen-lockfile )\nbun run --cwd desktop tauri dev",
   },
 ];
 ---
@@ -194,9 +194,11 @@ const tabs = [
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
         <p>
-          <span class="text-white/85 font-medium">Flatpak</span> validates Flathub repository
-          signatures during installation. For release downloads and source tags, follow the
-          <a href="/docs/contributing/signing/" class="text-clam-sage hover:text-white transition-colors">signing policy</a>.
+          <span class="text-white/85 font-medium">Flatpak</span> repository signatures cover the
+          historical Flathub 0.4.1 package. GitHub Flatpak bundles are separate release assets;
+          verify their release provenance and follow the
+          <a href="/docs/contributing/signing/" class="text-clam-sage hover:text-white transition-colors">signing policy</a>
+          before installation.
         </p>
       </div>
     </div>

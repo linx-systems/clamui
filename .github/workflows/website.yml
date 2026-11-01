@@ -33,6 +33,10 @@ jobs:
         working-directory: website
         run: bun install --frozen-lockfile
 
+      - name: Install Chromium for Mermaid rendering
+        working-directory: website
+        run: bunx playwright install --with-deps chromium
+
       - name: Check website
         working-directory: website
         run: bun run check

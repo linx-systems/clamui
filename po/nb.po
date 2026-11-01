@@ -1,0 +1,5842 @@
+# Norwegian Bokmål translation for ClamUI.
+# Copyright (C) 2026 ClamUI Contributors
+# This file is distributed under the same license as the ClamUI package.
+# John Erling Blad <jeblad@gmail.com>, 2026.
+# ClaudeAI (Opus 5.5), 2026: drafted the translation; every string was reviewed
+# and corrected by John Erling Blad, who is responsible for it. Listed here for
+# transparency, not in translator-credits.
+#
+# Glossary (follow Bokmålsordboka, https://ordbokene.no):
+#   scan (verb) = skanne, imperative «skann», past «skannet»
+#   scan (the act) = skanning; never write «scan» in Norwegian text
+#   scanner (program) = skanner, e.g. «virusskanner»
+#   threat = trussel; infected = infisert
+#   quarantine = karantene; quarantined = satt i karantene
+#   virus definitions = virusdefinisjoner; signatures = signaturer
+#   daemon (clamd) = tjeneste; «clamd-tjenesten» / «freshclam-tjenesten» if ambiguous
+#   rate limited (freshclam cool-down) = midlertidig begrenset;
+#     the cause = repetisjonsbegrensning; VirusTotal rate limit = hastighetsgrense
+#   on-access scanning = sanntidsskanning; scheduled scan = planlagt skanning
+#   exclusions = unntak
+#   mirror / CDN = nedlastingsserver (plain language, not «speil»/«CDN»)
+#   folder / directory = mappe, also in technical contexts (DatabaseDirectory);
+#     users don't relate to «katalog»
+#   Preferences (the app window, per-user) = Brukervalg
+#   settings (ClamAV/system configuration) = innstillinger
+#   tray / system tray / notification area = varslingsområde (Språkrådet, Microsoft)
+#   privileged helper = privilegert hjelper
+#   Save & Apply = Lagre og bruk
+#
+# Tools named in the strings (never translate the names):
+#   ClamAV           the antivirus engine and project as a whole
+#   clamscan         scanner the user starts; loads the database on every run
+#   clamd            ClamAV daemon; keeps the database in memory. Follow the
+#                    source's name: "ClamAV daemon" = «ClamAV-tjenesten»,
+#                    "clamd daemon" = «clamd-tjenesten»; package clamav-daemon (Debian),
+#                    unit clamd@scan (Fedora)
+#   clamdscan        client that asks clamd to scan; needs clamd running
+#   clamonacc        on-access (sanntids) scanning client, works with clamd
+#   freshclam        downloads/updates the virus database; service
+#                    clamav-freshclam (Debian) or freshclam
+#   fangfrisch, clamav-unofficial-sigs
+#                    third-party tools that fetch extra signature databases
+#   Lynis            security audit (revisjon) tool; chkrootkit: rootkit scanner
+#   pkexec / polkit  ask for administrator rights («administratortilgang»)
+#   flatpak-spawn    runs host commands from inside the Flatpak sandbox
+#
+# Style: sentence case, not English Title Case («Skanning fullført»).
+# Counts in pseudo-plurals like "threat(s)": always keep what is counted.
+# Mirror the source with «(er)» («{count} trussel(er)», «{count} fil(er)»),
+# or use number-neutral wording that still names it («{count} av filene»).
+# Never drop the noun («{count} funn», «{count} stk.») and never use
+# «trusler oppdaget: {count}».
+# Dashes: spaced en dash « – » as tankestrek; en dash without spaces in
+# ranges («1–28»). Quotation marks: «…».
+# Number + unit: never a plain space, so the pair can't break across lines.
+#   unit symbols (s, min, t, kB, MB, %, d.): U+202F NARROW NO-BREAK SPACE
+#   whole words (sekunder, minutter, dager, byte, …): U+00A0 NO-BREAK SPACE
+# Both are invisible in most editors; check with e.g. `grep -P '\x{202F}'`.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ClamUI 0.5.0\n"
+"Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
+"POT-Creation-Date: 2026-11-01 11:44+0100\n"
+"PO-Revision-Date: 2026-10-17 12:00+0200\n"
+"Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
+"Language-Team: Norwegian Bokmål\n"
+"Language: nb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: crates/clamui-core/src/audit/firewall.rs:53
+msgid "Firewall manager overlap"
+msgstr "Overlapp mellom brannmurbehandlere"
+
+#: crates/clamui-core/src/audit/firewall.rs:54
+msgid ""
+"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
+"was not evaluated."
+msgstr ""
+"UFW er aktiv mens Firewalld eier D-Bus-navnet; samspillet mellom reglene "
+"deres ble ikke vurdert."
+
+#: crates/clamui-core/src/audit/firewall.rs:157
+msgid "UFW Firewall"
+msgstr "UFW-brannmur"
+
+#: crates/clamui-core/src/audit/firewall.rs:162
+msgid ""
+"UFW is active; the default incoming policy is deny. Listed rules may allow "
+"exceptions."
+msgstr ""
+"UFW er aktiv; standardregelen for innkommende trafikk er avvisning. Oppførte "
+"regler kan tillate unntak."
+
+#: crates/clamui-core/src/audit/firewall.rs:169
+msgid ""
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
+msgstr ""
+"UFW er aktiv; standardregelen for innkommende trafikk er avvisning med "
+"avslag. Oppførte regler kan tillate unntak."
+
+#: crates/clamui-core/src/audit/firewall.rs:176
+msgid "UFW is active; the default incoming policy is deny."
+msgstr "UFW er aktiv; standardregelen for innkommende trafikk er avvisning."
+
+#: crates/clamui-core/src/audit/firewall.rs:180
+msgid "UFW is active; the default incoming policy is reject."
+msgstr ""
+"UFW er aktiv; standardregelen for innkommende trafikk er avvisning med "
+"avslag."
+
+#: crates/clamui-core/src/audit/firewall.rs:184
+msgid "UFW is active, but the default incoming policy allows traffic."
+msgstr ""
+"UFW er aktiv, men standardregelen for innkommende trafikk tillater trafikk."
+
+#: crates/clamui-core/src/audit/firewall.rs:191
+msgid "UFW is active, but its default incoming policy could not be verified."
+msgstr ""
+"UFW er aktiv, men standardregelen for innkommende trafikk kunne ikke "
+"bekreftes."
+
+#: crates/clamui-core/src/audit/firewall.rs:195
+msgid "UFW reports inactive."
+msgstr "UFW rapporterer at den er inaktiv."
+
+#: crates/clamui-core/src/audit/firewall.rs:196
+msgid "UFW status could not be inspected safely."
+msgstr "UFW-statusen kunne ikke undersøkes på en sikker måte."
+
+#: crates/clamui-core/src/audit/firewall.rs:234
+msgid "Firewalld"
+msgstr "firewalld"
+
+#: crates/clamui-core/src/audit/firewall.rs:236
+msgid ""
+"Firewalld owns its D-Bus name; readiness and firewall policy were not "
+"queried."
+msgstr ""
+"Firewalld eier D-Bus-navnet; beredskap og brannmurregler ble ikke spurt om."
+
+#: crates/clamui-core/src/audit/firewall.rs:240
+msgid ""
+"No Firewalld D-Bus owner was observed; this does not establish kernel "
+"firewall policy."
+msgstr ""
+"Ingen eier av Firewallds D-Bus-navn ble observert; dette fastslår ikke "
+"kjernens brannmurregler."
+
+#: crates/clamui-core/src/audit/firewall.rs:244
+msgid ""
+"Firewalld ownership could not be verified; readiness and firewall policy "
+"were not queried."
+msgstr ""
+"Eierskapet til Firewalld kunne ikke bekreftes; beredskap og brannmurregler "
+"ble ikke spurt om."
+
+#: crates/clamui-core/src/audit/firewall.rs:259
+msgid "firewall-cmd"
+msgstr "firewall-cmd"
+
+#: crates/clamui-core/src/audit/firewall.rs:264
+msgid "firewall-cmd is installed; it was not executed."
+msgstr "firewall-cmd er installert; den ble ikke kjørt."
+
+#: crates/clamui-core/src/audit/firewall.rs:270
+msgid "firewall-cmd could not be confirmed without executing it."
+msgstr "firewall-cmd kunne ikke bekreftes uten å kjøre den."
+
+#: crates/clamui-core/src/audit/firewall.rs:408
+msgid "nftables (native rules)"
+msgstr "nftables (innebygde regler)"
+
+#: crates/clamui-core/src/audit/firewall.rs:410
+msgid ""
+"nftables has restrictive default input policies for IPv4 and IPv6; "
+"individual rules may allow exceptions."
+msgstr ""
+"nftables har restriktive standardregler for innkommende IPv4- og IPv6-"
+"trafikk; enkeltregler kan tillate unntak."
+
+#: crates/clamui-core/src/audit/firewall.rs:414
+msgid ""
+"nftables reports a permissive default input policy; remaining coverage may "
+"be incomplete"
+msgstr ""
+"nftables rapporterer en tillatende standardregel for innkommende trafikk; "
+"den øvrige dekningen kan være ufullstendig."
+
+#: crates/clamui-core/src/audit/firewall.rs:418
+msgid ""
+"nftables input policy coverage could not be verified for both IPv4 and IPv6"
+msgstr ""
+"Dekningen av nftables-regler for innkommende IPv4- og IPv6-trafikk kunne "
+"ikke bekreftes."
+
+#: crates/clamui-core/src/audit/firewall.rs:478
+msgid "iptables (IPv4)"
+msgstr "iptables (IPv4)"
+
+#: crates/clamui-core/src/audit/firewall.rs:480
+msgid ""
+"iptables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"iptables har en restriktiv standardregel for INPUT; enkeltregler kan tillate "
+"unntak."
+
+#: crates/clamui-core/src/audit/firewall.rs:484
+msgid "iptables has a permissive INPUT default policy"
+msgstr "iptables har en tillatende standardregel for INPUT."
+
+#: crates/clamui-core/src/audit/firewall.rs:485
+msgid "iptables INPUT policy could not be verified"
+msgstr "iptables-regelen for INPUT kunne ikke bekreftes."
+
+#: crates/clamui-core/src/audit/firewall.rs:491
+msgid "iptables (IPv6)"
+msgstr "iptables (IPv6)"
+
+#: crates/clamui-core/src/audit/firewall.rs:493
+msgid ""
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+"ip6tables har en restriktiv standardregel for INPUT; enkeltregler kan "
+"tillate unntak."
+
+#: crates/clamui-core/src/audit/firewall.rs:497
+msgid "ip6tables has a permissive INPUT default policy"
+msgstr "ip6tables har en tillatende standardregel for INPUT."
+
+#: crates/clamui-core/src/audit/firewall.rs:498
+msgid "ip6tables INPUT policy could not be verified"
+msgstr "ip6tables-regelen for INPUT kunne ikke bekreftes."
+
+#: crates/clamui-core/src/audit/firewall.rs:508
+msgid "Gufw"
+msgstr "Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:510
+msgid "Gufw is available."
+msgstr "Gufw er tilgjengelig."
+
+#: crates/clamui-core/src/audit/firewall.rs:512
+msgid ""
+"Gufw was not confirmed; this optional inventory does not affect firewall "
+"policy analysis."
+msgstr ""
+"Gufw ble ikke bekreftet; denne valgfrie inventaroppføringen påvirker ikke "
+"analysen av brannmurregler."
+
+#: crates/clamui-core/src/audit/firewall.rs:519
+msgid "Open Gufw"
+msgstr "Åpne Gufw"
+
+#: crates/clamui-core/src/audit/firewall.rs:525
+msgid "Firewall Config"
+msgstr "Firewall Config"
+
+#: crates/clamui-core/src/audit/firewall.rs:530
+msgid "Firewall Config is available."
+msgstr "Firewall Config er tilgjengelig."
+
+#: crates/clamui-core/src/audit/firewall.rs:533
+msgid ""
+"Firewall Config was not confirmed; this optional inventory does not affect "
+"firewall policy analysis."
+msgstr ""
+"Firewall Config ble ikke bekreftet; denne valgfrie inventaroppføringen "
+"påvirker ikke analysen av brannmurregler."
+
+#: crates/clamui-core/src/audit/firewall.rs:540
+msgid "Open Firewall Config"
+msgstr "Åpne Firewall Config"
+
+#: crates/clamui-core/src/audit/firewall.rs:578
+msgid "Plasma Firewall"
+msgstr "Plasma Firewall"
+
+#: crates/clamui-core/src/audit/firewall.rs:583
+msgid "Plasma Firewall is installed; it manages an existing firewall backend."
+msgstr ""
+"Plasma Firewall er installert; den styrer en eksisterende brannmurkomponent."
+
+#: crates/clamui-core/src/audit/firewall.rs:592
+msgid "Plasma Firewall was not confirmed; it is only a management module."
+msgstr ""
+"Plasma Firewall ble ikke bekreftet; den er bare en administrasjonsmodul."
+
+#: crates/clamui-core/src/audit.rs:293
+msgid "ClamAV is not installed"
+msgstr "ClamAV er ikke installert"
+
+#: crates/clamui-core/src/audit.rs:295
+msgid "Install ClamAV to enable virus scanning"
+msgstr "Installer ClamAV for å kunne skanne etter virus"
+
+#: crates/clamui-core/src/audit.rs:312
+msgid "Installed: {version}"
+msgstr "Installert: {version}"
+
+#: crates/clamui-core/src/audit.rs:323
+msgid "Up to date ({days} day old, built {date})"
+msgid_plural "Up to date ({days} days old, built {date})"
+msgstr[0] "Oppdatert ({days} dag gammel, bygget {date})"
+msgstr[1] "Oppdatert ({days} dager gammel, bygget {date})"
+
+#: crates/clamui-core/src/audit.rs:339 crates/clamui-core/src/audit.rs:357
+msgid "Database is {days} day old (built {date})"
+msgid_plural "Database is {days} days old (built {date})"
+msgstr[0] "Databasen er {days} dag gammel (bygget {date})"
+msgstr[1] "Databasen er {days} dager gammel (bygget {date})"
+
+#: crates/clamui-core/src/audit.rs:347
+msgid "Update virus database to ensure protection"
+msgstr "Oppdater virusdatabasen for å sikre beskyttelsen"
+
+#: crates/clamui-core/src/audit.rs:365
+msgid "Database is critically outdated. Update immediately."
+msgstr "Databasen er kritisk utdatert. Oppdater den med en gang."
+
+#: crates/clamui-core/src/audit.rs:384
+msgid "Database files exist but age could not be determined"
+msgstr "Databasefilene finnes, men alderen kunne ikke fastslås"
+
+#: crates/clamui-core/src/audit.rs:386
+msgid "No virus database found"
+msgstr "Fant ingen virusdatabase"
+
+#: crates/clamui-core/src/audit.rs:390
+msgid "Download virus database"
+msgstr "Last ned virusdatabasen"
+
+#: crates/clamui-core/src/audit.rs:406
+msgid "Service {name} is running"
+msgstr "Tjenesten {name} kjører"
+
+#: crates/clamui-core/src/audit.rs:417
+msgid "Daemon is responding"
+msgstr "Tjenesten svarer"
+
+#: crates/clamui-core/src/audit.rs:424
+msgid "ClamAV daemon is not running"
+msgstr "ClamAV-tjenesten kjører ikke"
+
+#: crates/clamui-core/src/audit.rs:426
+msgid "Start the daemon for faster scanning"
+msgstr "Start tjenesten for raskere skanning"
+
+#: crates/clamui-core/src/audit.rs:441
+msgid "Freshclam service is active"
+msgstr "freshclam-tjenesten er aktiv"
+
+#: crates/clamui-core/src/audit.rs:448
+msgid "Freshclam automatic update service is not running"
+msgstr "freshclam-tjenesten for automatisk oppdatering kjører ikke"
+
+#: crates/clamui-core/src/audit.rs:450
+msgid "Enable automatic database updates"
+msgstr "Slå på automatisk oppdatering av databasen"
+
+#: crates/clamui-core/src/audit.rs:645
+msgid "{count} port listening, risky ports: {ports}"
+msgid_plural "{count} ports listening, risky ports: {ports}"
+msgstr[0] "{count} port lytter, risikable porter: {ports}"
+msgstr[1] "{count} porter lytter, risikable porter: {ports}"
+
+#: crates/clamui-core/src/audit.rs:656
+msgid "Review if these services need to be exposed"
+msgstr "Vurder om disse tjenestene må være tilgjengelige utenfra"
+
+#: crates/clamui-core/src/audit.rs:663
+msgid "{count} port listening"
+msgid_plural "{count} ports listening"
+msgstr[0] "{count} port lytter"
+msgstr[1] "{count} porter lytter"
+
+#: crates/clamui-core/src/audit.rs:671
+msgid "Review open ports and close unnecessary services"
+msgstr "Se over åpne porter og steng unødvendige tjenester"
+
+#: crates/clamui-core/src/audit.rs:678
+msgid "No open ports detected"
+msgstr "Fant ingen åpne porter"
+
+#: crates/clamui-core/src/audit.rs:709
+msgid "AppArmor is enabled"
+msgstr "AppArmor er slått på"
+
+#: crates/clamui-core/src/audit.rs:716
+msgid "AppArmor module is loaded but not enabled"
+msgstr "AppArmor-modulen er lastet, men ikke slått på"
+
+#: crates/clamui-core/src/audit.rs:718
+msgid "Enable AppArmor for application sandboxing"
+msgstr "Slå på AppArmor for å isolere programmer"
+
+#: crates/clamui-core/src/audit.rs:733
+msgid "SELinux is enforcing"
+msgstr "SELinux håndhever reglene (enforcing)"
+
+#: crates/clamui-core/src/audit.rs:740
+msgid "SELinux is in permissive mode"
+msgstr "SELinux er i tillatende modus (permissive)"
+
+#: crates/clamui-core/src/audit.rs:742
+msgid "Consider switching to enforcing mode for stronger protection"
+msgstr ""
+"Vurder å bytte til håndhevende modus (enforcing) for sterkere beskyttelse"
+
+#: crates/clamui-core/src/audit.rs:753
+msgid "SELinux is disabled"
+msgstr "SELinux er slått av"
+
+#: crates/clamui-core/src/audit.rs:755
+msgid "Enable SELinux for mandatory access control"
+msgstr "Slå på SELinux for obligatorisk tilgangskontroll"
+
+#: crates/clamui-core/src/audit.rs:769
+msgid "No mandatory access control framework detected"
+msgstr "Fant ikke noe rammeverk for obligatorisk tilgangskontroll (MAC)"
+
+#: crates/clamui-core/src/audit.rs:771
+msgid "Consider enabling AppArmor or SELinux"
+msgstr "Vurder å slå på AppArmor eller SELinux"
+
+#: crates/clamui-core/src/audit.rs:796
+msgid "Automatic security updates are enabled"
+msgstr "Automatiske sikkerhetsoppdateringer er slått på"
+
+#: crates/clamui-core/src/audit.rs:806
+msgid "Unattended upgrades is installed but disabled"
+msgstr "Unattended Upgrades er installert, men slått av"
+
+#: crates/clamui-core/src/audit.rs:808
+msgid "Enable automatic security updates"
+msgstr "Slå på automatiske sikkerhetsoppdateringer"
+
+#: crates/clamui-core/src/audit.rs:821
+msgid "DNF automatic updates are enabled"
+msgstr "Automatiske oppdateringer med DNF er slått på"
+
+#: crates/clamui-core/src/audit.rs:831
+msgid "DNF automatic is installed but timer is not active"
+msgstr "DNF Automatic er installert, men tidsuret er ikke aktivt"
+
+#: crates/clamui-core/src/audit.rs:833
+msgid "Enable automatic updates"
+msgstr "Slå på automatiske oppdateringer"
+
+#: crates/clamui-core/src/audit.rs:846
+msgid "Could not determine automatic update status"
+msgstr "Kunne ikke fastslå status for automatiske oppdateringer"
+
+#: crates/clamui-core/src/audit.rs:848
+msgid "Configure automatic security updates"
+msgstr "Sett opp automatiske sikkerhetsoppdateringer"
+
+#: crates/clamui-core/src/audit.rs:862
+msgid "System reboot required to apply updates"
+msgstr "Systemet må startes på nytt for å ta i bruk oppdateringene"
+
+#: crates/clamui-core/src/audit.rs:864
+msgid "Reboot the system to apply pending security updates"
+msgstr ""
+"Start systemet på nytt for å ta i bruk ventende sikkerhetsoppdateringer"
+
+#: crates/clamui-core/src/audit.rs:909
+msgid "{name} is installed but not running"
+msgstr "{name} er installert, men kjører ikke"
+
+#: crates/clamui-core/src/audit.rs:927
+msgid "No intrusion detection system found"
+msgstr "Fant ikke noe system for inntrengingsdeteksjon"
+
+#: crates/clamui-core/src/audit.rs:929
+msgid "Install fail2ban or CrowdSec to protect against attacks"
+msgstr "Installer fail2ban eller CrowdSec for å beskytte mot angrep"
+
+#: crates/clamui-core/src/audit.rs:955
+msgid "SSH server is not running (no remote attack surface)"
+msgstr "SSH-serveren kjører ikke (ingen angrepsflate utenfra)"
+
+#: crates/clamui-core/src/audit.rs:965
+msgid "SSH server is running"
+msgstr "SSH-serveren kjører"
+
+#: crates/clamui-core/src/audit.rs:974
+msgid "Could not read SSH configuration"
+msgstr "Kunne ikke lese SSH-konfigurasjonen"
+
+#: crates/clamui-core/src/audit.rs:992
+msgid "Root login: {value}"
+msgstr "Innlogging som root: {value}"
+
+#: crates/clamui-core/src/audit.rs:999
+msgid "Root login is allowed ({value})"
+msgstr "Innlogging som root er tillatt ({value})"
+
+#: crates/clamui-core/src/audit.rs:1005
+msgid "Disable root SSH login for security"
+msgstr "Slå av innlogging som root over SSH av hensyn til sikkerheten"
+
+#: crates/clamui-core/src/audit.rs:1019
+msgid "Password authentication is disabled (key-only)"
+msgstr "Passordautentisering er slått av (bare nøkler)"
+
+#: crates/clamui-core/src/audit.rs:1026
+msgid "Password authentication is enabled"
+msgstr "Passordautentisering er slått på"
+
+#: crates/clamui-core/src/audit.rs:1028
+msgid "Consider disabling password auth in favor of SSH keys"
+msgstr "Vurder å slå av passordautentisering og bruke SSH-nøkler i stedet"
+
+#: crates/clamui-core/src/audit.rs:1045
+msgid "X11 forwarding is disabled"
+msgstr "X11-videresending er slått av"
+
+#: crates/clamui-core/src/audit.rs:1052
+msgid "X11 forwarding is enabled"
+msgstr "X11-videresending er slått på"
+
+#: crates/clamui-core/src/audit.rs:1054
+msgid "Disable X11 forwarding to reduce attack surface"
+msgstr "Slå av X11-videresending for å redusere angrepsflaten"
+
+#: crates/clamui-core/src/audit.rs:1129
+msgid "Portmaster is running and protecting connections"
+msgstr "Portmaster kjører og beskytter tilkoblingene"
+
+#: crates/clamui-core/src/audit.rs:1153
+msgid "Authorize ClamUI in Portmaster for per-module health"
+msgstr "Gi ClamUI tilgang i Portmaster for å se tilstanden til hver modul"
+
+#: crates/clamui-core/src/audit.rs:1156
+msgid "Authorize"
+msgstr "Gi tilgang"
+
+#: crates/clamui-core/src/audit.rs:1166
+msgid "Portmaster is installed but not running"
+msgstr "Portmaster er installert, men kjører ikke"
+
+#: crates/clamui-core/src/audit.rs:1168
+msgid "Start the Portmaster service to enable network protection"
+msgstr "Start Portmaster-tjenesten for å slå på nettverksbeskyttelsen"
+
+#. Translators: The em dash separates the detection result from the component description.
+#: crates/clamui-core/src/audit.rs:1181
+msgid "Not detected — optional network monitor and application firewall"
+msgstr "Ikke funnet – valgfri nettverksovervåking og programbrannmur"
+
+#: crates/clamui-core/src/audit.rs:1195
+msgid "Could not probe Portmaster: {error}"
+msgstr "Kunne ikke undersøke Portmaster: {error}"
+
+#: crates/clamui-core/src/audit.rs:1245
+msgid "{name} is not installed"
+msgstr "{name} er ikke installert"
+
+#: crates/clamui-core/src/audit.rs:1251
+msgid "Install {name} for comprehensive security auditing"
+msgstr "Installer {name} for omfattende sikkerhetsrevisjon"
+
+#: crates/clamui-core/src/audit.rs:1257
+msgid "Install chkrootkit for rootkit detection"
+msgstr "Installer chkrootkit for å oppdage rootkits"
+
+#: crates/clamui-core/src/audit.rs:1276
+msgid "Authentication was cancelled"
+msgstr "Autentisering avbrutt"
+
+#: crates/clamui-core/src/audit.rs:1284
+msgid "Lynis audit timed out after 5 minutes"
+msgstr "Lynis-revisjon avbrutt etter 5 minutter"
+
+#: crates/clamui-core/src/audit.rs:1286
+msgid "Rootkit scan timed out after 5 minutes"
+msgstr "Skanningen etter rootkits ble avbrutt etter 5 minutter"
+
+#: crates/clamui-core/src/audit.rs:1304 crates/clamui-core/src/audit.rs:1348
+msgid "Failed to run Lynis: {error}"
+msgstr "Kunne ikke kjøre Lynis: {error}"
+
+#: crates/clamui-core/src/audit.rs:1310
+msgid "Failed to run chkrootkit: {error}"
+msgstr "Kunne ikke kjøre chkrootkit: {error}"
+
+#: crates/clamui-core/src/audit.rs:1376
+msgid "Score: {score}/100"
+msgstr "Poengsum: {score}/100"
+
+#. Translators: Keep the quoted shell command unchanged.
+#: crates/clamui-core/src/audit.rs:1379
+msgid "Run 'sudo lynis audit system' for detailed recommendations"
+msgstr "Kjør «sudo lynis audit system» for detaljerte anbefalinger"
+
+#: crates/clamui-core/src/audit.rs:1395
+msgid "Audit completed (exit code {code})"
+msgstr "Revisjon fullført (statuskode {code})"
+
+#: crates/clamui-core/src/audit.rs:1433 crates/clamui-core/src/audit.rs:1447
+msgid "Rootkit scan could not be completed (exit {code})"
+msgstr ""
+"Skanningen etter rootkits kunne ikke fullføres (avslutningskode {code})"
+
+#: crates/clamui-core/src/audit.rs:1477
+msgid "No rootkits detected"
+msgstr "Ingen rootkits oppdaget"
+
+#: crates/clamui-core/src/audit.rs:1488
+msgid "{count} potential rootkit detected"
+msgid_plural "{count} potential rootkits detected"
+msgstr[0] "{count} mulig rootkit oppdaget"
+msgstr[1] "{count} mulige rootkits oppdaget"
+
+#: crates/clamui-core/src/audit.rs:1496
+msgid "Investigate the detected threats immediately"
+msgstr "Undersøk de oppdagede truslene med en gang"
+
+#: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
+#: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
+#: crates/clamui-core/src/cli.rs:459 crates/clamui-core/src/cli.rs:499
+#: crates/clamui-core/src/cli.rs:1166 crates/clamui-core/src/cli.rs:1192
+#: crates/clamui-core/src/cli.rs:1723 crates/clamui-core/src/cli.rs:1728
+msgid "error"
+msgstr "feil"
+
+#: crates/clamui-core/src/cli.rs:57
+msgid "Unknown command: {command}"
+msgstr "Ukjent kommando: {command}"
+
+#. Translators: The em dash separates the application name from its description.
+#: crates/clamui-core/src/cli.rs:140
+msgid "ClamUI — ClamAV antivirus management\n"
+msgstr "ClamUI — ClamAV-antivirusadministrasjon\n"
+
+#: crates/clamui-core/src/cli.rs:146
+msgid "Usage:"
+msgstr "Bruk:"
+
+#. Translators: Keep `clamui` unchanged; it is the command name.
+#: crates/clamui-core/src/cli.rs:149
+msgid "  clamui                   Launch the graphical interface"
+msgstr "  clamui                   Start det grafiske grensesnittet"
+
+#. Translators: Keep `clamui`, `<command>`, and `[args]` unchanged; they are command syntax.
+#: crates/clamui-core/src/cli.rs:157
+msgid "  clamui <command> [args]   Run a CLI command\n"
+msgstr "  clamui <command> [args]   Kjør en kommando på kommandolinjen\n"
+
+#: crates/clamui-core/src/cli.rs:163
+msgid "Commands:"
+msgstr "Kommandoer:"
+
+#: crates/clamui-core/src/cli.rs:167
+msgid ""
+"\n"
+"Global options:"
+msgstr ""
+"\n"
+"Globale valg:"
+
+#. Translators: Keep `--json` and `JSON` unchanged; they are a CLI flag and data format.
+#: crates/clamui-core/src/cli.rs:170
+msgid "  --json                   Machine-readable JSON output"
+msgstr "  --json                   Maskinlesbar utdata i JSON"
+
+#. Translators: Keep `-v` and `--verbose` unchanged; they are CLI flags.
+#: crates/clamui-core/src/cli.rs:178
+msgid "  -v, --verbose            Verbose output"
+msgstr "  -v, --verbose            Detaljert utdata"
+
+#. Translators: Keep `-h` and `--help` unchanged; they are CLI flags.
+#: crates/clamui-core/src/cli.rs:186
+msgid "  -h, --help               Show help for any command\n"
+msgstr "  -h, --help               Vis hjelp for en kommando\n"
+
+#. Translators: Keep the quoted `clamui help <command>` command unchanged.
+#: crates/clamui-core/src/cli.rs:194
+msgid "Run 'clamui help <command>' for usage examples."
+msgstr "Kjør «clamui help <command>» for eksempler på bruk."
+
+#. Translators: Keep the quoted `clamui` command unchanged.
+#: crates/clamui-core/src/cli.rs:202
+msgid "Run 'clamui' without arguments to launch the GUI."
+msgstr "Kjør «clamui» uten argumenter for å starte det grafiske grensesnittet."
+
+#: crates/clamui-core/src/cli.rs:212
+msgid "Scan files or directories for threats"
+msgstr "Skann filer eller mapper etter trusler"
+
+#: crates/clamui-core/src/cli.rs:213
+msgid "Manage quarantined files"
+msgstr "Administrer filer i karantene"
+
+#: crates/clamui-core/src/cli.rs:214
+msgid "Manage scan profiles"
+msgstr "Administrer skanneprofiler"
+
+#: crates/clamui-core/src/cli.rs:215
+msgid "Show ClamAV and ClamUI status"
+msgstr "Vis status for ClamAV og ClamUI"
+
+#: crates/clamui-core/src/cli.rs:216
+msgid "View scan history"
+msgstr "Vis skannehistorikk"
+
+#: crates/clamui-core/src/cli.rs:219
+msgid ""
+"Install the polkit helper for saving system ClamAV configs (native host only)"
+msgstr ""
+"Installer polkit-hjelperen for systemets ClamAV-oppsett (bare på "
+"vertssystemet)"
+
+#: crates/clamui-core/src/cli.rs:221
+msgid "Show this help message"
+msgstr "Vis denne hjelpeteksten"
+
+#. Translators: Keep `clamui` and `[COMMAND]` command syntax unchanged; translate the `Usage:` label.
+#: crates/clamui-core/src/cli.rs:232
+msgid "Usage: clamui help [COMMAND]"
+msgstr "Bruk: clamui help [COMMAND]"
+
+#: crates/clamui-core/src/cli.rs:240
+msgid ""
+"Display an overview of all commands or detailed help for a specific one."
+msgstr ""
+"Vis en oversikt over alle kommandoer eller detaljert hjelp for én av dem."
+
+#. Translators: Keep `help` unchanged; it is the literal CLI subcommand.
+#: crates/clamui-core/src/cli.rs:251
+msgid "help accepts at most one command"
+msgstr "help godtar maksimalt én kommando"
+
+#: crates/clamui-core/src/cli.rs:269
+msgid "Unknown command: {name}\n"
+msgstr "Ukjent kommando: {name}\n"
+
+#. Translators: Keep `{name}` as the command name and `{summary}` as its translated description; the em dash separates them.
+#: crates/clamui-core/src/cli.rs:281
+msgid "clamui {name} — {summary}\n"
+msgstr "clamui {name} — {summary}\n"
+
+#: crates/clamui-core/src/cli.rs:291
+msgid "Examples:"
+msgstr "Eksempler:"
+
+#. Translators: Keep the quoted `clamui {name} --help` command unchanged; preserve `{name}` as the command name.
+#: crates/clamui-core/src/cli.rs:297
+msgid ""
+"\n"
+"Run 'clamui {name} --help' for full option reference."
+msgstr ""
+"\n"
+"Kjør «clamui {name} --help» for en full oversikt over valgene."
+
+#: crates/clamui-core/src/cli.rs:395 crates/clamui-core/src/cli.rs:1583
+msgid "unrecognized argument: {argument}"
+msgstr "ukjent argument: {argument}"
+
+#: crates/clamui-core/src/cli.rs:419
+msgid "No valid paths to scan"
+msgstr "Ingen gyldige stier å skanne"
+
+#: crates/clamui-core/src/cli.rs:435
+msgid "ClamAV not available: {error}"
+msgstr "ClamAV er utilgjengelig: {error}"
+
+#: crates/clamui-core/src/cli.rs:447
+msgid "ClamAV version: {version}"
+msgstr "ClamAV-versjon: {version}"
+
+#: crates/clamui-core/src/cli.rs:470
+msgid "Using profile: {name}"
+msgstr "Bruker profil: {name}"
+
+#: crates/clamui-core/src/cli.rs:489
+msgid "Scanning: {path}"
+msgstr "Skanner: {path}"
+
+#. Translators: Keep `clamui`, uppercase metavariables, brackets, and all `--` flags unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:570
+msgid ""
+"Usage: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
+"quarantine] [--json] [--verbose]"
+msgstr ""
+"Bruk: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
+"quarantine] [--json] [--verbose]"
+
+#. Translators: Preserve the numeric exit-code meanings.
+#: crates/clamui-core/src/cli.rs:578
+msgid ""
+"Scan one or more files or directories with ClamAV.\n"
+"Exit codes: 0 = clean, 1 = threats found, 2 = error."
+msgstr ""
+"Skann én eller flere filer eller mapper med ClamAV.\n"
+"Avslutningskoder: 0 = rent, 1 = trusler funnet, 2 = feil."
+
+#: crates/clamui-core/src/cli.rs:597
+msgid "Path not found: {path}"
+msgstr "Fant ikke stien: {path}"
+
+#: crates/clamui-core/src/cli.rs:616
+msgid "Profile not found: {name}"
+msgstr "Fant ikke profilen: {name}"
+
+#: crates/clamui-core/src/cli.rs:703
+msgid "Scanned {count} file in {duration:.1f}s"
+msgid_plural "Scanned {count} files in {duration:.1f}s"
+msgstr[0] "Skannet {count} fil på {duration:.1f}s"
+msgstr[1] "Skannet {count} filer på {duration:.1f}s"
+
+#: crates/clamui-core/src/cli.rs:716
+msgid ""
+"\n"
+"Threat found: {count}"
+msgid_plural ""
+"\n"
+"Threats found: {count}"
+msgstr[0] ""
+"\n"
+"Trussel funnet: {count}"
+msgstr[1] ""
+"\n"
+"Trusler funnet: {count}"
+
+#: crates/clamui-core/src/cli.rs:741
+msgid ""
+"\n"
+"Quarantined: {count} file"
+msgid_plural ""
+"\n"
+"Quarantined: {count} files"
+msgstr[0] ""
+"\n"
+"I karantene: {count} fil"
+msgstr[1] ""
+"\n"
+"I karantene: {count} filer"
+
+#: crates/clamui-core/src/cli.rs:751
+msgid ""
+"\n"
+"Failed to quarantine:"
+msgstr ""
+"\n"
+"Kunne ikke settes i karantene:"
+
+#: crates/clamui-core/src/cli.rs:762
+msgid ""
+"\n"
+"Scan completed with errors:"
+msgstr ""
+"\n"
+"Skanningen ble fullført med feil:"
+
+#: crates/clamui-core/src/cli.rs:767
+msgid "No threats found."
+msgstr "Ingen trusler funnet."
+
+#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:775 crates/clamui-core/src/cli.rs:797
+msgid "Usage: clamui quarantine <list|restore|delete> [args]"
+msgstr "Bruk: clamui quarantine <list|restore|delete> [args]"
+
+#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:785
+msgid "Usage: clamui quarantine list [--json]"
+msgstr "Bruk: clamui quarantine list [--json]"
+
+#. Translators: Keep `clamui`, `restore`, and `ID` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:789
+msgid "Usage: clamui quarantine restore ID"
+msgstr "Bruk: clamui quarantine restore ID"
+
+#. Translators: Keep `clamui`, `delete`, and `ID` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:793
+msgid "Usage: clamui quarantine delete ID"
+msgstr "Bruk: clamui quarantine delete ID"
+
+#: crates/clamui-core/src/cli.rs:825
+msgid "No quarantined files."
+msgstr "Ingen filer i karantene."
+
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
+msgid "ID"
+msgstr "ID"
+
+#: crates/clamui-core/src/cli.rs:843
+msgid "File"
+msgstr "Fil"
+
+#: crates/clamui-core/src/cli.rs:844
+msgid "Threat"
+msgstr "Trussel"
+
+#: crates/clamui-core/src/cli.rs:845 crates/clamui-core/src/cli.rs:1639
+msgid "Date"
+msgstr "Dato"
+
+#: crates/clamui-core/src/cli.rs:846
+msgid "Size"
+msgstr "Størrelse"
+
+#: crates/clamui-core/src/cli.rs:861
+msgid "{count} entry ({size} total)"
+msgid_plural "{count} entries ({size} total)"
+msgstr[0] "{count} oppføring (totalt {size})"
+msgstr[1] "{count} oppføringer (totalt {size})"
+
+#. Translators: Keep `quarantine`, command-valued `{action}`, and `ID` unchanged.
+#: crates/clamui-core/src/cli.rs:879 crates/clamui-core/src/cli.rs:893
+msgid "quarantine {action} requires ID"
+msgstr "quarantine {action} krever ID"
+
+#: crates/clamui-core/src/cli.rs:932
+msgid "Restored"
+msgstr "Gjenopprettet"
+
+#: crates/clamui-core/src/cli.rs:934
+msgid "Deleted"
+msgstr "Slettet"
+
+#: crates/clamui-core/src/cli.rs:939
+msgid "{verb}: {path}"
+msgstr "{verb}: {path}"
+
+#: crates/clamui-core/src/cli.rs:949
+msgid "Restore failed"
+msgstr "Gjenoppretting mislyktes"
+
+#: crates/clamui-core/src/cli.rs:951
+msgid "Delete failed"
+msgstr "Sletting mislyktes"
+
+#: crates/clamui-core/src/cli.rs:958
+msgid "{prefix}: {error}"
+msgstr "{prefix}: {error}"
+
+#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:417
+#: crates/clamui-core/src/quarantine.rs:454
+msgid "Quarantine entry not found: {id}"
+msgstr "Fant ikke karanteneoppføringen: {id}"
+
+#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1048 crates/clamui-core/src/cli.rs:1074
+msgid "Usage: clamui profile <list|show|export|import> [args]"
+msgstr "Bruk: clamui profile <list|show|export|import> [args]"
+
+#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1058
+msgid "Usage: clamui profile list [--json]"
+msgstr "Bruk: clamui profile list [--json]"
+
+#. Translators: Keep `clamui`, `show`, `NAME`, and `--json` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1062
+msgid "Usage: clamui profile show NAME [--json]"
+msgstr "Bruk: clamui profile show NAME [--json]"
+
+#. Translators: Keep `clamui`, `export`, `NAME`, and `FILE` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1066
+msgid "Usage: clamui profile export NAME FILE"
+msgstr "Bruk: clamui profile export NAME FILE"
+
+#. Translators: Keep `clamui`, `import`, and `FILE` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1070
+msgid "Usage: clamui profile import FILE"
+msgstr "Bruk: clamui profile import FILE"
+
+#: crates/clamui-core/src/cli.rs:1101
+msgid "No scan profiles configured."
+msgstr "Ingen skanneprofiler er satt opp."
+
+#: crates/clamui-core/src/cli.rs:1117
+msgid " (+{n} more)"
+msgstr " (+{n} til)"
+
+#: crates/clamui-core/src/cli.rs:1122
+msgid "(none)"
+msgstr "(ingen)"
+
+#: crates/clamui-core/src/cli.rs:1127 crates/clamui-core/src/cli.rs:1297
+msgid "yes"
+msgstr "ja"
+
+#: crates/clamui-core/src/cli.rs:1129 crates/clamui-core/src/cli.rs:1299
+msgid "no"
+msgstr "nei"
+
+#: crates/clamui-core/src/cli.rs:1137
+msgid "Name"
+msgstr "Navn"
+
+#: crates/clamui-core/src/cli.rs:1138
+msgid "Targets"
+msgstr "Mål"
+
+#: crates/clamui-core/src/cli.rs:1139
+msgid "Default"
+msgstr "Standard"
+
+#: crates/clamui-core/src/cli.rs:1140
+msgid "Updated"
+msgstr "Oppdatert"
+
+#: crates/clamui-core/src/cli.rs:1148
+msgid "{count} profile"
+msgid_plural "{count} profiles"
+msgstr[0] "{count} profil"
+msgstr[1] "{count} profiler"
+
+#. Translators: Preserve `{name}` as the profile name and `{path}` as its destination; quotation marks may be localized.
+#: crates/clamui-core/src/cli.rs:1207
+msgid "Exported '{name}' to {path}"
+msgstr "Eksporterte '{name}' til {path}"
+
+#: crates/clamui-core/src/cli.rs:1236
+msgid "Imported profile: {name}"
+msgstr "Importerte profil: {name}"
+
+#. Translators: Preserve command-valued `{usage}`, `NAME`, and the `--json` CLI flag.
+#: crates/clamui-core/src/cli.rs:1256 crates/clamui-core/src/cli.rs:1269
+msgid "{usage} requires NAME and optional --json"
+msgstr "{usage} krever NAME og valgfri --json"
+
+#: crates/clamui-core/src/cli.rs:1292
+msgid "Name:        {name}"
+msgstr "Navn:        {name}"
+
+#: crates/clamui-core/src/cli.rs:1295
+msgid "ID:          {id}"
+msgstr "ID:          {id}"
+
+#: crates/clamui-core/src/cli.rs:1303
+msgid "Default:     {value}"
+msgstr "Standard:    {value}"
+
+#: crates/clamui-core/src/cli.rs:1312
+msgid "Description: {description}"
+msgstr "Beskrivelse: {description}"
+
+#: crates/clamui-core/src/cli.rs:1322
+msgid "Created:     {created}"
+msgstr "Opprettet:     {created}"
+
+#: crates/clamui-core/src/cli.rs:1331
+msgid "Updated:     {updated}"
+msgstr "Oppdatert:     {updated}"
+
+#: crates/clamui-core/src/cli.rs:1337
+msgid "Targets:"
+msgstr "Mål:"
+
+#: crates/clamui-core/src/cli.rs:1346
+msgid "  (none)"
+msgstr "  (ingen)"
+
+#: crates/clamui-core/src/cli.rs:1357
+msgid "Exclusions:"
+msgstr "Ekskluderinger:"
+
+#: crates/clamui-core/src/cli.rs:1362
+msgid "  path:    {path}"
+msgstr "  sti:     {path}"
+
+#: crates/clamui-core/src/cli.rs:1369
+msgid "  pattern: {pattern}"
+msgstr "  mønster: {pattern}"
+
+#: crates/clamui-core/src/cli.rs:1381
+msgid "Options:"
+msgstr "Alternativer:"
+
+#. Translators: Keep `clamui` and `--json` unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1395
+msgid "Usage: clamui status [--json]"
+msgstr "Bruk: clamui status [--json]"
+
+#: crates/clamui-core/src/cli.rs:1450
+msgid "ClamAV"
+msgstr "ClamAV"
+
+#: crates/clamui-core/src/cli.rs:1455
+msgid "  Version:  {version}"
+msgstr "  Versjon:  {version}"
+
+#: crates/clamui-core/src/cli.rs:1462
+msgid "  Status:   not available"
+msgstr "  Status:   utilgjengelig"
+
+#: crates/clamui-core/src/cli.rs:1466
+msgid "  Error:    {error}"
+msgstr "  Feil:     {error}"
+
+#: crates/clamui-core/src/cli.rs:1472
+msgid "  Backend:  {backend}"
+msgstr "  Motor:    {backend}"
+
+#: crates/clamui-core/src/cli.rs:1481
+msgid "  Daemon:   {daemon}"
+msgstr "  Tjeneste: {daemon}"
+
+#: crates/clamui-core/src/cli.rs:1483
+msgid "Quarantine"
+msgstr "Sett i karantene"
+
+#: crates/clamui-core/src/cli.rs:1487 crates/clamui-core/src/cli.rs:1506
+msgid "  Entries:  {count}"
+msgstr "  Antall:    {count}"
+
+#: crates/clamui-core/src/cli.rs:1496
+msgid "  Size:     {size}"
+msgstr "  Størrelse: {size}"
+
+#: crates/clamui-core/src/cli.rs:1498
+msgid "Scan History"
+msgstr "Skannehistorikk"
+
+#. Translators: Keep `clamui`, all `--` flags, `N`, and type choices unchanged; they are CLI syntax.
+#: crates/clamui-core/src/cli.rs:1519
+msgid ""
+"Usage: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
+msgstr ""
+"Bruk: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
+
+#: crates/clamui-core/src/cli.rs:1602
+msgid "Failed to load history: {error}"
+msgstr "Kunne ikke laste historikken: {error}"
+
+#: crates/clamui-core/src/cli.rs:1617
+msgid "No scan history found."
+msgstr "Fant ingen skannehistorikk."
+
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
+msgid "Type"
+msgstr "Type"
+
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
+msgid "Status"
+msgstr "Status"
+
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
+msgid "Summary"
+msgstr "Sammendrag"
+
+#. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
+#. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
+#: crates/clamui-core/src/cli.rs:1656
+msgid "Showing {shown} of {total} entry. Use --limit to see more."
+msgid_plural "Showing {shown} of {total} entries. Use --limit to see more."
+msgstr[0] "Viser {shown} av {total} oppføring. Bruk --limit for å se mer."
+msgstr[1] "Viser {shown} av {total} oppføringer. Bruk --limit for å se mer."
+
+#. Translators: Keep `clamui install-privileged-helper` unchanged; it is the CLI command.
+#: crates/clamui-core/src/cli.rs:1691
+msgid "Usage: clamui install-privileged-helper"
+msgstr "Bruk: clamui install-privileged-helper"
+
+#: crates/clamui-core/src/config.rs:319 crates/clamui-core/src/config.rs:338
+msgid "Configuration file not found"
+msgstr "Finner ikke konfigurasjonsfilen"
+
+#: crates/clamui-core/src/config.rs:403
+msgid "Invalid scheduled scan configuration: {error}"
+msgstr "Ugyldig planlagt skannekonfigurasjon: {error}"
+
+#: crates/clamui-core/src/config.rs:462 crates/clamui-core/src/config.rs:520
+msgid "Not attempted because an earlier direct configuration write failed"
+msgstr ""
+"Ikke forsøkt fordi en tidligere direkte konfigurasjonsskriving mislyktes"
+
+#: crates/clamui-core/src/config.rs:500
+msgid "Protected configuration write failed"
+msgstr "Skriving av beskyttet konfigurasjon mislyktes"
+
+#: crates/clamui-core/src/config.rs:575
+msgid "Cannot save configuration paths: {error}"
+msgstr "Kan ikke lagre konfigurasjonsbaner: {error}"
+
+#: crates/clamui-core/src/config.rs:605 crates/clamui-core/src/config.rs:639
+msgid "Cannot save scheduled scan preferences: {error}"
+msgstr "Kan ikke lagre planlagte skanneinnstillinger: {error}"
+
+#: crates/clamui-core/src/config.rs:618 crates/clamui-core/src/config.rs:627
+msgid "Failed to apply scheduled scan configuration: {error}"
+msgstr "Kunne ikke bruke planlagt skannekonfigurasjon: {error}"
+
+#: crates/clamui-core/src/config.rs:701
+msgid "Configuration path appears more than once: {path}"
+msgstr "Konfigurasjonsbane vises mer enn én gang: {path}"
+
+#: crates/clamui-core/src/config.rs:709
+msgid "Configuration kinds sharing {setting} must use the same path"
+msgstr "Konfigurasjonstyper som deler {setting} må bruke samme bane"
+
+#: crates/clamui-core/src/config.rs:720
+msgid "Cannot prepare {path}: {error}"
+msgstr "Kan ikke forberede {path}: {error}"
+
+#: crates/clamui-core/src/config.rs:810
+msgid "Cannot read {path}: {error}"
+msgstr "Kan ikke lese {path}: {error}"
+
+#: crates/clamui-core/src/config.rs:820
+msgid "Configuration is not a regular file: {path}"
+msgstr "Konfigurasjonen er ikke en vanlig fil: {path}"
+
+#: crates/clamui-core/src/config.rs:826
+msgid "Cannot create {path}: {error}"
+msgstr "Kan ikke opprette {path}: {error}"
+
+#: crates/clamui-core/src/config.rs:835
+msgid "Cannot write {path}: {error}"
+msgstr "Kan ikke skrive {path}: {error}"
+
+#: crates/clamui-core/src/config.rs:934
+msgid ""
+"On-Access scanning requires at least one loop-prevention exclusion: Exclude "
+"Username, Exclude User ID, or Exclude Root User"
+msgstr ""
+"Sanntidsskanning krever minst én sløyfeforebyggende ekskludering: Ekskluder "
+"brukernavn, ekskluder bruker-ID eller ekskluder rotbruker"
+
+#: crates/clamui-core/src/config.rs:959
+msgid "{key}: invalid boolean value: {value}"
+msgstr "{key}: ugyldig boolsk verdi: {value}"
+
+#: crates/clamui-core/src/config.rs:988
+msgid "{key}: value {value} is below minimum {minimum}"
+msgstr "{key}: verdien {value} er under minimum {minimum}"
+
+#: crates/clamui-core/src/config.rs:996
+msgid "{key}: value {value} exceeds maximum {maximum}"
+msgstr "{key}: verdien {value} overskrider maksimum {maximum}"
+
+#: crates/clamui-core/src/config.rs:1005
+msgid "{key}: not a valid integer: {value}"
+msgstr "{key}: ikke et gyldig heltall: {value}"
+
+#: crates/clamui-core/src/config.rs:1014
+msgid "{key}: size must start with a number: {value}"
+msgstr "{key}: størrelsen må starte med et tall: {value}"
+
+#: crates/clamui-core/src/config.rs:1031
+msgid "{key}: path cannot be empty"
+msgstr "{key}: banen kan ikke være tom"
+
+#: crates/clamui-core/src/config.rs:1046
+msgid "{key}: string value cannot be empty"
+msgstr "{key}: strengverdien kan ikke være tom"
+
+#: crates/clamui-core/src/config.rs:1057
+msgid "{key}: URL must start with http(s)://, ftp(s)://, or file://"
+msgstr "{key}: URL-en må starte med http(s)://, ftp(s):// eller file://"
+
+#. Translators: The em dash separates the fallback state from its security warning.
+#: crates/clamui-core/src/credentials.rs:158
+msgid "Stored in settings file (keyring unavailable — less secure)"
+msgstr ""
+"Lagret i innstillingsfilen (nøkkelringen er utilgjengelig – mindre sikkert)"
+
+#. Translators: replace with your name(s) and optionally <email> or a URL, one translator per line. Leave untranslated if you do not want to be credited.
+#: crates/clamui-core/src/credits.rs:15
+msgid "translator-credits"
+msgstr "John Erling Blad https://github.com/jeblad"
+
+#: crates/clamui-core/src/host.rs:729
+msgid "Daemon not responding: {error}"
+msgstr "Tjenesten svarer ikke: {error}"
+
+#: crates/clamui-core/src/host.rs:732
+msgid "{binary} found but returned error: {error}"
+msgstr "{binary} ble funnet, men returnerte feil: {error}"
+
+#: crates/clamui-core/src/host.rs:737
+msgid "{service} is active"
+msgstr "{service} er aktiv"
+
+#: crates/clamui-core/src/host.rs:740
+msgid "No virus database files found in {path}"
+msgstr "Ingen virusdatabasefiler funnet i {path}"
+
+#: crates/clamui-core/src/host.rs:746
+msgid "Error accessing database {path}: {error}"
+msgstr "Feil ved tilgang til databasen {path}: {error}"
+
+#: crates/clamui-core/src/host.rs:752
+msgid "{binary} is not installed. Please install it with: {command}"
+msgstr "{binary} er ikke installert. Installer den med: {command}"
+
+#: crates/clamui-core/src/host.rs:762
+msgid ""
+"{binary} is not installed. Install the required ClamAV package for your "
+"distribution."
+msgstr ""
+"{binary} er ikke installert. Installer den nødvendige ClamAV-pakken for "
+"distribusjonen din."
+
+#: crates/clamui-core/src/logs.rs:767
+msgid "SCAN LOG"
+msgstr "SKANNELOGG"
+
+#: crates/clamui-core/src/logs.rs:769
+msgid "UPDATE LOG"
+msgstr "OPPDATERINGSLOGG"
+
+#: crates/clamui-core/src/logs.rs:779
+msgid "Timestamp"
+msgstr "Tidsstempel"
+
+#: crates/clamui-core/src/logs.rs:794
+msgid "Duration"
+msgstr "Varighet"
+
+#: crates/clamui-core/src/logs.rs:802
+msgid "Full Output"
+msgstr "Fullstendig utdata"
+
+#: crates/clamui-core/src/logs.rs:833
+msgid "{count} second"
+msgid_plural "{count} seconds"
+msgstr[0] "{count} sekund"
+msgstr[1] "{count} sekunder"
+
+#: crates/clamui-core/src/logs.rs:1063
+#: desktop/src-tauri/src/notifications.rs:107
+msgid "Scan Complete"
+msgstr "Skanning fullført"
+
+#: crates/clamui-core/src/logs.rs:1066
+msgid "Found {count} threat{suffix}"
+msgid_plural "Found {count} threats{suffix}"
+msgstr[0] "Fant {count} trussel{suffix}"
+msgstr[1] "Fant {count} trusler{suffix}"
+
+#: crates/clamui-core/src/logs.rs:1076
+msgid "Threats Detected"
+msgstr "Trusler oppdaget"
+
+#: crates/clamui-core/src/logs.rs:1081
+#: desktop/src-tauri/src/notifications.rs:109
+msgid "Scan Cancelled"
+msgstr "Skanning avbrutt"
+
+#: crates/clamui-core/src/logs.rs:1084
+#: desktop/src-tauri/src/notifications.rs:111
+msgid "Scan Error"
+msgstr "Skannefeil"
+
+#: crates/clamui-core/src/logs.rs:1095
+msgid "Scanned: {count} file"
+msgid_plural "Scanned: {count} files"
+msgstr[0] "Skannet: {count} fil"
+msgstr[1] "Skannet: {count} filer"
+
+#: crates/clamui-core/src/logs.rs:1102
+msgid "{count} directory"
+msgid_plural "{count} directories"
+msgstr[0] "{count} mappe"
+msgstr[1] "{count} mapper"
+
+#: crates/clamui-core/src/logs.rs:1113
+msgid "Threat found: {count}"
+msgid_plural "Threats found: {count}"
+msgstr[0] "Trussel funnet: {count}"
+msgstr[1] "Trusler funnet: {count}"
+
+#: crates/clamui-core/src/network.rs:86
+msgid "Network action is not supported."
+msgstr "Nettverkshandling støttes ikke."
+
+#: crates/clamui-core/src/network.rs:90
+msgid "Network snapshot accepts no arguments."
+msgstr "Nettverksøyeblikksbilde godtar ingen argumenter."
+
+#: crates/clamui-core/src/network.rs:118
+msgid ""
+"Some network socket rows could not be read, and the list was limited to 4096 "
+"rows."
+msgstr ""
+"Noen nettverkssokkelrader kunne ikke leses, og listen var begrenset til 4096 "
+"rader."
+
+#: crates/clamui-core/src/network.rs:125
+msgid "Some network socket rows could not be read."
+msgstr "Noen nettverkssokkelrader kunne ikke leses."
+
+#: crates/clamui-core/src/network.rs:129
+msgid "Network socket list was limited to 4096 rows."
+msgstr "Nettverkssokkellisten var begrenset til 4096 rader."
+
+#: crates/clamui-core/src/network.rs:152
+msgid "Network socket listing timed out. Try again."
+msgstr "Nettverkssokkellisten ble tidsavbrutt. Prøv igjen."
+
+#: crates/clamui-core/src/network.rs:156
+msgid "Network socket listing could not be completed safely. Try again."
+msgstr "Nettverkssokkellisten kunne ikke fullføres trygt. Prøv igjen."
+
+#: crates/clamui-core/src/network.rs:163
+msgid ""
+"Network socket listing returned invalid text and could not be read safely."
+msgstr ""
+"Nettverkssokkellisten returnerte ugyldig tekst og kunne ikke leses trygt."
+
+#: crates/clamui-core/src/network.rs:170
+msgid ""
+"Network socket listing is unavailable. Check that the system socket tool is "
+"installed and try again."
+msgstr ""
+"Nettverkssokkellisten er utilgjengelig. Kontroller at systemets "
+"sokkelverktøy er installert, og prøv igjen."
+
+#: crates/clamui-core/src/platform.rs:452
+msgid "Not running as Flatpak"
+msgstr "Kjører ikke som Flatpak"
+
+#. Translators: keep "Flatpak" and "clamui-privileged-helper" unchanged.
+#: crates/clamui-core/src/privileged/cli_install.rs:26
+msgid ""
+"ClamUI is running inside a Flatpak sandbox, which cannot install files on "
+"the host. Install the matching clamui-privileged-helper package on the host "
+"system instead."
+msgstr ""
+"ClamUI kjører i en Flatpak-sandkasse, som ikke kan installere filer på "
+"vertssystemet. Installer i stedet den tilsvarende pakken clamui-privileged-"
+"helper på vertssystemet."
+
+#. Translators: keep the paths and "sudo clamui install-privileged-helper" command unchanged.
+#: crates/clamui-core/src/privileged/cli_install.rs:33
+msgid ""
+"This command installs files under /usr and /usr/share and must be run as "
+"root. Try: sudo clamui install-privileged-helper"
+msgstr ""
+"Denne kommandoen installerer filer under /usr og /usr/share og må kjøres som "
+"root. Prøv: sudo clamui install-privileged-helper"
+
+#. Translators: keep the {error} placeholder; it is a sanitized installation error.
+#: crates/clamui-core/src/privileged/cli_install.rs:119
+msgid "Failed to install privileged helper: {error}"
+msgstr "Kunne ikke installere den privilegerte hjelperen: {error}"
+
+#. Translators: keep the {bin} and {policy} placeholders; they are installed file paths.
+#: crates/clamui-core/src/privileged/cli_install.rs:129
+msgid ""
+"Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
+"system ClamAV configuration from ClamUI should now work."
+msgstr ""
+"Installerte den privilegerte hjelperen i {bin} og polkit-regelen i {policy}. "
+"ClamUI skal nå kunne lagre ClamAV-konfigurasjonen på systemet."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:774
+msgid "Authorization was cancelled while {operation}."
+msgstr "Autorisasjonen ble kansellert mens {operation}."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:780
+msgid "The privileged helper is unavailable while {operation}."
+msgstr "Den privilegerte hjelperen er utilgjengelig mens {operation}."
+
+#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
+#: crates/clamui-core/src/privileged.rs:786
+msgid "The privileged helper rejected PKEXEC_UID while {operation}."
+msgstr "Den privilegerte hjelperen avviste PKEXEC_UID mens {operation}."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:792
+msgid "The privileged helper reported a protocol mismatch while {operation}."
+msgstr ""
+"Den privilegerte hjelperen rapporterte en protokollfeil mens {operation}."
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:798
+msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
+msgstr ""
+"Den privilegerte hjelperen mislyktes under {operation} (avslutningskode "
+"{code}): {detail}."
+
+#. Translators: keep the {operation} and numeric {code} placeholders.
+#: crates/clamui-core/src/privileged.rs:806
+msgid "The privileged helper failed while {operation} (exit {code})."
+msgstr ""
+"Den privilegerte hjelperen mislyktes under {operation} (avslutningskode "
+"{code})."
+
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
+#: crates/clamui-core/src/privileged.rs:813
+msgid "The privileged helper was terminated while {operation}."
+msgstr "Den privilegerte hjelperen ble avsluttet mens {operation}."
+
+#: crates/clamui-core/src/privileged.rs:872
+msgid "Applying configuration"
+msgstr "Bruker konfigurasjon"
+
+#. Translators: keep {message}; it is the complete preceding helper error.
+#: crates/clamui-core/src/privileged.rs:874
+msgid "{message} One or more earlier replacements may have succeeded."
+msgstr "{message} En eller flere tidligere erstatninger kan ha lyktes."
+
+#: crates/clamui-core/src/privileged.rs:1116
+msgid "Reading configuration"
+msgstr "Leser konfigurasjon"
+
+#. Translators: "privileged-helper" identifies the ClamUI helper component.
+#: crates/clamui-core/src/privileged.rs:2634
+msgid ""
+"The privileged-helper installation failed. Try again or install it manually."
+msgstr ""
+"Installasjonen av den privilegerte hjelperen mislyktes. Prøv igjen eller "
+"installer den manuelt."
+
+#: crates/clamui-core/src/profiles.rs:240
+#: crates/clamui-core/src/profiles.rs:311
+msgid "Profile name must be a string"
+msgstr "Profilnavnet må være en streng"
+
+#: crates/clamui-core/src/profiles.rs:244
+msgid "Cannot rename a default profile"
+msgstr "Kan ikke gi nytt navn til en standardprofil"
+
+#: crates/clamui-core/src/profiles.rs:248
+msgid "Cannot change whether a profile is default"
+msgstr "Kan ikke endre om en profil er standard"
+
+#: crates/clamui-core/src/profiles.rs:296
+msgid "Cannot delete default profile"
+msgstr "Kan ikke slette en standardprofil"
+
+#. Translators: Preserve `{path}` exactly as a user-provided file path and `{error}` as the filesystem diagnostic.
+#: crates/clamui-core/src/profiles.rs:336
+msgid "Could not read import file '{path}': {error}"
+msgstr "Kunne ikke lese importfilen '{path}': {error}"
+
+#: crates/clamui-core/src/profiles.rs:390
+msgid "Could not serialize profile export: {error}"
+msgstr "Kunne ikke serialisere profileksport: {error}"
+
+#: crates/clamui-core/src/profiles.rs:403
+msgid "Export path must be a non-empty string"
+msgstr "Eksportbanen må være en ikke-tom streng"
+
+#. Translators: Preserve `{id}` exactly; it is the profile's technical identifier.
+#: crates/clamui-core/src/profiles.rs:490
+msgid "Profile with ID '{id}' not found"
+msgstr "Finner ikke profil med ID '{id}'"
+
+#: crates/clamui-core/src/profiles.rs:569
+msgid "Profile name cannot be empty"
+msgstr "Profilnavnet kan ikke være tomt"
+
+#: crates/clamui-core/src/profiles.rs:572
+msgid "Profile name cannot exceed {max} characters"
+msgstr "Profilnavnet kan ikke overstige {max} tegn"
+
+#. Translators: Preserve `{name}` exactly; it is a user-provided profile name.
+#: crates/clamui-core/src/profiles.rs:582
+msgid "Profile name '{name}' already exists"
+msgstr "Profilnavnet '{name}' eksisterer allerede"
+
+#. Translators: Keep `paths` unchanged; it is the configuration key.
+#: crates/clamui-core/src/profiles.rs:594
+msgid "Exclusions 'paths' must be a list"
+msgstr "Ekskluderinger 'paths' må være en liste"
+
+#: crates/clamui-core/src/profiles.rs:603
+msgid "Exclusion path must be a string"
+msgstr "Ekskluderingsbanen må være en streng"
+
+#. Translators: Keep `patterns` unchanged; it is the configuration key.
+#: crates/clamui-core/src/profiles.rs:609
+msgid "Exclusions 'patterns' must be a list"
+msgstr "Ekskluderinger 'patterns' må være en liste"
+
+#: crates/clamui-core/src/profiles.rs:620
+msgid "Exclusion pattern cannot be empty"
+msgstr "Ekskluderingsmønsteret kan ikke være tomt"
+
+#: crates/clamui-core/src/profiles.rs:629
+msgid "{kind} cannot be empty"
+msgstr "{kind} kan ikke være tom"
+
+#: crates/clamui-core/src/profiles.rs:632
+msgid "Invalid {kind}: contains invalid characters"
+msgstr "Ugyldig {kind}: inneholder ugyldige tegn"
+
+#: crates/clamui-core/src/profiles.rs:641
+msgid "Invalid {kind} path format: {path}"
+msgstr "Ugyldig {kind} baneformat: {path}"
+
+#. Translators: Preserve `{name}` exactly; it is a user-provided profile name.
+#: crates/clamui-core/src/profiles.rs:663
+msgid "Could not generate unique name for '{name}'"
+msgstr "Kunne ikke generere unikt navn for '{name}'"
+
+#: crates/clamui-core/src/quarantine.rs:369
+msgid "Quarantine metadata was written but could not be read"
+msgstr "Karantenemetadata ble skrevet, men kunne ikke leses"
+
+#: crates/clamui-core/src/quarantine.rs:391
+msgid ""
+"Failed to record quarantine entry in database. File has been restored to "
+"original location."
+msgstr ""
+"Kunne ikke registrere karanteneoppføringen i databasen. Filen er "
+"gjenopprettet til den opprinnelige plasseringen."
+
+#. Translators: Preserve `{error}` as a localized failure description and `{path}` as a user-provided file path.
+#: crates/clamui-core/src/quarantine.rs:394
+msgid ""
+"Failed to record quarantine entry in database. Rollback also failed: "
+"{error}. File may be orphaned at: {path}"
+msgstr ""
+"Kunne ikke registrere karanteneoppføringen i databasen. Tilbakestillingen "
+"mislyktes også: {error}. Filen kan ligge igjen uten oppføring på: {path}"
+
+#: crates/clamui-core/src/quarantine.rs:442
+msgid ""
+"File restored successfully, but the database entry could not be removed. It "
+"may still appear in the list until cleaned up."
+msgstr ""
+"Filen er gjenopprettet, men oppføringen i databasen kunne ikke fjernes. Den "
+"kan fortsatt vises i listen til den er ryddet bort."
+
+#: crates/clamui-core/src/quarantine.rs:469
+msgid ""
+"File deleted successfully, but the database entry could not be removed. It "
+"may still appear in the list until cleaned up."
+msgstr ""
+"Filen er slettet, men oppføringen i databasen kunne ikke fjernes. Den kan "
+"fortsatt vises i listen til den er ryddet bort."
+
+#. Translators: Preserve `{path}` as a user-provided file path and `{error}` as the filesystem diagnostic.
+#: crates/clamui-core/src/quarantine.rs:1158
+msgid "Cannot quarantine {path}: {error}"
+msgstr "Kan ikke sette {path} i karantene: {error}"
+
+#. Translators: The em dash separates the integrity failure from its consequence.
+#: crates/clamui-core/src/quarantine.rs:1176
+msgid "File hash mismatch — file may be corrupted"
+msgstr "Filhash samsvarer ikke — filen kan være ødelagt"
+
+#: crates/clamui-core/src/scanner.rs:383
+msgid "No ClamAV database files were found in standard host locations"
+msgstr "Ingen ClamAV-databasefiler ble funnet på standard vertsplasseringer"
+
+#: crates/clamui-core/src/scanner.rs:1808
+msgid "Scan cancelled by user"
+msgstr "Skanning avbrutt av brukeren"
+
+#: crates/clamui-core/src/scanner.rs:1810
+msgid "No files could be scanned"
+msgstr "Ingen filer kunne skannes"
+
+#: crates/clamui-core/src/scanner.rs:1814
+msgid "Scan target does not exist or contains an invalid NUL byte"
+msgstr "Skannemål eksisterer ikke eller inneholder en ugyldig NUL-byte"
+
+#: crates/clamui-core/src/scanner.rs:1821
+msgid "Scan target is not a regular file or directory"
+msgstr "Skannemål er ikke en vanlig fil eller mappe"
+
+#: crates/clamui-core/src/scanner.rs:1835
+msgid "{count} file could not be accessed"
+msgid_plural "{count} files could not be accessed"
+msgstr[0] "{count} fil var utilgjengelig"
+msgstr[1] "{count} filer var utilgjengelige"
+
+#: crates/clamui-core/src/scanner.rs:1848
+msgid "{count} file could not be read"
+msgid_plural "{count} files could not be read"
+msgstr[0] "{count} fil kunne ikke leses"
+msgstr[1] "{count} filer kunne ikke leses"
+
+#: crates/clamui-core/src/scanner.rs:1867
+msgid ""
+"{count} non-fatal warning during scan; some files may have been only "
+"partially scanned"
+msgid_plural ""
+"{count} non-fatal warnings during scan; some files may have been only "
+"partially scanned"
+msgstr[0] ""
+"{count} ikke-dødelig advarsel under skanning; noen filer kan bare ha blitt "
+"skannet delvis"
+msgstr[1] ""
+"{count} ikke-dødelige advarsler under skanning; noen filer kan bare ha blitt "
+"skannet delvis"
+
+#: crates/clamui-core/src/scheduler.rs:805
+msgid "Scheduled scan cancelled"
+msgstr "Planlagt skanning avbrutt"
+
+#. Translators: Keep `clamui-scheduled-scan`, flags, `PATH`, and command syntax unchanged; translate the `Usage:` label.
+#: crates/clamui-core/src/scheduler.rs:824
+msgid ""
+"Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
+"target PATH] [--dry-run] [--verbose|-v]"
+msgstr ""
+"Bruk: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
+"target PATH] [--dry-run] [--verbose|-v]"
+
+#. Translators: The ellipsis indicates that the scheduled scan is starting.
+#: crates/clamui-core/src/scheduler.rs:865
+msgid "ClamUI scheduled scan starting…"
+msgstr "Planlagt ClamUI-skanning starter…"
+
+#: crates/clamui-core/src/scheduler.rs:874
+msgid "Scheduled scan skipped (on battery power)"
+msgstr "Planlagt skanning ble hoppet over (går på batteri)"
+
+#: crates/clamui-core/src/scheduler.rs:891
+msgid "Warning: Target does not exist: {target}"
+msgstr "Advarsel: Målet finnes ikke: {target}"
+
+#: crates/clamui-core/src/scheduler.rs:903
+msgid "Error: No valid scan targets found"
+msgstr "Feil: Fant ingen gyldig mål for skanning"
+
+#. Translators: The em dash separates the dry-run state from its consequence.
+#: crates/clamui-core/src/scheduler.rs:907
+msgid "Dry run mode — scan not executed"
+msgstr "Tørrkjøringsmodus — skanning ikke utført"
+
+#: crates/clamui-core/src/scheduler.rs:915
+msgid "  Skip on battery: {value}"
+msgstr "  Hopp over på batteri: {value}"
+
+#: crates/clamui-core/src/scheduler.rs:920
+msgid "  Auto quarantine: {value}"
+msgstr "  Automatisk karantene: {value}"
+
+#: crates/clamui-core/src/scheduler.rs:928
+msgid "  {count} target: {targets:?}"
+msgid_plural "  {count} targets: {targets:?}"
+msgstr[0] "  {count} mål: {targets:?}"
+msgstr[1] "  {count} mål: {targets:?}"
+
+#: crates/clamui-core/src/scheduler.rs:952
+msgid "Scheduled scan failed: ClamAV not available"
+msgstr "Planlagt skanning mislyktes: ClamAV er utilgjengelig"
+
+#. Translators: The em dash separates the unavailable component from `{error}`; preserve the raw diagnostic placeholder.
+#: crates/clamui-core/src/scheduler.rs:962
+msgid "Error: ClamAV not available — {error}"
+msgstr "Feil: ClamAV er ikke tilgjengelig — {error}"
+
+#: crates/clamui-core/src/scheduler.rs:971
+msgid "Scheduled Scan Failed"
+msgstr "Planlagt skanning mislyktes"
+
+#: crates/clamui-core/src/scheduler.rs:972
+msgid "ClamAV is not available. Please install ClamAV."
+msgstr "ClamAV er utilgjengelig. Installer ClamAV."
+
+#: crates/clamui-core/src/scheduler.rs:1035
+msgid "Scheduled scan found {infected} threat, {quarantined} quarantined"
+msgid_plural ""
+"Scheduled scan found {infected} threats, {quarantined} quarantined"
+msgstr[0] ""
+"Planlagt skanning fant {infected} trussel, {quarantined} satt i karantene"
+msgstr[1] ""
+"Planlagt skanning fant {infected} trusler, {quarantined} satt i karantene"
+
+#: crates/clamui-core/src/scheduler.rs:1046
+msgid "Scheduled scan found {count} threat"
+msgid_plural "Scheduled scan found {count} threats"
+msgstr[0] "Planlagt skanning fant {count} trussel"
+msgstr[1] "Planlagt skanning fant {count} trusler"
+
+#: crates/clamui-core/src/scheduler.rs:1055
+msgid "Scheduled scan completed with errors"
+msgstr "Planlagt skanning ble fullført med feil"
+
+#. Translators: The em dash separates the summary from the count; preserve `{count}`.
+#. Translators: The em dash separates the summary from the count; preserve `{count}`.
+#: crates/clamui-core/src/scheduler.rs:1058
+msgid "Scheduled scan completed — {count} file scanned, no threats"
+msgid_plural "Scheduled scan completed — {count} files scanned, no threats"
+msgstr[0] "Planlagt skanning fullført – {count} fil skannet, ingen trusler"
+msgstr[1] "Planlagt skanning fullført – {count} filer skannet, ingen trusler"
+
+#: crates/clamui-core/src/scheduler.rs:1073
+msgid "Scan Duration: {duration:.1f} seconds"
+msgstr "Skannetid: {duration:.1f} sekunder"
+
+#: crates/clamui-core/src/scheduler.rs:1075
+msgid "Files Scanned: {count}"
+msgstr "Filer skannet: {count}"
+
+#: crates/clamui-core/src/scheduler.rs:1076
+msgid "Threats Found: {count}"
+msgstr "Trusler funnet: {count}"
+
+#: crates/clamui-core/src/scheduler.rs:1077
+msgid "Targets: {targets}"
+msgstr "Mål: {targets}"
+
+#: crates/clamui-core/src/scheduler.rs:1081
+msgid "Quarantined: {count}"
+msgstr "Satt i karantene: {count}"
+
+#: crates/clamui-core/src/scheduler.rs:1086
+msgid "Quarantine Failed: {count}"
+msgstr "Mislykket karantene: {count}"
+
+#: crates/clamui-core/src/scheduler.rs:1114
+msgid "Scheduled Scan: Threats Detected!"
+msgstr "Planlagt skanning: trusler oppdaget!"
+
+#: crates/clamui-core/src/scheduler.rs:1120
+msgid "Scheduled Scan Completed"
+msgstr "Planlagt skanning er fullført"
+
+#: crates/clamui-core/src/scheduler.rs:1121
+msgid "Scan completed with some errors. Check logs for details."
+msgstr "Skanning fullført med noen feil. Se loggene for detaljer."
+
+#: crates/clamui-core/src/scheduler.rs:1129
+msgid "Scheduled Scan Complete"
+msgstr "Planlagt skanning fullført"
+
+#: crates/clamui-core/src/scheduler.rs:1142
+msgid "Failed to quarantine: {count} file"
+msgid_plural "Failed to quarantine: {count} files"
+msgstr[0] "Kunne ikke sette i karantene: {count} fil"
+msgstr[1] "Kunne ikke sette i karantene: {count} filer"
+
+#: crates/clamui-core/src/scheduler.rs:1168
+msgid ""
+"Battery level: {percent:.0f}%\n"
+"Scan skipped due to battery-aware settings."
+msgstr ""
+"Batterinivå: {percent:.0f} %\n"
+"Skanningen ble hoppet over på grunn av batteriinnstillingene."
+
+#: crates/clamui-core/src/scheduler.rs:1173
+msgid "Scan skipped due to battery-aware settings."
+msgstr "Skanning hoppet over på grunn av batteribevisste innstillinger."
+
+#: crates/clamui-core/src/scheduler.rs:1179
+msgid "Skipping scan: running on battery power ({percent:.0f}%)"
+msgstr "Hopper over skanningen: maskinen går på batteri ({percent:.0f} %)"
+
+#: crates/clamui-core/src/scheduler.rs:1184
+msgid "Skipping scan: running on battery power"
+msgstr "Hopper over skanning: kjører på batteristrøm"
+
+#: crates/clamui-core/src/updater.rs:132
+msgid "Update cancelled by user"
+msgstr "Oppdatering avbrutt av brukeren"
+
+#: crates/clamui-core/src/updater.rs:137
+msgid ""
+"Update process output did not close after cleanup; result cannot be "
+"classified."
+msgstr ""
+"Utdata for oppdateringsprosessen ble ikke lukket etter opprydding; "
+"resultatet kan ikke klassifiseres."
+
+#. Translators: Keep `freshclam` and `PID` unchanged; preserve `{pid}` as the process identifier.
+#: crates/clamui-core/src/updater.rs:505
+msgid "Update signal sent to freshclam service (PID {pid})"
+msgstr "Signal om oppdatering er sendt til freshclam-tjenesten (PID {pid})"
+
+#. Translators: Keep `freshclam`, `PID`, and `sudo systemctl stop clamav-freshclam` unchanged; preserve `{pid}` as the process identifier.
+#: crates/clamui-core/src/updater.rs:711
+msgid ""
+"Another freshclam instance is running (PID {pid}). Stop it first: sudo "
+"systemctl stop clamav-freshclam"
+msgstr ""
+"En annen freshclam-instans kjører (PID {pid}). Stopp den først: sudo "
+"systemctl stop clamav-freshclam"
+
+#. Translators: The em dash separates the completion state from the count; preserve `{count}`.
+#. Translators: The em dash separates the completion state from the count; preserve `{count}`.
+#: crates/clamui-core/src/updater.rs:829
+msgid "Database update completed — {count} database updated"
+msgid_plural "Database update completed — {count} databases updated"
+msgstr[0] "Databaseoppdatering fullført – {count} database oppdatert"
+msgstr[1] "Databaseoppdatering fullført – {count} databaser oppdatert"
+
+#. Translators: The em dash separates the completion state from the result.
+#: crates/clamui-core/src/updater.rs:839
+msgid "Database update completed — Already up to date"
+msgstr "Oppdatering av databasen fullført – allerede oppdatert"
+
+#: crates/clamui-core/src/updater.rs:906
+msgid "Selected freshclam config does not exist: {path}"
+msgstr "Den valgte freshclam-konfigurasjonen eksisterer ikke: {path}"
+
+#. Translators: Keep `freshclam` and `PID` unchanged; they name the service and its process identifier.
+#: crates/clamui-core/src/updater.rs:938
+msgid "Could not determine freshclam PID"
+msgstr "Kunne ikke finne PID for freshclam"
+
+#. Translators: Keep `sudo systemctl restart clamav-freshclam` unchanged and preserve `{error}` as the raw diagnostic.
+#: crates/clamui-core/src/updater.rs:948
+msgid ""
+"Could not trigger freshclam service update. Try restarting the service: sudo "
+"systemctl restart clamav-freshclam ({error})"
+msgstr ""
+"Kunne ikke utløse freshclam-tjenesteoppdateringen. Prøv å starte tjenesten "
+"på nytt: sudo systemctl restart clamav-freshclam ({error})"
+
+#: crates/clamui-core/src/virustotal.rs:807
+msgid "File too large ({size}MB). Maximum size is {max}MB"
+msgstr "Filen er for stor ({size} MB). Største tillatte størrelse er {max} MB"
+
+#: crates/clamui-core/src/virustotal.rs:811
+msgid "Invalid file path"
+msgstr "Ugyldig filbane"
+
+#: crates/clamui-core/src/virustotal.rs:813
+msgid "Path is not a regular file"
+msgstr "Banen er ikke en vanlig fil"
+
+#: crates/clamui-core/src/virustotal.rs:815
+msgid "File changed while hashing"
+msgstr "Fil endret under hashing"
+
+#: crates/clamui-core/src/virustotal.rs:817
+msgid "File changed before upload"
+msgstr "Fil endret før opplasting"
+
+#: crates/clamui-core/src/virustotal.rs:819
+msgid "File changed during upload"
+msgstr "Fil endret under opplasting"
+
+#: crates/clamui-core/src/virustotal.rs:828
+msgid "VirusTotal: Clean scan"
+msgstr "VirusTotal: Ren skanning"
+
+#: crates/clamui-core/src/virustotal.rs:831
+msgid "VirusTotal: {detections}/{total} engines detected threats"
+msgstr "VirusTotal: {detections}/{total} motorer oppdaget trusler"
+
+#: crates/clamui-core/src/virustotal.rs:838
+msgid "VirusTotal: Threats detected"
+msgstr "VirusTotal: Trusler oppdaget"
+
+#: crates/clamui-core/src/virustotal.rs:839
+msgid "VirusTotal: Rate limit exceeded"
+msgstr "VirusTotal: Frekvensgrensen er overskredet"
+
+#: crates/clamui-core/src/virustotal.rs:840
+msgid "VirusTotal: Analysis pending"
+msgstr "VirusTotal: Analyse venter"
+
+#: crates/clamui-core/src/virustotal.rs:843
+msgid "VirusTotal: File not previously analyzed"
+msgstr "VirusTotal: Filen er ikke tidligere analysert"
+
+#: crates/clamui-core/src/virustotal.rs:845
+msgid "VirusTotal: File too large for upload"
+msgstr "VirusTotal: Filen er for stor for opplasting"
+
+#: crates/clamui-core/src/virustotal.rs:846
+msgid "VirusTotal: Scan error"
+msgstr "VirusTotal: Skannefeil"
+
+#: crates/clamui-core/src/virustotal.rs:851
+msgid "Detections: {detections}/{total}"
+msgstr "Deteksjoner: {detections}/{total}"
+
+#: crates/clamui-core/src/virustotal.rs:865
+msgid "Error: {error}"
+msgstr "Feil: {error}"
+
+#. Translators: Keep `API` unchanged as the abbreviation for application programming interface.
+#: crates/clamui-core/src/virustotal.rs:973
+msgid "API key saved"
+msgstr "API-nøkkelen er lagret"
+
+#: desktop/src-tauri/src/notifications.rs:108
+msgid "Threats Detected!"
+msgstr "Trusler oppdaget!"
+
+#: desktop/src-tauri/src/notifications.rs:137
+msgid "Database Update Requested"
+msgstr "Databaseoppdatering forespurt"
+
+#: desktop/src-tauri/src/notifications.rs:138
+msgid "Freshclam service was signalled to check for updates"
+msgstr "Freshclam-tjenesten ble signalisert om å se etter oppdateringer"
+
+#: desktop/src-tauri/src/notifications.rs:141
+msgid "Database Updated"
+msgstr "Databasen er oppdatert"
+
+#: desktop/src-tauri/src/notifications.rs:142
+msgid "{count} virus database was updated"
+msgid_plural "{count} virus databases were updated"
+msgstr[0] "{count} virusdatabase ble oppdatert"
+msgstr[1] "{count} virusdatabaser ble oppdatert"
+
+#: desktop/src-tauri/src/notifications.rs:151
+msgid "Database Up to Date"
+msgstr "Database oppdatert"
+
+#: desktop/src-tauri/src/notifications.rs:152
+msgid "Virus definitions are already current"
+msgstr "Virusdefinisjoner er allerede gjeldende"
+
+#: desktop/src-tauri/src/notifications.rs:155
+msgid "Database Update Cancelled"
+msgstr "Databaseoppdatering avbrutt"
+
+#: desktop/src-tauri/src/notifications.rs:163
+msgid "Database Update Failed"
+msgstr "Oppdatering av databasen mislyktes"
+
+#: desktop/src-tauri/src/notifications.rs:175
+msgid "VirusTotal Analysis Complete"
+msgstr "VirusTotal-analyse fullført"
+
+#: desktop/src-tauri/src/notifications.rs:182
+msgid "Scanning Device"
+msgstr "Skanner enhet"
+
+#: desktop/src-tauri/src/notifications.rs:189
+msgid "Device Scan Complete"
+msgstr "Skanning av enhet fullført"
+
+#: desktop/src-tauri/src/notifications.rs:196
+msgid "Security Audit Complete"
+msgstr "Sikkerhetsrevisjon fullført"
+
+#: desktop/src-tauri/src/runtime.rs:190
+msgid "Quick Scan"
+msgstr "Rask skanning"
+
+#: desktop/src-tauri/src/runtime.rs:191
+msgid "Full Scan"
+msgstr "Full skanning"
+
+#: desktop/src-tauri/src/runtime.rs:192
+msgid "Home Folder"
+msgstr "Hjemmappe"
+
+#: desktop/src-tauri/src/runtime.rs:193
+msgid "Update Database"
+msgstr "Oppdater database"
+
+#: desktop/src-tauri/src/runtime.rs:194
+msgid "Scan Profile"
+msgstr "Skanneprofil"
+
+#: desktop/src-tauri/src/runtime.rs:195
+msgid "Quit"
+msgstr "Avslutt"
+
+#: desktop/src-tauri/src/runtime.rs:368
+msgid "Add Folders"
+msgstr "Legg til mapper"
+
+#: desktop/src-tauri/src/runtime.rs:370
+msgid "Add Files"
+msgstr "Legg til filer"
+
+#: desktop/src-tauri/src/runtime.rs:414
+msgid "Export"
+msgstr "Eksporter"
+
+#: desktop/src-tauri/src/runtime.rs:545
+msgid "Open"
+msgstr "Åpne"
+
+#: desktop/src/api.ts:75
+msgid "The contributor credits response was invalid."
+msgstr "Bidragsyter-krediteringssvaret var ugyldig."
+
+#: desktop/src/api.ts:178
+msgid "Enter a valid HTTP(S) address"
+msgstr "Skriv inn en gyldig HTTP(S)-adresse"
+
+#: desktop/src/api.ts:181
+msgid "Only HTTP(S) addresses may be opened externally"
+msgstr "Bare HTTP(S)-adresser kan åpnes eksternt"
+
+#: desktop/src/api.ts:190
+msgid "Choose a file or folder first"
+msgstr "Velg en fil eller mappe først"
+
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
+#: desktop/src/pages/Scan.tsx:536
+msgid "Scan"
+msgstr "Skanning"
+
+#: desktop/src/App.tsx:120 desktop/src/pages/Database.tsx:263
+#: desktop/src/pages/Preferences.tsx:15
+msgid "Database"
+msgstr "Database"
+
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+msgid "Logs"
+msgstr "Logger"
+
+#: desktop/src/App.tsx:124
+msgid "Components"
+msgstr "Komponenter"
+
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+msgid "Statistics"
+msgstr "Statistikk"
+
+#: desktop/src/App.tsx:130
+msgid "Audit"
+msgstr "Revisjon"
+
+#: desktop/src/App.tsx:132
+msgid "Network"
+msgstr "Nettverk"
+
+#: desktop/src/App.tsx:134 desktop/src/App.tsx:874 desktop/src/App.tsx:962
+#: desktop/src/pages/Preferences.tsx:117
+msgid "Preferences"
+msgstr "Brukervalg"
+
+#: desktop/src/App.tsx:136
+msgid "Profiles"
+msgstr "Profiler"
+
+#: desktop/src/App.tsx:138 desktop/src/pages/Results.tsx:281
+#: desktop/src/pages/Results.tsx:282
+msgid "Results"
+msgstr "Resultater"
+
+#: desktop/src/App.tsx:310 desktop/src/pages/ConfigPreferences.tsx:535
+msgid "Could not open link"
+msgstr "Kunne ikke åpne linken"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
+#: desktop/src/pages/Scan.tsx:322
+msgid "Scan in progress — wait for it to finish before changing targets"
+msgstr "Skanning pågår – vent til den er ferdig før du endrer mål"
+
+#: desktop/src/App.tsx:469
+msgid "The privileged-helper installation returned an invalid status."
+msgstr ""
+"Installasjonen av den privilegerte hjelperen returnerte en ugyldig status."
+
+#: desktop/src/App.tsx:476
+msgid "The privileged helper was installed successfully."
+msgstr "Den privilegerte hjelperen er installert."
+
+#: desktop/src/App.tsx:478
+msgid ""
+"The privileged helper is still unavailable. Try again or install it manually."
+msgstr ""
+"Den privilegerte hjelperen er fortsatt utilgjengelig. Prøv på nytt eller "
+"installer den manuelt."
+
+#: desktop/src/App.tsx:767
+msgid "The privileged-helper status returned an invalid response."
+msgstr "Statusen for den privilegerte hjelperen returnerte et ugyldig svar."
+
+#: desktop/src/App.tsx:872
+msgid "Back"
+msgstr "Tilbake"
+
+#: desktop/src/App.tsx:897
+msgid "Scan File or Folder"
+msgstr "Skann fil eller mappe"
+
+#: desktop/src/App.tsx:904
+msgid "Choose scan targets"
+msgstr "Velg skannemål"
+
+#: desktop/src/App.tsx:914
+msgid "Scan Files"
+msgstr "Skann filer"
+
+#: desktop/src/App.tsx:918
+msgid "Scan Folders"
+msgstr "Skann mapper"
+
+#: desktop/src/App.tsx:925
+msgid "Scan System (Quick Scan)"
+msgstr "Skann systemet (rask skanning)"
+
+#: desktop/src/App.tsx:932 desktop/src/App.tsx:933
+msgid "Menu"
+msgstr "Meny"
+
+#: desktop/src/App.tsx:952
+msgid "Application menu"
+msgstr "Applikasjonsmeny"
+
+#: desktop/src/App.tsx:965
+msgid "About"
+msgstr "Om"
+
+#: desktop/src/App.tsx:978
+msgid "Main navigation"
+msgstr "Hovednavigasjon"
+
+#: desktop/src/App.tsx:979
+msgid "Views"
+msgstr "Visninger"
+
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+msgid "Dismiss"
+msgstr "Lukk"
+
+#: desktop/src/App.tsx:1021
+msgid "About ClamUI"
+msgstr "Om ClamUI"
+
+#: desktop/src/App.tsx:1022
+msgid "A native desktop interface for ClamAV."
+msgstr "Et grafisk grensesnitt for antivirusprogrammet ClamAV"
+
+#: desktop/src/App.tsx:1024
+msgid "Version"
+msgstr "Versjon"
+
+#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:226
+#: desktop/src/pages/SettingsPreferences.tsx:227
+msgid "Language"
+msgstr "Språk"
+
+#: desktop/src/App.tsx:1026
+msgid "License"
+msgstr "Lisens"
+
+#: desktop/src/App.tsx:1029
+msgid "Project website"
+msgstr "Prosjektets nettside"
+
+#: desktop/src/App.tsx:1030
+msgid "Issue tracker"
+msgstr "Problemsporing"
+
+#: desktop/src/App.tsx:1032
+msgid "Could not load contributor credits: {error}"
+msgstr "Kunne ikke laste inn bidragsyterkrediteringer: {error}"
+
+#: desktop/src/App.tsx:1037
+msgid "Contributors"
+msgstr "Bidragsytere"
+
+#: desktop/src/App.tsx:1046
+msgid "Translator credits"
+msgstr "Oversetterkrediteringer"
+
+#: desktop/src/App.tsx:1049
+msgid "Loading contributor credits…"
+msgstr "Laster inn bidragsyterkrediteringer…"
+
+#: desktop/src/App.tsx:1051
+msgid "Close ClamUI?"
+msgstr "Vil du lukke ClamUI?"
+
+#: desktop/src/App.tsx:1052
+msgid ""
+"Choose whether to keep ClamUI available in the system tray or quit it "
+"completely."
+msgstr ""
+"Velg om du vil beholde ClamUI tilgjengelig i varslingsområdet eller avslutte "
+"det helt."
+
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+msgid "Remember my choice"
+msgstr "Husk valget mitt"
+
+#: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
+#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
+#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
+#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: desktop/src/App.tsx:1054
+msgid "Minimize to tray"
+msgstr "Minimer til varslingsområdet"
+
+#: desktop/src/App.tsx:1056
+msgid "Scan in Progress"
+msgstr "Skanning pågår"
+
+#: desktop/src/App.tsx:1057
+msgid "A scan is still running. Cancelling it may leave partial results."
+msgstr "En skanning kjører fortsatt. Avbryting kan gi delvise resultater."
+
+#: desktop/src/App.tsx:1058
+msgid "Keep Scanning"
+msgstr "Fortsett skanningen"
+
+#: desktop/src/App.tsx:1058
+msgid "Cancel Scan and Close"
+msgstr "Avbryt skanningen og lukk"
+
+#: desktop/src/App.tsx:1058 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
+#: desktop/src/pages/SettingsPreferences.tsx:256
+msgid "Close"
+msgstr "Lukk"
+
+#: desktop/src/App.tsx:1060
+msgid "Install Privileged Helper"
+msgstr "Installer privilegert hjelper"
+
+#: desktop/src/App.tsx:1061
+msgid ""
+"ClamUI needs its matching privileged helper to save system configuration."
+msgstr ""
+"ClamUI trenger sin matchende privilegerte hjelper for å lagre "
+"systemkonfigurasjon."
+
+#: desktop/src/App.tsx:1063 desktop/src/HelperTrustErrorDialog.tsx:52
+msgid "Installing the helper requires administrator authorization."
+msgstr "Installasjon av hjelperen krever administratorautorisasjon."
+
+#. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
+#: desktop/src/App.tsx:1064 desktop/src/HelperTrustErrorDialog.tsx:53
+msgid ""
+"On Fedora with DNF, installation also adds the ClamUI signing key to the "
+"system RPM keyring."
+msgstr ""
+"På Fedora med DNF legger installasjonen også ClamUIs signeringsnøkkel til i "
+"systemets RPM-nøkkelring."
+
+#: desktop/src/App.tsx:1069 desktop/src/HelperTrustErrorDialog.tsx:76
+msgid "Installing privileged helper…"
+msgstr "Installerer privilegert hjelper …"
+
+#: desktop/src/App.tsx:1071
+msgid "Not now"
+msgstr "Ikke nå"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Installing…"
+msgstr "Installerer …"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Try Again"
+msgstr "Prøv igjen"
+
+#: desktop/src/App.tsx:1071 desktop/src/HelperTrustErrorDialog.tsx:84
+msgid "Install Helper"
+msgstr "Installer hjelper"
+
+#: desktop/src/App.tsx:1071
+msgid "Open Preferences"
+msgstr "Åpne Brukervalg"
+
+#: desktop/src/ConfigurationRecovery.tsx:67
+msgid "Configuration from failed save attempt"
+msgstr "Konfigurasjon fra mislykket lagringsforsøk"
+
+#: desktop/src/ConfigurationRecovery.tsx:69
+msgid ""
+"These are the configuration contents from the failed save attempt. Some "
+"files may already have changed. Check each target before replacing its "
+"content."
+msgstr ""
+"Dette er konfigurasjonsinnholdet fra det mislykkede lagringsforsøket. Noen "
+"filer kan allerede ha blitt endret. Kontroller hvert mål før du erstatter "
+"innholdet."
+
+#: desktop/src/ConfigurationRecovery.tsx:70
+msgid ""
+"Configuration contents may include sensitive values. Copy and store them "
+"carefully."
+msgstr ""
+"Konfigurasjonsinnhold kan inneholde sensitive verdier. Kopier og lagre det "
+"forsiktig."
+
+#: desktop/src/ConfigurationRecovery.tsx:79
+msgid "Configuration path copied to clipboard"
+msgstr "Konfigurasjonssti kopiert til utklippstavlen"
+
+#: desktop/src/ConfigurationRecovery.tsx:80
+msgid "Could not copy configuration path."
+msgstr "Kunne ikke kopiere konfigurasjonsstien."
+
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:225
+msgid "Copy Path"
+msgstr "Kopier sti"
+
+#: desktop/src/ConfigurationRecovery.tsx:84
+msgid "Configuration content copied to clipboard"
+msgstr "Konfigurasjonsinnhold kopiert til utklippstavlen"
+
+#: desktop/src/ConfigurationRecovery.tsx:85
+msgid "Could not copy configuration content."
+msgstr "Kunne ikke kopiere konfigurasjonsinnholdet."
+
+#: desktop/src/ConfigurationRecovery.tsx:86
+msgid "Copy Content"
+msgstr "Kopier innhold"
+
+#: desktop/src/ConfigurationRecovery.tsx:89
+msgid "Configuration content"
+msgstr "Konfigurasjonsinnhold"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
+msgid "Could not open documentation: {error}"
+msgstr "Kunne ikke åpne dokumentasjonen: {error}"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:40
+msgid "Protected settings are blocked"
+msgstr "Beskyttede innstillinger er blokkert"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:46
+msgid ""
+"ClamUI could not save protected settings because its system helper is not "
+"installed."
+msgstr ""
+"ClamUI kunne ikke lagre beskyttede innstillinger fordi systemhjelperen ikke "
+"er installert."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:47
+msgid ""
+"ClamUI blocked this operation because its system helper is missing or is not "
+"securely installed."
+msgstr ""
+"ClamUI blokkerte denne operasjonen fordi systemhjelperen mangler eller ikke "
+"er sikkert installert."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:48
+msgid ""
+"The helper provides administrator-authorized access to protected ClamAV "
+"settings."
+msgstr ""
+"Hjelperen gir administratorautorisert tilgang til beskyttede ClamAV-"
+"innstillinger."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:59
+msgid "Helper location"
+msgstr "Hjelperens plassering"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:62
+msgid ""
+"The helper must be an executable file owned by root, not a symbolic link, "
+"and other users must not be able to change it."
+msgstr ""
+"Hjelperen må være en kjørbar fil som eies av root, ikke en symbolsk lenke, "
+"og andre brukere må ikke kunne endre den."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:63
+msgid "How to fix it"
+msgstr "Hvordan fikse det"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:66
+msgid "Install the matching helper from the same trusted ClamUI release."
+msgstr ""
+"Installer den matchende hjelperen fra den samme pålitelige ClamUI-utgivelsen."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:67
+msgid "Reinstall the matching helper from the same trusted ClamUI release."
+msgstr ""
+"Installer den matchende hjelperen på nytt fra den samme pålitelige ClamUI-"
+"utgivelsen."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:68
+msgid "Then return to Preferences and repeat the action."
+msgstr "Gå deretter tilbake til Innstillinger og gjenta handlingen."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:70
+msgid ""
+"Do not change the permissions of an unknown executable to bypass this check."
+msgstr ""
+"Ikke endre tillatelsene til en ukjent kjørbar fil for å omgå denne "
+"kontrollen."
+
+#: desktop/src/HelperTrustErrorDialog.tsx:72
+#: desktop/src/pages/ConfigPreferences.tsx:876
+msgid "Technical details"
+msgstr "Tekniske detaljer"
+
+#: desktop/src/HelperTrustErrorDialog.tsx:79
+msgid "Open repair instructions"
+msgstr "Åpne reparasjonsinstruksjonene"
+
+#. Translators: This button opens the failed native configuration snapshot.
+#: desktop/src/HelperTrustErrorDialog.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:880
+msgid "See Configuration"
+msgstr "Se konfigurasjon"
+
+#: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62
+msgid "Clean"
+msgstr "Ren"
+
+#: desktop/src/i18n.ts:93
+msgid "Infected"
+msgstr "Infisert"
+
+#: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
+#: desktop/src/pages/Statistics.tsx:140
+msgid "Error"
+msgstr "Feil"
+
+#: desktop/src/i18n.ts:95
+msgid "Cancelled"
+msgstr "Kansellert"
+
+#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
+#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:103
+#: desktop/src/pages/Logs.tsx:120 desktop/src/pages/Results.tsx:55
+#: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/SettingsPreferences.tsx:430
+#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/Statistics.tsx:141
+msgid "Unknown"
+msgstr "Ukjent"
+
+#: desktop/src/main.tsx:27
+msgid "ClamUI could not start"
+msgstr "ClamUI kunne ikke starte"
+
+#: desktop/src/main.tsx:30 desktop/src/pages/Network.tsx:402
+#: desktop/src/pages/Network.tsx:403
+msgid "Retry"
+msgstr "Prøv på nytt"
+
+#: desktop/src/pages/Audit.tsx:43
+msgid "ClamAV Health"
+msgstr "Tilstanden til ClamAV"
+
+#: desktop/src/pages/Audit.tsx:44
+msgid "Firewall"
+msgstr "Brannmur"
+
+#: desktop/src/pages/Audit.tsx:45
+msgid "Access Control"
+msgstr "Tilgangskontroll"
+
+#: desktop/src/pages/Audit.tsx:46
+msgid "Automatic Updates"
+msgstr "Automatiske oppdateringer"
+
+#: desktop/src/pages/Audit.tsx:47
+msgid "Intrusion Detection"
+msgstr "Inntrengingsdeteksjon"
+
+#: desktop/src/pages/Audit.tsx:48
+msgid "SSH Security"
+msgstr "SSH-sikkerhet"
+
+#: desktop/src/pages/Audit.tsx:49
+msgid "Portmaster"
+msgstr "Portmaster"
+
+#: desktop/src/pages/Audit.tsx:59 desktop/src/pages/Audit.tsx:267
+msgid "Checking"
+msgstr "Kontrollerer"
+
+#: desktop/src/pages/Audit.tsx:60 desktop/src/pages/Audit.tsx:265
+msgid "Pass"
+msgstr "Bestått"
+
+#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:265
+msgid "Warning"
+msgstr "Advarsel"
+
+#: desktop/src/pages/Audit.tsx:62
+msgid "Fail"
+msgstr "Mislykket"
+
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:119
+msgid "Skipped"
+msgstr "Hoppet over"
+
+#: desktop/src/pages/Audit.tsx:164
+msgid "{count} security issue needs attention"
+msgid_plural "{count} security issues need attention"
+msgstr[0] "{count} sikkerhetsproblem trenger oppmerksomhet"
+msgstr[1] "{count} sikkerhetsproblemer trenger oppmerksomhet"
+
+#: desktop/src/pages/Audit.tsx:165
+msgid "{count} audit check needs review"
+msgid_plural "{count} audit checks need review"
+msgstr[0] "{count} revisjonssjekk må gjennomgås"
+msgstr[1] "{count} revisjonssjekker må gjennomgås"
+
+#: desktop/src/pages/Audit.tsx:166
+msgid "Security audit completed"
+msgstr "Sikkerhetsrevisjon fullført"
+
+#: desktop/src/pages/Audit.tsx:189
+msgid "Could not receive progressive audit results: {error}"
+msgstr "Kunne ikke motta progressive revisjonsresultater: {error}"
+
+#: desktop/src/pages/Audit.tsx:208
+msgid "{tool} check completed"
+msgstr "{tool}-sjekken er fullført"
+
+#: desktop/src/pages/Audit.tsx:218
+msgid "The audit supplied an unsupported GUI launch action."
+msgstr "Revisjonen oppga en ustøttet handling for å starte GUI."
+
+#: desktop/src/pages/Audit.tsx:223
+msgid "The selected application did not start"
+msgstr "Det valgte programmet startet ikke"
+
+#: desktop/src/pages/Audit.tsx:236
+msgid "Portmaster authorization granted; refreshing audit."
+msgstr "Portmaster-autorisasjon gitt; oppdaterer revisjonen."
+
+#: desktop/src/pages/Audit.tsx:239
+msgid "Portmaster authorization was cancelled."
+msgstr "Portmaster-autorisasjonen ble kansellert."
+
+#: desktop/src/pages/Audit.tsx:241
+msgid "Portmaster authorization was not granted."
+msgstr "Portmaster-autorisasjon ble ikke gitt."
+
+#: desktop/src/pages/Audit.tsx:258
+msgid "System security audit"
+msgstr "Systemsikkerhetsrevisjon"
+
+#: desktop/src/pages/Audit.tsx:259
+msgid ""
+"Inspect your security posture and copy recommendations. Audit checks never "
+"change system configuration."
+msgstr ""
+"Inspiser sikkerhetsstillingen din og kopier anbefalingene. Revisjonssjekker "
+"endrer aldri systemkonfigurasjonen."
+
+#: desktop/src/pages/Audit.tsx:261
+msgid "Auditing…"
+msgstr "Revisjon …"
+
+#: desktop/src/pages/Audit.tsx:261
+msgid "Refresh audit"
+msgstr "Oppdater revisjonen"
+
+#: desktop/src/pages/Audit.tsx:265
+msgid "{count} issue"
+msgid_plural "{count} issues"
+msgstr[0] "{count} problem"
+msgstr[1] "{count} problemer"
+
+#: desktop/src/pages/Audit.tsx:265
+msgid "unavailable or skipped"
+msgstr "utilgjengelig eller hoppet over"
+
+#: desktop/src/pages/Audit.tsx:271
+msgid "Deep scans"
+msgstr "Dype skanninger"
+
+#. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
+#: desktop/src/pages/Audit.tsx:271
+msgid ""
+"Lynis and chkrootkit are never run automatically. Each check may request "
+"administrator authorization only after you explicitly start that check."
+msgstr ""
+"Lynis og chkrootkit kjøres aldri automatisk. Hver sjekk kan be om "
+"administratorautorisasjon bare etter at du eksplisitt har startet denne "
+"kontrollen."
+
+#: desktop/src/pages/Audit.tsx:276
+msgid "Running Lynis…"
+msgstr "Kjører Lynis..."
+
+#: desktop/src/pages/Audit.tsx:276
+msgid "Run Lynis security audit"
+msgstr "Kjør Lynis sikkerhetsrevisjon"
+
+#: desktop/src/pages/Audit.tsx:277
+msgid "Running chkrootkit…"
+msgstr "Kjører chkrootkit..."
+
+#: desktop/src/pages/Audit.tsx:277
+msgid "Run rootkit detection"
+msgstr "Kjør rootkit-deteksjon"
+
+#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Audit.tsx:300
+msgid "Portmaster — not detected (optional)"
+msgstr "Portmaster – ikke funnet (valgfritt)"
+
+#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Audit.tsx:305
+msgid "Portmaster — could not probe"
+msgstr "Portmaster – kunne ikke undersøkes"
+
+#: desktop/src/pages/Audit.tsx:314
+msgid "No audit details were returned."
+msgstr "Ingen revisjonsdetaljer ble returnert."
+
+#: desktop/src/pages/Audit.tsx:323 desktop/src/pages/Components.tsx:188
+msgid "Command copied to clipboard"
+msgstr "Kommandoen er kopiert til utklippstavlen"
+
+#: desktop/src/pages/Audit.tsx:325 desktop/src/pages/Components.tsx:191
+msgid "Could not copy command: {error}"
+msgstr "Kunne ikke kopiere kommandoen: {error}"
+
+#: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Logs.tsx:390 desktop/src/pages/Logs.tsx:415
+#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Copy"
+msgstr "Kopier"
+
+#: desktop/src/pages/Audit.tsx:340
+msgid "Authorizing…"
+msgstr "Godkjenner …"
+
+#: desktop/src/pages/Audit.tsx:340 desktop/src/pages/Network.tsx:441
+msgid "Open in browser"
+msgstr "Åpne i nettleseren"
+
+#: desktop/src/pages/Audit.tsx:340
+msgid "Learn more"
+msgstr "Lær mer"
+
+#: desktop/src/pages/Components.tsx:78
+msgid "Virus Scanner"
+msgstr "Virusskanner"
+
+#: desktop/src/pages/Components.tsx:80
+msgid "Database Updater"
+msgstr "Databaseoppdatering"
+
+#: desktop/src/pages/Components.tsx:82
+msgid "Daemon Scanner Client"
+msgstr "Klient for ClamAV-tjenesten"
+
+#: desktop/src/pages/Components.tsx:84
+msgid "Scanner Daemon"
+msgstr "Skannetjeneste"
+
+#. Translators: Keep clamscan unchanged; it is the scanner command name.
+#: desktop/src/pages/Components.tsx:91
+msgid "clamscan performs on-demand virus scans."
+msgstr "clamscan utfører virusskanninger på forespørsel."
+
+#. Translators: Keep freshclam unchanged; it is the database-updater command name.
+#: desktop/src/pages/Components.tsx:96
+msgid "freshclam downloads current virus definitions."
+msgstr "freshclam laster ned gjeldende virusdefinisjoner."
+
+#. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
+#: desktop/src/pages/Components.tsx:101
+msgid "clamdscan uses the clamd daemon for faster scanning."
+msgstr "clamdscan bruker clamd-tjenesten for raskere skanning."
+
+#. Translators: Keep clamd unchanged; it is the daemon service name.
+#: desktop/src/pages/Components.tsx:106
+msgid "clamd is the ClamAV daemon for faster scans."
+msgstr "clamd er ClamAV-tjenesten for raskere skanninger."
+
+#. Translators: Keep freshclam unchanged; it is the database-updater command name.
+#: desktop/src/pages/Components.tsx:116
+msgid "After installation, update virus definitions with freshclam."
+msgstr "Etter installasjon, oppdater virusdefinisjoner med freshclam."
+
+#. Translators: Keep the embedded shell commands and service name unchanged.
+#: desktop/src/pages/Components.tsx:121
+msgid ""
+"Enable the service for automatic updates: sudo systemctl enable clamav-"
+"freshclam; sudo systemctl start clamav-freshclam"
+msgstr ""
+"Aktiver tjenesten for automatiske oppdateringer: sudo systemctl enable "
+"clamav-freshclam; sudo systemctl start clamav-freshclam"
+
+#. Translators: Keep clamd unchanged; it is the daemon service name.
+#: desktop/src/pages/Components.tsx:126
+msgid "Requires the clamd daemon to be running."
+msgstr "Krever at clamd-tjenesten kjører."
+
+#. Translators: Keep the embedded file path, command, and command-line options unchanged.
+#: desktop/src/pages/Components.tsx:131
+msgid ""
+"Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
+"clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
+"permissions and run: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+msgstr ""
+"Konfigurasjonen oppdages automatisk i Brukervalg. På Fedora bruker ClamUI /"
+"etc/clamd.d/scan.conf. Hvis clamd kjører, men ikke er tilgjengelig, "
+"kontroller sokkelrettighetene og kjør: clamdscan --config-file=/etc/clamd.d/"
+"scan.conf --ping 3"
+
+#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:97
+msgid "Running"
+msgstr "Kjører"
+
+#: desktop/src/pages/Components.tsx:143
+#: desktop/src/pages/SettingsPreferences.tsx:247
+msgid "Installed"
+msgstr "Installert"
+
+#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:99
+msgid "Stopped"
+msgstr "Stoppet"
+
+#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:101
+#: desktop/src/pages/SettingsPreferences.tsx:249
+msgid "Not installed"
+msgstr "Ikke installert"
+
+#: desktop/src/pages/Components.tsx:200
+msgid "ClamAV components"
+msgstr "ClamAV-komponenter"
+
+#: desktop/src/pages/Components.tsx:201
+msgid ""
+"Check host-side ClamAV tools and copy distribution-specific setup commands."
+msgstr ""
+"Sjekk vertssiden ClamAV-verktøy og kopier distribusjonsspesifikke "
+"oppsettkommandoer."
+
+#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:228
+#: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
+msgid "Checking…"
+msgstr "Sjekker …"
+
+#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
+#: desktop/src/pages/Scan.tsx:537
+msgid "Refresh status"
+msgstr "Oppdater status"
+
+#: desktop/src/pages/Components.tsx:208
+msgid ""
+"Setup instructions are copy-only. ClamUI never installs packages or starts "
+"services for you."
+msgstr ""
+"Konfigurasjonsinstruksjonene kan bare kopieres. ClamUI installerer aldri "
+"pakker eller starter tjenester for deg."
+
+#: desktop/src/pages/Components.tsx:209
+msgid "Could not check component status: {error}"
+msgstr "Kunne ikke sjekke komponentstatus: {error}"
+
+#: desktop/src/pages/Components.tsx:210
+msgid "Detected host family: {distro}."
+msgstr "Oppdaget vertsfamilie: {distro}."
+
+#: desktop/src/pages/Components.tsx:215
+msgid "Components Status"
+msgstr "Status for komponenter"
+
+#: desktop/src/pages/Components.tsx:228
+msgid "Version unavailable"
+msgstr "Versjon utilgjengelig"
+
+#: desktop/src/pages/Components.tsx:245
+msgid "Hide details"
+msgstr "Skjul detaljer"
+
+#: desktop/src/pages/Components.tsx:245
+msgid "Show details"
+msgstr "Vis detaljer"
+
+#: desktop/src/pages/Components.tsx:252
+msgid "Suggested for the detected system:"
+msgstr "Foreslått for det oppdagede systemet:"
+
+#: desktop/src/pages/Components.tsx:255
+msgid "Commands for supported distributions:"
+msgstr "Kommandoer for støttede distribusjoner:"
+
+#: desktop/src/pages/Components.tsx:274
+msgid "Copied"
+msgstr "Kopiert"
+
+#: desktop/src/pages/ConfigPreferences.tsx:76
+msgid "Monday"
+msgstr "mandag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:77
+msgid "Tuesday"
+msgstr "tirsdag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:78
+msgid "Wednesday"
+msgstr "onsdag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:79
+msgid "Thursday"
+msgstr "torsdag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:80
+msgid "Friday"
+msgstr "fredag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:81
+msgid "Saturday"
+msgstr "lørdag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:82
+msgid "Sunday"
+msgstr "søndag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:85
+msgid "Hourly"
+msgstr "Hver time"
+
+#: desktop/src/pages/ConfigPreferences.tsx:86
+msgid "Daily"
+msgstr "Daglig"
+
+#: desktop/src/pages/ConfigPreferences.tsx:87
+msgid "Weekly"
+msgstr "Ukentlig"
+
+#: desktop/src/pages/ConfigPreferences.tsx:88
+msgid "Monthly"
+msgstr "Månedlig"
+
+#: desktop/src/pages/ConfigPreferences.tsx:201
+msgid "No configuration file selected"
+msgstr "Ingen konfigurasjonsfil valgt"
+
+#: desktop/src/pages/ConfigPreferences.tsx:208
+msgid "The file is not currently readable."
+msgstr "Filen er for øyeblikket ikke lesbar."
+
+#: desktop/src/pages/ConfigPreferences.tsx:211
+msgid "Detect"
+msgstr "Finn"
+
+#: desktop/src/pages/ConfigPreferences.tsx:212
+msgid "Browse"
+msgstr "Bla gjennom"
+
+#: desktop/src/pages/ConfigPreferences.tsx:213
+msgid "Authorize read"
+msgstr "Autoriser lesing"
+
+#. Translators: Save & Apply and Authorize read are button labels; use their translations.
+#: desktop/src/pages/ConfigPreferences.tsx:216
+msgid ""
+"Selecting a file keeps the path in this pending proposal. Save & Apply "
+"persists it only after the complete proposal is valid. Authorization is "
+"requested only when you explicitly choose Authorize read."
+msgstr ""
+"Når du velger en fil, beholdes banen i dette ventende utkastet. Lagre og "
+"bruk lagrer det bare etter at hele utkastet er gyldig. Autorisasjon bes bare "
+"om når du eksplisitt velger Autoriser lesing."
+
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:341
+#: desktop/src/pages/SettingsPreferences.tsx:323
+msgid "Add"
+msgstr "Legg til"
+
+#: desktop/src/pages/ConfigPreferences.tsx:299
+#: desktop/src/pages/ConfigPreferences.tsx:345
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/SettingsPreferences.tsx:253
+msgid "Remove"
+msgstr "Fjern"
+
+#. Translators: Keep the URI schemes unchanged.
+#: desktop/src/pages/ConfigPreferences.tsx:327
+msgid "Enter an http, https, ftp, ftps, or file URL."
+msgstr "Skriv inn en http-, https-, ftp-, ftps- eller file-URL."
+
+#: desktop/src/pages/ConfigPreferences.tsx:339
+msgid "Add URLs"
+msgstr "Legg til URL-er"
+
+#. Translators: Save & Apply is a button label; use its translation.
+#: desktop/src/pages/ConfigPreferences.tsx:446
+msgid "Configuration file selection is pending Save & Apply."
+msgstr "Valg av konfigurasjonsfil venter på Lagre og bruk."
+
+#: desktop/src/pages/ConfigPreferences.tsx:458
+msgid "No configuration file was found."
+msgstr "Ingen konfigurasjonsfil ble funnet."
+
+#: desktop/src/pages/ConfigPreferences.tsx:472
+msgid "Select a .conf configuration file."
+msgstr "Velg en .conf-konfigurasjonsfil."
+
+#: desktop/src/pages/ConfigPreferences.tsx:508
+msgid "Configuration loaded with administrator authorization."
+msgstr "Konfigurasjonen er lastet med administratorautorisasjon."
+
+#: desktop/src/pages/ConfigPreferences.tsx:545
+msgid "Scan backend saved."
+msgstr "Skannemotor lagret."
+
+#: desktop/src/pages/ConfigPreferences.tsx:578
+msgid "Choose a configuration file before applying its changes."
+msgstr "Velg en konfigurasjonsfil før du bruker endringene."
+
+#: desktop/src/pages/ConfigPreferences.tsx:590
+msgid ""
+"On-Access scanning requires an excluded username, UID, or root user to "
+"prevent scan loops."
+msgstr ""
+"Sanntidsskanning krever et ekskludert brukernavn, UID eller root-bruker for "
+"å forhindre skanneløkker."
+
+#: desktop/src/pages/ConfigPreferences.tsx:598
+#: desktop/src/pages/ConfigPreferences.tsx:688
+msgid "No changes to apply."
+msgstr "Ingen endringer å bruke."
+
+#: desktop/src/pages/ConfigPreferences.tsx:613
+msgid "Configuration validation failed."
+msgstr "Konfigurasjonsvalidering mislyktes."
+
+#: desktop/src/pages/ConfigPreferences.tsx:688
+msgid "Configuration saved and applied."
+msgstr "Konfigurasjonen er lagret og brukt."
+
+#: desktop/src/pages/ConfigPreferences.tsx:688
+#: desktop/src/pages/ConfigPreferences.tsx:705
+msgid "Some changes could not be applied."
+msgstr "Enkelte endringer kunne ikke brukes."
+
+#: desktop/src/pages/ConfigPreferences.tsx:689
+msgid "Saved groups"
+msgstr "Lagrede grupper"
+
+#: desktop/src/pages/ConfigPreferences.tsx:714
+msgid "Checking scanner status…"
+msgstr "Sjekker skannerstatus …"
+
+#: desktop/src/pages/ConfigPreferences.tsx:716
+msgid "Daemon connected"
+msgstr "Tjenesten er tilkoblet"
+
+#: desktop/src/pages/ConfigPreferences.tsx:717
+msgid "Scanner available"
+msgstr "Skanner tilgjengelig"
+
+#: desktop/src/pages/ConfigPreferences.tsx:717
+msgid "Scanner unavailable"
+msgstr "Skanner utilgjengelig"
+
+#: desktop/src/pages/ConfigPreferences.tsx:727
+msgid "Scan PE Files"
+msgstr "Skann PE-filer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:728
+msgid "Scan ELF Files"
+msgstr "Skann ELF-filer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:729
+msgid "Scan OLE2 Files"
+msgstr "Skann OLE2-filer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:730
+msgid "Scan PDF Files"
+msgstr "Skann PDF-filer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:731
+msgid "Scan HTML Files"
+msgstr "Skann HTML-filer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:732
+msgid "Scan Archive Files"
+msgstr "Skann arkivfiler"
+
+#: desktop/src/pages/ConfigPreferences.tsx:738
+msgid "Database Updates"
+msgstr "Databaseoppdateringer"
+
+#. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
+#: desktop/src/pages/ConfigPreferences.tsx:739
+msgid "freshclam.conf"
+msgstr "freshclam.conf"
+
+#: desktop/src/pages/ConfigPreferences.tsx:743
+msgid "Paths"
+msgstr "Stier"
+
+#: desktop/src/pages/ConfigPreferences.tsx:744
+msgid "Database Directory"
+msgstr "Databasemappe"
+
+#: desktop/src/pages/ConfigPreferences.tsx:745
+msgid "Update Log File"
+msgstr "Logg for oppdateringer"
+
+#: desktop/src/pages/ConfigPreferences.tsx:746
+msgid "PID File"
+msgstr "PID-fil"
+
+#: desktop/src/pages/ConfigPreferences.tsx:747
+msgid "Notify ClamD Config"
+msgstr "clamd-konfigurasjon som skal varsles"
+
+#: desktop/src/pages/ConfigPreferences.tsx:748
+msgid "Log timestamps"
+msgstr "Logg tidsstempler"
+
+#: desktop/src/pages/ConfigPreferences.tsx:749
+msgid "Verbose logging"
+msgstr "Utførlig logging"
+
+#: desktop/src/pages/ConfigPreferences.tsx:750
+msgid "Syslog logging"
+msgstr "Syslog logging"
+
+#: desktop/src/pages/ConfigPreferences.tsx:752
+msgid "Update Behavior"
+msgstr "Oppdateringsoppførsel"
+
+#: desktop/src/pages/ConfigPreferences.tsx:753
+msgid "Checks per day"
+msgstr "Sjekker per dag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:753
+msgid "0 disables automatic checks."
+msgstr "0 deaktiverer automatiske kontroller."
+
+#: desktop/src/pages/ConfigPreferences.tsx:754
+msgid "Database Mirror"
+msgstr "Nedlastingsserver for databasen"
+
+#: desktop/src/pages/ConfigPreferences.tsx:756
+msgid "Custom Signature Databases"
+msgstr "Egendefinerte signaturdatabaser"
+
+#: desktop/src/pages/ConfigPreferences.tsx:758
+msgid "Suggested"
+msgstr "Foreslåtte"
+
+#. Translators: Suggested and Save & Apply are button labels; use their translations. Keep URLhaus and InterServer unchanged.
+#: desktop/src/pages/ConfigPreferences.tsx:759
+msgid ""
+"Suggested adds URLhaus and three InterServer databases to this draft. Save & "
+"Apply is still required."
+msgstr ""
+"Foreslått legger URLhaus og tre InterServer-databaser til dette utkastet. "
+"Lagre og bruk er fortsatt nødvendig."
+
+#. Translators: Keep the URI schemes unchanged.
+#: desktop/src/pages/ConfigPreferences.tsx:763
+msgid ""
+"Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
+"URL as a separate entry."
+msgstr ""
+"Støttede URL-skjemaer: http, https, ftp, ftps og file. Lim inn hver "
+"leverandør-URL som en egen oppføring."
+
+#: desktop/src/pages/ConfigPreferences.tsx:768
+msgid "Signature Providers"
+msgstr "Signaturleverandører"
+
+#: desktop/src/pages/ConfigPreferences.tsx:769
+msgid "Free malware URL blocklist; no registration required."
+msgstr ""
+"Gratis blokkeringsliste med URL-er for skadevare; ingen registrering er "
+"nødvendig."
+
+#: desktop/src/pages/ConfigPreferences.tsx:769
+#: desktop/src/pages/ConfigPreferences.tsx:770
+#: desktop/src/pages/ConfigPreferences.tsx:774
+#: desktop/src/pages/ConfigPreferences.tsx:775
+msgid "Open provider"
+msgstr "Åpne leverandør"
+
+#: desktop/src/pages/ConfigPreferences.tsx:770
+msgid "Registration is required; URLs include your personal API key."
+msgstr ""
+"Registrering er nødvendig; URL-er inkluderer din personlige API-nøkkel."
+
+#. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
+#: desktop/src/pages/ConfigPreferences.tsx:771
+msgid ""
+"Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
+"provider."
+msgstr ""
+"Bruk fangfrisch eller clamav-unofficial-sigs; dette er ikke en direkte "
+"leverandør av egendefinerte URL-er."
+
+#: desktop/src/pages/ConfigPreferences.tsx:775
+msgid "Community hash, web-shell, and general malware signature databases."
+msgstr ""
+"Fellesskaps-hash, web-shell og generelle signaturdatabaser for skadelig "
+"programvare."
+
+#: desktop/src/pages/ConfigPreferences.tsx:777
+msgid "Proxy Settings"
+msgstr "Proxyinnstillinger"
+
+#: desktop/src/pages/ConfigPreferences.tsx:778
+msgid "Proxy Server"
+msgstr "Proxyserver"
+
+#: desktop/src/pages/ConfigPreferences.tsx:779
+msgid "Proxy Port"
+msgstr "Proxyport"
+
+#: desktop/src/pages/ConfigPreferences.tsx:779
+msgid "0 disables the proxy port."
+msgstr "0 deaktiverer proxy-porten."
+
+#: desktop/src/pages/ConfigPreferences.tsx:780
+msgid "Proxy Username"
+msgstr "Brukernavn for proxy"
+
+#: desktop/src/pages/ConfigPreferences.tsx:781
+msgid "Proxy Password"
+msgstr "Passord for proxy"
+
+#: desktop/src/pages/ConfigPreferences.tsx:786
+msgid "Scanner Settings"
+msgstr "Skannerinnstillinger"
+
+#: desktop/src/pages/ConfigPreferences.tsx:788
+msgid "Scan Backend"
+msgstr "Skannemotor"
+
+#: desktop/src/pages/ConfigPreferences.tsx:788
+msgid "Auto (prefer daemon)"
+msgstr "Automatisk (foretrekk tjenesten)"
+
+#. Translators: Keep clamd unchanged; it is the daemon command and service name.
+#: desktop/src/pages/ConfigPreferences.tsx:788
+msgid "ClamAV Daemon (clamd)"
+msgstr "ClamAV-tjeneste (clamd)"
+
+#. Translators: Keep clamscan unchanged; it is the scanner command name.
+#: desktop/src/pages/ConfigPreferences.tsx:791
+msgid "Standalone Scanner (clamscan)"
+msgstr "Frittstående skanner (clamscan)"
+
+#: desktop/src/pages/ConfigPreferences.tsx:795
+msgid "Daemon Status"
+msgstr "Tjenestestatus"
+
+#: desktop/src/pages/ConfigPreferences.tsx:795
+msgid "Refresh Status"
+msgstr "Oppdater status"
+
+#: desktop/src/pages/ConfigPreferences.tsx:796
+msgid "Documentation"
+msgstr "Dokumentasjon"
+
+#. Translators: Keep clamd.conf unchanged; it is a configuration file name.
+#: desktop/src/pages/ConfigPreferences.tsx:798
+#: desktop/src/pages/ConfigPreferences.tsx:819
+msgid "clamd.conf"
+msgstr "clamd.conf"
+
+#: desktop/src/pages/ConfigPreferences.tsx:802
+msgid "File Type Scanning"
+msgstr "Skanning etter filtype"
+
+#: desktop/src/pages/ConfigPreferences.tsx:805
+msgid "Performance and Limits"
+msgstr "Ytelse og grenser"
+
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:832
+msgid "Max File Size (MB)"
+msgstr "Maks filstørrelse (MB)"
+
+#: desktop/src/pages/ConfigPreferences.tsx:806
+#: desktop/src/pages/ConfigPreferences.tsx:807
+#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:832
+msgid "0 means unlimited."
+msgstr "0 betyr ubegrenset."
+
+#: desktop/src/pages/ConfigPreferences.tsx:807
+msgid "Max Scan Size (MB)"
+msgstr "Maks skannestørrelse (MB)"
+
+#: desktop/src/pages/ConfigPreferences.tsx:808
+msgid "Max Archive Recursion"
+msgstr "Maks rekursjonsdybde i arkiver"
+
+#: desktop/src/pages/ConfigPreferences.tsx:809
+msgid "Max Files in Archive"
+msgstr "Maks antall filer i arkiv"
+
+#: desktop/src/pages/ConfigPreferences.tsx:811
+msgid "Logging"
+msgstr "Logging"
+
+#: desktop/src/pages/ConfigPreferences.tsx:812
+msgid "Log File Path"
+msgstr "Sti til loggfil"
+
+#: desktop/src/pages/ConfigPreferences.tsx:813
+msgid "Verbose Logging"
+msgstr "Detaljert logging"
+
+#: desktop/src/pages/ConfigPreferences.tsx:813
+msgid "Syslog Logging"
+msgstr "Logging til syslog"
+
+#: desktop/src/pages/ConfigPreferences.tsx:818
+msgid "On-Access Scanning"
+msgstr "Sanntidsskanning"
+
+#: desktop/src/pages/ConfigPreferences.tsx:823
+msgid "Monitored Paths"
+msgstr "Overvåkede stier"
+
+#: desktop/src/pages/ConfigPreferences.tsx:824
+msgid "Include Paths"
+msgstr "Ta med stier"
+
+#: desktop/src/pages/ConfigPreferences.tsx:825
+msgid "Exclude Paths"
+msgstr "Unnta stier"
+
+#: desktop/src/pages/ConfigPreferences.tsx:827
+msgid "Behavior Settings"
+msgstr "Innstillinger for oppførsel"
+
+#: desktop/src/pages/ConfigPreferences.tsx:828
+msgid "Prevention Mode"
+msgstr "Blokkeringsmodus"
+
+#: desktop/src/pages/ConfigPreferences.tsx:828
+msgid "Extra Scanning"
+msgstr "Ekstra skanning"
+
+#: desktop/src/pages/ConfigPreferences.tsx:828
+msgid "Deny on Error"
+msgstr "Nekt ved feil"
+
+#: desktop/src/pages/ConfigPreferences.tsx:828
+msgid "Disable DDD"
+msgstr "Slå av DDD"
+
+#: desktop/src/pages/ConfigPreferences.tsx:830
+msgid "Performance Settings"
+msgstr "Ytelsesinnstillinger"
+
+#: desktop/src/pages/ConfigPreferences.tsx:831
+msgid "Max Threads"
+msgstr "Maks antall tråder"
+
+#: desktop/src/pages/ConfigPreferences.tsx:833
+msgid "Curl Timeout (seconds)"
+msgstr "Tidsavbrudd for curl (sekunder)"
+
+#: desktop/src/pages/ConfigPreferences.tsx:833
+msgid "0 disables the timeout."
+msgstr "0 deaktiverer tidsavbruddet."
+
+#: desktop/src/pages/ConfigPreferences.tsx:834
+msgid "Retry Attempts"
+msgstr "Antall nye forsøk"
+
+#: desktop/src/pages/ConfigPreferences.tsx:836
+msgid "Scan Loop Prevention"
+msgstr "Hindring av skanneløkker"
+
+#: desktop/src/pages/ConfigPreferences.tsx:837
+msgid ""
+"At least one loop-prevention exclusion is required. Exclude the clamav "
+"service account, its UID, or root to prevent recursive scans."
+msgstr ""
+"Minst én sløyfeforebyggende ekskludering er nødvendig. Ekskluder clamav-"
+"tjenestekontoen, dens UID eller root for å forhindre rekursive skanninger."
+
+#: desktop/src/pages/ConfigPreferences.tsx:838
+msgid "Exclude Username"
+msgstr "Unnta brukernavn"
+
+#: desktop/src/pages/ConfigPreferences.tsx:839
+msgid "Exclude User ID"
+msgstr "Unnta bruker-ID"
+
+#: desktop/src/pages/ConfigPreferences.tsx:840
+msgid "Exclude Root User"
+msgstr "Unnta root-brukeren"
+
+#: desktop/src/pages/ConfigPreferences.tsx:845
+msgid "Scheduled Scans"
+msgstr "Planlagte skanninger"
+
+#: desktop/src/pages/ConfigPreferences.tsx:846
+msgid "Schedule"
+msgstr "Rute"
+
+#: desktop/src/pages/ConfigPreferences.tsx:847
+msgid "Enable Scheduled Scans"
+msgstr "Slå på planlagte skanninger"
+
+#: desktop/src/pages/ConfigPreferences.tsx:848
+msgid "Scan Frequency"
+msgstr "Skannehyppighet"
+
+#: desktop/src/pages/ConfigPreferences.tsx:849
+msgid "Scan Time (24-hour)"
+msgstr "Skannetid (24 timer)"
+
+#: desktop/src/pages/ConfigPreferences.tsx:850
+msgid "Day of Week"
+msgstr "Ukedag"
+
+#: desktop/src/pages/ConfigPreferences.tsx:850
+msgid "Used for weekly scans."
+msgstr "Brukes til ukentlige skanninger."
+
+#: desktop/src/pages/ConfigPreferences.tsx:851
+msgid "Day of Month"
+msgstr "Dag i måneden"
+
+#: desktop/src/pages/ConfigPreferences.tsx:851
+msgid "Used for monthly scans."
+msgstr "Brukes til månedlige skanninger."
+
+#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
+msgid "Scan Targets"
+msgstr "Skannemål"
+
+#: desktop/src/pages/ConfigPreferences.tsx:853
+msgid ""
+"No targets are configured. The scheduled scan will use your home directory "
+"without saving it as an explicit target."
+msgstr ""
+"Ingen mål er konfigurert. Den planlagte skanningen vil bruke hjemmemappen "
+"din uten å lagre den som et eksplisitt mål."
+
+#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/SettingsPreferences.tsx:345
+msgid "Skip on Battery"
+msgstr "Hopp over på batteri"
+
+#: desktop/src/pages/ConfigPreferences.tsx:854
+msgid "Do not start scheduled scans while on battery power."
+msgstr "Ikke start planlagte skanninger mens du er på batteri."
+
+#: desktop/src/pages/ConfigPreferences.tsx:855
+msgid "Auto-Quarantine"
+msgstr "Automatisk karantene"
+
+#: desktop/src/pages/ConfigPreferences.tsx:855
+msgid "Automatically quarantine threats found by scheduled scans."
+msgstr "Sett automatisk trusler som planlagte skanninger finner, i karantene."
+
+#: desktop/src/pages/ConfigPreferences.tsx:860
+#: desktop/src/pages/ConfigPreferences.tsx:870
+msgid "Save & Apply"
+msgstr "Lagre og bruk"
+
+#: desktop/src/pages/ConfigPreferences.tsx:861
+msgid "Apply Configuration"
+msgstr "Bruk konfigurasjonen"
+
+#. Translators: Save & Apply is a button label; use its translation.
+#: desktop/src/pages/ConfigPreferences.tsx:862
+msgid ""
+"All edited forms are captured at the moment you click Save & Apply. Every "
+"configured file is validated before any write or authorization request."
+msgstr ""
+"Alle redigerte skjemaer fanges opp i det øyeblikket du klikker på Lagre og "
+"bruk. Hver konfigurert fil valideres før enhver skrive- eller "
+"autorisasjonsforespørsel."
+
+#. Translators: Keep clamd.conf unchanged; it is a configuration file name.
+#: desktop/src/pages/ConfigPreferences.tsx:866
+msgid ""
+"Scanner and On-Access changes share one clamd.conf proposal; neither form "
+"can overwrite the other's detached changes."
+msgstr ""
+"Endringer i skanneren og sanntidsskanningen deler ett clamd.conf-forslag; "
+"ingen av skjemaene kan overskrive den andres løsrevne endringer."
+
+#: desktop/src/pages/ConfigPreferences.tsx:870
+#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
+msgid "Saving…"
+msgstr "Lagrer …"
+
+#: desktop/src/pages/Database.tsx:58
+msgid "Active (PID {pid})"
+msgstr "Aktiv (PID {pid})"
+
+#: desktop/src/pages/Database.tsx:58
+msgid "Active"
+msgstr "Aktiv"
+
+#: desktop/src/pages/Database.tsx:60
+msgid "Installed but stopped"
+msgstr "Installert men stoppet"
+
+#: desktop/src/pages/Database.tsx:62
+msgid "No freshclam service detected; updates run manually"
+msgstr "Ingen freshclam-tjeneste oppdaget; oppdateringer kjøres manuelt"
+
+#: desktop/src/pages/Database.tsx:64
+msgid "Service state could not be determined"
+msgstr "Tjenestestatus kunne ikke fastslås"
+
+#: desktop/src/pages/Database.tsx:69
+msgid "Database freshness information is unavailable"
+msgstr "Databaseoppdateringsinformasjon er utilgjengelig"
+
+#: desktop/src/pages/Database.tsx:70
+msgid "No readable virus database was found"
+msgstr "Ingen lesbar virusdatabase ble funnet"
+
+#: desktop/src/pages/Database.tsx:72
+msgid "{count} day old"
+msgid_plural "{count} days old"
+msgstr[0] "{count} dag gammel"
+msgstr[1] "{count} dager gammel"
+
+#: desktop/src/pages/Database.tsx:74
+msgid "last updated {timestamp}"
+msgstr "sist oppdatert {timestamp}"
+
+#: desktop/src/pages/Database.tsx:75
+msgid "freshness could not be determined"
+msgstr "friskhet kunne ikke bestemmes"
+
+#: desktop/src/pages/Database.tsx:76
+msgid "Virus database available"
+msgstr "Virusdatabase tilgjengelig"
+
+#: desktop/src/pages/Database.tsx:81
+msgid "Status: {status}"
+msgstr "Status: {status}"
+
+#: desktop/src/pages/Database.tsx:82
+msgid "Method: {method}"
+msgstr "Metode: {method}"
+
+#: desktop/src/pages/Database.tsx:82
+msgid "freshclam service signal accepted"
+msgstr "Servicesignal for freshclam er godtatt"
+
+#: desktop/src/pages/Database.tsx:82
+msgid "manual freshclam"
+msgstr "manuell freshclam-kjøring"
+
+#: desktop/src/pages/Database.tsx:83
+msgid "Exit code: {code}"
+msgstr "Avslutningskode: {code}"
+
+#: desktop/src/pages/Database.tsx:85
+msgid "Database updated: {count}"
+msgid_plural "Databases updated: {count}"
+msgstr[0] "Database oppdatert: {count}"
+msgstr[1] "Databaser oppdatert: {count}"
+
+#: desktop/src/pages/Database.tsx:86
+msgid "Updated: {databases}"
+msgstr "Oppdatert: {databases}"
+
+#: desktop/src/pages/Database.tsx:87
+msgid "Already current: {databases}"
+msgstr "Allerede oppdatert: {databases}"
+
+#: desktop/src/pages/Database.tsx:89
+msgid "Rate limited: {database}{cooldown}"
+msgstr "Midlertidig begrenset: {database}{cooldown}"
+
+#: desktop/src/pages/Database.tsx:89
+msgid "until"
+msgstr "til"
+
+#: desktop/src/pages/Database.tsx:92
+msgid ""
+"The service accepted the signal; it performs the update asynchronously. "
+"Check its logs for completion."
+msgstr ""
+"Tjenesten aksepterte signalet; den utfører oppdateringen asynkront. Sjekk "
+"loggene for fullføring."
+
+#: desktop/src/pages/Database.tsx:100
+msgid "freshclam output:"
+msgstr "freshclam-utdata:"
+
+#: desktop/src/pages/Database.tsx:103
+msgid "Error output:"
+msgstr "Feilutdata:"
+
+#: desktop/src/pages/Database.tsx:199
+msgid "Could not listen for update progress: {error}"
+msgstr "Kunne ikke lytte etter oppdateringsfremdrift: {error}"
+
+#: desktop/src/pages/Database.tsx:213
+msgid ""
+"Force update requested: preserving existing databases until replacement "
+"succeeds."
+msgstr ""
+"Tvungen oppdatering er forespurt: Eksisterende databaser bevares til en "
+"erstatning lykkes."
+
+#: desktop/src/pages/Database.tsx:213
+msgid "Update requested."
+msgstr "Oppdatering forespurt."
+
+#: desktop/src/pages/Database.tsx:220
+msgid "Database update failed"
+msgstr "Databaseoppdatering mislyktes"
+
+#: desktop/src/pages/Database.tsx:221
+msgid "Database update cancelled"
+msgstr "Oppdatering av databasen avbrutt"
+
+#: desktop/src/pages/Database.tsx:222
+msgid "Update signal accepted by the freshclam service"
+msgstr "Oppdateringssignal akseptert av freshclam-tjenesten"
+
+#: desktop/src/pages/Database.tsx:223
+msgid "Database update completed"
+msgstr "Databaseoppdatering fullført"
+
+#: desktop/src/pages/Database.tsx:223
+msgid "Database is already up to date"
+msgstr "Databasen er allerede oppdatert"
+
+#: desktop/src/pages/Database.tsx:250
+msgid "No matching update operation could be cancelled."
+msgstr "Ingen samsvarende oppdateringsoperasjon kunne avbrytes."
+
+#: desktop/src/pages/Database.tsx:251
+msgid "Cancellation requested; waiting for freshclam to stop."
+msgstr "Avbestilling forespurt; venter på at freshclam skal stoppe."
+
+#: desktop/src/pages/Database.tsx:264
+msgid "Update ClamAV virus definitions and inspect their current state."
+msgstr ""
+"Oppdater ClamAV-virusdefinisjoner og inspiser deres nåværende tilstand."
+
+#: desktop/src/pages/Database.tsx:271
+msgid "Could not read updater status: {error}"
+msgstr "Kunne ikke lese oppdateringsstatus: {error}"
+
+#: desktop/src/pages/Database.tsx:276
+msgid "Virus definitions"
+msgstr "Virusdefinisjoner"
+
+#: desktop/src/pages/Database.tsx:282
+msgid "Checking freshclam…"
+msgstr "Sjekker freshclam …"
+
+#: desktop/src/pages/Database.tsx:282
+msgid "No freshclam status returned"
+msgstr "Ingen freshclam-status returnert"
+
+#: desktop/src/pages/Database.tsx:285
+msgid "Available"
+msgstr "Tilgjengelig"
+
+#: desktop/src/pages/Database.tsx:285
+msgid "Unavailable"
+msgstr "Utilgjengelig"
+
+#: desktop/src/pages/Database.tsx:288
+msgid "Update service"
+msgstr "Oppdateringstjeneste"
+
+#: desktop/src/pages/Database.tsx:293
+msgid "Database freshness"
+msgstr "Databasefriskhet"
+
+#: desktop/src/pages/Database.tsx:304 desktop/src/pages/Database.tsx:311
+msgid "Update database"
+msgstr "Oppdater databasen"
+
+#: desktop/src/pages/Database.tsx:305
+msgid ""
+"A normal update asks an active freshclam service to update when possible. A "
+"force update bypasses the service and stages replacements before promoting "
+"them, restoring prior databases if that replacement fails."
+msgstr ""
+"En vanlig oppdatering ber en aktiv freshclam-tjeneste om å oppdatere når det "
+"er mulig. En tvungen oppdatering omgår tjenesten og klargjør erstatninger "
+"før de tas i bruk, og gjenoppretter tidligere databaser hvis erstatningen "
+"mislykkes."
+
+#: desktop/src/pages/Database.tsx:311
+msgid "Updating…"
+msgstr "Oppdaterer …"
+
+#: desktop/src/pages/Database.tsx:312 desktop/src/pages/Database.tsx:340
+msgid "Force update"
+msgstr "Tving oppdatering"
+
+#: desktop/src/pages/Database.tsx:316
+msgid "Install freshclam before requesting database updates."
+msgstr "Installer freshclam før du ber om databaseoppdateringer."
+
+#: desktop/src/pages/Database.tsx:317
+msgid "Preparing the update progress listener…"
+msgstr "Forbereder oppdateringsfremdriftslytteren …"
+
+#: desktop/src/pages/Database.tsx:323
+msgid "Update log"
+msgstr "Oppdateringslogg"
+
+#: desktop/src/pages/Database.tsx:331
+msgid "No update has been requested in this session."
+msgstr "Ingen oppdatering er forespurt i denne økten."
+
+#: desktop/src/pages/Database.tsx:336
+msgid "Force database update?"
+msgstr "Tvinge databaseoppdatering?"
+
+#: desktop/src/pages/Database.tsx:337
+msgid ""
+"This bypasses the freshclam service and stages replacement databases. "
+"Existing definitions remain available until a replacement succeeds; they are "
+"restored if promotion fails."
+msgstr ""
+"Dette omgår freshclam-tjenesten og klargjør erstatningsdatabaser. "
+"Eksisterende definisjoner forblir tilgjengelige til en erstatning lykkes; de "
+"gjenopprettes hvis den ikke kan tas i bruk."
+
+#: desktop/src/pages/Logs.tsx:76
+msgid "{seconds} second"
+msgid_plural "{seconds} seconds"
+msgstr[0] "{seconds} sekund"
+msgstr[1] "{seconds} sekunder"
+
+#: desktop/src/pages/Logs.tsx:88 desktop/src/pages/Profiles.tsx:103
+#: desktop/src/pages/Quarantine.tsx:225
+msgid "Path"
+msgstr "Sti"
+
+#: desktop/src/pages/Logs.tsx:117
+msgid "Success"
+msgstr "Suksess"
+
+#: desktop/src/pages/Logs.tsx:118
+msgid "Up to date"
+msgstr "Oppdatert"
+
+#: desktop/src/pages/Logs.tsx:162
+msgid "Failed to load historical logs: {error}"
+msgstr "Kunne ikke laste inn historiske logger: {error}"
+
+#: desktop/src/pages/Logs.tsx:180
+msgid "Log updates are unavailable: {error}"
+msgstr "Loggoppdateringer er utilgjengelige: {error}"
+
+#: desktop/src/pages/Logs.tsx:193 desktop/src/pages/Logs.tsx:209
+msgid "Unable to determine ClamAV daemon status."
+msgstr "Kan ikke fastslå statusen for ClamAV-tjenesten."
+
+#: desktop/src/pages/Logs.tsx:202
+msgid "ClamAV daemon is not running."
+msgstr "ClamAV-tjenesten kjører ikke."
+
+#: desktop/src/pages/Logs.tsx:205
+msgid "ClamAV daemon is not installed."
+msgstr "ClamAV-tjenesten er ikke installert."
+
+#: desktop/src/pages/Logs.tsx:236
+msgid "Unable to load daemon logs."
+msgstr "Kan ikke laste tjenestelogger."
+
+#: desktop/src/pages/Logs.tsx:274
+msgid "The log entry returned by ClamUI was incomplete."
+msgstr "Loggoppføringen returnert av ClamUI var ufullstendig."
+
+#: desktop/src/pages/Logs.tsx:277
+msgid "Failed to load log details: {error}"
+msgstr "Kunne ikke laste inn loggdetaljer: {error}"
+
+#: desktop/src/pages/Logs.tsx:285 desktop/src/pages/Logs.tsx:295
+#: desktop/src/pages/Logs.tsx:403
+msgid "Text"
+msgstr "Tekst"
+
+#: desktop/src/pages/Logs.tsx:286 desktop/src/pages/Logs.tsx:296
+msgid "Exported selected log."
+msgstr "Eksportert valgt logg."
+
+#: desktop/src/pages/Logs.tsx:286
+msgid "Exported all logs."
+msgstr "Eksporterte alle logger."
+
+#: desktop/src/pages/Logs.tsx:288
+msgid "Failed to export logs"
+msgstr "Kunne ikke eksportere logger"
+
+#: desktop/src/pages/Logs.tsx:298
+msgid "Failed to export log"
+msgstr "Kunne ikke eksportere loggen"
+
+#: desktop/src/pages/Logs.tsx:306
+msgid ""
+"Log details are too large for the clipboard. Choose an export destination "
+"instead."
+msgstr ""
+"Loggdetaljene er for store for utklippstavlen. Velg en eksportdestinasjon i "
+"stedet."
+
+#: desktop/src/pages/Logs.tsx:312
+msgid "Log details copied to clipboard"
+msgstr "Loggdetaljene er kopiert til utklippstavlen"
+
+#: desktop/src/pages/Logs.tsx:314
+msgid "Failed to copy log details"
+msgstr "Kunne ikke kopiere loggdetaljer"
+
+#: desktop/src/pages/Logs.tsx:326
+msgid "Daemon logs copied to clipboard"
+msgstr "Tjenesteloggene er kopiert til utklippstavlen"
+
+#: desktop/src/pages/Logs.tsx:328
+msgid "Failed to copy daemon logs"
+msgstr "Kunne ikke kopiere tjenestelogger"
+
+#: desktop/src/pages/Logs.tsx:339
+msgid "Historical logs were cleared with {count} cleanup failure."
+msgid_plural "Historical logs were cleared with {count} cleanup failures."
+msgstr[0] "Historiske logger ble slettet med {count} oppryddingsfeil."
+msgstr[1] "Historiske logger ble slettet med {count} oppryddingsfeil."
+
+#: desktop/src/pages/Logs.tsx:345
+msgid "Historical logs cleared."
+msgstr "Historiske logger slettet."
+
+#: desktop/src/pages/Logs.tsx:348
+msgid "Failed to clear logs: {error}"
+msgstr "Kunne ikke tømme loggene: {error}"
+
+#: desktop/src/pages/Logs.tsx:353
+msgid "Select a log entry to view details."
+msgstr "Velg en loggoppføring for å se detaljene."
+
+#: desktop/src/pages/Logs.tsx:354
+msgid "Error loading daemon logs"
+msgstr "Feil ved innlasting av tjenestelogger"
+
+#: desktop/src/pages/Logs.tsx:360
+msgid "Review previous scan and update operations."
+msgstr "Gjennomgå tidligere skanne- og oppdateringsoperasjoner."
+
+#: desktop/src/pages/Logs.tsx:361
+msgid "Log source"
+msgstr "Loggkilde"
+
+#: desktop/src/pages/Logs.tsx:362 desktop/src/pages/Logs.tsx:368
+msgid "Historical Logs"
+msgstr "Tidligere logger"
+
+#: desktop/src/pages/Logs.tsx:363 desktop/src/pages/Logs.tsx:400
+msgid "ClamAV Daemon"
+msgstr "ClamAV-tjeneste"
+
+#: desktop/src/pages/Logs.tsx:368
+msgid "Previous scan and update operations"
+msgstr "Tidligere skanninger og oppdateringer"
+
+#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:402
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:217
+#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:449
+#: desktop/src/pages/Statistics.tsx:224
+msgid "Refresh"
+msgstr "Oppdater"
+
+#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:392
+msgid "Export CSV"
+msgstr "Eksporter CSV"
+
+#: desktop/src/pages/Logs.tsx:371 desktop/src/pages/Logs.tsx:393
+#: desktop/src/pages/Results.tsx:225
+msgid "Export JSON"
+msgstr "Eksporter JSON"
+
+#: desktop/src/pages/Logs.tsx:372 desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Scan.tsx:553
+msgid "Clear All"
+msgstr "Tøm alle"
+
+#: desktop/src/pages/Logs.tsx:375
+msgid "Loading logs…"
+msgstr "Laster inn logger …"
+
+#: desktop/src/pages/Logs.tsx:375
+msgid "No historical logs yet."
+msgstr "Ingen historiske logger ennå."
+
+#: desktop/src/pages/Logs.tsx:382
+msgid "{shown} of {total} loaded log shown"
+msgid_plural "{shown} of {total} loaded logs shown"
+msgstr[0] "{shown} av {total} lastet logg vist"
+msgstr[1] "{shown} av {total} innlastede logger vist"
+
+#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Network.tsx:430
+#: desktop/src/pages/Quarantine.tsx:230
+msgid "Load More"
+msgstr "Last inn mer"
+
+#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Quarantine.tsx:230
+msgid "Show All ({count})"
+msgstr "Vis alle ({count})"
+
+#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:394
+msgid "Log Details"
+msgstr "Loggdetaljer"
+
+#: desktop/src/pages/Logs.tsx:391 desktop/src/pages/Logs.tsx:403
+msgid "Export Text"
+msgstr "Eksporter tekst"
+
+#: desktop/src/pages/Logs.tsx:394 desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
+msgid "Fullscreen"
+msgstr "Fullskjerm"
+
+#: desktop/src/pages/Logs.tsx:400
+msgid "Live host daemon log output."
+msgstr "Direkte loggutdata fra vertens tjeneste."
+
+#: desktop/src/pages/Logs.tsx:401
+msgid "Stop Live Updates"
+msgstr "Stopp direkteoppdateringer"
+
+#: desktop/src/pages/Logs.tsx:401
+msgid "Start Live Updates"
+msgstr "Start direkteoppdateringer"
+
+#: desktop/src/pages/Logs.tsx:403
+msgid "Exported daemon logs."
+msgstr "Eksporterte tjenestelogger."
+
+#: desktop/src/pages/Logs.tsx:403
+msgid "Failed to export daemon logs"
+msgstr "Kunne ikke eksportere tjenestelogger"
+
+#: desktop/src/pages/Logs.tsx:404
+msgid "Daemon Logs"
+msgstr "Tjenestelogger"
+
+#: desktop/src/pages/Logs.tsx:407
+msgid "Checking daemon status…"
+msgstr "Kontrollerer tjenestestatus …"
+
+#: desktop/src/pages/Logs.tsx:408
+msgid "Live refresh is active every 3 seconds."
+msgstr "Direkteoppdatering er aktiv hvert tredje sekund."
+
+#: desktop/src/pages/Logs.tsx:409
+msgid "Daemon logs will appear here after a successful read."
+msgstr "Tjenestelogger vises her etter en vellykket lesing."
+
+#: desktop/src/pages/Logs.tsx:414
+msgid "Clear All Logs?"
+msgstr "Tømme alle loggene?"
+
+#: desktop/src/pages/Logs.tsx:414
+msgid ""
+"This will permanently delete all historical logs. This action cannot be "
+"undone."
+msgstr "Dette sletter alle tidligere logger permanent. Dette kan ikke angres."
+
+#: desktop/src/pages/Network.tsx:224 desktop/src/pages/Network.tsx:415
+msgid "Listening and bound"
+msgstr "Lytter og bundet"
+
+#: desktop/src/pages/Network.tsx:224
+msgid "Connection"
+msgstr "Forbindelse"
+
+#. Translators: Preserve the {label} placeholder. It is the translated endpoint label, such as “Local address”.
+#: desktop/src/pages/Network.tsx:230
+msgid "Copy {label}"
+msgstr "Kopier {label}"
+
+#: desktop/src/pages/Network.tsx:235
+msgid ""
+"VirusTotal reports are unavailable for private, special, scoped, or wildcard "
+"addresses."
+msgstr ""
+"VirusTotal-rapporter er utilgjengelige for private, spesielle, avgrensede "
+"eller jokertegnadresser."
+
+#: desktop/src/pages/Network.tsx:242
+msgid "Address copied to clipboard"
+msgstr "Adressen er kopiert til utklippstavlen"
+
+#. Translators: Preserve the {error} placeholder. It is a technical clipboard error.
+#: desktop/src/pages/Network.tsx:244
+msgid "Could not copy address: {error}"
+msgstr "Kunne ikke kopiere adressen: {error}"
+
+#: desktop/src/pages/Network.tsx:260 desktop/src/pages/Network.tsx:433
+msgid "Open VirusTotal IP report"
+msgstr "Åpne VirusTotal IP-rapport"
+
+#: desktop/src/pages/Network.tsx:265
+msgid "No remote address observed"
+msgstr "Ingen ekstern adresse observert"
+
+#: desktop/src/pages/Network.tsx:266
+msgid "No remote address is available to copy."
+msgstr "Ingen ekstern adresse er tilgjengelig for kopiering."
+
+#: desktop/src/pages/Network.tsx:282
+msgid "Local address"
+msgstr "Lokal adresse"
+
+#: desktop/src/pages/Network.tsx:283
+msgid "Remote address"
+msgstr "Ekstern adresse"
+
+#: desktop/src/pages/Network.tsx:287
+msgid "Process"
+msgstr "Prosess"
+
+#. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
+#: desktop/src/pages/Network.tsx:289
+msgid "PID {pid}"
+msgstr "PID {pid}"
+
+#: desktop/src/pages/Network.tsx:294
+msgid "Process information unavailable"
+msgstr "Prosessinformasjon er utilgjengelig"
+
+#: desktop/src/pages/Network.tsx:328
+msgid "Could not load network connections. Try again."
+msgstr "Kunne ikke laste nettverkstilkoblinger. Prøv igjen."
+
+#: desktop/src/pages/Network.tsx:366
+msgid "The VirusTotal report address was invalid."
+msgstr "VirusTotal-rapportadressen var ugyldig."
+
+#. Translators: Preserve the {error} placeholder. It is a technical browser-opening error.
+#: desktop/src/pages/Network.tsx:375
+msgid "Could not open VirusTotal: {error}"
+msgstr "Kunne ikke åpne VirusTotal: {error}"
+
+#: desktop/src/pages/Network.tsx:393
+msgid "Network Connections"
+msgstr "Nettverkstilkoblinger"
+
+#: desktop/src/pages/Network.tsx:394
+msgid ""
+"View the current listening ports and socket peers from one local snapshot."
+msgstr ""
+"Se gjeldende lytteporter og sokkelmotparter i ett lokalt øyeblikksbilde."
+
+#: desktop/src/pages/Network.tsx:397
+msgid "Refreshing…"
+msgstr "Oppdaterer …"
+
+#: desktop/src/pages/Network.tsx:397
+#: desktop/src/pages/SettingsPreferences.tsx:446
+#: desktop/src/pages/SettingsPreferences.tsx:449
+msgid "Loading…"
+msgstr "Laster inn …"
+
+#: desktop/src/pages/Network.tsx:401
+msgid "Loading network connections…"
+msgstr "Laster inn nettverkstilkoblinger …"
+
+#: desktop/src/pages/Network.tsx:403
+msgid ""
+"Network information is unavailable. Check that the system socket tool is "
+"installed and try again."
+msgstr ""
+"Nettverksinformasjon er utilgjengelig. Sjekk at systemets sokkelverktøy er "
+"installert, og prøv igjen."
+
+#: desktop/src/pages/Network.tsx:406
+msgid "The socket list was limited. This snapshot may be incomplete."
+msgstr ""
+"Sokkellisten var begrenset. Dette øyeblikksbildet kan være ufullstendig."
+
+#: desktop/src/pages/Network.tsx:406
+msgid "Some socket records could not be read. This snapshot may be incomplete."
+msgstr ""
+"Noen sokkeloppføringer kunne ikke leses. Dette øyeblikksbildet kan være "
+"ufullstendig."
+
+#. Translators: Preserve the {time} placeholder. It is the native UTC/ISO snapshot timestamp.
+#: desktop/src/pages/Network.tsx:407
+msgid "Captured at {time}"
+msgstr "Fanget kl. {time}"
+
+#: desktop/src/pages/Network.tsx:413
+msgid "Network socket filter"
+msgstr "Filter for nettverkssokler"
+
+#: desktop/src/pages/Network.tsx:414
+msgid "All"
+msgstr "Alle"
+
+#: desktop/src/pages/Network.tsx:416
+msgid "Connections"
+msgstr "Tilkoblinger"
+
+#: desktop/src/pages/Network.tsx:418
+msgid "Search sockets"
+msgstr "Søk i nettverkssokler"
+
+#: desktop/src/pages/Network.tsx:418
+msgid "Search address, port, process, or PID"
+msgstr "Søk etter adresse, port, prosess eller PID"
+
+#: desktop/src/pages/Network.tsx:420
+msgid ""
+"Process ownership depends on system permissions. Unavailable process "
+"information does not mean that no process owns the socket."
+msgstr ""
+"Prosesseierskap avhenger av systemtillatelser. Utilgjengelig "
+"prosessinformasjon betyr ikke at ingen prosess eier nettverkssokkelen."
+
+#: desktop/src/pages/Network.tsx:421
+msgid "No socket records could be read from this snapshot."
+msgstr "Ingen sokkeloppføringer kunne leses fra dette øyeblikksbildet."
+
+#: desktop/src/pages/Network.tsx:421
+msgid "No network sockets were found in this snapshot."
+msgstr "Ingen nettverkssokler ble funnet i dette øyeblikksbildet."
+
+#: desktop/src/pages/Network.tsx:421
+msgid "No sockets match the current filters."
+msgstr "Ingen nettverkssokler samsvarer med gjeldende filtre."
+
+#: desktop/src/pages/Network.tsx:421
+msgid "Network sockets"
+msgstr "Nettverkssokler"
+
+#. Translators: Preserve the {shown} and {count} placeholders. Both are socket counts.
+#: desktop/src/pages/Network.tsx:424
+msgid "Showing {shown} of {count} matching socket"
+msgid_plural "Showing {shown} of {count} matching sockets"
+msgstr[0] "Viser {shown} av {count} samsvarende nettverkssokkel"
+msgstr[1] "Viser {shown} av {count} samsvarende nettverkssokler"
+
+#. Translators: Preserve the {address} placeholder; it is an IP address that will be disclosed to VirusTotal through the browser.
+#: desktop/src/pages/Network.tsx:434
+msgid ""
+"Opening this report sends the IP address {address} to VirusTotal through "
+"your browser. Do not check sensitive IP addresses."
+msgstr ""
+"Åpning av denne rapporten sender IP-adressen {address} til VirusTotal via "
+"nettleseren din. Ikke sjekk sensitive IP-adresser."
+
+#: desktop/src/pages/Network.tsx:439
+msgid "No port, process information, or API key is sent by ClamUI."
+msgstr "Ingen port, prosessinformasjon eller API-nøkkel sendes av ClamUI."
+
+#: desktop/src/pages/Network.tsx:441
+msgid "Opening…"
+msgstr "Åpning…"
+
+#: desktop/src/pages/Preferences.tsx:13
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Behavior"
+msgstr "Oppførsel"
+
+#: desktop/src/pages/Preferences.tsx:14 desktop/src/pages/Profiles.tsx:100
+msgid "Exclusions"
+msgstr "Unntak"
+
+#: desktop/src/pages/Preferences.tsx:16
+msgid "Scanner"
+msgstr "Skanner"
+
+#: desktop/src/pages/Preferences.tsx:17
+msgid "Scheduled"
+msgstr "Planlagt"
+
+#: desktop/src/pages/Preferences.tsx:18
+msgid "Device Scan"
+msgstr "Skanning av enheter"
+
+#: desktop/src/pages/Preferences.tsx:19
+msgid "On-Access"
+msgstr "Sanntidsskanning"
+
+#: desktop/src/pages/Preferences.tsx:20
+msgid "VirusTotal"
+msgstr "VirusTotal"
+
+#: desktop/src/pages/Preferences.tsx:21
+msgid "Debug"
+msgstr "Feilsøking"
+
+#: desktop/src/pages/Preferences.tsx:22
+msgid "Save"
+msgstr "Lagre"
+
+#: desktop/src/pages/Preferences.tsx:47
+#: desktop/src/pages/SettingsPreferences.tsx:146
+msgid "Unable to load preferences: {error}"
+msgstr "Kan ikke laste inn preferanser: {error}"
+
+#: desktop/src/pages/Preferences.tsx:95
+#: desktop/src/pages/SettingsPreferences.tsx:160
+msgid "Could not save preference: {error}"
+msgstr "Kunne ikke lagre preferanse: {error}"
+
+#: desktop/src/pages/Preferences.tsx:112
+msgid "Loading preferences…"
+msgstr "Laster inn preferanser …"
+
+#: desktop/src/pages/Preferences.tsx:119
+msgid "Preference categories"
+msgstr "Preferansekategorier"
+
+#: desktop/src/pages/Profiles.tsx:57
+msgid "Name must be 50 characters or less"
+msgstr "Navnet må være på 50 tegn eller mindre"
+
+#: desktop/src/pages/Profiles.tsx:57
+msgid "Profile name is required"
+msgstr "Profilen må ha et navn"
+
+#: desktop/src/pages/Profiles.tsx:63
+msgid "Options must be a JSON object"
+msgstr "Alternativer må være et JSON-objekt"
+
+#: desktop/src/pages/Profiles.tsx:88
+msgid "Edit Profile"
+msgstr "Rediger profil"
+
+#: desktop/src/pages/Profiles.tsx:88 desktop/src/pages/Profiles.tsx:226
+msgid "New Profile"
+msgstr "Ny profil"
+
+#: desktop/src/pages/Profiles.tsx:91
+msgid "Default profile names are protected"
+msgstr "Standard profilnavn er beskyttet"
+
+#: desktop/src/pages/Profiles.tsx:92
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:554
+msgid "No targets added"
+msgstr "Ingen mål er lagt til"
+
+#: desktop/src/pages/Profiles.tsx:100
+msgid "Add Path"
+msgstr "Legg til bane"
+
+#: desktop/src/pages/Profiles.tsx:101 desktop/src/pages/Profiles.tsx:104
+msgid "Pattern"
+msgstr "Mønster"
+
+#: desktop/src/pages/Profiles.tsx:101
+msgid "Add Pattern"
+msgstr "Legg til mønster"
+
+#: desktop/src/pages/Profiles.tsx:102
+msgid "No exclusions added"
+msgstr "Ingen unntak er lagt til"
+
+#: desktop/src/pages/Profiles.tsx:108
+msgid "Scan Options (JSON)"
+msgstr "Skannealternativer (JSON)"
+
+#: desktop/src/pages/Profiles.tsx:109
+msgid "Save Profile"
+msgstr "Lagre profil"
+
+#: desktop/src/pages/Profiles.tsx:152
+msgid "Profile saved"
+msgstr "Profilen er lagret"
+
+#: desktop/src/pages/Profiles.tsx:161
+msgid "Profile duplicated"
+msgstr "Profil duplisert"
+
+#: desktop/src/pages/Profiles.tsx:177
+msgid "Profile deleted"
+msgstr "Profilen er slettet"
+
+#: desktop/src/pages/Profiles.tsx:191
+msgid "Profile imported"
+msgstr "Profilen er importert"
+
+#: desktop/src/pages/Profiles.tsx:201
+msgid "Profile export did not return data"
+msgstr "Profileksport returnerte ikke data"
+
+#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:217
+msgid "JSON Files"
+msgstr "JSON-filer"
+
+#: desktop/src/pages/Profiles.tsx:203
+msgid "Profile exported"
+msgstr "Profilen er eksportert"
+
+#: desktop/src/pages/Profiles.tsx:217
+msgid "Default profiles restored"
+msgstr "Standardprofiler gjenopprettet"
+
+#: desktop/src/pages/Profiles.tsx:225 desktop/src/pages/Profiles.tsx:226
+msgid "Scan Profiles"
+msgstr "Skanneprofiler"
+
+#: desktop/src/pages/Profiles.tsx:226
+msgid "Save targets, exclusions, and scan options for reuse."
+msgstr "Lagre mål, ekskluderinger og skannealternativer for gjenbruk."
+
+#: desktop/src/pages/Profiles.tsx:226
+msgid "Import"
+msgstr "Import"
+
+#: desktop/src/pages/Profiles.tsx:226 desktop/src/pages/Profiles.tsx:246
+msgid "Restore Defaults"
+msgstr "Gjenopprett standarder"
+
+#: desktop/src/pages/Profiles.tsx:228
+msgid "Loading profiles…"
+msgstr "Laster inn profiler …"
+
+#: desktop/src/pages/Profiles.tsx:228
+msgid "No profiles available"
+msgstr "Ingen profiler er tilgjengelige"
+
+#: desktop/src/pages/Profiles.tsx:230
+msgid "{count} target"
+msgid_plural "{count} targets"
+msgstr[0] "{count} mål"
+msgstr[1] "{count} mål"
+
+#: desktop/src/pages/Profiles.tsx:237
+msgid "Use this profile"
+msgstr "Bruk denne profilen"
+
+#: desktop/src/pages/Profiles.tsx:237
+msgid "Edit"
+msgstr "Redigere"
+
+#: desktop/src/pages/Profiles.tsx:237
+msgid "Duplicate"
+msgstr "Kopiere"
+
+#: desktop/src/pages/Profiles.tsx:237 desktop/src/pages/Profiles.tsx:245
+#: desktop/src/pages/Quarantine.tsx:228 desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Delete"
+msgstr "Slett"
+
+#: desktop/src/pages/Profiles.tsx:241
+msgid "Delete Profile"
+msgstr "Slett profil"
+
+#. Translators: Preserve the {name} placeholder; it is a user-provided profile name. Use quotation marks appropriate for your language.
+#: desktop/src/pages/Profiles.tsx:241
+msgid "Delete profile '{name}'? This cannot be undone."
+msgstr "Vil du slette profilen '{name}'? Dette kan ikke angres."
+
+#: desktop/src/pages/Profiles.tsx:245
+msgid "Deleting…"
+msgstr "Sletter …"
+
+#: desktop/src/pages/Profiles.tsx:246
+msgid "Restore Default Profiles"
+msgstr "Gjenopprett standardprofiler"
+
+#: desktop/src/pages/Profiles.tsx:246
+msgid ""
+"Restore the built-in default profiles? Any customizations to default "
+"profiles will be reset; custom profiles are preserved."
+msgstr ""
+"Vil du gjenopprette de innebygde standardprofilene? Eventuelle tilpasninger "
+"til standardprofiler vil bli tilbakestilt; tilpassede profiler er bevart."
+
+#: desktop/src/pages/Profiles.tsx:246
+msgid "Restoring…"
+msgstr "Gjenoppretter …"
+
+#: desktop/src/pages/Quarantine.tsx:97
+msgid "ClamUI returned invalid quarantine data."
+msgstr "ClamUI returnerte ugyldige karantenedata."
+
+#: desktop/src/pages/Quarantine.tsx:104
+msgid "Failed to load quarantine: {error}"
+msgstr "Kunne ikke laste inn karantene: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:122
+msgid "Quarantine updates are unavailable: {error}"
+msgstr "Karanteneoppdateringer er utilgjengelige: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:144
+msgid "ClamUI returned an invalid cleanup result."
+msgstr "ClamUI returnerte et ugyldig oppryddingsresultat."
+
+#: desktop/src/pages/Quarantine.tsx:149
+msgid "Removed {count} old quarantine entry."
+msgid_plural "Removed {count} old quarantine entries."
+msgstr[0] "Fjernet {count} gammel karanteneoppføring."
+msgstr[1] "Fjernet {count} gamle karanteneoppføringer."
+
+#: desktop/src/pages/Quarantine.tsx:155
+msgid "No old entries found to remove."
+msgstr "Ingen gamle oppføringer ble funnet for fjerning."
+
+#: desktop/src/pages/Quarantine.tsx:161
+msgid "Failed to clear old items: {error}"
+msgstr "Kunne ikke slette gamle elementer: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:162
+msgid "Failed to clear old quarantine items: {error}"
+msgstr "Kunne ikke fjerne gamle karanteneelementer: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:172
+msgid "ClamUI returned an invalid quarantine result."
+msgstr "ClamUI returnerte et ugyldig karanteneresultat."
+
+#: desktop/src/pages/Quarantine.tsx:175
+msgid "File restored successfully."
+msgstr "Filen ble gjenopprettet."
+
+#: desktop/src/pages/Quarantine.tsx:175
+msgid "File deleted successfully."
+msgstr "Filen ble slettet."
+
+#: desktop/src/pages/Quarantine.tsx:180
+msgid "File restored, but the database entry could not be removed."
+msgstr "Filen ble gjenopprettet, men databaseoppføringen kunne ikke fjernes."
+
+#: desktop/src/pages/Quarantine.tsx:180
+msgid "File deleted, but the database entry could not be removed."
+msgstr "Filen ble slettet, men databaseoppføringen kunne ikke fjernes."
+
+#: desktop/src/pages/Quarantine.tsx:184
+msgid "Failed to restore quarantined file ({status})."
+msgstr "Kunne ikke gjenopprette filen i karantene ({status})."
+
+#: desktop/src/pages/Quarantine.tsx:184
+msgid "Failed to delete quarantined file ({status})."
+msgstr "Kunne ikke slette filen i karantene ({status})."
+
+#: desktop/src/pages/Quarantine.tsx:188
+msgid "Failed to restore quarantined file: {error}"
+msgstr "Kunne ikke gjenopprette filen i karantene: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:189
+msgid "Failed to delete quarantined file: {error}"
+msgstr "Kunne ikke slette filen i karantene: {error}"
+
+#: desktop/src/pages/Quarantine.tsx:200
+msgid "Secure storage for isolated threats."
+msgstr "Sikker lagring for isolerte trusler."
+
+#: desktop/src/pages/Quarantine.tsx:205
+msgid "Quarantine Storage"
+msgstr "Karantenelager"
+
+#: desktop/src/pages/Quarantine.tsx:207
+msgid "Total Size"
+msgstr "Total størrelse"
+
+#: desktop/src/pages/Quarantine.tsx:207
+msgid "Calculating…"
+msgstr "Beregner …"
+
+#: desktop/src/pages/Quarantine.tsx:208
+msgid "Items"
+msgstr "Elementer"
+
+#: desktop/src/pages/Quarantine.tsx:209
+msgid "{filtered} of {total} item"
+msgid_plural "{filtered} of {total} items"
+msgstr[0] "{filtered} av {total} element"
+msgstr[1] "{filtered} av {total} elementer"
+
+#: desktop/src/pages/Quarantine.tsx:210
+msgid "{count} item"
+msgid_plural "{count} items"
+msgstr[0] "{count} element"
+msgstr[1] "{count} elementer"
+
+#: desktop/src/pages/Quarantine.tsx:215
+msgid "Quarantined Files"
+msgstr "Filer i karantene"
+
+#: desktop/src/pages/Quarantine.tsx:215
+msgid "Detected threats isolated from your system."
+msgstr "Oppdaget trusler isolert fra systemet ditt."
+
+#: desktop/src/pages/Quarantine.tsx:218
+msgid "Clear Old Items"
+msgstr "Fjern gamle elementer"
+
+#: desktop/src/pages/Quarantine.tsx:221
+msgid "Search by threat name or path"
+msgstr "Søk etter trusselnavn eller bane"
+
+#: desktop/src/pages/Quarantine.tsx:221
+msgid "Search by threat name or path…"
+msgstr "Søk etter trusselnavn eller bane..."
+
+#: desktop/src/pages/Quarantine.tsx:222
+msgid "Loading quarantine entries…"
+msgstr "Laster inn karanteneoppføringer …"
+
+#: desktop/src/pages/Quarantine.tsx:222
+msgid ""
+"No Quarantined Files. Detected threats will be isolated here for review."
+msgstr ""
+"Ingen filer i karantene. Oppdagede trusler vil bli isolert her for "
+"gjennomgang."
+
+#: desktop/src/pages/Quarantine.tsx:222
+msgid "No matching entries. Try a different search term."
+msgstr "Ingen samsvarende oppføringer. Prøv et annet søkeord."
+
+#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:235
+#: desktop/src/pages/Quarantine.tsx:239
+msgid "Unknown Threat"
+msgstr "Ukjent trussel"
+
+#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:226
+#: desktop/src/pages/Results.tsx:196
+msgid "Quarantined"
+msgstr "Satt i karantene"
+
+#: desktop/src/pages/Quarantine.tsx:228
+msgid "Restore"
+msgstr "Gjenopprett"
+
+#: desktop/src/pages/Quarantine.tsx:232
+msgid "Restore Quarantined File?"
+msgstr "Gjenopprette filen fra karantene?"
+
+#: desktop/src/pages/Quarantine.tsx:232
+msgid "Permanently Delete File?"
+msgstr "Slette filen permanent?"
+
+#. Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.
+#: desktop/src/pages/Quarantine.tsx:232
+msgid "This file was detected as '{threat}'. It will be restored to {path}."
+msgstr ""
+"Denne filen ble oppdaget som '{threat}'. Den vil bli gjenopprettet til "
+"{path}."
+
+#. Translators: Preserve the {path} and {threat} placeholders; they are runtime file-path and threat values. Use quotation marks appropriate for your language.
+#: desktop/src/pages/Quarantine.tsx:236
+msgid ""
+"The quarantined file from {path} ('{threat}') will be permanently deleted. "
+"This action cannot be undone."
+msgstr ""
+"Filen i karantene fra {path} ('{threat}') vil bli permanent slettet. Denne "
+"handlingen kan ikke angres."
+
+#: desktop/src/pages/Quarantine.tsx:240
+msgid "Restore Anyway"
+msgstr "Gjenopprett likevel"
+
+#: desktop/src/pages/Results.tsx:37
+msgid "Critical"
+msgstr "Kritisk"
+
+#: desktop/src/pages/Results.tsx:38
+msgid "High"
+msgstr "Høy"
+
+#: desktop/src/pages/Results.tsx:39
+msgid "Medium"
+msgstr "Medium"
+
+#: desktop/src/pages/Results.tsx:40
+msgid "Low"
+msgstr "Lav"
+
+#: desktop/src/pages/Results.tsx:41
+msgid "Ransomware"
+msgstr "Ransomware"
+
+#: desktop/src/pages/Results.tsx:42
+msgid "Rootkit"
+msgstr "Rootkit"
+
+#: desktop/src/pages/Results.tsx:43
+msgid "Trojan"
+msgstr "Trojan"
+
+#: desktop/src/pages/Results.tsx:44
+msgid "Worm"
+msgstr "Mark"
+
+#: desktop/src/pages/Results.tsx:45
+msgid "Backdoor"
+msgstr "Bakdør"
+
+#: desktop/src/pages/Results.tsx:46
+msgid "Exploit"
+msgstr "Utnyttelse"
+
+#: desktop/src/pages/Results.tsx:47
+msgid "Adware"
+msgstr "Adware"
+
+#: desktop/src/pages/Results.tsx:48
+msgid "Spyware"
+msgstr "Spionprogramvare"
+
+#: desktop/src/pages/Results.tsx:49
+msgid "Test"
+msgstr "Test"
+
+#: desktop/src/pages/Results.tsx:50
+msgid "Macro"
+msgstr "Makro"
+
+#: desktop/src/pages/Results.tsx:51
+msgid "Phishing"
+msgstr "Phishing"
+
+#: desktop/src/pages/Results.tsx:52
+msgid "Heuristic"
+msgstr "Heuristisk"
+
+#: desktop/src/pages/Results.tsx:53
+msgid "PUA"
+msgstr "PUA"
+
+#: desktop/src/pages/Results.tsx:54
+msgid "Virus"
+msgstr "Virus"
+
+#: desktop/src/pages/Results.tsx:63
+msgid "Detected"
+msgstr "Oppdaget"
+
+#: desktop/src/pages/Results.tsx:65
+msgid "Pending"
+msgstr "I påvente av"
+
+#: desktop/src/pages/Results.tsx:66
+msgid "Rate limited"
+msgstr "Midlertidig begrenset"
+
+#: desktop/src/pages/Results.tsx:67
+msgid "Not found"
+msgstr "Ikke funnet"
+
+#: desktop/src/pages/Results.tsx:68
+msgid "File too large"
+msgstr "Filen er for stor"
+
+#: desktop/src/pages/Results.tsx:74
+msgid "Malicious"
+msgstr "Ondsinnet"
+
+#: desktop/src/pages/Results.tsx:75
+msgid "Suspicious"
+msgstr "Mistenksom"
+
+#: desktop/src/pages/Results.tsx:110 desktop/src/pages/Scan.tsx:522
+msgid "Scan target"
+msgstr "Skannemål"
+
+#: desktop/src/pages/Results.tsx:116
+msgid "No scan output is available"
+msgstr "Ingen skanneutdata er tilgjengelige"
+
+#: desktop/src/pages/Results.tsx:118
+msgid "Text Files"
+msgstr "Tekstfiler"
+
+#: desktop/src/pages/Results.tsx:173
+msgid "Scan Results"
+msgstr "Skanneresultater"
+
+#: desktop/src/pages/Results.tsx:175 desktop/src/pages/Results.tsx:238
+msgid "Copy or Export"
+msgstr "Kopier eller eksporter"
+
+#: desktop/src/pages/Results.tsx:177
+msgid "Quarantine All"
+msgstr "Sett alle i karantene"
+
+#: desktop/src/pages/Results.tsx:181
+msgid "Files scanned"
+msgstr "Filer skannet"
+
+#: desktop/src/pages/Results.tsx:182
+msgid "Directories"
+msgstr "Mapper"
+
+#: desktop/src/pages/Results.tsx:183
+msgid "Threats found"
+msgstr "Trusler funnet"
+
+#: desktop/src/pages/Results.tsx:184
+msgid "Not accessible"
+msgstr "Ikke tilgjengelig"
+
+#: desktop/src/pages/Results.tsx:192
+msgid "Detected Threats"
+msgstr "Oppdagede trusler"
+
+#: desktop/src/pages/Results.tsx:192
+msgid "Large result set: displaying threats in batches."
+msgstr "Stort resultatsett: viser trusler i grupper."
+
+#: desktop/src/pages/Results.tsx:196
+msgid "Excluded"
+msgstr "Unntatt"
+
+#: desktop/src/pages/Results.tsx:196
+msgid "Exclude"
+msgstr "Unnta"
+
+#: desktop/src/pages/Results.tsx:197 desktop/src/pages/Results.tsx:228
+msgid "Show {count} more"
+msgstr "Vis {count} til"
+
+#: desktop/src/pages/Results.tsx:199
+msgid "Files Not Accessible"
+msgstr "Filer uten tilgang"
+
+#: desktop/src/pages/Results.tsx:199
+msgid "Additional inaccessible files are omitted from this view."
+msgstr "Ytterligere utilgjengelige filer er utelatt fra denne visningen."
+
+#: desktop/src/pages/Results.tsx:200 desktop/src/pages/Results.tsx:201
+#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+msgid "Scan details"
+msgstr "Skannedetaljer"
+
+#: desktop/src/pages/Results.tsx:202
+msgid "Quarantine File"
+msgstr "Sett fil i karantene"
+
+#: desktop/src/pages/Results.tsx:202
+msgid "Quarantine All Threats"
+msgstr "Sett alle trusler i karantene"
+
+#. Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
+#: desktop/src/pages/Results.tsx:202
+msgid "Move '{path}' to quarantine?"
+msgstr "Flytte '{path}' til karantene?"
+
+#: desktop/src/pages/Results.tsx:206
+msgid "Move {count} detected file to quarantine?"
+msgid_plural "Move {count} detected files to quarantine?"
+msgstr[0] "Flytte {count} oppdaget fil til karantene?"
+msgstr[1] "Flytte {count} oppdagede filer til karantene?"
+
+#: desktop/src/pages/Results.tsx:206
+msgid "This removes each original file from its current location."
+msgstr "Dette fjerner hver originalfil fra sin nåværende plassering."
+
+#: desktop/src/pages/Results.tsx:206
+msgid "Quarantining…"
+msgstr "Setter i karantene …"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "VirusTotal Results"
+msgstr "VirusTotal-resultater"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "Detections"
+msgstr "Deteksjoner"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "Last scanned"
+msgstr "Sist skannet"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "Copy JSON"
+msgstr "Kopier JSON"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "Copy Hash"
+msgstr "Kopier Hash"
+
+#: desktop/src/pages/Results.tsx:225
+msgid "View on VirusTotal"
+msgstr "Vis på VirusTotal"
+
+#: desktop/src/pages/Results.tsx:228
+msgid "Detection Details"
+msgstr "Detaljer om treff"
+
+#: desktop/src/pages/Results.tsx:228
+msgid "Large result set: displaying detections in batches."
+msgstr "Stort resultatsett: viser deteksjoner i batcher."
+
+#: desktop/src/pages/Results.tsx:228
+msgid "No result"
+msgstr "Ingen resultat"
+
+#: desktop/src/pages/Results.tsx:282
+msgid "Review scan findings and take action on detected threats."
+msgstr "Gjennomgå skannefunn og iverksette tiltak mot oppdagede trusler."
+
+#: desktop/src/pages/Results.tsx:282
+msgid "Back to Scan"
+msgstr "Tilbake til skanning"
+
+#: desktop/src/pages/Results.tsx:283
+msgid "No results yet"
+msgstr "Ingen resultater ennå"
+
+#: desktop/src/pages/Results.tsx:283
+msgid "Start a scan to see its results here."
+msgstr "Start en skanning for å se resultatene her."
+
+#: desktop/src/pages/Scan.tsx:89
+msgid "Scan complete with warnings"
+msgstr "Skanning komplett med advarsler"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Scan.tsx:90
+msgid "Scan complete — no threats found"
+msgstr "Skanning fullført – ingen trusler funnet"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Scan.tsx:98
+msgid "Scan complete — {count} threat detected"
+msgid_plural "Scan complete — {count} threats detected"
+msgstr[0] "Skanning fullført – {count} trussel oppdaget"
+msgstr[1] "Skanning fullført – {count} trusler oppdaget"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Scan.tsx:108
+msgid "Scan cancelled — partial results are available"
+msgstr "Skanning avbrutt — delvise resultater er tilgjengelige"
+
+#: desktop/src/pages/Scan.tsx:113 desktop/src/pages/Scan.tsx:524
+msgid "Scan error"
+msgstr "Skannefeil"
+
+#: desktop/src/pages/Scan.tsx:113
+msgid "Unknown error"
+msgstr "Ukjent feil"
+
+#: desktop/src/pages/Scan.tsx:148
+msgid "API key must contain exactly 64 hexadecimal characters"
+msgstr "API-nøkkelen må inneholde nøyaktig 64 heksadesimale tegn"
+
+#: desktop/src/pages/Scan.tsx:176
+msgid "VirusTotal Scan"
+msgstr "VirusTotal skanning"
+
+#: desktop/src/pages/Scan.tsx:177
+msgid ""
+"VirusTotal uploads one file at a time. Only send files you are authorized to "
+"share."
+msgstr ""
+"VirusTotal laster opp én fil om gangen. Send kun filer du er autorisert til "
+"å dele."
+
+#: desktop/src/pages/Scan.tsx:181
+msgid "API key available"
+msgstr "API-nøkkel tilgjengelig"
+
+#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+msgid "Scanning…"
+msgstr "Skanner …"
+
+#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+msgid "Scan with VirusTotal"
+msgstr "Skann med VirusTotal"
+
+#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:367
+msgid "API Key"
+msgstr "API-nøkkel"
+
+#: desktop/src/pages/Scan.tsx:185
+msgid "Save & Scan"
+msgstr "Lagre og skann"
+
+#: desktop/src/pages/Scan.tsx:187
+msgid "Upload file manually"
+msgstr "Last opp filen manuelt"
+
+#: desktop/src/pages/Scan.tsx:218
+msgid "Unable to load scan profiles"
+msgstr "Kan ikke laste inn skanneprofiler"
+
+#: desktop/src/pages/Scan.tsx:225
+msgid "Unable to check scanner status"
+msgstr "Kan ikke sjekke skannerstatus"
+
+#: desktop/src/pages/Scan.tsx:259 desktop/src/pages/Scan.tsx:340
+msgid "Please select a file or folder to scan"
+msgstr "Velg en fil eller mappe som skal skannes"
+
+#: desktop/src/pages/Scan.tsx:273
+msgid "Starting scan…"
+msgstr "Starter skanning …"
+
+#: desktop/src/pages/Scan.tsx:340
+msgid "Quick Scan profile has no valid targets"
+msgstr "Hurtigskanningsprofilen har ingen gyldige mål"
+
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
+#: desktop/src/pages/Scan.tsx:354 desktop/src/pages/Scan.tsx:457
+#: desktop/src/pages/Scan.tsx:508
+msgid "Scan in progress — wait for it to finish before adding targets"
+msgstr "Skanning pågår – vent til den er ferdig før du legger til mål"
+
+#: desktop/src/pages/Scan.tsx:374
+msgid "VirusTotal scans one file at a time; {count} selection was ignored."
+msgid_plural ""
+"VirusTotal scans one file at a time; {count} selections were ignored."
+msgstr[0] ""
+"VirusTotal skanner én fil om gangen; {count} valgt element ble ignorert."
+msgstr[1] ""
+"VirusTotal skanner én fil om gangen; {count} valgte elementer ble ignorert."
+
+#: desktop/src/pages/Scan.tsx:389 desktop/src/pages/Scan.tsx:517
+msgid "Only local files and folders can be scanned"
+msgstr "Bare lokale filer og mapper kan skannes"
+
+#: desktop/src/pages/Scan.tsx:466
+msgid "Unable to choose scan targets"
+msgstr "Kan ikke velge skannemål"
+
+#: desktop/src/pages/Scan.tsx:473
+msgid "Cancelling scan…"
+msgstr "Avbryter skanning …"
+
+#: desktop/src/pages/Scan.tsx:475
+msgid "Unable to cancel scan"
+msgstr "Kan ikke avbryte skanningen"
+
+#: desktop/src/pages/Scan.tsx:491
+msgid "Running EICAR test…"
+msgstr "Kjører EICAR-test..."
+
+#: desktop/src/pages/Scan.tsx:536
+msgid "Backend"
+msgstr "Backend"
+
+#: desktop/src/pages/Scan.tsx:537
+msgid "Manage Profiles"
+msgstr "Administrer profiler"
+
+#: desktop/src/pages/Scan.tsx:539 desktop/src/pages/Scan.tsx:561
+msgid "Details"
+msgstr "Detaljer"
+
+#: desktop/src/pages/Scan.tsx:543
+msgid "Profile"
+msgstr "Profil"
+
+#: desktop/src/pages/Scan.tsx:549
+msgid "No Profile (Manual)"
+msgstr "Ingen profil (manuelt)"
+
+#: desktop/src/pages/Scan.tsx:553
+msgid "Drop local files or folders here, or add them below."
+msgstr "Slipp lokale filer eller mapper her, eller legg dem til nedenfor."
+
+#: desktop/src/pages/Scan.tsx:557
+msgid "Scanning"
+msgstr "Skanning"
+
+#: desktop/src/pages/Scan.tsx:557
+msgid "Waiting for scan data…"
+msgstr "Venter på skannedata …"
+
+#: desktop/src/pages/Scan.tsx:557
+msgid "Scan progress"
+msgstr "Skannefremdrift"
+
+#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
+msgid "{count} file scanned"
+msgid_plural "{count} files scanned"
+msgstr[0] "{count} fil skannet"
+msgstr[1] "{count} filer skannet"
+
+#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Statistics.tsx:160
+msgid "{count} threat"
+msgid_plural "{count} threats"
+msgstr[0] "{count} trussel"
+msgstr[1] "{count} trusler"
+
+#: desktop/src/pages/Scan.tsx:557
+msgid "Estimated file count exceeded"
+msgstr "Anslått filantall er overskredet"
+
+#: desktop/src/pages/Scan.tsx:557
+msgid ""
+"Live progress is disabled. The completed scan result will remain available."
+msgstr ""
+"Direktefremdrift er deaktivert. Det fullførte skanneresultatet forblir "
+"tilgjengelig."
+
+#: desktop/src/pages/Scan.tsx:557
+msgid "Cancel All"
+msgstr "Avbryt alle"
+
+#: desktop/src/pages/Scan.tsx:559
+msgid "Start Scan"
+msgstr "Start skanning"
+
+#: desktop/src/pages/Scan.tsx:559
+msgid "Run EICAR Test"
+msgstr "Kjør EICAR Test"
+
+#: desktop/src/pages/Scan.tsx:559
+msgid "Select one file before using VirusTotal"
+msgstr "Velg én fil før du bruker VirusTotal"
+
+#: desktop/src/pages/Scan.tsx:561
+msgid "Latest scan"
+msgstr "Siste skanning"
+
+#: desktop/src/pages/Scan.tsx:561
+msgid "View Results"
+msgstr "Vis resultater"
+
+#: desktop/src/pages/Scan.tsx:563
+msgid "Virus database is not available"
+msgstr "Virusdatabasen er utilgjengelig"
+
+#: desktop/src/pages/Scan.tsx:563
+msgid "Update the database before starting a scan."
+msgstr "Oppdater databasen før du starter en skanning."
+
+#: desktop/src/pages/Scan.tsx:563
+msgid "Open Database Updates"
+msgstr "Åpne Databaseoppdateringer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:47
+msgid "Node.js dependencies"
+msgstr "Node.js-avhengigheter"
+
+#: desktop/src/pages/SettingsPreferences.tsx:48
+msgid "Git repository data"
+msgstr "Data fra Git-depot"
+
+#: desktop/src/pages/SettingsPreferences.tsx:49
+msgid "Python virtual environment"
+msgstr "Virtuelt Python-miljø"
+
+#: desktop/src/pages/SettingsPreferences.tsx:50
+msgid "Build output directory"
+msgstr "Mappe for byggeresultater"
+
+#: desktop/src/pages/SettingsPreferences.tsx:51
+msgid "Distribution output directory"
+msgstr "Mappe for distribusjonsfiler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:52
+msgid "Python bytecode cache"
+msgstr "Hurtigbuffer for Python-bytekode"
+
+#: desktop/src/pages/SettingsPreferences.tsx:68
+msgid "Removable Devices"
+msgstr "Avtakbare enheter"
+
+#: desktop/src/pages/SettingsPreferences.tsx:68
+msgid "USB flash drives, SD cards, and removable media"
+msgstr "USB-flash-stasjoner, SD-kort og flyttbare medier"
+
+#: desktop/src/pages/SettingsPreferences.tsx:69
+msgid "External Drives"
+msgstr "Eksterne stasjoner"
+
+#: desktop/src/pages/SettingsPreferences.tsx:69
+msgid "Ejectable external HDDs and SSDs"
+msgstr "Utløsbare eksterne HDD-er og SSD-er"
+
+#: desktop/src/pages/SettingsPreferences.tsx:70
+msgid "Network Mounts"
+msgstr "Nettverksmonteringer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:70
+msgid "NFS, SMB/CIFS, and SSHFS mounts"
+msgstr "NFS-, SMB/CIFS- og SSHFS-monteringer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:71
+msgid "Internal Volumes"
+msgstr "Interne volumer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:71
+msgid "Non-removable local storage"
+msgstr "Ikke-flyttbar lokal lagring"
+
+#: desktop/src/pages/SettingsPreferences.tsx:87
+msgid "{count} byte"
+msgid_plural "{count} bytes"
+msgstr[0] "{count} byte"
+msgstr[1] "{count} byte"
+
+#: desktop/src/pages/SettingsPreferences.tsx:191
+msgid "Unable to read file manager integrations: {error}"
+msgstr "Kan ikke lese filbehandlingsintegrasjoner: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:208
+msgid "{name} integration removed"
+msgstr "{name}-integrasjonen er fjernet"
+
+#: desktop/src/pages/SettingsPreferences.tsx:210
+msgid "{name} integration repaired"
+msgstr "{name}-integrasjon reparert"
+
+#: desktop/src/pages/SettingsPreferences.tsx:211
+msgid "{name} integration installed"
+msgstr "{name}-integrasjon installert"
+
+#: desktop/src/pages/SettingsPreferences.tsx:214
+msgid "Integration {action} failed: {error}"
+msgstr "Integrasjon {action} mislyktes: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:226
+msgid ""
+"Override the application language. Restart ClamUI to apply a language change."
+msgstr ""
+"Overstyr applikasjonsspråket. Start ClamUI på nytt for å bruke en "
+"språkendring."
+
+#: desktop/src/pages/SettingsPreferences.tsx:228
+msgid "Restart ClamUI to apply the new language"
+msgstr "Start ClamUI på nytt for å ta i bruk det nye språket"
+
+#: desktop/src/pages/SettingsPreferences.tsx:229
+msgid "Automatic (System)"
+msgstr "Automatisk (system)"
+
+#: desktop/src/pages/SettingsPreferences.tsx:231
+#: desktop/src/pages/SettingsPreferences.tsx:234
+msgid "Window Behavior"
+msgstr "Vindusoppførsel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:231
+msgid "Configure what happens when closing the main window."
+msgstr "Konfigurer hva som skjer når du lukker hovedvinduet."
+
+#: desktop/src/pages/SettingsPreferences.tsx:232
+msgid "When closing window"
+msgstr "Når vinduet lukkes"
+
+#: desktop/src/pages/SettingsPreferences.tsx:233
+msgid "Start in System Tray"
+msgstr "Start i varslingsområdet"
+
+#: desktop/src/pages/SettingsPreferences.tsx:233
+msgid "Launch in the background and show only the tray icon."
+msgstr "Start i bakgrunnen og vis bare ikonet i varslingsområdet."
+
+#: desktop/src/pages/SettingsPreferences.tsx:234
+msgid ""
+"System tray is not available. Window behavior settings require an active "
+"system tray."
+msgstr ""
+"Varslingsområdet er ikke tilgjengelig. Innstillinger for vindusoppførsel "
+"krever et aktivt varslingsområde."
+
+#: desktop/src/pages/SettingsPreferences.tsx:235
+msgid "Scan Behavior"
+msgstr "Skanneoppførsel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:236
+msgid "Show Live Scan Progress"
+msgstr "Vis skannefremdrift fortløpende"
+
+#: desktop/src/pages/SettingsPreferences.tsx:236
+msgid "Display files being scanned in real time."
+msgstr "Vis filer som skannes i sanntid."
+
+#: desktop/src/pages/SettingsPreferences.tsx:237
+msgid "Desktop Notifications"
+msgstr "Skrivebordsvarsler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:237
+msgid "Allow scan, update, device, and VirusTotal notifications."
+msgstr "Tillat skanning, oppdatering, enhet og VirusTotal-varsler."
+
+#: desktop/src/pages/SettingsPreferences.tsx:239
+#: desktop/src/pages/SettingsPreferences.tsx:240
+msgid "File Manager Integration"
+msgstr "Integrasjon med filbehandleren"
+
+#: desktop/src/pages/SettingsPreferences.tsx:239
+msgid "Add context menu actions for supported file managers."
+msgstr "Legg til kontekstmenyhandlinger for støttede filbehandlere."
+
+#: desktop/src/pages/SettingsPreferences.tsx:239
+msgid "Configure Integration"
+msgstr "Sett opp integrasjon"
+
+#. Translators: 'Scan with ClamUI' is the installed file-manager menu label; keep it in English.
+#: desktop/src/pages/SettingsPreferences.tsx:241
+msgid "Install, repair, or remove 'Scan with ClamUI' context menu actions."
+msgstr ""
+"Installer, reparer eller fjern hurtigmenyhandlingene «Scan with ClamUI»."
+
+#: desktop/src/pages/SettingsPreferences.tsx:250
+msgid "Partially installed"
+msgstr "Delvis installert"
+
+#: desktop/src/pages/SettingsPreferences.tsx:252
+msgid "Not available"
+msgstr "Ikke tilgjengelig"
+
+#: desktop/src/pages/SettingsPreferences.tsx:252
+msgid "missing"
+msgstr "mangler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:253
+msgid "Repair"
+msgstr "Reparer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:280
+msgid "This exclusion already exists"
+msgstr "Denne ekskluderingen eksisterer allerede"
+
+#: desktop/src/pages/SettingsPreferences.tsx:296
+msgid "Unable to choose exclusions: {error}"
+msgstr "Kan ikke velge ekskluderinger: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:305
+msgid "Preset Exclusions"
+msgstr "Forhåndsinnstilte ekskluderinger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:305
+msgid "Common directories to exclude from scanning. Changes save immediately."
+msgstr ""
+"Vanlige mapper å ekskludere fra skanning. Endringer lagres umiddelbart."
+
+#: desktop/src/pages/SettingsPreferences.tsx:316
+msgid "Custom Exclusions"
+msgstr "Egendefinerte ekskluderinger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:316
+msgid ""
+"Select files or folders, or enter an absolute file path or pattern. Changes "
+"save immediately."
+msgstr ""
+"Velg filer eller mapper, eller skriv inn en absolutt filbane eller et "
+"mønster. Endringer lagres umiddelbart."
+
+#: desktop/src/pages/SettingsPreferences.tsx:322
+msgid "/path/to/exclude or *.tmp"
+msgstr "/path/to/exclude eller *.tmp"
+
+#: desktop/src/pages/SettingsPreferences.tsx:330
+msgid "Remove {pattern}"
+msgstr "Fjern {pattern}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "General"
+msgstr "Generelt"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Automatically scan storage devices when they are connected."
+msgstr "Skann automatisk lagringsenheter når de er tilkoblet."
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Enable Device Auto-Scan"
+msgstr "Slå på automatisk skanning av enheter"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Device Types"
+msgstr "Enhetstyper"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Select which kinds of mounted devices may be scanned."
+msgstr "Velg hvilke typer monterte enheter som kan skannes."
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Options"
+msgstr "Alternativer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Max Device Size (GB)"
+msgstr "Maks enhetsstørrelse (GB)"
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "0 means no size limit; devices larger than 10,000 GB are not accepted."
+msgstr ""
+"0 betyr ingen størrelsesgrense; enheter større enn 10 000 GB godtas ikke."
+
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Scan Delay (seconds)"
+msgstr "Forsinkelse før skanning (sekunder)"
+
+#. Translators: The en dash marks the inclusive 0–60-second delay range; use your language's usual range typography.
+#: desktop/src/pages/SettingsPreferences.tsx:342
+msgid "Wait after mounting before scanning (0–60 seconds)."
+msgstr "Vent etter montering før skanning (0–60 sekunder)."
+
+#: desktop/src/pages/SettingsPreferences.tsx:345
+msgid "Auto-Quarantine Threats"
+msgstr "Sett trusler i karantene automatisk"
+
+#: desktop/src/pages/SettingsPreferences.tsx:345
+msgid "Notifications"
+msgstr "Varsler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:345
+msgid "Show desktop notifications for device scan events."
+msgstr "Vis skrivebordsvarsler for enhetsskanningshendelser."
+
+#: desktop/src/pages/SettingsPreferences.tsx:345
+msgid "Desktop notifications are globally disabled in Behavior."
+msgstr "Skrivebordsvarsler er globalt deaktivert i Oppførsel."
+
+#: desktop/src/pages/SettingsPreferences.tsx:358
+msgid "VirusTotal API keys must be exactly 64 hexadecimal characters"
+msgstr "VirusTotal-API-nøkler må inneholde nøyaktig 64 heksadesimale tegn"
+
+#: desktop/src/pages/SettingsPreferences.tsx:360
+msgid "Unable to save the API key"
+msgstr "Kan ikke lagre API-nøkkelen"
+
+#: desktop/src/pages/SettingsPreferences.tsx:364
+msgid "API key deleted"
+msgstr "API-nøkkelen er slettet"
+
+#: desktop/src/pages/SettingsPreferences.tsx:364
+msgid "Unable to delete the API key"
+msgstr "Kan ikke slette API-nøkkelen"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid ""
+"Keys are stored in the operating system keyring or the explicitly enabled "
+"compatibility fallback; they are never returned to the interface."
+msgstr ""
+"Nøkler lagres i operativsystemets nøkkelring eller den eksplisitt aktiverte "
+"kompatibilitetsreserven; de blir aldri returnert til grensesnittet."
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Configured ({masked}) using {backend}"
+msgstr "Konfigurert ({masked}) med {backend}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "masked"
+msgstr "maskert"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Keyring is locked"
+msgstr "Nøkkelringen er låst"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Keyring unavailable"
+msgstr "Nøkkelringen er utilgjengelig"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Not configured"
+msgstr "Ikke satt opp"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Exactly 64 hexadecimal characters."
+msgstr "Nøyaktig 64 heksadesimale tegn."
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Save Key"
+msgstr "Lagre nøkkel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Get a free API key"
+msgstr "Skaff en gratis API-nøkkel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Delete Key"
+msgstr "Slett nøkkel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "When API key is missing"
+msgstr "Når API-nøkkelen mangler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Always ask"
+msgstr "Spør alltid"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Open VirusTotal website"
+msgstr "Åpne nettstedet til VirusTotal"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Show notification only"
+msgstr "Bare vis et varsel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Information"
+msgstr "Informasjon"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid ""
+"Free tier: 4 requests per minute, 500 per day. Files up to 650 MB can be "
+"scanned."
+msgstr ""
+"Gratis nivå: 4 forespørsler per minutt, 500 per dag. Filer på opptil 650 MB "
+"kan skannes."
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid "Delete VirusTotal API key"
+msgstr "Slett VirusTotal API-nøkkel"
+
+#: desktop/src/pages/SettingsPreferences.tsx:367
+msgid ""
+"This removes the key from secure storage. You will need to enter it again to "
+"use VirusTotal scanning."
+msgstr ""
+"Dette fjerner nøkkelen fra sikker lagring. Du må angi den på nytt for å "
+"bruke VirusTotal-skanning."
+
+#: desktop/src/pages/SettingsPreferences.tsx:375
+msgid "{count} file"
+msgid_plural "{count} files"
+msgstr[0] "{count} fil"
+msgstr[1] "{count} filer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:382
+msgid "Unable to read debug logs: {error}"
+msgstr "Kan ikke lese feilsøkingslogger: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:390
+msgid "Unable to read system information: {error}"
+msgstr "Kan ikke lese systeminformasjon: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:397
+msgid "ZIP archives"
+msgstr "ZIP-arkiver"
+
+#: desktop/src/pages/SettingsPreferences.tsx:398
+msgid "All files"
+msgstr "Alle filer"
+
+#: desktop/src/pages/SettingsPreferences.tsx:400
+msgid "Logs exported successfully"
+msgstr "Loggene er eksportert"
+
+#: desktop/src/pages/SettingsPreferences.tsx:402
+msgid "Unable to export logs: {error}"
+msgstr "Kan ikke eksportere logger: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:414
+msgid "{count} log file cleared"
+msgid_plural "{count} log files cleared"
+msgstr[0] "{count} loggfil er slettet"
+msgstr[1] "{count} loggfiler er slettet"
+
+#: desktop/src/pages/SettingsPreferences.tsx:417
+msgid "Unable to clear logs: {error}"
+msgstr "Kan ikke tømme logger: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:424
+msgid "ClamUI System Information"
+msgstr "Systeminformasjon for ClamUI"
+
+#: desktop/src/pages/SettingsPreferences.tsx:426
+msgid "Installation Type: {value}"
+msgstr "Installasjonstype: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:427
+msgid "Distribution: {value}"
+msgstr "Distribusjon: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:428
+msgid "Desktop Environment: {value}"
+msgstr "Skrivebordsmiljø: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:429
+msgid "Rust Runtime: {value}"
+msgstr "Rust kjøretid: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:430
+msgid "Tauri Runtime: {value}"
+msgstr "Tauri kjøretid: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:431
+msgid "Platform: {value}"
+msgstr "Plattform: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:432
+msgid "Architecture: {value}"
+msgstr "Arkitektur: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:433
+msgid "Version: {value}"
+msgstr "Versjon: {value}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:437
+msgid "System information copied to clipboard"
+msgstr "Systeminformasjonen er kopiert til utklippstavlen"
+
+#: desktop/src/pages/SettingsPreferences.tsx:439
+msgid "Unable to copy system information: {error}"
+msgstr "Kan ikke kopiere systeminformasjon: {error}"
+
+#: desktop/src/pages/SettingsPreferences.tsx:444
+msgid "Logging Settings"
+msgstr "Logginnstillinger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:444
+msgid "Higher levels produce more detailed logs and apply immediately."
+msgstr "Høyere nivåer produserer mer detaljerte logger og gjelder umiddelbart."
+
+#: desktop/src/pages/SettingsPreferences.tsx:445
+msgid "Log Level"
+msgstr "Loggnivå"
+
+#: desktop/src/pages/SettingsPreferences.tsx:446
+msgid "Log File Location"
+msgstr "Plassering av loggfiler"
+
+#: desktop/src/pages/SettingsPreferences.tsx:448
+msgid "Log Management"
+msgstr "Loggadministrasjon"
+
+#: desktop/src/pages/SettingsPreferences.tsx:448
+msgid ""
+"Export a ZIP archive for support or permanently clear the application logs."
+msgstr "Eksporter et ZIP-arkiv for støtte eller tøm programloggene permanent."
+
+#: desktop/src/pages/SettingsPreferences.tsx:449
+msgid "Current Log Size"
+msgstr "Nåværende loggstørrelse"
+
+#: desktop/src/pages/SettingsPreferences.tsx:450
+msgid "Export Logs"
+msgstr "Eksporter logger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:450
+msgid "Save all sanitized debug logs to a ZIP archive."
+msgstr "Lagre alle rensede feilsøkingslogger i et ZIP-arkiv."
+
+#: desktop/src/pages/SettingsPreferences.tsx:451
+msgid "Clear Logs"
+msgstr "Tøm logger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:451
+msgid "This permanently deletes all debug log files."
+msgstr "Dette sletter alle feilsøkingsloggfiler permanent."
+
+#: desktop/src/pages/SettingsPreferences.tsx:451
+msgid "Clear"
+msgstr "Tøm"
+
+#: desktop/src/pages/SettingsPreferences.tsx:453
+msgid "System Information"
+msgstr "Systeminformasjon"
+
+#: desktop/src/pages/SettingsPreferences.tsx:453
+msgid "Useful for troubleshooting and bug reports."
+msgstr "Nyttig for feilsøking og feilrapporter."
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Installation Type"
+msgstr "Installasjonstype"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Distribution"
+msgstr "Distribusjon"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Desktop Environment"
+msgstr "Skrivebordsmiljø"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Rust Runtime"
+msgstr "Rust-kjøretid"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Tauri Runtime"
+msgstr "Tauri-kjøretid"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Platform"
+msgstr "Plattform"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Copy System Info"
+msgstr "Kopier systeminformasjon"
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Copy all system information to the clipboard."
+msgstr "Kopier all systeminformasjon til utklippstavlen."
+
+#: desktop/src/pages/SettingsPreferences.tsx:454
+msgid "Loading system information…"
+msgstr "Laster inn systeminformasjon …"
+
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid "Clear logs"
+msgstr "Tøm logger"
+
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid ""
+"This permanently deletes {count} log file totaling {size}. This action "
+"cannot be undone."
+msgid_plural ""
+"This permanently deletes {count} log files totaling {size}. This action "
+"cannot be undone."
+msgstr[0] ""
+"Dette sletter permanent {count} loggfil på totalt {size}. Denne handlingen "
+"kan ikke angres."
+msgstr[1] ""
+"Dette sletter permanent {count} loggfiler på totalt {size}. Denne handlingen "
+"kan ikke angres."
+
+#: desktop/src/pages/SettingsPreferences.tsx:456
+msgid "Delete Logs"
+msgstr "Slett logger"
+
+#: desktop/src/pages/Statistics.tsx:119
+msgid "No scans recorded"
+msgstr "Ingen skanninger er registrert"
+
+#: desktop/src/pages/Statistics.tsx:122
+msgid "less than an hour ago"
+msgstr "for under en time siden"
+
+#: desktop/src/pages/Statistics.tsx:125
+msgid "{count} hour ago"
+msgid_plural "{count} hours ago"
+msgstr[0] "{count} time siden"
+msgstr[1] "{count} timer siden"
+
+#: desktop/src/pages/Statistics.tsx:129
+msgid "{count} day ago"
+msgid_plural "{count} days ago"
+msgstr[0] "{count} dag siden"
+msgstr[1] "{count} dager siden"
+
+#: desktop/src/pages/Statistics.tsx:132
+msgid "{count} week ago"
+msgid_plural "{count} weeks ago"
+msgstr[0] "{count} uke siden"
+msgstr[1] "{count} uker siden"
+
+#: desktop/src/pages/Statistics.tsx:136
+msgid "Protected"
+msgstr "Beskyttet"
+
+#: desktop/src/pages/Statistics.tsx:137
+msgid "At Risk"
+msgstr "I faresonen"
+
+#: desktop/src/pages/Statistics.tsx:138
+msgid "Unprotected"
+msgstr "Ubeskyttet"
+
+#: desktop/src/pages/Statistics.tsx:139
+msgid "No Data"
+msgstr "Ingen data"
+
+#: desktop/src/pages/Statistics.tsx:145
+msgid "No scans performed yet"
+msgstr "Ingen skanninger utført ennå"
+
+#: desktop/src/pages/Statistics.tsx:146
+msgid "Last scan was over 30 days ago"
+msgstr "Siste skanning var for over 30 dager siden"
+
+#: desktop/src/pages/Statistics.tsx:147
+msgid "Last scan was over a week ago"
+msgstr "Siste skanning var for over en uke siden"
+
+#: desktop/src/pages/Statistics.tsx:148
+msgid "Virus definitions are over 7 days old"
+msgstr "Virusdefinisjoner er over 7 dager gamle"
+
+#: desktop/src/pages/Statistics.tsx:149
+msgid "Virus definitions are over 1 day old"
+msgstr "Virusdefinisjonene er over 1 dag gamle"
+
+#: desktop/src/pages/Statistics.tsx:150
+msgid "System is protected"
+msgstr "Systemet er beskyttet"
+
+#: desktop/src/pages/Statistics.tsx:155
+msgid "No scan activity in this timeframe."
+msgstr "Ingen skanneaktivitet i denne tidsrammen."
+
+#: desktop/src/pages/Statistics.tsx:157
+msgid "Scan activity trend"
+msgstr "Skanningsaktivitetstrend"
+
+#: desktop/src/pages/Statistics.tsx:159
+msgid "{count} scan"
+msgid_plural "{count} scans"
+msgstr[0] "{count} skanning"
+msgstr[1] "{count} skanninger"
+
+#: desktop/src/pages/Statistics.tsx:169
+msgid "Scans"
+msgstr "Skanninger"
+
+#: desktop/src/pages/Statistics.tsx:169
+msgid "Threats"
+msgstr "Trusler"
+
+#: desktop/src/pages/Statistics.tsx:185
+msgid "ClamUI returned invalid statistics data."
+msgstr "ClamUI returnerte ugyldige statistikkdata."
+
+#: desktop/src/pages/Statistics.tsx:190
+msgid "Failed to load statistics: {error}"
+msgstr "Kunne ikke laste inn statistikk: {error}"
+
+#: desktop/src/pages/Statistics.tsx:208
+msgid "Statistics updates are unavailable: {error}"
+msgstr "Statistikkoppdateringer er utilgjengelige: {error}"
+
+#: desktop/src/pages/Statistics.tsx:212
+msgid "Checking protection status"
+msgstr "Sjekker beskyttelsesstatus"
+
+#: desktop/src/pages/Statistics.tsx:214
+msgid "Total Scans"
+msgstr "Skanninger totalt"
+
+#: desktop/src/pages/Statistics.tsx:214
+msgid "Number of scans performed"
+msgstr "Antall skanninger som er utført"
+
+#: desktop/src/pages/Statistics.tsx:215
+msgid "Files Scanned"
+msgstr "Filer skannet"
+
+#: desktop/src/pages/Statistics.tsx:215
+msgid "Total files checked"
+msgstr "Antall filer kontrollert"
+
+#: desktop/src/pages/Statistics.tsx:216
+msgid "Malware and suspicious files found"
+msgstr "Skadevare og mistenkelige filer som er funnet"
+
+#: desktop/src/pages/Statistics.tsx:217
+msgid "Clean Scans"
+msgstr "Rene skanninger"
+
+#: desktop/src/pages/Statistics.tsx:217
+msgid "Scans with no threats found"
+msgstr "Skanninger uten funn av trusler"
+
+#: desktop/src/pages/Statistics.tsx:218
+msgid "Average Scan Duration"
+msgstr "Gjennomsnittlig skannetid"
+
+#: desktop/src/pages/Statistics.tsx:218
+msgid "Mean time per scan"
+msgstr "Gjennomsnittlig tid per skanning"
+
+#: desktop/src/pages/Statistics.tsx:223
+msgid "Scan history and current protection posture."
+msgstr "Skannehistorikk og gjeldende beskyttelsesstatus."
+
+#: desktop/src/pages/Statistics.tsx:226
+msgid "Unable to load statistics"
+msgstr "Kan ikke laste statistikken"
+
+#: desktop/src/pages/Statistics.tsx:229
+msgid "Protection Status"
+msgstr "Beskyttelsesstatus"
+
+#: desktop/src/pages/Statistics.tsx:229
+msgid "Current system security posture"
+msgstr "Gjeldende sikkerhetstilstand for systemet"
+
+#: desktop/src/pages/Statistics.tsx:233
+msgid "System Status"
+msgstr "Systemstatus"
+
+#: desktop/src/pages/Statistics.tsx:234
+msgid "Last Scan"
+msgstr "Siste skanning"
+
+#: desktop/src/pages/Statistics.tsx:238
+msgid "Timeframe"
+msgstr "Tidsrom"
+
+#: desktop/src/pages/Statistics.tsx:239
+msgid "Statistics timeframe"
+msgstr "Tidsramme for statistikk"
+
+#: desktop/src/pages/Statistics.tsx:239
+msgid "Day"
+msgstr "Dag"
+
+#: desktop/src/pages/Statistics.tsx:239
+msgid "Week"
+msgstr "Uke"
+
+#: desktop/src/pages/Statistics.tsx:239
+msgid "Month"
+msgstr "Måned"
+
+#: desktop/src/pages/Statistics.tsx:239
+msgid "All Time"
+msgstr "Hele perioden"
+
+#: desktop/src/pages/Statistics.tsx:242
+msgid "Scan Statistics"
+msgstr "Skannestatistikk"
+
+#. Translators: Preserve the {range} placeholder; it contains a localized start–end date range.
+#: desktop/src/pages/Statistics.tsx:242
+msgid "Statistics for: {range}"
+msgstr "Statistikk for: {range}"
+
+#: desktop/src/pages/Statistics.tsx:246
+msgid "Aggregated metrics for the selected timeframe"
+msgstr "Samlede tall for det valgte tidsrommet"
+
+#: desktop/src/pages/Statistics.tsx:247
+msgid "Loading statistics…"
+msgstr "Laster inn statistikk …"
+
+#: desktop/src/pages/Statistics.tsx:247
+msgid ""
+"No scan history yet. Run your first scan to see statistics and protection "
+"status."
+msgstr ""
+"Ingen skannehistorikk ennå. Kjør din første skanning for å se statistikk og "
+"beskyttelsesstatus."
+
+#: desktop/src/pages/Statistics.tsx:250
+msgid "Scan Activity"
+msgstr "Skanneaktivitet"
+
+#: desktop/src/pages/Statistics.tsx:250
+msgid "Scan trends over the selected timeframe"
+msgstr "Skannetrender i det valgte tidsrommet"
+
+#: desktop/src/pages/Statistics.tsx:254
+msgid "Quick Actions"
+msgstr "Hurtighandlinger"
+
+#: desktop/src/pages/Statistics.tsx:255
+msgid "Scan your home directory"
+msgstr "Skann hjemmemappen din"
+
+#: desktop/src/pages/Statistics.tsx:255
+msgid "View Scan Logs"
+msgstr "Vis skannelogger"
+
+#: desktop/src/pages/Statistics.tsx:255
+msgid "See detailed scan history"
+msgstr "Se detaljert skannehistorikk"
+
+#: desktop/src/profilePresentation.ts:30
+msgid "Fast scan of the Downloads folder for quick threat detection"
+msgstr "Rask skanning av nedlastingsmappen for rask trusseldeteksjon"
+
+#: desktop/src/profilePresentation.ts:34
+msgid "Comprehensive system-wide scan of all accessible directories"
+msgstr "Omfattende systemomfattende skanning av alle tilgjengelige mapper"
+
+#: desktop/src/profilePresentation.ts:38
+msgid "Scan of the user's home directory and personal files"
+msgstr "Skanning av brukerens hjemmemappe og personlige filer"

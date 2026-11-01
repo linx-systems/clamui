@@ -1,0 +1,38 @@
+[workspace]
+members = ["crates/clamui-core", "desktop/src-tauri"]
+resolver = "2"
+
+[workspace.package]
+version = "0.5.0"
+edition = "2021"
+license = "MIT"
+authors = ["ClamUI Contributors"]
+repository = "https://github.com/linx-systems/clamui"
+
+[workspace.dependencies]
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+signal-hook = "0.3"
+csv = "1"
+fs2 = "0.4"
+gio = "0.18"
+glib = "0.18"
+globset = "0.4"
+hex = "0.4"
+libc = "0.2"
+log = "0.4"
+percent-encoding = "2"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "multipart", "rustls-tls"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+semver = "1"
+serde = { version = "1", features = ["derive"] }
+secret-service = { version = "5", default-features = false, features = ["rt-async-io-crypto-rust"] }
+serde_json = "1"
+sha2 = "0.10"
+tempfile = "3"
+url = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+walkdir = "2"
+zip = { version = "9.0.0", default-features = false, features = ["deflate"] }
