@@ -79,7 +79,7 @@ export const features: Feature[] = [
     title: "VirusTotal, when you want it",
     eyebrow: "Optional",
     blurb:
-      "Enrich detections with a second opinion. API keys use the system keyring by default; a plaintext fallback requires explicit opt-in when the keyring is unavailable.",
+      "Enrich detections with a second opinion. API keys use the system keyring.",
     bullets: [
       "Keyring-backed API key storage by default",
       "SHA-256 lookups + optional uploads",
