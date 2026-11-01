@@ -11,7 +11,9 @@ Set the backend in **Preferences → Scanner Settings** or `scan_backend` in `se
 | Daemon | immediate | 500 MB–1 GB for `clamd` | Frequent, scheduled, or performance-sensitive scans |
 | Clamscan | loads definitions each scan (about 3–10 seconds) | about 50 MB | Occasional scans, minimal setup, or daemon diagnosis |
 
-Auto checks `clamdscan --ping` and caches availability for 60 seconds. Daemon mode uses `--multiscan` and `--fdpass`; scans fail when the daemon is down. `clamscan` has no background service and forwards relevant `clamd.conf` limits (`MaxFileSize`, `MaxScanSize`, `MaxRecursion`, and `MaxFiles`) as CLI limits so both modes remain consistent.
+Auto checks `clamdscan --ping` and caches availability for 60 seconds. Daemon mode uses `--fdpass`; scans fail when the daemon is down. `clamscan` has no background service and forwards relevant `clamd.conf` limits (`MaxFileSize`, `MaxScanSize`, `MaxRecursion`, and `MaxFiles`) as CLI limits so both modes remain consistent.
+
+Daemon scans batch ordinary paths in a private file list. Files whose names contain carriage returns or newlines are scanned individually through open file descriptors, so these valid filenames do not abort their parent-folder scan. Exclusions still apply, and detections retain the original paths.
 
 ## Install a daemon
 

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::ffi::OsStr;
-use std::fs::{self, OpenOptions};
+use std::fs::{self, File, OpenOptions};
 use std::io::{BufReader, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::OpenOptionsExt;
@@ -186,6 +186,117 @@ struct CapturedOutput {
     stderr: String,
     exit_code: i32,
     cancelled: bool,
+}
+
+struct DaemonPhase<'a> {
+    arguments: &'a [String],
+    stdin: Option<File>,
+    files: u64,
+    directories: u64,
+    stdin_path: Option<&'a str>,
+}
+
+struct DaemonPhaseEvidence<'a> {
+    output: CapturedOutput,
+    files: u64,
+    directories: u64,
+    stdin_path: Option<&'a str>,
+    scanned_files: u64,
+    progress_threats: &'a [ThreatDetail],
+}
+
+struct DaemonResultAccumulator {
+    result: ScanResult,
+    saw_infected: bool,
+    saw_error: bool,
+    saw_cancelled: bool,
+    failure_exit_code: Option<i32>,
+}
+
+impl DaemonResultAccumulator {
+    fn new(raw_path: &str) -> Self {
+        Self {
+            result: ScanResult {
+                status: ScanStatus::Clean,
+                path: raw_path.into(),
+                stdout: String::new(),
+                stderr: String::new(),
+                exit_code: 0,
+                infected_files: Vec::new(),
+                scanned_files: 0,
+                scanned_dirs: 0,
+                infected_count: 0,
+                error_message: None,
+                threat_details: Vec::new(),
+                skipped_files: Vec::new(),
+                skipped_count: 0,
+                warning_message: None,
+                nonfatal_warnings: Vec::new(),
+                backend: "daemon".into(),
+            },
+            saw_infected: false,
+            saw_error: false,
+            saw_cancelled: false,
+            failure_exit_code: None,
+        }
+    }
+
+    fn add(&mut self, phase: ScanResult) {
+        append_bounded_text(&mut self.result.stdout, &phase.stdout);
+        append_bounded_text(&mut self.result.stderr, &phase.stderr);
+        if phase.status == ScanStatus::Error && phase.exit_code != 0 {
+            self.failure_exit_code.get_or_insert(phase.exit_code);
+        } else if self.result.exit_code == 0 && phase.exit_code != 0 {
+            self.result.exit_code = phase.exit_code;
+        }
+        self.result.scanned_files += phase.scanned_files;
+        self.result.scanned_dirs += phase.scanned_dirs;
+        self.saw_infected |= phase.status == ScanStatus::Infected;
+        self.saw_error |= phase.status == ScanStatus::Error;
+        self.saw_cancelled |= phase.status == ScanStatus::Cancelled;
+        if let Some(error) = phase.error_message {
+            match &mut self.result.error_message {
+                Some(current) => append_bounded_text(current, &error),
+                None => self.result.error_message = Some(error),
+            }
+        }
+        if self.result.warning_message.is_none() {
+            self.result.warning_message = phase.warning_message;
+        }
+        self.result
+            .nonfatal_warnings
+            .extend(phase.nonfatal_warnings);
+        self.result.threat_details.extend(phase.threat_details);
+        self.result.skipped_files.extend(phase.skipped_files);
+    }
+
+    fn finish(mut self) -> ScanResult {
+        self.result.infected_files = self
+            .result
+            .threat_details
+            .iter()
+            .map(|threat| threat.file_path.clone())
+            .collect();
+        self.result.infected_count = self.result.threat_details.len() as u64;
+        self.result.skipped_count = self.result.skipped_files.len() as u64;
+        self.result.status = if self.saw_cancelled {
+            ScanStatus::Cancelled
+        } else if self.saw_infected {
+            ScanStatus::Infected
+        } else if self.saw_error {
+            ScanStatus::Error
+        } else {
+            ScanStatus::Clean
+        };
+        if let Some(exit_code) = self.failure_exit_code {
+            self.result.exit_code = exit_code;
+        }
+        if self.saw_cancelled {
+            self.result.exit_code = -1;
+            self.result.error_message = Some("Scan cancelled by user".into());
+        }
+        self.result
+    }
 }
 
 struct CapturedStream {
@@ -461,7 +572,7 @@ fn scan_target(
         );
     }
 
-    let (command, args) = if backend == "daemon" {
+    if backend == "daemon" {
         if count.files == 0 {
             return ScanResult {
                 status: ScanStatus::Clean,
@@ -482,40 +593,18 @@ fn scan_target(
                 backend: backend.into(),
             };
         }
-        match daemon_arguments(ctx, &path, &count, force_stream) {
-            Ok((program, arguments)) => (program, arguments),
-            Err(error) => return ScanResult::error(raw_path, error, backend),
-        }
-    } else {
-        (
-            "clamscan".to_owned(),
-            clamscan_arguments(ctx, &path, recursive, exclusions),
-        )
-    };
-    let file_list = args
-        .windows(2)
-        .find(|arguments| arguments[0] == "--file-list")
-        .map(|arguments| PathBuf::from(&arguments[1]));
+        return scan_daemon_target(ctx, job, raw_path, &count, force_stream);
+    }
+
+    let command = "clamscan".to_owned();
+    let args = clamscan_arguments(ctx, &path, recursive, exclusions);
     let mut progress = ProgressState::default();
-    let total = if backend == "daemon" {
-        Some(count.files)
-    } else {
-        Some(count.files).filter(|total| *total > 0)
-    };
-    let output = execute(&command, &args, &job.cancelled, |line| {
-        update_progress(line, backend, &mut progress, total, |event| {
-            let mut data = serde_json::to_value(event).unwrap_or(Value::Null);
-            if let Some(object) = data.as_object_mut() {
-                object.insert("id".into(), Value::String(job.id.clone()));
-                object.insert("path".into(), Value::String(raw_path.into()));
-                object.insert("backend".into(), Value::String(backend.into()));
-            }
-            ctx.emit("scan-progress", data);
+    let total = Some(count.files).filter(|total| *total > 0);
+    let output = execute(&command, &args, None, &job.cancelled, |line| {
+        update_progress(line, backend, None, &mut progress, total, |event| {
+            emit_scan_progress(ctx, job, raw_path, backend, event);
         });
     });
-    if let Some(file_list) = file_list {
-        let _ = fs::remove_file(file_list);
-    }
     let output = match output {
         Ok(output) => output,
         Err(error) => return ScanResult::error(raw_path, error, backend),
@@ -523,33 +612,13 @@ fn scan_target(
     let stdout = display_stdout(&output);
 
     if output.cancelled {
-        let daemon_precount_fallback = backend == "daemon" && progress.files_scanned == 0;
-        let mut partial = if backend == "daemon" {
-            interpret_daemon(
-                raw_path,
-                &stdout,
-                &output.stderr,
-                output.exit_code,
-                if daemon_precount_fallback {
-                    count.files
-                } else {
-                    progress.files_scanned
-                },
-                if daemon_precount_fallback {
-                    count.directories
-                } else {
-                    0
-                },
-            )
-        } else {
-            interpret_clamscan(
-                raw_path,
-                &stdout,
-                &output.stderr,
-                output.exit_code,
-                progress.files_scanned,
-            )
-        };
+        let mut partial = interpret_clamscan(
+            raw_path,
+            &stdout,
+            &output.stderr,
+            output.exit_code,
+            progress.files_scanned,
+        );
         restore_threat_paths(&mut partial, &output.stdout_bytes);
         for threat in partial.threat_details {
             if progress.infected_paths.insert(threat.file_path.clone()) {
@@ -557,46 +626,344 @@ fn scan_target(
                 progress.threats.push(threat);
             }
         }
-        let observed_files = progress.files_scanned;
-        drop(stdout);
-
         let mut result = ScanResult::cancelled(raw_path, output, backend, progress);
-        result.scanned_files = if backend == "daemon" && observed_files > 0 {
-            observed_files
-        } else {
-            result.scanned_files.max(partial.scanned_files)
-        };
-        result.scanned_dirs = if backend == "daemon" && observed_files == 0 {
-            partial.scanned_dirs
-        } else {
-            0
-        };
+        result.scanned_files = result.scanned_files.max(partial.scanned_files);
         result.skipped_files = partial.skipped_files;
         result.skipped_count = partial.skipped_count;
         result.warning_message = partial.warning_message;
         result.nonfatal_warnings = partial.nonfatal_warnings;
         return result;
     }
-    let mut result = if backend == "daemon" {
-        interpret_daemon(
-            raw_path,
-            &stdout,
-            &output.stderr,
-            output.exit_code,
-            count.files,
-            count.directories,
-        )
-    } else {
-        interpret_clamscan(
-            raw_path,
-            &stdout,
-            &output.stderr,
-            output.exit_code,
-            progress.files_scanned,
-        )
-    };
+    let mut result = interpret_clamscan(
+        raw_path,
+        &stdout,
+        &output.stderr,
+        output.exit_code,
+        progress.files_scanned,
+    );
     restore_threat_paths(&mut result, &output.stdout_bytes);
     result
+}
+
+fn scan_daemon_target(
+    ctx: &Context,
+    job: &Job,
+    raw_path: &str,
+    count: &TargetCount,
+    force_stream: bool,
+) -> ScanResult {
+    let base_arguments = match daemon_arguments(ctx, force_stream) {
+        Ok(arguments) => arguments,
+        Err(error) => return ScanResult::error(raw_path, error, "daemon"),
+    };
+    if job.cancelled.load(Ordering::Acquire) {
+        return ScanResult::cancelled(
+            raw_path,
+            CapturedOutput {
+                stdout_bytes: Vec::new(),
+                stdout_truncated: false,
+                stderr: String::new(),
+                exit_code: -1,
+                cancelled: true,
+            },
+            "daemon",
+            ProgressState::default(),
+        );
+    }
+    let stdin_files = count
+        .file_paths
+        .iter()
+        .filter(|path| requires_daemon_stdin(path))
+        .count() as u64;
+    let safe_files = count.files - stdin_files;
+    let mut progress = ProgressState::default();
+    if stdin_files == 0 {
+        let list = match write_private_file_list(ctx, &count.file_paths) {
+            Ok(list) => list,
+            Err(error) => return ScanResult::error(raw_path, error, "daemon"),
+        };
+        let mut arguments = base_arguments;
+        arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
+        let result = run_daemon_phase(
+            ctx,
+            job,
+            raw_path,
+            DaemonPhase {
+                arguments: &arguments,
+                stdin: None,
+                files: safe_files,
+                directories: count.directories,
+                stdin_path: None,
+            },
+            count.files,
+            &mut progress,
+        );
+        let _ = fs::remove_file(list);
+        return result;
+    }
+
+    let mut accumulator = DaemonResultAccumulator::new(raw_path);
+    let mut stopped_for_cancellation = false;
+    let mut stdin_directories = if safe_files == 0 {
+        count.directories
+    } else {
+        0
+    };
+    if safe_files > 0 {
+        let list = write_private_file_list(
+            ctx,
+            count
+                .file_paths
+                .iter()
+                .filter(|path| !requires_daemon_stdin(path)),
+        );
+        match list {
+            Ok(list) => {
+                let mut arguments = base_arguments.clone();
+                arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
+                let phase = run_daemon_phase(
+                    ctx,
+                    job,
+                    raw_path,
+                    DaemonPhase {
+                        arguments: &arguments,
+                        stdin: None,
+                        files: safe_files,
+                        directories: count.directories,
+                        stdin_path: None,
+                    },
+                    count.files,
+                    &mut progress,
+                );
+                let _ = fs::remove_file(list);
+                accumulator.add(phase);
+            }
+            Err(error) => accumulator.add(ScanResult::error(raw_path, error, "daemon")),
+        }
+    }
+
+    for path in count
+        .file_paths
+        .iter()
+        .filter(|path| requires_daemon_stdin(path))
+    {
+        if job.cancelled.load(Ordering::Acquire) {
+            stopped_for_cancellation = true;
+            break;
+        }
+        let wire_path = path_to_wire(path);
+        let file = match open_daemon_stdin_file(path) {
+            Ok(file) => file,
+            Err(error) => {
+                let mut result = ScanResult::error(raw_path, error, "daemon");
+                result.skipped_files.push(wire_path);
+                result.skipped_count = 1;
+                accumulator.add(result);
+                continue;
+            }
+        };
+        let mut arguments = base_arguments.clone();
+        arguments.push("-".into());
+        let phase = run_daemon_phase(
+            ctx,
+            job,
+            raw_path,
+            DaemonPhase {
+                arguments: &arguments,
+                stdin: Some(file),
+                files: 1,
+                directories: stdin_directories,
+                stdin_path: Some(&wire_path),
+            },
+            count.files,
+            &mut progress,
+        );
+        if phase.status != ScanStatus::Cancelled && phase.exit_code != -1 {
+            stdin_directories = 0;
+        }
+        accumulator.add(phase);
+        if job.cancelled.load(Ordering::Acquire) {
+            stopped_for_cancellation = true;
+            break;
+        }
+    }
+
+    let mut result = accumulator.finish();
+    if stopped_for_cancellation && result.status != ScanStatus::Cancelled {
+        result.status = ScanStatus::Cancelled;
+        result.exit_code = -1;
+        result.error_message = Some("Scan cancelled by user".into());
+    }
+    result
+}
+
+fn run_daemon_phase(
+    ctx: &Context,
+    job: &Job,
+    raw_path: &str,
+    phase: DaemonPhase<'_>,
+    total: u64,
+    progress: &mut ProgressState,
+) -> ScanResult {
+    let DaemonPhase {
+        arguments,
+        stdin,
+        files,
+        directories,
+        stdin_path,
+    } = phase;
+    let before_files = progress.files_scanned;
+    let before_threats = progress.threats.len();
+    let output = execute("clamdscan", arguments, stdin, &job.cancelled, |line| {
+        update_progress(line, "daemon", stdin_path, progress, Some(total), |event| {
+            emit_scan_progress(ctx, job, raw_path, "daemon", event)
+        });
+    });
+    let output = match output {
+        Ok(output) => output,
+        Err(error) => return ScanResult::error(raw_path, error, "daemon"),
+    };
+    finalize_daemon_phase(
+        raw_path,
+        DaemonPhaseEvidence {
+            output,
+            files,
+            directories,
+            stdin_path,
+            scanned_files: progress.files_scanned.saturating_sub(before_files),
+            progress_threats: &progress.threats[before_threats..],
+        },
+    )
+}
+
+fn finalize_daemon_phase(raw_path: &str, evidence: DaemonPhaseEvidence<'_>) -> ScanResult {
+    let DaemonPhaseEvidence {
+        output,
+        files,
+        directories,
+        stdin_path,
+        scanned_files,
+        progress_threats,
+    } = evidence;
+    let stdout = display_stdout(&output);
+    let mut result = interpret_daemon(
+        raw_path,
+        &stdout,
+        &output.stderr,
+        output.exit_code,
+        if output.cancelled {
+            scanned_files
+        } else {
+            files
+        },
+        if output.cancelled { 0 } else { directories },
+    );
+    if let Some(path) = stdin_path {
+        restore_stdin_paths(&mut result, path);
+    } else {
+        restore_threat_paths(&mut result, &output.stdout_bytes);
+    }
+    if output.cancelled {
+        merge_cancelled_phase_threats(&mut result, progress_threats, stdin_path);
+        result.status = ScanStatus::Cancelled;
+        result.error_message = Some("Scan cancelled by user".into());
+    }
+    result
+}
+
+fn merge_cancelled_phase_threats(
+    result: &mut ScanResult,
+    progress_threats: &[ThreatDetail],
+    stdin_path: Option<&str>,
+) {
+    let mut seen = result
+        .threat_details
+        .iter()
+        .map(|threat| (threat.file_path.clone(), threat.threat_name.clone()))
+        .collect::<HashSet<_>>();
+    for threat in progress_threats {
+        let mut threat = threat.clone();
+        if let Some(path) = stdin_path {
+            threat.file_path = path.into();
+        }
+        if seen.insert((threat.file_path.clone(), threat.threat_name.clone())) {
+            result.threat_details.push(threat);
+        }
+    }
+    result.infected_files = result
+        .threat_details
+        .iter()
+        .map(|threat| threat.file_path.clone())
+        .collect();
+    result.infected_count = result.threat_details.len() as u64;
+}
+
+fn open_daemon_stdin_file(path: &Path) -> AppResult<File> {
+    let file = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_CLOEXEC | libc::O_NOFOLLOW | libc::O_NONBLOCK)
+        .open(path)
+        .map_err(|error| format!("Unable to safely open scan input: {error}"))?;
+    let metadata = file
+        .metadata()
+        .map_err(|error| format!("Unable to inspect scan input: {error}"))?;
+    if !metadata.is_file() {
+        return Err("Scan input is not a regular file".into());
+    }
+    Ok(file)
+}
+
+fn restore_stdin_paths(result: &mut ScanResult, path: &str) {
+    for threat in &mut result.threat_details {
+        threat.file_path = path.into();
+    }
+    result.infected_files = result
+        .threat_details
+        .iter()
+        .map(|threat| threat.file_path.clone())
+        .collect();
+    for skipped in &mut result.skipped_files {
+        *skipped = path.into();
+    }
+    result.skipped_count = result.skipped_files.len() as u64;
+}
+
+fn append_bounded_text(target: &mut String, value: &str) {
+    if value.is_empty() || target.len() >= OUTPUT_LIMIT {
+        return;
+    }
+    if !target.is_empty() {
+        if target.len() + 1 >= OUTPUT_LIMIT {
+            return;
+        }
+        target.push('\n');
+    }
+    let remaining = OUTPUT_LIMIT - target.len();
+    if value.len() <= remaining {
+        target.push_str(value);
+        return;
+    }
+    let mut end = remaining;
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+    target.push_str(&value[..end]);
+}
+
+fn emit_scan_progress(
+    ctx: &Context,
+    job: &Job,
+    raw_path: &str,
+    backend: &str,
+    event: ScanProgress,
+) {
+    let mut data = serde_json::to_value(event).unwrap_or(Value::Null);
+    if let Some(object) = data.as_object_mut() {
+        object.insert("id".into(), Value::String(job.id.clone()));
+        object.insert("path".into(), Value::String(raw_path.into()));
+        object.insert("backend".into(), Value::String(backend.into()));
+    }
+    ctx.emit("scan-progress", data);
 }
 
 fn configured_backend(ctx: &Context) -> String {
@@ -691,19 +1058,13 @@ fn clamscan_arguments(
     args
 }
 
-fn daemon_arguments(
-    ctx: &Context,
-    _path: &Path,
-    count: &TargetCount,
-    force_stream: bool,
-) -> AppResult<(String, Vec<String>)> {
+fn daemon_arguments(ctx: &Context, force_stream: bool) -> AppResult<Vec<String>> {
     if !probe_program("clamdscan", &["--version"]).available {
         return Err("clamdscan is not installed".into());
     }
     if !probe_clamd(ctx, &["--ping", "1"]).available {
         return Err("clamd is not accessible".into());
     }
-    let list = write_private_file_list(ctx, &count.file_paths)?;
     let mut args = Vec::new();
     if let Some(path) = clamd_config_path(ctx) {
         args.extend(["--config-file".into(), path]);
@@ -714,11 +1075,18 @@ fn daemon_arguments(
         args.push("--fdpass".into());
     }
     args.push("-v".into());
-    args.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
-    Ok(("clamdscan".into(), args))
+    Ok(args)
 }
 
-fn write_private_file_list(ctx: &Context, paths: &[PathBuf]) -> AppResult<PathBuf> {
+fn requires_daemon_stdin(path: &Path) -> bool {
+    let bytes = path.as_os_str().as_bytes();
+    bytes.contains(&b'\n') || bytes.contains(&b'\r')
+}
+
+fn write_private_file_list<'a>(
+    ctx: &Context,
+    paths: impl IntoIterator<Item = &'a PathBuf>,
+) -> AppResult<PathBuf> {
     fs::create_dir_all(&ctx.paths.data_dir)
         .map_err(|error| format!("Unable to create private scan-list directory: {error}"))?;
     let sequence = REQUEST_SEQUENCE.fetch_add(1, Ordering::Relaxed);
@@ -985,6 +1353,7 @@ fn display_stdout(output: &CapturedOutput) -> String {
 fn update_progress(
     line: &str,
     backend: &str,
+    stdin_path: Option<&str>,
     state: &mut ProgressState,
     total: Option<u64>,
     emit: impl FnOnce(ScanProgress),
@@ -994,7 +1363,7 @@ fn update_progress(
     let mut threat = None;
     if backend == "daemon" {
         if let Some(path) = line.strip_suffix(": OK") {
-            current = Some(path.trim().to_owned());
+            current = Some(stdin_path.unwrap_or(path.trim()).to_owned());
         }
     } else if let Some(path) = line.strip_prefix("Scanning ") {
         current = Some(path.trim().to_owned());
@@ -1008,7 +1377,7 @@ fn update_progress(
                 .trim();
             if !path.trim().is_empty() && !threat_name.is_empty() {
                 let detail = ThreatDetail {
-                    file_path: path.trim().into(),
+                    file_path: stdin_path.unwrap_or(path.trim()).into(),
                     threat_name: threat_name.into(),
                     category: crate::threat::categorize(Some(threat_name)),
                     severity: crate::threat::classify_severity(Some(threat_name))
@@ -1049,6 +1418,7 @@ fn update_progress(
 fn execute(
     program: &str,
     args: &[String],
+    stdin: Option<File>,
     cancelled: &AtomicBool,
     mut line: impl FnMut(&str),
 ) -> AppResult<CapturedOutput> {
@@ -1057,6 +1427,9 @@ fn execute(
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .process_group(0);
+    if let Some(stdin) = stdin {
+        command.stdin(Stdio::from(stdin));
+    }
     let mut child = command
         .spawn()
         .map_err(|error| format!("Unable to start {program}: {error}"))?;
@@ -1078,6 +1451,9 @@ fn execute(
     let stderr = stderr_reader
         .join()
         .map_err(|_| "Scanner stderr reader panicked".to_owned())?;
+    while let Ok(value) = receiver.try_recv() {
+        line(&value);
+    }
     let mut stderr_text = String::from_utf8_lossy(&stderr.bytes).into_owned();
     if stderr.truncated {
         stderr_text.push_str("\n[stderr truncated at 67108864 bytes]\n");
@@ -1663,5 +2039,82 @@ mod tests {
         restore_threat_paths(&mut daemon, raw);
         assert_eq!(daemon.threat_details[0].file_path, expected);
         assert_eq!(daemon.infected_files[0], expected);
+    }
+    #[test]
+    fn cancelled_daemon_phase_unions_captured_and_current_progress_threats() {
+        let path = "file:///tmp/unsafe%0Afile";
+        let overlap = ThreatDetail {
+            file_path: "fd[0]".into(),
+            threat_name: "Overlap.Signature".into(),
+            category: "Virus".into(),
+            severity: "medium".into(),
+        };
+        let late = ThreatDetail {
+            file_path: "fd[0]".into(),
+            threat_name: "Late.Signature".into(),
+            category: "Virus".into(),
+            severity: "medium".into(),
+        };
+        let current_phase_threats = [overlap, late];
+        let result = finalize_daemon_phase(
+            "/tmp",
+            DaemonPhaseEvidence {
+                output: CapturedOutput {
+                    stdout_bytes:
+                        b"fd[0]: Overlap.Signature FOUND\nfd[0]: Captured.Only.Signature FOUND\n"
+                            .to_vec(),
+                    stdout_truncated: true,
+                    stderr: String::new(),
+                    exit_code: -1,
+                    cancelled: true,
+                },
+                files: 1,
+                directories: 0,
+                stdin_path: Some(path),
+                scanned_files: 2,
+                progress_threats: &current_phase_threats,
+            },
+        );
+
+        assert_eq!(result.status, ScanStatus::Cancelled);
+        assert_eq!(result.scanned_files, 2);
+        assert_eq!(result.infected_count, 3);
+        assert!(result
+            .threat_details
+            .iter()
+            .all(|threat| threat.file_path == path));
+        assert_eq!(
+            result
+                .threat_details
+                .iter()
+                .map(|threat| threat.threat_name.as_str())
+                .collect::<HashSet<_>>(),
+            HashSet::from([
+                "Overlap.Signature",
+                "Late.Signature",
+                "Captured.Only.Signature",
+            ])
+        );
+    }
+
+    #[test]
+    fn daemon_accumulator_preserves_error_exit_codes() {
+        let mut accumulator = DaemonResultAccumulator::new("/tmp");
+        accumulator.add(ScanResult::error("/tmp", "open failed", "daemon"));
+        assert_eq!(accumulator.finish().exit_code, -1);
+
+        let mut accumulator = DaemonResultAccumulator::new("/tmp");
+        accumulator.add(interpret_daemon(
+            "/tmp",
+            "/tmp/infected: Signature FOUND\n",
+            "",
+            1,
+            1,
+            0,
+        ));
+        accumulator.add(ScanResult::error("/tmp", "open failed", "daemon"));
+        let result = accumulator.finish();
+        assert_eq!(result.status, ScanStatus::Infected);
+        assert_eq!(result.exit_code, -1);
     }
 }
