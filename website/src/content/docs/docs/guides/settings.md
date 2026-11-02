@@ -33,7 +33,7 @@ Use an entry's checkbox to enable or disable it without removing it. Changes sav
 
 ## Host configuration warning
 
-Database, Scanner, and On-Access settings change host `/etc/clamav`, not Flatpak files. They need the trusted version-matched native `/usr/bin/clamui-apply-preferences` helper and polkit approval. The onboarding flow reports the helper ready only after validating matching newly published, signed Rust release assets; source builds and old helpers do not grant host-write authorization. Its protected-host protocol rejects unauthorized or invalid writes; if the helper is unavailable, saving fails without modifying host configuration. Exclusions and normal application settings remain local to ClamUI.
+Database, Scanner, and On-Access settings change host `/etc/clamav`, not Flatpak files. They need the trusted canonical native `/usr/bin/clamui-apply-preferences` helper and polkit approval. Native helper readiness does not depend on unavailable automatic-install support or installed-package metadata; a successfully reported version or architecture mismatch is reported as outdated and prompts repair, while every untrusted helper remains blocked. Flatpak continues to validate its host package state. Where offered, automatic setup requires explicit action and validates matching newly published, signed Rust release assets. Its protected-host protocol rejects unauthorized or invalid writes; if the helper is unavailable, saving fails without modifying host configuration. Exclusions and normal application settings remain local to ClamUI.
 
 ## Safe defaults
 

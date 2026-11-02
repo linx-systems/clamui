@@ -2317,13 +2317,30 @@ pub fn run_helper(args: &[String]) -> i32 {
     }
 }
 
+fn installed_deb_version_matches(expected: &str, installed: &str) -> bool {
+    if installed == expected {
+        return true;
+    }
+    let Some(revision) = installed
+        .strip_prefix(expected)
+        .and_then(|suffix| suffix.strip_prefix('-'))
+    else {
+        return false;
+    };
+    let mut bytes = revision.bytes();
+    matches!(bytes.next(), Some(first) if first.is_ascii_digit())
+        && bytes.all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'+' | b'.' | b'~'))
+}
+
 fn installed_deb_package_identity_matches<'a>(
     mut fields: impl Iterator<Item = &'a str>,
     host_architecture: &str,
 ) -> bool {
-    let version = app_version();
+    let version = env!("CARGO_PKG_VERSION");
     fields.next() == Some("ii ")
-        && fields.next() == Some(version.as_str())
+        && fields
+            .next()
+            .is_some_and(|installed| installed_deb_version_matches(version, installed))
         && matches!(
             fields.next(),
             Some(architecture) if architecture == host_architecture || architecture == "all"
@@ -2474,8 +2491,65 @@ fn unavailable_helper_status(
     }
 }
 
+fn installed_helper_status(version: String) -> PrivilegedHelperStatus {
+    PrivilegedHelperStatus {
+        state: "installed".to_owned(),
+        package_name: HELPER_PACKAGE.to_owned(),
+        version,
+        detail: None,
+        installed: true,
+        installable: false,
+        needs_onboarding: false,
+    }
+}
+
+fn trusted_helper_status(
+    version: String,
+    flatpak_host: bool,
+    backend_installable: bool,
+    package_matches: AppResult<bool>,
+) -> PrivilegedHelperStatus {
+    match package_matches {
+        Ok(true) => installed_helper_status(version),
+        Ok(false) if flatpak_host && backend_installable => PrivilegedHelperStatus {
+            state: "installable".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: None,
+            installed: false,
+            installable: true,
+            needs_onboarding: true,
+        },
+        Ok(false) => PrivilegedHelperStatus {
+            state: "outdated".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper package version does not match this ClamUI version.".to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+        Err(_) if !flatpak_host => installed_helper_status(version),
+        Err(_) => PrivilegedHelperStatus {
+            state: "unsupported".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper was found, but its installed package version could not be verified."
+                    .to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+    }
+}
+
 pub fn status() -> PrivilegedHelperStatus {
     let version = app_version();
+    let flatpak_host = flatpak();
     let backend = helper_backend();
     match trusted_helper_path() {
         Ok(_) => {
@@ -2487,29 +2561,12 @@ pub fn status() -> PrivilegedHelperStatus {
                         installed_backend_version_matches(backend, &architecture)
                     })
                 });
-            match package_matches {
-                Ok(true) => PrivilegedHelperStatus {
-                    state: "installed".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: true, installable: false, needs_onboarding: false,
-                },
-                Ok(false) if flatpak() && backend.is_some_and(helper_backend_available) => PrivilegedHelperStatus {
-                    state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: false, installable: true, needs_onboarding: true,
-                },
-                Ok(false) => PrivilegedHelperStatus {
-                    state: "outdated".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper package version does not match this ClamUI version.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-                Err(_) => PrivilegedHelperStatus {
-                    state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper was found, but its installed package version could not be verified.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-            }
+            let backend_installable = flatpak_host
+                && package_matches.as_ref().is_ok_and(|matches| !*matches)
+                && backend.is_some_and(helper_backend_available);
+            trusted_helper_status(version, flatpak_host, backend_installable, package_matches)
         }
         Err(detail) => {
-            let flatpak_host = flatpak();
             let state = if flatpak_host {
                 CanonicalHelperState::Missing
             } else {
@@ -3253,6 +3310,40 @@ mod installed_deb_package_tests {
     }
 
     #[test]
+    fn installed_debian_package_identity_accepts_conventional_revisions() {
+        let version = app_version();
+        for revision in ["1", "1ubuntu1", "1~noble1", "1+deb12u1", "1.2"] {
+            let installed = format!("{version}-{revision}");
+            assert!(installed_deb_package_identity_matches(
+                ["ii ", installed.as_str(), "amd64"].into_iter(),
+                "amd64"
+            ));
+        }
+    }
+
+    #[test]
+    fn installed_debian_version_rejects_other_upstream_versions_and_malformed_revisions() {
+        for installed in [
+            "0.5.0",
+            "0.5.10",
+            "0.5.1-rc1",
+            "0.5.1-",
+            "0.5.1-ubuntu1",
+            "0.5.1-~noble1",
+            "0.5.1-1-ubuntu1",
+            "0.5.1-1_ubuntu1",
+            "0.5.1-1é",
+        ] {
+            assert!(
+                !installed_deb_version_matches("0.5.1", installed),
+                "must reject {installed}"
+            );
+        }
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1"));
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1-1"));
+    }
+
+    #[test]
     fn installed_debian_package_identity_rejects_invalid_status_version_or_architecture() {
         let version = app_version();
         assert!(!installed_deb_package_identity_matches(
@@ -3275,6 +3366,108 @@ mod installed_deb_package_tests {
             ["ii ", version.as_str(), "amd64", "unexpected-field"].into_iter(),
             "amd64"
         ));
+    }
+}
+
+#[cfg(test)]
+mod helper_status_tests {
+    use super::*;
+
+    fn assert_status(
+        status: PrivilegedHelperStatus,
+        state: &str,
+        installed: bool,
+        installable: bool,
+        needs_onboarding: bool,
+    ) {
+        assert_eq!(status.state, state);
+        assert_eq!(status.installed, installed);
+        assert_eq!(status.installable, installable);
+        assert_eq!(status.needs_onboarding, needs_onboarding);
+    }
+
+    #[test]
+    fn trusted_native_helper_is_installed_without_an_install_backend() {
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                false,
+                false,
+                Err("the host package manager is unavailable".to_owned()),
+            ),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn known_native_helper_mismatch_remains_outdated() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), false, true, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn verified_flatpak_helper_match_is_installed() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(true)),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn flatpak_package_checks_remain_strict() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(false)),
+            "installable",
+            false,
+            true,
+            true,
+        );
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, false, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                true,
+                true,
+                Err("cannot inspect host package metadata".to_owned()),
+            ),
+            "unsupported",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn unavailable_native_helpers_remain_unavailable() {
+        for (state, expected_state) in [
+            (CanonicalHelperState::Missing, "unsupported"),
+            (CanonicalHelperState::Untrusted, "untrusted"),
+        ] {
+            assert_status(
+                unavailable_helper_status("0.5.1".to_owned(), state, "unavailable".to_owned()),
+                expected_state,
+                false,
+                false,
+                true,
+            );
+        }
     }
 }
 
