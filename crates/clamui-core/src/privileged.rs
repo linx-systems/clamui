@@ -284,12 +284,17 @@ fn host_metadata_is_trusted(metadata: &[u8], executable: bool) -> bool {
         && (!executable || mode & 0o100 != 0)
 }
 
-// GNU stat does not dereference the final component unless explicitly asked.
+// Host tools may be root-provided symlinks, so inspect the resolved executable.
 // Its fixed format makes any extra or malformed host output fail closed.
 fn trusted_host_program(path: &str, executable: bool, flatpak: bool) -> bool {
-    host_command_in_environment(HOST_STAT, &["--format=%f:%u", "--", path], flatpak).is_ok_and(
-        |output| output.status.success() && host_metadata_is_trusted(&output.stdout, executable),
+    host_command_in_environment(
+        HOST_STAT,
+        &["--dereference", "--format=%f:%u", "--", path],
+        flatpak,
     )
+    .is_ok_and(|output| {
+        output.status.success() && host_metadata_is_trusted(&output.stdout, executable)
+    })
 }
 
 fn trusted_tool_in_environment<'a>(candidates: &'a [&'a str], flatpak: bool) -> AppResult<&'a str> {
@@ -605,6 +610,71 @@ mod helper_trust_tests {
         assert!(!host_metadata_is_trusted(b"81ed:0", true));
         assert!(!host_metadata_is_trusted(b"not-a-mode:0\n", true));
         assert!(!host_metadata_is_trusted(b"81ed:0\n81ed:0\n", true));
+    }
+
+    #[test]
+    fn trusted_host_program_dereferences_host_checksum_symlink_for_execution() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let host_tool = root.path().join("host-sha256sum");
+        let candidate = root.path().join("sha256sum");
+        let input = root.path().join("input");
+        std::os::unix::fs::symlink("/usr/bin/sha256sum", &host_tool)
+            .expect("link host checksum tool");
+        std::os::unix::fs::symlink(&host_tool, &candidate).expect("link checksum candidate");
+        std::fs::write(&input, b"abc").expect("write checksum input");
+
+        let flatpak = flatpak();
+        let candidate = candidate.to_str().expect("checksum candidate is UTF-8");
+        let candidates = [candidate];
+        assert!(trusted_host_program(candidate, true, flatpak));
+        let selected = if flatpak {
+            let selected = trusted_tool_in_environment(&candidates, flatpak)
+                .expect("select checksum candidate");
+            assert_eq!(selected, candidate);
+            selected
+        } else {
+            assert!(trusted_tool_in_environment(&candidates, flatpak).is_err());
+            candidate
+        };
+
+        let output = command_in_environment(selected, flatpak)
+            .arg(&input)
+            .output()
+            .expect("run selected checksum candidate");
+        assert!(output.status.success());
+        let output = std::str::from_utf8(&output.stdout).expect("checksum output is UTF-8");
+        let digest = output
+            .split_whitespace()
+            .next()
+            .expect("checksum output has a digest");
+        assert_eq!(
+            digest,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
+
+    #[test]
+    fn trusted_host_program_rejects_broken_symlink_chains() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let dangling = root.path().join("dangling");
+        let cycle_a = root.path().join("cycle-a");
+        let cycle_b = root.path().join("cycle-b");
+        std::os::unix::fs::symlink(root.path().join("missing"), &dangling)
+            .expect("create dangling link");
+        std::os::unix::fs::symlink(&cycle_b, &cycle_a).expect("create first cycle link");
+        std::os::unix::fs::symlink(&cycle_a, &cycle_b).expect("create second cycle link");
+
+        let flatpak = flatpak();
+        assert!(!trusted_host_program(
+            dangling.to_str().expect("dangling path is UTF-8"),
+            true,
+            flatpak
+        ));
+        assert!(!trusted_host_program(
+            cycle_a.to_str().expect("cyclic path is UTF-8"),
+            true,
+            flatpak
+        ));
     }
 
     #[test]
