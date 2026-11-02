@@ -37,6 +37,8 @@ Fedora uses `/etc/clamd.d/scan.conf`; ClamUI invokes `clamdscan --config-file=/e
 
 Flatpak users install all ClamAV tools on the **host**. ClamUI invokes them through `flatpak-spawn --host` and auto-detects the host daemon.
 
+Database availability is checked on the host too, including `DatabaseDirectory` from the configured `clamd.conf` or `freshclam.conf`. Do not copy host definitions into the sandbox; read-only database detection does not require the privileged helper.
+
 ## Sockets and exit codes
 
 ClamUI probes `/var/run/clamav/clamd.ctl`, `/run/clamav/clamd.ctl`, `/run/clamd.scan/clamd.sock`, and `/var/run/clamd.scan/clamd.sock`, after checking configured `LocalSocket`. Override with `daemon_socket_path` when necessary.

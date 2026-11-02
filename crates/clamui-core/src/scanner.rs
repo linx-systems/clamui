@@ -1707,25 +1707,13 @@ fn database_status(ctx: &Context) -> Value {
     let mut selected = None;
     let mut files = 0_u64;
     for location in locations {
-        let path = Path::new(&location);
-        let Ok(entries) = fs::read_dir(path) else {
+        let Ok(inventory) = crate::host::database_directory_inventory(&location) else {
             continue;
         };
         selected = Some(location);
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name = name.to_string_lossy();
-            if !name.ends_with(".cvd") && !name.ends_with(".cld") && !name.ends_with(".cud") {
-                continue;
-            }
-            files += 1;
-            if let Ok(modified) = entry.metadata().and_then(|metadata| metadata.modified()) {
-                if let Ok(modified) = modified.duration_since(UNIX_EPOCH) {
-                    newest = Some(newest.map_or(modified.as_secs(), |current: u64| {
-                        current.max(modified.as_secs())
-                    }));
-                }
-            }
+        files += inventory.files;
+        if let Some(modified) = inventory.latest_modified_unix {
+            newest = Some(newest.map_or(modified, |current: u64| current.max(modified)));
         }
     }
     json!({"available": files > 0, "path": selected, "files": files, "latest_modified_unix": newest})
