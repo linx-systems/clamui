@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-01 21:11+0100\n"
+"POT-Creation-Date: 2026-11-02 18:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1154,31 +1154,31 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:729
+#: crates/clamui-core/src/host.rs:868
 msgid "Daemon not responding: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:732
+#: crates/clamui-core/src/host.rs:871
 msgid "{binary} found but returned error: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:737
+#: crates/clamui-core/src/host.rs:876
 msgid "{service} is active"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:740
+#: crates/clamui-core/src/host.rs:879
 msgid "No virus database files found in {path}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:746
+#: crates/clamui-core/src/host.rs:885
 msgid "Error accessing database {path}: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:752
+#: crates/clamui-core/src/host.rs:891
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:762
+#: crates/clamui-core/src/host.rs:901
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -1326,55 +1326,55 @@ msgid ""
 msgstr ""
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:982
+#: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
 msgstr ""
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:988
+#: crates/clamui-core/src/privileged.rs:1058
 msgid "The privileged helper is unavailable while {operation}."
 msgstr ""
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:994
+#: crates/clamui-core/src/privileged.rs:1064
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr ""
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1000
+#: crates/clamui-core/src/privileged.rs:1070
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr ""
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:1006
+#: crates/clamui-core/src/privileged.rs:1076
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr ""
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:1014
+#: crates/clamui-core/src/privileged.rs:1084
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr ""
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1021
+#: crates/clamui-core/src/privileged.rs:1091
 msgid "The privileged helper was terminated while {operation}."
 msgstr ""
 
-#: crates/clamui-core/src/privileged.rs:1080
+#: crates/clamui-core/src/privileged.rs:1150
 msgid "Applying configuration"
 msgstr ""
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:1082
+#: crates/clamui-core/src/privileged.rs:1152
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr ""
 
-#: crates/clamui-core/src/privileged.rs:1324
+#: crates/clamui-core/src/privileged.rs:1394
 msgid "Reading configuration"
 msgstr ""
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2836
+#: crates/clamui-core/src/privileged.rs:2963
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""
@@ -1505,35 +1505,35 @@ msgstr ""
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1808
+#: crates/clamui-core/src/scanner.rs:1796
 msgid "Scan cancelled by user"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1810
+#: crates/clamui-core/src/scanner.rs:1798
 msgid "No files could be scanned"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1814
+#: crates/clamui-core/src/scanner.rs:1802
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1821
+#: crates/clamui-core/src/scanner.rs:1809
 msgid "Scan target is not a regular file or directory"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1835
+#: crates/clamui-core/src/scanner.rs:1823
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1848
+#: crates/clamui-core/src/scanner.rs:1836
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1867
+#: crates/clamui-core/src/scanner.rs:1855
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
