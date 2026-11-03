@@ -4,9 +4,9 @@
 # SPDX-FileCopyrightText: 2026 Markson Hosben <marksonhosben@proton.me>
 msgid ""
 msgstr ""
-"Project-Id-Version: ClamUI 0.5.0\n"
+"Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-01 11:44+0100\n"
+"POT-Creation-Date: 2026-11-03 14:35+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -791,7 +791,7 @@ msgstr "用法：clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "没有已隔离的文件。"
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:1108
 msgid "ID"
 msgstr "ID"
 
@@ -845,8 +845,8 @@ msgstr "删除失败"
 msgid "{prefix}: {error}"
 msgstr "{prefix}：{error}"
 
-#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:417
-#: crates/clamui-core/src/quarantine.rs:454
+#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:443
+#: crates/clamui-core/src/quarantine.rs:480
 msgid "Quarantine entry not found: {id}"
 msgstr "未找到隔离条目：{id}"
 
@@ -1038,15 +1038,15 @@ msgstr "加载历史记录失败：{error}"
 msgid "No scan history found."
 msgstr "未找到扫描历史记录。"
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:1118
 msgid "Type"
 msgstr "类型"
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:1123
 msgid "Status"
 msgstr "状态"
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:1142
 msgid "Summary"
 msgstr "摘要"
 
@@ -1168,96 +1168,96 @@ msgstr "存储在设置文件中（密钥环不可用 — 安全性较低）"
 msgid "translator-credits"
 msgstr "Markson Hosben <marksonhosben@proton.me>"
 
-#: crates/clamui-core/src/host.rs:729
+#: crates/clamui-core/src/host.rs:868
 msgid "Daemon not responding: {error}"
 msgstr "守护进程未响应：{error}"
 
-#: crates/clamui-core/src/host.rs:732
+#: crates/clamui-core/src/host.rs:871
 msgid "{binary} found but returned error: {error}"
 msgstr "已找到 {binary}，但返回错误：{error}"
 
-#: crates/clamui-core/src/host.rs:737
+#: crates/clamui-core/src/host.rs:876
 msgid "{service} is active"
 msgstr "{service} 正在运行"
 
-#: crates/clamui-core/src/host.rs:740
+#: crates/clamui-core/src/host.rs:879
 msgid "No virus database files found in {path}"
 msgstr "未在 {path} 中找到病毒数据库文件"
 
-#: crates/clamui-core/src/host.rs:746
+#: crates/clamui-core/src/host.rs:885
 msgid "Error accessing database {path}: {error}"
 msgstr "访问数据库 {path} 时出错：{error}"
 
-#: crates/clamui-core/src/host.rs:752
+#: crates/clamui-core/src/host.rs:891
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "未安装 {binary}。请使用以下命令安装：{command}"
 
-#: crates/clamui-core/src/host.rs:762
+#: crates/clamui-core/src/host.rs:901
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
 msgstr "未安装 {binary}。请为您使用的发行版安装所需的 ClamAV 软件包。"
 
-#: crates/clamui-core/src/logs.rs:767
+#: crates/clamui-core/src/logs.rs:1101
 msgid "SCAN LOG"
 msgstr "扫描日志"
 
-#: crates/clamui-core/src/logs.rs:769
+#: crates/clamui-core/src/logs.rs:1103
 msgid "UPDATE LOG"
 msgstr "更新日志"
 
-#: crates/clamui-core/src/logs.rs:779
+#: crates/clamui-core/src/logs.rs:1113
 msgid "Timestamp"
 msgstr "时间戳"
 
-#: crates/clamui-core/src/logs.rs:794
+#: crates/clamui-core/src/logs.rs:1128
 msgid "Duration"
 msgstr "耗时"
 
-#: crates/clamui-core/src/logs.rs:802
+#: crates/clamui-core/src/logs.rs:1136
 msgid "Full Output"
 msgstr "完整输出"
 
-#: crates/clamui-core/src/logs.rs:833
+#: crates/clamui-core/src/logs.rs:1167
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} 秒"
 
-#: crates/clamui-core/src/logs.rs:1063
+#: crates/clamui-core/src/logs.rs:1393
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "扫描完成"
 
-#: crates/clamui-core/src/logs.rs:1066
+#: crates/clamui-core/src/logs.rs:1396
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "发现 {count} 个威胁{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1076
+#: crates/clamui-core/src/logs.rs:1406
 msgid "Threats Detected"
 msgstr "检测到威胁"
 
-#: crates/clamui-core/src/logs.rs:1081
+#: crates/clamui-core/src/logs.rs:1411
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "扫描已取消"
 
-#: crates/clamui-core/src/logs.rs:1084
+#: crates/clamui-core/src/logs.rs:1414
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "扫描出错"
 
-#: crates/clamui-core/src/logs.rs:1095
+#: crates/clamui-core/src/logs.rs:1425
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "已扫描：{count} 个文件"
 
-#: crates/clamui-core/src/logs.rs:1102
+#: crates/clamui-core/src/logs.rs:1432
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} 个目录"
 
-#: crates/clamui-core/src/logs.rs:1113
+#: crates/clamui-core/src/logs.rs:1443
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "发现威胁：{count} 个"
@@ -1341,55 +1341,55 @@ msgstr ""
 "在 ClamUI 中保存系统级 ClamAV 配置了。"
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:774
+#: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
 msgstr "{operation}时，授权被取消。"
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:780
+#: crates/clamui-core/src/privileged.rs:1058
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "{operation}时，特权助手不可用。"
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:786
+#: crates/clamui-core/src/privileged.rs:1064
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr "{operation}时，特权助手拒绝了 PKEXEC_UID。"
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:792
+#: crates/clamui-core/src/privileged.rs:1070
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr "{operation}时，特权助手报告协议不匹配。"
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:798
+#: crates/clamui-core/src/privileged.rs:1076
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr "{operation}时，特权助手执行失败（退出码 {code}）：{detail}。"
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:806
+#: crates/clamui-core/src/privileged.rs:1084
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr "{operation}时，特权助手执行失败（退出码 {code}）。"
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:813
+#: crates/clamui-core/src/privileged.rs:1091
 msgid "The privileged helper was terminated while {operation}."
 msgstr "{operation}时，特权助手被终止。"
 
-#: crates/clamui-core/src/privileged.rs:872
+#: crates/clamui-core/src/privileged.rs:1150
 msgid "Applying configuration"
 msgstr "应用配置"
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:874
+#: crates/clamui-core/src/privileged.rs:1152
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr "{message} 此前可能已有替换操作成功。"
 
-#: crates/clamui-core/src/privileged.rs:1116
+#: crates/clamui-core/src/privileged.rs:1394
 msgid "Reading configuration"
 msgstr "读取配置"
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2634
+#: crates/clamui-core/src/privileged.rs:2963
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr "特权助手安装失败。请重试或手动安装。"
@@ -1477,18 +1477,18 @@ msgstr "{kind} 路径格式无效：{path}"
 msgid "Could not generate unique name for '{name}'"
 msgstr "无法为“{name}”生成唯一名称"
 
-#: crates/clamui-core/src/quarantine.rs:369
+#: crates/clamui-core/src/quarantine.rs:395
 msgid "Quarantine metadata was written but could not be read"
 msgstr "隔离区元数据已写入，但无法读取"
 
-#: crates/clamui-core/src/quarantine.rs:391
+#: crates/clamui-core/src/quarantine.rs:417
 msgid ""
 "Failed to record quarantine entry in database. File has been restored to "
 "original location."
 msgstr "无法将隔离记录写入数据库。文件已还原至原始位置。"
 
 #. Translators: Preserve `{error}` as a localized failure description and `{path}` as a user-provided file path.
-#: crates/clamui-core/src/quarantine.rs:394
+#: crates/clamui-core/src/quarantine.rs:420
 msgid ""
 "Failed to record quarantine entry in database. Rollback also failed: "
 "{error}. File may be orphaned at: {path}"
@@ -1496,7 +1496,7 @@ msgstr ""
 "无法将隔离记录写入数据库。回滚也失败：{error}。文件可能遗留在以下位置且无对应"
 "记录：{path}"
 
-#: crates/clamui-core/src/quarantine.rs:442
+#: crates/clamui-core/src/quarantine.rs:468
 msgid ""
 "File restored successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
@@ -1504,7 +1504,7 @@ msgstr ""
 "文件已成功还原，但无法删除数据库记录。清理记录前，该文件可能仍会显示在列表"
 "中。"
 
-#: crates/clamui-core/src/quarantine.rs:469
+#: crates/clamui-core/src/quarantine.rs:495
 msgid ""
 "File deleted successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
@@ -1513,46 +1513,46 @@ msgstr ""
 "中。"
 
 #. Translators: Preserve `{path}` as a user-provided file path and `{error}` as the filesystem diagnostic.
-#: crates/clamui-core/src/quarantine.rs:1158
+#: crates/clamui-core/src/quarantine.rs:1411
 msgid "Cannot quarantine {path}: {error}"
 msgstr "无法隔离 {path}：{error}"
 
 #. Translators: The em dash separates the integrity failure from its consequence.
-#: crates/clamui-core/src/quarantine.rs:1176
+#: crates/clamui-core/src/quarantine.rs:1429
 msgid "File hash mismatch — file may be corrupted"
 msgstr "文件哈希值不匹配 — 文件可能已损坏"
 
-#: crates/clamui-core/src/scanner.rs:383
+#: crates/clamui-core/src/scanner.rs:389
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "未在宿主机的标准位置找到 ClamAV 数据库文件"
 
-#: crates/clamui-core/src/scanner.rs:1808
+#: crates/clamui-core/src/scanner.rs:1815
 msgid "Scan cancelled by user"
 msgstr "用户已取消扫描"
 
-#: crates/clamui-core/src/scanner.rs:1810
+#: crates/clamui-core/src/scanner.rs:1817
 msgid "No files could be scanned"
 msgstr "未能扫描任何文件"
 
-#: crates/clamui-core/src/scanner.rs:1814
+#: crates/clamui-core/src/scanner.rs:1821
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "扫描目标不存在或包含无效的 NUL 字节"
 
-#: crates/clamui-core/src/scanner.rs:1821
+#: crates/clamui-core/src/scanner.rs:1828
 msgid "Scan target is not a regular file or directory"
 msgstr "扫描目标不是普通文件或目录"
 
-#: crates/clamui-core/src/scanner.rs:1835
+#: crates/clamui-core/src/scanner.rs:1842
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "无法访问 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1848
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "无法读取 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1867
+#: crates/clamui-core/src/scanner.rs:1874
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -1889,43 +1889,43 @@ msgstr "设备扫描完成"
 msgid "Security Audit Complete"
 msgstr "安全审计完成"
 
-#: desktop/src-tauri/src/runtime.rs:190
+#: desktop/src-tauri/src/runtime.rs:199
 msgid "Quick Scan"
 msgstr "快速扫描"
 
-#: desktop/src-tauri/src/runtime.rs:191
+#: desktop/src-tauri/src/runtime.rs:200
 msgid "Full Scan"
 msgstr "全盘扫描"
 
-#: desktop/src-tauri/src/runtime.rs:192
+#: desktop/src-tauri/src/runtime.rs:201
 msgid "Home Folder"
 msgstr "主文件夹"
 
-#: desktop/src-tauri/src/runtime.rs:193
+#: desktop/src-tauri/src/runtime.rs:202
 msgid "Update Database"
 msgstr "更新数据库"
 
-#: desktop/src-tauri/src/runtime.rs:194
+#: desktop/src-tauri/src/runtime.rs:203
 msgid "Scan Profile"
 msgstr "扫描配置方案"
 
-#: desktop/src-tauri/src/runtime.rs:195
+#: desktop/src-tauri/src/runtime.rs:204
 msgid "Quit"
 msgstr "退出"
 
-#: desktop/src-tauri/src/runtime.rs:368
+#: desktop/src-tauri/src/runtime.rs:405
 msgid "Add Folders"
 msgstr "添加文件夹"
 
-#: desktop/src-tauri/src/runtime.rs:370
+#: desktop/src-tauri/src/runtime.rs:407
 msgid "Add Files"
 msgstr "添加文件"
 
-#: desktop/src-tauri/src/runtime.rs:414
+#: desktop/src-tauri/src/runtime.rs:451
 msgid "Export"
 msgstr "导出"
 
-#: desktop/src-tauri/src/runtime.rs:545
+#: desktop/src-tauri/src/runtime.rs:582
 msgid "Open"
 msgstr "打开"
 
@@ -1955,7 +1955,7 @@ msgstr "扫描"
 msgid "Database"
 msgstr "数据库"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:358
 msgid "Logs"
 msgstr "日志"
 
@@ -1963,7 +1963,7 @@ msgstr "日志"
 msgid "Components"
 msgstr "组件"
 
-#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "统计信息"
 
@@ -2060,7 +2060,7 @@ msgstr "主导航"
 msgid "Views"
 msgstr "视图"
 
-#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "关闭"
 
@@ -2125,9 +2125,9 @@ msgstr "记住我的选择"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
 #: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
 #: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
 #: desktop/src/pages/SettingsPreferences.tsx:367
 #: desktop/src/pages/SettingsPreferences.tsx:456
@@ -2336,7 +2336,7 @@ msgid "Infected"
 msgstr "已感染"
 
 #: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
-#: desktop/src/pages/Statistics.tsx:140
+#: desktop/src/pages/Statistics.tsx:141
 msgid "Error"
 msgstr "错误"
 
@@ -2345,12 +2345,12 @@ msgid "Cancelled"
 msgstr "已取消"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:103
-#: desktop/src/pages/Logs.tsx:120 desktop/src/pages/Results.tsx:55
+#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/SettingsPreferences.tsx:430
 #: desktop/src/pages/SettingsPreferences.tsx:454
-#: desktop/src/pages/Statistics.tsx:141
+#: desktop/src/pages/Statistics.tsx:142
 msgid "Unknown"
 msgstr "未知"
 
@@ -2407,7 +2407,7 @@ msgstr "警告"
 msgid "Fail"
 msgstr "未通过"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:119
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "已跳过"
 
@@ -2532,7 +2532,7 @@ msgid "Could not copy command: {error}"
 msgstr "无法复制命令：{error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
-#: desktop/src/pages/Logs.tsx:390 desktop/src/pages/Logs.tsx:415
+#: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
 #: desktop/src/pages/SettingsPreferences.tsx:454
 msgid "Copy"
@@ -2616,7 +2616,7 @@ msgstr ""
 "conf。如果 clamd 已在运行但无法使用，请检查套接字权限并运行：clamdscan --"
 "config-file=/etc/clamd.d/scan.conf --ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:97
+#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "正在运行"
 
@@ -2625,11 +2625,11 @@ msgstr "正在运行"
 msgid "Installed"
 msgstr "已安装"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:99
+#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "已停止"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:101
+#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:249
 msgid "Not installed"
 msgstr "未安装"
@@ -3518,238 +3518,237 @@ msgstr ""
 "此操作会绕过 freshclam 服务，并暂存替换用的病毒库。在替换成功之前，现有病毒库"
 "仍然可用；若正式启用失败，则会恢复原有病毒库。"
 
-#: desktop/src/pages/Logs.tsx:76
+#: desktop/src/pages/Logs.tsx:77
 msgid "{seconds} second"
 msgid_plural "{seconds} seconds"
 msgstr[0] "{seconds} 秒"
 
-#: desktop/src/pages/Logs.tsx:88 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Quarantine.tsx:225
+#: desktop/src/pages/Logs.tsx:89 desktop/src/pages/Profiles.tsx:103
+#: desktop/src/pages/Quarantine.tsx:304
 msgid "Path"
 msgstr "路径"
 
-#: desktop/src/pages/Logs.tsx:117
+#: desktop/src/pages/Logs.tsx:118
 msgid "Success"
 msgstr "成功"
 
-#: desktop/src/pages/Logs.tsx:118
+#: desktop/src/pages/Logs.tsx:119
 msgid "Up to date"
 msgstr "已是最新"
 
-#: desktop/src/pages/Logs.tsx:162
+#: desktop/src/pages/Logs.tsx:163
 msgid "Failed to load historical logs: {error}"
 msgstr "加载历史日志失败：{error}"
 
-#: desktop/src/pages/Logs.tsx:180
+#: desktop/src/pages/Logs.tsx:178
 msgid "Log updates are unavailable: {error}"
 msgstr "无法获取日志更新：{error}"
 
-#: desktop/src/pages/Logs.tsx:193 desktop/src/pages/Logs.tsx:209
+#: desktop/src/pages/Logs.tsx:191 desktop/src/pages/Logs.tsx:207
 msgid "Unable to determine ClamAV daemon status."
 msgstr "无法确定 ClamAV 守护进程的状态。"
 
-#: desktop/src/pages/Logs.tsx:202
+#: desktop/src/pages/Logs.tsx:200
 msgid "ClamAV daemon is not running."
 msgstr "ClamAV 守护进程未运行。"
 
-#: desktop/src/pages/Logs.tsx:205
+#: desktop/src/pages/Logs.tsx:203
 msgid "ClamAV daemon is not installed."
 msgstr "未安装 ClamAV 守护进程。"
 
-#: desktop/src/pages/Logs.tsx:236
+#: desktop/src/pages/Logs.tsx:234
 msgid "Unable to load daemon logs."
 msgstr "无法加载守护进程日志。"
 
-#: desktop/src/pages/Logs.tsx:274
+#: desktop/src/pages/Logs.tsx:272
 msgid "The log entry returned by ClamUI was incomplete."
 msgstr "ClamUI 返回的日志条目不完整。"
 
-#: desktop/src/pages/Logs.tsx:277
+#: desktop/src/pages/Logs.tsx:275
 msgid "Failed to load log details: {error}"
 msgstr "加载日志详情失败：{error}"
 
-#: desktop/src/pages/Logs.tsx:285 desktop/src/pages/Logs.tsx:295
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:283 desktop/src/pages/Logs.tsx:293
+#: desktop/src/pages/Logs.tsx:401
 msgid "Text"
 msgstr "文本"
 
-#: desktop/src/pages/Logs.tsx:286 desktop/src/pages/Logs.tsx:296
+#: desktop/src/pages/Logs.tsx:284 desktop/src/pages/Logs.tsx:294
 msgid "Exported selected log."
 msgstr "已导出所选日志。"
 
-#: desktop/src/pages/Logs.tsx:286
+#: desktop/src/pages/Logs.tsx:284
 msgid "Exported all logs."
 msgstr "已导出所有日志。"
 
-#: desktop/src/pages/Logs.tsx:288
+#: desktop/src/pages/Logs.tsx:286
 msgid "Failed to export logs"
 msgstr "导出日志失败"
 
-#: desktop/src/pages/Logs.tsx:298
+#: desktop/src/pages/Logs.tsx:296
 msgid "Failed to export log"
 msgstr "导出日志失败"
 
-#: desktop/src/pages/Logs.tsx:306
+#: desktop/src/pages/Logs.tsx:304
 msgid ""
 "Log details are too large for the clipboard. Choose an export destination "
 "instead."
 msgstr "日志详情内容过多，无法复制到剪贴板。请改为选择导出位置。"
 
-#: desktop/src/pages/Logs.tsx:312
+#: desktop/src/pages/Logs.tsx:310
 msgid "Log details copied to clipboard"
 msgstr "日志详情已复制到剪贴板"
 
-#: desktop/src/pages/Logs.tsx:314
+#: desktop/src/pages/Logs.tsx:312
 msgid "Failed to copy log details"
 msgstr "复制日志详情失败"
 
-#: desktop/src/pages/Logs.tsx:326
+#: desktop/src/pages/Logs.tsx:324
 msgid "Daemon logs copied to clipboard"
 msgstr "守护进程日志已复制到剪贴板"
 
-#: desktop/src/pages/Logs.tsx:328
+#: desktop/src/pages/Logs.tsx:326
 msgid "Failed to copy daemon logs"
 msgstr "复制守护进程日志失败"
 
-#: desktop/src/pages/Logs.tsx:339
+#: desktop/src/pages/Logs.tsx:337
 msgid "Historical logs were cleared with {count} cleanup failure."
 msgid_plural "Historical logs were cleared with {count} cleanup failures."
 msgstr[0] "历史日志已清除，但有 {count} 项清理操作失败。"
 
-#: desktop/src/pages/Logs.tsx:345
+#: desktop/src/pages/Logs.tsx:343
 msgid "Historical logs cleared."
 msgstr "历史日志已清除。"
 
-#: desktop/src/pages/Logs.tsx:348
+#: desktop/src/pages/Logs.tsx:346
 msgid "Failed to clear logs: {error}"
 msgstr "清除日志失败：{error}"
 
-#: desktop/src/pages/Logs.tsx:353
+#: desktop/src/pages/Logs.tsx:351
 msgid "Select a log entry to view details."
 msgstr "请选择一条日志以查看详情。"
 
-#: desktop/src/pages/Logs.tsx:354
+#: desktop/src/pages/Logs.tsx:352
 msgid "Error loading daemon logs"
 msgstr "加载守护进程日志时出错"
 
-#: desktop/src/pages/Logs.tsx:360
+#: desktop/src/pages/Logs.tsx:358
 msgid "Review previous scan and update operations."
 msgstr "查看以往的扫描和更新操作。"
 
-#: desktop/src/pages/Logs.tsx:361
+#: desktop/src/pages/Logs.tsx:359
 msgid "Log source"
 msgstr "日志来源"
 
-#: desktop/src/pages/Logs.tsx:362 desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:360 desktop/src/pages/Logs.tsx:366
 msgid "Historical Logs"
 msgstr "历史日志"
 
-#: desktop/src/pages/Logs.tsx:363 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:361 desktop/src/pages/Logs.tsx:398
 msgid "ClamAV Daemon"
 msgstr "ClamAV 守护进程"
 
-#: desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:366
 msgid "Previous scan and update operations"
 msgstr "以往的扫描和更新操作"
 
-#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:217
+#: desktop/src/pages/Logs.tsx:367 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:296
 #: desktop/src/pages/SettingsPreferences.tsx:367
 #: desktop/src/pages/SettingsPreferences.tsx:449
-#: desktop/src/pages/Statistics.tsx:224
+#: desktop/src/pages/Statistics.tsx:234
 msgid "Refresh"
 msgstr "刷新"
 
-#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:392
+#: desktop/src/pages/Logs.tsx:368 desktop/src/pages/Logs.tsx:390
 msgid "Export CSV"
 msgstr "导出 CSV"
 
-#: desktop/src/pages/Logs.tsx:371 desktop/src/pages/Logs.tsx:393
+#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
 #: desktop/src/pages/Results.tsx:225
 msgid "Export JSON"
 msgstr "导出 JSON"
 
-#: desktop/src/pages/Logs.tsx:372 desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Scan.tsx:553
 msgid "Clear All"
 msgstr "全部清除"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "Loading logs…"
 msgstr "正在加载日志…"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "No historical logs yet."
 msgstr "暂无历史日志。"
 
-#: desktop/src/pages/Logs.tsx:382
+#: desktop/src/pages/Logs.tsx:380
 msgid "{shown} of {total} loaded log shown"
 msgid_plural "{shown} of {total} loaded logs shown"
 msgstr[0] "已加载 {total} 条日志，当前显示 {shown} 条"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Network.tsx:430
-#: desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381 desktop/src/pages/Network.tsx:430
 msgid "Load More"
 msgstr "加载更多"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381
 msgid "Show All ({count})"
 msgstr "显示全部（{count}）"
 
-#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:394
+#: desktop/src/pages/Logs.tsx:387 desktop/src/pages/Logs.tsx:392
 msgid "Log Details"
 msgstr "日志详情"
 
-#: desktop/src/pages/Logs.tsx:391 desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:401
 msgid "Export Text"
 msgstr "导出文本"
 
-#: desktop/src/pages/Logs.tsx:394 desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
 #: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
 msgid "Fullscreen"
 msgstr "全屏"
 
-#: desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:398
 msgid "Live host daemon log output."
 msgstr "宿主机守护进程的实时日志输出。"
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Stop Live Updates"
 msgstr "停止实时更新"
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Start Live Updates"
 msgstr "启动实时更新"
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Exported daemon logs."
 msgstr "守护进程日志已导出。"
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Failed to export daemon logs"
 msgstr "导出守护进程日志失败"
 
-#: desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:402
 msgid "Daemon Logs"
 msgstr "守护进程日志"
 
-#: desktop/src/pages/Logs.tsx:407
+#: desktop/src/pages/Logs.tsx:405
 msgid "Checking daemon status…"
 msgstr "正在检查守护进程状态…"
 
-#: desktop/src/pages/Logs.tsx:408
+#: desktop/src/pages/Logs.tsx:406
 msgid "Live refresh is active every 3 seconds."
 msgstr "已启用实时刷新，每 3 秒刷新一次。"
 
-#: desktop/src/pages/Logs.tsx:409
+#: desktop/src/pages/Logs.tsx:407
 msgid "Daemon logs will appear here after a successful read."
 msgstr "成功读取后，守护进程日志将显示在此处。"
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid "Clear All Logs?"
 msgstr "清除所有日志？"
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid ""
 "This will permanently delete all historical logs. This action cannot be "
 "undone."
@@ -4124,7 +4123,7 @@ msgid "Duplicate"
 msgstr "复制"
 
 #: desktop/src/pages/Profiles.tsx:237 desktop/src/pages/Profiles.tsx:245
-#: desktop/src/pages/Quarantine.tsx:228 desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/Quarantine.tsx:307 desktop/src/pages/Quarantine.tsx:319
 #: desktop/src/pages/SettingsPreferences.tsx:367
 msgid "Delete"
 msgstr "删除"
@@ -4158,173 +4157,185 @@ msgstr ""
 msgid "Restoring…"
 msgstr "正在恢复…"
 
-#: desktop/src/pages/Quarantine.tsx:97
+#: desktop/src/pages/Quarantine.tsx:127 desktop/src/pages/Quarantine.tsx:165
 msgid "ClamUI returned invalid quarantine data."
 msgstr "ClamUI 返回了无效的隔离区数据。"
 
-#: desktop/src/pages/Quarantine.tsx:104
+#: desktop/src/pages/Quarantine.tsx:135 desktop/src/pages/Quarantine.tsx:172
 msgid "Failed to load quarantine: {error}"
 msgstr "加载隔离区失败：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:122
+#: desktop/src/pages/Quarantine.tsx:201
 msgid "Quarantine updates are unavailable: {error}"
 msgstr "隔离区更新功能不可用：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:144
+#: desktop/src/pages/Quarantine.tsx:223
 msgid "ClamUI returned an invalid cleanup result."
 msgstr "ClamUI 返回了无效的清理结果。"
 
-#: desktop/src/pages/Quarantine.tsx:149
+#: desktop/src/pages/Quarantine.tsx:228
 msgid "Removed {count} old quarantine entry."
 msgid_plural "Removed {count} old quarantine entries."
 msgstr[0] "已移除 {count} 个旧隔离项。"
 
-#: desktop/src/pages/Quarantine.tsx:155
+#: desktop/src/pages/Quarantine.tsx:234
 msgid "No old entries found to remove."
 msgstr "未找到可清理的旧记录。"
 
-#: desktop/src/pages/Quarantine.tsx:161
+#: desktop/src/pages/Quarantine.tsx:240
 msgid "Failed to clear old items: {error}"
 msgstr "清理旧项目失败：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:162
+#: desktop/src/pages/Quarantine.tsx:241
 msgid "Failed to clear old quarantine items: {error}"
 msgstr "清理隔离区中的旧项目失败：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:172
+#: desktop/src/pages/Quarantine.tsx:251
 msgid "ClamUI returned an invalid quarantine result."
 msgstr "ClamUI 返回了无效的隔离操作结果。"
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File restored successfully."
 msgstr "文件已成功恢复。"
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File deleted successfully."
 msgstr "文件已成功删除。"
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File restored, but the database entry could not be removed."
 msgstr "文件已恢复，但无法删除数据库记录。"
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File deleted, but the database entry could not be removed."
 msgstr "文件已删除，但无法删除数据库记录。"
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to restore quarantined file ({status})."
 msgstr "恢复已隔离的文件失败（{status}）。"
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to delete quarantined file ({status})."
 msgstr "删除已隔离的文件失败（{status}）。"
 
-#: desktop/src/pages/Quarantine.tsx:188
+#: desktop/src/pages/Quarantine.tsx:267
 msgid "Failed to restore quarantined file: {error}"
 msgstr "恢复已隔离的文件失败：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:189
+#: desktop/src/pages/Quarantine.tsx:268
 msgid "Failed to delete quarantined file: {error}"
 msgstr "删除已隔离的文件失败：{error}"
 
-#: desktop/src/pages/Quarantine.tsx:200
+#: desktop/src/pages/Quarantine.tsx:279
 msgid "Secure storage for isolated threats."
 msgstr "安全存放已隔离的威胁。"
 
-#: desktop/src/pages/Quarantine.tsx:205
+#: desktop/src/pages/Quarantine.tsx:284
 msgid "Quarantine Storage"
 msgstr "隔离区存储"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Total Size"
 msgstr "总大小"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Calculating…"
 msgstr "正在计算…"
 
-#: desktop/src/pages/Quarantine.tsx:208
+#: desktop/src/pages/Quarantine.tsx:287
 msgid "Items"
 msgstr "项目"
 
-#: desktop/src/pages/Quarantine.tsx:209
+#: desktop/src/pages/Quarantine.tsx:288
 msgid "{filtered} of {total} item"
 msgid_plural "{filtered} of {total} items"
 msgstr[0] "{filtered} 项，共 {total} 项"
 
-#: desktop/src/pages/Quarantine.tsx:210
+#: desktop/src/pages/Quarantine.tsx:289
 msgid "{count} item"
 msgid_plural "{count} items"
 msgstr[0] "{count} 项"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Quarantined Files"
 msgstr "已隔离的文件"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Detected threats isolated from your system."
 msgstr "检测到的威胁已与您的系统隔离。"
 
-#: desktop/src/pages/Quarantine.tsx:218
+#: desktop/src/pages/Quarantine.tsx:297
 msgid "Clear Old Items"
 msgstr "清理旧项目"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path"
 msgstr "按威胁名称或路径搜索"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path…"
 msgstr "按威胁名称或路径搜索…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "Loading quarantine entries…"
 msgstr "正在加载隔离区记录…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid ""
 "No Quarantined Files. Detected threats will be isolated here for review."
 msgstr "暂无已隔离的文件。检测到的威胁将在此处隔离，供您检查。"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "No matching entries. Try a different search term."
 msgstr "没有匹配的记录。请尝试其他搜索词。"
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:235
-#: desktop/src/pages/Quarantine.tsx:239
+#: desktop/src/pages/Quarantine.tsx:301
+msgid "No entries on this page."
+msgstr "此页没有条目。"
+
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:314
+#: desktop/src/pages/Quarantine.tsx:318
 msgid "Unknown Threat"
 msgstr "未知威胁"
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:226
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
 #: desktop/src/pages/Results.tsx:196
 msgid "Quarantined"
 msgstr "已隔离"
 
-#: desktop/src/pages/Quarantine.tsx:228
+#: desktop/src/pages/Quarantine.tsx:307
 msgid "Restore"
 msgstr "还原"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Previous"
+msgstr "上一页"
+
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Next"
+msgstr "下一页"
+
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Restore Quarantined File?"
 msgstr "还原已隔离的文件？"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Permanently Delete File?"
 msgstr "永久删除文件？"
 
 #. Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "This file was detected as '{threat}'. It will be restored to {path}."
 msgstr "此文件被检测为“{threat}”。它将被还原至 {path}。"
 
 #. Translators: Preserve the {path} and {threat} placeholders; they are runtime file-path and threat values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:236
+#: desktop/src/pages/Quarantine.tsx:315
 msgid ""
 "The quarantined file from {path} ('{threat}') will be permanently deleted. "
 "This action cannot be undone."
 msgstr "来自 {path} 的已隔离文件（“{threat}”）将被永久删除。此操作无法撤销。"
 
-#: desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/Quarantine.tsx:319
 msgid "Restore Anyway"
 msgstr "仍然还原"
 
@@ -4739,7 +4750,7 @@ msgid_plural "{count} files scanned"
 msgstr[0] "已扫描 {count} 个文件"
 
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:160
+#: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
 msgstr[0] "{count} 个威胁"
@@ -5343,234 +5354,234 @@ msgstr[0] "这将永久删除 {count} 个日志文件，总大小为 {size}。�
 msgid "Delete Logs"
 msgstr "删除日志"
 
-#: desktop/src/pages/Statistics.tsx:119
+#: desktop/src/pages/Statistics.tsx:120
 msgid "No scans recorded"
 msgstr "暂无扫描记录"
 
-#: desktop/src/pages/Statistics.tsx:122
+#: desktop/src/pages/Statistics.tsx:123
 msgid "less than an hour ago"
 msgstr "不到一小时前"
 
-#: desktop/src/pages/Statistics.tsx:125
+#: desktop/src/pages/Statistics.tsx:126
 msgid "{count} hour ago"
 msgid_plural "{count} hours ago"
 msgstr[0] "{count} 小时前"
 
-#: desktop/src/pages/Statistics.tsx:129
+#: desktop/src/pages/Statistics.tsx:130
 msgid "{count} day ago"
 msgid_plural "{count} days ago"
 msgstr[0] "{count} 天前"
 
-#: desktop/src/pages/Statistics.tsx:132
+#: desktop/src/pages/Statistics.tsx:133
 msgid "{count} week ago"
 msgid_plural "{count} weeks ago"
 msgstr[0] "{count} 周前"
 
-#: desktop/src/pages/Statistics.tsx:136
+#: desktop/src/pages/Statistics.tsx:137
 msgid "Protected"
 msgstr "受保护"
 
-#: desktop/src/pages/Statistics.tsx:137
+#: desktop/src/pages/Statistics.tsx:138
 msgid "At Risk"
 msgstr "存在风险"
 
-#: desktop/src/pages/Statistics.tsx:138
+#: desktop/src/pages/Statistics.tsx:139
 msgid "Unprotected"
 msgstr "未受保护"
 
-#: desktop/src/pages/Statistics.tsx:139
+#: desktop/src/pages/Statistics.tsx:140
 msgid "No Data"
 msgstr "暂无数据"
 
-#: desktop/src/pages/Statistics.tsx:145
+#: desktop/src/pages/Statistics.tsx:146
 msgid "No scans performed yet"
 msgstr "尚未执行任何扫描"
 
-#: desktop/src/pages/Statistics.tsx:146
+#: desktop/src/pages/Statistics.tsx:147
 msgid "Last scan was over 30 days ago"
 msgstr "距上次扫描已超过 30 天"
 
-#: desktop/src/pages/Statistics.tsx:147
+#: desktop/src/pages/Statistics.tsx:148
 msgid "Last scan was over a week ago"
 msgstr "距上次扫描已超过一周"
 
-#: desktop/src/pages/Statistics.tsx:148
+#: desktop/src/pages/Statistics.tsx:149
 msgid "Virus definitions are over 7 days old"
 msgstr "病毒特征库已超过 7 天未更新"
 
-#: desktop/src/pages/Statistics.tsx:149
+#: desktop/src/pages/Statistics.tsx:150
 msgid "Virus definitions are over 1 day old"
 msgstr "病毒特征库已超过 1 天未更新"
 
-#: desktop/src/pages/Statistics.tsx:150
+#: desktop/src/pages/Statistics.tsx:151
 msgid "System is protected"
 msgstr "系统已受到保护"
 
-#: desktop/src/pages/Statistics.tsx:155
+#: desktop/src/pages/Statistics.tsx:156
 msgid "No scan activity in this timeframe."
 msgstr "此时间段内没有扫描活动。"
 
-#: desktop/src/pages/Statistics.tsx:157
+#: desktop/src/pages/Statistics.tsx:158
 msgid "Scan activity trend"
 msgstr "扫描活动趋势"
 
-#: desktop/src/pages/Statistics.tsx:159
+#: desktop/src/pages/Statistics.tsx:160
 msgid "{count} scan"
 msgid_plural "{count} scans"
 msgstr[0] "{count} 次扫描"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Scans"
 msgstr "扫描次数"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Threats"
 msgstr "威胁数"
 
-#: desktop/src/pages/Statistics.tsx:185
+#: desktop/src/pages/Statistics.tsx:187
 msgid "ClamUI returned invalid statistics data."
 msgstr "ClamUI 返回了无效的统计数据。"
 
-#: desktop/src/pages/Statistics.tsx:190
+#: desktop/src/pages/Statistics.tsx:192
 msgid "Failed to load statistics: {error}"
 msgstr "加载统计数据失败：{error}"
 
-#: desktop/src/pages/Statistics.tsx:208
+#: desktop/src/pages/Statistics.tsx:215
 msgid "Statistics updates are unavailable: {error}"
 msgstr "无法更新统计数据：{error}"
 
-#: desktop/src/pages/Statistics.tsx:212
+#: desktop/src/pages/Statistics.tsx:222
 msgid "Checking protection status"
 msgstr "正在检查防护状态"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Total Scans"
 msgstr "扫描总次数"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Number of scans performed"
 msgstr "已执行的扫描次数"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Files Scanned"
 msgstr "已扫描文件数"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Total files checked"
 msgstr "已检查的文件总数"
 
-#: desktop/src/pages/Statistics.tsx:216
+#: desktop/src/pages/Statistics.tsx:226
 msgid "Malware and suspicious files found"
 msgstr "发现的恶意软件和可疑文件"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Clean Scans"
 msgstr "无威胁扫描"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Scans with no threats found"
 msgstr "未发现威胁的扫描"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Average Scan Duration"
 msgstr "平均扫描时长"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Mean time per scan"
 msgstr "每次扫描的平均耗时"
 
-#: desktop/src/pages/Statistics.tsx:223
+#: desktop/src/pages/Statistics.tsx:233
 msgid "Scan history and current protection posture."
 msgstr "扫描历史记录和当前防护状况。"
 
-#: desktop/src/pages/Statistics.tsx:226
+#: desktop/src/pages/Statistics.tsx:236
 msgid "Unable to load statistics"
 msgstr "无法加载统计信息"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Protection Status"
 msgstr "防护状态"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Current system security posture"
 msgstr "当前系统安全状况"
 
-#: desktop/src/pages/Statistics.tsx:233
+#: desktop/src/pages/Statistics.tsx:243
 msgid "System Status"
 msgstr "系统状态"
 
-#: desktop/src/pages/Statistics.tsx:234
+#: desktop/src/pages/Statistics.tsx:244
 msgid "Last Scan"
 msgstr "上次扫描"
 
-#: desktop/src/pages/Statistics.tsx:238
+#: desktop/src/pages/Statistics.tsx:248
 msgid "Timeframe"
 msgstr "时间范围"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Statistics timeframe"
 msgstr "统计时间范围"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Day"
 msgstr "日"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Week"
 msgstr "周"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Month"
 msgstr "月"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "All Time"
 msgstr "全部时间"
 
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Scan Statistics"
 msgstr "扫描统计"
 
 #. Translators: Preserve the {range} placeholder; it contains a localized start–end date range.
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Statistics for: {range}"
 msgstr "统计时段：{range}"
 
-#: desktop/src/pages/Statistics.tsx:246
+#: desktop/src/pages/Statistics.tsx:256
 msgid "Aggregated metrics for the selected timeframe"
 msgstr "所选时间范围内的汇总指标"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid "Loading statistics…"
 msgstr "正在加载统计信息…"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid ""
 "No scan history yet. Run your first scan to see statistics and protection "
 "status."
 msgstr "暂无扫描历史记录。运行首次扫描后，即可查看统计信息和防护状态。"
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan Activity"
 msgstr "扫描活动"
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan trends over the selected timeframe"
 msgstr "所选时间范围内的扫描趋势"
 
-#: desktop/src/pages/Statistics.tsx:254
+#: desktop/src/pages/Statistics.tsx:264
 msgid "Quick Actions"
 msgstr "快捷操作"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "Scan your home directory"
 msgstr "扫描您的主目录"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "View Scan Logs"
 msgstr "查看扫描日志"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "See detailed scan history"
 msgstr "查看详细的扫描历史记录"
 

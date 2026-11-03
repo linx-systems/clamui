@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { navigate, notify, onEvent, request } from "../api";
 import { Icon } from "../Icon";
 import { _, ngettext } from "../i18n";
+import { useActivityRefresh } from "./useActivityRefresh";
 type TrendPoint = { label: string; scans: number; threats: number };
 type Protection = { level: string; message: string; lastScanTimestamp?: string; lastScanAgeHours?: number };
 type Statistics = {
@@ -170,11 +171,12 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
   </div>;
 }
 
-export default function Statistics() {
+export default function Statistics({ active }: { active: boolean }) {
   const [timeframe, setTimeframe] = useState<Timeframe>("week");
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const previousTimeframe = useRef(timeframe);
 
   const loadStatistics = useCallback(async (selectedTimeframe: Timeframe) => {
     setLoading(true);
@@ -193,21 +195,29 @@ export default function Statistics() {
     }
   }, []);
 
+  const loadSelectedStatistics = useCallback(() => loadStatistics(timeframe), [loadStatistics, timeframe]);
+  const refreshStatistics = useActivityRefresh(active, loadSelectedStatistics);
+
   useEffect(() => {
-    void loadStatistics(timeframe);
-  }, [loadStatistics, timeframe]);
+    if (previousTimeframe.current === timeframe) return;
+    previousTimeframe.current = timeframe;
+    void refreshStatistics();
+  }, [refreshStatistics, timeframe]);
 
   useEffect(() => {
     let dispose: (() => void) | undefined;
-    let active = true;
+    let listening = true;
     void onEvent((event) => {
-      if (event.event === "scan-complete") void loadStatistics(timeframe);
+      if (event.event === "scan-complete") void refreshStatistics(false);
     }).then((unlisten) => {
-      if (active) dispose = unlisten;
+      if (listening) dispose = unlisten;
       else unlisten();
     }).catch((listenError: unknown) => notify(_("Statistics updates are unavailable: {error}", { error: readableError(listenError) }), "warning"));
-    return () => { active = false; dispose?.(); };
-  }, [loadStatistics, timeframe]);
+    return () => {
+      listening = false;
+      dispose?.();
+    };
+  }, [refreshStatistics]);
 
   const protection = statistics?.protection ?? { level: "unknown", message: _("Checking protection status") };
   const cards = statistics ? [
@@ -221,7 +231,7 @@ export default function Statistics() {
   return <main className="page statistics-page">
     <header className="page-header">
       <div><h1>{_("Statistics")}</h1><p>{_("Scan history and current protection posture.")}</p></div>
-      <button className="button" type="button" onClick={() => void loadStatistics(timeframe)} disabled={loading}><Icon name="refresh" />{_("Refresh")}</button>
+      <button className="button" type="button" onClick={() => void refreshStatistics()} disabled={loading}><Icon name="refresh" />{_("Refresh")}</button>
     </header>
     {error && <p className="error-banner" role="alert">{_("Unable to load statistics")}: {error}</p>}
     <section aria-labelledby="protection-heading">
