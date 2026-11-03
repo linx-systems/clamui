@@ -30,6 +30,7 @@
 ### Maintenance
 
 - Enabled verbose Tauri AppImage logs to keep `linuxdeploy` failures actionable.
+- Made the escaped-writer deadline regression fixture wait for process readiness, eliminating a CI startup race without relaxing the deadline.
 
 
 
