@@ -8,7 +8,7 @@ use sha2::{Digest, Sha256};
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom};
 use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -178,6 +178,7 @@ impl FileIdentity {
 struct PinnedFile {
     file: Arc<Mutex<File>>,
     identity: FileIdentity,
+    path: PathBuf,
     filename: String,
 }
 
@@ -203,8 +204,19 @@ impl PinnedFile {
         Ok(Self {
             file: Arc::new(Mutex::new(file)),
             identity,
+            path: path.to_owned(),
             filename,
         })
+    }
+
+    fn path_unchanged(&self) -> bool {
+        OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+            .open(&self.path)
+            .ok()
+            .and_then(|file| FileIdentity::from_file(&file).ok())
+            .is_some_and(|identity| identity == self.identity)
     }
 
     fn unchanged(&self) -> bool {
@@ -213,6 +225,7 @@ impl PinnedFile {
             .ok()
             .and_then(|file| FileIdentity::from_file(&file).ok())
             .is_some_and(|identity| identity == self.identity)
+            && self.path_unchanged()
     }
 
     fn calculate_sha256(&self, cancelled: &std::sync::atomic::AtomicBool) -> AppResult<String> {
