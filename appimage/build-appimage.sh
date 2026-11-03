@@ -108,10 +108,11 @@ build_tauri_bundle() {
     # checkout and `bun run tauri` resolves the project-local CLI.
     log "Installing locked Bun dependencies"
     (cd "$PROJECT_ROOT/desktop" && bun install --frozen-lockfile)
-    # The Bun-locked Tauri CLI runs the frontend command from tauri.conf and
-    # bundles the native Tauri/WebKitGTK application. No Python app is copied.
+    # Keep linuxdeploy diagnostics visible: Tauri otherwise suppresses its
+    # stderr at the default error log level, turning packaging failures into
+    # an unactionable generic error.
     (cd "$PROJECT_ROOT/desktop" && \
-        bun run tauri build --config "$TAURI_CONFIG" --bundles appimage)
+        bun run tauri build --verbose --config "$TAURI_CONFIG" --bundles appimage)
     [ -x "$RELEASE_DIR/clamui" ] || die "Tauri did not produce target/release/clamui"
     [ -x "$RELEASE_DIR/clamui-scheduled-scan" ] || die "scheduled scan helper was not built"
     [ -x "$RELEASE_DIR/clamui-apply-preferences" ] || die "privileged helper was not built"
