@@ -16,7 +16,7 @@ cd "$PROJECT_ROOT"
 
 LINGUAS="po/LINGUAS"
 POT="po/clamui.pot"
-EXPECTED_ACTIVE_CODES=(de en es fr hu it nb pt_BR zh_CN)
+EXPECTED_ACTIVE_CODES=(de en es fr hu it nb pt_BR vi zh_CN)
 ERRORS=0
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT

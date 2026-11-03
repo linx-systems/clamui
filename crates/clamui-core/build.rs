@@ -290,6 +290,7 @@ fn language_name(code: &str) -> &'static str {
         "it" => "Italiano",
         "nb" => "Norsk bokmål",
         "pt_BR" => "Português (Brasil)",
+        "vi" => "Tiếng Việt",
         "zh_CN" => "简体中文",
         _ => panic!("unsupported catalog language in po/LINGUAS: {code}"),
     }

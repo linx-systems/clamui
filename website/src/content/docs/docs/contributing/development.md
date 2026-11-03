@@ -236,7 +236,7 @@ bun run --cwd website check
 bun run --cwd website build
 ```
 
-Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
+Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
 
 ## Update the application icon
 
