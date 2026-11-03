@@ -11,7 +11,9 @@ Set the backend in **Preferences → Scanner Settings** or `scan_backend` in `se
 | Daemon | immediate | 500 MB–1 GB for `clamd` | Frequent, scheduled, or performance-sensitive scans |
 | Clamscan | loads definitions each scan (about 3–10 seconds) | about 50 MB | Occasional scans, minimal setup, or daemon diagnosis |
 
-Auto checks `clamdscan --ping` and caches availability for 60 seconds. Daemon mode uses `--multiscan` and `--fdpass`; scans fail when the daemon is down. `clamscan` has no background service and forwards relevant `clamd.conf` limits (`MaxFileSize`, `MaxScanSize`, `MaxRecursion`, and `MaxFiles`) as CLI limits so both modes remain consistent.
+Auto checks `clamdscan --ping` and caches availability for 60 seconds. Daemon mode uses `--fdpass`; scans fail when the daemon is down. `clamscan` has no background service and forwards relevant `clamd.conf` limits (`MaxFileSize`, `MaxScanSize`, `MaxRecursion`, and `MaxFiles`) as CLI limits so both modes remain consistent.
+
+Daemon scans batch ordinary paths in a private file list. Files whose names contain carriage returns or newlines are scanned individually through open file descriptors, so these valid filenames do not abort their parent-folder scan. Exclusions still apply, and detections retain the original paths.
 
 ## Install a daemon
 
@@ -34,6 +36,8 @@ sudo systemctl enable --now clamav-daemon
 Fedora uses `/etc/clamd.d/scan.conf`; ClamUI invokes `clamdscan --config-file=/etc/clamd.d/scan.conf`. If a running Fedora daemon is unavailable, check its `LocalSocketMode` and `LocalSocketGroup`.
 
 Flatpak users install all ClamAV tools on the **host**. ClamUI invokes them through `flatpak-spawn --host` and auto-detects the host daemon.
+
+Database availability is checked on the host too, including `DatabaseDirectory` from the configured `clamd.conf` or `freshclam.conf`. Do not copy host definitions into the sandbox; read-only database detection does not require the privileged helper.
 
 ## Sockets and exit codes
 

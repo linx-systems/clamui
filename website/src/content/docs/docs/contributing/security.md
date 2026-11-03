@@ -19,6 +19,8 @@ Areas of particular interest include ClamAV command execution, path validation a
 
 ClamUI sanitizes untrusted log text, validates paths before file operations, uses an owner-only quarantine directory with integrity verification, stores VirusTotal keys in the system keyring where available, and keeps privileged host configuration behind polkit. These controls reduce risk; they do not replace review of untrusted files, current ClamAV definitions, or supported system hardening.
 
+Flatpak helper operations select host tools from fixed system paths. Metadata checks follow system-provided tool symlinks; executable targets must be regular files, root-owned, owner-executable, and not group- or other-writable. The canonical privileged-helper path has separate, unchanged checks.
+
 ## Disclosure and safe use
 
 The project investigates, develops, tests, releases, and coordinates disclosure of validated reports. Do not disclose details before a fix and coordinated announcement. Keep ClamUI and ClamAV definitions current, inspect unexpected detections before restoring them, and verify release artifacts before installation.
