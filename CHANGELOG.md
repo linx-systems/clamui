@@ -7,7 +7,7 @@
 - Added a Vietnamese (`vi`) translation.
 
 ### Changed
-- Updated the desktop TypeScript compiler to 7.0.2 and declared Vite client types so stylesheet side-effect imports remain type-checkable.
+- Updated the desktop TypeScript compiler to 7.0.2 and added the locked, maintained Babel parser only for gettext extraction because TypeScript 7 does not provide its former compiler API; declared Vite client types so stylesheet side-effect imports remain type-checkable.
 
 - Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
 - Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
