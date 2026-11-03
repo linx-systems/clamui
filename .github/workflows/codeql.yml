@@ -47,7 +47,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: rust,javascript-typescript
-          build-mode: manual
+          build-mode: none
 
       - name: Install frontend dependencies
         working-directory: desktop
