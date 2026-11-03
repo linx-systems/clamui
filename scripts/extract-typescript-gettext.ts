@@ -150,7 +150,7 @@ export function extractTypeScriptGettext(source: string, sourceName = "TypeScrip
   try {
     parsed = parse(source, {
       sourceType: "module",
-      plugins: ["typescript", "jsx"],
+      plugins: sourceName.endsWith(".tsx") ? ["typescript", "jsx"] : ["typescript"],
       attachComment: false,
     });
   } catch (error) {

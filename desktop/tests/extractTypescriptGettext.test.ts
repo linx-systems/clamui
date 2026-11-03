@@ -32,6 +32,15 @@ const component = <section>
     ]);
   });
 
+  test("uses TypeScript grammar for angle assertions in .ts files", () => {
+    const source = `const value = <number>1;
+const label = _("Label");`;
+
+    expect(extractTypeScriptGettext(source, "fixture.ts")).toEqual([
+      { name: "_", messages: ["Label"], line: 2, comments: [] },
+    ]);
+  });
+
   test("reports source names for invalid TypeScript instead of silently omitting messages", () => {
     expect(() => extractTypeScriptGettext("const = ;", "broken.tsx")).toThrow("Unable to parse broken.tsx");
   });
