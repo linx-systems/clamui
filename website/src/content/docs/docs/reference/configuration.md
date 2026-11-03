@@ -28,7 +28,7 @@ The settings file is an object. ClamUI merges missing defaults, preserves unknow
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `language` | `"auto"` | Automatic system locale, or one of `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, or `zh_CN`; unsupported saved or system locales use English |
+| `language` | `"auto"` | Automatic system locale, or one of `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, or `zh_CN`; unsupported saved or system locales use English |
 | `notifications_enabled` | `true` | Global application notifications |
 | `minimize_to_tray` / `start_minimized` | `false` | Optional tray behavior |
 | `close_behavior` | `null` | `unset`, `minimize`, `quit`, or `ask` |

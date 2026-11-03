@@ -23,7 +23,7 @@ For every raw key, default, location, and host boundary see [Configuration](/doc
 
 ## Language
 
-Open **Preferences → Behavior → Language** to use **Automatic (System)** or choose `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, or `zh_CN`. Restart ClamUI after changing the selection so the core, CLI, tray, and desktop load the same catalog. See [translation](/docs/contributing/translating/) for regional locale normalization and plural-form conventions.
+Open **Preferences → Behavior → Language** to use **Automatic (System)** or choose `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, or `zh_CN`. Restart ClamUI after changing the selection so the core, CLI, tray, and desktop load the same catalog. See [translation](/docs/contributing/translating/) for regional locale normalization and plural-form conventions.
 
 ## Global scan exclusions
 

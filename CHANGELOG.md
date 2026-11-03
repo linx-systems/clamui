@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a Vietnamese (`vi`) translation.
+
 ## [0.5.1] - 2026-11-01
 ### Fixed
 
