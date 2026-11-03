@@ -25,6 +25,22 @@ dpkg -l libwebkit2gtk-4.1-0 libgtk-3-0
 
 For a source build, install the development packages in [Development](/docs/contributing/development/#prerequisites). A build or launch on a newer host does not prove compatibility with the Ubuntu 22.04 baseline; use the project baseline build for release compatibility evidence.
 
+### Wayland `Error 71` in Flatpak
+
+WebKitGTK's DMA-BUF renderer path can fail during startup on some Wayland systems, especially with NVIDIA graphics, and report `Error 71`. The current Flatpak package configuration disables that WebKitGTK renderer path by default to avoid [issue #282](https://github.com/linx-systems/clamui/issues/282); it does not force X11 or set `WEBKIT_DISABLE_COMPOSITING_MODE`.
+
+For an older Flatpak package, disable the path for one launch:
+
+```bash
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 io.github.linx_systems.ClamUI
+```
+
+The workaround trades the potentially faster DMA-BUF path for compatibility and may reduce hardware acceleration, depending on the WebKitGTK runtime. To re-enable it for one launch on systems where it is not needed, use the following command; this can restore the startup failure:
+
+```bash
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=0 io.github.linx_systems.ClamUI
+```
+
 ## Daemon backend unavailable
 
 The daemon backend needs `clamd` and `clamdscan` running. Check its service, then choose **Auto** or **Clamscan** if you do not need a persistent daemon:

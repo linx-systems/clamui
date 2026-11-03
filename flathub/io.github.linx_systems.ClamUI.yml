@@ -19,6 +19,8 @@ finish-args:
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  # Work around upstream WebKitGTK Wayland dmabuf protocol errors (#282).
+  - --env=WEBKIT_DISABLE_DMABUF_RENDERER=1
   - --share=network
 
 
