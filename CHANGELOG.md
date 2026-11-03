@@ -13,7 +13,7 @@
 - Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
 - Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
 - Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
-- Updated `rfd` from 0.15.4 to 0.17.2 for the native file, folder, and export dialogs. The lockfile removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
+- Updated `rfd` from 0.15.4 to 0.17.2 and selected its GTK 3 dialog backend instead of its default portal backend; native file and folder pickers continue to work without changing Flatpak permissions.
 
 ### Fixed
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
