@@ -48,7 +48,9 @@ const O_NOFOLLOW: i32 = 0o400000;
 const O_DIRECTORY: i32 = 0o200000;
 const O_NONBLOCK: i32 = 0o4000;
 static UNIQUE_COUNTER: AtomicU64 = AtomicU64::new(0);
-// A first-time Flatpak installation has no host helper yet. This fixed,
+const GETENT_CANDIDATES: [&str; 2] = ["/usr/bin/getent", "/bin/getent"];
+static GPG_CANDIDATES: [&str; 2] = ["/usr/bin/gpg2", "/usr/bin/gpg"];
+const HOST_STAT: &str = "/usr/bin/stat";
 // argument-only POSIX shell transaction runs under pkexec using trusted host
 // tools. It never evaluates user data and copies through GNU dd with
 // O_NOFOLLOW before apt receives a root-owned package path.
@@ -253,13 +255,119 @@ fn current_uid() -> u32 {
         .unwrap_or(u32::MAX)
 }
 
-fn passwd_home(uid: u32) -> AppResult<PathBuf> {
-    let getent = ["/usr/bin/getent", "/bin/getent"]
-        .into_iter()
+fn host_metadata_is_trusted(metadata: &[u8], executable: bool) -> bool {
+    let Ok(metadata) = std::str::from_utf8(metadata) else {
+        return false;
+    };
+    let Some(line) = metadata.strip_suffix('\n') else {
+        return false;
+    };
+    let Some((mode, uid)) = line.split_once(':') else {
+        return false;
+    };
+    if mode.is_empty()
+        || uid.is_empty()
+        || line.contains('\n')
+        || line.contains('\r')
+        || uid.contains(':')
+        || !mode.bytes().all(|byte| byte.is_ascii_hexdigit())
+        || !uid.bytes().all(|byte| byte.is_ascii_digit())
+    {
+        return false;
+    }
+    let (Ok(mode), Ok(uid)) = (u32::from_str_radix(mode, 16), uid.parse::<u32>()) else {
+        return false;
+    };
+    mode & 0o170000 == 0o100000
+        && uid == 0
+        && mode & 0o022 == 0
+        && (!executable || mode & 0o100 != 0)
+}
+
+// Host tools may be root-provided symlinks, so inspect the resolved executable.
+// Its fixed format makes any extra or malformed host output fail closed.
+fn trusted_host_program(path: &str, executable: bool, flatpak: bool) -> bool {
+    host_command_in_environment(
+        HOST_STAT,
+        &["--dereference", "--format=%f:%u", "--", path],
+        flatpak,
+    )
+    .is_ok_and(|output| {
+        output.status.success() && host_metadata_is_trusted(&output.stdout, executable)
+    })
+}
+
+fn trusted_tool_in_environment<'a>(candidates: &'a [&'a str], flatpak: bool) -> AppResult<&'a str> {
+    candidates
+        .iter()
+        .copied()
+        .find(|path| {
+            if flatpak {
+                trusted_host_program(path, true, flatpak)
+            } else {
+                root_owned_regular(Path::new(path), true)
+            }
+        })
+        .ok_or_else(|| {
+            format!(
+                "required trusted tool is unavailable: {}",
+                candidates.join(" or ")
+            )
+        })
+}
+
+fn canonical_local_tool<'a>(candidates: &'a [&'a str]) -> AppResult<&'a str> {
+    candidates
+        .iter()
+        .copied()
         .find(|path| root_owned_regular(Path::new(path), true))
-        .ok_or_else(|| "trusted getent is unavailable for passwd lookup".to_owned())?;
-    let output = Command::new(getent)
-        .args(["passwd", &uid.to_string()])
+        .ok_or_else(|| {
+            format!(
+                "required trusted tool is unavailable: {}",
+                candidates.join(" or ")
+            )
+        })
+}
+
+fn command_in_environment(program: &str, flatpak: bool) -> Command {
+    if flatpak {
+        let mut command = Command::new("flatpak-spawn");
+        command.arg("--host").arg(program);
+        command
+    } else {
+        Command::new(program)
+    }
+}
+
+fn bounded_output_in_environment(
+    program: &str,
+    args: &[&str],
+    max: usize,
+    deadline: Duration,
+    flatpak: bool,
+) -> AppResult<(std::process::ExitStatus, Vec<u8>, Vec<u8>)> {
+    let mut command = command_in_environment(program, flatpak);
+    command.args(args);
+    bounded_child_output(command, max, deadline)
+}
+
+fn host_bounded_output_in_environment(
+    program: &str,
+    args: &[&str],
+    max: usize,
+    deadline: Duration,
+    flatpak: bool,
+) -> AppResult<(std::process::ExitStatus, Vec<u8>, Vec<u8>)> {
+    bounded_output_in_environment(program, args, max, deadline, flatpak)
+}
+
+fn passwd_home(uid: u32) -> AppResult<PathBuf> {
+    let flatpak = flatpak();
+    let getent = trusted_tool_in_environment(&GETENT_CANDIDATES, flatpak)
+        .map_err(|_| "trusted getent is unavailable for passwd lookup".to_owned())?;
+    let uid = uid.to_string();
+    let output = command_in_environment(getent, flatpak)
+        .args(["passwd", &uid])
         .output()
         .map_err(|error| format!("cannot query passwd entry for uid {uid}: {error}"))?;
     if !output.status.success() {
@@ -267,8 +375,7 @@ fn passwd_home(uid: u32) -> AppResult<PathBuf> {
     }
     let entry = String::from_utf8(output.stdout)
         .map_err(|_| format!("passwd home for uid {uid} is not UTF-8"))?;
-    let fields: Vec<_> = entry.trim_end().split(':').collect();
-    let home = fields.get(5).copied().unwrap_or_default();
+    let home = entry.trim_end().split(':').nth(5).unwrap_or_default();
     if home.is_empty() || !Path::new(home).is_absolute() {
         return Err(format!("passwd home for uid {uid} is not an absolute path"));
     }
@@ -454,6 +561,121 @@ pub fn trusted_helper_path() -> AppResult<PathBuf> {
 mod helper_trust_tests {
     use super::*;
     use tempfile::TempDir;
+    fn host_stat_metadata(mode: u32, uid: u32) -> String {
+        format!("{mode:x}:{uid}\n")
+    }
+
+    #[test]
+    fn host_metadata_accepts_trusted_regular_executable() {
+        assert!(host_metadata_is_trusted(
+            host_stat_metadata(0o100755, 0).as_bytes(),
+            true
+        ));
+    }
+
+    #[test]
+    fn host_metadata_rejects_symlink_and_nonregular_entries() {
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o120755, 0).as_bytes(),
+            true
+        ));
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o040755, 0).as_bytes(),
+            true
+        ));
+    }
+
+    #[test]
+    fn host_metadata_rejects_wrong_owner_writable_and_nonexecutable_entries() {
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o100755, 1).as_bytes(),
+            true
+        ));
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o100775, 0).as_bytes(),
+            true
+        ));
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o100757, 0).as_bytes(),
+            true
+        ));
+        assert!(!host_metadata_is_trusted(
+            host_stat_metadata(0o100644, 0).as_bytes(),
+            true
+        ));
+    }
+
+    #[test]
+    fn host_metadata_rejects_malformed_and_ambiguous_output() {
+        assert!(!host_metadata_is_trusted(b"81ed:0", true));
+        assert!(!host_metadata_is_trusted(b"not-a-mode:0\n", true));
+        assert!(!host_metadata_is_trusted(b"81ed:0\n81ed:0\n", true));
+    }
+
+    #[test]
+    fn trusted_host_program_dereferences_host_checksum_symlink_for_execution() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let host_tool = root.path().join("host-sha256sum");
+        let candidate = root.path().join("sha256sum");
+        let input = root.path().join("input");
+        std::os::unix::fs::symlink("/usr/bin/sha256sum", &host_tool)
+            .expect("link host checksum tool");
+        std::os::unix::fs::symlink(&host_tool, &candidate).expect("link checksum candidate");
+        std::fs::write(&input, b"abc").expect("write checksum input");
+
+        let flatpak = flatpak();
+        let candidate = candidate.to_str().expect("checksum candidate is UTF-8");
+        let candidates = [candidate];
+        assert!(trusted_host_program(candidate, true, flatpak));
+        let selected = if flatpak {
+            let selected = trusted_tool_in_environment(&candidates, flatpak)
+                .expect("select checksum candidate");
+            assert_eq!(selected, candidate);
+            selected
+        } else {
+            assert!(trusted_tool_in_environment(&candidates, flatpak).is_err());
+            candidate
+        };
+
+        let output = command_in_environment(selected, flatpak)
+            .arg(&input)
+            .output()
+            .expect("run selected checksum candidate");
+        assert!(output.status.success());
+        let output = std::str::from_utf8(&output.stdout).expect("checksum output is UTF-8");
+        let digest = output
+            .split_whitespace()
+            .next()
+            .expect("checksum output has a digest");
+        assert_eq!(
+            digest,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
+
+    #[test]
+    fn trusted_host_program_rejects_broken_symlink_chains() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let dangling = root.path().join("dangling");
+        let cycle_a = root.path().join("cycle-a");
+        let cycle_b = root.path().join("cycle-b");
+        std::os::unix::fs::symlink(root.path().join("missing"), &dangling)
+            .expect("create dangling link");
+        std::os::unix::fs::symlink(&cycle_b, &cycle_a).expect("create first cycle link");
+        std::os::unix::fs::symlink(&cycle_a, &cycle_b).expect("create second cycle link");
+
+        let flatpak = flatpak();
+        assert!(!trusted_host_program(
+            dangling.to_str().expect("dangling path is UTF-8"),
+            true,
+            flatpak
+        ));
+        assert!(!trusted_host_program(
+            cycle_a.to_str().expect("cyclic path is UTF-8"),
+            true,
+            flatpak
+        ));
+    }
 
     #[test]
     fn root_owned_regular_trust_distinguishes_missing_path() {
@@ -515,6 +737,68 @@ mod helper_trust_tests {
             Err(RootOwnedRegularError::Untrusted)
         );
         assert!(!root_owned_regular(&helper, true));
+    }
+
+    const EMPTY_MD5: &str = "d41d8cd98f00b204e9800998ecf8427e";
+    const EMPTY_SHA1: &str = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+
+    fn signed_member_fixture() -> BTreeMap<String, Vec<u8>> {
+        BTreeMap::from([
+            ("_gpgbuilder".to_owned(), b"signature".to_vec()),
+            ("control.tar.zst".to_owned(), Vec::new()),
+            ("data.tar.zst".to_owned(), Vec::new()),
+            ("debian-binary".to_owned(), Vec::new()),
+        ])
+    }
+
+    fn signed_member_line(name: &str) -> String {
+        format!("{EMPTY_MD5} {EMPTY_SHA1} 0 {name}\n")
+    }
+
+    fn valid_signed_member_signature() -> String {
+        format!(
+            "Version: 4\nRole: builder\nFiles:\n{}{}{}",
+            signed_member_line("debian-binary"),
+            signed_member_line("control.tar.zst"),
+            signed_member_line("data.tar.zst"),
+        )
+    }
+
+    #[test]
+    fn signed_members_accept_matching_md5_and_sha1_digests() {
+        signed_members_match(&valid_signed_member_signature(), &signed_member_fixture())
+            .expect("known MD5 and SHA-1 digests must validate every signed member");
+    }
+
+    #[test]
+    fn signed_members_reject_modified_md5_sha1_and_size() {
+        let members = signed_member_fixture();
+        let signature = valid_signed_member_signature();
+
+        let invalid_md5 = signature.replacen(EMPTY_MD5, "041d8cd98f00b204e9800998ecf8427e", 1);
+        assert!(signed_members_match(&invalid_md5, &members).is_err());
+
+        let invalid_sha1 =
+            signature.replacen(EMPTY_SHA1, "0a39a3ee5e6b4b0d3255bfef95601890afd80709", 1);
+        assert!(signed_members_match(&invalid_sha1, &members).is_err());
+
+        let invalid_size = signature.replacen(" 0 data.tar.zst\n", " 1 data.tar.zst\n", 1);
+        assert!(signed_members_match(&invalid_size, &members).is_err());
+    }
+
+    #[test]
+    fn signed_members_reject_modified_member_and_incomplete_coverage() {
+        let signature = valid_signed_member_signature();
+        let mut modified_members = signed_member_fixture();
+        modified_members.insert("data.tar.zst".to_owned(), b"changed".to_vec());
+        assert!(signed_members_match(&signature, &modified_members).is_err());
+
+        let incomplete = signature.replace(&signed_member_line("data.tar.zst"), "");
+        assert!(signed_members_match(&incomplete, &signed_member_fixture()).is_err());
+
+        let mut extra_member = signed_member_fixture();
+        extra_member.insert("unexpected".to_owned(), Vec::new());
+        assert!(signed_members_match(&signature, &extra_member).is_err());
     }
 }
 
@@ -707,13 +991,15 @@ fn helper_command(helper: &Path) -> Command {
 }
 
 fn host_command(program: &str, args: &[&str]) -> AppResult<std::process::Output> {
-    let mut command = if flatpak() {
-        let mut command = Command::new("flatpak-spawn");
-        command.arg("--host").arg(program);
-        command
-    } else {
-        Command::new(program)
-    };
+    host_command_in_environment(program, args, flatpak())
+}
+
+fn host_command_in_environment(
+    program: &str,
+    args: &[&str],
+    flatpak: bool,
+) -> AppResult<std::process::Output> {
+    let mut command = command_in_environment(program, flatpak);
     command.args(args);
     command
         .output()
@@ -726,15 +1012,7 @@ fn host_bounded_output(
     max: usize,
     deadline: Duration,
 ) -> AppResult<(std::process::ExitStatus, Vec<u8>, Vec<u8>)> {
-    let mut command = if flatpak() {
-        let mut command = Command::new("flatpak-spawn");
-        command.arg("--host").arg(program);
-        command
-    } else {
-        Command::new(program)
-    };
-    command.args(args);
-    bounded_child_output(command, max, deadline)
+    host_bounded_output_in_environment(program, args, max, deadline, flatpak())
 }
 
 fn sanitized_helper_stderr(stderr: &[u8]) -> String {
@@ -1219,7 +1497,7 @@ fn atomic_replace(mut source: File, destination: &Path) -> AppResult<()> {
             .sync_all()
             .map_err(|error| format!("cannot sync replacement: {error}"))?;
         if let Some((uid, gid, mode)) = metadata {
-            let chown = canonical_tool(&["/usr/bin/chown", "/bin/chown"])?;
+            let chown = canonical_local_tool(&["/usr/bin/chown", "/bin/chown"])?;
             let ownership = format!("{uid}:{gid}");
             let output = Command::new(chown)
                 .arg(ownership)
@@ -1410,21 +1688,10 @@ fn hex_digest(value: &str) -> bool {
             .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
 }
 
-fn canonical_tool(names: &[&str]) -> AppResult<String> {
-    for path in names {
-        if root_owned_regular(Path::new(path), true) {
-            return Ok((*path).to_owned());
-        }
-    }
-    Err(format!(
-        "required trusted tool is unavailable: {}",
-        names.join(" or ")
-    ))
-}
-
 fn sha256_file(path: &Path) -> AppResult<String> {
-    let tool = canonical_tool(&["/usr/bin/sha256sum", "/bin/sha256sum"])?;
-    let output = Command::new(tool)
+    let flatpak = flatpak();
+    let tool = trusted_tool_in_environment(&["/usr/bin/sha256sum", "/bin/sha256sum"], flatpak)?;
+    let output = command_in_environment(tool, flatpak)
         .arg(path)
         .output()
         .map_err(|error| format!("cannot hash helper package: {error}"))?;
@@ -1645,8 +1912,8 @@ fn read_deb_members(path: &Path) -> AppResult<BTreeMap<String, Vec<u8>>> {
     Ok(members)
 }
 
-fn hash_bytes(program: &str, bytes: &[u8]) -> AppResult<String> {
-    let mut child = Command::new(program)
+fn hash_bytes(program: &str, bytes: &[u8], flatpak: bool) -> AppResult<String> {
+    let mut child = command_in_environment(program, flatpak)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -1687,8 +1954,9 @@ fn signed_members_match(signature: &str, members: &BTreeMap<String, Vec<u8>>) ->
         .position(|line| *line == "Files:")
         .ok_or_else(|| "helper signature lacks signed members".to_owned())?
         + 1;
-    let md5 = canonical_tool(&["/usr/bin/md5sum", "/bin/md5sum"])?;
-    let sha1 = canonical_tool(&["/usr/bin/sha1sum", "/bin/sha1sum"])?;
+    let flatpak = flatpak();
+    let md5 = trusted_tool_in_environment(&["/usr/bin/md5sum", "/bin/md5sum"], flatpak)?;
+    let sha1 = trusted_tool_in_environment(&["/usr/bin/sha1sum", "/bin/sha1sum"], flatpak)?;
     let mut signed = BTreeSet::new();
     for line in &lines[start..] {
         let fields: Vec<_> = line.split_whitespace().collect();
@@ -1699,8 +1967,8 @@ fn signed_members_match(signature: &str, members: &BTreeMap<String, Vec<u8>>) ->
             .get(fields[3])
             .ok_or_else(|| "helper signature names a missing member".to_owned())?;
         if fields[2].parse::<usize>().ok() != Some(bytes.len())
-            || hash_bytes(&md5, bytes)? != fields[0]
-            || hash_bytes(&sha1, bytes)? != fields[1]
+            || hash_bytes(md5, bytes, flatpak)? != fields[0]
+            || hash_bytes(sha1, bytes, flatpak)? != fields[1]
         {
             return Err("helper signature does not match archive members".to_owned());
         }
@@ -1743,6 +2011,8 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
     let signature = members
         .get("_gpgbuilder")
         .ok_or_else(|| "helper package has no builder signature".to_owned())?;
+    let flatpak = flatpak();
+    let gpg = host_gpg(flatpak)?;
     let temporary_root = path
         .parent()
         .ok_or_else(|| "helper package has no parent directory".to_owned())?;
@@ -1777,8 +2047,8 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
         let home_text = home.to_string_lossy().into_owned();
         let signature_text = signature_path.to_string_lossy().into_owned();
         let key_text = key_path.to_string_lossy().into_owned();
-        let (import_status, _, _) = host_bounded_output(
-            "/usr/bin/gpg",
+        let (import_status, _, _) = host_bounded_output_in_environment(
+            gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -1789,12 +2059,13 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
             ],
             MAX_HELPER_METADATA_BYTES,
             Duration::from_secs(30),
+            flatpak,
         )?;
         if !import_status.success() {
             return Err("cannot import ClamUI signing key".to_owned());
         }
-        let (verify_status, verified_stdout, verified_stderr) = host_bounded_output(
-            "/usr/bin/gpg",
+        let (verify_status, verified_stdout, verified_stderr) = host_bounded_output_in_environment(
+            gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -1806,6 +2077,7 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
             ],
             MAX_HELPER_METADATA_BYTES,
             Duration::from_secs(30),
+            flatpak,
         )?;
         if !verify_status.success() {
             return Err("helper package signature is invalid".to_owned());
@@ -1835,23 +2107,19 @@ fn write_pinned_signing_key(path: &Path) -> AppResult<()> {
         .map_err(|error| format!("cannot sync pinned signing key: {error}"))
 }
 
-fn host_gpg() -> AppResult<&'static str> {
-    ["/usr/bin/gpg2", "/usr/bin/gpg"]
-        .into_iter()
-        .find(|program| {
-            host_command(program, &["--version"]).is_ok_and(|output| output.status.success())
-        })
-        .ok_or_else(|| "GnuPG is unavailable for helper signature verification".to_owned())
+fn host_gpg(flatpak: bool) -> AppResult<&'static str> {
+    trusted_tool_in_environment(&GPG_CANDIDATES, flatpak)
+        .map_err(|_| "GnuPG is unavailable for helper signature verification".to_owned())
 }
 
-fn verify_pinned_key_material(gpg: &str, key_path: &Path) -> AppResult<()> {
+fn verify_pinned_key_material(gpg: &str, key_path: &Path, flatpak: bool) -> AppResult<()> {
     let home = key_path
         .parent()
         .ok_or_else(|| "compiled signing key has no private keyring parent".to_owned())?
         .to_string_lossy()
         .into_owned();
     let key_text = key_path.to_string_lossy().into_owned();
-    let (status, output, _) = host_bounded_output(
+    let (status, output, _) = host_bounded_output_in_environment(
         gpg,
         &[
             "--batch",
@@ -1867,6 +2135,7 @@ fn verify_pinned_key_material(gpg: &str, key_path: &Path) -> AppResult<()> {
         ],
         MAX_HELPER_METADATA_BYTES,
         Duration::from_secs(30),
+        flatpak,
     )?;
     let decoded = String::from_utf8_lossy(&output);
     let mut primary = None;
@@ -1895,6 +2164,8 @@ fn verify_pinned_key_material(gpg: &str, key_path: &Path) -> AppResult<()> {
 }
 
 fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<()> {
+    let flatpak = flatpak();
+    let gpg = host_gpg(flatpak)?;
     let temporary_root = package
         .parent()
         .ok_or_else(|| "helper RPM has no parent directory".to_owned())?;
@@ -1902,13 +2173,12 @@ fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<
     let key_path = home.join("clamui-signing-key.asc");
     let outcome = (|| -> AppResult<()> {
         write_pinned_signing_key(&key_path)?;
-        let gpg = host_gpg()?;
-        verify_pinned_key_material(gpg, &key_path)?;
+        verify_pinned_key_material(gpg, &key_path, flatpak)?;
         let home_text = home.to_string_lossy().into_owned();
         let key_text = key_path.to_string_lossy().into_owned();
         let signature_text = signature.to_string_lossy().into_owned();
         let package_text = package.to_string_lossy().into_owned();
-        let (import_status, _, _) = host_bounded_output(
+        let (import_status, _, _) = host_bounded_output_in_environment(
             gpg,
             &[
                 "--batch",
@@ -1920,11 +2190,12 @@ fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<
             ],
             MAX_HELPER_METADATA_BYTES,
             Duration::from_secs(30),
+            flatpak,
         )?;
         if !import_status.success() {
             return Err("cannot import ClamUI signing key".to_owned());
         }
-        let (verify_status, _, verified_stderr) = host_bounded_output(
+        let (verify_status, _, verified_stderr) = host_bounded_output_in_environment(
             gpg,
             &[
                 "--batch",
@@ -1938,6 +2209,7 @@ fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<
             ],
             MAX_HELPER_METADATA_BYTES,
             Duration::from_secs(30),
+            flatpak,
         )?;
         if !verify_status.success() {
             return Err("helper RPM detached signature is invalid".to_owned());
@@ -2045,13 +2317,30 @@ pub fn run_helper(args: &[String]) -> i32 {
     }
 }
 
+fn installed_deb_version_matches(expected: &str, installed: &str) -> bool {
+    if installed == expected {
+        return true;
+    }
+    let Some(revision) = installed
+        .strip_prefix(expected)
+        .and_then(|suffix| suffix.strip_prefix('-'))
+    else {
+        return false;
+    };
+    let mut bytes = revision.bytes();
+    matches!(bytes.next(), Some(first) if first.is_ascii_digit())
+        && bytes.all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'+' | b'.' | b'~'))
+}
+
 fn installed_deb_package_identity_matches<'a>(
     mut fields: impl Iterator<Item = &'a str>,
     host_architecture: &str,
 ) -> bool {
-    let version = app_version();
+    let version = env!("CARGO_PKG_VERSION");
     fields.next() == Some("ii ")
-        && fields.next() == Some(version.as_str())
+        && fields
+            .next()
+            .is_some_and(|installed| installed_deb_version_matches(version, installed))
         && matches!(
             fields.next(),
             Some(architecture) if architecture == host_architecture || architecture == "all"
@@ -2202,8 +2491,65 @@ fn unavailable_helper_status(
     }
 }
 
+fn installed_helper_status(version: String) -> PrivilegedHelperStatus {
+    PrivilegedHelperStatus {
+        state: "installed".to_owned(),
+        package_name: HELPER_PACKAGE.to_owned(),
+        version,
+        detail: None,
+        installed: true,
+        installable: false,
+        needs_onboarding: false,
+    }
+}
+
+fn trusted_helper_status(
+    version: String,
+    flatpak_host: bool,
+    backend_installable: bool,
+    package_matches: AppResult<bool>,
+) -> PrivilegedHelperStatus {
+    match package_matches {
+        Ok(true) => installed_helper_status(version),
+        Ok(false) if flatpak_host && backend_installable => PrivilegedHelperStatus {
+            state: "installable".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: None,
+            installed: false,
+            installable: true,
+            needs_onboarding: true,
+        },
+        Ok(false) => PrivilegedHelperStatus {
+            state: "outdated".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper package version does not match this ClamUI version.".to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+        Err(_) if !flatpak_host => installed_helper_status(version),
+        Err(_) => PrivilegedHelperStatus {
+            state: "unsupported".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper was found, but its installed package version could not be verified."
+                    .to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+    }
+}
+
 pub fn status() -> PrivilegedHelperStatus {
     let version = app_version();
+    let flatpak_host = flatpak();
     let backend = helper_backend();
     match trusted_helper_path() {
         Ok(_) => {
@@ -2215,29 +2561,12 @@ pub fn status() -> PrivilegedHelperStatus {
                         installed_backend_version_matches(backend, &architecture)
                     })
                 });
-            match package_matches {
-                Ok(true) => PrivilegedHelperStatus {
-                    state: "installed".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: true, installable: false, needs_onboarding: false,
-                },
-                Ok(false) if flatpak() && backend.is_some_and(helper_backend_available) => PrivilegedHelperStatus {
-                    state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: false, installable: true, needs_onboarding: true,
-                },
-                Ok(false) => PrivilegedHelperStatus {
-                    state: "outdated".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper package version does not match this ClamUI version.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-                Err(_) => PrivilegedHelperStatus {
-                    state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper was found, but its installed package version could not be verified.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-            }
+            let backend_installable = flatpak_host
+                && package_matches.as_ref().is_ok_and(|matches| !*matches)
+                && backend.is_some_and(helper_backend_available);
+            trusted_helper_status(version, flatpak_host, backend_installable, package_matches)
         }
         Err(detail) => {
-            let flatpak_host = flatpak();
             let state = if flatpak_host {
                 CanonicalHelperState::Missing
             } else {
@@ -2981,6 +3310,40 @@ mod installed_deb_package_tests {
     }
 
     #[test]
+    fn installed_debian_package_identity_accepts_conventional_revisions() {
+        let version = app_version();
+        for revision in ["1", "1ubuntu1", "1~noble1", "1+deb12u1", "1.2"] {
+            let installed = format!("{version}-{revision}");
+            assert!(installed_deb_package_identity_matches(
+                ["ii ", installed.as_str(), "amd64"].into_iter(),
+                "amd64"
+            ));
+        }
+    }
+
+    #[test]
+    fn installed_debian_version_rejects_other_upstream_versions_and_malformed_revisions() {
+        for installed in [
+            "0.5.0",
+            "0.5.10",
+            "0.5.1-rc1",
+            "0.5.1-",
+            "0.5.1-ubuntu1",
+            "0.5.1-~noble1",
+            "0.5.1-1-ubuntu1",
+            "0.5.1-1_ubuntu1",
+            "0.5.1-1é",
+        ] {
+            assert!(
+                !installed_deb_version_matches("0.5.1", installed),
+                "must reject {installed}"
+            );
+        }
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1"));
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1-1"));
+    }
+
+    #[test]
     fn installed_debian_package_identity_rejects_invalid_status_version_or_architecture() {
         let version = app_version();
         assert!(!installed_deb_package_identity_matches(
@@ -3003,6 +3366,108 @@ mod installed_deb_package_tests {
             ["ii ", version.as_str(), "amd64", "unexpected-field"].into_iter(),
             "amd64"
         ));
+    }
+}
+
+#[cfg(test)]
+mod helper_status_tests {
+    use super::*;
+
+    fn assert_status(
+        status: PrivilegedHelperStatus,
+        state: &str,
+        installed: bool,
+        installable: bool,
+        needs_onboarding: bool,
+    ) {
+        assert_eq!(status.state, state);
+        assert_eq!(status.installed, installed);
+        assert_eq!(status.installable, installable);
+        assert_eq!(status.needs_onboarding, needs_onboarding);
+    }
+
+    #[test]
+    fn trusted_native_helper_is_installed_without_an_install_backend() {
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                false,
+                false,
+                Err("the host package manager is unavailable".to_owned()),
+            ),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn known_native_helper_mismatch_remains_outdated() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), false, true, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn verified_flatpak_helper_match_is_installed() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(true)),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn flatpak_package_checks_remain_strict() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(false)),
+            "installable",
+            false,
+            true,
+            true,
+        );
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, false, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                true,
+                true,
+                Err("cannot inspect host package metadata".to_owned()),
+            ),
+            "unsupported",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn unavailable_native_helpers_remain_unavailable() {
+        for (state, expected_state) in [
+            (CanonicalHelperState::Missing, "unsupported"),
+            (CanonicalHelperState::Untrusted, "untrusted"),
+        ] {
+            assert_status(
+                unavailable_helper_status("0.5.1".to_owned(), state, "unavailable".to_owned()),
+                expected_state,
+                false,
+                false,
+                true,
+            );
+        }
     }
 }
 

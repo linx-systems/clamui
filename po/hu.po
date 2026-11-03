@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ClamUI 0.5.0\n"
+"Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-01 11:44+0100\n"
+"POT-Creation-Date: 2026-11-03 14:35+0100\n"
 "PO-Revision-Date: 2026-09-13 09:59+0200\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -836,7 +836,7 @@ msgstr "Használat: clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "Nincs karanténba helyezett fájl."
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:1108
 msgid "ID"
 msgstr "Azonosító"
 
@@ -891,8 +891,8 @@ msgstr "Törlés sikertelen"
 msgid "{prefix}: {error}"
 msgstr "{prefix}: {error}"
 
-#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:417
-#: crates/clamui-core/src/quarantine.rs:454
+#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:443
+#: crates/clamui-core/src/quarantine.rs:480
 msgid "Quarantine entry not found: {id}"
 msgstr "A karantén-bejegyzés nem található: {id}"
 
@@ -1086,15 +1086,15 @@ msgstr "Nem sikerült betölteni az előzményeket: {error}"
 msgid "No scan history found."
 msgstr "Nem található vizsgálati előzmény."
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:1118
 msgid "Type"
 msgstr "Típus"
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:1123
 msgid "Status"
 msgstr "Állapot"
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:1142
 msgid "Summary"
 msgstr "Összegzés"
 
@@ -1229,31 +1229,31 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Kálmán „KAMI” Szalai"
 
-#: crates/clamui-core/src/host.rs:729
+#: crates/clamui-core/src/host.rs:868
 msgid "Daemon not responding: {error}"
 msgstr "A démon nem válaszol: {error}"
 
-#: crates/clamui-core/src/host.rs:732
+#: crates/clamui-core/src/host.rs:871
 msgid "{binary} found but returned error: {error}"
 msgstr "A(z) {binary} megtalálható, de hibát adott vissza: {error}"
 
-#: crates/clamui-core/src/host.rs:737
+#: crates/clamui-core/src/host.rs:876
 msgid "{service} is active"
 msgstr "A(z) {service} aktív"
 
-#: crates/clamui-core/src/host.rs:740
+#: crates/clamui-core/src/host.rs:879
 msgid "No virus database files found in {path}"
 msgstr "Nem találhatók vírusadatbázis-fájlok itt: {path}"
 
-#: crates/clamui-core/src/host.rs:746
+#: crates/clamui-core/src/host.rs:885
 msgid "Error accessing database {path}: {error}"
 msgstr "Hiba az adatbázis elérésekor ({path}): {error}"
 
-#: crates/clamui-core/src/host.rs:752
+#: crates/clamui-core/src/host.rs:891
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "A(z) {binary} nincs telepítve. Telepítse ezzel: {command}"
 
-#: crates/clamui-core/src/host.rs:762
+#: crates/clamui-core/src/host.rs:901
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -1261,70 +1261,70 @@ msgstr ""
 "A(z) {binary} nincs telepítve. Telepítse a disztribúciójához szükséges "
 "ClamAV-csomagot."
 
-#: crates/clamui-core/src/logs.rs:767
+#: crates/clamui-core/src/logs.rs:1101
 msgid "SCAN LOG"
 msgstr "VIZSGÁLATI NAPLÓ"
 
-#: crates/clamui-core/src/logs.rs:769
+#: crates/clamui-core/src/logs.rs:1103
 msgid "UPDATE LOG"
 msgstr "FRISSÍTÉSI NAPLÓ"
 
-#: crates/clamui-core/src/logs.rs:779
+#: crates/clamui-core/src/logs.rs:1113
 msgid "Timestamp"
 msgstr "Időbélyeg"
 
-#: crates/clamui-core/src/logs.rs:794
+#: crates/clamui-core/src/logs.rs:1128
 msgid "Duration"
 msgstr "Időtartam"
 
-#: crates/clamui-core/src/logs.rs:802
+#: crates/clamui-core/src/logs.rs:1136
 msgid "Full Output"
 msgstr "Teljes kimenet"
 
-#: crates/clamui-core/src/logs.rs:833
+#: crates/clamui-core/src/logs.rs:1167
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} másodperc"
 msgstr[1] "{count} másodperc"
 
-#: crates/clamui-core/src/logs.rs:1063
+#: crates/clamui-core/src/logs.rs:1393
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "Vizsgálat befejezve"
 
-#: crates/clamui-core/src/logs.rs:1066
+#: crates/clamui-core/src/logs.rs:1396
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "Talált fenyegetés: {count}{suffix}"
 msgstr[1] "Talált fenyegetések: {count}{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1076
+#: crates/clamui-core/src/logs.rs:1406
 msgid "Threats Detected"
 msgstr "Fenyegetés észlelve"
 
-#: crates/clamui-core/src/logs.rs:1081
+#: crates/clamui-core/src/logs.rs:1411
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "Vizsgálat megszakítva"
 
-#: crates/clamui-core/src/logs.rs:1084
+#: crates/clamui-core/src/logs.rs:1414
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "Vizsgálati hiba"
 
-#: crates/clamui-core/src/logs.rs:1095
+#: crates/clamui-core/src/logs.rs:1425
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "Megvizsgálva: {count} fájl"
 msgstr[1] "Megvizsgálva: {count} fájl"
 
-#: crates/clamui-core/src/logs.rs:1102
+#: crates/clamui-core/src/logs.rs:1432
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} könyvtár"
 msgstr[1] "{count} könyvtár"
 
-#: crates/clamui-core/src/logs.rs:1113
+#: crates/clamui-core/src/logs.rs:1443
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Talált fenyegetés: {count}"
@@ -1420,63 +1420,63 @@ msgstr ""
 "már működhet."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:774
+#: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
 msgstr "Az engedélykérést megszakították eközben: {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:780
+#: crates/clamui-core/src/privileged.rs:1058
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "A jogosultságemelt segédprogram nem érhető el eközben: {operation}."
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:786
+#: crates/clamui-core/src/privileged.rs:1064
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr ""
 "A jogosultságemelt segédprogram elutasította a PKEXEC_UID értéket eközben: "
 "{operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:792
+#: crates/clamui-core/src/privileged.rs:1070
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr ""
 "A jogosultságemelt segédprogram protokolleltérést jelzett eközben: "
 "{operation}."
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:798
+#: crates/clamui-core/src/privileged.rs:1076
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr ""
 "A jogosultságemelt segédprogram hibát észlelt eközben: {operation} (kilépési "
 "kód: {code}): {detail}."
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:806
+#: crates/clamui-core/src/privileged.rs:1084
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr ""
 "A jogosultságemelt segédprogram hibát észlelt eközben: {operation} (kilépési "
 "kód: {code})."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:813
+#: crates/clamui-core/src/privileged.rs:1091
 msgid "The privileged helper was terminated while {operation}."
 msgstr "A jogosultságemelt segédprogram leállt eközben: {operation}."
 
-#: crates/clamui-core/src/privileged.rs:872
+#: crates/clamui-core/src/privileged.rs:1150
 msgid "Applying configuration"
 msgstr "Konfiguráció alkalmazása"
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:874
+#: crates/clamui-core/src/privileged.rs:1152
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr "{message} Egy vagy több korábbi csere sikeres lehetett."
 
-#: crates/clamui-core/src/privileged.rs:1116
+#: crates/clamui-core/src/privileged.rs:1394
 msgid "Reading configuration"
 msgstr "Konfiguráció olvasása"
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2634
+#: crates/clamui-core/src/privileged.rs:2963
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""
@@ -1566,11 +1566,11 @@ msgstr "Érvénytelen {kind} elérésiút-formátum: {path}"
 msgid "Could not generate unique name for '{name}'"
 msgstr "Nem hozható létre egyedi név ehhez: '{name}'"
 
-#: crates/clamui-core/src/quarantine.rs:369
+#: crates/clamui-core/src/quarantine.rs:395
 msgid "Quarantine metadata was written but could not be read"
 msgstr "A karantén metaadatai írásra kerültek, de nem olvashatók"
 
-#: crates/clamui-core/src/quarantine.rs:391
+#: crates/clamui-core/src/quarantine.rs:417
 msgid ""
 "Failed to record quarantine entry in database. File has been restored to "
 "original location."
@@ -1579,7 +1579,7 @@ msgstr ""
 "visszaállítva az eredeti helyére."
 
 #. Translators: Preserve `{error}` as a localized failure description and `{path}` as a user-provided file path.
-#: crates/clamui-core/src/quarantine.rs:394
+#: crates/clamui-core/src/quarantine.rs:420
 msgid ""
 "Failed to record quarantine entry in database. Rollback also failed: "
 "{error}. File may be orphaned at: {path}"
@@ -1588,7 +1588,7 @@ msgstr ""
 "visszaállítás is sikertelen volt: {error}. A fájl elárvult állapotban lehet "
 "itt: {path}"
 
-#: crates/clamui-core/src/quarantine.rs:442
+#: crates/clamui-core/src/quarantine.rs:468
 msgid ""
 "File restored successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
@@ -1596,7 +1596,7 @@ msgstr ""
 "A fájl sikeresen visszaállítva, de az adatbázis-bejegyzést nem sikerült "
 "eltávolítani. Előfordulhat, hogy még megjelenik a listában a takarításig."
 
-#: crates/clamui-core/src/quarantine.rs:469
+#: crates/clamui-core/src/quarantine.rs:495
 msgid ""
 "File deleted successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
@@ -1605,49 +1605,49 @@ msgstr ""
 "eltávolítani. Előfordulhat, hogy még megjelenik a listában a takarításig."
 
 #. Translators: Preserve `{path}` as a user-provided file path and `{error}` as the filesystem diagnostic.
-#: crates/clamui-core/src/quarantine.rs:1158
+#: crates/clamui-core/src/quarantine.rs:1411
 msgid "Cannot quarantine {path}: {error}"
 msgstr "A(z) {path} nem helyezhető karanténba: {error}"
 
 #. Translators: The em dash separates the integrity failure from its consequence.
-#: crates/clamui-core/src/quarantine.rs:1176
+#: crates/clamui-core/src/quarantine.rs:1429
 msgid "File hash mismatch — file may be corrupted"
 msgstr "A fájl kivonata nem egyezik — a fájl sérült lehet"
 
-#: crates/clamui-core/src/scanner.rs:383
+#: crates/clamui-core/src/scanner.rs:389
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 "Nem találhatók ClamAV-adatbázisfájlok a szokásos gazdarendszerbeli helyeken"
 
-#: crates/clamui-core/src/scanner.rs:1808
+#: crates/clamui-core/src/scanner.rs:1815
 msgid "Scan cancelled by user"
 msgstr "A felhasználó megszakította a vizsgálatot"
 
-#: crates/clamui-core/src/scanner.rs:1810
+#: crates/clamui-core/src/scanner.rs:1817
 msgid "No files could be scanned"
 msgstr "Egyetlen fájl sem volt megvizsgálható"
 
-#: crates/clamui-core/src/scanner.rs:1814
+#: crates/clamui-core/src/scanner.rs:1821
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "A vizsgálati cél nem létezik, vagy érvénytelen NUL bájtot tartalmaz"
 
-#: crates/clamui-core/src/scanner.rs:1821
+#: crates/clamui-core/src/scanner.rs:1828
 msgid "Scan target is not a regular file or directory"
 msgstr "A vizsgálati cél nem szabályos fájl vagy könyvtár"
 
-#: crates/clamui-core/src/scanner.rs:1835
+#: crates/clamui-core/src/scanner.rs:1842
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "{count} fájl nem volt elérhető"
 msgstr[1] "{count} fájl nem volt elérhető"
 
-#: crates/clamui-core/src/scanner.rs:1848
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "{count} fájl nem volt olvasható"
 msgstr[1] "{count} fájl nem volt olvasható"
 
-#: crates/clamui-core/src/scanner.rs:1867
+#: crates/clamui-core/src/scanner.rs:1874
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2008,43 +2008,43 @@ msgstr "Eszközvizsgálat befejezve"
 msgid "Security Audit Complete"
 msgstr "Biztonsági ellenőrzés befejezve"
 
-#: desktop/src-tauri/src/runtime.rs:190
+#: desktop/src-tauri/src/runtime.rs:199
 msgid "Quick Scan"
 msgstr "Gyors vizsgálat"
 
-#: desktop/src-tauri/src/runtime.rs:191
+#: desktop/src-tauri/src/runtime.rs:200
 msgid "Full Scan"
 msgstr "Teljes vizsgálat"
 
-#: desktop/src-tauri/src/runtime.rs:192
+#: desktop/src-tauri/src/runtime.rs:201
 msgid "Home Folder"
 msgstr "Saját mappa"
 
-#: desktop/src-tauri/src/runtime.rs:193
+#: desktop/src-tauri/src/runtime.rs:202
 msgid "Update Database"
 msgstr "Adatbázis frissítése"
 
-#: desktop/src-tauri/src/runtime.rs:194
+#: desktop/src-tauri/src/runtime.rs:203
 msgid "Scan Profile"
 msgstr "Vizsgálati profil"
 
-#: desktop/src-tauri/src/runtime.rs:195
+#: desktop/src-tauri/src/runtime.rs:204
 msgid "Quit"
 msgstr "Kilépés"
 
-#: desktop/src-tauri/src/runtime.rs:368
+#: desktop/src-tauri/src/runtime.rs:405
 msgid "Add Folders"
 msgstr "Mappák hozzáadása"
 
-#: desktop/src-tauri/src/runtime.rs:370
+#: desktop/src-tauri/src/runtime.rs:407
 msgid "Add Files"
 msgstr "Fájlok hozzáadása"
 
-#: desktop/src-tauri/src/runtime.rs:414
+#: desktop/src-tauri/src/runtime.rs:451
 msgid "Export"
 msgstr "Exportálás"
 
-#: desktop/src-tauri/src/runtime.rs:545
+#: desktop/src-tauri/src/runtime.rs:582
 msgid "Open"
 msgstr "Megnyitás"
 
@@ -2074,7 +2074,7 @@ msgstr "Vizsgálat"
 msgid "Database"
 msgstr "Adatbázis"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:358
 msgid "Logs"
 msgstr "Naplók"
 
@@ -2082,7 +2082,7 @@ msgstr "Naplók"
 msgid "Components"
 msgstr "Összetevők"
 
-#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Statisztikák"
 
@@ -2185,7 +2185,7 @@ msgstr "Fő navigáció"
 msgid "Views"
 msgstr "Nézetek"
 
-#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Elvetés"
 
@@ -2252,9 +2252,9 @@ msgstr "Válaszom megjegyzése"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
 #: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
 #: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
 #: desktop/src/pages/SettingsPreferences.tsx:367
 #: desktop/src/pages/SettingsPreferences.tsx:456
@@ -2483,7 +2483,7 @@ msgid "Infected"
 msgstr "Fertőzött"
 
 #: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
-#: desktop/src/pages/Statistics.tsx:140
+#: desktop/src/pages/Statistics.tsx:141
 msgid "Error"
 msgstr "Hiba"
 
@@ -2492,12 +2492,12 @@ msgid "Cancelled"
 msgstr "Megszakítva"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:103
-#: desktop/src/pages/Logs.tsx:120 desktop/src/pages/Results.tsx:55
+#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/SettingsPreferences.tsx:430
 #: desktop/src/pages/SettingsPreferences.tsx:454
-#: desktop/src/pages/Statistics.tsx:141
+#: desktop/src/pages/Statistics.tsx:142
 msgid "Unknown"
 msgstr "Ismeretlen"
 
@@ -2554,7 +2554,7 @@ msgstr "Figyelmeztetés"
 msgid "Fail"
 msgstr "Sikertelen"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:119
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "Kihagyva"
 
@@ -2685,7 +2685,7 @@ msgid "Could not copy command: {error}"
 msgstr "Nem másolható a parancs: {error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
-#: desktop/src/pages/Logs.tsx:390 desktop/src/pages/Logs.tsx:415
+#: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
 #: desktop/src/pages/SettingsPreferences.tsx:454
 msgid "Copy"
@@ -2771,7 +2771,7 @@ msgstr ""
 "érhető el, ellenőrizze a socket jogosultságait, és futtassa: clamdscan --"
 "config-file=/etc/clamd.d/scan.conf --ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:97
+#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "Fut"
 
@@ -2780,11 +2780,11 @@ msgstr "Fut"
 msgid "Installed"
 msgstr "Telepítve"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:99
+#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "Leállítva"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:101
+#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:249
 msgid "Not installed"
 msgstr "Nincs telepítve"
@@ -3697,79 +3697,79 @@ msgstr ""
 "A meglévő definíciók a csere sikeréig elérhetők maradnak; az élesítés "
 "sikertelensége esetén visszaállnak."
 
-#: desktop/src/pages/Logs.tsx:76
+#: desktop/src/pages/Logs.tsx:77
 msgid "{seconds} second"
 msgid_plural "{seconds} seconds"
 msgstr[0] "{seconds} másodperc"
 msgstr[1] "{seconds} másodperc"
 
-#: desktop/src/pages/Logs.tsx:88 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Quarantine.tsx:225
+#: desktop/src/pages/Logs.tsx:89 desktop/src/pages/Profiles.tsx:103
+#: desktop/src/pages/Quarantine.tsx:304
 msgid "Path"
 msgstr "Útvonal"
 
-#: desktop/src/pages/Logs.tsx:117
+#: desktop/src/pages/Logs.tsx:118
 msgid "Success"
 msgstr "Sikeres"
 
-#: desktop/src/pages/Logs.tsx:118
+#: desktop/src/pages/Logs.tsx:119
 msgid "Up to date"
 msgstr "Naprakész"
 
-#: desktop/src/pages/Logs.tsx:162
+#: desktop/src/pages/Logs.tsx:163
 msgid "Failed to load historical logs: {error}"
 msgstr "Nem sikerült betölteni az előzmény-naplókat: {error}"
 
-#: desktop/src/pages/Logs.tsx:180
+#: desktop/src/pages/Logs.tsx:178
 msgid "Log updates are unavailable: {error}"
 msgstr "A naplófrissítések nem érhetők el: {error}"
 
-#: desktop/src/pages/Logs.tsx:193 desktop/src/pages/Logs.tsx:209
+#: desktop/src/pages/Logs.tsx:191 desktop/src/pages/Logs.tsx:207
 msgid "Unable to determine ClamAV daemon status."
 msgstr "Nem állapítható meg a ClamAV démon állapota."
 
-#: desktop/src/pages/Logs.tsx:202
+#: desktop/src/pages/Logs.tsx:200
 msgid "ClamAV daemon is not running."
 msgstr "A ClamAV démon nem fut."
 
-#: desktop/src/pages/Logs.tsx:205
+#: desktop/src/pages/Logs.tsx:203
 msgid "ClamAV daemon is not installed."
 msgstr "A ClamAV démon nincs telepítve."
 
-#: desktop/src/pages/Logs.tsx:236
+#: desktop/src/pages/Logs.tsx:234
 msgid "Unable to load daemon logs."
 msgstr "Nem tölthetők be a démonnaplók."
 
-#: desktop/src/pages/Logs.tsx:274
+#: desktop/src/pages/Logs.tsx:272
 msgid "The log entry returned by ClamUI was incomplete."
 msgstr "A ClamUI által visszaadott naplóbejegyzés hiányos volt."
 
-#: desktop/src/pages/Logs.tsx:277
+#: desktop/src/pages/Logs.tsx:275
 msgid "Failed to load log details: {error}"
 msgstr "Nem sikerült betölteni a napló részleteit: {error}"
 
-#: desktop/src/pages/Logs.tsx:285 desktop/src/pages/Logs.tsx:295
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:283 desktop/src/pages/Logs.tsx:293
+#: desktop/src/pages/Logs.tsx:401
 msgid "Text"
 msgstr "Szöveg"
 
-#: desktop/src/pages/Logs.tsx:286 desktop/src/pages/Logs.tsx:296
+#: desktop/src/pages/Logs.tsx:284 desktop/src/pages/Logs.tsx:294
 msgid "Exported selected log."
 msgstr "A kiválasztott naplóbejegyzés exportálva."
 
-#: desktop/src/pages/Logs.tsx:286
+#: desktop/src/pages/Logs.tsx:284
 msgid "Exported all logs."
 msgstr "Az összes napló exportálva."
 
-#: desktop/src/pages/Logs.tsx:288
+#: desktop/src/pages/Logs.tsx:286
 msgid "Failed to export logs"
 msgstr "Nem sikerült exportálni a naplókat"
 
-#: desktop/src/pages/Logs.tsx:298
+#: desktop/src/pages/Logs.tsx:296
 msgid "Failed to export log"
 msgstr "Nem sikerült exportálni a naplót"
 
-#: desktop/src/pages/Logs.tsx:306
+#: desktop/src/pages/Logs.tsx:304
 msgid ""
 "Log details are too large for the clipboard. Choose an export destination "
 "instead."
@@ -3777,163 +3777,162 @@ msgstr ""
 "A napló részletei túl nagyok a vágólaphoz. Válasszon inkább exportálási "
 "célhelyet."
 
-#: desktop/src/pages/Logs.tsx:312
+#: desktop/src/pages/Logs.tsx:310
 msgid "Log details copied to clipboard"
 msgstr "A napló részletei a vágólapra másolva"
 
-#: desktop/src/pages/Logs.tsx:314
+#: desktop/src/pages/Logs.tsx:312
 msgid "Failed to copy log details"
 msgstr "Nem sikerült másolni a napló részleteit"
 
-#: desktop/src/pages/Logs.tsx:326
+#: desktop/src/pages/Logs.tsx:324
 msgid "Daemon logs copied to clipboard"
 msgstr "A démonnaplók a vágólapra másolva"
 
-#: desktop/src/pages/Logs.tsx:328
+#: desktop/src/pages/Logs.tsx:326
 msgid "Failed to copy daemon logs"
 msgstr "Nem sikerült másolni a démonnaplókat"
 
-#: desktop/src/pages/Logs.tsx:339
+#: desktop/src/pages/Logs.tsx:337
 msgid "Historical logs were cleared with {count} cleanup failure."
 msgid_plural "Historical logs were cleared with {count} cleanup failures."
 msgstr[0] "Az előzmény-naplók törölve, {count} tisztítási hibával."
 msgstr[1] "Az előzmény-naplók törölve, {count} tisztítási hibával."
 
-#: desktop/src/pages/Logs.tsx:345
+#: desktop/src/pages/Logs.tsx:343
 msgid "Historical logs cleared."
 msgstr "Az előzmény-naplók törölve."
 
-#: desktop/src/pages/Logs.tsx:348
+#: desktop/src/pages/Logs.tsx:346
 msgid "Failed to clear logs: {error}"
 msgstr "Nem sikerült törölni a naplókat: {error}"
 
-#: desktop/src/pages/Logs.tsx:353
+#: desktop/src/pages/Logs.tsx:351
 msgid "Select a log entry to view details."
 msgstr "Válasszon naplóbejegyzést a részletek megtekintéséhez."
 
-#: desktop/src/pages/Logs.tsx:354
+#: desktop/src/pages/Logs.tsx:352
 msgid "Error loading daemon logs"
 msgstr "Hiba a démonnaplók betöltésekor"
 
-#: desktop/src/pages/Logs.tsx:360
+#: desktop/src/pages/Logs.tsx:358
 msgid "Review previous scan and update operations."
 msgstr "Tekintse át a korábbi vizsgálati és frissítési műveleteket."
 
-#: desktop/src/pages/Logs.tsx:361
+#: desktop/src/pages/Logs.tsx:359
 msgid "Log source"
 msgstr "Naplóforrás"
 
-#: desktop/src/pages/Logs.tsx:362 desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:360 desktop/src/pages/Logs.tsx:366
 msgid "Historical Logs"
 msgstr "Előzmény-naplók"
 
-#: desktop/src/pages/Logs.tsx:363 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:361 desktop/src/pages/Logs.tsx:398
 msgid "ClamAV Daemon"
 msgstr "ClamAV démon"
 
-#: desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:366
 msgid "Previous scan and update operations"
 msgstr "Korábbi vizsgálati és frissítési műveletek"
 
-#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:217
+#: desktop/src/pages/Logs.tsx:367 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:296
 #: desktop/src/pages/SettingsPreferences.tsx:367
 #: desktop/src/pages/SettingsPreferences.tsx:449
-#: desktop/src/pages/Statistics.tsx:224
+#: desktop/src/pages/Statistics.tsx:234
 msgid "Refresh"
 msgstr "Frissítés"
 
-#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:392
+#: desktop/src/pages/Logs.tsx:368 desktop/src/pages/Logs.tsx:390
 msgid "Export CSV"
 msgstr "CSV exportálása"
 
-#: desktop/src/pages/Logs.tsx:371 desktop/src/pages/Logs.tsx:393
+#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
 #: desktop/src/pages/Results.tsx:225
 msgid "Export JSON"
 msgstr "JSON exportálása"
 
-#: desktop/src/pages/Logs.tsx:372 desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Scan.tsx:553
 msgid "Clear All"
 msgstr "Összes törlése"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "Loading logs…"
 msgstr "Naplók betöltése…"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "No historical logs yet."
 msgstr "Még nincsenek előzmény-naplók."
 
-#: desktop/src/pages/Logs.tsx:382
+#: desktop/src/pages/Logs.tsx:380
 msgid "{shown} of {total} loaded log shown"
 msgid_plural "{shown} of {total} loaded logs shown"
 msgstr[0] "{shown} / {total} betöltött napló megjelenítve"
 msgstr[1] "{shown} / {total} betöltött napló megjelenítve"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Network.tsx:430
-#: desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381 desktop/src/pages/Network.tsx:430
 msgid "Load More"
 msgstr "Továbbiak betöltése"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381
 msgid "Show All ({count})"
 msgstr "Összes megjelenítése ({count})"
 
-#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:394
+#: desktop/src/pages/Logs.tsx:387 desktop/src/pages/Logs.tsx:392
 msgid "Log Details"
 msgstr "Napló részletei"
 
-#: desktop/src/pages/Logs.tsx:391 desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:401
 msgid "Export Text"
 msgstr "Szöveg exportálása"
 
-#: desktop/src/pages/Logs.tsx:394 desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
 #: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
 msgid "Fullscreen"
 msgstr "Teljes képernyő"
 
-#: desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:398
 msgid "Live host daemon log output."
 msgstr "Élő gazdagép-démonnapló kimenete."
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Stop Live Updates"
 msgstr "Élő frissítések leállítása"
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Start Live Updates"
 msgstr "Élő frissítések indítása"
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Exported daemon logs."
 msgstr "Exportált démonnaplók."
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Failed to export daemon logs"
 msgstr "Nem sikerült exportálni a démonnaplókat"
 
-#: desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:402
 msgid "Daemon Logs"
 msgstr "Démonnaplók"
 
-#: desktop/src/pages/Logs.tsx:407
+#: desktop/src/pages/Logs.tsx:405
 msgid "Checking daemon status…"
 msgstr "Démon állapotának ellenőrzése…"
 
-#: desktop/src/pages/Logs.tsx:408
+#: desktop/src/pages/Logs.tsx:406
 msgid "Live refresh is active every 3 seconds."
 msgstr "Az élő frissítés 3 másodpercenként aktív."
 
-#: desktop/src/pages/Logs.tsx:409
+#: desktop/src/pages/Logs.tsx:407
 msgid "Daemon logs will appear here after a successful read."
 msgstr "A démonnaplók sikeres beolvasás után jelennek meg itt."
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid "Clear All Logs?"
 msgstr "Minden napló törlése?"
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid ""
 "This will permanently delete all historical logs. This action cannot be "
 "undone."
@@ -4320,7 +4319,7 @@ msgid "Duplicate"
 msgstr "Megkettőzés"
 
 #: desktop/src/pages/Profiles.tsx:237 desktop/src/pages/Profiles.tsx:245
-#: desktop/src/pages/Quarantine.tsx:228 desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/Quarantine.tsx:307 desktop/src/pages/Quarantine.tsx:319
 #: desktop/src/pages/SettingsPreferences.tsx:367
 msgid "Delete"
 msgstr "Törlés"
@@ -4355,174 +4354,186 @@ msgstr ""
 msgid "Restoring…"
 msgstr "Visszaállítás…"
 
-#: desktop/src/pages/Quarantine.tsx:97
+#: desktop/src/pages/Quarantine.tsx:127 desktop/src/pages/Quarantine.tsx:165
 msgid "ClamUI returned invalid quarantine data."
 msgstr "A ClamUI érvénytelen karanténadatokat adott vissza."
 
-#: desktop/src/pages/Quarantine.tsx:104
+#: desktop/src/pages/Quarantine.tsx:135 desktop/src/pages/Quarantine.tsx:172
 msgid "Failed to load quarantine: {error}"
 msgstr "A karantén betöltése sikertelen: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:122
+#: desktop/src/pages/Quarantine.tsx:201
 msgid "Quarantine updates are unavailable: {error}"
 msgstr "A karantén frissítései nem érhetők el: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:144
+#: desktop/src/pages/Quarantine.tsx:223
 msgid "ClamUI returned an invalid cleanup result."
 msgstr "A ClamUI érvénytelen tisztítási eredményt adott vissza."
 
-#: desktop/src/pages/Quarantine.tsx:149
+#: desktop/src/pages/Quarantine.tsx:228
 msgid "Removed {count} old quarantine entry."
 msgid_plural "Removed {count} old quarantine entries."
 msgstr[0] "{count} régi karantén-bejegyzés eltávolítva"
 msgstr[1] "{count} régi karantén-bejegyzés eltávolítva"
 
-#: desktop/src/pages/Quarantine.tsx:155
+#: desktop/src/pages/Quarantine.tsx:234
 msgid "No old entries found to remove."
 msgstr "Nem találhatók eltávolítandó régi bejegyzések."
 
-#: desktop/src/pages/Quarantine.tsx:161
+#: desktop/src/pages/Quarantine.tsx:240
 msgid "Failed to clear old items: {error}"
 msgstr "A régi elemek törlése sikertelen: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:162
+#: desktop/src/pages/Quarantine.tsx:241
 msgid "Failed to clear old quarantine items: {error}"
 msgstr "A régi karanténelemek törlése sikertelen: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:172
+#: desktop/src/pages/Quarantine.tsx:251
 msgid "ClamUI returned an invalid quarantine result."
 msgstr "A ClamUI érvénytelen karanténeredményt adott vissza."
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File restored successfully."
 msgstr "A fájl sikeresen visszaállítva."
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File deleted successfully."
 msgstr "A fájl sikeresen törölve."
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File restored, but the database entry could not be removed."
 msgstr ""
 "A fájl visszaállítva, de az adatbázis-bejegyzést nem sikerült eltávolítani."
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File deleted, but the database entry could not be removed."
 msgstr "A fájl törölve, de az adatbázis-bejegyzést nem sikerült eltávolítani."
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to restore quarantined file ({status})."
 msgstr "Nem sikerült visszaállítani a karanténba helyezett fájlt ({status})."
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to delete quarantined file ({status})."
 msgstr "Nem sikerült törölni a karanténba helyezett fájlt ({status})."
 
-#: desktop/src/pages/Quarantine.tsx:188
+#: desktop/src/pages/Quarantine.tsx:267
 msgid "Failed to restore quarantined file: {error}"
 msgstr "Nem sikerült visszaállítani a karanténba helyezett fájlt: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:189
+#: desktop/src/pages/Quarantine.tsx:268
 msgid "Failed to delete quarantined file: {error}"
 msgstr "Nem sikerült törölni a karanténba helyezett fájlt: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:200
+#: desktop/src/pages/Quarantine.tsx:279
 msgid "Secure storage for isolated threats."
 msgstr "Biztonságos tárhely az elkülönített fenyegetésekhez."
 
-#: desktop/src/pages/Quarantine.tsx:205
+#: desktop/src/pages/Quarantine.tsx:284
 msgid "Quarantine Storage"
 msgstr "Karanténtároló"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Total Size"
 msgstr "Teljes méret"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Calculating…"
 msgstr "Számítás…"
 
-#: desktop/src/pages/Quarantine.tsx:208
+#: desktop/src/pages/Quarantine.tsx:287
 msgid "Items"
 msgstr "Elemek"
 
-#: desktop/src/pages/Quarantine.tsx:209
+#: desktop/src/pages/Quarantine.tsx:288
 msgid "{filtered} of {total} item"
 msgid_plural "{filtered} of {total} items"
 msgstr[0] "{filtered} / {total} elem"
 msgstr[1] "{filtered} / {total} elem"
 
-#: desktop/src/pages/Quarantine.tsx:210
+#: desktop/src/pages/Quarantine.tsx:289
 msgid "{count} item"
 msgid_plural "{count} items"
 msgstr[0] "{count} elem"
 msgstr[1] "{count} elem"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Quarantined Files"
 msgstr "Karanténba helyezett fájlok"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Detected threats isolated from your system."
 msgstr "A rendszeréből elkülönített észlelt fenyegetések."
 
-#: desktop/src/pages/Quarantine.tsx:218
+#: desktop/src/pages/Quarantine.tsx:297
 msgid "Clear Old Items"
 msgstr "Régi elemek törlése"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path"
 msgstr "Keresés fenyegetésnév vagy elérési út alapján"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path…"
 msgstr "Keresés fenyegetésnév vagy elérési út alapján…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "Loading quarantine entries…"
 msgstr "Karanténbejegyzések betöltése…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid ""
 "No Quarantined Files. Detected threats will be isolated here for review."
 msgstr ""
 "Nincsenek karanténba helyezett fájlok. Az észlelt fenyegetések itt lesznek "
 "elkülönítve felülvizsgálatra."
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "No matching entries. Try a different search term."
 msgstr "Nincsenek egyező bejegyzések. Próbáljon más keresőkifejezést."
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:235
-#: desktop/src/pages/Quarantine.tsx:239
+#: desktop/src/pages/Quarantine.tsx:301
+msgid "No entries on this page."
+msgstr "Ezen az oldalon nincsenek bejegyzések."
+
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:314
+#: desktop/src/pages/Quarantine.tsx:318
 msgid "Unknown Threat"
 msgstr "Ismeretlen fenyegetés"
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:226
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
 #: desktop/src/pages/Results.tsx:196
 msgid "Quarantined"
 msgstr "Karanténba helyezve"
 
-#: desktop/src/pages/Quarantine.tsx:228
+#: desktop/src/pages/Quarantine.tsx:307
 msgid "Restore"
 msgstr "Visszaállítás"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Previous"
+msgstr "Előző"
+
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Next"
+msgstr "Következő"
+
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Restore Quarantined File?"
 msgstr "Visszaállítja a karanténba helyezett fájlt?"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Permanently Delete File?"
 msgstr "Véglegesen törli a fájlt?"
 
 #. Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "This file was detected as '{threat}'. It will be restored to {path}."
 msgstr ""
 "A fájlt „{threat}” fenyegetésként észleltük. Visszaállítás helye: {path}."
 
 #. Translators: Preserve the {path} and {threat} placeholders; they are runtime file-path and threat values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:236
+#: desktop/src/pages/Quarantine.tsx:315
 msgid ""
 "The quarantined file from {path} ('{threat}') will be permanently deleted. "
 "This action cannot be undone."
@@ -4530,7 +4541,7 @@ msgstr ""
 "A {path} helyről származó, „{threat}” fenyegetésként észlelt karanténba "
 "helyezett fájl véglegesen törlődik. Ez a művelet nem vonható vissza."
 
-#: desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/Quarantine.tsx:319
 msgid "Restore Anyway"
 msgstr "Visszaállítás mégis"
 
@@ -4958,7 +4969,7 @@ msgstr[0] "{count} fájl ellenőrizve"
 msgstr[1] "{count} fájl ellenőrizve"
 
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:160
+#: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
 msgstr[0] "{count} fenyegetés"
@@ -5597,212 +5608,212 @@ msgstr[1] ""
 msgid "Delete Logs"
 msgstr "Naplók törlése"
 
-#: desktop/src/pages/Statistics.tsx:119
+#: desktop/src/pages/Statistics.tsx:120
 msgid "No scans recorded"
 msgstr "Nincsenek rögzített vizsgálatok"
 
-#: desktop/src/pages/Statistics.tsx:122
+#: desktop/src/pages/Statistics.tsx:123
 msgid "less than an hour ago"
 msgstr "kevesebb mint egy órája"
 
-#: desktop/src/pages/Statistics.tsx:125
+#: desktop/src/pages/Statistics.tsx:126
 msgid "{count} hour ago"
 msgid_plural "{count} hours ago"
 msgstr[0] "{count} órával ezelőtt"
 msgstr[1] "{count} órával ezelőtt"
 
-#: desktop/src/pages/Statistics.tsx:129
+#: desktop/src/pages/Statistics.tsx:130
 msgid "{count} day ago"
 msgid_plural "{count} days ago"
 msgstr[0] "{count} nappal ezelőtt"
 msgstr[1] "{count} nappal ezelőtt"
 
-#: desktop/src/pages/Statistics.tsx:132
+#: desktop/src/pages/Statistics.tsx:133
 msgid "{count} week ago"
 msgid_plural "{count} weeks ago"
 msgstr[0] "{count} héttel ezelőtt"
 msgstr[1] "{count} héttel ezelőtt"
 
-#: desktop/src/pages/Statistics.tsx:136
+#: desktop/src/pages/Statistics.tsx:137
 msgid "Protected"
 msgstr "Védett"
 
-#: desktop/src/pages/Statistics.tsx:137
+#: desktop/src/pages/Statistics.tsx:138
 msgid "At Risk"
 msgstr "Veszélyeztetett"
 
-#: desktop/src/pages/Statistics.tsx:138
+#: desktop/src/pages/Statistics.tsx:139
 msgid "Unprotected"
 msgstr "Nem védett"
 
-#: desktop/src/pages/Statistics.tsx:139
+#: desktop/src/pages/Statistics.tsx:140
 msgid "No Data"
 msgstr "Nincs adat"
 
-#: desktop/src/pages/Statistics.tsx:145
+#: desktop/src/pages/Statistics.tsx:146
 msgid "No scans performed yet"
 msgstr "Még nem történt vizsgálat"
 
-#: desktop/src/pages/Statistics.tsx:146
+#: desktop/src/pages/Statistics.tsx:147
 msgid "Last scan was over 30 days ago"
 msgstr "Az utolsó vizsgálat több mint 30 napja történt"
 
-#: desktop/src/pages/Statistics.tsx:147
+#: desktop/src/pages/Statistics.tsx:148
 msgid "Last scan was over a week ago"
 msgstr "Az utolsó vizsgálat több mint egy hete történt"
 
-#: desktop/src/pages/Statistics.tsx:148
+#: desktop/src/pages/Statistics.tsx:149
 msgid "Virus definitions are over 7 days old"
 msgstr "A vírusdefiníciók több mint 7 naposak"
 
-#: desktop/src/pages/Statistics.tsx:149
+#: desktop/src/pages/Statistics.tsx:150
 msgid "Virus definitions are over 1 day old"
 msgstr "A vírusdefiníciók több mint 1 naposak"
 
-#: desktop/src/pages/Statistics.tsx:150
+#: desktop/src/pages/Statistics.tsx:151
 msgid "System is protected"
 msgstr "A rendszer védett"
 
-#: desktop/src/pages/Statistics.tsx:155
+#: desktop/src/pages/Statistics.tsx:156
 msgid "No scan activity in this timeframe."
 msgstr "Ebben az időszakban nem volt vizsgálati tevékenység."
 
-#: desktop/src/pages/Statistics.tsx:157
+#: desktop/src/pages/Statistics.tsx:158
 msgid "Scan activity trend"
 msgstr "Vizsgálati tevékenység alakulása"
 
-#: desktop/src/pages/Statistics.tsx:159
+#: desktop/src/pages/Statistics.tsx:160
 msgid "{count} scan"
 msgid_plural "{count} scans"
 msgstr[0] "{count} vizsgálat"
 msgstr[1] "{count} vizsgálat"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Scans"
 msgstr "Vizsgálatok"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Threats"
 msgstr "Fenyegetések"
 
-#: desktop/src/pages/Statistics.tsx:185
+#: desktop/src/pages/Statistics.tsx:187
 msgid "ClamUI returned invalid statistics data."
 msgstr "A ClamUI érvénytelen statisztikai adatokat adott vissza."
 
-#: desktop/src/pages/Statistics.tsx:190
+#: desktop/src/pages/Statistics.tsx:192
 msgid "Failed to load statistics: {error}"
 msgstr "Nem sikerült betölteni a statisztikákat: {error}"
 
-#: desktop/src/pages/Statistics.tsx:208
+#: desktop/src/pages/Statistics.tsx:215
 msgid "Statistics updates are unavailable: {error}"
 msgstr "A statisztikák frissítése nem érhető el: {error}"
 
-#: desktop/src/pages/Statistics.tsx:212
+#: desktop/src/pages/Statistics.tsx:222
 msgid "Checking protection status"
 msgstr "Védelmi állapot ellenőrzése"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Total Scans"
 msgstr "Vizsgálatok összesen"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Number of scans performed"
 msgstr "Elvégzett vizsgálatok száma"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Files Scanned"
 msgstr "Vizsgált fájlok"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Total files checked"
 msgstr "Ellenőrzött fájlok száma"
 
-#: desktop/src/pages/Statistics.tsx:216
+#: desktop/src/pages/Statistics.tsx:226
 msgid "Malware and suspicious files found"
 msgstr "Talált kártevők és gyanús fájlok"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Clean Scans"
 msgstr "Tiszta vizsgálatok"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Scans with no threats found"
 msgstr "Fenyegetést nem találó vizsgálatok"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Average Scan Duration"
 msgstr "Átlagos vizsgálati idő"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Mean time per scan"
 msgstr "Vizsgálatonkénti átlagos idő"
 
-#: desktop/src/pages/Statistics.tsx:223
+#: desktop/src/pages/Statistics.tsx:233
 msgid "Scan history and current protection posture."
 msgstr "Vizsgálati előzmények és aktuális védelmi állapot."
 
-#: desktop/src/pages/Statistics.tsx:226
+#: desktop/src/pages/Statistics.tsx:236
 msgid "Unable to load statistics"
 msgstr "Nem sikerült betölteni a statisztikákat"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Protection Status"
 msgstr "Védelmi állapot"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Current system security posture"
 msgstr "A rendszer aktuális biztonsági állapota"
 
-#: desktop/src/pages/Statistics.tsx:233
+#: desktop/src/pages/Statistics.tsx:243
 msgid "System Status"
 msgstr "Rendszerállapot"
 
-#: desktop/src/pages/Statistics.tsx:234
+#: desktop/src/pages/Statistics.tsx:244
 msgid "Last Scan"
 msgstr "Legutóbbi vizsgálat"
 
-#: desktop/src/pages/Statistics.tsx:238
+#: desktop/src/pages/Statistics.tsx:248
 msgid "Timeframe"
 msgstr "Időszak"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Statistics timeframe"
 msgstr "Statisztikák időszaka"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Day"
 msgstr "Nap"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Week"
 msgstr "Hét"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Month"
 msgstr "Hónap"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "All Time"
 msgstr "Teljes időszak"
 
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Scan Statistics"
 msgstr "Vizsgálati statisztikák"
 
 #. Translators: Preserve the {range} placeholder; it contains a localized start–end date range.
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Statistics for: {range}"
 msgstr "Statisztikák erre az időszakra: {range}"
 
-#: desktop/src/pages/Statistics.tsx:246
+#: desktop/src/pages/Statistics.tsx:256
 msgid "Aggregated metrics for the selected timeframe"
 msgstr "Összesített mutatók a kiválasztott időszakra"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid "Loading statistics…"
 msgstr "Statisztikák betöltése…"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid ""
 "No scan history yet. Run your first scan to see statistics and protection "
 "status."
@@ -5810,27 +5821,27 @@ msgstr ""
 "Még nincs vizsgálati előzmény. Futtassa az első vizsgálatot a statisztikák "
 "és a védelmi állapot megtekintéséhez."
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan Activity"
 msgstr "Vizsgálati tevékenység"
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan trends over the selected timeframe"
 msgstr "Vizsgálati trendek a kiválasztott időszakban"
 
-#: desktop/src/pages/Statistics.tsx:254
+#: desktop/src/pages/Statistics.tsx:264
 msgid "Quick Actions"
 msgstr "Gyorsműveletek"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "Scan your home directory"
 msgstr "Saját mappa vizsgálata"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "View Scan Logs"
 msgstr "Vizsgálati naplók megtekintése"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "See detailed scan history"
 msgstr "Részletes vizsgálati előzmények megtekintése"
 

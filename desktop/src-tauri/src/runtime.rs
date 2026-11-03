@@ -2,6 +2,7 @@ use crate::{
     model::{ChoosePathsOptions, ChosenPaths, CloseResult, SavedExport, StartupState},
     notifications::Notifications,
     policy::{decode_open_target, is_safe_external_url, select_close_action, CloseAction},
+    scan_progress::ScanProgressCoalescer,
     tray::{TrayController, TrayEvent, TrayLabels},
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -19,6 +20,7 @@ use std::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         Arc, Condvar, Mutex,
     },
+    time::{Duration, Instant},
 };
 use tauri::{
     webview::NewWindowResponse, AppHandle, DragDropEvent, Emitter, Manager, RunEvent, State,
@@ -33,6 +35,7 @@ pub struct AppState {
     ctx: Context,
     initial: Mutex<StartupState>,
     active_jobs: RunningJobs,
+    scan_progress: Mutex<ScanProgressCoalescer>,
     start_minimized_pending: AtomicBool,
     tray: Arc<TrayController>,
     monitor: Mutex<Option<clamui_core::platform::MonitorHandle>>,
@@ -153,7 +156,13 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             state
                 .notifications
                 .dispatch(&state.ctx, app, &event.event, &event.data);
-            let _ = app.emit("clamui-event", event);
+            state
+                .scan_progress
+                .lock()
+                .expect("scan progress state poisoned")
+                .forward(event, Instant::now(), |event| {
+                    let _ = app.emit("clamui-event", event);
+                });
         }
     });
 
@@ -214,6 +223,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             accepting: AtomicBool::new(true),
             idle: Condvar::new(),
         },
+        scan_progress: Mutex::new(ScanProgressCoalescer::new(Duration::from_millis(50))),
         start_minimized_pending: AtomicBool::new(false),
         tray,
         monitor: Mutex::new(None),
@@ -333,14 +343,41 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn request(state: State<'_, AppState>, action: String, args: Value) -> Result<Value, String> {
+async fn request(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    action: String,
+    args: Value,
+) -> Result<Value, String> {
     let _operation = state.active_jobs.register(action.clone())?;
+    let progress_registration = if action == "scanner.scan" {
+        match args.get("id").and_then(Value::as_str) {
+            Some(operation_id) => state
+                .scan_progress
+                .lock()
+                .expect("scan progress state poisoned")
+                .register(operation_id)
+                .map(|registration| (operation_id.to_owned(), registration)),
+            None => None,
+        }
+    } else {
+        None
+    };
     let ctx = state.ctx.clone();
     let action_for_work = action.clone();
     let result =
         tauri::async_runtime::spawn_blocking(move || dispatch(&ctx, &action_for_work, args))
             .await
             .map_err(|error| format!("operation task failed: {error}"));
+    if let Some((operation_id, registration)) = progress_registration {
+        state
+            .scan_progress
+            .lock()
+            .expect("scan progress state poisoned")
+            .finish(&operation_id, registration, |event| {
+                let _ = app.emit("clamui-event", event);
+            });
+    }
     let value = result??;
     if action.starts_with("profiles.") {
         sync_profiles(&state.ctx, &state.tray);

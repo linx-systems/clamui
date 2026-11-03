@@ -1,10 +1,38 @@
 # Changelog
 
 ## [Unreleased]
+
+### Added
+
+- Added a Vietnamese (`vi`) translation.
+
+### Changed
+- Updated the desktop TypeScript compiler to 7.0.2 and declared Vite client types so stylesheet side-effect imports remain type-checkable.
+
+- Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
+- Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
+- Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
+- Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
+- Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
+
 ### Fixed
 
-- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+- Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
+- Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
+- Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
 
+## [0.5.1] - 2026-11-01
+### Fixed
+
+- Fixed Flatpak helper-installation and configuration-staging lookups to validate and run the host's trusted `getent`, retaining authoritative passwd homes and executable ownership and permission checks.
+- Fixed Flatpak helper-package verification to resolve and execute trusted checksum and GnuPG tools on the host, preserving pinned signatures and signed archive-member checks.
+- Fixed helper-installation errors clipping long diagnostics and unbroken paths; complete messages now wrap and remain selectable within the scrolling dialog.
+- Fixed Flathub manifest lint compatibility by relying on Flatpak's default application D-Bus permissions instead of redundantly declaring ClamUI's own bus name.
+
+### Maintenance
+
+- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+- Corrected website copy to describe the native Rust/Tauri desktop runtime and its system GTK 3 and WebKitGTK 4.1 dependencies.
 
 ## [0.5.0] - 2026-11-01
 
@@ -158,8 +186,9 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
 
+[0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0

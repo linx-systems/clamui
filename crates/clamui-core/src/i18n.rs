@@ -70,7 +70,7 @@ fn date_time_format(code: &str) -> &'static str {
     match code {
         "de" | "nb" => "%d.%m.%Y, %H:%M %:z",
         "en" => "%Y-%m-%d, %H:%M %:z",
-        "es" | "fr" | "it" | "pt_BR" => "%d/%m/%Y, %H:%M %:z",
+        "es" | "fr" | "it" | "pt_BR" | "vi" => "%d/%m/%Y, %H:%M %:z",
         "hu" => "%Y.%m.%d. %H:%M %:z",
         "zh_CN" => "%Y/%m/%d %H:%M %:z",
         _ => "%Y-%m-%d, %H:%M %:z",
@@ -385,6 +385,7 @@ mod tests {
         assert_eq!(resolve_catalog_code("fr_CA:de_DE"), Some("fr"));
         assert_eq!(resolve_catalog_code("pt-BR.UTF-8"), Some("pt_BR"));
         assert_eq!(resolve_catalog_code("zh-Hans"), Some("zh_CN"));
+        assert_eq!(resolve_catalog_code("vi_VN.UTF-8"), Some("vi"));
         assert_eq!(catalog_for_locale(Some("fr_CA")).code, "fr");
         assert_eq!(catalog_for_locale(Some("unavailable")).code, "en");
     }
@@ -402,6 +403,7 @@ mod tests {
             ("it", "20/10/2026, 13:04 +02:00"),
             ("nb", "20.10.2026, 13:04 +02:00"),
             ("pt_BR", "20/10/2026, 13:04 +02:00"),
+            ("vi", "20/10/2026, 13:04 +02:00"),
             ("zh_CN", "2026/10/20 13:04 +02:00"),
         ] {
             assert_eq!(
@@ -422,6 +424,7 @@ mod tests {
             ("it", [1, 0, 1]),
             ("nb", [1, 0, 1]),
             ("pt_BR", [0, 0, 1]),
+            ("vi", [0, 0, 0]),
             ("zh_CN", [0, 0, 0]),
         ] {
             let catalog = catalog_for_locale(Some(locale));
