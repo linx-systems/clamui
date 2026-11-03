@@ -26,12 +26,20 @@ fn temporary_directory(label: &str) -> std::path::PathBuf {
     directory
 }
 
-fn passwd_home(uid: u32) -> std::path::PathBuf {
+fn host_passwd_home(uid: u32) -> std::path::PathBuf {
     let uid_text = uid.to_string();
-    let output = Command::new("/usr/bin/getent")
+    let mut command =
+        if std::env::var_os("FLATPAK_ID").is_some() || Path::new("/.flatpak-info").is_file() {
+            let mut command = Command::new("flatpak-spawn");
+            command.args(["--host", "/usr/bin/getent"]);
+            command
+        } else {
+            Command::new("/usr/bin/getent")
+        };
+    let output = command
         .args(["passwd", &uid_text])
         .output()
-        .expect("query passwd database");
+        .expect("query authoritative passwd database");
     assert!(output.status.success(), "getent passwd must succeed");
     let record = String::from_utf8(output.stdout).expect("passwd record is UTF-8");
     let home = record
@@ -68,7 +76,7 @@ fn staging_root_comes_from_passwd_not_environment() {
     if let Some(forged_home) = std::env::var_os(CHILD) {
         let forged_home = std::path::PathBuf::from(forged_home);
         let root = staging_root_for_uid(uid()).expect("derive passwd home staging root");
-        let expected = passwd_home(uid()).join(".cache/clamui/privileged-staging");
+        let expected = host_passwd_home(uid()).join(".cache/clamui/privileged-staging");
         assert_eq!(root, expected);
         assert!(!root.starts_with(&forged_home));
         return;

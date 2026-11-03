@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { notify, openExternal, openPaths, request } from "../api";
+import { type ManualConfiguration, useConfigurationRecovery } from "../ConfigurationRecovery";
+import { isHelperTrustError } from "../helperTrustError";
 import { _ } from "../i18n";
 
 type ConfigKind = "freshclam" | "clamd";
@@ -58,6 +60,7 @@ type Schedule = {
 
 type ApplyResult = {
   status: "applied" | "partially_applied" | "failed" | "no_changes";
+  manual_configurations: readonly ManualConfiguration[];
   durable_groups?: string[];
   failures?: Array<{ group: string; message: string; path?: string }>;
   configs?: Array<{ kind: ConfigKind; path: string; changed: boolean; written: boolean; error?: string }>;
@@ -66,7 +69,7 @@ type ApplyResult = {
 };
 
 type ReportTone = "success" | "warning" | "error" | "info";
-type SaveReport = { tone: ReportTone; text: string } | null;
+type SaveReport = { tone: ReportTone; message: string; technicalDetails?: string } | null;
 
 const EMPTY_VALUES: ConfigValues = {};
 const DAY_LABELS = [
@@ -346,6 +349,7 @@ function CustomUrlListField({ values, onChange }: { values: string[]; onChange: 
 }
 
 export default function ConfigPreferences({ section }: { section: string }) {
+  const { clear: clearConfigurationRecovery, helperFailed, open: openConfigurationRecovery } = useConfigurationRecovery();
   const [freshclam, setFreshclam] = useState<ConfigDocument | null>(null);
   const [clamd, setClamd] = useState<ConfigDocument | null>(null);
   const [scanner, setScanner] = useState<ScannerStatus | null>(null);
@@ -353,24 +357,52 @@ export default function ConfigPreferences({ section }: { section: string }) {
   const [schedule, setSchedule] = useState<Schedule>(defaultSchedule);
   const [scheduleBaseline, setScheduleBaseline] = useState<Schedule>(defaultSchedule);
   const [report, setReport] = useState<SaveReport>(null);
+  const [manualConfigurations, setManualConfigurations] = useState<readonly ManualConfiguration[]>([]);
+  const [configLoadCount, setConfigLoadCount] = useState(0);
   const [busy, setBusy] = useState(false);
-
+  const loadRequests = useRef<Record<ConfigKind, number>>({ freshclam: 0, clamd: 0 });
+  const persistedConfigPaths = useRef<Record<ConfigKind, string>>({ freshclam: "", clamd: "" });
+  const contextVersion = useRef(0);
+  const saveAttempt = useRef(0);
+  const clearRecovery = useCallback(() => {
+    setManualConfigurations([]);
+    clearConfigurationRecovery();
+  }, [clearConfigurationRecovery]);
+  const changeConfigContext = useCallback(() => {
+    contextVersion.current += 1;
+    saveAttempt.current += 1;
+    clearRecovery();
+  }, [clearRecovery]);
   const loadConfig = useCallback(async (kind: ConfigKind, path?: string, baselinePath?: string) => {
-    const loaded = await request<LoadResult>("config.load", path ? { kind, path } : { kind });
-    const next: ConfigDocument = {
-      kind,
-      path: loaded.path ?? path ?? "",
-      baselinePath: baselinePath ?? loaded.path ?? path ?? "",
-      values: cloneValues(loaded.values ?? EMPTY_VALUES),
-      baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
-      needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
-      readable: loaded.readable ?? false,
-      error: loaded.error,
-    };
-    if (kind === "freshclam") setFreshclam(next);
-    else setClamd(next);
-    return next;
-  }, []);
+    const requestId = ++loadRequests.current[kind];
+    setConfigLoadCount((count) => count + 1);
+    try {
+      const loaded = await request<LoadResult>("config.load", path ? { kind, path } : { kind });
+      if (requestId !== loadRequests.current[kind]) {
+        return;
+      }
+      const loadedPath = loaded.path ?? path ?? "";
+      const loadedBaselinePath = baselinePath ?? loadedPath;
+      if (!persistedConfigPaths.current[kind]) {
+        persistedConfigPaths.current[kind] = loadedBaselinePath;
+      }
+      const next: ConfigDocument = {
+        kind,
+        path: loadedPath,
+        baselinePath: persistedConfigPaths.current[kind],
+        values: cloneValues(loaded.values ?? EMPTY_VALUES),
+        baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
+        needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
+        readable: loaded.readable ?? false,
+        error: loaded.error,
+      };
+      changeConfigContext();
+      if (kind === "freshclam") setFreshclam(next);
+      else setClamd(next);
+    } finally {
+      setConfigLoadCount((count) => count - 1);
+    }
+  }, [changeConfigContext]);
 
   const refreshScanner = useCallback(async () => {
     try {
@@ -408,6 +440,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
 
   const selectConfig = useCallback(async (kind: ConfigKind, path: string) => {
     const existing = kind === "freshclam" ? freshclam : clamd;
+    changeConfigContext();
     await loadConfig(kind, path, existing?.baselinePath ?? "");
     notify(
       _(
@@ -416,7 +449,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
       ),
       "info",
     );
-  }, [clamd, freshclam, loadConfig]);
+  }, [changeConfigContext, clamd, freshclam, loadConfig]);
 
   const detectConfig = useCallback(async (kind: ConfigKind) => {
     try {
@@ -448,25 +481,39 @@ export default function ConfigPreferences({ section }: { section: string }) {
   const authorizeRead = useCallback(async (kind: ConfigKind) => {
     const document = kind === "freshclam" ? freshclam : clamd;
     if (!document?.path) return;
+    changeConfigContext();
+    const requestId = ++loadRequests.current[kind];
+    setConfigLoadCount((count) => count + 1);
     try {
       const loaded = await request<LoadResult>("config.read_authorized", { path: document.path });
+      if (requestId !== loadRequests.current[kind]) {
+        return;
+      }
+      if (!persistedConfigPaths.current[kind]) {
+        persistedConfigPaths.current[kind] = document.baselinePath;
+      }
       const next: ConfigDocument = {
         kind,
         path: loaded.path ?? document.path,
-        baselinePath: document.baselinePath,
+        baselinePath: persistedConfigPaths.current[kind],
         values: cloneValues(loaded.values ?? EMPTY_VALUES),
         baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
         needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
         readable: loaded.readable ?? true,
         error: loaded.error,
       };
+      changeConfigContext();
       if (kind === "freshclam") setFreshclam(next);
       else setClamd(next);
       notify(_("Configuration loaded with administrator authorization."), "success");
     } catch (error) {
-      notify(String(error), "error");
+      if (requestId === loadRequests.current[kind]) {
+        notify(String(error), "error");
+      }
+    } finally {
+      setConfigLoadCount((count) => count - 1);
     }
-  }, [clamd, freshclam]);
+  }, [changeConfigContext, clamd, freshclam]);
 
   const updateConfig = useCallback((kind: ConfigKind, updater: (values: ConfigValues) => ConfigValues) => {
     const setDocument = kind === "freshclam" ? setFreshclam : setClamd;
@@ -503,6 +550,13 @@ export default function ConfigPreferences({ section }: { section: string }) {
   }, [backend, refreshScanner]);
 
   const saveAndApply = useCallback(async () => {
+    if (configLoadCount > 0) {
+      return;
+    }
+    const attempt = ++saveAttempt.current;
+    const saveContext = contextVersion.current;
+    const isCurrentAttempt = (): boolean => attempt === saveAttempt.current && saveContext === contextVersion.current;
+    clearRecovery();
     const freshclamSnapshot = freshclam && {
       ...freshclam,
       values: cloneValues(freshclam.values),
@@ -522,7 +576,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
     const unselected = configs.find((document) => !document.path);
     if (unselected) {
       const message = _("Choose a configuration file before applying its changes.");
-      setReport({ tone: "error", text: message });
+      setReport({ tone: "error", message });
       notify(message, "error");
       return;
     }
@@ -534,7 +588,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
     );
     if (onAccessIncluded && !hasLoopPrevention) {
       const message = _("On-Access scanning requires an excluded username, UID, or root user to prevent scan loops.");
-      setReport({ tone: "error", text: message });
+      setReport({ tone: "error", message });
       notify(message, "error");
       return;
     }
@@ -542,7 +596,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
     const scheduleChanged = !schedulesEqual(scheduleSnapshot, scheduleBaseline);
     if (changedConfigs.length === 0 && !scheduleChanged) {
       const message = _("No changes to apply.");
-      setReport({ tone: "info", text: message });
+      setReport({ tone: "info", message });
       notify(message, "info");
       return;
     }
@@ -551,9 +605,13 @@ export default function ConfigPreferences({ section }: { section: string }) {
     try {
       for (const config of changedConfigs) {
         const validation = await request<{ valid: boolean; errors: string[] }>("config.validate", { kind: config.kind, values: config.values });
+        if (!isCurrentAttempt()) {
+          return;
+        }
         if (!validation.valid) {
-          const message = validation.errors.join("\n") || _("Configuration validation failed.");
-          setReport({ tone: "error", text: message });
+          const technicalDetails = validation.errors.join("\n");
+          const message = _("Configuration validation failed.");
+          setReport({ tone: "error", message, ...(technicalDetails ? { technicalDetails } : {}) });
           notify(message, "error");
           return;
         }
@@ -570,6 +628,12 @@ export default function ConfigPreferences({ section }: { section: string }) {
       const durablePathKeys = new Set(result.config_paths?.durable_keys ?? []);
       const freshclamPathDurable = durablePathKeys.has("freshclam_conf_path");
       const clamdPathDurable = durablePathKeys.has("clamd_conf_path");
+      if (freshclamPathDurable && freshclamSnapshot) {
+        persistedConfigPaths.current.freshclam = freshclamSnapshot.path;
+      }
+      if (clamdPathDurable && clamdSnapshot) {
+        persistedConfigPaths.current.clamd = clamdSnapshot.path;
+      }
       if (freshclamSnapshot && (written.has("freshclam") || freshclamPathDurable)) {
         setFreshclam((current) => {
           if (!current) return current;
@@ -597,31 +661,54 @@ export default function ConfigPreferences({ section }: { section: string }) {
       const scheduleWritten = result.schedule?.written === true || result.schedule?.success === true
         || (result.durable_groups ?? []).some((group) => group === "scheduled_preferences" || group === "schedule");
       if (scheduleChanged && scheduleWritten) setScheduleBaseline(scheduleSnapshot);
+      if (!isCurrentAttempt()) {
+        return;
+      }
 
       const durable = (result.durable_groups ?? []).join(", ");
-      const explicitFailures = (result.failures ?? []).map((failure) => `${failure.group}: ${failure.message}`);
-      const configFailures = (result.configs ?? [])
-        .filter((config) => Boolean(config.error))
-        .map((config) => `${config.path}: ${config.error}`);
-      const failures = [...explicitFailures, ...configFailures, ...(result.schedule?.error ? [`schedule: ${result.schedule.error}`] : [])]
+      const tone: ReportTone = result.status === "applied" ? "success" : result.status === "no_changes" ? "info" : result.status === "partially_applied" ? "warning" : "error";
+      const diagnostics = [
+        ...(result.failures ?? []).map((failure) => ({
+          context: `${failure.group}${failure.path ? ` (${failure.path})` : ""}`,
+          rawError: failure.message,
+        })),
+        ...(result.configs ?? [])
+          .filter((config): config is typeof config & { error: string } => Boolean(config.error))
+          .map((config) => ({ context: config.path, rawError: config.error })),
+        ...(result.schedule?.error ? [{ context: "schedule", rawError: result.schedule.error }] : []),
+      ];
+      const helperFailure = tone === "warning" || tone === "error"
+        ? diagnostics.find(({ rawError }) => isHelperTrustError(rawError))?.rawError
+        : undefined;
+      const technicalDetails = diagnostics
+        .map(({ context, rawError }) => `${context}: ${rawError}`)
         .filter((failure, index, allFailures) => allFailures.indexOf(failure) === index)
         .join("\n");
-      const text = [
+      const message = [
         result.status === "applied" ? _("Configuration saved and applied.") : result.status === "no_changes" ? _("No changes to apply.") : _("Some changes could not be applied."),
         durable && `${_("Saved groups")}: ${durable}`,
-        failures,
       ].filter(Boolean).join("\n");
-      const tone: ReportTone = result.status === "applied" ? "success" : result.status === "no_changes" ? "info" : result.status === "partially_applied" ? "warning" : "error";
-      setReport({ tone, text });
-      notify(text, tone === "warning" ? "warning" : tone === "error" ? "error" : tone === "success" ? "success" : "info");
+      const hasUnconfirmedConfiguration = (result.configs ?? []).some((config) => config.changed && !config.written);
+      const recoveryConfigurations = hasUnconfirmedConfiguration ? result.manual_configurations : [];
+      setManualConfigurations(recoveryConfigurations);
+      setReport({ tone, message, ...(technicalDetails ? { technicalDetails } : {}) });
+      if (helperFailure) {
+        helperFailed(helperFailure, recoveryConfigurations);
+      } else {
+        notify(tone === "warning" || tone === "error" ? message.split("\n", 1)[0] : message, tone);
+      }
     } catch (error) {
-      const message = String(error);
-      setReport({ tone: "error", text: message });
-      notify(message, "error");
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      const technicalDetails = String(error);
+      const message = _("Some changes could not be applied.");
+      setReport({ tone: "error", message, technicalDetails });
+      notify(isHelperTrustError(technicalDetails) ? technicalDetails : message, "error");
     } finally {
       setBusy(false);
     }
-  }, [clamd, freshclam, schedule, scheduleBaseline]);
+  }, [clamd, clearRecovery, configLoadCount, freshclam, helperFailed, schedule, scheduleBaseline]);
 
   const scannerSummary = useMemo(() => {
     if (!scanner) return _("Checking scanner status…");
@@ -780,9 +867,23 @@ export default function ConfigPreferences({ section }: { section: string }) {
           // Translators: Keep clamd.conf unchanged; it is a configuration file name.
           "Scanner and On-Access changes share one clamd.conf proposal; neither form can overwrite the other's detached changes.",
         )}</p>
-        <button className="button primary" type="button" disabled={busy} onClick={() => void saveAndApply()}>{busy ? _("Saving…") : _("Save & Apply")}</button>
+        <button className="button primary" type="button" disabled={busy || configLoadCount > 0} onClick={() => void saveAndApply()}>{busy ? _("Saving…") : _("Save & Apply")}</button>
       </section>
-      {report && <section className={`notice ${report.tone}`} aria-live="polite"><pre>{report.text}</pre></section>}
+      {report && <section className={`notice ${report.tone} preferences-save-report`} aria-live="polite">
+        <div className="preferences-save-report-content">
+          <p className="preferences-save-report-message">{report.message}</p>
+          {report.technicalDetails && <details className="preferences-save-report-details">
+            <summary>{_("Technical details")}</summary>
+            <pre>{report.technicalDetails}</pre>
+          </details>}
+          {manualConfigurations.length > 0 ? <div className="preferences-save-report-actions">
+            <button className="button" type="button" onClick={() => openConfigurationRecovery(manualConfigurations)}>{_(
+              // Translators: This button opens the failed native configuration snapshot.
+              "See Configuration",
+            )}</button>
+          </div> : null}
+        </div>
+      </section>}
     </>}
   </div>;
 }

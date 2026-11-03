@@ -1,7 +1,11 @@
 use crate::common::{expand_path, now_iso, path_from_wire, Context};
 use crate::AppResult;
+use base64::prelude::{Engine as _, BASE64_URL_SAFE_NO_PAD};
+use icu_casemap::CaseMapper;
+use icu_locale_core::Locale;
 use rusqlite::types::ValueRef;
-use rusqlite::{params, Connection, OpenFlags, Row};
+use rusqlite::{params, Connection, OpenFlags, Row, TransactionBehavior};
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::ffi::{CStr, CString, OsStr, OsString};
@@ -95,6 +99,28 @@ enum Status {
     RestoreDestinationExists,
     InvalidRestorePath,
     Error,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct UiCursor {
+    anchor_id: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    after: Option<CursorPosition>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct CursorPosition {
+    detection_date: String,
+    id: i64,
+}
+
+struct UiListRequest {
+    limit: usize,
+    search: String,
+    locale: Locale,
+    cursor: Option<UiCursor>,
 }
 
 impl Status {
@@ -495,6 +521,166 @@ impl QuarantineManager {
             .map_err(|error| error.to_string())
     }
 
+    fn list_ui(&self, request: UiListRequest) -> AppResult<Value> {
+        self.maybe_cleanup_orphans();
+        let mut connection = self.connection()?;
+        let transaction = connection
+            .transaction_with_behavior(TransactionBehavior::Deferred)
+            .map_err(|error| error.to_string())?;
+        let (entry_count, total_size) = transaction
+            .query_row(
+                "SELECT COUNT(*), COALESCE(SUM(file_size), 0) FROM quarantine",
+                [],
+                |row| Ok((row.get::<_, i64>(0)? as u64, row.get::<_, i64>(1)? as u64)),
+            )
+            .map_err(|error| error.to_string())?;
+        let newest_id = transaction
+            .query_row("SELECT MAX(id) FROM quarantine", [], |row| {
+                row.get::<_, Option<i64>>(0)
+            })
+            .map_err(|error| error.to_string())?;
+        let cursor = if entry_count == 0 {
+            None
+        } else {
+            request.cursor.or_else(|| {
+                newest_id.map(|anchor_id| UiCursor {
+                    anchor_id,
+                    after: None,
+                })
+            })
+        };
+        let Some(cursor) = cursor else {
+            transaction.commit().map_err(|error| error.to_string())?;
+            return Ok(json!({
+                "entries": [],
+                "total_size": total_size,
+                "entry_count": entry_count,
+                "matched_count": 0,
+                "cursor": Value::Null,
+                "next_cursor": Value::Null,
+            }));
+        };
+
+        let (mut entries, matched_count) = if request.search.is_empty() {
+            let matched_count = transaction
+                .query_row(
+                    "SELECT COUNT(*) FROM quarantine WHERE id <= ?1",
+                    [cursor.anchor_id],
+                    |row| row.get::<_, i64>(0),
+                )
+                .map_err(|error| error.to_string())? as u64;
+            let mut entries = Vec::with_capacity(request.limit + 1);
+            match &cursor.after {
+                Some(after) => {
+                    let mut statement = transaction.prepare(
+                        "SELECT id, original_path, quarantine_path, threat_name, detection_date, file_size, file_hash, original_permissions
+                         FROM quarantine
+                         WHERE id <= ?1 AND (detection_date < ?2 OR (detection_date = ?2 AND id < ?3))
+                         ORDER BY detection_date DESC, id DESC
+                         LIMIT ?4",
+                    ).map_err(|error| error.to_string())?;
+                    let mut rows = statement
+                        .query(params![
+                            cursor.anchor_id,
+                            &after.detection_date,
+                            after.id,
+                            (request.limit + 1) as i64
+                        ])
+                        .map_err(|error| error.to_string())?;
+                    while let Some(row) = rows.next().map_err(|error| error.to_string())? {
+                        entries.push(entry_from_row(row).map_err(|error| error.to_string())?);
+                    }
+                }
+                None => {
+                    let mut statement = transaction.prepare(
+                        "SELECT id, original_path, quarantine_path, threat_name, detection_date, file_size, file_hash, original_permissions
+                         FROM quarantine
+                         WHERE id <= ?1
+                         ORDER BY detection_date DESC, id DESC
+                         LIMIT ?2",
+                    ).map_err(|error| error.to_string())?;
+                    let mut rows = statement
+                        .query(params![cursor.anchor_id, (request.limit + 1) as i64])
+                        .map_err(|error| error.to_string())?;
+                    while let Some(row) = rows.next().map_err(|error| error.to_string())? {
+                        entries.push(entry_from_row(row).map_err(|error| error.to_string())?);
+                    }
+                }
+            }
+            (entries, matched_count)
+        } else {
+            let mapper = CaseMapper::new();
+            let needle = mapper.lowercase_to_string(&request.search, &request.locale.id);
+            let mut entries = Vec::with_capacity(request.limit + 1);
+            let mut matched_count = 0_u64;
+            let mut statement = transaction.prepare(
+                "SELECT id, original_path, quarantine_path, threat_name, detection_date, file_size, file_hash, original_permissions
+                 FROM quarantine
+                 WHERE id <= ?1
+                 ORDER BY detection_date DESC, id DESC",
+            ).map_err(|error| error.to_string())?;
+            let mut rows = statement
+                .query([cursor.anchor_id])
+                .map_err(|error| error.to_string())?;
+            while let Some(row) = rows.next().map_err(|error| error.to_string())? {
+                let entry = entry_from_row(row).map_err(|error| error.to_string())?;
+                let threat_matches = mapper
+                    .lowercase_to_string(&entry.threat_name, &request.locale.id)
+                    .contains(needle.as_ref());
+                let path_matches = if threat_matches {
+                    false
+                } else {
+                    let original_path = entry.original_path.display();
+                    mapper
+                        .lowercase_to_string(&original_path, &request.locale.id)
+                        .contains(needle.as_ref())
+                };
+                if !threat_matches && !path_matches {
+                    continue;
+                }
+                matched_count += 1;
+                let is_after_cursor = match cursor.after.as_ref() {
+                    Some(after) => entry_precedes_cursor(&entry, after),
+                    None => true,
+                };
+                if is_after_cursor && entries.len() < request.limit + 1 {
+                    entries.push(entry);
+                }
+            }
+            (entries, matched_count)
+        };
+        let has_next = entries.len() > request.limit;
+        if has_next {
+            entries.pop();
+        }
+        let current_cursor = encode_cursor(&cursor)?;
+        let next_cursor = if has_next {
+            entries
+                .last()
+                .map(|entry| {
+                    encode_cursor(&UiCursor {
+                        anchor_id: cursor.anchor_id,
+                        after: Some(CursorPosition {
+                            detection_date: entry.detection_date.clone(),
+                            id: entry.id,
+                        }),
+                    })
+                })
+                .transpose()?
+        } else {
+            None
+        };
+        transaction.commit().map_err(|error| error.to_string())?;
+        Ok(json!({
+            "entries": entries.into_iter().map(|entry| entry.to_json()).collect::<Vec<_>>(),
+            "total_size": total_size,
+            "entry_count": entry_count,
+            "matched_count": matched_count,
+            "cursor": current_cursor,
+            "next_cursor": next_cursor,
+        }))
+    }
+
     fn get_entry(&self, id: i64) -> AppResult<Option<QuarantineEntry>> {
         let connection = self.connection()?;
         let mut statement = connection.prepare(
@@ -783,6 +969,9 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
         }
         "restore" => Ok(manager.restore(ctx, required_id(&args)?).into_json()),
         "delete" => Ok(manager.delete(ctx, required_id(&args)?).into_json()),
+        "list" if args.get("schema").and_then(Value::as_str) == Some("ui") => {
+            manager.list_ui(parse_ui_list_request(&args)?)
+        }
         "list" => {
             let entries = manager.list()?;
             let (entry_count, total_size) = manager.statistics()?;
@@ -819,6 +1008,70 @@ fn required_id(args: &Value) -> AppResult<i64> {
         .and_then(Value::as_i64)
         .filter(|id| *id > 0)
         .ok_or_else(|| "quarantine id must be a positive integer".into())
+}
+
+fn parse_ui_list_request(args: &Value) -> AppResult<UiListRequest> {
+    let limit = match args.get("limit") {
+        None => 20,
+        Some(value) => value
+            .as_u64()
+            .filter(|limit| (1..=100).contains(limit))
+            .ok_or_else(|| "quarantine.list limit must be an integer from 1 to 100".to_owned())?
+            as usize,
+    };
+    let search = match args.get("search") {
+        None => String::new(),
+        Some(value) => value
+            .as_str()
+            .ok_or_else(|| "quarantine.list search must be a string".to_owned())?
+            .to_owned(),
+    };
+    let locale_text = match args.get("search_locale") {
+        None => "und",
+        Some(value) => value
+            .as_str()
+            .ok_or_else(|| "quarantine.list search_locale must be a string".to_owned())?,
+    };
+    let locale = locale_text
+        .parse::<Locale>()
+        .map_err(|_| "quarantine.list search_locale must be a valid locale".to_owned())?;
+    let cursor = match args.get("cursor") {
+        None | Some(Value::Null) => None,
+        Some(Value::String(value)) => Some(decode_cursor(value)?),
+        Some(_) => return Err("quarantine.list cursor must be a string or null".into()),
+    };
+    Ok(UiListRequest {
+        limit,
+        search,
+        locale,
+        cursor,
+    })
+}
+
+fn decode_cursor(value: &str) -> AppResult<UiCursor> {
+    let bytes = BASE64_URL_SAFE_NO_PAD
+        .decode(value)
+        .map_err(|_| "quarantine.list cursor must be a valid cursor".to_owned())?;
+    let cursor = serde_json::from_slice::<UiCursor>(&bytes)
+        .map_err(|_| "quarantine.list cursor must be a valid cursor".to_owned())?;
+    if cursor.anchor_id <= 0
+        || cursor.after.as_ref().is_some_and(|after| {
+            after.id <= 0 || after.id > cursor.anchor_id || after.detection_date.is_empty()
+        })
+    {
+        return Err("quarantine.list cursor must be a valid cursor".into());
+    }
+    Ok(cursor)
+}
+
+fn encode_cursor(cursor: &UiCursor) -> AppResult<String> {
+    let bytes = serde_json::to_vec(cursor).map_err(|error| error.to_string())?;
+    Ok(BASE64_URL_SAFE_NO_PAD.encode(bytes))
+}
+
+fn entry_precedes_cursor(entry: &QuarantineEntry, cursor: &CursorPosition) -> bool {
+    entry.detection_date < cursor.detection_date
+        || (entry.detection_date == cursor.detection_date && entry.id < cursor.id)
 }
 
 fn entry_from_row(row: &Row<'_>) -> rusqlite::Result<QuarantineEntry> {

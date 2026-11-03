@@ -2,12 +2,53 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a Vietnamese (`vi`) translation.
+
 ### Changed
+
+- Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
+- Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
+- Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
+- Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
+- Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
+- Updated `rfd` from 0.15.4 to 0.17.2 for the native file, folder, and export dialogs. The lockfile removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
+
+### Fixed
+
+- Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
+- Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
+- Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
+
+## [0.5.1] - 2026-11-01
+### Fixed
+
+- Fixed Flatpak helper-installation and configuration-staging lookups to validate and run the host's trusted `getent`, retaining authoritative passwd homes and executable ownership and permission checks.
+- Fixed Flatpak helper-package verification to resolve and execute trusted checksum and GnuPG tools on the host, preserving pinned signatures and signed archive-member checks.
+- Fixed helper-installation errors clipping long diagnostics and unbroken paths; complete messages now wrap and remain selectable within the scrolling dialog.
+- Fixed Flathub manifest lint compatibility by relying on Flatpak's default application D-Bus permissions instead of redundantly declaring ClamUI's own bus name.
+
+### Maintenance
+
+- Fixed GitHub Actions release-note output framing when `RELEASE_NOTES.md` lacks a final newline; this is post-tag CI maintenance and not part of the immutable v0.5.0 runtime release.
+- Corrected website copy to describe the native Rust/Tauri desktop runtime and its system GTK 3 and WebKitGTK 4.1 dependencies.
+
+## [0.5.0] - 2026-11-01
+
+### Changed
+
+- Updated the release documentation for the v0.5.0 Rust/Tauri package set and its deployment boundaries: GitHub release assets and the separate Flathub store rollout remain distinct.
+
+- Updated `ctutils` to 0.4.4, `rustls-webpki` to 0.103.16, `webpki-roots` to 1.0.10, `zip` to 9.2.1, and Vite to 6.4.5 for identified dependency advisories; removed the unused archive-codec/zstd dependency chain. This does not assert prior application exploitability, ZIP-extraction reachability, or complete audit coverage.
 
 - Added a separate snapshot-only **Network** sidebar for current TCP/UDP listeners and connections, endpoint copying, filtering, and permission-aware process attribution; it neither monitors traffic nor changes the advisory Audit or deep-scan workflows.
 - Added explicit browser-only VirusTotal IP-report confirmation with a conservative public-IP policy; private, special-purpose, scoped, and wildcard endpoints stay disabled and no port or process data is shared.
 - Expanded the advisory firewall audit with independent UFW, firewalld, nftables, IPv4/IPv6 iptables, and supported management-interface inventory while keeping host inspection read-only and non-interactive.
 - Moved Save & Apply proposal validation and persistence into a GTK-free workflow, with click-time snapshots and explicit durable outcomes for partial failures.
+- Added **See Configuration** to failed **Save & Apply** reports. It displays the frozen exact native ClamAV configuration attempted for each full target path, with separate copy actions for safe manual recovery; it never applies files or bypasses helper trust, and warns that a helper failure can follow partial writes.
+- Added an explicit **Install Helper** offer for a missing privileged helper on supported Debian-family native, source, AppImage, and Flatpak installs; it verifies the matching signed release package before graphical Polkit authorization, preserves safe manual repair for untrusted or unsupported cases, and requires an explicit Save retry after installation.
+- Added Fedora helper-only RPM support for explicit native and Flatpak-host recovery: matching signed published RPM and `.asc` assets are required, with DNF handling mutable hosts and guarded `rpm-ostree` handling Atomic desktops.
 - Consolidated standalone and daemon scan-result interpretation while retaining backend-specific counting and error semantics.
 - Strengthened property-based tests for log redaction, Unicode preservation, filesystem and symlink validation, scheduled-command quoting, and threat-classification precedence.
 - Rendered website Mermaid diagrams into accessible light and dark SVGs at build time, removing the Mermaid JavaScript payload from documentation pages.
@@ -38,12 +79,20 @@
 - Compared the public CLI against an exact legacy Python revision in an isolated HOME/XDG environment, and exercised a native Nemo action plus native Nautilus scripts against the running application. Nautilus and Dolphin GUIs were unavailable.
 
 ### Fixed
+- Fixed native Debian package compatibility with standard `dpkg-sig` 0.13 verification by uniformly compressing control and data archives with xz instead of the unsupported default zstd.
 - Fixed generation of immutable Flatpak release manifests when the checkout source block contains `skip:` entries.
 - Fixed pending Clamd size-unit repairs being omitted when normalized values matched the displayed baseline; reads and startup remain non-writing and do not request elevation.
 - Restored persisted debug-log size and backup-retention settings on every write, with safe fallbacks for unusable values.
-- Fixed locked Bun dependency installation in local source and Debian package builds with Bun 1.3.14.
+- Fixed locked Bun dependency installation in local source, Debian, and AppImage package builds with Bun 1.3.14; clean Debian CI runners now install the gettext catalog tools required by the package builder.
+- Fixed inconsistent button padding and spacing in the debug-log deletion confirmation dialog.
+- Fixed daemon scans aborting on filenames containing carriage returns or newlines; these files are scanned separately through open file descriptors while retaining exclusions, original detection paths, progress, and partial results. (#264)
+- Fixed uneven spacing between linked and plain-text contributor names in About.
+
 - Consolidated known privileged-helper trust failures into one localized, actionable recovery dialog instead of duplicate raw error notifications.
 - Checked Flatpak helper availability at the canonical host path and sanitized privileged-helper diagnostics before presentation while preserving useful paths and redacting secrets.
+- Distinguished a missing canonical system helper from an existing untrusted helper and provided actionable supported recovery; blocked protected writes remain unapplied and pending settings drafts can be retried after repair.
+- Fixed Flatpak recognition of a trusted, same-version protocol-v4 Debian `all` helper already installed at the canonical path; it no longer treats it as missing or requests a nonexistent architecture-specific release asset.
+- Wrapped settings-save diagnostics and toast messages so long errors remain readable without horizontal overflow.
 
 - Prevented delayed Save & Apply completion from replacing a newly selected configuration file with the previous save target.
 - Preserved literal backslashes before percent signs in cron scan targets and command arguments instead of letting cron interpret them as an input separator.
@@ -137,10 +186,11 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
 
+[0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/linx-systems/clamui/compare/v0.4.0...v0.4.1
-
 [0.4.0]: https://github.com/linx-systems/clamui/compare/v0.3.0...v0.4.0
 ## [0.3.0] - 2026-06-26
 
