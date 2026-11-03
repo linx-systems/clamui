@@ -24,13 +24,16 @@ Toolchain manifests are the source of truth. Typical local commands are:
 ```bash
 cargo test --workspace --locked
 cargo fmt --check --all
-cargo clippy --workspace --all-targets -- -D warnings
 ( cd desktop && bun install --frozen-lockfile )
 bun run --cwd desktop check
 bun run --cwd desktop build
+cargo clippy --workspace --all-targets --locked -- -D warnings
 bun run --cwd desktop tauri dev
 cargo run -p clamui-core --bin clamui-cli -- help
+
 ```
+
+`cargo clippy` compiles the production Tauri crate, whose `generate_context!` embeds `desktop/dist`; run the frozen frontend install and build first.
 
 Rust core tests live under `crates/clamui-core/tests/` alongside module-local tests. Add focused consumer-visible, data-compatibility, or security invariants beside the owning module; avoid implementation-text or mock-only tests.
 
