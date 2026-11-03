@@ -19,6 +19,8 @@
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
 - Regenerated the stale gettext template used by translation validation.
 - Restored Clippy by using a Clippy-compatible chunking form and building the frozen Bun frontend before linting so production `generate_context!` can embed `desktop/dist`.
+- Preserved native tray pixel ordering while updating its zero-copy chunk iteration for Rust 1.99 Clippy.
+- Fixed ordinary AppImage CI builds passing empty update metadata to `linuxdeploy`; release update information and `.zsync` sidecars remain intact.
 - Rejected VirusTotal uploads when the original pathname is substituted after lookup, retaining no-follow descriptor identity checks.
 
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
@@ -27,7 +29,7 @@
 
 ### Maintenance
 
-- Enabled verbose Tauri AppImage logs to expose `linuxdeploy` failures; this is diagnostic only and does not claim an AppImage packaging fix.
+- Enabled verbose Tauri AppImage logs to keep `linuxdeploy` failures actionable.
 
 
 

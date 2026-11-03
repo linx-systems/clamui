@@ -95,6 +95,15 @@ clean_build_environment() {
     unset GTK_PATH GTK_DATA_PREFIX GTK_EXE_PREFIX GTK_THEME GI_TYPELIB_PATH
     unset GDK_PIXBUF_MODULE_FILE GDK_PIXBUF_MODULEDIR GSETTINGS_SCHEMA_DIR
     unset LD_LIBRARY_PATH LD_PRELOAD
+    # linuxdeploy's AppImage plugin tests whether these metadata variables
+    # exist, not whether they contain metadata.  Do not let a CI expression
+    # that resolves to an empty string become an invalid `appimagetool -u ""`.
+    if [ -z "${UPDATE_INFORMATION:-}" ]; then
+        unset UPDATE_INFORMATION
+    fi
+    if [ -z "${LDAI_UPDATE_INFORMATION:-}" ]; then
+        unset LDAI_UPDATE_INFORMATION
+    fi
 }
 
 build_tauri_bundle() {
