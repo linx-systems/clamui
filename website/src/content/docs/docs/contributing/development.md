@@ -138,6 +138,8 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 ```
 
+Clippy compiles the production Tauri crate, whose `generate_context!` embeds `desktop/dist`; build the frozen frontend assets before running it.
+
 Exercise the real CLI and persisted compatibility fixtures in addition to unit tests. Test clean, EICAR, cancellation, scheduling dry-run, privileged-helper rejection, and compatible CLI output. For desktop work, manually verify Tauri startup, navigation, events, native dialogs, tray behavior, and file-argument forwarding.
 
 Recorded migration evidence includes Rust workspace tests and strict Clippy, real Tauri/AppImage/Flatpak EICAR scans through the host bridge, prior XDG JSON/SQLite/keyring compatibility, and desktop copy/ZIP-export coverage. It is not a zero-regression guarantee and does not claim exercised protected host writes, VirusTotal uploads, physical-device hardware, Wayland, or an aarch64 build of the current migration revision.
@@ -188,9 +190,11 @@ The checked-in `flathub/io.github.linx_systems.ClamUI.yml` currently has the sam
 
 ### Immutable Flatpak release packaging
 
-An official Rust Flatpak submission requires exactly three checked-in packaging inputs: a canonical YAML whose application source is a concrete public Git URL and full commit pin, `flathub/cargo-sources.json`, and `flathub/bun-sources.json`. The two source manifests must be generated from the settled `Cargo.lock` and the paired `desktop/bun.lock`/`desktop/yarn.lock`; do not hand-edit their checksums or retain legacy Python source JSON as a Rust packaging input.
+An official Rust Flatpak submission requires exactly three checked-in packaging inputs: a canonical YAML whose application source is a concrete public Git URL and full commit pin, `flathub/cargo-sources.json`, and `flathub/bun-sources.json`. `cargo-sources.json` derives from the settled `Cargo.lock`; `bun-sources.json` derives from the canonical `desktop/bun.lock` and its Bun-produced `desktop/yarn.lock` export. Do not hand-edit their checksums or retain legacy Python source JSON as a Rust packaging input.
 
-The product lockfile remains `desktop/bun.lock`. Before generation, intentionally export its paired Yarn lockfile after settling frontend dependencies:
+When updating a Rust dependency, constrain the resolver to the intended package (for example, `cargo update -p <crate> --precise <version>`) before regenerating the Cargo source input. Do not refresh the whole Cargo graph merely to update one dependency.
+
+The product lockfile remains `desktop/bun.lock`. After settling frontend dependencies, intentionally export its paired Yarn lockfile before generating Flatpak sources:
 
 ```bash
 ( cd desktop && bun install --frozen-lockfile --yarn )
