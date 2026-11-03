@@ -104,6 +104,10 @@ build_tauri_bundle() {
     (cd "$PROJECT_ROOT" && \
         cargo build --locked --release -p clamui-core \
             --bin clamui-scheduled-scan --bin clamui-apply-preferences)
+    # Install the locked frontend toolchain so this builder works from a clean
+    # checkout and `bun run tauri` resolves the project-local CLI.
+    log "Installing locked Bun dependencies"
+    (cd "$PROJECT_ROOT/desktop" && bun install --frozen-lockfile)
     # The Bun-locked Tauri CLI runs the frontend command from tauri.conf and
     # bundles the native Tauri/WebKitGTK application. No Python app is copied.
     (cd "$PROJECT_ROOT/desktop" && \

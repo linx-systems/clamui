@@ -75,6 +75,7 @@ fn load_and_save_retain_comments_order_and_repeated_directives() {
     )
     .expect("save");
     assert_eq!(saved["status"], "applied");
+    assert_eq!(saved["manual_configurations"], json!([]));
     assert_eq!(saved["config_paths"]["changed"], true);
     assert_eq!(saved["config_paths"]["durable"], true);
     assert_eq!(
@@ -147,6 +148,7 @@ fn clamd_size_unit_repair_is_reported_and_persisted_by_explicit_apply() {
     assert_eq!(applied["status"], "applied");
     assert_eq!(applied["configs"][0]["changed"], true);
     assert_eq!(applied["configs"][0]["written"], true);
+    assert_eq!(applied["manual_configurations"], json!([]));
     assert_eq!(
         fs::read_to_string(&path).expect("repaired configuration"),
         "# Retain this comment\nFutureClamavOption retained\nMaxFileSize 10M\nMaxScanSize 25M\nOnAccessMaxFileSize 0\n"

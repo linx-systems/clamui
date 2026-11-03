@@ -21,6 +21,46 @@ fn context() -> (TempDir, Context) {
     (temp, context)
 }
 
+fn history_entry(id: &str, timestamp: &str, log_type: &str, summary: &str) -> Value {
+    json!({
+        "id": id,
+        "timestamp": timestamp,
+        "type": log_type,
+        "status": "success",
+        "summary": summary,
+        "details": "details",
+        "path": null,
+        "duration": 0.0,
+        "scheduled": false,
+    })
+}
+
+fn atomically_replace_json(path: &Path, value: &Value) {
+    let replacement = path.with_extension("replacement");
+    fs::write(
+        &replacement,
+        serde_json::to_vec_pretty(value).expect("replacement JSON"),
+    )
+    .expect("replacement write");
+    fs::rename(replacement, path).expect("atomic replacement");
+}
+
+fn atomically_replace_json_preserving_mtime(path: &Path, value: &Value) {
+    let metadata = fs::metadata(path).expect("original metadata");
+    let original_modified = metadata.modified().expect("original modified time");
+    let replacement = path.with_extension("replacement");
+    let bytes = serde_json::to_vec_pretty(value).expect("replacement JSON");
+    assert_eq!(bytes.len() as u64, metadata.len(), "replacement size");
+    fs::write(&replacement, bytes).expect("replacement write");
+    fs::rename(replacement, path).expect("atomic replacement");
+    fs::OpenOptions::new()
+        .write(true)
+        .open(path)
+        .expect("replaced file")
+        .set_times(fs::FileTimes::new().set_modified(original_modified))
+        .expect("restore modified time");
+}
+
 fn fill_debug_log(path: &Path, content: &str, size: u64) {
     let mut file = fs::OpenOptions::new()
         .write(true)
@@ -100,7 +140,7 @@ fn save_migrates_legacy_history_and_never_persists_private_values() {
 }
 
 #[test]
-fn list_recovers_from_corrupt_index_and_skips_corrupt_entries() {
+fn list_recovers_from_missing_or_corrupt_index_and_skips_corrupt_entries() {
     let (_temp, context) = context();
     let saved = logs::save(
         &context,
@@ -111,19 +151,350 @@ fn list_recovers_from_corrupt_index_and_skips_corrupt_entries() {
     fs::write(logs_dir.join("log_index.json"), b"not JSON").expect("corrupt index");
     fs::write(logs_dir.join("broken.json"), b"{").expect("corrupt entry");
 
-    let entries = logs::dispatch(&context, "list", json!({"limit": 100})).expect("recovered list");
-    assert_eq!(entries.as_array().expect("array").len(), 1);
-    assert_eq!(entries[0]["id"], saved["id"]);
-    let rebuilt: Value =
-        serde_json::from_slice(&fs::read(logs_dir.join("log_index.json")).expect("rebuilt index"))
-            .expect("valid rebuilt index");
-    assert_eq!(rebuilt["version"], 1);
+    let recovered =
+        logs::dispatch(&context, "list", json!({"limit": 100})).expect("corrupt-index list");
     assert_eq!(
-        rebuilt["entries"].as_array().expect("index entries").len(),
-        1
+        recovered
+            .as_array()
+            .expect("entry array")
+            .iter()
+            .map(|entry| &entry["id"])
+            .collect::<Vec<_>>(),
+        vec![&saved["id"]]
+    );
+
+    let count = logs::dispatch(&context, "count", json!({})).expect("warm count");
+    assert_eq!(count["total_entries"], 1);
+
+    fs::remove_file(logs_dir.join("log_index.json")).expect("remove rebuilt index");
+    let rebuilt =
+        logs::dispatch(&context, "list", json!({"limit": 100})).expect("missing-index list");
+    assert_eq!(
+        rebuilt
+            .as_array()
+            .expect("entry array")
+            .iter()
+            .map(|entry| &entry["id"])
+            .collect::<Vec<_>>(),
+        vec![&saved["id"]]
     );
 }
 
+#[test]
+fn list_returns_actual_entries_for_the_maximum_u64_limit_after_warming_index() {
+    let (_temp, context) = context();
+    let saved = logs::save(
+        &context,
+        history_entry(
+            "max-limit-entry",
+            "2024-01-01T00:00:00+00:00",
+            "scan",
+            "Maximum limit",
+        ),
+    )
+    .expect("save entry");
+    logs::dispatch(&context, "list", json!({"limit": 10})).expect("warm list");
+
+    let entries =
+        logs::dispatch(&context, "list", json!({"limit": u64::MAX})).expect("maximum-limit list");
+    assert_eq!(
+        entries
+            .as_array()
+            .expect("entry array")
+            .iter()
+            .map(|entry| &entry["id"])
+            .collect::<Vec<_>>(),
+        vec![&saved["id"]]
+    );
+}
+
+#[test]
+fn list_preserves_tied_timestamp_order_between_cold_and_warm_indexes() {
+    let (_temp, context) = context();
+    for id in ["z-created-first", "a-created-second", "m-created-third"] {
+        logs::save(
+            &context,
+            history_entry(id, "2024-01-01T00:00:00+00:00", "scan", "Tied timestamp"),
+        )
+        .expect("save tied entry");
+    }
+
+    let logs_dir = context.paths.data_dir.join("logs");
+    fs::remove_file(logs_dir.join("log_index.json")).expect("remove warm index");
+    let cold = logs::dispatch(&context, "list", json!({"limit": 10})).expect("cold list");
+    let cold_ids = cold
+        .as_array()
+        .expect("cold entries")
+        .iter()
+        .map(|entry| entry["id"].as_str().expect("id").to_owned())
+        .collect::<Vec<_>>();
+
+    let warm = logs::dispatch(&context, "list", json!({"limit": 10})).expect("warm list");
+    let warm_ids = warm
+        .as_array()
+        .expect("warm entries")
+        .iter()
+        .map(|entry| entry["id"].as_str().expect("id").to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(warm_ids, cold_ids);
+}
+
+#[test]
+fn list_rebuilds_corrupted_cached_metadata_from_raw_scan_entries() {
+    let (_temp, context) = context();
+    let scan = logs::save(
+        &context,
+        history_entry(
+            "raw-newest-scan",
+            "2024-02-01T00:00:00+00:00",
+            "scan",
+            "Raw newest scan",
+        ),
+    )
+    .expect("save scan");
+    logs::save(
+        &context,
+        history_entry(
+            "raw-older-update",
+            "2024-01-01T00:00:00+00:00",
+            "update",
+            "Raw older update",
+        ),
+    )
+    .expect("save update");
+    logs::dispatch(&context, "list", json!({"limit": 10})).expect("warm list");
+
+    let index_path = context.paths.data_dir.join("logs/log_index.json");
+    let mut cache: Value =
+        serde_json::from_slice(&fs::read(&index_path).expect("index")).expect("index JSON");
+    let cached_scan = cache["entries"]
+        .as_array_mut()
+        .expect("cached entries")
+        .iter_mut()
+        .find(|entry| entry["id"] == scan["id"])
+        .expect("cached scan");
+    cached_scan["timestamp"] = json!("2099-01-01T00:00:00+00:00");
+    cached_scan["log_type"] = json!("update");
+    fs::write(
+        &index_path,
+        serde_json::to_vec_pretty(&cache).expect("corrupted cache JSON"),
+    )
+    .expect("write corrupted cache");
+
+    let filtered = logs::dispatch(&context, "list", json!({"limit": 1, "log_type": "scan"}))
+        .expect("filtered list");
+    assert_eq!(filtered[0]["id"], scan["id"]);
+
+    let newest = logs::dispatch(&context, "list", json!({"limit": 1})).expect("newest list");
+    assert_eq!(newest[0]["id"], scan["id"]);
+}
+
+#[test]
+fn list_refreshes_an_unselected_record_replaced_with_newer_metadata() {
+    let (_temp, context) = context();
+    let changed = logs::save(
+        &context,
+        history_entry(
+            "changed-entry",
+            "2024-01-01T00:00:00+00:00",
+            "scan",
+            "Original scan",
+        ),
+    )
+    .expect("save old entry");
+    let retained_scan = logs::save(
+        &context,
+        history_entry(
+            "retained-scan",
+            "2024-02-01T00:00:00+00:00",
+            "scan",
+            "Retained scan",
+        ),
+    )
+    .expect("save retained scan");
+    let selected_update = logs::save(
+        &context,
+        history_entry(
+            "selected-update",
+            "2024-03-01T00:00:00+00:00",
+            "update",
+            "Initially newest update",
+        ),
+    )
+    .expect("save selected update");
+
+    let initial = logs::dispatch(&context, "list", json!({"limit": 1})).expect("initial list");
+    assert_eq!(initial[0]["id"], selected_update["id"]);
+
+    let logs_dir = context.paths.data_dir.join("logs");
+    atomically_replace_json(
+        &logs_dir.join(format!(
+            "{}.json",
+            changed["id"].as_str().expect("changed id")
+        )),
+        &history_entry(
+            changed["id"].as_str().expect("changed id"),
+            "2024-04-01T00:00:00+00:00",
+            "update",
+            "Externally replaced record with deliberately longer metadata",
+        ),
+    );
+
+    let newest =
+        logs::dispatch(&context, "list", json!({"limit": 1})).expect("refreshed newest list");
+    assert_eq!(newest[0]["id"], changed["id"]);
+
+    let filtered = logs::dispatch(&context, "list", json!({"limit": 1, "log_type": "scan"}))
+        .expect("filtered list");
+    assert_eq!(filtered[0]["id"], retained_scan["id"]);
+}
+
+#[test]
+fn list_refreshes_an_unselected_same_length_replacement_with_restored_mtime() {
+    let (_temp, context) = context();
+    let changed = logs::save(
+        &context,
+        history_entry(
+            "time-preserved",
+            "2024-01-01T00:00:00+00:00",
+            "scan",
+            "Older record",
+        ),
+    )
+    .expect("save old entry");
+    let retained_scan = logs::save(
+        &context,
+        history_entry(
+            "current-scan",
+            "2024-02-01T00:00:00+00:00",
+            "scan",
+            "Current scan",
+        ),
+    )
+    .expect("save current scan");
+    let initial = logs::dispatch(&context, "list", json!({"limit": 1, "log_type": "scan"}))
+        .expect("initial filtered list");
+    assert_eq!(initial[0]["id"], retained_scan["id"]);
+
+    let path = context.paths.data_dir.join("logs").join(format!(
+        "{}.json",
+        changed["id"].as_str().expect("changed id")
+    ));
+    let mut replacement: Value =
+        serde_json::from_slice(&fs::read(&path).expect("old entry")).expect("old entry JSON");
+    replacement["timestamp"] = json!("2024-03-01T00:00:00+00:00");
+    replacement["summary"] = json!("Newer record");
+    atomically_replace_json_preserving_mtime(&path, &replacement);
+
+    let newest = logs::dispatch(&context, "list", json!({"limit": 1, "log_type": "scan"}))
+        .expect("refreshed filtered list");
+    assert_eq!(newest[0]["id"], changed["id"]);
+}
+
+#[test]
+fn list_detects_external_additions_and_deletions_with_legacy_filenames() {
+    let (_temp, context) = context();
+    let retained = logs::save(
+        &context,
+        history_entry(
+            "retained-entry",
+            "2024-01-01T00:00:00+00:00",
+            "update",
+            "Stored entry",
+        ),
+    )
+    .expect("save retained entry");
+    logs::dispatch(&context, "list", json!({"limit": 10})).expect("warm list");
+
+    let logs_dir = context.paths.data_dir.join("logs");
+    fs::write(
+        logs_dir.join("external-record.json"),
+        serde_json::to_vec_pretty(&history_entry(
+            "external-entry",
+            "2024-02-01T00:00:00+00:00",
+            "scan",
+            "Externally added entry",
+        ))
+        .expect("external entry JSON"),
+    )
+    .expect("write external entry");
+
+    let after_addition =
+        logs::dispatch(&context, "list", json!({"limit": 10})).expect("addition list");
+    assert_eq!(
+        after_addition
+            .as_array()
+            .expect("entry array")
+            .iter()
+            .map(|entry| entry["id"].as_str().expect("id"))
+            .collect::<Vec<_>>(),
+        vec![
+            "external-entry",
+            retained["id"].as_str().expect("retained id")
+        ]
+    );
+
+    fs::remove_file(logs_dir.join(format!(
+        "{}.json",
+        retained["id"].as_str().expect("retained id")
+    )))
+    .expect("remove retained entry");
+    let after_deletion =
+        logs::dispatch(&context, "list", json!({"limit": 10})).expect("deletion list");
+    assert_eq!(
+        after_deletion
+            .as_array()
+            .expect("entry array")
+            .iter()
+            .map(|entry| entry["id"].as_str().expect("id"))
+            .collect::<Vec<_>>(),
+        vec!["external-entry"]
+    );
+}
+
+#[test]
+fn list_rebuilds_a_version_one_index_before_serving_private_legacy_entries() {
+    let (_temp, context) = context();
+    let logs_dir = context.paths.data_dir.join("logs");
+    fs::create_dir_all(&logs_dir).expect("legacy log directory");
+    let mut legacy = history_entry(
+        "legacy-entry",
+        "2024-01-01T00:00:00+00:00",
+        "scan",
+        "Scanned /private/index-target",
+    );
+    legacy["details"] = json!("token=index-secret /private/index-target");
+    legacy["path"] = json!("/private/index-target");
+    fs::write(
+        logs_dir.join("unrelated-legacy-filename.json"),
+        serde_json::to_vec_pretty(&legacy).expect("legacy JSON"),
+    )
+    .expect("legacy write");
+    fs::write(
+        logs_dir.join("log_index.json"),
+        serde_json::to_vec_pretty(&json!({
+            "version": 1,
+            "entries": [{
+                "id": "legacy-entry",
+                "timestamp": "2024-01-01T00:00:00+00:00",
+                "type": "scan",
+            }],
+        }))
+        .expect("version-one index"),
+    )
+    .expect("write version-one index");
+
+    let entries = logs::dispatch(&context, "list", json!({"limit": 1, "log_type": "scan"}))
+        .expect("legacy-index list");
+    assert_eq!(entries[0]["id"], "legacy-entry");
+    assert!(!entries.to_string().contains("/private/index-target"));
+    assert!(!entries.to_string().contains("index-secret"));
+    assert!(
+        !fs::read_to_string(logs_dir.join("unrelated-legacy-filename.json"))
+            .expect("migrated data")
+            .contains("/private/index-target")
+    );
+}
 #[test]
 fn exports_preserve_legacy_wrappers_without_private_paths() {
     let (_temp, context) = context();

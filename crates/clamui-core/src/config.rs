@@ -257,11 +257,12 @@ impl ConfigDocument {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Proposal {
     kind: ConfigKind,
     path: PathBuf,
-    document: ConfigDocument,
+    document: Option<ConfigDocument>,
+    content: String,
     changed: bool,
 }
 
@@ -395,7 +396,7 @@ fn validate(ctx: &Context, args: Value) -> AppResult<Value> {
 
 fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
     let object = object(args)?;
-    let proposals = prepare_proposals(ctx, &object)?;
+    let mut proposals = prepare_proposals(ctx, &object)?;
     let schedule = optional_object(&object, "schedule")?
         .map(|schedule| {
             crate::scheduler::normalize_schedule(&Value::Object(schedule)).map_err(|error| {
@@ -451,11 +452,7 @@ fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
         for position in 0..direct.len() {
             let index = direct[position];
             let proposal = &proposals[index];
-            match write_direct(
-                ctx,
-                &proposal.path,
-                proposal.document.serialize().as_bytes(),
-            ) {
+            match write_direct(ctx, &proposal.path, proposal.content.as_bytes()) {
                 Ok(()) => outcomes[index].written = true,
                 Err(error) => {
                     outcomes[index].error = Some(error.clone());
@@ -484,10 +481,7 @@ fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
             .iter()
             .map(|index| {
                 let proposal = &proposals[*index];
-                crate::privileged::stage_config(
-                    proposal.document.serialize().as_bytes(),
-                    &proposal.path,
-                )
+                crate::privileged::stage_config(proposal.content.as_bytes(), &proposal.path)
             })
             .collect::<AppResult<Vec<_>>>();
         match staged.and_then(|writes| crate::privileged::write_staged_configs(ctx, &writes)) {
@@ -536,9 +530,11 @@ fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
         }
     }
 
-    for (index, outcome) in outcomes.iter().enumerate() {
+    for (proposal, outcome) in proposals.iter_mut().zip(&outcomes) {
         if outcome.changed && outcome.written {
-            cache_authorized_document(outcome.path.clone(), proposals[index].document.clone());
+            if let Some(document) = proposal.document.take() {
+                cache_authorized_document(outcome.path.clone(), document);
+            }
         }
     }
     if outcomes
@@ -665,7 +661,9 @@ fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
     } else {
         "partially_applied"
     };
-    Ok(json!({
+    let manual_configurations = manual_configurations(proposals, &outcomes);
+
+    let mut response = json!({
         "status": status,
         "durable_groups": durable_groups,
         "failures": failures,
@@ -675,7 +673,15 @@ fn save(ctx: &Context, args: Value, apply_schedule: bool) -> AppResult<Value> {
             "durable": config_paths_durable,
             "durable_keys": if config_paths_durable { config_path_keys } else { Vec::new() },
         },
-    }))
+    });
+    response
+        .as_object_mut()
+        .expect("configuration save response is an object")
+        .insert(
+            "manual_configurations".to_owned(),
+            Value::Array(manual_configurations),
+        );
+    Ok(response)
 }
 fn prepare_proposals(ctx: &Context, arguments: &Map<String, Value>) -> AppResult<Vec<Proposal>> {
     let configs = arguments
@@ -722,15 +728,37 @@ fn prepare_proposals(ctx: &Context, arguments: &Map<String, Value>) -> AppResult
         if !errors.is_empty() {
             return Err(errors.join("\n"));
         }
-        let changed = proposal.serialize() != loaded.serialize();
+        let content = proposal.serialize();
+        let changed = content != loaded.serialize();
         proposals.push(Proposal {
             kind,
             path,
-            document: proposal,
+            document: Some(proposal),
+            content,
             changed,
         });
     }
     Ok(proposals)
+}
+
+fn manual_configurations(proposals: Vec<Proposal>, outcomes: &[ConfigOutcome]) -> Vec<Value> {
+    proposals
+        .into_iter()
+        .zip(outcomes)
+        .filter_map(|(proposal, outcome)| {
+            if proposal.changed && !outcome.written {
+                let mut configuration = Map::new();
+                configuration.insert(
+                    "path".to_owned(),
+                    Value::String(proposal.path.to_string_lossy().into_owned()),
+                );
+                configuration.insert("content".to_owned(), Value::String(proposal.content));
+                Some(Value::Object(configuration))
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 fn schedule_settings(schedule: &Map<String, Value>) -> AppResult<Map<String, Value>> {
@@ -1129,4 +1157,121 @@ fn permissions_mode(metadata: &fs::Metadata) -> u32 {
 #[cfg(not(unix))]
 fn permissions_mode(_metadata: &fs::Metadata) -> u32 {
     0o600
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::BTreeMap;
+    use std::path::PathBuf;
+
+    #[test]
+    fn manual_configurations_preserve_native_text_for_failed_or_unconfirmed_writes() {
+        let failed_path = PathBuf::from("/etc/clamav/freshclam.conf");
+        let failed_document = ConfigDocument::parse(
+            b"# Preserve this native comment\nFutureClamavOption original\nDatabaseMirror first.example\n\nDatabaseMirror second.example\n",
+        )
+        .replace_values(BTreeMap::from([
+            (
+                "FutureClamavOption".to_owned(),
+                vec!["retained".to_owned()],
+            ),
+            (
+                "DatabaseMirror".to_owned(),
+                vec!["first.example".to_owned(), "replacement.example".to_owned()],
+            ),
+        ]));
+        let failed_content = failed_document.serialize();
+
+        let unconfirmed_document = ConfigDocument::parse(b"Checks 12\n").replace_values(
+            BTreeMap::from([("Checks".to_owned(), vec!["24".to_owned()])]),
+        );
+        let unconfirmed_content = unconfirmed_document.serialize();
+        let written_document = ConfigDocument::parse(b"MaxThreads 2\n").replace_values(
+            BTreeMap::from([("MaxThreads".to_owned(), vec!["4".to_owned()])]),
+        );
+        let written_content = written_document.serialize();
+        let unchanged_document = ConfigDocument::parse(b"Checks 12\n");
+        let unchanged_content = unchanged_document.serialize();
+
+        let configurations = manual_configurations(
+            vec![
+                Proposal {
+                    kind: ConfigKind::Freshclam,
+                    path: failed_path.clone(),
+                    document: Some(failed_document),
+                    content: failed_content,
+                    changed: true,
+                },
+                Proposal {
+                    kind: ConfigKind::Clamd,
+                    path: PathBuf::from("/etc/clamav/clamd-unconfirmed.conf"),
+                    document: Some(unconfirmed_document),
+                    content: unconfirmed_content,
+                    changed: true,
+                },
+                Proposal {
+                    kind: ConfigKind::Clamd,
+                    path: PathBuf::from("/etc/clamav/clamd.conf"),
+                    document: Some(written_document),
+                    content: written_content,
+                    changed: true,
+                },
+                Proposal {
+                    kind: ConfigKind::Onaccess,
+                    path: PathBuf::from("/etc/clamav/onaccess.conf"),
+                    document: Some(unchanged_document),
+                    content: unchanged_content,
+                    changed: false,
+                },
+            ],
+            &[
+                ConfigOutcome {
+                    kind: ConfigKind::Freshclam,
+                    path: failed_path.clone(),
+                    changed: true,
+                    written: false,
+                    error: Some(
+                        "privileged helper failed; earlier replacements may have succeeded"
+                            .to_owned(),
+                    ),
+                },
+                ConfigOutcome {
+                    kind: ConfigKind::Clamd,
+                    path: PathBuf::from("/etc/clamav/clamd-unconfirmed.conf"),
+                    changed: true,
+                    written: false,
+                    error: None,
+                },
+                ConfigOutcome {
+                    kind: ConfigKind::Clamd,
+                    path: PathBuf::from("/etc/clamav/clamd.conf"),
+                    changed: true,
+                    written: true,
+                    error: None,
+                },
+                ConfigOutcome {
+                    kind: ConfigKind::Onaccess,
+                    path: PathBuf::from("/etc/clamav/onaccess.conf"),
+                    changed: false,
+                    written: true,
+                    error: None,
+                },
+            ],
+        );
+
+        assert_eq!(
+            configurations,
+            vec![
+                serde_json::json!({
+                    "path": failed_path,
+                    "content": "# Preserve this native comment\nFutureClamavOption retained\nDatabaseMirror first.example\n\nDatabaseMirror replacement.example\n",
+                }),
+                serde_json::json!({
+                    "path": "/etc/clamav/clamd-unconfirmed.conf",
+                    "content": "Checks 24\n",
+                }),
+            ]
+        );
+    }
 }

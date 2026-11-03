@@ -28,7 +28,7 @@ The settings file is an object. ClamUI merges missing defaults, preserves unknow
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `language` | `"auto"` | Automatic system locale, or one of `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, or `zh_CN`; unsupported saved or system locales use English |
+| `language` | `"auto"` | Automatic system locale, or one of `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, or `zh_CN`; unsupported saved or system locales use English |
 | `notifications_enabled` | `true` | Global application notifications |
 | `minimize_to_tray` / `start_minimized` | `false` | Optional tray behavior |
 | `close_behavior` | `null` | `unset`, `minimize`, `quit`, or `ask` |
@@ -94,9 +94,15 @@ Built-in defaults are Quick Scan, Full Scan, and Home Folder. Their IDs are gene
 
 ## Host ClamAV settings
 
-**Database**, **Scanner**, and **On-Access** Preferences target host `freshclam.conf` and `clamd.conf`, including from Flatpak. They never write sandbox copies. The native `/usr/bin/clamui-apply-preferences` helper and `io.github.linx_systems.ClamUI.policy` authorize only allowlisted host configurations through the compatible protocol-v4 boundary. The in-app onboarding flow may report a ready helper only after validating a matching newly published, signed Rust release asset; source builds and older helpers do not supply that authorization. Missing trust, invalid input, or denied authorization fails closed without changing host configuration.
+**Database**, **Scanner**, and **On-Access** Preferences target host `freshclam.conf` and `clamd.conf`, including from Flatpak. They never write sandbox copies. The native `/usr/bin/clamui-apply-preferences` helper and `io.github.linx_systems.ClamUI.policy` authorize only allowlisted host configurations through the compatible protocol-v4 boundary. On native systems, a trusted canonical helper remains ready if automatic installation is unsupported or installed-package metadata cannot be inspected; a successfully reported version or architecture mismatch is reported as outdated and prompts repair, while every untrusted helper remains blocked. Flatpak continues to validate its host package state. On supported Debian-family and Fedora hosts, the local missing-helper diagnosis may show the explicit in-app offer without downloading release metadata. Automatic installation can complete only when matching signed published artifacts exist; before graphical Polkit authorization it verifies their signature, identity, version, size, digest, and compatible architecture, otherwise failing safely. Debian can use its signed same-version architecture-independent fallback only when no exact-architecture helper exists; Fedora requires the exact RPM. Missing trust, invalid input, or denied authorization fails closed without changing host configuration. See [installation](/docs/installation/#fedora-helper-rpm) for Fedora DNF and Atomic behavior.
 
 **Save & Apply** validates the snapshot captured when you click it. Configuration files, schedule settings, and timer/cron changes are not one atomic operation: later failures can leave earlier groups durable. Review each reported durable group and failure before retrying.
+
+### Recovering a failed configuration attempt
+
+When a failed configuration **Save & Apply** has valid native file proposals, its report offers **See Configuration**. This read-only view shows each full `clamd.conf` or `freshclam.conf` destination and the exact content prepared for that failed attempt. Copy the path and configuration separately, then use an administrative editor with the permissions appropriate to that destination, such as `sudoedit /full/path/to/clamd.conf`.
+
+The displayed content is a frozen failed-attempt snapshot, not a rendering of later preference edits. A helper failure may occur after writing one or more target files, so inspect each target before manually replacing it. Opening or copying from this view never applies a configuration, bypasses helper trust, or exposes application-settings JSON or VirusTotal data.
 
 When ClamUI reads legacy Clamd size-unit values, it normalizes them in memory and marks the raw configuration for pending repair. Reading or startup never writes the host configuration or requests elevation. **Save & Apply** carries that repair even if the displayed values match the baseline; only a successful repair clears it, while a failed apply or a new-path draft remains safe to review and retry.
 
