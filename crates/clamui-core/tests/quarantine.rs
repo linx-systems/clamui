@@ -50,6 +50,50 @@ fn quarantine(context: &Context, path: &Path) -> Value {
     .unwrap()
 }
 
+fn seed_entry(
+    test: &TestContext,
+    detection_date: &str,
+    original_path: &[u8],
+    threat_name: &str,
+    file_size: i64,
+) -> i64 {
+    dispatch(&test.context, "list", json!({})).unwrap();
+    let connection = Connection::open(test.data_dir().join("quarantine.db")).unwrap();
+    let sequence = connection
+        .query_row("SELECT COUNT(*) FROM quarantine", [], |row| {
+            row.get::<_, i64>(0)
+        })
+        .unwrap();
+    connection
+        .execute(
+            "INSERT INTO quarantine (original_path, quarantine_path, threat_name, detection_date, file_size, file_hash, original_permissions)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, 420)",
+            params![
+                original_path,
+                format!("/fixture-payload-{sequence}"),
+                threat_name,
+                detection_date,
+                file_size,
+                format!("fixture-hash-{sequence}"),
+            ],
+        )
+        .unwrap();
+    connection.last_insert_rowid()
+}
+
+fn ui_list(context: &Context, arguments: Value) -> Value {
+    dispatch(context, "list", arguments).unwrap()
+}
+
+fn listed_ids(response: &Value) -> Vec<i64> {
+    response["entries"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| entry["id"].as_i64().unwrap())
+        .collect()
+}
+
 fn sha256(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
@@ -442,4 +486,206 @@ fn startup_preserves_an_unverified_pending_payload_for_manual_recovery() {
             .unwrap(),
         1
     );
+}
+
+#[test]
+fn ui_list_pages_tied_dates_preserves_anchor_and_seeks_past_deleted_cursor_rows() {
+    let test = TestContext::new();
+    let first_id = seed_entry(&test, "2024-01-01T00:00:00Z", b"/fixture/first", "First", 1);
+    let second_id = seed_entry(
+        &test,
+        "2024-02-01T00:00:00Z",
+        b"/fixture/second",
+        "Second",
+        2,
+    );
+    let third_id = seed_entry(&test, "2024-02-01T00:00:00Z", b"/fixture/third", "Third", 3);
+    let fourth_id = seed_entry(
+        &test,
+        "2024-03-01T00:00:00Z",
+        b"/fixture/fourth",
+        "Fourth",
+        4,
+    );
+
+    let first = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": null}),
+    );
+    assert_eq!(listed_ids(&first), vec![fourth_id, third_id]);
+    assert_eq!(first["matched_count"], 4);
+    let second = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": first["next_cursor"]}),
+    );
+    assert_eq!(listed_ids(&second), vec![second_id, first_id]);
+    assert_eq!(second["next_cursor"], Value::Null);
+
+    let canonical_first = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": first["cursor"]}),
+    );
+    assert_eq!(listed_ids(&canonical_first), vec![fourth_id, third_id]);
+
+    let newer_id = seed_entry(&test, "2025-01-01T00:00:00Z", b"/fixture/newer", "Newer", 5);
+    seed_entry(
+        &test,
+        "2020-01-01T00:00:00Z",
+        b"/fixture/backdated",
+        "Backdated",
+        6,
+    );
+    let anchored = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": first["cursor"]}),
+    );
+    assert_eq!(listed_ids(&anchored), vec![fourth_id, third_id]);
+    assert_eq!(anchored["entry_count"], 6);
+    assert_eq!(anchored["matched_count"], 4);
+    let refreshed = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": null}),
+    );
+    assert_eq!(listed_ids(&refreshed), vec![newer_id, fourth_id]);
+
+    let connection = Connection::open(test.data_dir().join("quarantine.db")).unwrap();
+    connection
+        .execute("DELETE FROM quarantine WHERE id = ?1", [third_id])
+        .unwrap();
+    drop(connection);
+    let after_deleted_cursor = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 2, "search": "", "search_locale": "und", "cursor": first["next_cursor"]}),
+    );
+    assert_eq!(listed_ids(&after_deleted_cursor), vec![second_id, first_id]);
+}
+
+#[test]
+fn ui_list_keeps_global_statistics_separate_from_anchored_search_matches() {
+    let test = TestContext::new();
+    seed_entry(&test, "2024-01-01T00:00:00Z", b"/fixture/alpha", "Alpha", 5);
+    seed_entry(&test, "2024-02-01T00:00:00Z", b"/fixture/beta", "Beta", 7);
+    seed_entry(
+        &test,
+        "2024-03-01T00:00:00Z",
+        b"/fixture/delta",
+        "Delta",
+        11,
+    );
+
+    let filtered = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 20, "search": "ta", "search_locale": "und", "cursor": null}),
+    );
+    assert_eq!(filtered["entry_count"], 3);
+    assert_eq!(filtered["total_size"], 23);
+    assert_eq!(filtered["matched_count"], 2);
+    assert_eq!(listed_ids(&filtered).len(), 2);
+
+    let empty = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 20, "search": "no match", "search_locale": "und", "cursor": null}),
+    );
+    assert_eq!(empty["matched_count"], 0);
+    assert_eq!(empty["entries"], json!([]));
+    assert_ne!(empty["cursor"], Value::Null);
+}
+
+#[test]
+fn ui_list_uses_bounded_defaults_and_rejects_invalid_request_arguments() {
+    let test = TestContext::new();
+    let empty = ui_list(&test.context, json!({"schema": "ui"}));
+    assert_eq!(empty["entries"], json!([]));
+    assert_eq!(empty["cursor"], Value::Null);
+
+    seed_entry(&test, "2024-01-01T00:00:00Z", b"/fixture/entry", "Entry", 1);
+    assert!(dispatch(&test.context, "list", json!({"schema": "ui", "limit": 0}),).is_err());
+    assert!(dispatch(&test.context, "list", json!({"schema": "ui", "limit": 101}),).is_err());
+    assert!(dispatch(
+        &test.context,
+        "list",
+        json!({"schema": "ui", "limit": u64::MAX}),
+    )
+    .is_err());
+    assert!(dispatch(
+        &test.context,
+        "list",
+        json!({"schema": "ui", "cursor": "not-a-cursor"}),
+    )
+    .is_err());
+    assert!(dispatch(&test.context, "list", json!({"schema": "ui", "cursor": []}),).is_err());
+    assert!(dispatch(
+        &test.context,
+        "list",
+        json!({"schema": "ui", "search_locale": "invalid-locale"}),
+    )
+    .is_err());
+}
+
+#[test]
+fn ui_list_leaves_legacy_results_unbounded() {
+    let test = TestContext::new();
+    for index in 0..25 {
+        seed_entry(
+            &test,
+            &format!("2024-01-{index:02}T00:00:00Z"),
+            format!("/fixture/legacy-{index}").as_bytes(),
+            "Legacy",
+            1,
+        );
+    }
+
+    let legacy = dispatch(&test.context, "list", json!({})).unwrap();
+    assert_eq!(legacy["entries"].as_array().unwrap().len(), 25);
+    assert!(legacy.get("matched_count").is_none());
+    let bounded = ui_list(
+        &test.context,
+        json!({"schema": "ui", "search": "", "search_locale": "und", "cursor": null}),
+    );
+    assert_eq!(bounded["entries"].as_array().unwrap().len(), 20);
+    assert_eq!(bounded["matched_count"], 25);
+}
+
+#[test]
+fn ui_list_applies_locale_lowercasing_to_literals_and_lossy_paths_without_folding() {
+    let test = TestContext::new();
+    let threat_id = seed_entry(
+        &test,
+        "2024-01-01T00:00:00Z",
+        b"/fixture/plain",
+        "Istanbul",
+        1,
+    );
+    let path_id = seed_entry(
+        &test,
+        "2024-02-01T00:00:00Z",
+        b"/fixture/\xffIstanbul",
+        "Unrelated",
+        1,
+    );
+    let sharp_s_id = seed_entry(
+        &test,
+        "2024-03-01T00:00:00Z",
+        b"/fixture/sharp-s",
+        "Straße",
+        1,
+    );
+
+    let turkish = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 20, "search": "\u{131}stanbul", "search_locale": "tr", "cursor": null}),
+    );
+    assert_eq!(turkish["matched_count"], 2);
+    assert_eq!(listed_ids(&turkish), vec![path_id, threat_id]);
+
+    let no_fold = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 20, "search": "STRASSE", "search_locale": "de", "cursor": null}),
+    );
+    assert_eq!(no_fold["matched_count"], 0);
+    let sharp_s = ui_list(
+        &test.context,
+        json!({"schema": "ui", "limit": 20, "search": "straße", "search_locale": "de", "cursor": null}),
+    );
+    assert_eq!(listed_ids(&sharp_s), vec![sharp_s_id]);
 }
