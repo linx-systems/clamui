@@ -12,4 +12,7 @@ ClamUI v0.5.1 is a patch release for Flatpak privileged-helper installation and 
 
 - The existing pinned-signature and archive-member validation remains in place.
 - Manual Flatpak helper installation has been confirmed.
-- Post-tag CI and packaging work remain release-maintenance steps; these notes do not imply publication status.
+- Signed Debian packages, privileged-helper RPMs, and the x86_64 AppImage were verified from the v0.5.1 tag builds.
+- GitHub Flatpak bundles passed source, metadata, and integrity checks for x86_64 and aarch64.
+- Flathub test builds and manifest checks passed for x86_64 and aarch64.
+- Clean-file and EICAR scans passed through host ClamAV; quarantine, guarded restore, and deletion were verified using disposable files.

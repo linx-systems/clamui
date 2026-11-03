@@ -61,6 +61,7 @@ const LANGUAGE_FALLBACK = [
   { code: "it", name: "Italiano" },
   { code: "nb", name: "Norsk bokmål" },
   { code: "pt_BR", name: "Português (Brasil)" },
+  { code: "vi", name: "Tiếng Việt" },
   { code: "zh_CN", name: "简体中文" },
 ];
 const CLOSE_BEHAVIOR = ["minimize", "quit", "ask"] as const;

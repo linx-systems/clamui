@@ -1,4 +1,5 @@
 use crate::common::{host_command, is_flatpak};
+use crate::host_probe::run_limited_command;
 use crate::AppResult;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -16,6 +17,17 @@ const CLAMD_CONFIGS: [&str; 3] = [
     "/etc/clamd.conf",
 ];
 const FRESHCLAM_CONFIGS: [&str; 2] = ["/etc/clamav/freshclam.conf", "/etc/freshclam.conf"];
+
+// `find` emits timestamp-only records, but the capture remains bounded rather
+// than allowing an unexpected host directory to allocate unbounded memory.
+const DATABASE_INVENTORY_OUTPUT_LIMIT: usize = 4 * 1024 * 1024;
+const DATABASE_INVENTORY_TIMEOUT: Duration = Duration::from_secs(5);
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct DatabaseDirectoryInventory {
+    pub files: u64,
+    pub latest_modified_unix: Option<u64>,
+}
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Probe {
@@ -457,6 +469,133 @@ fn database_in_dir(dir: &str, require_readable: bool) -> AppResult<bool> {
     Ok(false)
 }
 
+/// Returns database-file metadata from the host filesystem.
+///
+/// Flatpak must not inspect its sandbox's `/var` directly. The host branch
+/// emits timestamps only, so database filenames (which may contain arbitrary
+/// bytes) never need to cross the process boundary.
+pub(crate) fn database_directory_inventory(dir: &str) -> AppResult<DatabaseDirectoryInventory> {
+    if is_flatpak() {
+        let find_dir = if dir.starts_with('-') {
+            format!("./{dir}")
+        } else {
+            dir.to_owned()
+        };
+        let directory = run_host("test", &["-d".to_owned(), find_dir.clone()], Some(5))?;
+        if !directory.status.success() {
+            return Err(format!(
+                "Error accessing database {dir}: {}",
+                String::from_utf8_lossy(&directory.stderr).trim()
+            ));
+        }
+        return host_database_directory_inventory(&find_dir);
+    }
+
+    let entries =
+        fs::read_dir(dir).map_err(|error| format!("Error accessing database {dir}: {error}"))?;
+    let mut inventory = DatabaseDirectoryInventory::default();
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        if !name.ends_with(".cvd") && !name.ends_with(".cld") && !name.ends_with(".cud") {
+            continue;
+        }
+        inventory.files += 1;
+        if let Ok(modified) = entry.metadata().and_then(|metadata| metadata.modified()) {
+            if let Ok(modified) = modified.duration_since(std::time::UNIX_EPOCH) {
+                let modified = modified.as_secs();
+                inventory.latest_modified_unix = Some(
+                    inventory
+                        .latest_modified_unix
+                        .map_or(modified, |current| current.max(modified)),
+                );
+            }
+        }
+    }
+    Ok(inventory)
+}
+
+fn host_database_directory_inventory(dir: &str) -> AppResult<DatabaseDirectoryInventory> {
+    let output = run_limited_command(
+        "find",
+        &[
+            "-H",
+            dir,
+            "-mindepth",
+            "1",
+            "-maxdepth",
+            "1",
+            "(",
+            "-name",
+            "*.cvd",
+            "-o",
+            "-name",
+            "*.cld",
+            "-o",
+            "-name",
+            "*.cud",
+            ")",
+            "-printf",
+            "%T@\n",
+        ],
+        DATABASE_INVENTORY_TIMEOUT,
+        DATABASE_INVENTORY_OUTPUT_LIMIT,
+    );
+    if output.timed_out {
+        return Err(format!("Timed out accessing database {dir}"));
+    }
+    if output.truncated {
+        return Err(format!(
+            "Database inventory output was incomplete for {dir}"
+        ));
+    }
+    if output.invalid_utf8 {
+        return Err(format!("Database inventory output was invalid for {dir}"));
+    }
+    if output.code != Some(0) {
+        return Err(format!("Error accessing database {dir}"));
+    }
+    database_inventory_from_timestamps(&output.stdout)
+}
+
+fn database_inventory_from_timestamps(timestamps: &str) -> AppResult<DatabaseDirectoryInventory> {
+    let mut inventory = DatabaseDirectoryInventory::default();
+    for timestamp in timestamps.lines() {
+        inventory.files += 1;
+        if let Some(timestamp) = parse_database_timestamp(timestamp)? {
+            inventory.latest_modified_unix = Some(
+                inventory
+                    .latest_modified_unix
+                    .map_or(timestamp, |current| current.max(timestamp)),
+            );
+        }
+    }
+    Ok(inventory)
+}
+
+fn parse_database_timestamp(timestamp: &str) -> AppResult<Option<u64>> {
+    let timestamp = timestamp.trim();
+    if timestamp.starts_with('-') {
+        return Ok(None);
+    }
+    let mut parts = timestamp.split('.');
+    let seconds = parts.next().unwrap_or_default();
+    let fraction = parts.next();
+    if seconds.is_empty()
+        || !seconds.bytes().all(|byte| byte.is_ascii_digit())
+        || fraction.is_some_and(|fraction| {
+            fraction.is_empty() || !fraction.bytes().all(|byte| byte.is_ascii_digit())
+        })
+        || parts.next().is_some()
+    {
+        return Err(format!("Invalid database timestamp: {timestamp}"));
+    }
+    seconds
+        .parse()
+        .map(Some)
+        .map_err(|error| format!("Invalid database timestamp {timestamp}: {error}"))
+}
+
 pub fn database_status(config_path: Option<&str>) -> Value {
     let probe = database_available(config_path, true);
     if !probe.available {
@@ -823,5 +962,79 @@ pub fn dispatch(ctx: &crate::common::Context, action: &str, args: Value) -> AppR
             Ok(json!({"distro":distro,"commands":commands}))
         }
         _ => Err(format!("Unknown components action: {action}")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::os::unix::fs::symlink;
+    use std::time::{Duration, UNIX_EPOCH};
+
+    #[test]
+    fn database_inventory_preserves_file_metadata_through_directory_symlinks() {
+        let root = tempfile::tempdir().expect("create database root");
+        let database = root.path().join("database");
+        fs::create_dir(&database).expect("create database directory");
+        let main = database.join("main.cvd");
+        let daily = database.join("daily\ncopy.cld");
+        let ignored = database.join("ignored.CLD");
+        fs::write(&main, "main").expect("write main database");
+        fs::write(&daily, "daily").expect("write daily database");
+        fs::write(&ignored, "ignored").expect("write ignored database");
+        for (path, timestamp) in [
+            (&main, 1_700_000_100),
+            (&daily, 1_700_000_200),
+            (&ignored, 1_700_000_300),
+        ] {
+            fs::File::open(path)
+                .expect("open database file")
+                .set_modified(UNIX_EPOCH + Duration::from_secs(timestamp))
+                .expect("set database modification time");
+        }
+
+        let direct = database_directory_inventory(database.to_str().expect("database path"))
+            .expect("inventory database");
+        assert_eq!(direct.files, 2);
+        assert_eq!(direct.latest_modified_unix, Some(1_700_000_200));
+
+        let linked = root.path().join("database-link");
+        symlink(&database, &linked).expect("link database directory");
+        assert_eq!(
+            database_directory_inventory(linked.to_str().expect("linked database path"))
+                .expect("inventory linked database"),
+            direct
+        );
+
+        let empty = root.path().join("empty");
+        fs::create_dir(&empty).expect("create empty database directory");
+        assert_eq!(
+            database_directory_inventory(empty.to_str().expect("empty database path"))
+                .expect("inventory empty database"),
+            DatabaseDirectoryInventory::default()
+        );
+        assert!(database_directory_inventory(
+            root.path()
+                .join("missing")
+                .to_str()
+                .expect("missing database path")
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn host_find_inventory_drains_large_database_directory() {
+        let root = tempfile::tempdir().expect("create database root");
+        for index in 0..6_000 {
+            fs::File::create(root.path().join(format!("database-{index:05}.cvd")))
+                .expect("create database file");
+        }
+
+        let inventory =
+            host_database_directory_inventory(root.path().to_str().expect("database path"))
+                .expect("inventory large database directory");
+        assert_eq!(inventory.files, 6_000);
+        assert!(inventory.latest_modified_unix.is_some());
     }
 }
