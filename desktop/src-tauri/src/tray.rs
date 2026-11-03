@@ -274,11 +274,12 @@ impl NativeTray {
 
 fn sni_icon(image: &tauri::image::Image<'_>) -> ksni::Icon {
     let rgba = image.rgba();
+    let (pixels, remainder) = rgba.as_chunks::<4>();
+    debug_assert!(remainder.is_empty());
     let mut data = Vec::with_capacity(rgba.len());
-    for pixel in rgba.chunks_exact(4) {
-        data.extend_from_slice(&[pixel[3], pixel[0], pixel[1], pixel[2]]);
+    for &[red, green, blue, alpha] in pixels {
+        data.extend_from_slice(&[alpha, red, green, blue]);
     }
-    debug_assert!(rgba.chunks_exact(4).remainder().is_empty());
     ksni::Icon {
         width: i32::try_from(image.width()).expect("bundled tray icon width exceeds SNI limits"),
         height: i32::try_from(image.height()).expect("bundled tray icon height exceeds SNI limits"),
