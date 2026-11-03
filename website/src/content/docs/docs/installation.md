@@ -61,7 +61,7 @@ For a directory outside the granted filesystem, grant only that directory:
 ```bash
 flatpak override --user --filesystem=/path/to/directory io.github.linx_systems.ClamUI
 ```
-Database, Scanner, and On-Access preferences target host ClamAV configuration, not sandbox copies. They require the trusted host helper and its polkit policy. On supported Debian-family and Fedora hosts, native packages, AppImages, source builds, and Flatpak may offer **Install Helper** when that helper is missing. This local diagnosis does not download release metadata, and nothing is downloaded or installed until you click the offer.
+Database, Scanner, and On-Access preferences target host ClamAV configuration, not sandbox copies. They require the trusted host helper and its polkit policy. On native systems, a trusted canonical helper remains ready if automatic installation is unsupported or its installed-package metadata cannot be inspected; this does not accept a successfully reported version or architecture mismatch. Flatpak continues to check host packages. On supported Debian-family and Fedora hosts, native packages, AppImages, source builds, and Flatpak may offer **Install Helper** when that helper is missing. This local diagnosis does not download release metadata, and nothing is downloaded or installed until you click the offer.
 
 After you click, automatic installation can complete only when the official matching published package is available. Before requesting graphical administrator authorization through Polkit, ClamUI verifies its signature, identity, version, size, digest, and compatible architecture; a missing or invalid asset fails safely before authorization. On Debian, a signed same-version architecture-independent helper remains an accepted legacy fallback only when no exact-architecture helper exists. The UI never runs as root or collects an administrator password.
 
@@ -77,7 +77,7 @@ sudo apt install "./clamui_0.5.1_${DEB_ARCH}.deb" \
   "./clamui-privileged-helper_0.5.1_${DEB_ARCH}.deb"
 ```
 
-Do not mix release versions or substitute a foreign-architecture package. The canonical helper keeps the protected-host protocol and data rules intact.
+Do not mix upstream release versions or substitute a foreign-architecture package. Installed Debian metadata accepts a conventional numeric-leading Debian revision after the exact application upstream version, such as `0.5.1-1`; other version or architecture mismatches need repair. The canonical helper keeps the protected-host protocol and data rules intact.
 
 ## Fedora helper RPM
 

@@ -34,6 +34,15 @@ cargo run -p clamui-core --bin clamui-cli -- help
 
 Rust core tests live under `crates/clamui-core/tests/` alongside module-local tests. Add focused consumer-visible, data-compatibility, or security invariants beside the owning module; avoid implementation-text or mock-only tests.
 
+For gettext changes, validate extraction and catalogs with:
+
+```bash
+./scripts/update-pot.sh --check
+./scripts/check-potfiles.sh
+./scripts/check-translations.sh
+```
+
+
 The website is a separate Bun project:
 
 ```bash
@@ -44,6 +53,18 @@ bun run build
 ```
 
 CI builds native artifacts on the Ubuntu 22.04-compatible baseline. A build on a newer host does not establish that compatibility.
+
+## Coding-agent skills
+
+Project-local coding-agent skills are optional development aids, not build or runtime dependencies. Their canonical imports are in `.agents/skills`; `.claude/skills` provides compatibility links. For installation details, see the published [Development guide](https://clamui.com/docs/contributing/development/).
+
+Refresh only a deliberately selected upstream skill. `skills-lock.json` records its source, selected path, and content hash; it does not pin a commit. Start OMP from the repository root: `.omp/config.yml` applies its cwd-scoped `ignoredSkills` filter while preserving global skill payloads.
+
+- Rust changes: use `rust-best-practices`.
+- React client changes: use `vercel-react-best-practices`; apply it to `desktop/src/`, not Next.js or server patterns.
+- Accessibility work: use `accessibility`, then validate the actual Tauri/WebKitGTK desktop rather than relying only on browser scores.
+- Gettext messages, catalogs, plural forms, translator notes, or extraction: use `clamui-gettext` and the translation guide it points to.
+- Globally managed IPC and release skills remain optional; contributors do not need them to work on ClamUI.
 
 ## Runtime, data, and security rules
 

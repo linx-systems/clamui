@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-01 21:11+0100\n"
+"POT-Creation-Date: 2026-11-03 15:48+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -53,7 +53,9 @@ msgstr "Các trình quản lý tường lửa chồng chéo"
 msgid ""
 "UFW is active while Firewalld owns its D-Bus name; their rule interaction "
 "was not evaluated."
-msgstr "UFW đang hoạt động trong khi Firewalld đang giữ tên D-Bus của nó; tương tác giữa các quy tắc của hai bên chưa được đánh giá."
+msgstr ""
+"UFW đang hoạt động trong khi Firewalld đang giữ tên D-Bus của nó; tương tác "
+"giữa các quy tắc của hai bên chưa được đánh giá."
 
 #: crates/clamui-core/src/audit/firewall.rs:157
 msgid "UFW Firewall"
@@ -63,29 +65,39 @@ msgstr "Tường lửa UFW"
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
-msgstr "UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny). Các quy tắc được liệt kê có thể cho phép ngoại lệ."
+msgstr ""
+"UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny). Các "
+"quy tắc được liệt kê có thể cho phép ngoại lệ."
 
 #: crates/clamui-core/src/audit/firewall.rs:169
 msgid ""
 "UFW is active; the default incoming policy is reject. Listed rules may allow "
 "exceptions."
-msgstr "UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject). Các quy tắc được liệt kê có thể cho phép ngoại lệ."
+msgstr ""
+"UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject). "
+"Các quy tắc được liệt kê có thể cho phép ngoại lệ."
 
 #: crates/clamui-core/src/audit/firewall.rs:176
 msgid "UFW is active; the default incoming policy is deny."
-msgstr "UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny)."
+msgstr ""
+"UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny)."
 
 #: crates/clamui-core/src/audit/firewall.rs:180
 msgid "UFW is active; the default incoming policy is reject."
-msgstr "UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject)."
+msgstr ""
+"UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject)."
 
 #: crates/clamui-core/src/audit/firewall.rs:184
 msgid "UFW is active, but the default incoming policy allows traffic."
-msgstr "UFW đang hoạt động nhưng chính sách mặc định cho kết nối đến lại cho phép lưu lượng đi qua."
+msgstr ""
+"UFW đang hoạt động nhưng chính sách mặc định cho kết nối đến lại cho phép "
+"lưu lượng đi qua."
 
 #: crates/clamui-core/src/audit/firewall.rs:191
 msgid "UFW is active, but its default incoming policy could not be verified."
-msgstr "UFW đang hoạt động nhưng không thể xác minh chính sách mặc định cho kết nối đến."
+msgstr ""
+"UFW đang hoạt động nhưng không thể xác minh chính sách mặc định cho kết nối "
+"đến."
 
 #: crates/clamui-core/src/audit/firewall.rs:195
 msgid "UFW reports inactive."
@@ -103,19 +115,25 @@ msgstr "Firewalld"
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
-msgstr "Firewalld đang giữ tên D-Bus của nó; chưa truy vấn trạng thái sẵn sàng và chính sách tường lửa."
+msgstr ""
+"Firewalld đang giữ tên D-Bus của nó; chưa truy vấn trạng thái sẵn sàng và "
+"chính sách tường lửa."
 
 #: crates/clamui-core/src/audit/firewall.rs:240
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
-msgstr "Không thấy tiến trình nào giữ tên D-Bus của Firewalld; điều này không đủ để xác định chính sách tường lửa của nhân hệ điều hành."
+msgstr ""
+"Không thấy tiến trình nào giữ tên D-Bus của Firewalld; điều này không đủ để "
+"xác định chính sách tường lửa của nhân hệ điều hành."
 
 #: crates/clamui-core/src/audit/firewall.rs:244
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
-msgstr "Không thể xác minh Firewalld có đang giữ tên D-Bus hay không; chưa truy vấn trạng thái sẵn sàng và chính sách tường lửa."
+msgstr ""
+"Không thể xác minh Firewalld có đang giữ tên D-Bus hay không; chưa truy vấn "
+"trạng thái sẵn sàng và chính sách tường lửa."
 
 #: crates/clamui-core/src/audit/firewall.rs:259
 msgid "firewall-cmd"
@@ -137,18 +155,24 @@ msgstr "nftables (quy tắc gốc)"
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
-msgstr "nftables có chính sách mặc định hạn chế cho lưu lượng vào trên IPv4 và IPv6; từng quy tắc riêng lẻ có thể cho phép ngoại lệ."
+msgstr ""
+"nftables có chính sách mặc định hạn chế cho lưu lượng vào trên IPv4 và IPv6; "
+"từng quy tắc riêng lẻ có thể cho phép ngoại lệ."
 
 #: crates/clamui-core/src/audit/firewall.rs:414
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
-msgstr "nftables báo cáo chính sách mặc định cho lưu lượng vào là cho phép; phạm vi kiểm tra còn lại có thể chưa đầy đủ"
+msgstr ""
+"nftables báo cáo chính sách mặc định cho lưu lượng vào là cho phép; phạm vi "
+"kiểm tra còn lại có thể chưa đầy đủ"
 
 #: crates/clamui-core/src/audit/firewall.rs:418
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
-msgstr "Không thể xác minh phạm vi chính sách lưu lượng vào của nftables cho cả IPv4 và IPv6"
+msgstr ""
+"Không thể xác minh phạm vi chính sách lưu lượng vào của nftables cho cả IPv4 "
+"và IPv6"
 
 #: crates/clamui-core/src/audit/firewall.rs:478
 msgid "iptables (IPv4)"
@@ -158,7 +182,9 @@ msgstr "iptables (IPv4)"
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
-msgstr "iptables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc riêng lẻ có thể cho phép ngoại lệ."
+msgstr ""
+"iptables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc riêng "
+"lẻ có thể cho phép ngoại lệ."
 
 #: crates/clamui-core/src/audit/firewall.rs:484
 msgid "iptables has a permissive INPUT default policy"
@@ -176,7 +202,9 @@ msgstr "iptables (IPv6)"
 msgid ""
 "ip6tables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
-msgstr "ip6tables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc riêng lẻ có thể cho phép ngoại lệ."
+msgstr ""
+"ip6tables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc "
+"riêng lẻ có thể cho phép ngoại lệ."
 
 #: crates/clamui-core/src/audit/firewall.rs:497
 msgid "ip6tables has a permissive INPUT default policy"
@@ -198,7 +226,9 @@ msgstr "Gufw có sẵn."
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
-msgstr "Chưa xác nhận được Gufw; mục kiểm kê tùy chọn này không ảnh hưởng đến việc phân tích chính sách tường lửa."
+msgstr ""
+"Chưa xác nhận được Gufw; mục kiểm kê tùy chọn này không ảnh hưởng đến việc "
+"phân tích chính sách tường lửa."
 
 #: crates/clamui-core/src/audit/firewall.rs:519
 msgid "Open Gufw"
@@ -216,7 +246,9 @@ msgstr "Firewall Config có sẵn."
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
-msgstr "Chưa xác nhận được Firewall Config; mục kiểm kê tùy chọn này không ảnh hưởng đến việc phân tích chính sách tường lửa."
+msgstr ""
+"Chưa xác nhận được Firewall Config; mục kiểm kê tùy chọn này không ảnh hưởng "
+"đến việc phân tích chính sách tường lửa."
 
 #: crates/clamui-core/src/audit/firewall.rs:540
 msgid "Open Firewall Config"
@@ -228,7 +260,9 @@ msgstr "Plasma Firewall"
 
 #: crates/clamui-core/src/audit/firewall.rs:583
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
-msgstr "Plasma Firewall đã được cài đặt; công cụ này quản lý một hệ thống tường lửa có sẵn."
+msgstr ""
+"Plasma Firewall đã được cài đặt; công cụ này quản lý một hệ thống tường lửa "
+"có sẵn."
 
 #: crates/clamui-core/src/audit/firewall.rs:592
 msgid "Plasma Firewall was not confirmed; it is only a management module."
@@ -472,7 +506,8 @@ msgstr "Portmaster đang chạy và bảo vệ các kết nối"
 
 #: crates/clamui-core/src/audit.rs:1153
 msgid "Authorize ClamUI in Portmaster for per-module health"
-msgstr "Cấp quyền cho ClamUI trong Portmaster để xem tình trạng của từng mô-đun"
+msgstr ""
+"Cấp quyền cho ClamUI trong Portmaster để xem tình trạng của từng mô-đun"
 
 #: crates/clamui-core/src/audit.rs:1156
 msgid "Authorize"
@@ -596,7 +631,9 @@ msgstr "Các lệnh:"
 msgid ""
 "\n"
 "Global options:"
-msgstr "\nTùy chọn chung:"
+msgstr ""
+"\n"
+"Tùy chọn chung:"
 
 #. Translators: Keep `--json` and `JSON` unchanged; they are a CLI flag and data format.
 #: crates/clamui-core/src/cli.rs:170
@@ -646,7 +683,9 @@ msgstr "Xem lịch sử quét"
 #: crates/clamui-core/src/cli.rs:219
 msgid ""
 "Install the polkit helper for saving system ClamAV configs (native host only)"
-msgstr "Cài đặt trình trợ giúp polkit để lưu cài đặt ClamAV của hệ thống (chỉ với bản cài đặt trực tiếp trên máy chủ)"
+msgstr ""
+"Cài đặt trình trợ giúp polkit để lưu cài đặt ClamAV của hệ thống (chỉ với "
+"bản cài đặt trực tiếp trên máy chủ)"
 
 #: crates/clamui-core/src/cli.rs:221
 msgid "Show this help message"
@@ -660,7 +699,9 @@ msgstr "Cách dùng: clamui help [COMMAND]"
 #: crates/clamui-core/src/cli.rs:240
 msgid ""
 "Display an overview of all commands or detailed help for a specific one."
-msgstr "Hiển thị tổng quan về tất cả các lệnh hoặc trợ giúp chi tiết cho một lệnh cụ thể."
+msgstr ""
+"Hiển thị tổng quan về tất cả các lệnh hoặc trợ giúp chi tiết cho một lệnh cụ "
+"thể."
 
 #. Translators: Keep `help` unchanged; it is the literal CLI subcommand.
 #: crates/clamui-core/src/cli.rs:251
@@ -685,7 +726,9 @@ msgstr "Ví dụ:"
 msgid ""
 "\n"
 "Run 'clamui {name} --help' for full option reference."
-msgstr "\nChạy “clamui {name} --help” để xem đầy đủ các tùy chọn."
+msgstr ""
+"\n"
+"Chạy “clamui {name} --help” để xem đầy đủ các tùy chọn."
 
 #: crates/clamui-core/src/cli.rs:395 crates/clamui-core/src/cli.rs:1583
 msgid "unrecognized argument: {argument}"
@@ -716,14 +759,18 @@ msgstr "Đang quét: {path}"
 msgid ""
 "Usage: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
 "quarantine] [--json] [--verbose]"
-msgstr "Cách dùng: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--quarantine] [--json] [--verbose]"
+msgstr ""
+"Cách dùng: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
+"quarantine] [--json] [--verbose]"
 
 #. Translators: Preserve the numeric exit-code meanings.
 #: crates/clamui-core/src/cli.rs:578
 msgid ""
 "Scan one or more files or directories with ClamAV.\n"
 "Exit codes: 0 = clean, 1 = threats found, 2 = error."
-msgstr "Quét một hoặc nhiều tệp hoặc thư mục bằng ClamAV.\nMã thoát: 0 = sạch, 1 = tìm thấy mối đe dọa, 2 = lỗi."
+msgstr ""
+"Quét một hoặc nhiều tệp hoặc thư mục bằng ClamAV.\n"
+"Mã thoát: 0 = sạch, 1 = tìm thấy mối đe dọa, 2 = lỗi."
 
 #: crates/clamui-core/src/cli.rs:597
 msgid "Path not found: {path}"
@@ -745,7 +792,9 @@ msgid ""
 msgid_plural ""
 "\n"
 "Threats found: {count}"
-msgstr[0] "\nSố mối đe dọa tìm thấy: {count}"
+msgstr[0] ""
+"\n"
+"Số mối đe dọa tìm thấy: {count}"
 
 #: crates/clamui-core/src/cli.rs:741
 msgid ""
@@ -754,19 +803,25 @@ msgid ""
 msgid_plural ""
 "\n"
 "Quarantined: {count} files"
-msgstr[0] "\nĐã cách ly: {count} tệp"
+msgstr[0] ""
+"\n"
+"Đã cách ly: {count} tệp"
 
 #: crates/clamui-core/src/cli.rs:751
 msgid ""
 "\n"
 "Failed to quarantine:"
-msgstr "\nKhông thể cách ly:"
+msgstr ""
+"\n"
+"Không thể cách ly:"
 
 #: crates/clamui-core/src/cli.rs:762
 msgid ""
 "\n"
 "Scan completed with errors:"
-msgstr "\nQuá trình quét đã hoàn tất nhưng có lỗi:"
+msgstr ""
+"\n"
+"Quá trình quét đã hoàn tất nhưng có lỗi:"
 
 #: crates/clamui-core/src/cli.rs:767
 msgid "No threats found."
@@ -796,7 +851,7 @@ msgstr "Cách dùng: clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "Không có tệp nào đã cách ly."
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:774
+#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:1108
 msgid "ID"
 msgstr "ID"
 
@@ -850,8 +905,8 @@ msgstr "Xóa thất bại"
 msgid "{prefix}: {error}"
 msgstr "{prefix}: {error}"
 
-#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:417
-#: crates/clamui-core/src/quarantine.rs:454
+#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:443
+#: crates/clamui-core/src/quarantine.rs:480
 msgid "Quarantine entry not found: {id}"
 msgstr "Không tìm thấy mục trong khu cách ly: {id}"
 
@@ -1032,7 +1087,9 @@ msgstr "Lịch sử quét"
 #: crates/clamui-core/src/cli.rs:1519
 msgid ""
 "Usage: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
-msgstr "Cách dùng: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
+msgstr ""
+"Cách dùng: clamui history [--limit N] [--type scan|update|virustotal] [--"
+"json]"
 
 #: crates/clamui-core/src/cli.rs:1602
 msgid "Failed to load history: {error}"
@@ -1042,15 +1099,15 @@ msgstr "Không thể tải lịch sử: {error}"
 msgid "No scan history found."
 msgstr "Không tìm thấy lịch sử quét."
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:784
+#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:1118
 msgid "Type"
 msgstr "Loại"
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:789
+#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:1123
 msgid "Status"
 msgstr "Trạng thái"
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:808
+#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:1142
 msgid "Summary"
 msgstr "Tóm tắt"
 
@@ -1059,7 +1116,8 @@ msgstr "Tóm tắt"
 #: crates/clamui-core/src/cli.rs:1656
 msgid "Showing {shown} of {total} entry. Use --limit to see more."
 msgid_plural "Showing {shown} of {total} entries. Use --limit to see more."
-msgstr[0] "Đang hiển thị {shown} trên tổng số {total} mục. Dùng --limit để xem thêm."
+msgstr[0] ""
+"Đang hiển thị {shown} trên tổng số {total} mục. Dùng --limit để xem thêm."
 
 #. Translators: Keep `clamui install-privileged-helper` unchanged; it is the CLI command.
 #: crates/clamui-core/src/cli.rs:1691
@@ -1126,7 +1184,9 @@ msgstr "Không thể ghi {path}: {error}"
 msgid ""
 "On-Access scanning requires at least one loop-prevention exclusion: Exclude "
 "Username, Exclude User ID, or Exclude Root User"
-msgstr "Quét thời gian thực cần ít nhất một ngoại lệ để tránh vòng lặp quét: Loại trừ tên người dùng, Loại trừ ID người dùng hoặc Loại trừ người dùng root"
+msgstr ""
+"Quét thời gian thực cần ít nhất một ngoại lệ để tránh vòng lặp quét: Loại "
+"trừ tên người dùng, Loại trừ ID người dùng hoặc Loại trừ người dùng root"
 
 #: crates/clamui-core/src/config.rs:959
 msgid "{key}: invalid boolean value: {value}"
@@ -1170,96 +1230,98 @@ msgstr "Lưu trong tệp cài đặt (kho khóa không khả dụng — kém an 
 msgid "translator-credits"
 msgstr "dinhkarate"
 
-#: crates/clamui-core/src/host.rs:729
+#: crates/clamui-core/src/host.rs:868
 msgid "Daemon not responding: {error}"
 msgstr "Dịch vụ không phản hồi: {error}"
 
-#: crates/clamui-core/src/host.rs:732
+#: crates/clamui-core/src/host.rs:871
 msgid "{binary} found but returned error: {error}"
 msgstr "Đã tìm thấy {binary} nhưng chương trình trả về lỗi: {error}"
 
-#: crates/clamui-core/src/host.rs:737
+#: crates/clamui-core/src/host.rs:876
 msgid "{service} is active"
 msgstr "{service} đang hoạt động"
 
-#: crates/clamui-core/src/host.rs:740
+#: crates/clamui-core/src/host.rs:879
 msgid "No virus database files found in {path}"
 msgstr "Không tìm thấy tệp cơ sở dữ liệu virus nào trong {path}"
 
-#: crates/clamui-core/src/host.rs:746
+#: crates/clamui-core/src/host.rs:885
 msgid "Error accessing database {path}: {error}"
 msgstr "Lỗi khi truy cập cơ sở dữ liệu {path}: {error}"
 
-#: crates/clamui-core/src/host.rs:752
+#: crates/clamui-core/src/host.rs:891
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "{binary} chưa được cài đặt. Hãy cài đặt bằng lệnh: {command}"
 
-#: crates/clamui-core/src/host.rs:762
+#: crates/clamui-core/src/host.rs:901
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
-msgstr "{binary} chưa được cài đặt. Hãy cài đặt gói ClamAV cần thiết cho bản phân phối đang dùng."
+msgstr ""
+"{binary} chưa được cài đặt. Hãy cài đặt gói ClamAV cần thiết cho bản phân "
+"phối đang dùng."
 
-#: crates/clamui-core/src/logs.rs:767
+#: crates/clamui-core/src/logs.rs:1101
 msgid "SCAN LOG"
 msgstr "NHẬT KÝ QUÉT"
 
-#: crates/clamui-core/src/logs.rs:769
+#: crates/clamui-core/src/logs.rs:1103
 msgid "UPDATE LOG"
 msgstr "NHẬT KÝ CẬP NHẬT"
 
-#: crates/clamui-core/src/logs.rs:779
+#: crates/clamui-core/src/logs.rs:1113
 msgid "Timestamp"
 msgstr "Thời điểm"
 
-#: crates/clamui-core/src/logs.rs:794
+#: crates/clamui-core/src/logs.rs:1128
 msgid "Duration"
 msgstr "Thời lượng"
 
-#: crates/clamui-core/src/logs.rs:802
+#: crates/clamui-core/src/logs.rs:1136
 msgid "Full Output"
 msgstr "Toàn bộ đầu ra"
 
-#: crates/clamui-core/src/logs.rs:833
+#: crates/clamui-core/src/logs.rs:1167
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} giây"
 
-#: crates/clamui-core/src/logs.rs:1063
+#: crates/clamui-core/src/logs.rs:1393
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "Quét hoàn tất"
 
-#: crates/clamui-core/src/logs.rs:1066
+#: crates/clamui-core/src/logs.rs:1396
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "Tìm thấy {count} mối đe dọa{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1076
+#: crates/clamui-core/src/logs.rs:1406
 msgid "Threats Detected"
 msgstr "Phát hiện mối đe dọa"
 
-#: crates/clamui-core/src/logs.rs:1081
+#: crates/clamui-core/src/logs.rs:1411
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "Đã hủy quét"
 
-#: crates/clamui-core/src/logs.rs:1084
+#: crates/clamui-core/src/logs.rs:1414
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "Lỗi quét"
 
-#: crates/clamui-core/src/logs.rs:1095
+#: crates/clamui-core/src/logs.rs:1425
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "Đã quét: {count} tệp"
 
-#: crates/clamui-core/src/logs.rs:1102
+#: crates/clamui-core/src/logs.rs:1432
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} thư mục"
 
-#: crates/clamui-core/src/logs.rs:1113
+#: crates/clamui-core/src/logs.rs:1443
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Số mối đe dọa tìm thấy: {count}"
@@ -1276,7 +1338,9 @@ msgstr "Thao tác chụp trạng thái mạng không nhận tham số nào."
 msgid ""
 "Some network socket rows could not be read, and the list was limited to 4096 "
 "rows."
-msgstr "Không thể đọc một số dòng socket mạng và danh sách đã bị giới hạn ở 4096 dòng."
+msgstr ""
+"Không thể đọc một số dòng socket mạng và danh sách đã bị giới hạn ở 4096 "
+"dòng."
 
 #: crates/clamui-core/src/network.rs:125
 msgid "Some network socket rows could not be read."
@@ -1292,18 +1356,23 @@ msgstr "Quá thời gian chờ khi liệt kê socket mạng. Hãy thử lại."
 
 #: crates/clamui-core/src/network.rs:156
 msgid "Network socket listing could not be completed safely. Try again."
-msgstr "Không thể hoàn tất việc liệt kê socket mạng một cách an toàn. Hãy thử lại."
+msgstr ""
+"Không thể hoàn tất việc liệt kê socket mạng một cách an toàn. Hãy thử lại."
 
 #: crates/clamui-core/src/network.rs:163
 msgid ""
 "Network socket listing returned invalid text and could not be read safely."
-msgstr "Kết quả liệt kê socket mạng chứa văn bản không hợp lệ nên không thể đọc một cách an toàn."
+msgstr ""
+"Kết quả liệt kê socket mạng chứa văn bản không hợp lệ nên không thể đọc một "
+"cách an toàn."
 
 #: crates/clamui-core/src/network.rs:170
 msgid ""
 "Network socket listing is unavailable. Check that the system socket tool is "
 "installed and try again."
-msgstr "Không thể liệt kê socket mạng. Hãy kiểm tra xem công cụ socket của hệ thống đã được cài đặt chưa rồi thử lại."
+msgstr ""
+"Không thể liệt kê socket mạng. Hãy kiểm tra xem công cụ socket của hệ thống "
+"đã được cài đặt chưa rồi thử lại."
 
 #: crates/clamui-core/src/platform.rs:452
 msgid "Not running as Flatpak"
@@ -1315,14 +1384,19 @@ msgid ""
 "ClamUI is running inside a Flatpak sandbox, which cannot install files on "
 "the host. Install the matching clamui-privileged-helper package on the host "
 "system instead."
-msgstr "ClamUI đang chạy trong sandbox Flatpak nên không thể cài đặt tệp lên hệ thống chủ. Thay vào đó, hãy cài gói clamui-privileged-helper tương ứng trên hệ thống chủ."
+msgstr ""
+"ClamUI đang chạy trong sandbox Flatpak nên không thể cài đặt tệp lên hệ "
+"thống chủ. Thay vào đó, hãy cài gói clamui-privileged-helper tương ứng trên "
+"hệ thống chủ."
 
 #. Translators: keep the paths and "sudo clamui install-privileged-helper" command unchanged.
 #: crates/clamui-core/src/privileged/cli_install.rs:33
 msgid ""
 "This command installs files under /usr and /usr/share and must be run as "
 "root. Try: sudo clamui install-privileged-helper"
-msgstr "Lệnh này cài đặt tệp vào /usr và /usr/share nên phải chạy với quyền root. Hãy thử: sudo clamui install-privileged-helper"
+msgstr ""
+"Lệnh này cài đặt tệp vào /usr và /usr/share nên phải chạy với quyền root. "
+"Hãy thử: sudo clamui install-privileged-helper"
 
 #. Translators: keep the {error} placeholder; it is a sanitized installation error.
 #: crates/clamui-core/src/privileged/cli_install.rs:119
@@ -1334,61 +1408,65 @@ msgstr "Không thể cài đặt trình trợ giúp đặc quyền: {error}"
 msgid ""
 "Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
 "system ClamAV configuration from ClamUI should now work."
-msgstr "Đã cài đặt trình trợ giúp đặc quyền tại {bin} và chính sách polkit tại {policy}. Giờ đây ClamUI có thể lưu cấu hình ClamAV của hệ thống."
+msgstr ""
+"Đã cài đặt trình trợ giúp đặc quyền tại {bin} và chính sách polkit tại "
+"{policy}. Giờ đây ClamUI có thể lưu cấu hình ClamAV của hệ thống."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:982
+#: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
 msgstr "Đã hủy cấp quyền khi {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:988
+#: crates/clamui-core/src/privileged.rs:1058
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "Trình trợ giúp đặc quyền không khả dụng khi {operation}."
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:994
+#: crates/clamui-core/src/privileged.rs:1064
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr "Trình trợ giúp đặc quyền đã từ chối PKEXEC_UID khi {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1000
+#: crates/clamui-core/src/privileged.rs:1070
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr "Trình trợ giúp đặc quyền báo không khớp giao thức khi {operation}."
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:1006
+#: crates/clamui-core/src/privileged.rs:1076
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
-msgstr "Trình trợ giúp đặc quyền gặp lỗi khi {operation} (mã thoát {code}): {detail}."
+msgstr ""
+"Trình trợ giúp đặc quyền gặp lỗi khi {operation} (mã thoát {code}): {detail}."
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:1014
+#: crates/clamui-core/src/privileged.rs:1084
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr "Trình trợ giúp đặc quyền gặp lỗi khi {operation} (mã thoát {code})."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1021
+#: crates/clamui-core/src/privileged.rs:1091
 msgid "The privileged helper was terminated while {operation}."
 msgstr "Trình trợ giúp đặc quyền đã bị buộc dừng khi {operation}."
 
-#: crates/clamui-core/src/privileged.rs:1080
+#: crates/clamui-core/src/privileged.rs:1150
 msgid "Applying configuration"
 msgstr "đang áp dụng cấu hình"
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:1082
+#: crates/clamui-core/src/privileged.rs:1152
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr "{message} Một hoặc nhiều lần thay thế trước đó có thể đã thành công."
 
-#: crates/clamui-core/src/privileged.rs:1324
+#: crates/clamui-core/src/privileged.rs:1394
 msgid "Reading configuration"
 msgstr "đang đọc cấu hình"
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2836
+#: crates/clamui-core/src/privileged.rs:2963
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
-msgstr "Cài đặt trình trợ giúp đặc quyền thất bại. Hãy thử lại hoặc cài đặt thủ công."
+msgstr ""
+"Cài đặt trình trợ giúp đặc quyền thất bại. Hãy thử lại hoặc cài đặt thủ công."
 
 #: crates/clamui-core/src/profiles.rs:240
 #: crates/clamui-core/src/profiles.rs:311
@@ -1473,83 +1551,95 @@ msgstr "Định dạng đường dẫn {kind} không hợp lệ: {path}"
 msgid "Could not generate unique name for '{name}'"
 msgstr "Không thể tạo tên duy nhất cho “{name}”"
 
-#: crates/clamui-core/src/quarantine.rs:369
+#: crates/clamui-core/src/quarantine.rs:395
 msgid "Quarantine metadata was written but could not be read"
 msgstr "Đã ghi siêu dữ liệu cách ly nhưng không thể đọc lại"
 
-#: crates/clamui-core/src/quarantine.rs:391
+#: crates/clamui-core/src/quarantine.rs:417
 msgid ""
 "Failed to record quarantine entry in database. File has been restored to "
 "original location."
-msgstr "Không thể ghi mục cách ly vào cơ sở dữ liệu. Tệp đã được khôi phục về vị trí ban đầu."
+msgstr ""
+"Không thể ghi mục cách ly vào cơ sở dữ liệu. Tệp đã được khôi phục về vị trí "
+"ban đầu."
 
 #. Translators: Preserve `{error}` as a localized failure description and `{path}` as a user-provided file path.
-#: crates/clamui-core/src/quarantine.rs:394
+#: crates/clamui-core/src/quarantine.rs:420
 msgid ""
 "Failed to record quarantine entry in database. Rollback also failed: "
 "{error}. File may be orphaned at: {path}"
-msgstr "Không thể ghi mục cách ly vào cơ sở dữ liệu. Hoàn tác cũng thất bại: {error}. Tệp có thể bị bỏ lại tại: {path}"
+msgstr ""
+"Không thể ghi mục cách ly vào cơ sở dữ liệu. Hoàn tác cũng thất bại: "
+"{error}. Tệp có thể bị bỏ lại tại: {path}"
 
-#: crates/clamui-core/src/quarantine.rs:442
+#: crates/clamui-core/src/quarantine.rs:468
 msgid ""
 "File restored successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
-msgstr "Đã khôi phục tệp thành công nhưng không thể xóa mục tương ứng trong cơ sở dữ liệu. Mục này có thể vẫn hiển thị trong danh sách cho đến khi được dọn dẹp."
+msgstr ""
+"Đã khôi phục tệp thành công nhưng không thể xóa mục tương ứng trong cơ sở dữ "
+"liệu. Mục này có thể vẫn hiển thị trong danh sách cho đến khi được dọn dẹp."
 
-#: crates/clamui-core/src/quarantine.rs:469
+#: crates/clamui-core/src/quarantine.rs:495
 msgid ""
 "File deleted successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
-msgstr "Đã xóa tệp thành công nhưng không thể xóa mục tương ứng trong cơ sở dữ liệu. Mục này có thể vẫn hiển thị trong danh sách cho đến khi được dọn dẹp."
+msgstr ""
+"Đã xóa tệp thành công nhưng không thể xóa mục tương ứng trong cơ sở dữ liệu. "
+"Mục này có thể vẫn hiển thị trong danh sách cho đến khi được dọn dẹp."
 
 #. Translators: Preserve `{path}` as a user-provided file path and `{error}` as the filesystem diagnostic.
-#: crates/clamui-core/src/quarantine.rs:1158
+#: crates/clamui-core/src/quarantine.rs:1411
 msgid "Cannot quarantine {path}: {error}"
 msgstr "Không thể cách ly {path}: {error}"
 
 #. Translators: The em dash separates the integrity failure from its consequence.
-#: crates/clamui-core/src/quarantine.rs:1176
+#: crates/clamui-core/src/quarantine.rs:1429
 msgid "File hash mismatch — file may be corrupted"
 msgstr "Mã băm của tệp không khớp — tệp có thể đã bị hỏng"
 
-#: crates/clamui-core/src/scanner.rs:383
+#: crates/clamui-core/src/scanner.rs:389
 msgid "No ClamAV database files were found in standard host locations"
-msgstr "Không tìm thấy tệp cơ sở dữ liệu ClamAV nào ở các vị trí tiêu chuẩn trên hệ thống chủ"
+msgstr ""
+"Không tìm thấy tệp cơ sở dữ liệu ClamAV nào ở các vị trí tiêu chuẩn trên hệ "
+"thống chủ"
 
-#: crates/clamui-core/src/scanner.rs:1808
+#: crates/clamui-core/src/scanner.rs:1815
 msgid "Scan cancelled by user"
 msgstr "Người dùng đã hủy quá trình quét"
 
-#: crates/clamui-core/src/scanner.rs:1810
+#: crates/clamui-core/src/scanner.rs:1817
 msgid "No files could be scanned"
 msgstr "Không thể quét tệp nào"
 
-#: crates/clamui-core/src/scanner.rs:1814
+#: crates/clamui-core/src/scanner.rs:1821
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "Mục tiêu quét không tồn tại hoặc chứa byte NUL không hợp lệ"
 
-#: crates/clamui-core/src/scanner.rs:1821
+#: crates/clamui-core/src/scanner.rs:1828
 msgid "Scan target is not a regular file or directory"
 msgstr "Mục tiêu quét không phải là tệp hoặc thư mục thông thường"
 
-#: crates/clamui-core/src/scanner.rs:1835
+#: crates/clamui-core/src/scanner.rs:1842
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "Không thể truy cập {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1848
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "Không thể đọc {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1867
+#: crates/clamui-core/src/scanner.rs:1874
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
 msgid_plural ""
 "{count} non-fatal warnings during scan; some files may have been only "
 "partially scanned"
-msgstr[0] "{count} cảnh báo không nghiêm trọng trong quá trình quét; một số tệp có thể chỉ được quét một phần"
+msgstr[0] ""
+"{count} cảnh báo không nghiêm trọng trong quá trình quét; một số tệp có thể "
+"chỉ được quét một phần"
 
 #: crates/clamui-core/src/scheduler.rs:805
 msgid "Scheduled scan cancelled"
@@ -1560,7 +1650,9 @@ msgstr "Đã hủy quét theo lịch"
 msgid ""
 "Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
 "target PATH] [--dry-run] [--verbose|-v]"
-msgstr "Cách dùng: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--target PATH] [--dry-run] [--verbose|-v]"
+msgstr ""
+"Cách dùng: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
+"target PATH] [--dry-run] [--verbose|-v]"
 
 #. Translators: The ellipsis indicates that the scheduled scan is starting.
 #: crates/clamui-core/src/scheduler.rs:865
@@ -1618,7 +1710,8 @@ msgstr "ClamAV không khả dụng. Vui lòng cài đặt ClamAV."
 msgid "Scheduled scan found {infected} threat, {quarantined} quarantined"
 msgid_plural ""
 "Scheduled scan found {infected} threats, {quarantined} quarantined"
-msgstr[0] "Quét theo lịch phát hiện {infected} mối đe dọa, đã cách ly {quarantined}"
+msgstr[0] ""
+"Quét theo lịch phát hiện {infected} mối đe dọa, đã cách ly {quarantined}"
 
 #: crates/clamui-core/src/scheduler.rs:1046
 msgid "Scheduled scan found {count} threat"
@@ -1634,7 +1727,8 @@ msgstr "Quét theo lịch đã hoàn tất nhưng có lỗi"
 #: crates/clamui-core/src/scheduler.rs:1058
 msgid "Scheduled scan completed — {count} file scanned, no threats"
 msgid_plural "Scheduled scan completed — {count} files scanned, no threats"
-msgstr[0] "Quét theo lịch đã hoàn tất — đã quét {count} tệp, không có mối đe dọa"
+msgstr[0] ""
+"Quét theo lịch đã hoàn tất — đã quét {count} tệp, không có mối đe dọa"
 
 #: crates/clamui-core/src/scheduler.rs:1073
 msgid "Scan Duration: {duration:.1f} seconds"
@@ -1670,7 +1764,8 @@ msgstr "Quét theo lịch đã hoàn tất"
 
 #: crates/clamui-core/src/scheduler.rs:1121
 msgid "Scan completed with some errors. Check logs for details."
-msgstr "Quá trình quét đã hoàn tất nhưng có một số lỗi. Xem nhật ký để biết chi tiết."
+msgstr ""
+"Quá trình quét đã hoàn tất nhưng có một số lỗi. Xem nhật ký để biết chi tiết."
 
 #: crates/clamui-core/src/scheduler.rs:1129
 msgid "Scheduled Scan Complete"
@@ -1685,7 +1780,9 @@ msgstr[0] "Không thể cách ly: {count} tệp"
 msgid ""
 "Battery level: {percent:.0f}%\n"
 "Scan skipped due to battery-aware settings."
-msgstr "Mức pin: {percent:.0f}%\nĐã bỏ qua lượt quét do cài đặt tiết kiệm pin."
+msgstr ""
+"Mức pin: {percent:.0f}%\n"
+"Đã bỏ qua lượt quét do cài đặt tiết kiệm pin."
 
 #: crates/clamui-core/src/scheduler.rs:1173
 msgid "Scan skipped due to battery-aware settings."
@@ -1707,7 +1804,9 @@ msgstr "Người dùng đã hủy cập nhật"
 msgid ""
 "Update process output did not close after cleanup; result cannot be "
 "classified."
-msgstr "Đầu ra của tiến trình cập nhật không đóng sau khi dọn dẹp; không thể xác định kết quả."
+msgstr ""
+"Đầu ra của tiến trình cập nhật không đóng sau khi dọn dẹp; không thể xác "
+"định kết quả."
 
 #. Translators: Keep `freshclam` and `PID` unchanged; preserve `{pid}` as the process identifier.
 #: crates/clamui-core/src/updater.rs:505
@@ -1719,14 +1818,17 @@ msgstr "Đã gửi tín hiệu cập nhật đến dịch vụ freshclam (PID {p
 msgid ""
 "Another freshclam instance is running (PID {pid}). Stop it first: sudo "
 "systemctl stop clamav-freshclam"
-msgstr "Một tiến trình freshclam khác đang chạy (PID {pid}). Hãy dừng nó trước: sudo systemctl stop clamav-freshclam"
+msgstr ""
+"Một tiến trình freshclam khác đang chạy (PID {pid}). Hãy dừng nó trước: sudo "
+"systemctl stop clamav-freshclam"
 
 #. Translators: The em dash separates the completion state from the count; preserve `{count}`.
 #. Translators: The em dash separates the completion state from the count; preserve `{count}`.
 #: crates/clamui-core/src/updater.rs:829
 msgid "Database update completed — {count} database updated"
 msgid_plural "Database update completed — {count} databases updated"
-msgstr[0] "Cập nhật cơ sở dữ liệu đã hoàn tất — đã cập nhật {count} cơ sở dữ liệu"
+msgstr[0] ""
+"Cập nhật cơ sở dữ liệu đã hoàn tất — đã cập nhật {count} cơ sở dữ liệu"
 
 #. Translators: The em dash separates the completion state from the result.
 #: crates/clamui-core/src/updater.rs:839
@@ -1747,7 +1849,9 @@ msgstr "Không thể xác định PID của freshclam"
 msgid ""
 "Could not trigger freshclam service update. Try restarting the service: sudo "
 "systemctl restart clamav-freshclam ({error})"
-msgstr "Không thể kích hoạt cập nhật qua dịch vụ freshclam. Hãy thử khởi động lại dịch vụ: sudo systemctl restart clamav-freshclam ({error})"
+msgstr ""
+"Không thể kích hoạt cập nhật qua dịch vụ freshclam. Hãy thử khởi động lại "
+"dịch vụ: sudo systemctl restart clamav-freshclam ({error})"
 
 #: crates/clamui-core/src/virustotal.rs:807
 msgid "File too large ({size}MB). Maximum size is {max}MB"
@@ -1871,43 +1975,43 @@ msgstr "Đã quét xong thiết bị"
 msgid "Security Audit Complete"
 msgstr "Đã hoàn tất kiểm tra bảo mật"
 
-#: desktop/src-tauri/src/runtime.rs:190
+#: desktop/src-tauri/src/runtime.rs:199
 msgid "Quick Scan"
 msgstr "Quét nhanh"
 
-#: desktop/src-tauri/src/runtime.rs:191
+#: desktop/src-tauri/src/runtime.rs:200
 msgid "Full Scan"
 msgstr "Quét toàn bộ"
 
-#: desktop/src-tauri/src/runtime.rs:192
+#: desktop/src-tauri/src/runtime.rs:201
 msgid "Home Folder"
 msgstr "Thư mục chính"
 
-#: desktop/src-tauri/src/runtime.rs:193
+#: desktop/src-tauri/src/runtime.rs:202
 msgid "Update Database"
 msgstr "Cập nhật cơ sở dữ liệu"
 
-#: desktop/src-tauri/src/runtime.rs:194
+#: desktop/src-tauri/src/runtime.rs:203
 msgid "Scan Profile"
 msgstr "Quét theo hồ sơ"
 
-#: desktop/src-tauri/src/runtime.rs:195
+#: desktop/src-tauri/src/runtime.rs:204
 msgid "Quit"
 msgstr "Thoát"
 
-#: desktop/src-tauri/src/runtime.rs:368
+#: desktop/src-tauri/src/runtime.rs:405
 msgid "Add Folders"
 msgstr "Thêm thư mục"
 
-#: desktop/src-tauri/src/runtime.rs:370
+#: desktop/src-tauri/src/runtime.rs:407
 msgid "Add Files"
 msgstr "Thêm tệp"
 
-#: desktop/src-tauri/src/runtime.rs:414
+#: desktop/src-tauri/src/runtime.rs:451
 msgid "Export"
 msgstr "Xuất"
 
-#: desktop/src-tauri/src/runtime.rs:545
+#: desktop/src-tauri/src/runtime.rs:582
 msgid "Open"
 msgstr "Mở"
 
@@ -1937,7 +2041,7 @@ msgstr "Quét"
 msgid "Database"
 msgstr "Cơ sở dữ liệu"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:360
+#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:358
 msgid "Logs"
 msgstr "Nhật ký"
 
@@ -1945,7 +2049,7 @@ msgstr "Nhật ký"
 msgid "Components"
 msgstr "Thành phần"
 
-#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:223
+#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Thống kê"
 
@@ -1979,11 +2083,13 @@ msgstr "Không thể mở liên kết"
 #: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
 #: desktop/src/pages/Scan.tsx:322
 msgid "Scan in progress — wait for it to finish before changing targets"
-msgstr "Đang quét — hãy đợi quá trình quét hoàn tất trước khi thay đổi mục tiêu"
+msgstr ""
+"Đang quét — hãy đợi quá trình quét hoàn tất trước khi thay đổi mục tiêu"
 
 #: desktop/src/App.tsx:469
 msgid "The privileged-helper installation returned an invalid status."
-msgstr "Quá trình cài đặt trình trợ giúp đặc quyền trả về trạng thái không hợp lệ."
+msgstr ""
+"Quá trình cài đặt trình trợ giúp đặc quyền trả về trạng thái không hợp lệ."
 
 #: desktop/src/App.tsx:476
 msgid "The privileged helper was installed successfully."
@@ -1992,11 +2098,15 @@ msgstr "Đã cài đặt trình trợ giúp đặc quyền thành công."
 #: desktop/src/App.tsx:478
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
-msgstr "Trình trợ giúp đặc quyền vẫn chưa khả dụng. Hãy thử lại hoặc cài đặt thủ công."
+msgstr ""
+"Trình trợ giúp đặc quyền vẫn chưa khả dụng. Hãy thử lại hoặc cài đặt thủ "
+"công."
 
 #: desktop/src/App.tsx:767
 msgid "The privileged-helper status returned an invalid response."
-msgstr "Yêu cầu kiểm tra trạng thái trình trợ giúp đặc quyền trả về phản hồi không hợp lệ."
+msgstr ""
+"Yêu cầu kiểm tra trạng thái trình trợ giúp đặc quyền trả về phản hồi không "
+"hợp lệ."
 
 #: desktop/src/App.tsx:872
 msgid "Back"
@@ -2042,7 +2152,7 @@ msgstr "Điều hướng chính"
 msgid "Views"
 msgstr "Các trang"
 
-#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:203
+#: desktop/src/App.tsx:999 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Bỏ qua"
 
@@ -2058,8 +2168,8 @@ msgstr "Giao diện máy tính để bàn gốc dành cho ClamAV."
 msgid "Version"
 msgstr "Phiên bản"
 
-#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:226
-#: desktop/src/pages/SettingsPreferences.tsx:227
+#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:227
+#: desktop/src/pages/SettingsPreferences.tsx:228
 msgid "Language"
 msgstr "Ngôn ngữ"
 
@@ -2107,12 +2217,12 @@ msgstr "Ghi nhớ lựa chọn của tôi"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
 #: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:414 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
 #: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:240 desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
-#: desktop/src/pages/SettingsPreferences.tsx:367
-#: desktop/src/pages/SettingsPreferences.tsx:456
+#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:457
 msgid "Cancel"
 msgstr "Hủy"
 
@@ -2138,7 +2248,7 @@ msgstr "Hủy quét và đóng"
 
 #: desktop/src/App.tsx:1058 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
-#: desktop/src/pages/SettingsPreferences.tsx:256
+#: desktop/src/pages/SettingsPreferences.tsx:257
 msgid "Close"
 msgstr "Đóng"
 
@@ -2149,7 +2259,8 @@ msgstr "Cài đặt trình trợ giúp đặc quyền"
 #: desktop/src/App.tsx:1061
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
-msgstr "ClamUI cần trình trợ giúp đặc quyền tương ứng để lưu cấu hình hệ thống."
+msgstr ""
+"ClamUI cần trình trợ giúp đặc quyền tương ứng để lưu cấu hình hệ thống."
 
 #: desktop/src/App.tsx:1063 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
@@ -2160,7 +2271,9 @@ msgstr "Việc cài đặt trình trợ giúp cần được cấp quyền quả
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
-msgstr "Trên Fedora dùng DNF, quá trình cài đặt cũng thêm khóa ký của ClamUI vào kho khóa RPM của hệ thống."
+msgstr ""
+"Trên Fedora dùng DNF, quá trình cài đặt cũng thêm khóa ký của ClamUI vào kho "
+"khóa RPM của hệ thống."
 
 #: desktop/src/App.tsx:1069 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
@@ -2195,13 +2308,18 @@ msgid ""
 "These are the configuration contents from the failed save attempt. Some "
 "files may already have changed. Check each target before replacing its "
 "content."
-msgstr "Đây là nội dung cấu hình từ lần lưu không thành công. Một số tệp có thể đã bị thay đổi. Hãy kiểm tra từng tệp đích trước khi thay thế nội dung của tệp đó."
+msgstr ""
+"Đây là nội dung cấu hình từ lần lưu không thành công. Một số tệp có thể đã "
+"bị thay đổi. Hãy kiểm tra từng tệp đích trước khi thay thế nội dung của tệp "
+"đó."
 
 #: desktop/src/ConfigurationRecovery.tsx:70
 msgid ""
 "Configuration contents may include sensitive values. Copy and store them "
 "carefully."
-msgstr "Nội dung cấu hình có thể chứa giá trị nhạy cảm. Hãy sao chép và lưu trữ cẩn thận."
+msgstr ""
+"Nội dung cấu hình có thể chứa giá trị nhạy cảm. Hãy sao chép và lưu trữ cẩn "
+"thận."
 
 #: desktop/src/ConfigurationRecovery.tsx:79
 msgid "Configuration path copied to clipboard"
@@ -2244,19 +2362,25 @@ msgstr "Cài đặt được bảo vệ đang bị chặn"
 msgid ""
 "ClamUI could not save protected settings because its system helper is not "
 "installed."
-msgstr "ClamUI không thể lưu cài đặt được bảo vệ vì trình trợ giúp hệ thống của ClamUI chưa được cài đặt."
+msgstr ""
+"ClamUI không thể lưu cài đặt được bảo vệ vì trình trợ giúp hệ thống của "
+"ClamUI chưa được cài đặt."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:47
 msgid ""
 "ClamUI blocked this operation because its system helper is missing or is not "
 "securely installed."
-msgstr "ClamUI đã chặn thao tác này vì trình trợ giúp hệ thống bị thiếu hoặc không được cài đặt an toàn."
+msgstr ""
+"ClamUI đã chặn thao tác này vì trình trợ giúp hệ thống bị thiếu hoặc không "
+"được cài đặt an toàn."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:48
 msgid ""
 "The helper provides administrator-authorized access to protected ClamAV "
 "settings."
-msgstr "Trình trợ giúp cung cấp quyền truy cập vào các cài đặt ClamAV được bảo vệ khi được quản trị viên cho phép."
+msgstr ""
+"Trình trợ giúp cung cấp quyền truy cập vào các cài đặt ClamAV được bảo vệ "
+"khi được quản trị viên cho phép."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:59
 msgid "Helper location"
@@ -2266,7 +2390,9 @@ msgstr "Vị trí trình trợ giúp"
 msgid ""
 "The helper must be an executable file owned by root, not a symbolic link, "
 "and other users must not be able to change it."
-msgstr "Trình trợ giúp phải là tệp thực thi thuộc sở hữu của root, không phải liên kết tượng trưng, và người dùng khác không được phép thay đổi tệp này."
+msgstr ""
+"Trình trợ giúp phải là tệp thực thi thuộc sở hữu của root, không phải liên "
+"kết tượng trưng, và người dùng khác không được phép thay đổi tệp này."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:63
 msgid "How to fix it"
@@ -2274,11 +2400,14 @@ msgstr "Cách khắc phục"
 
 #: desktop/src/HelperTrustErrorDialog.tsx:66
 msgid "Install the matching helper from the same trusted ClamUI release."
-msgstr "Cài đặt trình trợ giúp tương ứng từ cùng bản phát hành ClamUI đáng tin cậy."
+msgstr ""
+"Cài đặt trình trợ giúp tương ứng từ cùng bản phát hành ClamUI đáng tin cậy."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:67
 msgid "Reinstall the matching helper from the same trusted ClamUI release."
-msgstr "Cài đặt lại trình trợ giúp tương ứng từ cùng bản phát hành ClamUI đáng tin cậy."
+msgstr ""
+"Cài đặt lại trình trợ giúp tương ứng từ cùng bản phát hành ClamUI đáng tin "
+"cậy."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:68
 msgid "Then return to Preferences and repeat the action."
@@ -2287,7 +2416,9 @@ msgstr "Sau đó quay lại Tùy chọn và thực hiện lại thao tác."
 #: desktop/src/HelperTrustErrorDialog.tsx:70
 msgid ""
 "Do not change the permissions of an unknown executable to bypass this check."
-msgstr "Không thay đổi quyền của một tệp thực thi không rõ nguồn gốc để vượt qua bước kiểm tra này."
+msgstr ""
+"Không thay đổi quyền của một tệp thực thi không rõ nguồn gốc để vượt qua "
+"bước kiểm tra này."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:72
 #: desktop/src/pages/ConfigPreferences.tsx:876
@@ -2313,7 +2444,7 @@ msgid "Infected"
 msgstr "Bị nhiễm"
 
 #: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
-#: desktop/src/pages/Statistics.tsx:140
+#: desktop/src/pages/Statistics.tsx:141
 msgid "Error"
 msgstr "Lỗi"
 
@@ -2322,12 +2453,12 @@ msgid "Cancelled"
 msgstr "Đã hủy"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:103
-#: desktop/src/pages/Logs.tsx:120 desktop/src/pages/Results.tsx:55
+#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
-#: desktop/src/pages/SettingsPreferences.tsx:430
-#: desktop/src/pages/SettingsPreferences.tsx:454
-#: desktop/src/pages/Statistics.tsx:141
+#: desktop/src/pages/SettingsPreferences.tsx:431
+#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/Statistics.tsx:142
 msgid "Unknown"
 msgstr "Không xác định"
 
@@ -2384,7 +2515,7 @@ msgstr "Cảnh báo"
 msgid "Fail"
 msgstr "Không đạt"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:119
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "Đã bỏ qua"
 
@@ -2412,7 +2543,8 @@ msgstr "Đã hoàn tất kiểm tra {tool}"
 
 #: desktop/src/pages/Audit.tsx:218
 msgid "The audit supplied an unsupported GUI launch action."
-msgstr "Kết quả kiểm tra bảo mật chứa thao tác khởi chạy giao diện không được hỗ trợ."
+msgstr ""
+"Kết quả kiểm tra bảo mật chứa thao tác khởi chạy giao diện không được hỗ trợ."
 
 #: desktop/src/pages/Audit.tsx:223
 msgid "The selected application did not start"
@@ -2438,7 +2570,9 @@ msgstr "Kiểm tra bảo mật hệ thống"
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
-msgstr "Đánh giá tình trạng bảo mật và sao chép các khuyến nghị. Các bước kiểm tra bảo mật không bao giờ thay đổi cấu hình hệ thống."
+msgstr ""
+"Đánh giá tình trạng bảo mật và sao chép các khuyến nghị. Các bước kiểm tra "
+"bảo mật không bao giờ thay đổi cấu hình hệ thống."
 
 #: desktop/src/pages/Audit.tsx:261
 msgid "Auditing…"
@@ -2466,7 +2600,9 @@ msgstr "Quét chuyên sâu"
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
-msgstr "Lynis và chkrootkit không bao giờ tự động chạy. Mỗi bước kiểm tra chỉ yêu cầu quyền quản trị sau khi bạn chủ động bắt đầu bước kiểm tra đó."
+msgstr ""
+"Lynis và chkrootkit không bao giờ tự động chạy. Mỗi bước kiểm tra chỉ yêu "
+"cầu quyền quản trị sau khi bạn chủ động bắt đầu bước kiểm tra đó."
 
 #: desktop/src/pages/Audit.tsx:276
 msgid "Running Lynis…"
@@ -2507,9 +2643,9 @@ msgid "Could not copy command: {error}"
 msgstr "Không thể sao chép lệnh: {error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
-#: desktop/src/pages/Logs.tsx:390 desktop/src/pages/Logs.tsx:415
+#: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Copy"
 msgstr "Sao chép"
 
@@ -2571,7 +2707,9 @@ msgstr "Sau khi cài đặt, hãy cập nhật cơ sở dữ liệu virus bằng
 msgid ""
 "Enable the service for automatic updates: sudo systemctl enable clamav-"
 "freshclam; sudo systemctl start clamav-freshclam"
-msgstr "Bật dịch vụ để tự động cập nhật: sudo systemctl enable clamav-freshclam; sudo systemctl start clamav-freshclam"
+msgstr ""
+"Bật dịch vụ để tự động cập nhật: sudo systemctl enable clamav-freshclam; "
+"sudo systemctl start clamav-freshclam"
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
 #: desktop/src/pages/Components.tsx:126
@@ -2584,23 +2722,27 @@ msgid ""
 "Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
 "clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
 "permissions and run: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
-msgstr "Cấu hình được tự động phát hiện trong Tùy chọn. Trên Fedora, ClamUI dùng /etc/clamd.d/scan.conf. Nếu clamd đang chạy nhưng không khả dụng, hãy kiểm tra quyền của socket và chạy: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
+msgstr ""
+"Cấu hình được tự động phát hiện trong Tùy chọn. Trên Fedora, ClamUI dùng /"
+"etc/clamd.d/scan.conf. Nếu clamd đang chạy nhưng không khả dụng, hãy kiểm "
+"tra quyền của socket và chạy: clamdscan --config-file=/etc/clamd.d/scan.conf "
+"--ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:97
+#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "Đang chạy"
 
 #: desktop/src/pages/Components.tsx:143
-#: desktop/src/pages/SettingsPreferences.tsx:247
+#: desktop/src/pages/SettingsPreferences.tsx:248
 msgid "Installed"
 msgstr "Đã cài đặt"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:99
+#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "Đã dừng"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:101
-#: desktop/src/pages/SettingsPreferences.tsx:249
+#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
+#: desktop/src/pages/SettingsPreferences.tsx:250
 msgid "Not installed"
 msgstr "Chưa cài đặt"
 
@@ -2611,7 +2753,9 @@ msgstr "Thành phần ClamAV"
 #: desktop/src/pages/Components.tsx:201
 msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
-msgstr "Kiểm tra các công cụ ClamAV trên hệ thống chủ và sao chép lệnh thiết lập dành riêng cho từng bản phân phối."
+msgstr ""
+"Kiểm tra các công cụ ClamAV trên hệ thống chủ và sao chép lệnh thiết lập "
+"dành riêng cho từng bản phân phối."
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:228
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
@@ -2627,7 +2771,9 @@ msgstr "Làm mới trạng thái"
 msgid ""
 "Setup instructions are copy-only. ClamUI never installs packages or starts "
 "services for you."
-msgstr "Hướng dẫn thiết lập chỉ để sao chép. ClamUI không bao giờ tự cài gói hay khởi động dịch vụ thay bạn."
+msgstr ""
+"Hướng dẫn thiết lập chỉ để sao chép. ClamUI không bao giờ tự cài gói hay "
+"khởi động dịch vụ thay bạn."
 
 #: desktop/src/pages/Components.tsx:209
 msgid "Could not check component status: {error}"
@@ -2735,11 +2881,14 @@ msgid ""
 "Selecting a file keeps the path in this pending proposal. Save & Apply "
 "persists it only after the complete proposal is valid. Authorization is "
 "requested only when you explicitly choose Authorize read."
-msgstr "Việc chọn tệp chỉ giữ đường dẫn trong bản đề xuất đang chờ này. “Lưu và áp dụng” chỉ lưu lại đường dẫn khi toàn bộ đề xuất hợp lệ. Quyền chỉ được yêu cầu khi bạn chủ động chọn “Cấp quyền đọc”."
+msgstr ""
+"Việc chọn tệp chỉ giữ đường dẫn trong bản đề xuất đang chờ này. “Lưu và áp "
+"dụng” chỉ lưu lại đường dẫn khi toàn bộ đề xuất hợp lệ. Quyền chỉ được yêu "
+"cầu khi bạn chủ động chọn “Cấp quyền đọc”."
 
 #: desktop/src/pages/ConfigPreferences.tsx:294
 #: desktop/src/pages/ConfigPreferences.tsx:341
-#: desktop/src/pages/SettingsPreferences.tsx:323
+#: desktop/src/pages/SettingsPreferences.tsx:324
 msgid "Add"
 msgstr "Thêm"
 
@@ -2747,7 +2896,7 @@ msgstr "Thêm"
 #: desktop/src/pages/ConfigPreferences.tsx:345
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
-#: desktop/src/pages/SettingsPreferences.tsx:253
+#: desktop/src/pages/SettingsPreferences.tsx:254
 msgid "Remove"
 msgstr "Gỡ bỏ"
 
@@ -2789,7 +2938,9 @@ msgstr "Hãy chọn tệp cấu hình trước khi áp dụng thay đổi."
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
-msgstr "Quét thời gian thực yêu cầu loại trừ một tên người dùng, UID hoặc người dùng root để tránh vòng lặp quét."
+msgstr ""
+"Quét thời gian thực yêu cầu loại trừ một tên người dùng, UID hoặc người dùng "
+"root để tránh vòng lặp quét."
 
 #: desktop/src/pages/ConfigPreferences.tsx:598
 #: desktop/src/pages/ConfigPreferences.tsx:688
@@ -2923,14 +3074,18 @@ msgstr "Đề xuất"
 msgid ""
 "Suggested adds URLhaus and three InterServer databases to this draft. Save & "
 "Apply is still required."
-msgstr "“Đề xuất” sẽ thêm URLhaus và ba cơ sở dữ liệu InterServer vào bản nháp này. Bạn vẫn cần nhấn “Lưu và áp dụng”."
+msgstr ""
+"“Đề xuất” sẽ thêm URLhaus và ba cơ sở dữ liệu InterServer vào bản nháp này. "
+"Bạn vẫn cần nhấn “Lưu và áp dụng”."
 
 #. Translators: Keep the URI schemes unchanged.
 #: desktop/src/pages/ConfigPreferences.tsx:763
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
-msgstr "Các giao thức URL được hỗ trợ: http, https, ftp, ftps và file. Dán từng URL của nhà cung cấp thành một mục riêng."
+msgstr ""
+"Các giao thức URL được hỗ trợ: http, https, ftp, ftps và file. Dán từng URL "
+"của nhà cung cấp thành một mục riêng."
 
 #: desktop/src/pages/ConfigPreferences.tsx:768
 msgid "Signature Providers"
@@ -2956,11 +3111,15 @@ msgstr "Cần đăng ký; URL chứa khóa API cá nhân của bạn."
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
-msgstr "Hãy dùng fangfrisch hoặc clamav-unofficial-sigs; nhà cung cấp này không hỗ trợ thêm trực tiếp bằng URL tùy chỉnh."
+msgstr ""
+"Hãy dùng fangfrisch hoặc clamav-unofficial-sigs; nhà cung cấp này không hỗ "
+"trợ thêm trực tiếp bằng URL tùy chỉnh."
 
 #: desktop/src/pages/ConfigPreferences.tsx:775
 msgid "Community hash, web-shell, and general malware signature databases."
-msgstr "Cơ sở dữ liệu chữ ký virus cộng đồng cho mã băm, web shell và phần mềm độc hại nói chung."
+msgstr ""
+"Cơ sở dữ liệu chữ ký virus cộng đồng cho mã băm, web shell và phần mềm độc "
+"hại nói chung."
 
 #: desktop/src/pages/ConfigPreferences.tsx:777
 msgid "Proxy Settings"
@@ -3138,7 +3297,9 @@ msgstr "Chống quét lặp vòng"
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
-msgstr "Cần ít nhất một ngoại lệ chống lặp vòng. Hãy loại trừ tài khoản dịch vụ clamav, UID của tài khoản đó hoặc root để tránh quét đệ quy."
+msgstr ""
+"Cần ít nhất một ngoại lệ chống lặp vòng. Hãy loại trừ tài khoản dịch vụ "
+"clamav, UID của tài khoản đó hoặc root để tránh quét đệ quy."
 
 #: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Exclude Username"
@@ -3197,10 +3358,12 @@ msgstr "Mục tiêu quét"
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
-msgstr "Chưa cấu hình mục tiêu nào. Lượt quét theo lịch sẽ dùng thư mục cá nhân của bạn mà không lưu thư mục đó thành mục tiêu cụ thể."
+msgstr ""
+"Chưa cấu hình mục tiêu nào. Lượt quét theo lịch sẽ dùng thư mục cá nhân của "
+"bạn mà không lưu thư mục đó thành mục tiêu cụ thể."
 
 #: desktop/src/pages/ConfigPreferences.tsx:854
-#: desktop/src/pages/SettingsPreferences.tsx:345
+#: desktop/src/pages/SettingsPreferences.tsx:346
 msgid "Skip on Battery"
 msgstr "Bỏ qua khi dùng pin"
 
@@ -3230,14 +3393,20 @@ msgstr "Áp dụng cấu hình"
 msgid ""
 "All edited forms are captured at the moment you click Save & Apply. Every "
 "configured file is validated before any write or authorization request."
-msgstr "Mọi biểu mẫu đã chỉnh sửa được ghi nhận tại thời điểm bạn nhấn “Lưu và áp dụng”. Mọi tệp đã cấu hình đều được kiểm tra hợp lệ trước khi ghi hoặc yêu cầu cấp quyền."
+msgstr ""
+"Mọi biểu mẫu đã chỉnh sửa được ghi nhận tại thời điểm bạn nhấn “Lưu và áp "
+"dụng”. Mọi tệp đã cấu hình đều được kiểm tra hợp lệ trước khi ghi hoặc yêu "
+"cầu cấp quyền."
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
 #: desktop/src/pages/ConfigPreferences.tsx:866
 msgid ""
 "Scanner and On-Access changes share one clamd.conf proposal; neither form "
 "can overwrite the other's detached changes."
-msgstr "Các thay đổi trong phần trình quét và quét thời gian thực dùng chung một bản đề xuất clamd.conf; biểu mẫu này không thể ghi đè các thay đổi riêng của biểu mẫu kia."
+msgstr ""
+"Các thay đổi trong phần trình quét và quét thời gian thực dùng chung một bản "
+"đề xuất clamd.conf; biểu mẫu này không thể ghi đè các thay đổi riêng của "
+"biểu mẫu kia."
 
 #: desktop/src/pages/ConfigPreferences.tsx:870
 #: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
@@ -3334,7 +3503,9 @@ msgstr "đến"
 msgid ""
 "The service accepted the signal; it performs the update asynchronously. "
 "Check its logs for completion."
-msgstr "Dịch vụ đã nhận tín hiệu và sẽ cập nhật ở chế độ nền. Hãy xem nhật ký của dịch vụ để biết khi nào hoàn tất."
+msgstr ""
+"Dịch vụ đã nhận tín hiệu và sẽ cập nhật ở chế độ nền. Hãy xem nhật ký của "
+"dịch vụ để biết khi nào hoàn tất."
 
 #: desktop/src/pages/Database.tsx:100
 msgid "freshclam output:"
@@ -3352,7 +3523,9 @@ msgstr "Không thể theo dõi tiến trình cập nhật: {error}"
 msgid ""
 "Force update requested: preserving existing databases until replacement "
 "succeeds."
-msgstr "Đã yêu cầu buộc cập nhật: giữ nguyên cơ sở dữ liệu hiện có cho đến khi thay thế thành công."
+msgstr ""
+"Đã yêu cầu buộc cập nhật: giữ nguyên cơ sở dữ liệu hiện có cho đến khi thay "
+"thế thành công."
 
 #: desktop/src/pages/Database.tsx:213
 msgid "Update requested."
@@ -3431,7 +3604,11 @@ msgid ""
 "A normal update asks an active freshclam service to update when possible. A "
 "force update bypasses the service and stages replacements before promoting "
 "them, restoring prior databases if that replacement fails."
-msgstr "Cập nhật thông thường sẽ yêu cầu dịch vụ freshclam đang hoạt động cập nhật khi có thể. Buộc cập nhật sẽ bỏ qua dịch vụ, chuẩn bị sẵn bản thay thế trước khi đưa vào sử dụng và khôi phục cơ sở dữ liệu trước đó nếu việc thay thế thất bại."
+msgstr ""
+"Cập nhật thông thường sẽ yêu cầu dịch vụ freshclam đang hoạt động cập nhật "
+"khi có thể. Buộc cập nhật sẽ bỏ qua dịch vụ, chuẩn bị sẵn bản thay thế trước "
+"khi đưa vào sử dụng và khôi phục cơ sở dữ liệu trước đó nếu việc thay thế "
+"thất bại."
 
 #: desktop/src/pages/Database.tsx:311
 msgid "Updating…"
@@ -3466,244 +3643,248 @@ msgid ""
 "This bypasses the freshclam service and stages replacement databases. "
 "Existing definitions remain available until a replacement succeeds; they are "
 "restored if promotion fails."
-msgstr "Thao tác này bỏ qua dịch vụ freshclam và chuẩn bị sẵn cơ sở dữ liệu thay thế. Cơ sở dữ liệu virus hiện có vẫn dùng được cho đến khi thay thế thành công và sẽ được khôi phục nếu việc đưa vào sử dụng thất bại."
+msgstr ""
+"Thao tác này bỏ qua dịch vụ freshclam và chuẩn bị sẵn cơ sở dữ liệu thay "
+"thế. Cơ sở dữ liệu virus hiện có vẫn dùng được cho đến khi thay thế thành "
+"công và sẽ được khôi phục nếu việc đưa vào sử dụng thất bại."
 
-#: desktop/src/pages/Logs.tsx:76
+#: desktop/src/pages/Logs.tsx:77
 msgid "{seconds} second"
 msgid_plural "{seconds} seconds"
 msgstr[0] "{seconds} giây"
 
-#: desktop/src/pages/Logs.tsx:88 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Quarantine.tsx:225
+#: desktop/src/pages/Logs.tsx:89 desktop/src/pages/Profiles.tsx:103
+#: desktop/src/pages/Quarantine.tsx:304
 msgid "Path"
 msgstr "Đường dẫn"
 
-#: desktop/src/pages/Logs.tsx:117
+#: desktop/src/pages/Logs.tsx:118
 msgid "Success"
 msgstr "Thành công"
 
-#: desktop/src/pages/Logs.tsx:118
+#: desktop/src/pages/Logs.tsx:119
 msgid "Up to date"
 msgstr "Đã là bản mới nhất"
 
-#: desktop/src/pages/Logs.tsx:162
+#: desktop/src/pages/Logs.tsx:163
 msgid "Failed to load historical logs: {error}"
 msgstr "Không thể tải nhật ký cũ: {error}"
 
-#: desktop/src/pages/Logs.tsx:180
+#: desktop/src/pages/Logs.tsx:178
 msgid "Log updates are unavailable: {error}"
 msgstr "Không thể nhận cập nhật nhật ký: {error}"
 
-#: desktop/src/pages/Logs.tsx:193 desktop/src/pages/Logs.tsx:209
+#: desktop/src/pages/Logs.tsx:191 desktop/src/pages/Logs.tsx:207
 msgid "Unable to determine ClamAV daemon status."
 msgstr "Không thể xác định trạng thái dịch vụ ClamAV."
 
-#: desktop/src/pages/Logs.tsx:202
+#: desktop/src/pages/Logs.tsx:200
 msgid "ClamAV daemon is not running."
 msgstr "Dịch vụ ClamAV không chạy."
 
-#: desktop/src/pages/Logs.tsx:205
+#: desktop/src/pages/Logs.tsx:203
 msgid "ClamAV daemon is not installed."
 msgstr "Dịch vụ ClamAV chưa được cài đặt."
 
-#: desktop/src/pages/Logs.tsx:236
+#: desktop/src/pages/Logs.tsx:234
 msgid "Unable to load daemon logs."
 msgstr "Không thể tải nhật ký dịch vụ."
 
-#: desktop/src/pages/Logs.tsx:274
+#: desktop/src/pages/Logs.tsx:272
 msgid "The log entry returned by ClamUI was incomplete."
 msgstr "Mục nhật ký do ClamUI trả về không đầy đủ."
 
-#: desktop/src/pages/Logs.tsx:277
+#: desktop/src/pages/Logs.tsx:275
 msgid "Failed to load log details: {error}"
 msgstr "Không thể tải chi tiết nhật ký: {error}"
 
-#: desktop/src/pages/Logs.tsx:285 desktop/src/pages/Logs.tsx:295
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:283 desktop/src/pages/Logs.tsx:293
+#: desktop/src/pages/Logs.tsx:401
 msgid "Text"
 msgstr "Văn bản"
 
-#: desktop/src/pages/Logs.tsx:286 desktop/src/pages/Logs.tsx:296
+#: desktop/src/pages/Logs.tsx:284 desktop/src/pages/Logs.tsx:294
 msgid "Exported selected log."
 msgstr "Đã xuất nhật ký được chọn."
 
-#: desktop/src/pages/Logs.tsx:286
+#: desktop/src/pages/Logs.tsx:284
 msgid "Exported all logs."
 msgstr "Đã xuất tất cả nhật ký."
 
-#: desktop/src/pages/Logs.tsx:288
+#: desktop/src/pages/Logs.tsx:286
 msgid "Failed to export logs"
 msgstr "Không thể xuất nhật ký"
 
-#: desktop/src/pages/Logs.tsx:298
+#: desktop/src/pages/Logs.tsx:296
 msgid "Failed to export log"
 msgstr "Không thể xuất nhật ký"
 
-#: desktop/src/pages/Logs.tsx:306
+#: desktop/src/pages/Logs.tsx:304
 msgid ""
 "Log details are too large for the clipboard. Choose an export destination "
 "instead."
-msgstr "Chi tiết nhật ký quá lớn để sao chép vào bộ nhớ tạm. Hãy chọn nơi xuất tệp."
+msgstr ""
+"Chi tiết nhật ký quá lớn để sao chép vào bộ nhớ tạm. Hãy chọn nơi xuất tệp."
 
-#: desktop/src/pages/Logs.tsx:312
+#: desktop/src/pages/Logs.tsx:310
 msgid "Log details copied to clipboard"
 msgstr "Đã sao chép chi tiết nhật ký vào bộ nhớ tạm"
 
-#: desktop/src/pages/Logs.tsx:314
+#: desktop/src/pages/Logs.tsx:312
 msgid "Failed to copy log details"
 msgstr "Không sao chép được chi tiết nhật ký"
 
-#: desktop/src/pages/Logs.tsx:326
+#: desktop/src/pages/Logs.tsx:324
 msgid "Daemon logs copied to clipboard"
 msgstr "Đã sao chép nhật ký dịch vụ vào bộ nhớ tạm"
 
-#: desktop/src/pages/Logs.tsx:328
+#: desktop/src/pages/Logs.tsx:326
 msgid "Failed to copy daemon logs"
 msgstr "Không sao chép được nhật ký dịch vụ"
 
-#: desktop/src/pages/Logs.tsx:339
+#: desktop/src/pages/Logs.tsx:337
 msgid "Historical logs were cleared with {count} cleanup failure."
 msgid_plural "Historical logs were cleared with {count} cleanup failures."
 msgstr[0] "Đã xóa nhật ký lịch sử, có {count} lỗi khi dọn dẹp."
 
-#: desktop/src/pages/Logs.tsx:345
+#: desktop/src/pages/Logs.tsx:343
 msgid "Historical logs cleared."
 msgstr "Đã xóa nhật ký lịch sử."
 
-#: desktop/src/pages/Logs.tsx:348
+#: desktop/src/pages/Logs.tsx:346
 msgid "Failed to clear logs: {error}"
 msgstr "Không xóa được nhật ký: {error}"
 
-#: desktop/src/pages/Logs.tsx:353
+#: desktop/src/pages/Logs.tsx:351
 msgid "Select a log entry to view details."
 msgstr "Chọn một mục nhật ký để xem chi tiết."
 
-#: desktop/src/pages/Logs.tsx:354
+#: desktop/src/pages/Logs.tsx:352
 msgid "Error loading daemon logs"
 msgstr "Lỗi khi tải nhật ký dịch vụ"
 
-#: desktop/src/pages/Logs.tsx:360
+#: desktop/src/pages/Logs.tsx:358
 msgid "Review previous scan and update operations."
 msgstr "Xem lại các lượt quét và cập nhật trước đây."
 
-#: desktop/src/pages/Logs.tsx:361
+#: desktop/src/pages/Logs.tsx:359
 msgid "Log source"
 msgstr "Nguồn nhật ký"
 
-#: desktop/src/pages/Logs.tsx:362 desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:360 desktop/src/pages/Logs.tsx:366
 msgid "Historical Logs"
 msgstr "Nhật ký lịch sử"
 
-#: desktop/src/pages/Logs.tsx:363 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:361 desktop/src/pages/Logs.tsx:398
 msgid "ClamAV Daemon"
 msgstr "Dịch vụ ClamAV"
 
-#: desktop/src/pages/Logs.tsx:368
+#: desktop/src/pages/Logs.tsx:366
 msgid "Previous scan and update operations"
 msgstr "Các lượt quét và cập nhật trước đây"
 
-#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:217
-#: desktop/src/pages/SettingsPreferences.tsx:367
-#: desktop/src/pages/SettingsPreferences.tsx:449
-#: desktop/src/pages/Statistics.tsx:224
+#: desktop/src/pages/Logs.tsx:367 desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:296
+#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:450
+#: desktop/src/pages/Statistics.tsx:234
 msgid "Refresh"
 msgstr "Làm mới"
 
-#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:392
+#: desktop/src/pages/Logs.tsx:368 desktop/src/pages/Logs.tsx:390
 msgid "Export CSV"
 msgstr "Xuất CSV"
 
-#: desktop/src/pages/Logs.tsx:371 desktop/src/pages/Logs.tsx:393
+#: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
 #: desktop/src/pages/Results.tsx:225
 msgid "Export JSON"
 msgstr "Xuất JSON"
 
-#: desktop/src/pages/Logs.tsx:372 desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Scan.tsx:553
 msgid "Clear All"
 msgstr "Xóa tất cả"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "Loading logs…"
 msgstr "Đang tải nhật ký…"
 
-#: desktop/src/pages/Logs.tsx:375
+#: desktop/src/pages/Logs.tsx:373
 msgid "No historical logs yet."
 msgstr "Chưa có nhật ký lịch sử."
 
-#: desktop/src/pages/Logs.tsx:382
+#: desktop/src/pages/Logs.tsx:380
 msgid "{shown} of {total} loaded log shown"
 msgid_plural "{shown} of {total} loaded logs shown"
 msgstr[0] "Đang hiển thị {shown}/{total} nhật ký đã tải"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Network.tsx:430
-#: desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381 desktop/src/pages/Network.tsx:430
 msgid "Load More"
 msgstr "Tải thêm"
 
-#: desktop/src/pages/Logs.tsx:383 desktop/src/pages/Quarantine.tsx:230
+#: desktop/src/pages/Logs.tsx:381
 msgid "Show All ({count})"
 msgstr "Hiển thị tất cả ({count})"
 
-#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:394
+#: desktop/src/pages/Logs.tsx:387 desktop/src/pages/Logs.tsx:392
 msgid "Log Details"
 msgstr "Chi tiết nhật ký"
 
-#: desktop/src/pages/Logs.tsx:391 desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:389 desktop/src/pages/Logs.tsx:401
 msgid "Export Text"
 msgstr "Xuất văn bản"
 
-#: desktop/src/pages/Logs.tsx:394 desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
 #: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
 msgid "Fullscreen"
 msgstr "Toàn màn hình"
 
-#: desktop/src/pages/Logs.tsx:400
+#: desktop/src/pages/Logs.tsx:398
 msgid "Live host daemon log output."
 msgstr "Nhật ký trực tiếp của dịch vụ trên hệ thống chủ."
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Stop Live Updates"
 msgstr "Dừng cập nhật trực tiếp"
 
-#: desktop/src/pages/Logs.tsx:401
+#: desktop/src/pages/Logs.tsx:399
 msgid "Start Live Updates"
 msgstr "Bắt đầu cập nhật trực tiếp"
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Exported daemon logs."
 msgstr "Đã xuất nhật ký dịch vụ."
 
-#: desktop/src/pages/Logs.tsx:403
+#: desktop/src/pages/Logs.tsx:401
 msgid "Failed to export daemon logs"
 msgstr "Không xuất được nhật ký dịch vụ"
 
-#: desktop/src/pages/Logs.tsx:404
+#: desktop/src/pages/Logs.tsx:402
 msgid "Daemon Logs"
 msgstr "Nhật ký dịch vụ"
 
-#: desktop/src/pages/Logs.tsx:407
+#: desktop/src/pages/Logs.tsx:405
 msgid "Checking daemon status…"
 msgstr "Đang kiểm tra trạng thái dịch vụ…"
 
-#: desktop/src/pages/Logs.tsx:408
+#: desktop/src/pages/Logs.tsx:406
 msgid "Live refresh is active every 3 seconds."
 msgstr "Đang tự động làm mới sau mỗi 3 giây."
 
-#: desktop/src/pages/Logs.tsx:409
+#: desktop/src/pages/Logs.tsx:407
 msgid "Daemon logs will appear here after a successful read."
 msgstr "Nhật ký dịch vụ sẽ hiển thị ở đây sau khi đọc thành công."
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid "Clear All Logs?"
 msgstr "Xóa toàn bộ nhật ký?"
 
-#: desktop/src/pages/Logs.tsx:414
+#: desktop/src/pages/Logs.tsx:412
 msgid ""
 "This will permanently delete all historical logs. This action cannot be "
 "undone."
-msgstr "Thao tác này sẽ xóa vĩnh viễn toàn bộ nhật ký lịch sử và không thể hoàn tác."
+msgstr ""
+"Thao tác này sẽ xóa vĩnh viễn toàn bộ nhật ký lịch sử và không thể hoàn tác."
 
 #: desktop/src/pages/Network.tsx:224 desktop/src/pages/Network.tsx:415
 msgid "Listening and bound"
@@ -3722,7 +3903,9 @@ msgstr "Sao chép {label}"
 msgid ""
 "VirusTotal reports are unavailable for private, special, scoped, or wildcard "
 "addresses."
-msgstr "Không có báo cáo VirusTotal cho địa chỉ riêng, địa chỉ đặc biệt, địa chỉ có phạm vi hoặc địa chỉ đại diện."
+msgstr ""
+"Không có báo cáo VirusTotal cho địa chỉ riêng, địa chỉ đặc biệt, địa chỉ có "
+"phạm vi hoặc địa chỉ đại diện."
 
 #: desktop/src/pages/Network.tsx:242
 msgid "Address copied to clipboard"
@@ -3786,15 +3969,17 @@ msgstr "Kết nối mạng"
 #: desktop/src/pages/Network.tsx:394
 msgid ""
 "View the current listening ports and socket peers from one local snapshot."
-msgstr "Xem các cổng đang lắng nghe và các đầu kết nối socket hiện tại từ một ảnh chụp cục bộ."
+msgstr ""
+"Xem các cổng đang lắng nghe và các đầu kết nối socket hiện tại từ một ảnh "
+"chụp cục bộ."
 
 #: desktop/src/pages/Network.tsx:397
 msgid "Refreshing…"
 msgstr "Đang làm mới…"
 
 #: desktop/src/pages/Network.tsx:397
-#: desktop/src/pages/SettingsPreferences.tsx:446
-#: desktop/src/pages/SettingsPreferences.tsx:449
+#: desktop/src/pages/SettingsPreferences.tsx:447
+#: desktop/src/pages/SettingsPreferences.tsx:450
 msgid "Loading…"
 msgstr "Đang tải…"
 
@@ -3806,7 +3991,9 @@ msgstr "Đang tải các kết nối mạng…"
 msgid ""
 "Network information is unavailable. Check that the system socket tool is "
 "installed and try again."
-msgstr "Không có thông tin mạng. Hãy kiểm tra xem công cụ socket của hệ thống đã được cài đặt chưa rồi thử lại."
+msgstr ""
+"Không có thông tin mạng. Hãy kiểm tra xem công cụ socket của hệ thống đã "
+"được cài đặt chưa rồi thử lại."
 
 #: desktop/src/pages/Network.tsx:406
 msgid "The socket list was limited. This snapshot may be incomplete."
@@ -3814,7 +4001,8 @@ msgstr "Danh sách socket đã bị giới hạn. Ảnh chụp này có thể kh
 
 #: desktop/src/pages/Network.tsx:406
 msgid "Some socket records could not be read. This snapshot may be incomplete."
-msgstr "Không đọc được một số bản ghi socket. Ảnh chụp này có thể không đầy đủ."
+msgstr ""
+"Không đọc được một số bản ghi socket. Ảnh chụp này có thể không đầy đủ."
 
 #. Translators: Preserve the {time} placeholder. It is the native UTC/ISO snapshot timestamp.
 #: desktop/src/pages/Network.tsx:407
@@ -3845,7 +4033,9 @@ msgstr "Tìm địa chỉ, cổng, tiến trình hoặc PID"
 msgid ""
 "Process ownership depends on system permissions. Unavailable process "
 "information does not mean that no process owns the socket."
-msgstr "Việc xác định tiến trình sở hữu phụ thuộc vào quyền hệ thống. Không có thông tin tiến trình không có nghĩa là socket không thuộc tiến trình nào."
+msgstr ""
+"Việc xác định tiến trình sở hữu phụ thuộc vào quyền hệ thống. Không có thông "
+"tin tiến trình không có nghĩa là socket không thuộc tiến trình nào."
 
 #: desktop/src/pages/Network.tsx:421
 msgid "No socket records could be read from this snapshot."
@@ -3874,7 +4064,9 @@ msgstr[0] "Đang hiển thị {shown}/{count} socket khớp"
 msgid ""
 "Opening this report sends the IP address {address} to VirusTotal through "
 "your browser. Do not check sensitive IP addresses."
-msgstr "Mở báo cáo này sẽ gửi địa chỉ IP {address} tới VirusTotal qua trình duyệt của bạn. Không kiểm tra các địa chỉ IP nhạy cảm."
+msgstr ""
+"Mở báo cáo này sẽ gửi địa chỉ IP {address} tới VirusTotal qua trình duyệt "
+"của bạn. Không kiểm tra các địa chỉ IP nhạy cảm."
 
 #: desktop/src/pages/Network.tsx:439
 msgid "No port, process information, or API key is sent by ClamUI."
@@ -3885,7 +4077,7 @@ msgid "Opening…"
 msgstr "Đang mở…"
 
 #: desktop/src/pages/Preferences.tsx:13
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Behavior"
 msgstr "Hành vi"
 
@@ -3922,12 +4114,12 @@ msgid "Save"
 msgstr "Lưu"
 
 #: desktop/src/pages/Preferences.tsx:47
-#: desktop/src/pages/SettingsPreferences.tsx:146
+#: desktop/src/pages/SettingsPreferences.tsx:147
 msgid "Unable to load preferences: {error}"
 msgstr "Không tải được tùy chọn: {error}"
 
 #: desktop/src/pages/Preferences.tsx:95
-#: desktop/src/pages/SettingsPreferences.tsx:160
+#: desktop/src/pages/SettingsPreferences.tsx:161
 msgid "Could not save preference: {error}"
 msgstr "Không lưu được tùy chọn: {error}"
 
@@ -4069,8 +4261,8 @@ msgid "Duplicate"
 msgstr "Nhân bản"
 
 #: desktop/src/pages/Profiles.tsx:237 desktop/src/pages/Profiles.tsx:245
-#: desktop/src/pages/Quarantine.tsx:228 desktop/src/pages/Quarantine.tsx:240
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/Quarantine.tsx:307 desktop/src/pages/Quarantine.tsx:319
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Delete"
 msgstr "Xóa"
 
@@ -4095,179 +4287,198 @@ msgstr "Khôi phục hồ sơ quét mặc định"
 msgid ""
 "Restore the built-in default profiles? Any customizations to default "
 "profiles will be reset; custom profiles are preserved."
-msgstr "Khôi phục các hồ sơ quét mặc định có sẵn? Mọi tùy chỉnh trên hồ sơ quét mặc định sẽ bị đặt lại; các hồ sơ quét tùy chỉnh vẫn được giữ nguyên."
+msgstr ""
+"Khôi phục các hồ sơ quét mặc định có sẵn? Mọi tùy chỉnh trên hồ sơ quét mặc "
+"định sẽ bị đặt lại; các hồ sơ quét tùy chỉnh vẫn được giữ nguyên."
 
 #: desktop/src/pages/Profiles.tsx:246
 msgid "Restoring…"
 msgstr "Đang khôi phục…"
 
-#: desktop/src/pages/Quarantine.tsx:97
+#: desktop/src/pages/Quarantine.tsx:127 desktop/src/pages/Quarantine.tsx:165
 msgid "ClamUI returned invalid quarantine data."
 msgstr "ClamUI trả về dữ liệu khu cách ly không hợp lệ."
 
-#: desktop/src/pages/Quarantine.tsx:104
+#: desktop/src/pages/Quarantine.tsx:135 desktop/src/pages/Quarantine.tsx:172
 msgid "Failed to load quarantine: {error}"
 msgstr "Không tải được khu cách ly: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:122
+#: desktop/src/pages/Quarantine.tsx:201
 msgid "Quarantine updates are unavailable: {error}"
 msgstr "Không nhận được cập nhật của khu cách ly: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:144
+#: desktop/src/pages/Quarantine.tsx:223
 msgid "ClamUI returned an invalid cleanup result."
 msgstr "ClamUI trả về kết quả dọn dẹp không hợp lệ."
 
-#: desktop/src/pages/Quarantine.tsx:149
+#: desktop/src/pages/Quarantine.tsx:228
 msgid "Removed {count} old quarantine entry."
 msgid_plural "Removed {count} old quarantine entries."
 msgstr[0] "Đã gỡ bỏ {count} mục cũ khỏi khu cách ly."
 
-#: desktop/src/pages/Quarantine.tsx:155
+#: desktop/src/pages/Quarantine.tsx:234
 msgid "No old entries found to remove."
 msgstr "Không tìm thấy mục cũ nào để gỡ bỏ."
 
-#: desktop/src/pages/Quarantine.tsx:161
+#: desktop/src/pages/Quarantine.tsx:240
 msgid "Failed to clear old items: {error}"
 msgstr "Không xóa được các mục cũ: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:162
+#: desktop/src/pages/Quarantine.tsx:241
 msgid "Failed to clear old quarantine items: {error}"
 msgstr "Không xóa được các mục cũ trong khu cách ly: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:172
+#: desktop/src/pages/Quarantine.tsx:251
 msgid "ClamUI returned an invalid quarantine result."
 msgstr "ClamUI trả về kết quả xử lý khu cách ly không hợp lệ."
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File restored successfully."
 msgstr "Đã khôi phục tệp thành công."
 
-#: desktop/src/pages/Quarantine.tsx:175
+#: desktop/src/pages/Quarantine.tsx:254
 msgid "File deleted successfully."
 msgstr "Đã xóa tệp thành công."
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File restored, but the database entry could not be removed."
-msgstr "Đã khôi phục tệp nhưng không gỡ bỏ được mục tương ứng trong cơ sở dữ liệu."
+msgstr ""
+"Đã khôi phục tệp nhưng không gỡ bỏ được mục tương ứng trong cơ sở dữ liệu."
 
-#: desktop/src/pages/Quarantine.tsx:180
+#: desktop/src/pages/Quarantine.tsx:259
 msgid "File deleted, but the database entry could not be removed."
 msgstr "Đã xóa tệp nhưng không gỡ bỏ được mục tương ứng trong cơ sở dữ liệu."
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to restore quarantined file ({status})."
 msgstr "Không khôi phục được tệp đã cách ly ({status})."
 
-#: desktop/src/pages/Quarantine.tsx:184
+#: desktop/src/pages/Quarantine.tsx:263
 msgid "Failed to delete quarantined file ({status})."
 msgstr "Không xóa được tệp đã cách ly ({status})."
 
-#: desktop/src/pages/Quarantine.tsx:188
+#: desktop/src/pages/Quarantine.tsx:267
 msgid "Failed to restore quarantined file: {error}"
 msgstr "Không khôi phục được tệp đã cách ly: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:189
+#: desktop/src/pages/Quarantine.tsx:268
 msgid "Failed to delete quarantined file: {error}"
 msgstr "Không xóa được tệp đã cách ly: {error}"
 
-#: desktop/src/pages/Quarantine.tsx:200
+#: desktop/src/pages/Quarantine.tsx:279
 msgid "Secure storage for isolated threats."
 msgstr "Nơi lưu trữ an toàn cho các mối đe dọa đã cách ly."
 
-#: desktop/src/pages/Quarantine.tsx:205
+#: desktop/src/pages/Quarantine.tsx:284
 msgid "Quarantine Storage"
 msgstr "Lưu trữ khu cách ly"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Total Size"
 msgstr "Tổng dung lượng"
 
-#: desktop/src/pages/Quarantine.tsx:207
+#: desktop/src/pages/Quarantine.tsx:286
 msgid "Calculating…"
 msgstr "Đang tính…"
 
-#: desktop/src/pages/Quarantine.tsx:208
+#: desktop/src/pages/Quarantine.tsx:287
 msgid "Items"
 msgstr "Mục"
 
-#: desktop/src/pages/Quarantine.tsx:209
+#: desktop/src/pages/Quarantine.tsx:288
 msgid "{filtered} of {total} item"
 msgid_plural "{filtered} of {total} items"
 msgstr[0] "{filtered}/{total} mục"
 
-#: desktop/src/pages/Quarantine.tsx:210
+#: desktop/src/pages/Quarantine.tsx:289
 msgid "{count} item"
 msgid_plural "{count} items"
 msgstr[0] "{count} mục"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Quarantined Files"
 msgstr "Tệp đã cách ly"
 
-#: desktop/src/pages/Quarantine.tsx:215
+#: desktop/src/pages/Quarantine.tsx:294
 msgid "Detected threats isolated from your system."
 msgstr "Các mối đe dọa đã phát hiện và được cách ly khỏi hệ thống."
 
-#: desktop/src/pages/Quarantine.tsx:218
+#: desktop/src/pages/Quarantine.tsx:297
 msgid "Clear Old Items"
 msgstr "Xóa các mục cũ"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path"
 msgstr "Tìm theo tên mối đe dọa hoặc đường dẫn"
 
-#: desktop/src/pages/Quarantine.tsx:221
+#: desktop/src/pages/Quarantine.tsx:300
 msgid "Search by threat name or path…"
 msgstr "Tìm theo tên mối đe dọa hoặc đường dẫn…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "Loading quarantine entries…"
 msgstr "Đang tải các mục trong khu cách ly…"
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid ""
 "No Quarantined Files. Detected threats will be isolated here for review."
-msgstr "Không có tệp nào bị cách ly. Các mối đe dọa phát hiện được sẽ được cách ly tại đây để xem xét."
+msgstr ""
+"Không có tệp nào bị cách ly. Các mối đe dọa phát hiện được sẽ được cách ly "
+"tại đây để xem xét."
 
-#: desktop/src/pages/Quarantine.tsx:222
+#: desktop/src/pages/Quarantine.tsx:301
 msgid "No matching entries. Try a different search term."
 msgstr "Không có mục nào khớp. Hãy thử từ khóa tìm kiếm khác."
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:235
-#: desktop/src/pages/Quarantine.tsx:239
+#: desktop/src/pages/Quarantine.tsx:301
+msgid "No entries on this page."
+msgstr "Không có mục nào trên trang này."
+
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:314
+#: desktop/src/pages/Quarantine.tsx:318
 msgid "Unknown Threat"
 msgstr "Mối đe dọa không xác định"
 
-#: desktop/src/pages/Quarantine.tsx:224 desktop/src/pages/Quarantine.tsx:226
+#: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
 #: desktop/src/pages/Results.tsx:196
 msgid "Quarantined"
 msgstr "Đã cách ly"
 
-#: desktop/src/pages/Quarantine.tsx:228
+#: desktop/src/pages/Quarantine.tsx:307
 msgid "Restore"
 msgstr "Khôi phục"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Previous"
+msgstr "Trước"
+
+#: desktop/src/pages/Quarantine.tsx:309
+msgid "Next"
+msgstr "Tiếp theo"
+
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Restore Quarantined File?"
 msgstr "Khôi phục tệp đã cách ly?"
 
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "Permanently Delete File?"
 msgstr "Xóa vĩnh viễn tệp?"
 
 #. Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:232
+#: desktop/src/pages/Quarantine.tsx:311
 msgid "This file was detected as '{threat}'. It will be restored to {path}."
 msgstr "Tệp này được phát hiện là “{threat}”. Tệp sẽ được khôi phục về {path}."
 
 #. Translators: Preserve the {path} and {threat} placeholders; they are runtime file-path and threat values. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Quarantine.tsx:236
+#: desktop/src/pages/Quarantine.tsx:315
 msgid ""
 "The quarantined file from {path} ('{threat}') will be permanently deleted. "
 "This action cannot be undone."
-msgstr "Tệp đã cách ly từ {path} (“{threat}”) sẽ bị xóa vĩnh viễn. Không thể hoàn tác thao tác này."
+msgstr ""
+"Tệp đã cách ly từ {path} (“{threat}”) sẽ bị xóa vĩnh viễn. Không thể hoàn "
+"tác thao tác này."
 
-#: desktop/src/pages/Quarantine.tsx:240
+#: desktop/src/pages/Quarantine.tsx:319
 msgid "Restore Anyway"
 msgstr "Vẫn khôi phục"
 
@@ -4562,7 +4773,8 @@ msgstr "Quét bằng VirusTotal"
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
-msgstr "VirusTotal tải lên từng tệp một. Chỉ gửi những tệp bạn được phép chia sẻ."
+msgstr ""
+"VirusTotal tải lên từng tệp một. Chỉ gửi những tệp bạn được phép chia sẻ."
 
 #: desktop/src/pages/Scan.tsx:181
 msgid "API key available"
@@ -4576,7 +4788,7 @@ msgstr "Đang quét…"
 msgid "Scan with VirusTotal"
 msgstr "Quét bằng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:368
 msgid "API Key"
 msgstr "Khóa API"
 
@@ -4682,7 +4894,7 @@ msgid_plural "{count} files scanned"
 msgstr[0] "Đã quét {count} tệp"
 
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:160
+#: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
 msgstr[0] "{count} mối đe dọa"
@@ -4694,7 +4906,9 @@ msgstr "Đã vượt quá số tệp ước tính"
 #: desktop/src/pages/Scan.tsx:557
 msgid ""
 "Live progress is disabled. The completed scan result will remain available."
-msgstr "Đã tắt hiển thị tiến trình trực tiếp. Kết quả quét sau khi hoàn tất vẫn sẽ có sẵn."
+msgstr ""
+"Đã tắt hiển thị tiến trình trực tiếp. Kết quả quét sau khi hoàn tất vẫn sẽ "
+"có sẵn."
 
 #: desktop/src/pages/Scan.tsx:557
 msgid "Cancel All"
@@ -4756,762 +4970,786 @@ msgstr "Thư mục đầu ra bản phân phối"
 msgid "Python bytecode cache"
 msgstr "Bộ nhớ đệm bytecode Python"
 
-#: desktop/src/pages/SettingsPreferences.tsx:68
+#: desktop/src/pages/SettingsPreferences.tsx:69
 msgid "Removable Devices"
 msgstr "Thiết bị lưu trữ rời"
 
-#: desktop/src/pages/SettingsPreferences.tsx:68
+#: desktop/src/pages/SettingsPreferences.tsx:69
 msgid "USB flash drives, SD cards, and removable media"
 msgstr "Ổ USB, thẻ SD và phương tiện lưu trữ rời"
 
-#: desktop/src/pages/SettingsPreferences.tsx:69
+#: desktop/src/pages/SettingsPreferences.tsx:70
 msgid "External Drives"
 msgstr "Ổ đĩa ngoài"
 
-#: desktop/src/pages/SettingsPreferences.tsx:69
+#: desktop/src/pages/SettingsPreferences.tsx:70
 msgid "Ejectable external HDDs and SSDs"
 msgstr "Ổ HDD và SSD gắn ngoài có thể tháo ra"
 
-#: desktop/src/pages/SettingsPreferences.tsx:70
+#: desktop/src/pages/SettingsPreferences.tsx:71
 msgid "Network Mounts"
 msgstr "Ổ mạng đã gắn kết"
 
-#: desktop/src/pages/SettingsPreferences.tsx:70
+#: desktop/src/pages/SettingsPreferences.tsx:71
 msgid "NFS, SMB/CIFS, and SSHFS mounts"
 msgstr "Các điểm gắn kết NFS, SMB/CIFS và SSHFS"
 
-#: desktop/src/pages/SettingsPreferences.tsx:71
+#: desktop/src/pages/SettingsPreferences.tsx:72
 msgid "Internal Volumes"
 msgstr "Phân vùng nội bộ"
 
-#: desktop/src/pages/SettingsPreferences.tsx:71
+#: desktop/src/pages/SettingsPreferences.tsx:72
 msgid "Non-removable local storage"
 msgstr "Bộ nhớ cục bộ không tháo rời được"
 
-#: desktop/src/pages/SettingsPreferences.tsx:87
+#: desktop/src/pages/SettingsPreferences.tsx:88
 msgid "{count} byte"
 msgid_plural "{count} bytes"
 msgstr[0] "{count} byte"
 
-#: desktop/src/pages/SettingsPreferences.tsx:191
+#: desktop/src/pages/SettingsPreferences.tsx:192
 msgid "Unable to read file manager integrations: {error}"
 msgstr "Không thể đọc thông tin tích hợp trình quản lý tệp: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:208
+#: desktop/src/pages/SettingsPreferences.tsx:209
 msgid "{name} integration removed"
 msgstr "Đã gỡ bỏ tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:210
+#: desktop/src/pages/SettingsPreferences.tsx:211
 msgid "{name} integration repaired"
 msgstr "Đã sửa tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:211
+#: desktop/src/pages/SettingsPreferences.tsx:212
 msgid "{name} integration installed"
 msgstr "Đã cài đặt tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:214
+#: desktop/src/pages/SettingsPreferences.tsx:215
 msgid "Integration {action} failed: {error}"
 msgstr "Thao tác tích hợp {action} thất bại: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:226
+#: desktop/src/pages/SettingsPreferences.tsx:227
 msgid ""
 "Override the application language. Restart ClamUI to apply a language change."
-msgstr "Thay đổi ngôn ngữ của ứng dụng. Khởi động lại ClamUI để áp dụng thay đổi ngôn ngữ."
+msgstr ""
+"Thay đổi ngôn ngữ của ứng dụng. Khởi động lại ClamUI để áp dụng thay đổi "
+"ngôn ngữ."
 
-#: desktop/src/pages/SettingsPreferences.tsx:228
+#: desktop/src/pages/SettingsPreferences.tsx:229
 msgid "Restart ClamUI to apply the new language"
 msgstr "Khởi động lại ClamUI để áp dụng ngôn ngữ mới"
 
-#: desktop/src/pages/SettingsPreferences.tsx:229
+#: desktop/src/pages/SettingsPreferences.tsx:230
 msgid "Automatic (System)"
 msgstr "Tự động (theo hệ thống)"
 
-#: desktop/src/pages/SettingsPreferences.tsx:231
-#: desktop/src/pages/SettingsPreferences.tsx:234
+#: desktop/src/pages/SettingsPreferences.tsx:232
+#: desktop/src/pages/SettingsPreferences.tsx:235
 msgid "Window Behavior"
 msgstr "Hành vi cửa sổ"
 
-#: desktop/src/pages/SettingsPreferences.tsx:231
+#: desktop/src/pages/SettingsPreferences.tsx:232
 msgid "Configure what happens when closing the main window."
 msgstr "Thiết lập hành động khi đóng cửa sổ chính."
 
-#: desktop/src/pages/SettingsPreferences.tsx:232
+#: desktop/src/pages/SettingsPreferences.tsx:233
 msgid "When closing window"
 msgstr "Khi đóng cửa sổ"
 
-#: desktop/src/pages/SettingsPreferences.tsx:233
+#: desktop/src/pages/SettingsPreferences.tsx:234
 msgid "Start in System Tray"
 msgstr "Khởi động trong khay hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:233
+#: desktop/src/pages/SettingsPreferences.tsx:234
 msgid "Launch in the background and show only the tray icon."
 msgstr "Chạy ở chế độ nền và chỉ hiện biểu tượng trên khay hệ thống."
 
-#: desktop/src/pages/SettingsPreferences.tsx:234
+#: desktop/src/pages/SettingsPreferences.tsx:235
 msgid ""
 "System tray is not available. Window behavior settings require an active "
 "system tray."
-msgstr "Không có khay hệ thống. Các thiết lập hành vi cửa sổ yêu cầu khay hệ thống đang hoạt động."
+msgstr ""
+"Không có khay hệ thống. Các thiết lập hành vi cửa sổ yêu cầu khay hệ thống "
+"đang hoạt động."
 
-#: desktop/src/pages/SettingsPreferences.tsx:235
+#: desktop/src/pages/SettingsPreferences.tsx:236
 msgid "Scan Behavior"
 msgstr "Hành vi quét"
 
-#: desktop/src/pages/SettingsPreferences.tsx:236
+#: desktop/src/pages/SettingsPreferences.tsx:237
 msgid "Show Live Scan Progress"
 msgstr "Hiện tiến trình quét trực tiếp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:236
+#: desktop/src/pages/SettingsPreferences.tsx:237
 msgid "Display files being scanned in real time."
 msgstr "Hiển thị các tệp đang được quét theo thời gian thực."
 
-#: desktop/src/pages/SettingsPreferences.tsx:237
+#: desktop/src/pages/SettingsPreferences.tsx:238
 msgid "Desktop Notifications"
 msgstr "Thông báo trên màn hình"
 
-#: desktop/src/pages/SettingsPreferences.tsx:237
+#: desktop/src/pages/SettingsPreferences.tsx:238
 msgid "Allow scan, update, device, and VirusTotal notifications."
 msgstr "Cho phép thông báo về quét, cập nhật, thiết bị và VirusTotal."
 
-#: desktop/src/pages/SettingsPreferences.tsx:239
 #: desktop/src/pages/SettingsPreferences.tsx:240
+#: desktop/src/pages/SettingsPreferences.tsx:241
 msgid "File Manager Integration"
 msgstr "Tích hợp trình quản lý tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:239
+#: desktop/src/pages/SettingsPreferences.tsx:240
 msgid "Add context menu actions for supported file managers."
 msgstr "Thêm thao tác vào menu ngữ cảnh của các trình quản lý tệp được hỗ trợ."
 
-#: desktop/src/pages/SettingsPreferences.tsx:239
+#: desktop/src/pages/SettingsPreferences.tsx:240
 msgid "Configure Integration"
 msgstr "Thiết lập tích hợp"
 
 #. Translators: 'Scan with ClamUI' is the installed file-manager menu label; keep it in English.
-#: desktop/src/pages/SettingsPreferences.tsx:241
+#: desktop/src/pages/SettingsPreferences.tsx:242
 msgid "Install, repair, or remove 'Scan with ClamUI' context menu actions."
-msgstr "Cài đặt, sửa chữa hoặc gỡ bỏ các mục “Scan with ClamUI” trong menu ngữ cảnh."
+msgstr ""
+"Cài đặt, sửa chữa hoặc gỡ bỏ các mục “Scan with ClamUI” trong menu ngữ cảnh."
 
-#: desktop/src/pages/SettingsPreferences.tsx:250
+#: desktop/src/pages/SettingsPreferences.tsx:251
 msgid "Partially installed"
 msgstr "Đã cài đặt một phần"
 
-#: desktop/src/pages/SettingsPreferences.tsx:252
+#: desktop/src/pages/SettingsPreferences.tsx:253
 msgid "Not available"
 msgstr "Không khả dụng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:252
+#: desktop/src/pages/SettingsPreferences.tsx:253
 msgid "missing"
 msgstr "thiếu"
 
-#: desktop/src/pages/SettingsPreferences.tsx:253
+#: desktop/src/pages/SettingsPreferences.tsx:254
 msgid "Repair"
 msgstr "Sửa chữa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:280
+#: desktop/src/pages/SettingsPreferences.tsx:281
 msgid "This exclusion already exists"
 msgstr "Ngoại lệ này đã tồn tại"
 
-#: desktop/src/pages/SettingsPreferences.tsx:296
+#: desktop/src/pages/SettingsPreferences.tsx:297
 msgid "Unable to choose exclusions: {error}"
 msgstr "Không thể chọn ngoại lệ: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:305
+#: desktop/src/pages/SettingsPreferences.tsx:306
 msgid "Preset Exclusions"
 msgstr "Ngoại lệ có sẵn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:305
+#: desktop/src/pages/SettingsPreferences.tsx:306
 msgid "Common directories to exclude from scanning. Changes save immediately."
-msgstr "Các thư mục thường được loại trừ khỏi quá trình quét. Thay đổi được lưu ngay lập tức."
+msgstr ""
+"Các thư mục thường được loại trừ khỏi quá trình quét. Thay đổi được lưu ngay "
+"lập tức."
 
-#: desktop/src/pages/SettingsPreferences.tsx:316
+#: desktop/src/pages/SettingsPreferences.tsx:317
 msgid "Custom Exclusions"
 msgstr "Ngoại lệ tùy chỉnh"
 
-#: desktop/src/pages/SettingsPreferences.tsx:316
+#: desktop/src/pages/SettingsPreferences.tsx:317
 msgid ""
 "Select files or folders, or enter an absolute file path or pattern. Changes "
 "save immediately."
-msgstr "Chọn tệp hoặc thư mục, hoặc nhập đường dẫn tuyệt đối hay mẫu tên tệp. Thay đổi được lưu ngay lập tức."
+msgstr ""
+"Chọn tệp hoặc thư mục, hoặc nhập đường dẫn tuyệt đối hay mẫu tên tệp. Thay "
+"đổi được lưu ngay lập tức."
 
-#: desktop/src/pages/SettingsPreferences.tsx:322
+#: desktop/src/pages/SettingsPreferences.tsx:323
 msgid "/path/to/exclude or *.tmp"
 msgstr "/đường/dẫn/cần/loại/trừ hoặc *.tmp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:330
+#: desktop/src/pages/SettingsPreferences.tsx:331
 msgid "Remove {pattern}"
 msgstr "Gỡ bỏ {pattern}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "General"
 msgstr "Chung"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Automatically scan storage devices when they are connected."
 msgstr "Tự động quét thiết bị lưu trữ khi được kết nối."
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Enable Device Auto-Scan"
 msgstr "Bật tự động quét thiết bị"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Device Types"
 msgstr "Loại thiết bị"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Select which kinds of mounted devices may be scanned."
 msgstr "Chọn những loại thiết bị đã gắn kết được phép quét."
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Options"
 msgstr "Tùy chọn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Max Device Size (GB)"
 msgstr "Dung lượng thiết bị tối đa (GB)"
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "0 means no size limit; devices larger than 10,000 GB are not accepted."
-msgstr "0 nghĩa là không giới hạn dung lượng; không chấp nhận thiết bị lớn hơn 10.000 GB."
+msgstr ""
+"0 nghĩa là không giới hạn dung lượng; không chấp nhận thiết bị lớn hơn "
+"10.000 GB."
 
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Scan Delay (seconds)"
 msgstr "Độ trễ quét (giây)"
 
 #. Translators: The en dash marks the inclusive 0–60-second delay range; use your language's usual range typography.
-#: desktop/src/pages/SettingsPreferences.tsx:342
+#: desktop/src/pages/SettingsPreferences.tsx:343
 msgid "Wait after mounting before scanning (0–60 seconds)."
 msgstr "Thời gian chờ sau khi gắn kết trước khi quét (0–60 giây)."
 
-#: desktop/src/pages/SettingsPreferences.tsx:345
+#: desktop/src/pages/SettingsPreferences.tsx:346
 msgid "Auto-Quarantine Threats"
 msgstr "Tự động cách ly mối đe dọa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:345
+#: desktop/src/pages/SettingsPreferences.tsx:346
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: desktop/src/pages/SettingsPreferences.tsx:345
+#: desktop/src/pages/SettingsPreferences.tsx:346
 msgid "Show desktop notifications for device scan events."
 msgstr "Hiển thị thông báo trên màn hình cho các sự kiện quét thiết bị."
 
-#: desktop/src/pages/SettingsPreferences.tsx:345
+#: desktop/src/pages/SettingsPreferences.tsx:346
 msgid "Desktop notifications are globally disabled in Behavior."
 msgstr "Thông báo trên màn hình đang bị tắt toàn cục trong mục Hành vi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:358
+#: desktop/src/pages/SettingsPreferences.tsx:359
 msgid "VirusTotal API keys must be exactly 64 hexadecimal characters"
 msgstr "Khóa API VirusTotal phải gồm đúng 64 ký tự thập lục phân"
 
-#: desktop/src/pages/SettingsPreferences.tsx:360
+#: desktop/src/pages/SettingsPreferences.tsx:361
 msgid "Unable to save the API key"
 msgstr "Không thể lưu khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:364
+#: desktop/src/pages/SettingsPreferences.tsx:365
 msgid "API key deleted"
 msgstr "Đã xóa khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:364
+#: desktop/src/pages/SettingsPreferences.tsx:365
 msgid "Unable to delete the API key"
 msgstr "Không thể xóa khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid ""
 "Keys are stored in the operating system keyring or the explicitly enabled "
 "compatibility fallback; they are never returned to the interface."
-msgstr "Khóa được lưu trong kho khóa của hệ điều hành hoặc phương án dự phòng tương thích đã được bật rõ ràng; khóa không bao giờ được trả về giao diện."
+msgstr ""
+"Khóa được lưu trong kho khóa của hệ điều hành hoặc phương án dự phòng tương "
+"thích đã được bật rõ ràng; khóa không bao giờ được trả về giao diện."
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Configured ({masked}) using {backend}"
 msgstr "Đã cấu hình ({masked}) qua {backend}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "masked"
 msgstr "đã ẩn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Keyring is locked"
 msgstr "Kho khóa đang bị khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Keyring unavailable"
 msgstr "Kho khóa không khả dụng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Not configured"
 msgstr "Chưa cấu hình"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Exactly 64 hexadecimal characters."
 msgstr "Đúng 64 ký tự thập lục phân."
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Save Key"
 msgstr "Lưu khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Get a free API key"
 msgstr "Nhận khóa API miễn phí"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Delete Key"
 msgstr "Xóa khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "When API key is missing"
 msgstr "Khi chưa có khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Always ask"
 msgstr "Luôn hỏi"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Open VirusTotal website"
 msgstr "Mở trang web VirusTotal"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Show notification only"
 msgstr "Chỉ hiển thị thông báo"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Information"
 msgstr "Thông tin"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid ""
 "Free tier: 4 requests per minute, 500 per day. Files up to 650 MB can be "
 "scanned."
-msgstr "Gói miễn phí: 4 yêu cầu mỗi phút, 500 yêu cầu mỗi ngày. Có thể quét tệp có dung lượng tối đa 650 MB."
+msgstr ""
+"Gói miễn phí: 4 yêu cầu mỗi phút, 500 yêu cầu mỗi ngày. Có thể quét tệp có "
+"dung lượng tối đa 650 MB."
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid "Delete VirusTotal API key"
 msgstr "Xóa khóa API VirusTotal"
 
-#: desktop/src/pages/SettingsPreferences.tsx:367
+#: desktop/src/pages/SettingsPreferences.tsx:368
 msgid ""
 "This removes the key from secure storage. You will need to enter it again to "
 "use VirusTotal scanning."
-msgstr "Thao tác này xóa khóa khỏi kho lưu trữ bảo mật. Bạn sẽ cần nhập lại khóa để dùng tính năng quét bằng VirusTotal."
+msgstr ""
+"Thao tác này xóa khóa khỏi kho lưu trữ bảo mật. Bạn sẽ cần nhập lại khóa để "
+"dùng tính năng quét bằng VirusTotal."
 
-#: desktop/src/pages/SettingsPreferences.tsx:375
+#: desktop/src/pages/SettingsPreferences.tsx:376
 msgid "{count} file"
 msgid_plural "{count} files"
 msgstr[0] "{count} tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:382
+#: desktop/src/pages/SettingsPreferences.tsx:383
 msgid "Unable to read debug logs: {error}"
 msgstr "Không thể đọc nhật ký gỡ lỗi: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:390
+#: desktop/src/pages/SettingsPreferences.tsx:391
 msgid "Unable to read system information: {error}"
 msgstr "Không thể đọc thông tin hệ thống: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:397
+#: desktop/src/pages/SettingsPreferences.tsx:398
 msgid "ZIP archives"
 msgstr "Tệp nén ZIP"
 
-#: desktop/src/pages/SettingsPreferences.tsx:398
+#: desktop/src/pages/SettingsPreferences.tsx:399
 msgid "All files"
 msgstr "Tất cả tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:400
+#: desktop/src/pages/SettingsPreferences.tsx:401
 msgid "Logs exported successfully"
 msgstr "Đã xuất nhật ký thành công"
 
-#: desktop/src/pages/SettingsPreferences.tsx:402
+#: desktop/src/pages/SettingsPreferences.tsx:403
 msgid "Unable to export logs: {error}"
 msgstr "Không thể xuất nhật ký: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:414
+#: desktop/src/pages/SettingsPreferences.tsx:415
 msgid "{count} log file cleared"
 msgid_plural "{count} log files cleared"
 msgstr[0] "Đã xóa {count} tệp nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:417
+#: desktop/src/pages/SettingsPreferences.tsx:418
 msgid "Unable to clear logs: {error}"
 msgstr "Không thể xóa nhật ký: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:424
+#: desktop/src/pages/SettingsPreferences.tsx:425
 msgid "ClamUI System Information"
 msgstr "Thông tin hệ thống ClamUI"
 
-#: desktop/src/pages/SettingsPreferences.tsx:426
+#: desktop/src/pages/SettingsPreferences.tsx:427
 msgid "Installation Type: {value}"
 msgstr "Kiểu cài đặt: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:427
+#: desktop/src/pages/SettingsPreferences.tsx:428
 msgid "Distribution: {value}"
 msgstr "Bản phân phối: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:428
+#: desktop/src/pages/SettingsPreferences.tsx:429
 msgid "Desktop Environment: {value}"
 msgstr "Môi trường desktop: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:429
+#: desktop/src/pages/SettingsPreferences.tsx:430
 msgid "Rust Runtime: {value}"
 msgstr "Môi trường chạy Rust: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:430
+#: desktop/src/pages/SettingsPreferences.tsx:431
 msgid "Tauri Runtime: {value}"
 msgstr "Môi trường chạy Tauri: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:431
+#: desktop/src/pages/SettingsPreferences.tsx:432
 msgid "Platform: {value}"
 msgstr "Nền tảng: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:432
+#: desktop/src/pages/SettingsPreferences.tsx:433
 msgid "Architecture: {value}"
 msgstr "Kiến trúc: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:433
+#: desktop/src/pages/SettingsPreferences.tsx:434
 msgid "Version: {value}"
 msgstr "Phiên bản: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:437
+#: desktop/src/pages/SettingsPreferences.tsx:438
 msgid "System information copied to clipboard"
 msgstr "Đã sao chép thông tin hệ thống vào bộ nhớ tạm"
 
-#: desktop/src/pages/SettingsPreferences.tsx:439
+#: desktop/src/pages/SettingsPreferences.tsx:440
 msgid "Unable to copy system information: {error}"
 msgstr "Không thể sao chép thông tin hệ thống: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:444
+#: desktop/src/pages/SettingsPreferences.tsx:445
 msgid "Logging Settings"
 msgstr "Cài đặt ghi nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:444
-msgid "Higher levels produce more detailed logs and apply immediately."
-msgstr "Mức càng cao thì nhật ký càng chi tiết; thay đổi được áp dụng ngay lập tức."
-
 #: desktop/src/pages/SettingsPreferences.tsx:445
+msgid "Higher levels produce more detailed logs and apply immediately."
+msgstr ""
+"Mức càng cao thì nhật ký càng chi tiết; thay đổi được áp dụng ngay lập tức."
+
+#: desktop/src/pages/SettingsPreferences.tsx:446
 msgid "Log Level"
 msgstr "Mức nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:446
+#: desktop/src/pages/SettingsPreferences.tsx:447
 msgid "Log File Location"
 msgstr "Vị trí tệp nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:448
+#: desktop/src/pages/SettingsPreferences.tsx:449
 msgid "Log Management"
 msgstr "Quản lý nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:448
+#: desktop/src/pages/SettingsPreferences.tsx:449
 msgid ""
 "Export a ZIP archive for support or permanently clear the application logs."
-msgstr "Xuất tệp nén ZIP để gửi hỗ trợ hoặc xóa vĩnh viễn nhật ký của ứng dụng."
+msgstr ""
+"Xuất tệp nén ZIP để gửi hỗ trợ hoặc xóa vĩnh viễn nhật ký của ứng dụng."
 
-#: desktop/src/pages/SettingsPreferences.tsx:449
+#: desktop/src/pages/SettingsPreferences.tsx:450
 msgid "Current Log Size"
 msgstr "Dung lượng nhật ký hiện tại"
 
-#: desktop/src/pages/SettingsPreferences.tsx:450
+#: desktop/src/pages/SettingsPreferences.tsx:451
 msgid "Export Logs"
 msgstr "Xuất nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:450
-msgid "Save all sanitized debug logs to a ZIP archive."
-msgstr "Lưu toàn bộ nhật ký gỡ lỗi đã lọc thông tin nhạy cảm vào một tệp nén ZIP."
-
 #: desktop/src/pages/SettingsPreferences.tsx:451
+msgid "Save all sanitized debug logs to a ZIP archive."
+msgstr ""
+"Lưu toàn bộ nhật ký gỡ lỗi đã lọc thông tin nhạy cảm vào một tệp nén ZIP."
+
+#: desktop/src/pages/SettingsPreferences.tsx:452
 msgid "Clear Logs"
 msgstr "Xóa nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:451
+#: desktop/src/pages/SettingsPreferences.tsx:452
 msgid "This permanently deletes all debug log files."
 msgstr "Thao tác này xóa vĩnh viễn toàn bộ tệp nhật ký gỡ lỗi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:451
+#: desktop/src/pages/SettingsPreferences.tsx:452
 msgid "Clear"
 msgstr "Xóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:453
+#: desktop/src/pages/SettingsPreferences.tsx:454
 msgid "System Information"
 msgstr "Thông tin hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:453
+#: desktop/src/pages/SettingsPreferences.tsx:454
 msgid "Useful for troubleshooting and bug reports."
 msgstr "Hữu ích khi khắc phục sự cố và báo cáo lỗi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Installation Type"
 msgstr "Kiểu cài đặt"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Distribution"
 msgstr "Bản phân phối"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Desktop Environment"
 msgstr "Môi trường desktop"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Rust Runtime"
 msgstr "Môi trường chạy Rust"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Tauri Runtime"
 msgstr "Môi trường chạy Tauri"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Platform"
 msgstr "Nền tảng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Copy System Info"
 msgstr "Sao chép thông tin hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Copy all system information to the clipboard."
 msgstr "Sao chép toàn bộ thông tin hệ thống vào bộ nhớ tạm."
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "Loading system information…"
 msgstr "Đang tải thông tin hệ thống…"
 
-#: desktop/src/pages/SettingsPreferences.tsx:456
+#: desktop/src/pages/SettingsPreferences.tsx:457
 msgid "Clear logs"
 msgstr "Xóa nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:456
+#: desktop/src/pages/SettingsPreferences.tsx:457
 msgid ""
 "This permanently deletes {count} log file totaling {size}. This action "
 "cannot be undone."
 msgid_plural ""
 "This permanently deletes {count} log files totaling {size}. This action "
 "cannot be undone."
-msgstr[0] "Thao tác này xóa vĩnh viễn {count} tệp nhật ký, tổng dung lượng {size}. Không thể hoàn tác thao tác này."
+msgstr[0] ""
+"Thao tác này xóa vĩnh viễn {count} tệp nhật ký, tổng dung lượng {size}. "
+"Không thể hoàn tác thao tác này."
 
-#: desktop/src/pages/SettingsPreferences.tsx:456
+#: desktop/src/pages/SettingsPreferences.tsx:457
 msgid "Delete Logs"
 msgstr "Xóa nhật ký"
 
-#: desktop/src/pages/Statistics.tsx:119
+#: desktop/src/pages/Statistics.tsx:120
 msgid "No scans recorded"
 msgstr "Chưa có lượt quét nào được ghi nhận"
 
-#: desktop/src/pages/Statistics.tsx:122
+#: desktop/src/pages/Statistics.tsx:123
 msgid "less than an hour ago"
 msgstr "chưa đầy một giờ trước"
 
-#: desktop/src/pages/Statistics.tsx:125
+#: desktop/src/pages/Statistics.tsx:126
 msgid "{count} hour ago"
 msgid_plural "{count} hours ago"
 msgstr[0] "{count} giờ trước"
 
-#: desktop/src/pages/Statistics.tsx:129
+#: desktop/src/pages/Statistics.tsx:130
 msgid "{count} day ago"
 msgid_plural "{count} days ago"
 msgstr[0] "{count} ngày trước"
 
-#: desktop/src/pages/Statistics.tsx:132
+#: desktop/src/pages/Statistics.tsx:133
 msgid "{count} week ago"
 msgid_plural "{count} weeks ago"
 msgstr[0] "{count} tuần trước"
 
-#: desktop/src/pages/Statistics.tsx:136
+#: desktop/src/pages/Statistics.tsx:137
 msgid "Protected"
 msgstr "Được bảo vệ"
 
-#: desktop/src/pages/Statistics.tsx:137
+#: desktop/src/pages/Statistics.tsx:138
 msgid "At Risk"
 msgstr "Có nguy cơ"
 
-#: desktop/src/pages/Statistics.tsx:138
+#: desktop/src/pages/Statistics.tsx:139
 msgid "Unprotected"
 msgstr "Không được bảo vệ"
 
-#: desktop/src/pages/Statistics.tsx:139
+#: desktop/src/pages/Statistics.tsx:140
 msgid "No Data"
 msgstr "Không có dữ liệu"
 
-#: desktop/src/pages/Statistics.tsx:145
+#: desktop/src/pages/Statistics.tsx:146
 msgid "No scans performed yet"
 msgstr "Chưa thực hiện lượt quét nào"
 
-#: desktop/src/pages/Statistics.tsx:146
+#: desktop/src/pages/Statistics.tsx:147
 msgid "Last scan was over 30 days ago"
 msgstr "Lượt quét gần nhất đã hơn 30 ngày trước"
 
-#: desktop/src/pages/Statistics.tsx:147
+#: desktop/src/pages/Statistics.tsx:148
 msgid "Last scan was over a week ago"
 msgstr "Lượt quét gần nhất đã hơn một tuần trước"
 
-#: desktop/src/pages/Statistics.tsx:148
+#: desktop/src/pages/Statistics.tsx:149
 msgid "Virus definitions are over 7 days old"
 msgstr "Cơ sở dữ liệu virus đã cũ hơn 7 ngày"
 
-#: desktop/src/pages/Statistics.tsx:149
+#: desktop/src/pages/Statistics.tsx:150
 msgid "Virus definitions are over 1 day old"
 msgstr "Cơ sở dữ liệu virus đã cũ hơn 1 ngày"
 
-#: desktop/src/pages/Statistics.tsx:150
+#: desktop/src/pages/Statistics.tsx:151
 msgid "System is protected"
 msgstr "Hệ thống đang được bảo vệ"
 
-#: desktop/src/pages/Statistics.tsx:155
+#: desktop/src/pages/Statistics.tsx:156
 msgid "No scan activity in this timeframe."
 msgstr "Không có hoạt động quét nào trong khoảng thời gian này."
 
-#: desktop/src/pages/Statistics.tsx:157
+#: desktop/src/pages/Statistics.tsx:158
 msgid "Scan activity trend"
 msgstr "Xu hướng hoạt động quét"
 
-#: desktop/src/pages/Statistics.tsx:159
+#: desktop/src/pages/Statistics.tsx:160
 msgid "{count} scan"
 msgid_plural "{count} scans"
 msgstr[0] "{count} lượt quét"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Scans"
 msgstr "Lượt quét"
 
-#: desktop/src/pages/Statistics.tsx:169
+#: desktop/src/pages/Statistics.tsx:170
 msgid "Threats"
 msgstr "Mối đe dọa"
 
-#: desktop/src/pages/Statistics.tsx:185
+#: desktop/src/pages/Statistics.tsx:187
 msgid "ClamUI returned invalid statistics data."
 msgstr "ClamUI trả về dữ liệu thống kê không hợp lệ."
 
-#: desktop/src/pages/Statistics.tsx:190
+#: desktop/src/pages/Statistics.tsx:192
 msgid "Failed to load statistics: {error}"
 msgstr "Không thể tải thống kê: {error}"
 
-#: desktop/src/pages/Statistics.tsx:208
+#: desktop/src/pages/Statistics.tsx:215
 msgid "Statistics updates are unavailable: {error}"
 msgstr "Cập nhật thống kê không khả dụng: {error}"
 
-#: desktop/src/pages/Statistics.tsx:212
+#: desktop/src/pages/Statistics.tsx:222
 msgid "Checking protection status"
 msgstr "Đang kiểm tra trạng thái bảo vệ"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Total Scans"
 msgstr "Tổng số lượt quét"
 
-#: desktop/src/pages/Statistics.tsx:214
+#: desktop/src/pages/Statistics.tsx:224
 msgid "Number of scans performed"
 msgstr "Số lượt quét đã thực hiện"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Files Scanned"
 msgstr "Tệp đã quét"
 
-#: desktop/src/pages/Statistics.tsx:215
+#: desktop/src/pages/Statistics.tsx:225
 msgid "Total files checked"
 msgstr "Tổng số tệp đã kiểm tra"
 
-#: desktop/src/pages/Statistics.tsx:216
+#: desktop/src/pages/Statistics.tsx:226
 msgid "Malware and suspicious files found"
 msgstr "Phần mềm độc hại và tệp đáng ngờ được phát hiện"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Clean Scans"
 msgstr "Lượt quét sạch"
 
-#: desktop/src/pages/Statistics.tsx:217
+#: desktop/src/pages/Statistics.tsx:227
 msgid "Scans with no threats found"
 msgstr "Lượt quét không phát hiện mối đe dọa nào"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Average Scan Duration"
 msgstr "Thời gian quét trung bình"
 
-#: desktop/src/pages/Statistics.tsx:218
+#: desktop/src/pages/Statistics.tsx:228
 msgid "Mean time per scan"
 msgstr "Thời gian trung bình mỗi lượt quét"
 
-#: desktop/src/pages/Statistics.tsx:223
+#: desktop/src/pages/Statistics.tsx:233
 msgid "Scan history and current protection posture."
 msgstr "Lịch sử quét và tình trạng bảo vệ hiện tại."
 
-#: desktop/src/pages/Statistics.tsx:226
+#: desktop/src/pages/Statistics.tsx:236
 msgid "Unable to load statistics"
 msgstr "Không thể tải thống kê"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Protection Status"
 msgstr "Trạng thái bảo vệ"
 
-#: desktop/src/pages/Statistics.tsx:229
+#: desktop/src/pages/Statistics.tsx:239
 msgid "Current system security posture"
 msgstr "Tình trạng bảo mật hiện tại của hệ thống"
 
-#: desktop/src/pages/Statistics.tsx:233
+#: desktop/src/pages/Statistics.tsx:243
 msgid "System Status"
 msgstr "Trạng thái hệ thống"
 
-#: desktop/src/pages/Statistics.tsx:234
+#: desktop/src/pages/Statistics.tsx:244
 msgid "Last Scan"
 msgstr "Lượt quét gần nhất"
 
-#: desktop/src/pages/Statistics.tsx:238
+#: desktop/src/pages/Statistics.tsx:248
 msgid "Timeframe"
 msgstr "Khoảng thời gian"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Statistics timeframe"
 msgstr "Khoảng thời gian thống kê"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Day"
 msgstr "Ngày"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Week"
 msgstr "Tuần"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "Month"
 msgstr "Tháng"
 
-#: desktop/src/pages/Statistics.tsx:239
+#: desktop/src/pages/Statistics.tsx:249
 msgid "All Time"
 msgstr "Toàn bộ thời gian"
 
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Scan Statistics"
 msgstr "Thống kê quét"
 
 #. Translators: Preserve the {range} placeholder; it contains a localized start–end date range.
-#: desktop/src/pages/Statistics.tsx:242
+#: desktop/src/pages/Statistics.tsx:252
 msgid "Statistics for: {range}"
 msgstr "Thống kê cho: {range}"
 
-#: desktop/src/pages/Statistics.tsx:246
+#: desktop/src/pages/Statistics.tsx:256
 msgid "Aggregated metrics for the selected timeframe"
 msgstr "Số liệu tổng hợp cho khoảng thời gian đã chọn"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid "Loading statistics…"
 msgstr "Đang tải thống kê…"
 
-#: desktop/src/pages/Statistics.tsx:247
+#: desktop/src/pages/Statistics.tsx:257
 msgid ""
 "No scan history yet. Run your first scan to see statistics and protection "
 "status."
-msgstr "Chưa có lịch sử quét. Hãy chạy lượt quét đầu tiên để xem thống kê và trạng thái bảo vệ."
+msgstr ""
+"Chưa có lịch sử quét. Hãy chạy lượt quét đầu tiên để xem thống kê và trạng "
+"thái bảo vệ."
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan Activity"
 msgstr "Hoạt động quét"
 
-#: desktop/src/pages/Statistics.tsx:250
+#: desktop/src/pages/Statistics.tsx:260
 msgid "Scan trends over the selected timeframe"
 msgstr "Xu hướng quét trong khoảng thời gian đã chọn"
 
-#: desktop/src/pages/Statistics.tsx:254
+#: desktop/src/pages/Statistics.tsx:264
 msgid "Quick Actions"
 msgstr "Thao tác nhanh"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "Scan your home directory"
 msgstr "Quét thư mục cá nhân"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "View Scan Logs"
 msgstr "Xem nhật ký quét"
 
-#: desktop/src/pages/Statistics.tsx:255
+#: desktop/src/pages/Statistics.tsx:265
 msgid "See detailed scan history"
 msgstr "Xem lịch sử quét chi tiết"
 

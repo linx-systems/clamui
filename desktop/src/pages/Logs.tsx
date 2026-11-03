@@ -3,6 +3,7 @@ import { copyText, notify, onEvent, request, saveText } from "../api";
 import { Icon } from "../Icon";
 import { _, ngettext, scanStatusLabel } from "../i18n";
 import { Modal } from "../Modal";
+import { useActivityRefresh } from "./useActivityRefresh";
 
 type LogEntry = {
   id: string;
@@ -133,7 +134,7 @@ function HistoryLogStatusIndicator({ status }: { status: string }) {
 }
 
 
-export default function Logs() {
+export default function Logs({ active }: { active: boolean }) {
   const [tab, setTab] = useState<"history" | "daemon">("history");
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [selected, setSelected] = useState<LogEntry | null>(null);
@@ -164,25 +165,22 @@ export default function Logs() {
       setLoading(false);
     }
   }, []);
+  const refreshEntries = useActivityRefresh(active, loadEntries);
 
   useEffect(() => {
-    void loadEntries();
-  }, [loadEntries]);
-
-  useEffect(() => {
-    let active = true;
+    let listening = true;
     let dispose: (() => void) | undefined;
     void onEvent((event) => {
-      if (event.event === "scan-complete" || event.event === "update-complete") void loadEntries();
+      if (event.event === "scan-complete" || event.event === "update-complete") void refreshEntries(false);
     }).then((unlisten) => {
-      if (active) dispose = unlisten;
+      if (listening) dispose = unlisten;
       else unlisten();
     }).catch((listenError: unknown) => notify(_("Log updates are unavailable: {error}", { error: readableError(listenError) }), "warning"));
     return () => {
-      active = false;
+      listening = false;
       dispose?.();
     };
-  }, [loadEntries]);
+  }, [refreshEntries]);
 
   const loadDaemonStatus = useCallback(async () => {
     try {
@@ -256,15 +254,15 @@ export default function Logs() {
       setLive(false);
       return;
     }
-    void loadDaemonStatus();
-  }, [loadDaemonStatus, tab]);
+    if (active) void loadDaemonStatus();
+  }, [active, loadDaemonStatus, tab]);
 
   useEffect(() => {
-    if (tab !== "daemon" || !live || (daemonState !== "running" && daemonState !== "stopped")) return;
+    if (!active || tab !== "daemon" || !live || (daemonState !== "running" && daemonState !== "stopped")) return;
     void refreshDaemon();
     const timer = window.setInterval(() => void refreshDaemon(), 3000);
     return () => window.clearInterval(timer);
-  }, [daemonState, live, refreshDaemon, tab]);
+  }, [active, daemonState, live, refreshDaemon, tab]);
 
   const selectEntry = async (entry: LogEntry) => {
     setSelected(entry);
@@ -343,7 +341,7 @@ export default function Logs() {
           { count: failures },
         ), "warning");
       } else notify(_("Historical logs cleared."), "success");
-      await loadEntries();
+      await refreshEntries();
     } catch (error) {
       notify(_("Failed to clear logs: {error}", { error: readableError(error) }), "error");
     }
@@ -366,7 +364,7 @@ export default function Logs() {
       {tab === "history" ? <div id="history-panel" role="tabpanel" aria-labelledby="history-tab">
         <section aria-labelledby="history-heading">
           <header className="section-header"><div><h2 className="section-heading" id="history-heading">{_("Historical Logs")}</h2><p>{_("Previous scan and update operations")}</p></div><div className="actions logs-history-actions">
-            <button className="button icon-button" type="button" title={_("Refresh")} aria-label={_("Refresh")} onClick={() => void loadEntries()} disabled={loading}><Icon name="refresh" /></button>
+            <button className="button icon-button" type="button" title={_("Refresh")} aria-label={_("Refresh")} onClick={() => void refreshEntries()} disabled={loading}><Icon name="refresh" /></button>
             <button className="button icon-button" type="button" title={_("Export CSV")} aria-label={_("Export CSV")} onClick={() => void exportLogs("csv")} disabled={!entries.length}><Icon name="file-csv" /></button>
             <button className="button icon-button" type="button" title={_("Export JSON")} aria-label={_("Export JSON")} onClick={() => void exportLogs("json")} disabled={!entries.length}><Icon name="file-json" /></button>
             <button className="button destructive icon-button" type="button" title={_("Clear All")} aria-label={_("Clear All")} onClick={() => setClearConfirming(true)} disabled={!entries.length}><Icon name="trash" /></button>
