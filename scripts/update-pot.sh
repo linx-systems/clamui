@@ -17,6 +17,10 @@
 # TypeScript frontend after the Python/GTK runtime cutover.
 
 set -euo pipefail
+# xgettext and msgcat preserve input order. Use bytewise collation so generated
+# source references and message order do not depend on the developer's locale.
+export LC_ALL=C
+
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
