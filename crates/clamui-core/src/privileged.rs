@@ -1660,7 +1660,7 @@ fn run_config_helper(args: &[String], uid: u32) -> AppResult<()> {
     let root = staging_root_for_uid(uid)?;
     verify_staging_root(&root, uid)?;
     let mut pairs = Vec::with_capacity(args.len() / 2);
-    for chunk in args.chunks_exact(2) {
+    for chunk in args.chunks(2) {
         pairs.push((
             PathBuf::from(&chunk[0]),
             validate_destination(Path::new(&chunk[1]))?,
