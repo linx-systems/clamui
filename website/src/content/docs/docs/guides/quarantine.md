@@ -15,7 +15,7 @@ Deletion and **Clear Old Items** are irreversible. Clear Old Items deletes items
 
 ## Work in the GUI
 
-Open **Quarantine**, search by threat or path, expand an item for metadata, then choose **Restore** or **Delete**. The list paginates large collections. If restoration fails an integrity check, do not manually restore the file.
+Open **Quarantine**, search by threat or original path, then choose **Restore** or **Delete** for an item. Browse bounded pages with **Previous** and **Next**. **Refresh** starts a fresh view that includes newly added items; storage totals cover the whole quarantine. If restoration fails an integrity check, do not manually restore the file.
 
 ## Locations and recovery
 

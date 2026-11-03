@@ -105,6 +105,22 @@ RUST_LOG=clamui=debug bun run --cwd desktop tauri dev
 
 Use the Tauri/WebKit developer tools for frontend state and the terminal for Rust/core diagnostics. Never replace native IPC with a browser filesystem, shell, or process permission. The only frontend request boundary is Tauri's allowlisted `request` command and `clamui-event` event stream.
 
+### Optional coding-agent skills
+
+These optional, project-local skills assist compatible coding agents; they are not application dependencies and do not change the build or runtime requirements. From the repository root, install only the selected skills:
+
+```bash
+npx skills@1.7.4 add apollographql/skills --skill rust-best-practices
+npx skills@1.7.4 add vercel-labs/agent-skills --skill vercel-react-best-practices
+npx skills@1.7.4 add addyosmani/web-quality-skills --skill accessibility
+```
+
+Do not use `-g` or bulk-install an upstream repository. Imported payloads belong in `.agents/skills`; `.claude/skills` provides compatibility links, and `skills-lock.json` records each source, selected `skillPath`, and content hash. Refresh only a named skill intentionally and review its provenance and changes.
+
+The project-only OMP filter is `.omp/config.yml` under `skills.ignoredSkills`; it excludes irrelevant global skills without deleting their global payloads. Start OMP from the repository root because project configuration is current-working-directory scoped.
+
+ClamAV and gettext guidance is authored for this project; the contributor rules and the existing [architecture](/docs/contributing/architecture/) and [translation](/docs/contributing/translating/) pages remain authoritative. The React guidance applies to the client UI: exclude Next.js and other server-only changes. Check native accessibility in Tauri/WebKitGTK—Chrome accessibility scores alone do not prove the desktop application is accessible.
+
 ### Data compatibility
 
 Work against the existing XDG layouts, never ad-hoc project-local data:
@@ -240,7 +256,7 @@ bun run --cwd website check
 bun run --cwd website build
 ```
 
-Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
+Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
 
 ## Update the application icon
 

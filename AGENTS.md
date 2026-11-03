@@ -37,6 +37,15 @@ cargo run -p clamui-core --bin clamui-cli -- help
 
 Rust core tests live under `crates/clamui-core/tests/` alongside module-local tests. Add focused consumer-visible, data-compatibility, or security invariants beside the owning module; avoid implementation-text or mock-only tests.
 
+For gettext changes, validate extraction and catalogs with:
+
+```bash
+./scripts/update-pot.sh --check
+./scripts/check-potfiles.sh
+./scripts/check-translations.sh
+```
+
+
 The website is a separate Bun project:
 
 ```bash
@@ -47,6 +56,18 @@ bun run build
 ```
 
 CI builds native artifacts on the Ubuntu 22.04-compatible baseline. A build on a newer host does not establish that compatibility.
+
+## Coding-agent skills
+
+Project-local coding-agent skills are optional development aids, not build or runtime dependencies. Their canonical imports are in `.agents/skills`; `.claude/skills` provides compatibility links. For installation details, see the published [Development guide](https://clamui.com/docs/contributing/development/).
+
+Refresh only a deliberately selected upstream skill. `skills-lock.json` records its source, selected path, and content hash; it does not pin a commit. Start OMP from the repository root: `.omp/config.yml` applies its cwd-scoped `ignoredSkills` filter while preserving global skill payloads.
+
+- Rust changes: use `rust-best-practices`.
+- React client changes: use `vercel-react-best-practices`; apply it to `desktop/src/`, not Next.js or server patterns.
+- Accessibility work: use `accessibility`, then validate the actual Tauri/WebKitGTK desktop rather than relying only on browser scores.
+- Gettext messages, catalogs, plural forms, translator notes, or extraction: use `clamui-gettext` and the translation guide it points to.
+- Globally managed IPC and release skills remain optional; contributors do not need them to work on ClamUI.
 
 ## Runtime, data, and security rules
 
@@ -60,7 +81,7 @@ CI builds native artifacts on the Ubuntu 22.04-compatible baseline. A build on a
 
 Preserve all seven `clamui` CLI subcommands, their flags, output schemas, stream destinations, and exit behavior. `clamui --help` and every CLI route must stay headless; `clamui-scheduled-scan` and `clamui-apply-preferences` are native entry points with their established contracts.
 
-Reuse existing gettext message IDs and plural behavior from `po/`/`po/LINGUAS`; active locales are `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN`. All user-facing gettext calls need static literal arguments: choose conditional translated branches outside helpers, then interpolate after translation or plural selection. Use the existing plural API, never new `file(s)`-style pseudo-plurals. Write `—` (prose break), `–` (range), and `…` directly; do not use ASCII ` - ` or `--` as prose separators. For a literal containing a dash, range, quotation, markup, or quoted UI label/command/key/package/file literal, put a `// Translators:` comment immediately above that literal argument—not above a lone call opener. State whether a quoted UI label must match its label translation or whether a protected literal stays unchanged. See the published [translation guide](https://clamui.com/docs/contributing/translating/) for the detailed translator conventions. Do not add a Python runtime requirement to build or load catalogs.
+Reuse existing gettext message IDs and plural behavior from `po/`/`po/LINGUAS`; active locales are `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, and `zh_CN`. All user-facing gettext calls need static literal arguments: choose conditional translated branches outside helpers, then interpolate after translation or plural selection. Use the existing plural API, never new `file(s)`-style pseudo-plurals. Write `—` (prose break), `–` (range), and `…` directly; do not use ASCII ` - ` or `--` as prose separators. For a literal containing a dash, range, quotation, markup, or quoted UI label/command/key/package/file literal, put a `// Translators:` comment immediately above that literal argument—not above a lone call opener. State whether a quoted UI label must match its label translation or whether a protected literal stays unchanged. See the published [translation guide](https://clamui.com/docs/contributing/translating/) for the detailed translator conventions. Do not add a Python runtime requirement to build or load catalogs.
 
 ## Packaging and documentation
 
