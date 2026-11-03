@@ -180,6 +180,12 @@ struct TargetCount {
     file_paths: Vec<PathBuf>,
 }
 
+#[derive(Clone, Copy)]
+enum TraversalMode {
+    CountOnly,
+    CollectPaths,
+}
+
 struct CapturedOutput {
     stdout_bytes: Vec<u8>,
     stdout_truncated: bool,
@@ -549,10 +555,15 @@ fn scan_target(
             backend,
         );
     }
+    let traversal_mode = if backend == "daemon" {
+        TraversalMode::CollectPaths
+    } else {
+        TraversalMode::CountOnly
+    };
     let count = if backend != "daemon" && is_root_level(&path) {
         TargetCount::default()
     } else {
-        match count_targets(&path, exclusions, &job.cancelled) {
+        match count_targets(&path, exclusions, &job.cancelled, traversal_mode) {
             Ok(count) => count,
             Err(error) => return ScanResult::error(raw_path, error, backend),
         }
@@ -1216,6 +1227,7 @@ fn count_targets(
     path: &Path,
     exclusions: &Exclusions,
     cancelled: &AtomicBool,
+    mode: TraversalMode,
 ) -> AppResult<TargetCount> {
     let name = path
         .file_name()
@@ -1227,11 +1239,15 @@ fn count_targets(
         {
             return Ok(TargetCount::default());
         }
-        return Ok(TargetCount {
+        let mut count = TargetCount {
             files: 1,
             directories: 0,
-            file_paths: vec![path.to_path_buf()],
-        });
+            file_paths: Vec::new(),
+        };
+        if matches!(mode, TraversalMode::CollectPaths) {
+            count.file_paths.push(path.to_path_buf());
+        }
+        return Ok(count);
     }
     if !path.is_dir() {
         return Err("Scan target is not a regular file or directory".into());
@@ -1240,7 +1256,7 @@ fn count_targets(
         return Ok(TargetCount::default());
     }
     let mut count = TargetCount::default();
-    walk_targets(path, exclusions, cancelled, &mut count, true)?;
+    walk_targets(path, exclusions, cancelled, &mut count, mode, true)?;
     if count.files > 0 || count.directories > 0 {
         count.directories += 1;
     }
@@ -1252,6 +1268,7 @@ fn walk_targets(
     exclusions: &Exclusions,
     cancelled: &AtomicBool,
     count: &mut TargetCount,
+    mode: TraversalMode,
     root: bool,
 ) -> AppResult<()> {
     if cancelled.load(Ordering::Acquire) {
@@ -1286,10 +1303,12 @@ fn walk_targets(
                 continue;
             }
             count.directories += 1;
-            let _ = walk_targets(&entry_path, exclusions, cancelled, count, false);
+            let _ = walk_targets(&entry_path, exclusions, cancelled, count, mode, false);
         } else if kind.is_file() && !is_excluded(&entry_path, &name, &exclusions.patterns) {
             count.files += 1;
-            count.file_paths.push(entry_path);
+            if matches!(mode, TraversalMode::CollectPaths) {
+                count.file_paths.push(entry_path);
+            }
         }
     }
     Ok(())
