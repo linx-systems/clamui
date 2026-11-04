@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-03 15:48+0100\n"
+"POT-Creation-Date: 2026-11-03 18:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,195 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: crates/clamui-core/src/audit/firewall.rs:53
-msgid "Firewall manager overlap"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:54
-msgid ""
-"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
-"was not evaluated."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:157
-msgid "UFW Firewall"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:162
-msgid ""
-"UFW is active; the default incoming policy is deny. Listed rules may allow "
-"exceptions."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:169
-msgid ""
-"UFW is active; the default incoming policy is reject. Listed rules may allow "
-"exceptions."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:176
-msgid "UFW is active; the default incoming policy is deny."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:180
-msgid "UFW is active; the default incoming policy is reject."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:184
-msgid "UFW is active, but the default incoming policy allows traffic."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:191
-msgid "UFW is active, but its default incoming policy could not be verified."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:195
-msgid "UFW reports inactive."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:196
-msgid "UFW status could not be inspected safely."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:234
-msgid "Firewalld"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:236
-msgid ""
-"Firewalld owns its D-Bus name; readiness and firewall policy were not "
-"queried."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:240
-msgid ""
-"No Firewalld D-Bus owner was observed; this does not establish kernel "
-"firewall policy."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:244
-msgid ""
-"Firewalld ownership could not be verified; readiness and firewall policy "
-"were not queried."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:259
-msgid "firewall-cmd"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:264
-msgid "firewall-cmd is installed; it was not executed."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:270
-msgid "firewall-cmd could not be confirmed without executing it."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:408
-msgid "nftables (native rules)"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:410
-msgid ""
-"nftables has restrictive default input policies for IPv4 and IPv6; "
-"individual rules may allow exceptions."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:414
-msgid ""
-"nftables reports a permissive default input policy; remaining coverage may "
-"be incomplete"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:418
-msgid ""
-"nftables input policy coverage could not be verified for both IPv4 and IPv6"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:478
-msgid "iptables (IPv4)"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:480
-msgid ""
-"iptables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:484
-msgid "iptables has a permissive INPUT default policy"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:485
-msgid "iptables INPUT policy could not be verified"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:491
-msgid "iptables (IPv6)"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:493
-msgid ""
-"ip6tables has a restrictive INPUT default policy; individual rules may allow "
-"exceptions."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:497
-msgid "ip6tables has a permissive INPUT default policy"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:498
-msgid "ip6tables INPUT policy could not be verified"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:508
-msgid "Gufw"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:510
-msgid "Gufw is available."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:512
-msgid ""
-"Gufw was not confirmed; this optional inventory does not affect firewall "
-"policy analysis."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:519
-msgid "Open Gufw"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:525
-msgid "Firewall Config"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:530
-msgid "Firewall Config is available."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:533
-msgid ""
-"Firewall Config was not confirmed; this optional inventory does not affect "
-"firewall policy analysis."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:540
-msgid "Open Firewall Config"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:578
-msgid "Plasma Firewall"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:583
-msgid "Plasma Firewall is installed; it manages an existing firewall backend."
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:592
-msgid "Plasma Firewall was not confirmed; it is only a management module."
-msgstr ""
 
 #: crates/clamui-core/src/audit.rs:293
 msgid "ClamAV is not installed"
@@ -533,6 +344,195 @@ msgstr[1] ""
 
 #: crates/clamui-core/src/audit.rs:1496
 msgid "Investigate the detected threats immediately"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:53
+msgid "Firewall manager overlap"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:54
+msgid ""
+"UFW is active while Firewalld owns its D-Bus name; their rule interaction "
+"was not evaluated."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:157
+msgid "UFW Firewall"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:162
+msgid ""
+"UFW is active; the default incoming policy is deny. Listed rules may allow "
+"exceptions."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:169
+msgid ""
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:176
+msgid "UFW is active; the default incoming policy is deny."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:180
+msgid "UFW is active; the default incoming policy is reject."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:184
+msgid "UFW is active, but the default incoming policy allows traffic."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:191
+msgid "UFW is active, but its default incoming policy could not be verified."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:195
+msgid "UFW reports inactive."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:196
+msgid "UFW status could not be inspected safely."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:234
+msgid "Firewalld"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:236
+msgid ""
+"Firewalld owns its D-Bus name; readiness and firewall policy were not "
+"queried."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:240
+msgid ""
+"No Firewalld D-Bus owner was observed; this does not establish kernel "
+"firewall policy."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:244
+msgid ""
+"Firewalld ownership could not be verified; readiness and firewall policy "
+"were not queried."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:259
+msgid "firewall-cmd"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:264
+msgid "firewall-cmd is installed; it was not executed."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:270
+msgid "firewall-cmd could not be confirmed without executing it."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:408
+msgid "nftables (native rules)"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:410
+msgid ""
+"nftables has restrictive default input policies for IPv4 and IPv6; "
+"individual rules may allow exceptions."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:414
+msgid ""
+"nftables reports a permissive default input policy; remaining coverage may "
+"be incomplete"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:418
+msgid ""
+"nftables input policy coverage could not be verified for both IPv4 and IPv6"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:478
+msgid "iptables (IPv4)"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:480
+msgid ""
+"iptables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:484
+msgid "iptables has a permissive INPUT default policy"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:485
+msgid "iptables INPUT policy could not be verified"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:491
+msgid "iptables (IPv6)"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:493
+msgid ""
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:497
+msgid "ip6tables has a permissive INPUT default policy"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:498
+msgid "ip6tables INPUT policy could not be verified"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:508
+msgid "Gufw"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:510
+msgid "Gufw is available."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:512
+msgid ""
+"Gufw was not confirmed; this optional inventory does not affect firewall "
+"policy analysis."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:519
+msgid "Open Gufw"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:525
+msgid "Firewall Config"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:530
+msgid "Firewall Config is available."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:533
+msgid ""
+"Firewall Config was not confirmed; this optional inventory does not affect "
+"firewall policy analysis."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:540
+msgid "Open Firewall Config"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:578
+msgid "Plasma Firewall"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:583
+msgid "Plasma Firewall is installed; it manages an existing firewall backend."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:592
+msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr ""
 
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
@@ -1298,33 +1298,6 @@ msgstr ""
 msgid "Not running as Flatpak"
 msgstr ""
 
-#. Translators: keep "Flatpak" and "clamui-privileged-helper" unchanged.
-#: crates/clamui-core/src/privileged/cli_install.rs:26
-msgid ""
-"ClamUI is running inside a Flatpak sandbox, which cannot install files on "
-"the host. Install the matching clamui-privileged-helper package on the host "
-"system instead."
-msgstr ""
-
-#. Translators: keep the paths and "sudo clamui install-privileged-helper" command unchanged.
-#: crates/clamui-core/src/privileged/cli_install.rs:33
-msgid ""
-"This command installs files under /usr and /usr/share and must be run as "
-"root. Try: sudo clamui install-privileged-helper"
-msgstr ""
-
-#. Translators: keep the {error} placeholder; it is a sanitized installation error.
-#: crates/clamui-core/src/privileged/cli_install.rs:119
-msgid "Failed to install privileged helper: {error}"
-msgstr ""
-
-#. Translators: keep the {bin} and {policy} placeholders; they are installed file paths.
-#: crates/clamui-core/src/privileged/cli_install.rs:129
-msgid ""
-"Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
-"system ClamAV configuration from ClamUI should now work."
-msgstr ""
-
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
 #: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
@@ -1377,6 +1350,33 @@ msgstr ""
 #: crates/clamui-core/src/privileged.rs:2963
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
+msgstr ""
+
+#. Translators: keep "Flatpak" and "clamui-privileged-helper" unchanged.
+#: crates/clamui-core/src/privileged/cli_install.rs:26
+msgid ""
+"ClamUI is running inside a Flatpak sandbox, which cannot install files on "
+"the host. Install the matching clamui-privileged-helper package on the host "
+"system instead."
+msgstr ""
+
+#. Translators: keep the paths and "sudo clamui install-privileged-helper" command unchanged.
+#: crates/clamui-core/src/privileged/cli_install.rs:33
+msgid ""
+"This command installs files under /usr and /usr/share and must be run as "
+"root. Try: sudo clamui install-privileged-helper"
+msgstr ""
+
+#. Translators: keep the {error} placeholder; it is a sanitized installation error.
+#: crates/clamui-core/src/privileged/cli_install.rs:119
+msgid "Failed to install privileged helper: {error}"
+msgstr ""
+
+#. Translators: keep the {bin} and {policy} placeholders; they are installed file paths.
+#: crates/clamui-core/src/privileged/cli_install.rs:129
+msgid ""
+"Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
+"system ClamAV configuration from ClamUI should now work."
 msgstr ""
 
 #: crates/clamui-core/src/profiles.rs:240
@@ -1747,72 +1747,72 @@ msgid ""
 "systemctl restart clamav-freshclam ({error})"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:807
+#: crates/clamui-core/src/virustotal.rs:820
 msgid "File too large ({size}MB). Maximum size is {max}MB"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:811
+#: crates/clamui-core/src/virustotal.rs:824
 msgid "Invalid file path"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:813
+#: crates/clamui-core/src/virustotal.rs:826
 msgid "Path is not a regular file"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:815
+#: crates/clamui-core/src/virustotal.rs:828
 msgid "File changed while hashing"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:817
+#: crates/clamui-core/src/virustotal.rs:830
 msgid "File changed before upload"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:819
+#: crates/clamui-core/src/virustotal.rs:832
 msgid "File changed during upload"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:828
+#: crates/clamui-core/src/virustotal.rs:841
 msgid "VirusTotal: Clean scan"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:831
+#: crates/clamui-core/src/virustotal.rs:844
 msgid "VirusTotal: {detections}/{total} engines detected threats"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:838
+#: crates/clamui-core/src/virustotal.rs:851
 msgid "VirusTotal: Threats detected"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:839
+#: crates/clamui-core/src/virustotal.rs:852
 msgid "VirusTotal: Rate limit exceeded"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:840
+#: crates/clamui-core/src/virustotal.rs:853
 msgid "VirusTotal: Analysis pending"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:843
+#: crates/clamui-core/src/virustotal.rs:856
 msgid "VirusTotal: File not previously analyzed"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:845
+#: crates/clamui-core/src/virustotal.rs:858
 msgid "VirusTotal: File too large for upload"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:846
+#: crates/clamui-core/src/virustotal.rs:859
 msgid "VirusTotal: Scan error"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:851
+#: crates/clamui-core/src/virustotal.rs:864
 msgid "Detections: {detections}/{total}"
 msgstr ""
 
-#: crates/clamui-core/src/virustotal.rs:865
+#: crates/clamui-core/src/virustotal.rs:878
 msgid "Error: {error}"
 msgstr ""
 
 #. Translators: Keep `API` unchanged as the abbreviation for application programming interface.
-#: crates/clamui-core/src/virustotal.rs:973
+#: crates/clamui-core/src/virustotal.rs:986
 msgid "API key saved"
 msgstr ""
 
@@ -1908,22 +1908,6 @@ msgstr ""
 
 #: desktop/src-tauri/src/runtime.rs:582
 msgid "Open"
-msgstr ""
-
-#: desktop/src/api.ts:75
-msgid "The contributor credits response was invalid."
-msgstr ""
-
-#: desktop/src/api.ts:178
-msgid "Enter a valid HTTP(S) address"
-msgstr ""
-
-#: desktop/src/api.ts:181
-msgid "Only HTTP(S) addresses may be opened externally"
-msgstr ""
-
-#: desktop/src/api.ts:190
-msgid "Choose a file or folder first"
 msgstr ""
 
 #: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
@@ -2301,6 +2285,22 @@ msgstr ""
 #: desktop/src/HelperTrustErrorDialog.tsx:80
 #: desktop/src/pages/ConfigPreferences.tsx:880
 msgid "See Configuration"
+msgstr ""
+
+#: desktop/src/api.ts:75
+msgid "The contributor credits response was invalid."
+msgstr ""
+
+#: desktop/src/api.ts:178
+msgid "Enter a valid HTTP(S) address"
+msgstr ""
+
+#: desktop/src/api.ts:181
+msgid "Only HTTP(S) addresses may be opened externally"
+msgstr ""
+
+#: desktop/src/api.ts:190
+msgid "Choose a file or folder first"
 msgstr ""
 
 #: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62

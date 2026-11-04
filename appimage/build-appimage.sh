@@ -95,6 +95,15 @@ clean_build_environment() {
     unset GTK_PATH GTK_DATA_PREFIX GTK_EXE_PREFIX GTK_THEME GI_TYPELIB_PATH
     unset GDK_PIXBUF_MODULE_FILE GDK_PIXBUF_MODULEDIR GSETTINGS_SCHEMA_DIR
     unset LD_LIBRARY_PATH LD_PRELOAD
+    # linuxdeploy's AppImage plugin tests whether these metadata variables
+    # exist, not whether they contain metadata.  Do not let a CI expression
+    # that resolves to an empty string become an invalid `appimagetool -u ""`.
+    if [ -z "${UPDATE_INFORMATION:-}" ]; then
+        unset UPDATE_INFORMATION
+    fi
+    if [ -z "${LDAI_UPDATE_INFORMATION:-}" ]; then
+        unset LDAI_UPDATE_INFORMATION
+    fi
 }
 
 build_tauri_bundle() {
@@ -108,10 +117,11 @@ build_tauri_bundle() {
     # checkout and `bun run tauri` resolves the project-local CLI.
     log "Installing locked Bun dependencies"
     (cd "$PROJECT_ROOT/desktop" && bun install --frozen-lockfile)
-    # The Bun-locked Tauri CLI runs the frontend command from tauri.conf and
-    # bundles the native Tauri/WebKitGTK application. No Python app is copied.
+    # Keep linuxdeploy diagnostics visible: Tauri otherwise suppresses its
+    # stderr at the default error log level, turning packaging failures into
+    # an unactionable generic error.
     (cd "$PROJECT_ROOT/desktop" && \
-        bun run tauri build --config "$TAURI_CONFIG" --bundles appimage)
+        bun run tauri build --verbose --config "$TAURI_CONFIG" --bundles appimage)
     [ -x "$RELEASE_DIR/clamui" ] || die "Tauri did not produce target/release/clamui"
     [ -x "$RELEASE_DIR/clamui-scheduled-scan" ] || die "scheduled scan helper was not built"
     [ -x "$RELEASE_DIR/clamui-apply-preferences" ] || die "privileged helper was not built"

@@ -13,13 +13,27 @@
 - Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
 - Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
 - Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
+- Updated direct Rust dependencies: `glib` to 0.20.12 and `zip` to 9.2.1.
 
 ### Fixed
+- Fixed CodeQL Rust analysis configuration to use no manual build mode.
+- Regenerated the stale gettext template used by translation validation.
+- Restored Clippy by using a Clippy-compatible chunking form and building the frozen Bun frontend before linting so production `generate_context!` can embed `desktop/dist`.
+- Preserved native tray pixel ordering while updating its zero-copy chunk iteration for Rust 1.99 Clippy.
+- Fixed ordinary AppImage CI builds passing empty update metadata to `linuxdeploy`; release update information and `.zsync` sidecars remain intact.
+- Rejected VirusTotal uploads when the original pathname is substituted after lookup, retaining no-follow descriptor identity checks.
 
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
 - Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
 - Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
 - Fixed Flatpak Wayland startup compatibility by disabling WebKitGTK's DMA-BUF renderer path by default while preserving explicit environment overrides. (#282)
+
+### Maintenance
+
+- Enabled verbose Tauri AppImage logs to keep `linuxdeploy` failures actionable.
+- Made the escaped-writer deadline regression fixture wait for process readiness, eliminating a CI startup race without relaxing the deadline.
+
+
 
 ## [0.5.1] - 2026-11-01
 ### Fixed

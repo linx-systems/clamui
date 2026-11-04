@@ -1660,7 +1660,7 @@ fn run_config_helper(args: &[String], uid: u32) -> AppResult<()> {
     let root = staging_root_for_uid(uid)?;
     verify_staging_root(&root, uid)?;
     let mut pairs = Vec::with_capacity(args.len() / 2);
-    for chunk in args.chunks_exact(2) {
+    for chunk in args.chunks(2) {
         pairs.push((
             PathBuf::from(&chunk[0]),
             validate_destination(Path::new(&chunk[1]))?,
@@ -3556,6 +3556,211 @@ mod helper_failure_tests {
 #[cfg(test)]
 mod bounded_output_tests {
     use super::*;
+    use std::io::Read;
+    use std::os::fd::{FromRawFd, OwnedFd};
+
+    const SLEEP_PATH: &[u8] = b"/bin/sleep\0";
+    const SLEEP_ARG0: &[u8] = b"sleep\0";
+    const SLEEP_ARG1: &[u8] = b"5\0";
+
+    type CapturedOutput = AppResult<(std::process::ExitStatus, Vec<u8>, Vec<u8>)>;
+
+    struct EscapedWriter {
+        pid: libc::pid_t,
+    }
+
+    impl Drop for EscapedWriter {
+        fn drop(&mut self) {
+            // SAFETY: pid is the escaped fixture process created below.
+            unsafe {
+                libc::kill(self.pid, libc::SIGKILL);
+            }
+        }
+    }
+
+    impl EscapedWriter {
+        fn holds_output_pipes_in_own_session(&self) -> bool {
+            let Ok(stdout) = fs::read_link(format!("/proc/{}/fd/1", self.pid)) else {
+                return false;
+            };
+            let Ok(stderr) = fs::read_link(format!("/proc/{}/fd/2", self.pid)) else {
+                return false;
+            };
+            // SAFETY: getsid only reads session metadata for the owned fixture PID.
+            let in_own_session = unsafe { libc::getsid(self.pid) == self.pid };
+            in_own_session
+                && stdout != stderr
+                && stdout.to_string_lossy().starts_with("pipe:[")
+                && stderr.to_string_lossy().starts_with("pipe:[")
+        }
+    }
+
+    struct EscapedWriterFixture {
+        command: Command,
+        ready_read: OwnedFd,
+        ready_write: OwnedFd,
+        pid_read: OwnedFd,
+        pid_write: OwnedFd,
+    }
+
+    impl EscapedWriterFixture {
+        fn new(startup_delay: Duration) -> io::Result<Self> {
+            let (ready_read, ready_write) = pipe()?;
+            let (pid_read, pid_write) = pipe()?;
+            let ready_read_fd = ready_read.as_raw_fd();
+            let ready_write_fd = ready_write.as_raw_fd();
+            let pid_read_fd = pid_read.as_raw_fd();
+            let pid_write_fd = pid_write.as_raw_fd();
+            let startup_delay = libc::timespec {
+                tv_sec: startup_delay.as_secs().min(libc::time_t::MAX as u64) as libc::time_t,
+                tv_nsec: startup_delay.subsec_nanos().into(),
+            };
+            let mut command = shell("exec >/dev/null 2>&1; sleep 5");
+
+            // SAFETY: The callback captures only raw file descriptors and a prepared timespec.
+            // After fork it uses only async-signal-safe libc calls, without Rust allocation or locks.
+            unsafe {
+                command.pre_exec(move || {
+                    let escaped = libc::fork();
+                    if escaped < 0 {
+                        return Err(io::Error::last_os_error());
+                    }
+                    if escaped == 0 {
+                        libc::close(ready_read_fd);
+                        libc::close(pid_read_fd);
+                        if !sleep_after_fork(startup_delay) {
+                            let _ = write_all_after_fork(ready_write_fd, &[2]);
+                            libc::_exit(127);
+                        }
+                        if libc::setsid() == -1 {
+                            let _ = write_all_after_fork(ready_write_fd, &[2]);
+                            libc::_exit(127);
+                        }
+
+                        let pid = libc::getpid();
+                        if !write_all_after_fork(pid_write_fd, &pid.to_ne_bytes())
+                            || !write_all_after_fork(ready_write_fd, &[1])
+                        {
+                            libc::_exit(127);
+                        }
+                        libc::close(ready_write_fd);
+                        libc::close(pid_write_fd);
+                        libc::execl(
+                            SLEEP_PATH.as_ptr().cast::<libc::c_char>(),
+                            SLEEP_ARG0.as_ptr().cast::<libc::c_char>(),
+                            SLEEP_ARG1.as_ptr().cast::<libc::c_char>(),
+                            std::ptr::null::<libc::c_char>(),
+                        );
+                        libc::_exit(127);
+                    }
+
+                    libc::close(ready_write_fd);
+                    libc::close(pid_read_fd);
+                    libc::close(pid_write_fd);
+                    let mut state = 0_u8;
+                    loop {
+                        let read = libc::read(ready_read_fd, (&mut state as *mut u8).cast(), 1);
+                        if read == 1 {
+                            break;
+                        }
+                        if read < 0 && was_interrupted_after_fork() {
+                            continue;
+                        }
+                        libc::close(ready_read_fd);
+                        return Err(io::Error::from_raw_os_error(libc::EIO));
+                    }
+                    libc::close(ready_read_fd);
+                    if state == 1 {
+                        Ok(())
+                    } else {
+                        Err(io::Error::from_raw_os_error(libc::EIO))
+                    }
+                });
+            }
+
+            Ok(Self {
+                command,
+                ready_read,
+                ready_write,
+                pid_read,
+                pid_write,
+            })
+        }
+
+        fn run(
+            self,
+            max: usize,
+            deadline: Duration,
+        ) -> (CapturedOutput, io::Result<EscapedWriter>) {
+            let Self {
+                command,
+                ready_read,
+                ready_write,
+                pid_read,
+                pid_write,
+            } = self;
+            let output = bounded_child_output(command, max, deadline);
+            drop(ready_read);
+            drop(ready_write);
+            drop(pid_write);
+
+            let mut pid_reader = File::from(pid_read);
+            let mut pid = [0_u8; std::mem::size_of::<libc::pid_t>()];
+            let escaped_writer = pid_reader.read_exact(&mut pid).map(|()| EscapedWriter {
+                pid: libc::pid_t::from_ne_bytes(pid),
+            });
+            (output, escaped_writer)
+        }
+    }
+
+    fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
+        let mut fds = [-1; 2];
+        // SAFETY: fds points to two valid c_int slots and pipe2 atomically marks them close-on-exec.
+        if unsafe { libc::pipe2(fds.as_mut_ptr(), libc::O_CLOEXEC) } == -1 {
+            return Err(io::Error::last_os_error());
+        }
+        // SAFETY: pipe2 returned two newly owned file descriptors.
+        Ok(unsafe { (OwnedFd::from_raw_fd(fds[0]), OwnedFd::from_raw_fd(fds[1])) })
+    }
+
+    unsafe fn write_all_after_fork(fd: libc::c_int, mut bytes: &[u8]) -> bool {
+        while !bytes.is_empty() {
+            // SAFETY: fd is an inherited pipe descriptor and bytes is valid for its length.
+            let written = unsafe { libc::write(fd, bytes.as_ptr().cast(), bytes.len()) };
+            if written > 0 {
+                bytes = &bytes[written as usize..];
+                continue;
+            }
+            if written < 0 && unsafe { was_interrupted_after_fork() } {
+                continue;
+            }
+            return false;
+        }
+        true
+    }
+
+    unsafe fn sleep_after_fork(mut remaining: libc::timespec) -> bool {
+        loop {
+            let mut interrupted = libc::timespec {
+                tv_sec: 0,
+                tv_nsec: 0,
+            };
+            // SAFETY: both pointers refer to initialized stack values for nanosleep to read/write.
+            if unsafe { libc::nanosleep(&remaining, &mut interrupted) } == 0 {
+                return true;
+            }
+            if unsafe { was_interrupted_after_fork() } {
+                remaining = interrupted;
+                continue;
+            }
+            return false;
+        }
+    }
+
+    unsafe fn was_interrupted_after_fork() -> bool {
+        // SAFETY: Linux exposes this thread-local errno accessor without allocating or locking.
+        unsafe { *libc::__errno_location() == libc::EINTR }
+    }
 
     fn shell(script: &str) -> Command {
         let mut command = Command::new("/bin/sh");
@@ -3613,37 +3818,18 @@ mod bounded_output_tests {
 
     #[test]
     fn returns_after_deadline_when_an_escaped_silent_writer_keeps_pipes_open() {
-        let pid_file = format!(
-            "/tmp/clamui-bounded-output-escaped-{}-{}.pid",
-            std::process::id(),
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("clock")
-                .as_nanos()
-        );
-        let script = format!(
-            "/usr/bin/setsid /bin/sh -c 'echo $$ > {pid_file}; sleep 5' & exec >/dev/null 2>&1; sleep 5"
-        );
+        // This exceeds the command deadline, so a test that races escaped-writer startup fails
+        // reliably while the handshake establishes the writer before that deadline begins.
+        let fixture = EscapedWriterFixture::new(Duration::from_millis(150))
+            .expect("create escaped writer fixture");
         let started = Instant::now();
-        let result = bounded_child_output(shell(&script), 1024, Duration::from_millis(100));
+        let (result, escaped_writer) = fixture.run(1024, Duration::from_millis(100));
+        let escaped_writer = escaped_writer.expect("escaped pipe writer did not start");
+        assert!(
+            escaped_writer.holds_output_pipes_in_own_session(),
+            "escaped writer did not retain both output pipes in its own session"
+        );
 
-        let mut escaped_pid = None;
-        for _ in 0..100 {
-            if let Ok(pid) = std::fs::read_to_string(&pid_file) {
-                let pid = pid.trim().to_owned();
-                if !pid.is_empty() {
-                    escaped_pid = Some(pid);
-                    break;
-                }
-            }
-            thread::sleep(Duration::from_millis(10));
-        }
-        if let Some(pid) = &escaped_pid {
-            let _ = Command::new("/bin/kill").args(["-KILL", pid]).status();
-        }
-        let _ = std::fs::remove_file(&pid_file);
-
-        assert!(escaped_pid.is_some(), "escaped pipe writer did not start");
         assert!(matches!(result, Err(error) if error.contains("deadline")));
         assert!(started.elapsed() < Duration::from_secs(2));
     }
