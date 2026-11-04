@@ -22,6 +22,8 @@
 
 - Updated `@tauri-apps/cli` to 2.12.4.
 
+- Updated `glib` to 0.22.10.
+
 ### Fixed
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
 - Regenerated the stale gettext template used by translation validation.
