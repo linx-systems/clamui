@@ -42,6 +42,8 @@ sudo pacman -S gettext
 ./scripts/update-pot.sh
 ./scripts/update-pot.sh --check
 ```
+The locked desktop dependencies include the maintained Babel parser used to extract TypeScript and TSX; TypeScript 7 itself does not expose its former compiler API. Keep that direct development dependency locked when updating frontend extraction tooling.
+
 
 Then merge and complete **every active catalog**, then run the canonical freshness and catalog checks:
 

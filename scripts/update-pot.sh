@@ -9,8 +9,9 @@
 #   sudo apt install gettext
 #   (cd desktop && bun install --frozen-lockfile)
 #
-# Bun and the desktop's locked development dependencies provide the TypeScript
-# compiler used only for frontend message extraction.
+# The maintained Babel parser is a locked development dependency solely for
+# frontend message extraction. TypeScript 7 provides the project compiler but
+# does not expose its former compiler API.
 #
 # The production catalog is extracted only from the Rust/Tauri runtime and
 # TypeScript frontend after the Python/GTK runtime cutover.
@@ -386,8 +387,8 @@ if [ -s "$TYPESCRIPT_FILES" ]; then
         echo "Error: Bun is required to extract TypeScript translations. Run bun install --frozen-lockfile in desktop first." >&2
         exit 1
     fi
-    if [ ! -f desktop/node_modules/typescript/lib/typescript.js ]; then
-        echo "Error: desktop TypeScript dependencies are missing. Run bun install --frozen-lockfile in desktop first." >&2
+    if [ ! -f desktop/node_modules/@babel/parser/package.json ]; then
+        echo "Error: desktop Babel parser dependency is missing. Run bun install --frozen-lockfile in desktop first." >&2
         exit 1
     fi
     TYPESCRIPT_COMPAT_DIR="$TMPDIR/typescript-compat"
