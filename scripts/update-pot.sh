@@ -378,8 +378,8 @@ else
 fi
 
 # xgettext's JavaScript parser does not recognize translation calls in TSX JSX
-# expressions. Project recognized static calls through the TypeScript compiler
-# API before using the portable C parser.
+# expressions. Project recognized static calls through the Babel TypeScript
+# parser before using the portable C parser.
 TYPESCRIPT_COMPAT_FILES="$TMPDIR/typescript-compat-files"
 : > "$TYPESCRIPT_COMPAT_FILES"
 if [ -s "$TYPESCRIPT_FILES" ]; then

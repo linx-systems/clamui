@@ -41,6 +41,16 @@ const label = _("Label");`;
     ]);
   });
 
+  test("extracts optional-call helpers", () => {
+    const source = `const label = _?.("Optional label");
+const files = ngettext?.("one item", "many items", count);`;
+
+    expect(extractTypeScriptGettext(source, "fixture.ts")).toEqual([
+      { name: "_", messages: ["Optional label"], line: 1, comments: [] },
+      { name: "ngettext", messages: ["one item", "many items"], line: 2, comments: [] },
+    ]);
+  });
+
   test("reports source names for invalid TypeScript instead of silently omitting messages", () => {
     expect(() => extractTypeScriptGettext("const = ;", "broken.tsx")).toThrow("Unable to parse broken.tsx");
   });

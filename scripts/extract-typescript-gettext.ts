@@ -163,7 +163,7 @@ export function extractTypeScriptGettext(source: string, sourceName = "TypeScrip
 
   const visit = (node: AstNode): void => {
     if (
-      node.type === "CallExpression"
+      (node.type === "CallExpression" || node.type === "OptionalCallExpression")
       && isNode(node.callee)
       && node.callee.type === "Identifier"
       && typeof node.callee.name === "string"
