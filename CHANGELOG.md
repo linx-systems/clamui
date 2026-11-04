@@ -15,6 +15,7 @@
 - Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
 - Updated direct Rust dependencies: `glib` to 0.20.12 and `zip` to 9.2.1.
 - Updated `base64` to 0.23.1.
+- Updated `rfd` from 0.15.4 to 0.17.2 for the native file, folder, and export dialogs. The lockfile removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
 
 ### Fixed
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
