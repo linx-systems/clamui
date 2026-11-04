@@ -23,6 +23,7 @@
 - Updated `@tauri-apps/cli` to 2.12.4.
 
 - Updated `glib` to 0.22.10.
+- Updated `@vitejs/plugin-react` to 5.2.0.
 
 ### Fixed
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
