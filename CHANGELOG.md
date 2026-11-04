@@ -17,6 +17,10 @@
 - Updated `base64` to 0.23.1.
 - Updated `rfd` from 0.15.4 to 0.17.2 for the native file, folder, and export dialogs. The lockfile removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
 
+### Maintenance
+
+- Updated `@tauri-apps/cli` to 2.12.4.
+
 ### Fixed
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
 - Regenerated the stale gettext template used by translation validation.
