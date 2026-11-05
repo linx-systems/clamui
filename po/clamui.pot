@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-03 18:10+0100\n"
+"POT-Creation-Date: 2026-11-05 12:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -538,8 +538,8 @@ msgstr ""
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
 #: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
 #: crates/clamui-core/src/cli.rs:459 crates/clamui-core/src/cli.rs:499
-#: crates/clamui-core/src/cli.rs:1166 crates/clamui-core/src/cli.rs:1192
-#: crates/clamui-core/src/cli.rs:1723 crates/clamui-core/src/cli.rs:1728
+#: crates/clamui-core/src/cli.rs:1188 crates/clamui-core/src/cli.rs:1214
+#: crates/clamui-core/src/cli.rs:1745 crates/clamui-core/src/cli.rs:1750
 msgid "error"
 msgstr ""
 
@@ -665,7 +665,7 @@ msgid ""
 "Run 'clamui {name} --help' for full option reference."
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:395 crates/clamui-core/src/cli.rs:1583
+#: crates/clamui-core/src/cli.rs:395 crates/clamui-core/src/cli.rs:1605
 msgid "unrecognized argument: {argument}"
 msgstr ""
 
@@ -690,34 +690,34 @@ msgid "Scanning: {path}"
 msgstr ""
 
 #. Translators: Keep `clamui`, uppercase metavariables, brackets, and all `--` flags unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:570
+#: crates/clamui-core/src/cli.rs:572
 msgid ""
 "Usage: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
 "quarantine] [--json] [--verbose]"
 msgstr ""
 
 #. Translators: Preserve the numeric exit-code meanings.
-#: crates/clamui-core/src/cli.rs:578
+#: crates/clamui-core/src/cli.rs:580
 msgid ""
 "Scan one or more files or directories with ClamAV.\n"
 "Exit codes: 0 = clean, 1 = threats found, 2 = error."
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:597
+#: crates/clamui-core/src/cli.rs:599
 msgid "Path not found: {path}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:616
+#: crates/clamui-core/src/cli.rs:618
 msgid "Profile not found: {name}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:703
+#: crates/clamui-core/src/cli.rs:717
 msgid "Scanned {count} file in {duration:.1f}s"
 msgid_plural "Scanned {count} files in {duration:.1f}s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/cli.rs:716
+#: crates/clamui-core/src/cli.rs:730
 msgid ""
 "\n"
 "Threat found: {count}"
@@ -727,7 +727,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/cli.rs:741
+#: crates/clamui-core/src/cli.rs:755
 msgid ""
 "\n"
 "Quarantined: {count} file"
@@ -737,316 +737,320 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/cli.rs:751
+#: crates/clamui-core/src/cli.rs:765
 msgid ""
 "\n"
 "Failed to quarantine:"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:762
+#: crates/clamui-core/src/cli.rs:777 crates/clamui-core/src/logs.rs:1406
+msgid "Threats Detected"
+msgstr ""
+
+#: crates/clamui-core/src/cli.rs:783
 msgid ""
 "\n"
 "Scan completed with errors:"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:767
+#: crates/clamui-core/src/cli.rs:788
 msgid "No threats found."
 msgstr ""
 
 #. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:775 crates/clamui-core/src/cli.rs:797
+#: crates/clamui-core/src/cli.rs:797 crates/clamui-core/src/cli.rs:819
 msgid "Usage: clamui quarantine <list|restore|delete> [args]"
 msgstr ""
 
 #. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:785
+#: crates/clamui-core/src/cli.rs:807
 msgid "Usage: clamui quarantine list [--json]"
 msgstr ""
 
 #. Translators: Keep `clamui`, `restore`, and `ID` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:789
+#: crates/clamui-core/src/cli.rs:811
 msgid "Usage: clamui quarantine restore ID"
 msgstr ""
 
 #. Translators: Keep `clamui`, `delete`, and `ID` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:793
+#: crates/clamui-core/src/cli.rs:815
 msgid "Usage: clamui quarantine delete ID"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:825
+#: crates/clamui-core/src/cli.rs:847
 msgid "No quarantined files."
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:842 crates/clamui-core/src/logs.rs:1108
+#: crates/clamui-core/src/cli.rs:864 crates/clamui-core/src/logs.rs:1108
 msgid "ID"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:843
+#: crates/clamui-core/src/cli.rs:865
 msgid "File"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:844
+#: crates/clamui-core/src/cli.rs:866
 msgid "Threat"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:845 crates/clamui-core/src/cli.rs:1639
+#: crates/clamui-core/src/cli.rs:867 crates/clamui-core/src/cli.rs:1661
 msgid "Date"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:846
+#: crates/clamui-core/src/cli.rs:868
 msgid "Size"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:861
+#: crates/clamui-core/src/cli.rs:883
 msgid "{count} entry ({size} total)"
 msgid_plural "{count} entries ({size} total)"
 msgstr[0] ""
 msgstr[1] ""
 
 #. Translators: Keep `quarantine`, command-valued `{action}`, and `ID` unchanged.
-#: crates/clamui-core/src/cli.rs:879 crates/clamui-core/src/cli.rs:893
+#: crates/clamui-core/src/cli.rs:901 crates/clamui-core/src/cli.rs:915
 msgid "quarantine {action} requires ID"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:932
+#: crates/clamui-core/src/cli.rs:954
 msgid "Restored"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:934
+#: crates/clamui-core/src/cli.rs:956
 msgid "Deleted"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:939
+#: crates/clamui-core/src/cli.rs:961
 msgid "{verb}: {path}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:949
+#: crates/clamui-core/src/cli.rs:971
 msgid "Restore failed"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:951
+#: crates/clamui-core/src/cli.rs:973
 msgid "Delete failed"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:958
+#: crates/clamui-core/src/cli.rs:980
 msgid "{prefix}: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1035 crates/clamui-core/src/quarantine.rs:443
+#: crates/clamui-core/src/cli.rs:1057 crates/clamui-core/src/quarantine.rs:443
 #: crates/clamui-core/src/quarantine.rs:480
 msgid "Quarantine entry not found: {id}"
 msgstr ""
 
 #. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1048 crates/clamui-core/src/cli.rs:1074
+#: crates/clamui-core/src/cli.rs:1070 crates/clamui-core/src/cli.rs:1096
 msgid "Usage: clamui profile <list|show|export|import> [args]"
 msgstr ""
 
 #. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1058
+#: crates/clamui-core/src/cli.rs:1080
 msgid "Usage: clamui profile list [--json]"
 msgstr ""
 
 #. Translators: Keep `clamui`, `show`, `NAME`, and `--json` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1062
+#: crates/clamui-core/src/cli.rs:1084
 msgid "Usage: clamui profile show NAME [--json]"
 msgstr ""
 
 #. Translators: Keep `clamui`, `export`, `NAME`, and `FILE` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1066
+#: crates/clamui-core/src/cli.rs:1088
 msgid "Usage: clamui profile export NAME FILE"
 msgstr ""
 
 #. Translators: Keep `clamui`, `import`, and `FILE` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1070
+#: crates/clamui-core/src/cli.rs:1092
 msgid "Usage: clamui profile import FILE"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1101
+#: crates/clamui-core/src/cli.rs:1123
 msgid "No scan profiles configured."
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1117
+#: crates/clamui-core/src/cli.rs:1139
 msgid " (+{n} more)"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1122
+#: crates/clamui-core/src/cli.rs:1144
 msgid "(none)"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1127 crates/clamui-core/src/cli.rs:1297
+#: crates/clamui-core/src/cli.rs:1149 crates/clamui-core/src/cli.rs:1319
 msgid "yes"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1129 crates/clamui-core/src/cli.rs:1299
+#: crates/clamui-core/src/cli.rs:1151 crates/clamui-core/src/cli.rs:1321
 msgid "no"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1137
+#: crates/clamui-core/src/cli.rs:1159
 msgid "Name"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1138
+#: crates/clamui-core/src/cli.rs:1160
 msgid "Targets"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1139
+#: crates/clamui-core/src/cli.rs:1161
 msgid "Default"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1140
+#: crates/clamui-core/src/cli.rs:1162
 msgid "Updated"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1148
+#: crates/clamui-core/src/cli.rs:1170
 msgid "{count} profile"
 msgid_plural "{count} profiles"
 msgstr[0] ""
 msgstr[1] ""
 
 #. Translators: Preserve `{name}` as the profile name and `{path}` as its destination; quotation marks may be localized.
-#: crates/clamui-core/src/cli.rs:1207
+#: crates/clamui-core/src/cli.rs:1229
 msgid "Exported '{name}' to {path}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1236
+#: crates/clamui-core/src/cli.rs:1258
 msgid "Imported profile: {name}"
 msgstr ""
 
 #. Translators: Preserve command-valued `{usage}`, `NAME`, and the `--json` CLI flag.
-#: crates/clamui-core/src/cli.rs:1256 crates/clamui-core/src/cli.rs:1269
+#: crates/clamui-core/src/cli.rs:1278 crates/clamui-core/src/cli.rs:1291
 msgid "{usage} requires NAME and optional --json"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1292
+#: crates/clamui-core/src/cli.rs:1314
 msgid "Name:        {name}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1295
+#: crates/clamui-core/src/cli.rs:1317
 msgid "ID:          {id}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1303
+#: crates/clamui-core/src/cli.rs:1325
 msgid "Default:     {value}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1312
+#: crates/clamui-core/src/cli.rs:1334
 msgid "Description: {description}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1322
+#: crates/clamui-core/src/cli.rs:1344
 msgid "Created:     {created}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1331
+#: crates/clamui-core/src/cli.rs:1353
 msgid "Updated:     {updated}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1337
+#: crates/clamui-core/src/cli.rs:1359
 msgid "Targets:"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1346
+#: crates/clamui-core/src/cli.rs:1368
 msgid "  (none)"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1357
+#: crates/clamui-core/src/cli.rs:1379
 msgid "Exclusions:"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1362
+#: crates/clamui-core/src/cli.rs:1384
 msgid "  path:    {path}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1369
+#: crates/clamui-core/src/cli.rs:1391
 msgid "  pattern: {pattern}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1381
+#: crates/clamui-core/src/cli.rs:1403
 msgid "Options:"
 msgstr ""
 
 #. Translators: Keep `clamui` and `--json` unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1395
+#: crates/clamui-core/src/cli.rs:1417
 msgid "Usage: clamui status [--json]"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1450
+#: crates/clamui-core/src/cli.rs:1472
 msgid "ClamAV"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1455
+#: crates/clamui-core/src/cli.rs:1477
 msgid "  Version:  {version}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1462
+#: crates/clamui-core/src/cli.rs:1484
 msgid "  Status:   not available"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1466
+#: crates/clamui-core/src/cli.rs:1488
 msgid "  Error:    {error}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1472
+#: crates/clamui-core/src/cli.rs:1494
 msgid "  Backend:  {backend}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1481
+#: crates/clamui-core/src/cli.rs:1503
 msgid "  Daemon:   {daemon}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1483
+#: crates/clamui-core/src/cli.rs:1505
 msgid "Quarantine"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1487 crates/clamui-core/src/cli.rs:1506
+#: crates/clamui-core/src/cli.rs:1509 crates/clamui-core/src/cli.rs:1528
 msgid "  Entries:  {count}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1496
+#: crates/clamui-core/src/cli.rs:1518
 msgid "  Size:     {size}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1498
+#: crates/clamui-core/src/cli.rs:1520
 msgid "Scan History"
 msgstr ""
 
 #. Translators: Keep `clamui`, all `--` flags, `N`, and type choices unchanged; they are CLI syntax.
-#: crates/clamui-core/src/cli.rs:1519
+#: crates/clamui-core/src/cli.rs:1541
 msgid ""
 "Usage: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1602
+#: crates/clamui-core/src/cli.rs:1624
 msgid "Failed to load history: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1617
+#: crates/clamui-core/src/cli.rs:1639
 msgid "No scan history found."
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1640 crates/clamui-core/src/logs.rs:1118
+#: crates/clamui-core/src/cli.rs:1662 crates/clamui-core/src/logs.rs:1118
 msgid "Type"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1641 crates/clamui-core/src/logs.rs:1123
+#: crates/clamui-core/src/cli.rs:1663 crates/clamui-core/src/logs.rs:1123
 msgid "Status"
 msgstr ""
 
-#: crates/clamui-core/src/cli.rs:1642 crates/clamui-core/src/logs.rs:1142
+#: crates/clamui-core/src/cli.rs:1664 crates/clamui-core/src/logs.rs:1142
 msgid "Summary"
 msgstr ""
 
 #. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
 #. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
-#: crates/clamui-core/src/cli.rs:1656
+#: crates/clamui-core/src/cli.rs:1678
 msgid "Showing {shown} of {total} entry. Use --limit to see more."
 msgid_plural "Showing {shown} of {total} entries. Use --limit to see more."
 msgstr[0] ""
 msgstr[1] ""
 
 #. Translators: Keep `clamui install-privileged-helper` unchanged; it is the CLI command.
-#: crates/clamui-core/src/cli.rs:1691
+#: crates/clamui-core/src/cli.rs:1713
 msgid "Usage: clamui install-privileged-helper"
 msgstr ""
 
@@ -1220,10 +1224,6 @@ msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] ""
 msgstr[1] ""
-
-#: crates/clamui-core/src/logs.rs:1406
-msgid "Threats Detected"
-msgstr ""
 
 #: crates/clamui-core/src/logs.rs:1411
 #: desktop/src-tauri/src/notifications.rs:109
@@ -1501,39 +1501,43 @@ msgstr ""
 msgid "File hash mismatch — file may be corrupted"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:389
+#: crates/clamui-core/src/scanner.rs:393
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1815
+#: crates/clamui-core/src/scanner.rs:1752
 msgid "Scan cancelled by user"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1817
+#: crates/clamui-core/src/scanner.rs:1759
 msgid "No files could be scanned"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1821
+#: crates/clamui-core/src/scanner.rs:1765
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1828
+#: crates/clamui-core/src/scanner.rs:1772
 msgid "Scan target is not a regular file or directory"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1842
+#: crates/clamui-core/src/scanner.rs:1781
+msgid "Threats were detected, but details are unavailable."
+msgstr ""
+
+#: crates/clamui-core/src/scanner.rs:1793
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1855
+#: crates/clamui-core/src/scanner.rs:1806
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1874
+#: crates/clamui-core/src/scanner.rs:1825
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"

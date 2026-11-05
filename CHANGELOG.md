@@ -22,6 +22,8 @@
 - Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
 - Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
 - Fixed Flatpak Wayland startup compatibility by disabling WebKitGTK's DMA-BUF renderer path by default while preserving explicit environment overrides. (#282)
+- Fixed large scans losing threats, skipped files, warnings, and summary counts after the 64 MiB output limit; final results and history now retain complete scan evidence for both ClamAV backends while keeping displayed output bounded, preserving exact filename identities, and preventing the CLI from reporting an infected scan as clean. (#285)
+- Fixed daemon scans splitting long file-list paths or reporting spurious errors by routing paths of 1,023 bytes or more through the existing protected stdin transport; preserved shorter-path batching, exact filenames, exclusions, progress, and cancellation. (#286)
 - Rejected VirusTotal uploads when the original pathname is substituted after lookup, retaining no-follow descriptor identity checks.
 - Fixed CodeQL Rust analysis configuration to use no manual build mode.
 - Regenerated the stale gettext template used by translation validation.
