@@ -126,7 +126,7 @@ jobs:
           rm -rf squashfs-root
 
       - name: Upload AppImage artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: appimage-package
           path: |

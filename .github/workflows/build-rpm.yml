@@ -154,7 +154,7 @@ jobs:
           esac
 
       - name: Upload RPM helper package artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: rpm-package-${{ matrix.arch }}
           path: |
