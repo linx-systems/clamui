@@ -5,6 +5,12 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Expected commit SHA (optional)
+        type: string
+
 
 permissions:
   contents: read
@@ -13,6 +19,13 @@ jobs:
   rust:
     runs-on: ubuntu-22.04
     steps:
+      - name: Verify dispatched commit
+        if: inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
       - name: Checkout repository
         uses: actions/checkout@v7
 
@@ -57,6 +70,13 @@ jobs:
   frontend:
     runs-on: ubuntu-22.04
     steps:
+      - name: Verify dispatched commit
+        if: inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
       - name: Checkout repository
         uses: actions/checkout@v7
 

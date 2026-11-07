@@ -33,6 +33,8 @@
 
 ### Maintenance
 
+- Added concise GitHub bug report, feature request, and pull request templates.
+- Switched Dependabot's JavaScript projects to Bun, grouped weekly minor and patch updates, and automated the related Bun/Yarn and Flatpak dependency source refresh.
 - Enabled verbose Tauri AppImage logs to keep `linuxdeploy` failures actionable.
 - Made the escaped-writer deadline regression fixture wait for process readiness, eliminating a CI startup race without relaxing the deadline.
 

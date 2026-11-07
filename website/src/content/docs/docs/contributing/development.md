@@ -144,6 +144,8 @@ Protected configuration changes use the authenticated protocol-v4 helper at `/us
 
 ## Test before a pull request
 
+Use the [bug report or feature request forms](https://github.com/linx-systems/clamui/issues/new/choose) for issues, and summarize your changes and actual verification in the pull request template.
+
 Run the applicable checks from the repository root:
 
 ```bash
@@ -185,6 +187,23 @@ CLAMUI_ARTIFACT_DIR=/absolute/path/to/ubuntu22/target/release CLAMUI_RPM_ARCH=x8
 The scripts can produce local `x86_64` or `aarch64` helper artifacts when built for the matching target; they contain the Rust helper and canonical policy, not the GUI or ClamAV. A local RPM is unsigned and is not an eligible installer asset. Only a matching signed RPM published with its detached signature can be used by the in-app Fedora installer. The RPM builder requires Cargo, `readelf` from `binutils`, and the `rpm`/`rpmbuild` package tools; a local source compilation also needs the usual Rust C toolchain, `pkg-config`, and GLib development files. It builds only the helper, so it needs neither Python nor the Bun/Tauri GUI toolchain. `CLAMUI_ARTIFACT_DIR`, `CARGO_TARGET_DIR`, and `CARGO_BUILD_TARGET` select a prebuilt or nondefault Cargo artifact; `CLAMUI_RPM_ARCH` asserts `x86_64` or `aarch64` against the helper ELF.
 
 `debian/build-deb.sh` is the authoritative Debian entry point: it produces the application/helper pair and stages the policy and scheduled-scan payload. `CLAMUI_ARTIFACT_DIR` must contain executable `clamui`, `clamui-scheduled-scan`, and `clamui-apply-preferences` binaries from the baseline build. The AppImage build produces `ClamUI-<VERSION>-x86_64.AppImage` and its `.zsync` metadata.
+
+### Dependabot and Flatpak sources
+
+Dependabot checks Cargo, the desktop and website Bun projects, and GitHub Actions weekly. Minor and patch version updates are grouped per project; major updates and security updates remain separate.
+
+`desktop/bun.lock` is the canonical desktop lockfile; `desktop/yarn.lock` is only its Bun-generated export for Flatpak's offline source generator. Eligible Cargo and desktop Dependabot pull requests automatically refresh the coupled lockfile export and Flatpak source JSON files; website and Actions updates do not need this refresh. The Dependabot branch must include current `master`; for an older pull request, comment `@dependabot rebase` first. If a refresh fails or an existing Dependabot pull request needs one, run **Dependabot source refresh** in GitHub Actions with its pull request number as `pr_number`, or use the command below, replacing `123` with that number:
+
+```bash
+gh workflow run dependabot-refresh.yml --ref master -f pr_number=123
+```
+
+Review the generated changes and the verification workflow results on the pull request. For a manual local refresh, export the Yarn lockfile and regenerate both Flatpak source lists using the generator prerequisites described below:
+
+```bash
+( cd desktop && bun install --frozen-lockfile --yarn )
+scripts/generate-flatpak-sources.sh
+```
 
 ## Flatpak builds and Flathub releases
 

@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest an improvement to ClamUI.
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing issues before suggesting a feature.
+  - type: textarea
+    id: problem-or-use-case
+    attributes:
+      label: Problem or use case
+      description: Describe the problem you want to solve or what you want to accomplish.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-change
+    attributes:
+      label: Suggested change
+      description: Describe the behavior or improvement you would like to see.
+    validations:
+      required: true
