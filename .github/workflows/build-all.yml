@@ -7,28 +7,51 @@ on:
         description: "Sign Debian, RPM, and AppImage packages with GPG"
         type: boolean
         default: false
+      expected_sha:
+        description: Expected commit SHA (optional)
+        type: string
+
 
 permissions:
   contents: read
 
 jobs:
+  verify-ref:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Verify dispatched commit
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test -z "$EXPECTED_SHA" || test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
   build-deb:
+    needs: verify-ref
     uses: ./.github/workflows/build-deb.yml
     with:
       sign: ${{ inputs.sign }}
-    secrets: inherit
+    secrets:
+      GPG_PRIVATE_KEY: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PRIVATE_KEY || '' }}
+      GPG_PASSPHRASE: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PASSPHRASE || '' }}
 
   build-rpm:
+    needs: verify-ref
     uses: ./.github/workflows/build-rpm.yml
     with:
       sign: ${{ inputs.sign }}
-    secrets: inherit
+    secrets:
+      GPG_PRIVATE_KEY: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PRIVATE_KEY || '' }}
+      GPG_PASSPHRASE: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PASSPHRASE || '' }}
 
   build-flatpak:
+    needs: verify-ref
     uses: ./.github/workflows/build-flatpak.yml
 
   build-appimage:
+    needs: verify-ref
     uses: ./.github/workflows/build-appimage.yml
     with:
       sign: ${{ inputs.sign }}
-    secrets: inherit
+    secrets:
+      GPG_PRIVATE_KEY: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PRIVATE_KEY || '' }}
+      GPG_PASSPHRASE: ${{ (inputs.sign || startsWith(github.ref, 'refs/tags/')) && secrets.GPG_PASSPHRASE || '' }}
