@@ -193,6 +193,24 @@ jobs:
               .head.ref == $branch and .head.sha == $head
             ' <<<"$pr" >/dev/null || { echo 'PR identity, base, branch, or head changed; refusing to continue.' >&2; exit 1; }
           }
+          wait_for_pr_head() {
+            local old_head="$1" new_head="$2" pr observed branch_head attempt
+            for attempt in {1..20}; do
+              pr="$(gh api "repos/$REPO/pulls/$PR_NUMBER")"
+              observed="$(jq -er --arg repo "$REPO" --arg branch "$BRANCH" --arg old "$old_head" --arg new "$new_head" --arg base "$BASE_SHA" '
+                select(.state == "open" and .user.login == "dependabot[bot]" and
+                  .head.repo.full_name == $repo and .base.repo.full_name == $repo and
+                  .base.ref == "master" and .base.sha == $base and .head.ref == $branch and
+                  (.head.sha == $old or .head.sha == $new)) | .head.sha
+              ' <<<"$pr")" || { echo 'PR identity, base, branch, or head changed while awaiting synchronization.' >&2; exit 1; }
+              branch_head="$(gh api "repos/$REPO/git/ref/heads/$BRANCH" --jq '.object.sha')"
+              [[ "$branch_head" == "$new_head" ]] || { echo 'Branch changed after publishing; refusing to continue.' >&2; exit 1; }
+              [[ "$observed" == "$new_head" ]] && return 0
+              if (( attempt < 20 )); then sleep 2; fi
+            done
+            echo 'Timed out waiting for the PR head to reflect the published commit.' >&2
+            exit 1
+          }
           check_pr "$HEAD_SHA"
           git fetch --no-tags origin "$HEAD_SHA"
           git merge-base --is-ancestor "$BASE_SHA" "$HEAD_SHA" || { echo 'PR needs rebasing onto master.' >&2; exit 1; }
@@ -210,7 +228,9 @@ jobs:
             auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)"
             GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $auth" \
               git push origin "HEAD:refs/heads/$BRANCH"
+            old_head="$HEAD_SHA"
             HEAD_SHA="$(git rev-parse HEAD)"
+            wait_for_pr_head "$old_head" "$HEAD_SHA"
           fi
           check_pr "$HEAD_SHA"
           # workflow_dispatch is an explicit exception to GITHUB_TOKEN event suppression.
