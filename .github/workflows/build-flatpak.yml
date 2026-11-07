@@ -49,7 +49,7 @@ jobs:
           cache-key: flatpak-builder-${{ matrix.runner }}-${{ matrix.arch }}
 
       - name: Upload Flatpak bundle artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: flatpak-bundle-${{ matrix.arch }}
           path: clamui-${{ matrix.arch }}.flatpak
