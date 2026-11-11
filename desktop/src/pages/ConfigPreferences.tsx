@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { notify, openExternal, openPaths, request } from "../api";
 import { type ManualConfiguration, useConfigurationRecovery } from "../ConfigurationRecovery";
 import { isHelperTrustError } from "../helperTrustError";
+import { Icon } from "../Icon";
 import { _ } from "../i18n";
 
 type ConfigKind = "freshclam" | "clamd";
@@ -99,7 +100,6 @@ const ONACCESS_BOOLEAN_FIELDS = [
 ] as const;
 
 const SUGGESTED_SIGNATURE_URLS = [
-  "https://urlhaus.abuse.ch/downloads/urlhaus.ndb",
   "http://sigs.interserver.net/interserver256.hdb",
   "http://sigs.interserver.net/interservertopline.db",
   "http://sigs.interserver.net/shell.ldb",
@@ -319,6 +319,7 @@ function parseCustomUrls(raw: string): string[] {
 }
 
 function CustomUrlListField({ values, onChange }: { values: string[]; onChange: (next: string[]) => void }) {
+  const urlId = useId();
   const [draft, setDraft] = useState("");
   const add = () => {
     const candidates = parseCustomUrls(draft);
@@ -335,16 +336,24 @@ function CustomUrlListField({ values, onChange }: { values: string[]; onChange: 
     onChange([...values, ...candidates.filter((candidate) => !values.includes(candidate))]);
     setDraft("");
   };
-  return <div className="form-grid">
-    <label className="field field-control" htmlFor="config-databasecustomurl">{_("Add URLs")}</label>
-    <textarea id="config-databasecustomurl" value={draft} rows={3} placeholder={"DatabaseCustomURL https://example.invalid/signatures.ndb"} onChange={(event) => setDraft(event.target.value)} />
-    <div className="toolbar actions"><button className="button" type="button" onClick={add}>{_("Add")}</button></div>
-    {values.length > 0 && <ul className="table">
-      {values.map((item) => <li className="row setting-row" key={item}>
-        <code className="monospace">{item}</code>
-        <button className="button danger" type="button" onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}>{_("Remove")}</button>
+  return <div className="signature-url-editor">
+    {values.length > 0 && <ul className="signature-url-list" aria-label={_("Custom Signature Databases")}>
+      {values.map((item, index) => <li className="signature-url-row" key={item}>
+        <code id={`${urlId}-${index}`} className="monospace signature-url-value">{item}</code>
+        <button className="button signature-url-remove" type="button" aria-describedby={`${urlId}-${index}`} onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}><Icon name="trash" />{_("Remove")}</button>
       </li>)}
     </ul>}
+    <div className="signature-url-composer">
+      <label className="field field-control" htmlFor="config-databasecustomurl">{_("Add URLs")}</label>
+      <textarea className="signature-url-input" id="config-databasecustomurl" value={draft} rows={3} placeholder={"DatabaseCustomURL https://example.invalid/signatures.ndb"} aria-describedby="signature-url-help" onChange={(event) => setDraft(event.target.value)} />
+      <div className="signature-url-footer">
+        <p id="signature-url-help" className="muted signature-note">{_(
+          // Translators: Keep the URI schemes unchanged.
+          "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider URL as a separate entry.",
+        )}</p>
+        <button className="button primary" type="button" onClick={add}><Icon name="plus" />{_("Add")}</button>
+      </div>
+    </div>
   </div>;
 }
 
@@ -753,26 +762,27 @@ export default function ConfigPreferences({ section }: { section: string }) {
         <NumberField label={_("Checks per day")} field="Checks" value={numberValue(freshclamValues, "Checks", 0)} min={0} max={50} note={_("0 disables automatic checks.")} onChange={(next) => setFreshclamField("Checks", String(next))} />
         <TextField label={_("Database Mirror")} field="DatabaseMirror" value={value(freshclamValues, "DatabaseMirror")} onChange={(next) => setFreshclamField("DatabaseMirror", next)} />
       </section>
-      <section className="preference-section form-section"><h3 className="section-heading">{_("Custom Signature Databases")}</h3>
+      <section className="preference-section form-section signature-databases" aria-labelledby="signature-databases-title">
+        <div className="signature-section-heading">
+          <h3 id="signature-databases-title" className="section-heading">{_("Custom Signature Databases")}</h3>
+          <button className="button" type="button" aria-describedby="signature-suggestions-note" onClick={addSuggestedUrls}><Icon name="plus" />{_("Suggested")}</button>
+        </div>
+        <p id="signature-suggestions-note" className="muted signature-note">{_(
+          // Translators: Suggested and Save & Apply are button labels; use their translations. Keep InterServer unchanged.
+          "Suggested adds three InterServer databases to this draft. Save & Apply is still required.",
+        )}</p>
         <CustomUrlListField values={freshclamValues.DatabaseCustomURL ?? []} onChange={(next) => updateConfig("freshclam", (values) => valuesForMany(values, "DatabaseCustomURL", next))} />
-        <div className="toolbar actions"><button className="button" type="button" onClick={addSuggestedUrls}>{_("Suggested")}</button></div>
-        <p className="muted">{_(
-          // Translators: Suggested and Save & Apply are button labels; use their translations. Keep URLhaus and InterServer unchanged.
-          "Suggested adds URLhaus and three InterServer databases to this draft. Save & Apply is still required.",
-        )}</p>
-        <p className="muted">{_(
-          // Translators: Keep the URI schemes unchanged.
-          "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider URL as a separate entry.",
-        )}</p>
       </section>
-      <section className="preference-section form-section"><h3 className="section-heading">{_("Signature Providers")}</h3>
-        <div className="setting-row"><span className="row-copy"><strong>URLhaus</strong><small className="muted">{_("Free malware URL blocklist; no registration required.")}</small></span><button className="button" type="button" onClick={() => void openReference("https://urlhaus.abuse.ch/api/")}>{_("Open provider")}</button></div>
-        <div className="setting-row"><span className="row-copy"><strong>SecuriteInfo</strong><small className="muted">{_("Registration is required; URLs include your personal API key.")}</small></span><button className="button" type="button" onClick={() => void openReference("https://www.securiteinfo.com/")}>{_("Open provider")}</button></div>
-        <div className="setting-row"><span className="row-copy"><strong>SaneSecurity</strong><small className="muted">{_(
-          // Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-          "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL provider.",
-        )}</small></span><button className="button" type="button" onClick={() => void openReference("https://sanesecurity.com/")}>{_("Open provider")}</button></div>
-        <div className="setting-row"><span className="row-copy"><strong>InterServer</strong><small className="muted">{_("Community hash, web-shell, and general malware signature databases.")}</small></span><button className="button" type="button" onClick={() => void openReference("http://sigs.interserver.net/")}>{_("Open provider")}</button></div>
+      <section className="preference-section form-section signature-providers" aria-labelledby="signature-providers-title">
+        <h3 id="signature-providers-title" className="section-heading">{_("Signature Providers")}</h3>
+        <ul className="signature-provider-list">
+          <li className="signature-provider-row"><span className="row-copy signature-provider-copy"><strong id="signature-provider-securiteinfo">SecuriteInfo</strong><small className="muted">{_("Registration is required; URLs include your personal API key.")}</small></span><button className="button signature-provider-action" type="button" aria-describedby="signature-provider-securiteinfo" onClick={() => void openReference("https://www.securiteinfo.com/")}>{_("Open provider")}<Icon name="external-link" /></button></li>
+          <li className="signature-provider-row"><span className="row-copy signature-provider-copy"><strong id="signature-provider-sanesecurity">SaneSecurity</strong><small className="muted">{_(
+            // Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
+            "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL provider.",
+          )}</small></span><button className="button signature-provider-action" type="button" aria-describedby="signature-provider-sanesecurity" onClick={() => void openReference("https://sanesecurity.com/")}>{_("Open provider")}<Icon name="external-link" /></button></li>
+          <li className="signature-provider-row"><span className="row-copy signature-provider-copy"><strong id="signature-provider-interserver">InterServer</strong><small className="muted">{_("Community hash, web-shell, and general malware signature databases.")}</small></span><button className="button signature-provider-action" type="button" aria-describedby="signature-provider-interserver" onClick={() => void openReference("http://sigs.interserver.net/")}>{_("Open provider")}<Icon name="external-link" /></button></li>
+        </ul>
       </section>
       <section className="preference-section form-section"><h3 className="section-heading">{_("Proxy Settings")}</h3>
         <TextField label={_("Proxy Server")} field="HTTPProxyServer" value={value(freshclamValues, "HTTPProxyServer")} onChange={(next) => setFreshclamField("HTTPProxyServer", next)} />

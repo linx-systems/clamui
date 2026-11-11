@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Improved the signature database editor and provider list with full-width URLs, clearer actions, and external-link indicators.
+- Removed the unavailable URLhaus database recommendation; existing custom databases are unchanged.
 - Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
 - Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
 - Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.

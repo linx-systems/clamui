@@ -1579,6 +1579,104 @@ button.log-row:hover:not(:disabled),
 .config-path-row small,
 .integration-row small { display: block; margin-top: 2px; }
 
+.signature-section-heading,
+.signature-url-footer,
+.signature-provider-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.signature-section-heading > h3 {
+  flex: 1 1 180px;
+  min-width: 0;
+  margin: 0;
+}
+
+.signature-section-heading > .button,
+.signature-url-footer > .button,
+.signature-provider-action {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.signature-databases > .signature-note,
+.signature-url-footer > .signature-note {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.signature-url-editor,
+.signature-url-composer {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.signature-url-list,
+.signature-provider-list {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signature-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 0;
+}
+
+.signature-url-row + .signature-url-row,
+.signature-provider-row + .signature-provider-row {
+  border-top: 1px solid var(--border);
+}
+
+.signature-url-value {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.signature-url-remove {
+  min-width: 0;
+  border-color: transparent;
+  background: transparent;
+  overflow-wrap: anywhere;
+}
+
+.signature-url-input {
+  min-width: 0;
+  width: 100%;
+}
+
+.signature-url-footer > .signature-note {
+  flex: 1 1 220px;
+}
+
+.signature-url-footer > .button,
+.signature-provider-action {
+  margin-inline-start: auto;
+}
+
+.signature-providers > h3 { margin: 0; }
+
+.signature-provider-row {
+  padding: 9px 0;
+}
+
+.signature-provider-copy {
+  flex: 1 1 220px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .config-path-row,
 .integration-row { align-items: flex-start; }
 .config-path-row .actions,
