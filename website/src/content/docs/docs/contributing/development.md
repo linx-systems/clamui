@@ -34,7 +34,7 @@ flatpak install --user --arch="$(flatpak --default-arch)" flathub \
   org.freedesktop.Sdk.Extension.rust-stable//26.08
 ```
 
-The Rust/Tauri source for the v0.5.1 release is on `master`; the `v0.4.1` tag preserves the historical Python release. Clone `master`:
+The Rust/Tauri source for the v0.6.0 release is on `master`; the `v0.4.1` tag preserves the historical Python release. Clone `master`:
 
 ```bash
 git clone https://github.com/linx-systems/clamui.git
@@ -105,6 +105,22 @@ RUST_LOG=clamui=debug bun run --cwd desktop tauri dev
 
 Use the Tauri/WebKit developer tools for frontend state and the terminal for Rust/core diagnostics. Never replace native IPC with a browser filesystem, shell, or process permission. The only frontend request boundary is Tauri's allowlisted `request` command and `clamui-event` event stream.
 
+### Optional coding-agent skills
+
+These optional, project-local skills assist compatible coding agents; they are not application dependencies and do not change the build or runtime requirements. From the repository root, install only the selected skills:
+
+```bash
+npx skills@1.7.4 add apollographql/skills --skill rust-best-practices
+npx skills@1.7.4 add vercel-labs/agent-skills --skill vercel-react-best-practices
+npx skills@1.7.4 add addyosmani/web-quality-skills --skill accessibility
+```
+
+Do not use `-g` or bulk-install an upstream repository. Imported payloads belong in `.agents/skills`; `.claude/skills` provides compatibility links, and `skills-lock.json` records each source, selected `skillPath`, and content hash. Refresh only a named skill intentionally and review its provenance and changes.
+
+The project-only OMP filter is `.omp/config.yml` under `skills.ignoredSkills`; it excludes irrelevant global skills without deleting their global payloads. Start OMP from the repository root because project configuration is current-working-directory scoped.
+
+ClamAV and gettext guidance is authored for this project; the contributor rules and the existing [architecture](/docs/contributing/architecture/) and [translation](/docs/contributing/translating/) pages remain authoritative. The React guidance applies to the client UI: exclude Next.js and other server-only changes. Check native accessibility in Tauri/WebKitGTK—Chrome accessibility scores alone do not prove the desktop application is accessible.
+
 ### Data compatibility
 
 Work against the existing XDG layouts, never ad-hoc project-local data:
@@ -128,6 +144,8 @@ Protected configuration changes use the authenticated protocol-v4 helper at `/us
 
 ## Test before a pull request
 
+Use the [bug report or feature request forms](https://github.com/linx-systems/clamui/issues/new/choose) for issues, and summarize your changes and actual verification in the pull request template.
+
 Run the applicable checks from the repository root:
 
 ```bash
@@ -137,6 +155,8 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 ```
+
+Clippy compiles the production Tauri crate, whose `generate_context!` embeds `desktop/dist`; build the frozen frontend assets before running it.
 
 Exercise the real CLI and persisted compatibility fixtures in addition to unit tests. Test clean, EICAR, cancellation, scheduling dry-run, privileged-helper rejection, and compatible CLI output. For desktop work, manually verify Tauri startup, navigation, events, native dialogs, tray behavior, and file-argument forwarding.
 
@@ -168,6 +188,23 @@ The scripts can produce local `x86_64` or `aarch64` helper artifacts when built 
 
 `debian/build-deb.sh` is the authoritative Debian entry point: it produces the application/helper pair and stages the policy and scheduled-scan payload. `CLAMUI_ARTIFACT_DIR` must contain executable `clamui`, `clamui-scheduled-scan`, and `clamui-apply-preferences` binaries from the baseline build. The AppImage build produces `ClamUI-<VERSION>-x86_64.AppImage` and its `.zsync` metadata.
 
+### Dependabot and Flatpak sources
+
+Dependabot checks Cargo, the desktop and website Bun projects, and GitHub Actions weekly. Minor and patch version updates are grouped per project; major updates and security updates remain separate.
+
+`desktop/bun.lock` is the canonical desktop lockfile; `desktop/yarn.lock` is only its Bun-generated export for Flatpak's offline source generator. Eligible Cargo and desktop Dependabot pull requests automatically refresh the coupled lockfile export and Flatpak source JSON files; website and Actions updates do not need this refresh. The Dependabot branch must include current `master`; for an older pull request, comment `@dependabot rebase` first. If a refresh fails or an existing Dependabot pull request needs one, run **Dependabot source refresh** in GitHub Actions with its pull request number as `pr_number`, or use the command below, replacing `123` with that number:
+
+```bash
+gh workflow run dependabot-refresh.yml --ref master -f pr_number=123
+```
+
+Review the generated changes and the verification workflow results on the pull request. For a manual local refresh, export the Yarn lockfile and regenerate both Flatpak source lists using the generator prerequisites described below:
+
+```bash
+( cd desktop && bun install --frozen-lockfile --yarn )
+scripts/generate-flatpak-sources.sh
+```
+
 ## Flatpak builds and Flathub releases
 
 ### Local Flatpak checkout build
@@ -188,9 +225,11 @@ The checked-in `flathub/io.github.linx_systems.ClamUI.yml` currently has the sam
 
 ### Immutable Flatpak release packaging
 
-An official Rust Flatpak submission requires exactly three checked-in packaging inputs: a canonical YAML whose application source is a concrete public Git URL and full commit pin, `flathub/cargo-sources.json`, and `flathub/bun-sources.json`. The two source manifests must be generated from the settled `Cargo.lock` and the paired `desktop/bun.lock`/`desktop/yarn.lock`; do not hand-edit their checksums or retain legacy Python source JSON as a Rust packaging input.
+An official Rust Flatpak submission requires exactly three checked-in packaging inputs: a canonical YAML whose application source is a concrete public Git URL and full commit pin, `flathub/cargo-sources.json`, and `flathub/bun-sources.json`. `cargo-sources.json` derives from the settled `Cargo.lock`; `bun-sources.json` derives from the canonical `desktop/bun.lock` and its Bun-produced `desktop/yarn.lock` export. Do not hand-edit their checksums or retain legacy Python source JSON as a Rust packaging input.
 
-The product lockfile remains `desktop/bun.lock`. Before generation, intentionally export its paired Yarn lockfile after settling frontend dependencies:
+When updating a Rust dependency, constrain the resolver to the intended package (for example, `cargo update -p <crate> --precise <version>`) before regenerating the Cargo source input. Do not refresh the whole Cargo graph merely to update one dependency.
+
+The product lockfile remains `desktop/bun.lock`. After settling frontend dependencies, intentionally export its paired Yarn lockfile before generating Flatpak sources:
 
 ```bash
 ( cd desktop && bun install --frozen-lockfile --yarn )
@@ -220,7 +259,7 @@ flatpak-builder --user --arch="$(flatpak --default-arch)" \
   flathub/io.github.linx_systems.ClamUI.release.yml
 ```
 
-This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before a Flathub submission, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub review and publication process. GitHub v0.5.1 bundles and matching signed helper packages do not by themselves update Flathub; the live Flathub store remains the Python 0.4.1 release until that separate rollout. The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call.
+This local build neither installs nor replaces an existing Flatpak, and it proves only the host architecture. Before a Flathub submission, independently complete the offline build and metadata/package validation for both `x86_64` and `aarch64`, then complete the Flathub review and publication process. GitHub v0.6.0 drafts, bundles, and matching signed helper packages do not by themselves update Flathub; query the appropriate remote with `flatpak remote-info --user --arch=x86_64 flathub io.github.linx_systems.ClamUI` or `--arch=aarch64` to check its published version (use `--system` for a system remote). The Flatpak workflow triggers on `master` pushes, pull requests targeting `master`, `v*` tags, manual dispatch, or a workflow call.
 
 Before publishing, inspect package payloads for the right architecture, native command names, helper/policy paths, and absence of a Python application runtime. Build compatibility still requires proof from the baseline environment and target package/OS; do not infer it from this development guide.
 
@@ -236,7 +275,7 @@ bun run --cwd website check
 bun run --cwd website build
 ```
 
-Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
+Do not edit generated `website/public/` or `website/dist/`. Keep the active `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, and `zh_CN` gettext catalogs in `po/` and listed in `po/LINGUAS`; Rust build tooling and packaging export each catalog for the core and UI. Localized historical scan-summary recognition is embedded build data, not an archived catalog source, and catalog extraction, loading, and packaging have no Python runtime dependency. See [translation](/docs/contributing/translating/) for the catalog workflow.
 
 ## Update the application icon
 

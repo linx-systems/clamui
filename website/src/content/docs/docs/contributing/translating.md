@@ -3,7 +3,7 @@ title: Translate ClamUI
 description: Maintain ClamUI's gettext catalogs for the Rust core and Tauri frontend.
 ---
 
-ClamUI keeps GNU gettext catalogs in `po/`. `po/clamui.pot` is the source template, `po/LINGUAS` is the authoritative list of active catalogs, and each supported translation is `po/<LANG>.po`. The application ships **German (`de`)**, **English (`en`)**, **Spanish (`es`)**, **French (`fr`)**, **Hungarian (`hu`)**, **Italian (`it`)**, **Norwegian Bokmål (`nb`)**, **Brazilian Portuguese (`pt_BR`)**, and **Simplified Chinese (`zh_CN`)**. Rust build tooling and packaging export every catalog listed in `LINGUAS` for the headless core and React UI; generated runtime files are not committed.
+ClamUI keeps GNU gettext catalogs in `po/`. `po/clamui.pot` is the source template, `po/LINGUAS` is the authoritative list of active catalogs, and each supported translation is `po/<LANG>.po`. The application ships **German (`de`)**, **English (`en`)**, **Spanish (`es`)**, **French (`fr`)**, **Hungarian (`hu`)**, **Italian (`it`)**, **Norwegian Bokmål (`nb`)**, **Brazilian Portuguese (`pt_BR`)**, **Vietnamese (`vi`)**, and **Simplified Chinese (`zh_CN`)**. Rust build tooling and packaging export every catalog listed in `LINGUAS` for the headless core and React UI; generated runtime files are not committed.
 
 Localized historical scan-summary recognition is retained as bounded embedded Rust data, not as inactive full catalogs. It does not make a locale selectable, packaged, or synchronized to the current template. Catalog extraction, loading, and packaging have no Python runtime dependency.
 
@@ -42,11 +42,13 @@ sudo pacman -S gettext
 ./scripts/update-pot.sh
 ./scripts/update-pot.sh --check
 ```
+The locked desktop dependencies include the maintained Babel parser used to extract TypeScript and TSX; TypeScript 7 itself does not expose its former compiler API. Keep that direct development dependency locked when updating frontend extraction tooling.
+
 
 Then merge and complete **every active catalog**, then run the canonical freshness and catalog checks:
 
 ```bash
-for language in de en es fr hu it nb pt_BR zh_CN; do
+for language in de en es fr hu it nb pt_BR vi zh_CN; do
   msgmerge --update "po/${language}.po" po/clamui.pot
 done
 ./scripts/update-pot.sh --check
@@ -63,7 +65,7 @@ Render-time Rust and frontend gettext calls must use static literal message IDs,
 
 ## Plural-form headers
 
-Each catalog's `Plural-Forms` header is runtime data and must match its language. `de`, `en`, `es`, `hu`, `it`, and `nb` use two forms with `n != 1`. `fr` and `pt_BR` use two forms with `n > 1`, so both `0` and `1` select the singular form. `zh_CN` has one form and always selects form `0`. Preserve the header and every required `msgstr[N]` when translating.
+Each catalog's `Plural-Forms` header is runtime data and must match its language. `de`, `en`, `es`, `hu`, `it`, and `nb` use two forms with `n != 1`. `fr` and `pt_BR` use two forms with `n > 1`, so both `0` and `1` select the singular form. `vi` and `zh_CN` have one form and always select form `0`. Preserve the header and every required `msgstr[N]` when translating.
 
 ## About and translator credits
 

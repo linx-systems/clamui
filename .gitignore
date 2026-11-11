@@ -123,6 +123,7 @@ refs
 # Repowise local indexes and caches
 .repowise/
 .repowise-workspace/
+.repowise-workspace.yaml
 
 # Rust / Tauri
 target/
@@ -137,4 +138,5 @@ desktop/node_modules/
 desktop/.vite/
 *.tsbuildinfo
 
-.repowise-workspace.yaml
+# Local task tracking
+/TODO.md

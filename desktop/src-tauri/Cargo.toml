@@ -1,6 +1,6 @@
 [package]
 name = "clamui"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 description = "ClamUI desktop runtime"
 license = "MIT"
@@ -18,11 +18,11 @@ path = "src/main.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-base64 = "0.22"
+base64 = "0.23"
 clamui-core = { path = "../../crates/clamui-core" }
 ksni = "0.3.6"
 open = "5"
-rfd = "0.15"
+rfd = "0.17"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri = { version = "2", features = [] }

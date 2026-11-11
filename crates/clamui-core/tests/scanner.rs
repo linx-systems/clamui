@@ -3,10 +3,12 @@ use serde_json::{json, Value};
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs;
+use std::os::unix::ffi::OsStrExt;
 use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
 use std::sync::{Arc, LazyLock, Mutex, MutexGuard};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, UNIX_EPOCH};
 use tempfile::TempDir;
 
 static ENV_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
@@ -62,6 +64,8 @@ fn install_daemon_fixture(temp: &TempDir) -> EnvironmentGuard {
     fs::write(
         &executable,
         r#"#!/bin/sh
+LC_ALL=C
+export LC_ALL
 for argument in "$@"; do
     case "$argument" in
         --version) printf 'ClamAV fixture\n'; exit 0 ;;
@@ -101,7 +105,16 @@ scan_file() {
 
 if [ -n "$file_list" ]; then
     while IFS= read -r file || [ -n "$file" ]; do
-        scan_file "$file"
+        if [ "${#file}" -eq 1023 ]; then
+            scan_file "$file"
+            printf 'file-list remainder: Failed to open file ERROR\n'
+            errors=$((errors + 1))
+        elif [ "${#file}" -ge 1024 ]; then
+            printf 'file-list fragment: Failed to open file ERROR\n'
+            errors=$((errors + 1))
+        else
+            scan_file "$file"
+        fi
     done < "$file_list"
     if [ -n "${CLAMUI_FIXTURE_REPLACE_PATH:-}" ]; then
         rm -f -- "$CLAMUI_FIXTURE_REPLACE_PATH"
@@ -185,6 +198,119 @@ fn fixture_context() -> (TempDir, Context) {
     fs::create_dir_all(&paths.home).expect("home");
     let context = Context::with_paths(paths).expect("context");
     (temp, context)
+}
+
+fn file_with_path_length(root: &Path, length: usize, unicode: bool) -> std::path::PathBuf {
+    let mut path = root.to_path_buf();
+    let mut remaining = length - path.as_os_str().as_bytes().len();
+    while remaining > 201 {
+        path.push(if unicode {
+            "é".repeat(90)
+        } else {
+            "d".repeat(180)
+        });
+        remaining -= 181;
+    }
+    path.push("x".repeat(remaining - 1));
+    fs::create_dir_all(path.parent().expect("file parent")).expect("long path directories");
+    assert_eq!(path.as_os_str().as_bytes().len(), length);
+    path
+}
+
+fn install_status_probe_fixtures(temp: &TempDir) -> EnvironmentGuard {
+    let bin = temp.path().join("status-bin");
+    fs::create_dir_all(&bin).expect("status fixture directory");
+    for (name, script) in [
+        (
+            "clamscan",
+            "#!/bin/sh\n[ \"$1\" = \"--version\" ] && { printf 'ClamAV fixture\\n'; exit 0; }\nexit 2\n",
+        ),
+        (
+            "clamdscan",
+            "#!/bin/sh\n[ \"$1\" = \"--version\" ] && { printf 'ClamAV fixture\\n'; exit 0; }\nprintf 'fixture daemon is offline\\n' >&2\nexit 1\n",
+        ),
+    ] {
+        let executable = bin.join(name);
+        fs::write(&executable, script).expect("status probe fixture");
+        fs::set_permissions(&executable, fs::Permissions::from_mode(0o700))
+            .expect("status probe fixture mode");
+    }
+    prepend_fixture_path(&bin)
+}
+
+fn set_modified_unix(path: &Path, seconds: u64) {
+    fs::File::open(path)
+        .and_then(|file| file.set_modified(UNIX_EPOCH + Duration::from_secs(seconds)))
+        .expect("set fixture mtime");
+}
+
+fn write_database_directory_config(path: &Path, directory: &Path) {
+    fs::write(path, format!("DatabaseDirectory {}\n", directory.display()))
+        .expect("database directory config");
+}
+
+#[test]
+fn scanner_status_aggregates_configured_database_directories_without_host_assumptions() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let _path = install_status_probe_fixtures(&temp);
+
+    let clamd_config = temp.path().join("clamd.conf");
+    let freshclam_config = temp.path().join("freshclam.conf");
+    let empty_database = temp.path().join("empty-database");
+    let missing_database = temp.path().join("missing-database");
+    fs::create_dir_all(&empty_database).expect("empty database directory");
+    write_database_directory_config(&clamd_config, &empty_database);
+    write_database_directory_config(&freshclam_config, &missing_database);
+    context
+        .update_settings(json!({
+            "clamd_conf_path": clamd_config,
+            "freshclam_conf_path": freshclam_config,
+        }))
+        .expect("database configuration settings");
+
+    let baseline = scanner::dispatch(&context, "status", json!({})).expect("baseline status");
+    let baseline_files = baseline["database"]["files"]
+        .as_u64()
+        .expect("baseline database file count");
+    let baseline_newest = baseline["database"]["latest_modified_unix"].as_u64();
+    let fixture_newest = baseline_newest
+        .unwrap_or(1_800_000_222)
+        .max(1_800_000_222)
+        .checked_add(1)
+        .expect("fixture timestamp overflow");
+    let clamd_database = temp.path().join("clamd-database");
+    let freshclam_database = temp.path().join("freshclam-database");
+    fs::create_dir_all(&clamd_database).expect("clamd database directory");
+    fs::create_dir_all(&freshclam_database).expect("freshclam database directory");
+    let main = clamd_database.join("main.cld");
+    let bytecode = freshclam_database.join("bytecode.cud");
+    let daily = freshclam_database.join("daily.cvd");
+    fs::write(&main, b"main").expect("main database");
+    fs::write(&bytecode, b"bytecode").expect("bytecode database");
+    fs::write(&daily, b"daily").expect("daily database");
+    fs::write(freshclam_database.join("ignored.txt"), b"not a database").expect("ignored fixture");
+    set_modified_unix(&main, fixture_newest - 111);
+    set_modified_unix(&bytecode, fixture_newest - 22);
+    set_modified_unix(&daily, fixture_newest);
+    write_database_directory_config(&clamd_config, &clamd_database);
+    write_database_directory_config(&freshclam_config, &freshclam_database);
+
+    let status = scanner::dispatch(&context, "status", json!({})).expect("configured status");
+    let database = &status["database"];
+    assert_eq!(database["available"], true);
+    assert_eq!(status["database_available"], true);
+    assert_eq!(
+        database["files"],
+        baseline_files
+            .checked_add(3)
+            .expect("database count overflow")
+    );
+    assert_eq!(database["latest_modified_unix"], fixture_newest);
+    assert_eq!(
+        database["path"],
+        freshclam_database.to_string_lossy().as_ref()
+    );
 }
 
 #[test]
@@ -354,6 +480,249 @@ fn directly_selected_daemon_file_respects_pattern_exclusions() {
 
     assert_eq!(result["status"], "clean");
     assert_eq!(result["scanned_files"], 0);
+}
+
+#[test]
+fn daemon_long_paths_preserve_detections_and_progress_across_batch_and_stdin() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    let target = temp.path().join("scan");
+    let clean = target.join("ordinary.txt");
+    let excluded = target.join("ignored.infected");
+    fs::create_dir_all(&target).expect("scan directory");
+    fs::write(&clean, b"clean").expect("ordinary target");
+    fs::write(&excluded, b"INFECTED").expect("excluded target");
+    let boundary_1022 = file_with_path_length(&target.join("p1022"), 1022, false);
+    let boundary_1023 = file_with_path_length(&target.join("p1023"), 1023, false);
+    let boundary_1024 = file_with_path_length(&target.join("p1024"), 1024, false);
+    let longer = file_with_path_length(&target.join("p1500"), 1500, false);
+    let unicode = file_with_path_length(&target.join("unicode"), 1023, true);
+    assert!(unicode.to_str().expect("UTF-8 path").chars().count() < 1023);
+    let infected = [
+        &boundary_1022,
+        &boundary_1023,
+        &boundary_1024,
+        &longer,
+        &unicode,
+    ];
+    for path in &infected {
+        fs::write(path, b"INFECTED").expect("infected target");
+    }
+    context
+        .update_settings(json!({
+            "scan_backend": "daemon",
+            "exclusion_patterns": disabled_default_exclusions(),
+        }))
+        .expect("settings");
+    let _path = install_daemon_fixture(&temp);
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({
+            "id": "daemon-long-mixed",
+            "paths": [target],
+            "exclusions": [{"type": "pattern", "pattern": "*.infected", "enabled": true}],
+        }),
+    )
+    .expect("daemon scan result");
+
+    let expected_threats = infected
+        .iter()
+        .map(|path| path.to_string_lossy().into_owned())
+        .collect::<BTreeSet<_>>();
+    let actual_threats = result["threat_details"]
+        .as_array()
+        .expect("threat details")
+        .iter()
+        .map(|threat| {
+            threat["file_path"]
+                .as_str()
+                .expect("threat path")
+                .to_owned()
+        })
+        .collect::<BTreeSet<_>>();
+    assert_eq!(result["status"], "infected");
+    assert_eq!(result["scanned_files"], 6);
+    assert_eq!(result["infected_count"], 5);
+    assert_eq!(result["skipped_count"], 0);
+    assert_eq!(result["skipped_files"], json!([]));
+    assert!(result["error_message"].is_null());
+    assert_eq!(actual_threats, expected_threats);
+    assert_eq!(
+        result["threat_details"]
+            .as_array()
+            .expect("threat details")
+            .len(),
+        5
+    );
+
+    let events = events.lock().expect("event lock");
+    let progress = scan_progress(&events);
+    assert_eq!(progress.len(), 6);
+    assert_eq!(
+        progress
+            .iter()
+            .map(|event| event["files_scanned"].as_u64().expect("progress count"))
+            .collect::<Vec<_>>(),
+        vec![1, 2, 3, 4, 5, 6]
+    );
+    assert!(progress
+        .iter()
+        .all(|event| event["files_total"] == 6 && event["total_files"] == 6));
+    let mut expected_paths = expected_threats;
+    expected_paths.insert(clean.to_string_lossy().into_owned());
+    assert_eq!(progress_paths(&events), expected_paths);
+}
+
+#[test]
+fn daemon_all_long_paths_honor_force_stream_and_keep_original_identities() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    let target = temp.path().join("scan");
+    let clean = file_with_path_length(&target.join("clean"), 1023, false);
+    let infected = file_with_path_length(&target.join("infected"), 1500, false);
+    fs::write(&clean, b"clean").expect("clean target");
+    fs::write(&infected, b"INFECTED").expect("infected target");
+    context
+        .update_settings(json!({
+            "scan_backend": "daemon",
+            "exclusion_patterns": disabled_default_exclusions(),
+        }))
+        .expect("settings");
+    let mut environment = install_daemon_fixture(&temp);
+    environment.set("CLAMUI_FIXTURE_REQUIRE_STREAM", "1");
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "daemon-long-stream", "paths": [target], "force_stream": true}),
+    )
+    .expect("stream scan result");
+
+    assert_eq!(result["status"], "infected");
+    assert_eq!(result["scanned_files"], 2);
+    assert_eq!(result["infected_count"], 1);
+    assert_eq!(result["skipped_count"], 0);
+    assert_eq!(result["skipped_files"], json!([]));
+    assert!(result["error_message"].is_null());
+    assert_eq!(
+        result["threat_details"]
+            .as_array()
+            .expect("threat details")
+            .len(),
+        1
+    );
+    assert_eq!(
+        result["threat_details"][0]["file_path"],
+        infected.to_string_lossy().as_ref()
+    );
+    let events = events.lock().expect("event lock");
+    let progress = scan_progress(&events);
+    assert_eq!(progress.len(), 2);
+    assert_eq!(
+        progress
+            .iter()
+            .map(|event| event["files_scanned"].as_u64().expect("progress count"))
+            .collect::<Vec<_>>(),
+        vec![1, 2]
+    );
+    assert!(progress
+        .iter()
+        .all(|event| event["files_total"] == 2 && event["total_files"] == 2));
+    assert_eq!(
+        progress_paths(&events),
+        BTreeSet::from([
+            clean.to_string_lossy().into_owned(),
+            infected.to_string_lossy().into_owned(),
+        ])
+    );
+}
+
+#[test]
+fn daemon_long_path_open_failure_keeps_other_results_and_exact_skip() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    let target = temp.path().join("scan");
+    let safe = target.join("safe.txt");
+    let failed = file_with_path_length(&target.join("failed"), 1023, false);
+    let infected = file_with_path_length(&target.join("infected"), 1024, false);
+    fs::write(&safe, b"clean").expect("safe target");
+    fs::write(&failed, b"clean").expect("replaceable target");
+    fs::write(&infected, b"INFECTED").expect("infected target");
+    context
+        .update_settings(json!({
+            "scan_backend": "daemon",
+            "exclusion_patterns": disabled_default_exclusions(),
+        }))
+        .expect("settings");
+    let mut environment = install_daemon_fixture(&temp);
+    environment.set(
+        "CLAMUI_FIXTURE_REPLACE_PATH",
+        failed.as_os_str().to_os_string(),
+    );
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "daemon-long-open-failure", "paths": [target]}),
+    )
+    .expect("partial daemon scan result");
+
+    assert_eq!(result["status"], "infected");
+    assert_eq!(result["scanned_files"], 2);
+    assert_eq!(result["infected_count"], 1);
+    assert_eq!(
+        result["threat_details"]
+            .as_array()
+            .expect("threat details")
+            .len(),
+        1
+    );
+    assert_eq!(
+        result["threat_details"][0]["file_path"],
+        infected.to_string_lossy().as_ref()
+    );
+    assert_eq!(result["skipped_count"], 1);
+    assert_eq!(
+        result["skipped_files"],
+        json!([failed.to_string_lossy().as_ref()])
+    );
+    let events = events.lock().expect("event lock");
+    let progress = scan_progress(&events);
+    assert_eq!(progress.len(), 2);
+    assert_eq!(
+        progress
+            .iter()
+            .map(|event| event["files_scanned"].as_u64().expect("progress count"))
+            .collect::<Vec<_>>(),
+        vec![1, 2]
+    );
+    assert!(progress
+        .iter()
+        .all(|event| event["files_total"] == 3 && event["total_files"] == 3));
+    assert_eq!(
+        progress_paths(&events),
+        BTreeSet::from([
+            safe.to_string_lossy().into_owned(),
+            infected.to_string_lossy().into_owned(),
+        ])
+    );
 }
 
 #[test]

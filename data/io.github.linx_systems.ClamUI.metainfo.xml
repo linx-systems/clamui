@@ -100,6 +100,17 @@
     </keywords>
 
     <releases>
+        <release version="0.6.0" date="2026-11-11">
+            <description>
+                <p>ClamUI 0.6.0 adds Vietnamese and improves scan reliability and responsiveness.</p>
+                <ul>
+                    <li>Load history and quarantine more efficiently, and reduce scan progress overhead.</li>
+                    <li>Preserve complete findings and counts for large scans and handle long daemon scan paths.</li>
+                    <li>Improve trusted helper and host virus database detection and Flatpak Wayland startup.</li>
+                    <li>Reject VirusTotal uploads if the original pathname is substituted after lookup.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.5.1" date="2026-11-01">
             <description>
                 <p>ClamUI 0.5.1 fixes Flatpak privileged-helper installation and improves error reporting.</p>

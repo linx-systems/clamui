@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a problem with ClamUI.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues before reporting a bug. Report vulnerabilities [privately](https://github.com/linx-systems/clamui/security/advisories/new).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe what you expected and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the steps needed to reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include your ClamUI version, installation method, Linux distribution and version, architecture, desktop environment, and ClamAV version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: logs-or-screenshots
+    attributes:
+      label: Logs or screenshots
+      description: Include relevant error output or screenshots. Redact secrets and personal paths before sharing.
+    validations:
+      required: false

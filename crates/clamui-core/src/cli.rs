@@ -507,6 +507,7 @@ fn run_scan(ctx: &Context, args: &[String]) -> i32 {
         .unwrap_or(threats.len() as u64);
     let has_errors = scan_has_errors(&result);
     let cancelled = scan_is_cancelled(&result);
+    let infected = infected_count > 0 || scan_is_infected(&result);
 
     let quarantine_info = if quarantine && !threats.is_empty() {
         Some(quarantine_threats(ctx, &threats))
@@ -516,7 +517,7 @@ fn run_scan(ctx: &Context, args: &[String]) -> i32 {
 
     if json_output {
         let mut output = json!({
-            "status": if cancelled { "cancelled" } else if infected_count > 0 { "infected" } else if has_errors { "error" } else { "clean" },
+            "status": if cancelled { "cancelled" } else if infected { "infected" } else if has_errors { "error" } else { "clean" },
             "scanned_files": result["scanned_files"].as_u64().unwrap_or(0),
             "infected_count": infected_count,
             "duration_seconds": round_hundredths(duration),
@@ -550,12 +551,13 @@ fn run_scan(ctx: &Context, args: &[String]) -> i32 {
             &threats,
             quarantine_info.as_ref(),
             has_errors,
+            infected,
         );
     }
 
     if cancelled {
         130
-    } else if infected_count > 0 {
+    } else if infected {
         1
     } else if has_errors {
         2
@@ -637,6 +639,17 @@ fn collect_threats(result: &Value) -> Vec<Value> {
         .unwrap_or_default()
 }
 
+fn scan_is_infected(result: &Value) -> bool {
+    result["status"].as_str() == Some("infected")
+        || result["per_target_results"]
+            .as_array()
+            .is_some_and(|targets| {
+                targets
+                    .iter()
+                    .any(|target| target["status"].as_str() == Some("infected"))
+            })
+}
+
 fn scan_has_errors(result: &Value) -> bool {
     result["status"].as_str() == Some("error")
         || result["per_target_results"]
@@ -694,6 +707,7 @@ fn print_scan_text(
     threats: &[Value],
     quarantine_info: Option<&(u64, Vec<Value>)>,
     has_errors: bool,
+    infected: bool,
 ) {
     let count = result["scanned_files"].as_u64().unwrap_or(0);
     let count_display = count.to_string();
@@ -758,13 +772,21 @@ fn print_scan_text(
                 }
             }
         }
-    } else if has_errors {
-        println!("{}", tr(Some(ctx), "\nScan completed with errors:"));
-        for error in scan_errors(result) {
-            println!("  {}", sanitize_line(&error));
-        }
     } else {
-        println!("{}", tr(Some(ctx), "No threats found."));
+        if infected {
+            println!("{}", tr(Some(ctx), "Threats Detected"));
+            if let Some(warning) = result["warning_message"].as_str() {
+                println!("{}", sanitize_line(warning));
+            }
+        }
+        if has_errors {
+            println!("{}", tr(Some(ctx), "\nScan completed with errors:"));
+            for error in scan_errors(result) {
+                println!("  {}", sanitize_line(&error));
+            }
+        } else if !infected {
+            println!("{}", tr(Some(ctx), "No threats found."));
+        }
     }
 }
 

@@ -2,12 +2,17 @@ use crate::{AppResult, Context};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, TimeZone, Utc};
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
+use sha2::{Digest, Sha256};
 use std::{
+    collections::BTreeMap,
     fs,
     io::{Cursor, Write},
+    os::unix::fs::MetadataExt,
     path::{Component, Path, PathBuf},
     sync::LazyLock,
+    time::UNIX_EPOCH,
 };
 use uuid::Uuid;
 use zip::write::SimpleFileOptions;
@@ -20,6 +25,52 @@ const DEBUG_FILE: &str = "clamui.log";
 const MAX_HISTORY: usize = 10_000;
 const DEBUG_MAX_BYTES: u64 = 5 * 1024 * 1024;
 const DEBUG_BACKUPS: u64 = 3;
+
+const INDEX_VERSION: u64 = 2;
+
+#[derive(Clone, Deserialize, Serialize, PartialEq, Eq)]
+struct IndexedLogFile {
+    name: String,
+    length: u64,
+    modified_seconds: u64,
+    modified_nanoseconds: u32,
+    device: u64,
+    inode: u64,
+    changed_seconds: i64,
+    changed_nanoseconds: i64,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+struct IndexedLogEntry {
+    file: IndexedLogFile,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    timestamp: Option<String>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    log_type: Option<String>,
+    generated_timestamp: bool,
+}
+
+#[derive(Deserialize, Serialize)]
+struct LogIndex {
+    version: u64,
+    entries: Vec<IndexedLogEntry>,
+    checksum: String,
+}
+
+struct HashWriter(Sha256);
+
+impl Write for HashWriter {
+    fn write(&mut self, buffer: &[u8]) -> std::io::Result<usize> {
+        self.0.update(buffer);
+        Ok(buffer.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
 
 static FILES_SCANNED: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)(?:\b(\d+)\s*files?\s*scanned\b|\bscanned\s*:?\s*(\d+)\s*files?\b|\bfiles\s*:\s*(\d+)|\b(\d+)\s*files?\b)")
@@ -64,7 +115,7 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
         "clear" => clear(ctx),
         "export" => export(ctx, &args),
         "statistics" => statistics(ctx, &args),
-        "count" => Ok(json!({"total_entries": load_entries(ctx, &logs_dir(ctx))?.len()})),
+        "count" => Ok(json!({"total_entries": entry_count(ctx, &logs_dir(ctx))?})),
         "daemon" => daemon(ctx, &args),
         "debug_info" => debug_info(ctx),
         "debug_list" => debug_list(ctx),
@@ -202,10 +253,8 @@ pub fn write_debug(ctx: &Context, level: &str, target: &str, message: &str) -> A
 fn list(ctx: &Context, args: &Value) -> AppResult<Value> {
     let limit = args.get("limit").and_then(Value::as_u64).unwrap_or(100) as usize;
     let log_type = args.get("log_type").and_then(Value::as_str);
-    let entries = load_entries(ctx, &logs_dir(ctx))?
+    let entries = load_list_entries(ctx, &logs_dir(ctx), log_type, limit)?
         .into_iter()
-        .filter(|entry| log_type.is_none_or(|kind| entry["type"] == kind))
-        .take(limit)
         .map(public_entry)
         .collect::<Vec<_>>();
     Ok(Value::Array(entries))
@@ -318,39 +367,57 @@ fn statistics(ctx: &Context, args: &Value) -> AppResult<Value> {
         .take(MAX_HISTORY)
         .collect::<Vec<_>>();
     let now = Local::now();
-    let scans = all_scans
-        .iter()
-        .filter(|entry| {
-            parse_time(entry["timestamp"].as_str().unwrap_or_default())
-                .is_some_and(|time| period.is_none_or(|start| time >= start && time <= now))
-        })
-        .collect::<Vec<_>>();
-    let total = scans.len() as u64;
-    let files_scanned = scans.iter().map(|entry| scanned_files(entry)).sum::<u64>();
-    let threats_detected = scans.iter().map(|entry| threats(entry)).sum::<u64>();
-    let total_duration = scans
-        .iter()
-        .map(|entry| entry["duration"].as_f64().unwrap_or(0.0))
-        .sum::<f64>();
-    let clean_scans = scans
-        .iter()
-        .filter(|entry| entry["status"] == "clean")
-        .count() as u64;
-    let infected_scans = scans
-        .iter()
-        .filter(|entry| entry["status"] == "infected")
-        .count() as u64;
-    let error_scans = scans
-        .iter()
-        .filter(|entry| entry["status"] == "error")
-        .count() as u64;
-    let scheduled_scans = scans
-        .iter()
-        .filter(|entry| entry["scheduled"] == true)
-        .count() as u64;
+    let today = now.date_naive();
+    let mut trends = BTreeMap::<NaiveDate, (u64, u64)>::new();
+    let mut earliest_trend_date: Option<NaiveDate> = None;
+    let mut total = 0_u64;
+    let mut files_scanned = 0_u64;
+    let mut threats_detected = 0_u64;
+    let mut total_duration = 0.0;
+    let mut clean_scans = 0_u64;
+    let mut infected_scans = 0_u64;
+    let mut error_scans = 0_u64;
+    let mut scheduled_scans = 0_u64;
+    let mut first_scan_time = None;
+
+    for (position, entry) in all_scans.iter().enumerate() {
+        let Some(time) = parse_time(entry["timestamp"].as_str().unwrap_or_default()) else {
+            continue;
+        };
+        if position == 0 {
+            first_scan_time = Some(time);
+        }
+
+        let threat_count = threats(entry);
+        let date = time.date_naive();
+        if date <= today {
+            let bucket = trends.entry(date).or_default();
+            bucket.0 += 1;
+            bucket.1 += threat_count;
+            earliest_trend_date =
+                Some(earliest_trend_date.map_or(date, |earliest| earliest.min(date)));
+        }
+        if !period.is_none_or(|start| time >= start && time <= now) {
+            continue;
+        }
+        total += 1;
+        files_scanned += scanned_files(entry);
+        threats_detected += threat_count;
+        total_duration += entry["duration"].as_f64().unwrap_or(0.0);
+        match entry["status"].as_str() {
+            Some("clean") => clean_scans += 1,
+            Some("infected") => infected_scans += 1,
+            Some("error") => error_scans += 1,
+            _ => {}
+        }
+        if entry["scheduled"] == true {
+            scheduled_scans += 1;
+        }
+    }
+
     let definition = args.get("last_definition_update").and_then(Value::as_str);
     let last_scan = all_scans.first().cloned().unwrap_or(Value::Null);
-    let protection = protection_status(all_scans.first(), definition, now);
+    let protection = protection_status(all_scans.first(), first_scan_time, definition, now);
     Ok(json!({
         "timeframe": timeframe,
         "total_scans": total,
@@ -365,7 +432,7 @@ fn statistics(ctx: &Context, args: &Value) -> AppResult<Value> {
         "manual_scans": total - scheduled_scans,
         "start_date": period.map(|start| start.to_rfc3339()),
         "end_date": now.to_rfc3339(),
-        "trends": trend_data(&all_scans, timeframe, now),
+        "trends": trend_data(&trends, earliest_trend_date, timeframe, now),
         "protection_status": protection,
         "last_scan": last_scan,
     }))
@@ -554,25 +621,59 @@ fn load_entries(ctx: &Context, dir: &Path) -> AppResult<Vec<Value>> {
         return Ok(Vec::new());
     }
     migrate_logs(ctx, dir)?;
-    let mut entries = Vec::new();
-    for entry in fs::read_dir(dir).map_err(|error| format!("reading logs: {error}"))? {
-        let path = entry.map_err(|error| error.to_string())?.path();
-        if path
-            .extension()
-            .is_some_and(|extension| extension == "json")
-            && path.file_name().is_some_and(|name| name != INDEX_FILE)
-        {
-            if let Ok(value) = read_entry(&path) {
-                entries.push(value);
-            }
+    if let Some(index) = load_index(dir)? {
+        if let Some(entries) = read_indexed_entries(dir, &index) {
+            return Ok(entries);
         }
     }
-    entries.sort_by(|left, right| right["timestamp"].as_str().cmp(&left["timestamp"].as_str()));
-    let _ = rebuild_index(dir);
+    let (entries, index) = scan_entries(dir)?;
+    if let Some(index) = index {
+        let _ = write_index(dir, &index);
+    }
     Ok(entries)
 }
 
+fn entry_count(ctx: &Context, dir: &Path) -> AppResult<usize> {
+    if !dir.exists() {
+        return Ok(0);
+    }
+    migrate_logs(ctx, dir)?;
+    if let Some(index) = load_index(dir)? {
+        return Ok(index
+            .iter()
+            .filter(|entry| indexed_entry_is_usable(entry))
+            .count());
+    }
+    Ok(load_entries(ctx, dir)?.len())
+}
+
+fn load_list_entries(
+    ctx: &Context,
+    dir: &Path,
+    log_type: Option<&str>,
+    limit: usize,
+) -> AppResult<Vec<Value>> {
+    if !dir.exists() {
+        return Ok(Vec::new());
+    }
+    migrate_logs(ctx, dir)?;
+    if let Some(index) = load_index(dir)? {
+        if let Some(entries) = read_indexed_page(dir, &index, log_type, limit) {
+            return Ok(entries);
+        }
+    }
+    Ok(load_entries(ctx, dir)?
+        .into_iter()
+        .filter(|entry| log_type.is_none_or(|kind| entry["type"] == kind))
+        .take(limit)
+        .collect())
+}
+
 fn read_entry(path: &Path) -> AppResult<Value> {
+    read_entry_with_timestamp_source(path).map(|(entry, _)| entry)
+}
+
+fn read_entry_with_timestamp_source(path: &Path) -> AppResult<(Value, bool)> {
     let parsed: Value =
         serde_json::from_slice(&fs::read(path).map_err(|error| format!("reading log: {error}"))?)
             .map_err(|error| format!("invalid log JSON: {error}"))?;
@@ -584,6 +685,11 @@ fn read_entry(path: &Path) -> AppResult<Value> {
         .and_then(Value::as_str)
         .filter(|id| valid_id(id))
         .ok_or_else(|| "invalid log identifier".to_owned())?;
+    let timestamp = object
+        .get("timestamp")
+        .and_then(Value::as_str)
+        .filter(|value| parse_time(value).is_some());
+    let generated_timestamp = timestamp.is_none();
     let log_type = private_line(string_field(object, "type", "unknown"));
     let scanned_files = (log_type == "scan")
         .then(|| object.get("scanned_files").and_then(Value::as_u64))
@@ -593,7 +699,7 @@ fn read_entry(path: &Path) -> AppResult<Value> {
         .flatten();
     let mut entry = json!({
         "id": id,
-        "timestamp": object.get("timestamp").and_then(Value::as_str).filter(|value| parse_time(value).is_some()).map(ToOwned::to_owned).unwrap_or_else(now_iso),
+        "timestamp": timestamp.map(ToOwned::to_owned).unwrap_or_else(now_iso),
         "type": log_type,
         "status": private_line(string_field(object, "status", "unknown")),
         "summary": private_line(string_field(object, "summary", "")),
@@ -608,7 +714,7 @@ fn read_entry(path: &Path) -> AppResult<Value> {
     if let Some(infected_count) = infected_count {
         entry["infected_count"] = json!(infected_count);
     }
-    Ok(entry)
+    Ok((entry, generated_timestamp))
 }
 
 fn migrate_logs(ctx: &Context, dir: &Path) -> AppResult<()> {
@@ -656,35 +762,263 @@ fn migrate_logs(ctx: &Context, dir: &Path) -> AppResult<()> {
     Ok(())
 }
 
-fn rebuild_index(dir: &Path) -> AppResult<()> {
-    let entries = load_index_entries(dir)?;
-    write_index(dir, &entries)
+struct LogFile {
+    path: PathBuf,
+    index: Option<IndexedLogFile>,
 }
 
-fn load_index_entries(dir: &Path) -> AppResult<Vec<Value>> {
-    let mut entries = Vec::new();
-    if !dir.exists() {
-        return Ok(entries);
+fn rebuild_index(dir: &Path) -> AppResult<()> {
+    let (_, index) = scan_entries(dir)?;
+    if let Some(index) = index {
+        write_index(dir, &index)?;
     }
-    for entry in fs::read_dir(dir).map_err(|error| error.to_string())? {
-        let path = entry.map_err(|error| error.to_string())?.path();
-        if path
-            .extension()
-            .is_some_and(|extension| extension == "json")
-            && path.file_name().is_some_and(|name| name != INDEX_FILE)
-        {
-            if let Ok(value) = read_entry(&path) {
-                entries.push(json!({"id": value["id"], "timestamp": value["timestamp"], "type": value["type"]}));
-            }
+    Ok(())
+}
+
+fn scan_entries(dir: &Path) -> AppResult<(Vec<Value>, Option<Vec<IndexedLogEntry>>)> {
+    let files = log_files(dir)?;
+    let cacheable = files.iter().all(|file| file.index.is_some());
+    let mut entries = Vec::new();
+    let mut index = cacheable.then(|| Vec::with_capacity(files.len()));
+    for file in files {
+        let value = read_entry_with_timestamp_source(&file.path).ok();
+        let generated_timestamp = value
+            .as_ref()
+            .is_some_and(|(_, generated_timestamp)| *generated_timestamp);
+        if let (Some(index), Some(source)) = (&mut index, file.index) {
+            index.push(indexed_entry(
+                source,
+                value.as_ref().map(|(entry, _)| entry),
+                generated_timestamp,
+            ));
+        }
+        if let Some((value, _)) = value {
+            entries.push(value);
         }
     }
-    Ok(entries)
+    entries.sort_by(|left, right| right["timestamp"].as_str().cmp(&left["timestamp"].as_str()));
+    Ok((entries, index))
 }
 
-fn write_index(dir: &Path, entries: &[Value]) -> AppResult<()> {
+fn log_files(dir: &Path) -> AppResult<Vec<LogFile>> {
+    let mut files = Vec::new();
+    for entry in fs::read_dir(dir).map_err(|error| format!("reading logs: {error}"))? {
+        let path = entry.map_err(|error| error.to_string())?.path();
+        if !path
+            .extension()
+            .is_some_and(|extension| extension == "json")
+            || path.file_name().is_some_and(|name| name == INDEX_FILE)
+        {
+            continue;
+        }
+        let index = match fs::metadata(&path) {
+            Ok(metadata) if metadata.is_file() => indexed_file(&path, &metadata),
+            Ok(_) => continue,
+            Err(_) => None,
+        };
+        files.push(LogFile { path, index });
+    }
+    Ok(files)
+}
+
+fn indexed_file(path: &Path, metadata: &fs::Metadata) -> Option<IndexedLogFile> {
+    let name = path.file_name()?.to_str()?.to_owned();
+    if !valid_index_file_name(&name) {
+        return None;
+    }
+    let modified = metadata.modified().ok()?.duration_since(UNIX_EPOCH).ok()?;
+    Some(IndexedLogFile {
+        name,
+        length: metadata.len(),
+        modified_seconds: modified.as_secs(),
+        modified_nanoseconds: modified.subsec_nanos(),
+        device: metadata.dev(),
+        inode: metadata.ino(),
+        changed_seconds: metadata.ctime(),
+        changed_nanoseconds: metadata.ctime_nsec(),
+    })
+}
+
+fn valid_index_file_name(name: &str) -> bool {
+    let mut components = Path::new(name).components();
+    matches!(components.next(), Some(Component::Normal(_)))
+        && components.next().is_none()
+        && name != INDEX_FILE
+        && Path::new(name)
+            .extension()
+            .is_some_and(|extension| extension == "json")
+}
+
+fn indexed_entry(
+    file: IndexedLogFile,
+    value: Option<&Value>,
+    generated_timestamp: bool,
+) -> IndexedLogEntry {
+    IndexedLogEntry {
+        file,
+        id: value
+            .and_then(|entry| entry["id"].as_str())
+            .map(ToOwned::to_owned),
+        timestamp: value
+            .and_then(|entry| entry["timestamp"].as_str())
+            .map(ToOwned::to_owned),
+        log_type: value
+            .and_then(|entry| entry["type"].as_str())
+            .map(ToOwned::to_owned),
+        generated_timestamp,
+    }
+}
+
+fn load_index(dir: &Path) -> AppResult<Option<Vec<IndexedLogEntry>>> {
+    let index = match fs::read(dir.join(INDEX_FILE)) {
+        Ok(bytes) => serde_json::from_slice::<LogIndex>(&bytes).ok(),
+        Err(_) => None,
+    };
+    let Some(index) = index else {
+        return Ok(None);
+    };
+    if index.version != INDEX_VERSION
+        || index.checksum != index_checksum(index.version, &index.entries)?
+        || index.entries.iter().any(|entry| {
+            !valid_index_file_name(&entry.file.name) || !indexed_entry_is_structurally_valid(entry)
+        })
+    {
+        return Ok(None);
+    }
+
+    let files = log_files(dir)?;
+    let Some(mut files) = files
+        .into_iter()
+        .map(|file| file.index)
+        .collect::<Option<Vec<_>>>()
+    else {
+        return Ok(None);
+    };
+    files.sort_by(|left, right| left.name.cmp(&right.name));
+    let mut indexed_files = index
+        .entries
+        .iter()
+        .map(|entry| entry.file.clone())
+        .collect::<Vec<_>>();
+    indexed_files.sort_by(|left, right| left.name.cmp(&right.name));
+    if files != indexed_files {
+        return Ok(None);
+    }
+    Ok(Some(index.entries))
+}
+
+fn indexed_entry_is_structurally_valid(entry: &IndexedLogEntry) -> bool {
+    match (&entry.id, &entry.timestamp, &entry.log_type) {
+        (None, None, None) => true,
+        (Some(id), Some(timestamp), Some(log_type)) => {
+            valid_id(id)
+                && parse_time(timestamp).is_some()
+                && private_line(log_type) == log_type.as_str()
+        }
+        _ => false,
+    }
+}
+
+fn index_checksum(version: u64, entries: &[IndexedLogEntry]) -> AppResult<String> {
+    let mut writer = HashWriter(Sha256::new());
+    serde_json::to_writer(&mut writer, &(version, entries)).map_err(|error| error.to_string())?;
+    Ok(hex::encode(writer.0.finalize()))
+}
+
+fn indexed_entry_is_usable(entry: &IndexedLogEntry) -> bool {
+    entry.id.is_some() && entry.timestamp.is_some() && entry.log_type.is_some()
+}
+
+fn read_indexed_entries(dir: &Path, index: &[IndexedLogEntry]) -> Option<Vec<Value>> {
+    let mut entries = Vec::new();
+    for entry in index.iter().filter(|entry| indexed_entry_is_usable(entry)) {
+        let (value, generated_timestamp) =
+            read_entry_with_timestamp_source(&dir.join(&entry.file.name)).ok()?;
+        if !matches_index_entry(&value, entry, generated_timestamp) {
+            return None;
+        }
+        entries.push(value);
+    }
+    entries.sort_by(|left, right| right["timestamp"].as_str().cmp(&left["timestamp"].as_str()));
+    Some(entries)
+}
+
+fn read_indexed_page(
+    dir: &Path,
+    index: &[IndexedLogEntry],
+    log_type: Option<&str>,
+    limit: usize,
+) -> Option<Vec<Value>> {
+    if limit == 0 {
+        return Some(Vec::new());
+    }
+
+    let mut candidates = Vec::new();
+    for entry in index.iter().filter(|entry| indexed_entry_is_usable(entry)) {
+        let value = if entry.generated_timestamp {
+            let (value, generated_timestamp) =
+                read_entry_with_timestamp_source(&dir.join(&entry.file.name)).ok()?;
+            if !matches_index_entry(&value, entry, generated_timestamp) {
+                return None;
+            }
+            Some(value)
+        } else {
+            None
+        };
+        candidates.push((entry, value));
+    }
+    candidates.sort_by(|(left, left_value), (right, right_value)| {
+        let left_timestamp = left_value
+            .as_ref()
+            .and_then(|entry| entry["timestamp"].as_str())
+            .or(left.timestamp.as_deref());
+        let right_timestamp = right_value
+            .as_ref()
+            .and_then(|entry| entry["timestamp"].as_str())
+            .or(right.timestamp.as_deref());
+        right_timestamp.cmp(&left_timestamp)
+    });
+
+    let mut entries = Vec::with_capacity(limit.min(candidates.len()));
+    for (entry, value) in candidates
+        .into_iter()
+        .filter(|(entry, _)| log_type.is_none_or(|kind| entry.log_type.as_deref() == Some(kind)))
+    {
+        let value = match value {
+            Some(value) => value,
+            None => {
+                let (value, generated_timestamp) =
+                    read_entry_with_timestamp_source(&dir.join(&entry.file.name)).ok()?;
+                if !matches_index_entry(&value, entry, generated_timestamp) {
+                    return None;
+                }
+                value
+            }
+        };
+        entries.push(value);
+        if entries.len() == limit {
+            break;
+        }
+    }
+    Some(entries)
+}
+
+fn matches_index_entry(value: &Value, index: &IndexedLogEntry, generated_timestamp: bool) -> bool {
+    value["id"].as_str() == index.id.as_deref()
+        && value["type"].as_str() == index.log_type.as_deref()
+        && generated_timestamp == index.generated_timestamp
+        && (generated_timestamp || value["timestamp"].as_str() == index.timestamp.as_deref())
+}
+
+fn write_index(dir: &Path, entries: &[IndexedLogEntry]) -> AppResult<()> {
     fs::create_dir_all(dir).map_err(|error| error.to_string())?;
-    let bytes = serde_json::to_vec_pretty(&json!({"version": 1, "entries": entries}))
-        .map_err(|error| error.to_string())?;
+    let checksum = index_checksum(INDEX_VERSION, entries)?;
+    let bytes = serde_json::to_vec_pretty(&LogIndex {
+        version: INDEX_VERSION,
+        entries: entries.to_vec(),
+        checksum,
+    })
+    .map_err(|error| error.to_string())?;
     crate::common::atomic_write(&dir.join(INDEX_FILE), &bytes, 0o600)
 }
 
@@ -871,20 +1205,19 @@ fn timeframe(value: &str) -> AppResult<(&'static str, Option<DateTime<Local>>)> 
     }
 }
 
-fn trend_data(scans: &[Value], timeframe: &str, now: DateTime<Local>) -> Vec<Value> {
+fn trend_data(
+    scans: &BTreeMap<NaiveDate, (u64, u64)>,
+    earliest: Option<NaiveDate>,
+    timeframe: &str,
+    now: DateTime<Local>,
+) -> Vec<Value> {
     let today = now.date_naive();
     let (start, days_per_bucket) = match timeframe {
         "day" => (today - Duration::days(1), 1),
         "week" => (today - Duration::days(6), 1),
         "month" => (today - Duration::days(29), 3),
         _ => {
-            let earliest = scans
-                .iter()
-                .filter_map(|entry| parse_time(entry["timestamp"].as_str().unwrap_or_default()))
-                .map(|time| time.date_naive())
-                .filter(|date| *date <= today)
-                .min()
-                .unwrap_or(today);
+            let earliest = earliest.unwrap_or(today);
             let inclusive_days = (today - earliest).num_days() + 1;
             (earliest, (inclusive_days + 11) / 12)
         }
@@ -893,18 +1226,16 @@ fn trend_data(scans: &[Value], timeframe: &str, now: DateTime<Local>) -> Vec<Val
     let mut trends = Vec::new();
     while bucket <= today {
         let end = (bucket + Duration::days(days_per_bucket)).min(today + Duration::days(1));
-        let selected = scans
-            .iter()
-            .filter(|entry| {
-                parse_time(entry["timestamp"].as_str().unwrap_or_default())
-                    .map(|time| time.date_naive())
-                    .is_some_and(|date| date >= bucket && date < end)
-            })
-            .collect::<Vec<_>>();
+        let mut scan_count = 0_u64;
+        let mut threat_count = 0_u64;
+        for (_, (count, threats)) in scans.range(bucket..end) {
+            scan_count += *count;
+            threat_count += *threats;
+        }
         trends.push(json!({
             "date": bucket.format("%Y-%m-%d").to_string(),
-            "scans": selected.len(),
-            "threats": selected.iter().map(|entry| threats(entry)).sum::<u64>(),
+            "scans": scan_count,
+            "threats": threat_count,
         }));
         bucket = end;
     }
@@ -912,13 +1243,12 @@ fn trend_data(scans: &[Value], timeframe: &str, now: DateTime<Local>) -> Vec<Val
 }
 fn protection_status(
     last: Option<&Value>,
+    last_scan_time: Option<DateTime<Local>>,
     definition: Option<&str>,
     now: DateTime<Local>,
 ) -> Value {
     let last_scan_timestamp = last.and_then(|entry| entry["timestamp"].as_str());
-    let last_scan_age_hours = last_scan_timestamp
-        .and_then(parse_time)
-        .map(|time| (now - time).num_seconds() as f64 / 3600.0);
+    let last_scan_age_hours = last_scan_time.map(|time| (now - time).num_seconds() as f64 / 3600.0);
     let definition_age_hours = definition
         .and_then(parse_time)
         .map(|time| (now - time).num_seconds() as f64 / 3600.0);

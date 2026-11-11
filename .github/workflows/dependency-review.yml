@@ -3,6 +3,17 @@ name: Dependency Review
 on:
   pull_request:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: Base commit SHA for dependency comparison
+        required: true
+        type: string
+      head_ref:
+        description: Head commit SHA for dependency comparison
+        required: true
+        type: string
+
 
 jobs:
   dependency-review:
@@ -10,8 +21,18 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Verify dispatched commit
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EXPECTED_SHA: ${{ inputs.head_ref }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test -n "$EXPECTED_SHA" && test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
       - name: Checkout repository
         uses: actions/checkout@v7
 
       - name: Dependency review
         uses: actions/dependency-review-action@v5
+        with:
+          base-ref: ${{ inputs.base_ref }}
+          head-ref: ${{ inputs.head_ref }}

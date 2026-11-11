@@ -10,15 +10,16 @@ add-build-extensions:
     version: "26.08"
     directory: lib/sdk/rust-stable
 command: clamui
-# This checkout recipe is intentionally the source of truth while the Rust/Tauri
-# migration has no release tag. Generate a release manifest with
-# scripts/generate-flatpak-sources.sh --release-url URL --release-commit SHA
-# only after a published source commit and its generated locked sources exist.
+# This checkout recipe builds the local source tree. Generate an immutable
+# release manifest with scripts/generate-flatpak-sources.sh --release-url URL
+# --release-commit SHA after the release source commit exists.
 finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  # Work around upstream WebKitGTK Wayland dmabuf protocol errors (#282).
+  - --env=WEBKIT_DISABLE_DMABUF_RENDERER=1
   - --share=network
 
 
@@ -85,6 +86,6 @@ modules:
         path: ..
       # Generated only from an actual Cargo.lock; never hand-edit checksums.
       - cargo-sources.json
-      # Generated only from Bun's exported desktop/yarn.lock. It includes the
-      # x86_64 and aarch64 optional esbuild/Rollup packages used by Vite.
+      # Generated only from Bun's exported desktop/yarn.lock, including native
+      # frontend packages for both x86_64 and aarch64.
       - bun-sources.json

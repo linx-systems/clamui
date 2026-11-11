@@ -3,6 +3,7 @@ import { notify, onEvent, request } from "../api";
 import { Icon } from "../Icon";
 import { _, ngettext } from "../i18n";
 import { Modal } from "../Modal";
+import { useActivityRefresh } from "./useActivityRefresh";
 type QuarantineEntry = {
   id: number;
   originalPath: string;
@@ -14,7 +15,14 @@ type QuarantineEntry = {
   originalPermissions: number;
 };
 
-type QuarantineList = { entries: QuarantineEntry[]; totalSize: number; entryCount: number };
+type QuarantineList = {
+  entries: QuarantineEntry[];
+  totalSize: number;
+  entryCount: number;
+  matchedCount: number;
+  cursor: string | null;
+  nextCursor: string | null;
+};
 type QuarantineResult = { status: string; errorMessage?: string };
 
 const PAGE_SIZE = 20;
@@ -44,13 +52,16 @@ function parseList(value: unknown): QuarantineList | null {
   const rawEntries = fieldValue(value, "entries", "entries");
   const totalSize = fieldValue(value, "total_size", "totalSize");
   const entryCount = fieldValue(value, "entry_count", "entryCount");
-  if (!Array.isArray(rawEntries) || typeof totalSize !== "number" || typeof entryCount !== "number") return null;
+  const matchedCount = fieldValue(value, "matched_count", "matchedCount");
+  const cursor = fieldValue(value, "cursor", "cursor");
+  const nextCursor = fieldValue(value, "next_cursor", "nextCursor");
+  if (!Array.isArray(rawEntries) || rawEntries.length > PAGE_SIZE || typeof totalSize !== "number" || typeof entryCount !== "number" || typeof matchedCount !== "number" || (cursor !== null && typeof cursor !== "string") || (nextCursor !== null && typeof nextCursor !== "string")) return null;
   const entries = rawEntries.flatMap((entry) => {
     const parsed = parseEntry(entry);
     return parsed ? [parsed] : [];
   });
   if (entries.length !== rawEntries.length) return null;
-  return { entries, totalSize, entryCount };
+  return { entries, totalSize, entryCount, matchedCount, cursor, nextCursor };
 }
 
 function parseResult(value: unknown): QuarantineResult | null {
@@ -77,66 +88,134 @@ function formatDate(value: string): string {
 }
 
 
-export default function Quarantine() {
+export default function Quarantine({ active }: { active: boolean }) {
   const [data, setData] = useState<QuarantineList | null>(null);
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [cursorHistory, setCursorHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [showAll, setShowAll] = useState(false);
   const [banner, setBanner] = useState<{ message: string; type: "success" | "warning" | "error" } | null>(null);
   const [confirmation, setConfirmation] = useState<{ action: "restore" | "delete"; entry: QuarantineEntry } | null>(null);
+  const activeRef = useRef(active);
+  const queryRef = useRef({ search: "", locale: Intl.DateTimeFormat().resolvedOptions().locale });
+  const responseGeneration = useRef(0);
   const lastRefresh = useRef(0);
+  activeRef.current = active;
 
-  const loadEntries = useCallback(async (enforceDebounce = false) => {
-    if (enforceDebounce && Date.now() - lastRefresh.current < 1000) return;
+  const invalidateView = useCallback(() => {
+    responseGeneration.current += 1;
+    setData(null);
+    setCursorHistory([]);
+    setLoading(true);
+  }, []);
+
+  const loadEntries = useCallback(async () => {
+    const generation = ++responseGeneration.current;
+    const { search: searchTerm, locale } = queryRef.current;
+    setData(null);
+    setCursorHistory([]);
     setLoading(true);
     try {
-      const result = await request<unknown>("quarantine.list");
+      const result = await request<unknown>("quarantine.list", {
+        schema: "ui",
+        limit: PAGE_SIZE,
+        search: searchTerm,
+        search_locale: locale,
+        cursor: null,
+      });
       const parsed = parseList(result);
       if (!parsed) throw new Error(_("ClamUI returned invalid quarantine data."));
+      if (generation !== responseGeneration.current) return;
       setData(parsed);
+      setCursorHistory(parsed.cursor === null ? [] : [parsed.cursor]);
       lastRefresh.current = Date.now();
-      setPage(1);
-      setShowAll(false);
     } catch (error) {
+      if (generation !== responseGeneration.current) return;
       const message = readableError(error);
       const failure = _("Failed to load quarantine: {error}", { error: message });
       setBanner({ message: failure, type: "error" });
       notify(failure, "error");
     } finally {
-      setLoading(false);
+      if (generation === responseGeneration.current) setLoading(false);
     }
   }, []);
 
-  useEffect(() => { void loadEntries(); }, [loadEntries]);
+  const requestEntriesRefresh = useActivityRefresh(active, loadEntries);
+
+  const refreshEntries = useCallback((enforceDebounce = false, waitForCompletion = true): Promise<void> => {
+    if (enforceDebounce && Date.now() - lastRefresh.current < 1000) return Promise.resolve();
+    if (activeRef.current) invalidateView();
+    return requestEntriesRefresh(waitForCompletion);
+  }, [invalidateView, requestEntriesRefresh]);
+
+  const loadPage = useCallback((cursor: string, historyBeforePage: string[]) => {
+    const generation = ++responseGeneration.current;
+    const { search: searchTerm, locale } = queryRef.current;
+    setLoading(true);
+    void (async () => {
+      try {
+        const result = await request<unknown>("quarantine.list", {
+          schema: "ui",
+          limit: PAGE_SIZE,
+          search: searchTerm,
+          search_locale: locale,
+          cursor,
+        });
+        const parsed = parseList(result);
+        if (!parsed) throw new Error(_("ClamUI returned invalid quarantine data."));
+        if (generation !== responseGeneration.current) return;
+        setData(parsed);
+        setCursorHistory(parsed.cursor === null ? [] : [...historyBeforePage, parsed.cursor]);
+      } catch (error) {
+        if (generation !== responseGeneration.current) return;
+        const message = readableError(error);
+        const failure = _("Failed to load quarantine: {error}", { error: message });
+        setBanner({ message: failure, type: "error" });
+        notify(failure, "error");
+      } finally {
+        if (generation === responseGeneration.current) setLoading(false);
+      }
+    })();
+  }, []);
+
+  const showNextPage = useCallback(() => {
+    if (loading || !data?.nextCursor) return;
+    loadPage(data.nextCursor, cursorHistory);
+  }, [cursorHistory, data, loadPage, loading]);
+
+  const showPreviousPage = useCallback(() => {
+    if (loading || cursorHistory.length < 2) return;
+    const previousCursor = cursorHistory[cursorHistory.length - 2];
+    if (!previousCursor) return;
+    loadPage(previousCursor, cursorHistory.slice(0, -2));
+  }, [cursorHistory, loadPage, loading]);
 
   useEffect(() => {
-    let active = true;
+    let listening = true;
     let dispose: (() => void) | undefined;
     void onEvent((event) => {
-      if (event.event === "scan-complete") void loadEntries();
+      if (event.event === "scan-complete") void refreshEntries(false, false);
     }).then((unlisten) => {
-      if (active) dispose = unlisten;
+      if (listening) dispose = unlisten;
       else unlisten();
     }).catch((listenError: unknown) => notify(_("Quarantine updates are unavailable: {error}", { error: readableError(listenError) }), "warning"));
     return () => {
-      active = false;
+      listening = false;
       dispose?.();
     };
-  }, [loadEntries]);
+  }, [refreshEntries]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setAppliedSearch(search.trim().toLocaleLowerCase());
-      setPage(1);
-      setShowAll(false);
+      const searchTerm = search.trim();
+      if (searchTerm === queryRef.current.search) return;
+      queryRef.current = { search: searchTerm, locale: Intl.DateTimeFormat().resolvedOptions().locale };
+      setAppliedSearch(searchTerm);
+      invalidateView();
+      void requestEntriesRefresh();
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [search]);
-
-  const filtered = data?.entries.filter((entry) => !appliedSearch || entry.threatName.toLocaleLowerCase().includes(appliedSearch) || entry.originalPath.toLocaleLowerCase().includes(appliedSearch)) ?? [];
-  const displayed = showAll ? filtered : filtered.slice(0, page * PAGE_SIZE);
+  }, [invalidateView, requestEntriesRefresh, search]);
 
   const cleanupOld = async () => {
     try {
@@ -155,7 +234,7 @@ export default function Quarantine() {
           : _("No old entries found to remove."),
         type: removed > 0 ? "success" : "warning",
       });
-      if (removed > 0) await loadEntries();
+      if (removed > 0) await refreshEntries();
     } catch (error) {
       const message = readableError(error);
       setBanner({ message: _("Failed to clear old items: {error}", { error: message }), type: "error" });
@@ -173,12 +252,12 @@ export default function Quarantine() {
       setConfirmation(null);
       if (result.status === "success") {
         setBanner({ message: action === "restore" ? _("File restored successfully.") : _("File deleted successfully."), type: "success" });
-        await loadEntries();
+        await refreshEntries();
         return;
       }
       if (result.status === "database_error") {
         setBanner({ message: result.errorMessage ?? (action === "restore" ? _("File restored, but the database entry could not be removed.") : _("File deleted, but the database entry could not be removed.")), type: "warning" });
-        await loadEntries();
+        await refreshEntries();
         return;
       }
       setBanner({ message: result.errorMessage ?? (action === "restore" ? _("Failed to restore quarantined file ({status}).", { status: result.status }) : _("Failed to delete quarantined file ({status}).", { status: result.status })), type: "error" });
@@ -206,7 +285,7 @@ export default function Quarantine() {
       <dl className="grouped-list summary-list">
         <div className="group-row"><dt>{_("Total Size")}</dt><dd>{data ? formatFileSize(data.totalSize) : _("Calculating…")}</dd></div>
         <div className="group-row"><dt>{_("Items")}</dt><dd>{appliedSearch
-          ? ngettext("{filtered} of {total} item", "{filtered} of {total} items", data?.entryCount ?? 0, { filtered: filtered.length, total: data?.entryCount ?? 0 })
+          ? ngettext("{filtered} of {total} item", "{filtered} of {total} items", data?.entryCount ?? 0, { filtered: data?.matchedCount ?? 0, total: data?.entryCount ?? 0 })
           : ngettext("{count} item", "{count} items", data?.entryCount ?? 0, { count: data?.entryCount ?? 0 })}</dd></div>
       </dl>
     </section>
@@ -214,12 +293,12 @@ export default function Quarantine() {
       <header className="section-header">
         <div><h2 id="files-heading">{_("Quarantined Files")}</h2><p>{_("Detected threats isolated from your system.")}</p></div>
         <div className="actions">
-          <button className="button" type="button" onClick={() => void loadEntries(true)} disabled={loading}><Icon name="refresh" />{_("Refresh")}</button>
+          <button className="button" type="button" onClick={() => void refreshEntries(true)} disabled={loading}><Icon name="refresh" />{_("Refresh")}</button>
           <button className="button" type="button" onClick={() => void cleanupOld()} disabled={!data?.entryCount}>{_("Clear Old Items")}</button>
         </div>
       </header>
       <label className="search-field">{_("Search by threat name or path")}<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={_("Search by threat name or path…")} /></label>
-      {loading ? <p className="muted">{_("Loading quarantine entries…")}</p> : !data?.entries.length ? <p className="empty-state">{_("No Quarantined Files. Detected threats will be isolated here for review.")}</p> : filtered.length === 0 ? <p className="empty-state">{_("No matching entries. Try a different search term.")}</p> : <div className="grouped-list quarantine-list" role="list">{displayed.map((entry) => <article className="group-row quarantine-entry" role="listitem" key={entry.id}>
+      {loading ? <p className="muted">{_("Loading quarantine entries…")}</p> : !data || data.entryCount === 0 ? <p className="empty-state">{_("No Quarantined Files. Detected threats will be isolated here for review.")}</p> : appliedSearch && data.matchedCount === 0 ? <p className="empty-state">{_("No matching entries. Try a different search term.")}</p> : data.entries.length === 0 ? <p className="empty-state">{_("No entries on this page.")}</p> : <div className="grouped-list quarantine-list" role="list">{data.entries.map((entry) => <article className="group-row quarantine-entry" role="listitem" key={entry.id}>
         <div className="quarantine-entry-content row-copy">
           <header><h3 className="row-title">{entry.threatName || _("Unknown Threat")}</h3><span className="status-badge warning">{_("Quarantined")}</span></header>
           <p className="path-value">{_("Path")}: {entry.originalPath}</p>
@@ -227,7 +306,7 @@ export default function Quarantine() {
         </div>
         <div className="actions"><button className="button" type="button" onClick={() => setConfirmation({ action: "restore", entry })}>{_("Restore")}</button><button type="button" className="button destructive" onClick={() => setConfirmation({ action: "delete", entry })}>{_("Delete")}</button></div>
       </article>)}</div>}
-      {!showAll && displayed.length < filtered.length && <div className="pagination-actions"><button className="button" type="button" onClick={() => setPage((current) => current + 1)}>{_("Load More")}</button><button className="button" type="button" onClick={() => setShowAll(true)}>{_("Show All ({count})", { count: filtered.length })}</button></div>}
+      {!loading && data && (cursorHistory.length > 1 || data.nextCursor) && <div className="pagination-actions"><button className="button" type="button" onClick={showPreviousPage} disabled={cursorHistory.length < 2}>{_("Previous")}</button><button className="button" type="button" onClick={showNextPage} disabled={!data.nextCursor}>{_("Next")}</button></div>}
     </section>
     {confirmation && <Modal title={confirmation.action === "restore" ? _("Restore Quarantined File?") : _("Permanently Delete File?")} onClose={() => setConfirmation(null)}><p>{confirmation.action === "restore" ? _(
       // Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.

@@ -668,6 +668,95 @@ exit 1
 }
 
 #[test]
+fn scan_reports_infected_without_itemized_threats() {
+    let mut setup = cli();
+    let root = isolated_xdg(&mut setup);
+    let bin = root.join("bin");
+    let target = root.join("infected-target");
+    let error_target = root.join("error-target");
+    std::fs::create_dir_all(&bin).expect("create fake scanner directory");
+    std::fs::write(&target, b"scan target").expect("create infected target");
+    std::fs::write(&error_target, b"scan target").expect("create error target");
+
+    let scanner = bin.join("clamscan");
+    std::fs::write(
+        &scanner,
+        r#"#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf 'ClamAV 1.0\n'
+  exit 0
+fi
+for argument do target="$argument"; done
+case "$target" in
+  */error-target)
+    printf 'ERROR: scanner failure\n' >&2
+    exit 2
+    ;;
+esac
+printf 'Scanned files: 1\nScanned directories: 0\nInfected files: 0\nTotal errors: 0\n'
+exit 1
+"#,
+    )
+    .expect("write fixture scanner");
+    std::fs::set_permissions(&scanner, std::fs::Permissions::from_mode(0o755))
+        .expect("make fixture scanner executable");
+
+    let output = cli_with_xdg(&root)
+        .env("PATH", &bin)
+        .args(["scan", "--json", "--quarantine"])
+        .arg(&target)
+        .output()
+        .expect("scan without itemized threats");
+    assert_eq!(output.status.code(), Some(1), "{}", stderr(&output));
+    let result: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("parse infected scan JSON");
+    assert_eq!(result["status"], "infected");
+    assert_eq!(result["infected_count"], 0);
+    assert_eq!(result["threats"], serde_json::json!([]));
+    assert!(result.get("quarantined").is_none());
+    assert!(
+        target.exists(),
+        "no unidentified target should be quarantined"
+    );
+
+    let output = cli_with_xdg(&root)
+        .env("PATH", &bin)
+        .arg("scan")
+        .arg(&target)
+        .output()
+        .expect("scan without itemized threats in text mode");
+    assert_eq!(output.status.code(), Some(1), "{}", stderr(&output));
+
+    let output = cli_with_xdg(&root)
+        .env("PATH", &bin)
+        .args(["scan", "--json"])
+        .arg(&error_target)
+        .arg(&target)
+        .output()
+        .expect("scan mixed error and infected targets");
+    assert_eq!(output.status.code(), Some(1), "{}", stderr(&output));
+    let result: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("parse mixed scan JSON");
+    assert_eq!(result["status"], "infected");
+    assert_eq!(result["infected_count"], 0);
+    assert_eq!(result["threats"], serde_json::json!([]));
+    assert!(!result["errors"].as_array().expect("scan errors").is_empty());
+
+    let output = cli_with_xdg(&root)
+        .env("PATH", &bin)
+        .args(["scan", "--json"])
+        .arg(&error_target)
+        .output()
+        .expect("scan error target");
+    assert_eq!(output.status.code(), Some(2), "{}", stderr(&output));
+    let result: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("parse error scan JSON");
+    assert_eq!(result["status"], "error");
+
+    let _ = std::fs::remove_dir_all(root);
+}
+
+#[test]
 fn sigint_cancels_a_live_headless_scan_with_cancelled_json() {
     let mut command = cli();
     let root = isolated_xdg(&mut command);

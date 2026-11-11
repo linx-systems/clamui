@@ -2,6 +2,45 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-11
+
+### Added
+
+- Added a Vietnamese (`vi`) translation.
+
+### Changed
+
+- Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
+- Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
+- Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
+- Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
+- Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
+- Updated Rust dependencies: `glib` to 0.22.10, bundled `rusqlite` to 0.41.1, `base64` to 0.23.1, `rfd` to 0.17.2, `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, `zip` to 9.4.1, and the locked `tauri` resolution to 2.12.5. The `rfd` update removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
+- Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, TypeScript to 7.0.2, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources. Gettext extraction uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
+
+### Fixed
+
+- Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
+- Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
+- Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
+- Fixed Flatpak Wayland startup compatibility by disabling WebKitGTK's DMA-BUF renderer path by default while preserving explicit environment overrides. (#282)
+- Fixed large scans losing threats, skipped files, warnings, and summary counts after the 64 MiB output limit; final results and history now retain complete scan evidence for both ClamAV backends while keeping displayed output bounded, preserving exact filename identities, and preventing the CLI from reporting an infected scan as clean. (#285)
+- Fixed daemon scans splitting long file-list paths or reporting spurious errors by routing paths of 1,023 bytes or more through the existing protected stdin transport; preserved shorter-path batching, exact filenames, exclusions, progress, and cancellation. (#286)
+- Rejected VirusTotal uploads when the original pathname is substituted after lookup, retaining no-follow descriptor identity checks.
+- Fixed CodeQL Rust analysis configuration to use no manual build mode.
+- Regenerated the stale gettext template used by translation validation.
+- Restored Clippy by using a Clippy-compatible chunking form and building the frozen Bun frontend before linting so production `generate_context!` can embed `desktop/dist`.
+- Preserved native tray pixel ordering while updating its zero-copy chunk iteration for Rust 1.99 Clippy.
+- Fixed ordinary AppImage CI builds passing empty update metadata to `linuxdeploy`; release update information and `.zsync` sidecars remain intact.
+
+### Maintenance
+
+- Updated GitHub Actions artifact upload to 7.0.2 and artifact download to 8.0.2.
+- Added concise GitHub bug report, feature request, and pull request templates.
+- Switched Dependabot's JavaScript projects to Bun, grouped weekly minor and patch updates, and automated the related Bun/Yarn and Flatpak dependency source refresh.
+- Enabled verbose Tauri AppImage logs to keep `linuxdeploy` failures actionable.
+- Made the escaped-writer deadline regression fixture wait for process readiness, eliminating a CI startup race without relaxing the deadline.
+
 ## [0.5.1] - 2026-11-01
 ### Fixed
 
@@ -167,7 +206,9 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.6.0...HEAD
+
+[0.6.0]: https://github.com/linx-systems/clamui/compare/v0.5.1...v0.6.0
 
 [0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0

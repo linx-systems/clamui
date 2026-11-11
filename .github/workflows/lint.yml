@@ -5,6 +5,12 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Expected commit SHA (optional)
+        type: string
+
 
 permissions:
   contents: read
@@ -13,6 +19,13 @@ jobs:
   rust:
     runs-on: ubuntu-22.04
     steps:
+      - name: Verify dispatched commit
+        if: inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
       - name: Checkout repository
         uses: actions/checkout@v7
 
@@ -38,12 +51,32 @@ jobs:
       - name: Check formatting
         run: cargo fmt --check --all
 
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install frontend dependencies
+        working-directory: desktop
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend assets for Tauri
+        working-directory: desktop
+        run: bun run build
+
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
   frontend:
     runs-on: ubuntu-22.04
     steps:
+      - name: Verify dispatched commit
+        if: inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          ACTUAL_SHA: ${{ github.sha }}
+        run: test "$EXPECTED_SHA" = "$ACTUAL_SHA"
+
       - name: Checkout repository
         uses: actions/checkout@v7
 

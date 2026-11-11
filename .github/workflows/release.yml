@@ -28,14 +28,14 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download Debian package artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: debian-packages-*
           merge-multiple: true
           path: debs
 
       - name: Download RPM helper package artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: rpm-package-*
           merge-multiple: true

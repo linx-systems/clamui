@@ -25,6 +25,22 @@ dpkg -l libwebkit2gtk-4.1-0 libgtk-3-0
 
 For a source build, install the development packages in [Development](/docs/contributing/development/#prerequisites). A build or launch on a newer host does not prove compatibility with the Ubuntu 22.04 baseline; use the project baseline build for release compatibility evidence.
 
+### Wayland `Error 71` in Flatpak
+
+WebKitGTK's DMA-BUF renderer path can fail during startup on some Wayland systems, especially with NVIDIA graphics, and report `Error 71`. The current Flatpak package configuration disables that WebKitGTK renderer path by default to avoid [issue #282](https://github.com/linx-systems/clamui/issues/282); it does not force X11 or set `WEBKIT_DISABLE_COMPOSITING_MODE`.
+
+For an older Flatpak package, disable the path for one launch:
+
+```bash
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 io.github.linx_systems.ClamUI
+```
+
+The workaround trades the potentially faster DMA-BUF path for compatibility and may reduce hardware acceleration, depending on the WebKitGTK runtime. To re-enable it for one launch on systems where it is not needed, use the following command; this can restore the startup failure:
+
+```bash
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=0 io.github.linx_systems.ClamUI
+```
+
 ## Daemon backend unavailable
 
 The daemon backend needs `clamd` and `clamdscan` running. Check its service, then choose **Auto** or **Clamscan** if you do not need a persistent daemon:
@@ -53,14 +69,14 @@ Grant only the directory you need:
 flatpak override --user --filesystem=/path/to/directory io.github.linx_systems.ClamUI
 ```
 
-Database updates use host `freshclam`, which may need the host service's usual permissions. ClamUI cannot modify host configuration without the trusted version-matched native helper and polkit policy; failure leaves protected files unchanged.
+Database updates use host `freshclam`, which may need the host service's usual permissions. ClamUI cannot modify host configuration without the trusted canonical native helper and polkit policy; failure leaves protected files unchanged.
 
 
 ## Privileged helper is not trusted
 
 ClamUI reports an explicit **system helper is not installed** diagnosis when the canonical helper path is missing. On supported Debian-family and Fedora hosts, native packages, AppImages, source builds, and Flatpak may show **Install Helper** for this local missing-helper case without downloading release metadata. It does nothing until you click it. Automatic installation can complete only when the matching signed published package is available; it verifies that package's signature, identity, version, size, digest, and compatible architecture before graphical Polkit authorization, and fails safely before authorization if no eligible asset exists. Debian alone may use a signed same-version architecture-independent helper as the published fallback when no exact-architecture asset exists. The UI never runs as root or collects an administrator password.
 
-The public 0.4.1 release predates the current Rust/Tauri development source, so its helper assets are not proof of a matching source-build repair, even if a version string happens to match. A repair package must be signed and published for the exact application release and host architecture; the Debian fallback above is the only architecture-independent exception. An already-installed, trusted, same-version protocol-v4 Debian `all` helper remains valid: if an older ClamUI build reports it missing, update ClamUI and retry—do not reinstall the root-owned helper. This installed-helper recognition correction does not expand fresh-host installation: automatic installation still requires a matching signed published asset. Do not disable verification or use an unsigned legacy download.
+The public 0.4.1 release predates the current Rust/Tauri development source, so its helper assets are not proof of a matching source-build repair, even if a version string happens to match. A repair package must be signed and published for the exact application release and host architecture; the Debian fallback above is the only architecture-independent exception. An already-installed, trusted protocol-v4 Debian `all` helper for the exact application upstream version remains valid, including a conventional numeric-leading Debian revision. A trusted canonical native helper also remains ready when no automatic-install backend exists or installed-package metadata cannot be inspected. These exceptions do not accept a successfully reported version or architecture mismatch, which remains outdated and prompts repair; untrusted helpers remain blocked, and Flatpak continues to validate its host package state. This installed-helper recognition correction does not expand fresh-host installation: automatic installation still requires a matching signed published asset. Do not disable verification or use an unsigned legacy download.
 
 On Fedora Workstation or Server, the offer presents the persistent system RPM-key trust notice before its DNF transaction. On Fedora Atomic desktops, it can install live only a missing helper with no unrelated pending deployment; after a successful live install, it refreshes the active Polkit service and verifies the ClamUI action is available. It does not import a host RPM key or reboot, and does not automatically replace an existing, outdated, or corrupt Atomic package.
 

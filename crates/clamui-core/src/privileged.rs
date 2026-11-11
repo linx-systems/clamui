@@ -284,12 +284,17 @@ fn host_metadata_is_trusted(metadata: &[u8], executable: bool) -> bool {
         && (!executable || mode & 0o100 != 0)
 }
 
-// GNU stat does not dereference the final component unless explicitly asked.
+// Host tools may be root-provided symlinks, so inspect the resolved executable.
 // Its fixed format makes any extra or malformed host output fail closed.
 fn trusted_host_program(path: &str, executable: bool, flatpak: bool) -> bool {
-    host_command_in_environment(HOST_STAT, &["--format=%f:%u", "--", path], flatpak).is_ok_and(
-        |output| output.status.success() && host_metadata_is_trusted(&output.stdout, executable),
+    host_command_in_environment(
+        HOST_STAT,
+        &["--dereference", "--format=%f:%u", "--", path],
+        flatpak,
     )
+    .is_ok_and(|output| {
+        output.status.success() && host_metadata_is_trusted(&output.stdout, executable)
+    })
 }
 
 fn trusted_tool_in_environment<'a>(candidates: &'a [&'a str], flatpak: bool) -> AppResult<&'a str> {
@@ -605,6 +610,71 @@ mod helper_trust_tests {
         assert!(!host_metadata_is_trusted(b"81ed:0", true));
         assert!(!host_metadata_is_trusted(b"not-a-mode:0\n", true));
         assert!(!host_metadata_is_trusted(b"81ed:0\n81ed:0\n", true));
+    }
+
+    #[test]
+    fn trusted_host_program_dereferences_host_checksum_symlink_for_execution() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let host_tool = root.path().join("host-sha256sum");
+        let candidate = root.path().join("sha256sum");
+        let input = root.path().join("input");
+        std::os::unix::fs::symlink("/usr/bin/sha256sum", &host_tool)
+            .expect("link host checksum tool");
+        std::os::unix::fs::symlink(&host_tool, &candidate).expect("link checksum candidate");
+        std::fs::write(&input, b"abc").expect("write checksum input");
+
+        let flatpak = flatpak();
+        let candidate = candidate.to_str().expect("checksum candidate is UTF-8");
+        let candidates = [candidate];
+        assert!(trusted_host_program(candidate, true, flatpak));
+        let selected = if flatpak {
+            let selected = trusted_tool_in_environment(&candidates, flatpak)
+                .expect("select checksum candidate");
+            assert_eq!(selected, candidate);
+            selected
+        } else {
+            assert!(trusted_tool_in_environment(&candidates, flatpak).is_err());
+            candidate
+        };
+
+        let output = command_in_environment(selected, flatpak)
+            .arg(&input)
+            .output()
+            .expect("run selected checksum candidate");
+        assert!(output.status.success());
+        let output = std::str::from_utf8(&output.stdout).expect("checksum output is UTF-8");
+        let digest = output
+            .split_whitespace()
+            .next()
+            .expect("checksum output has a digest");
+        assert_eq!(
+            digest,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
+
+    #[test]
+    fn trusted_host_program_rejects_broken_symlink_chains() {
+        let root = TempDir::new().expect("create host tool trust root");
+        let dangling = root.path().join("dangling");
+        let cycle_a = root.path().join("cycle-a");
+        let cycle_b = root.path().join("cycle-b");
+        std::os::unix::fs::symlink(root.path().join("missing"), &dangling)
+            .expect("create dangling link");
+        std::os::unix::fs::symlink(&cycle_b, &cycle_a).expect("create first cycle link");
+        std::os::unix::fs::symlink(&cycle_a, &cycle_b).expect("create second cycle link");
+
+        let flatpak = flatpak();
+        assert!(!trusted_host_program(
+            dangling.to_str().expect("dangling path is UTF-8"),
+            true,
+            flatpak
+        ));
+        assert!(!trusted_host_program(
+            cycle_a.to_str().expect("cyclic path is UTF-8"),
+            true,
+            flatpak
+        ));
     }
 
     #[test]
@@ -1590,7 +1660,7 @@ fn run_config_helper(args: &[String], uid: u32) -> AppResult<()> {
     let root = staging_root_for_uid(uid)?;
     verify_staging_root(&root, uid)?;
     let mut pairs = Vec::with_capacity(args.len() / 2);
-    for chunk in args.chunks_exact(2) {
+    for chunk in args.chunks(2) {
         pairs.push((
             PathBuf::from(&chunk[0]),
             validate_destination(Path::new(&chunk[1]))?,
@@ -2247,13 +2317,30 @@ pub fn run_helper(args: &[String]) -> i32 {
     }
 }
 
+fn installed_deb_version_matches(expected: &str, installed: &str) -> bool {
+    if installed == expected {
+        return true;
+    }
+    let Some(revision) = installed
+        .strip_prefix(expected)
+        .and_then(|suffix| suffix.strip_prefix('-'))
+    else {
+        return false;
+    };
+    let mut bytes = revision.bytes();
+    matches!(bytes.next(), Some(first) if first.is_ascii_digit())
+        && bytes.all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'+' | b'.' | b'~'))
+}
+
 fn installed_deb_package_identity_matches<'a>(
     mut fields: impl Iterator<Item = &'a str>,
     host_architecture: &str,
 ) -> bool {
-    let version = app_version();
+    let version = env!("CARGO_PKG_VERSION");
     fields.next() == Some("ii ")
-        && fields.next() == Some(version.as_str())
+        && fields
+            .next()
+            .is_some_and(|installed| installed_deb_version_matches(version, installed))
         && matches!(
             fields.next(),
             Some(architecture) if architecture == host_architecture || architecture == "all"
@@ -2404,8 +2491,65 @@ fn unavailable_helper_status(
     }
 }
 
+fn installed_helper_status(version: String) -> PrivilegedHelperStatus {
+    PrivilegedHelperStatus {
+        state: "installed".to_owned(),
+        package_name: HELPER_PACKAGE.to_owned(),
+        version,
+        detail: None,
+        installed: true,
+        installable: false,
+        needs_onboarding: false,
+    }
+}
+
+fn trusted_helper_status(
+    version: String,
+    flatpak_host: bool,
+    backend_installable: bool,
+    package_matches: AppResult<bool>,
+) -> PrivilegedHelperStatus {
+    match package_matches {
+        Ok(true) => installed_helper_status(version),
+        Ok(false) if flatpak_host && backend_installable => PrivilegedHelperStatus {
+            state: "installable".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: None,
+            installed: false,
+            installable: true,
+            needs_onboarding: true,
+        },
+        Ok(false) => PrivilegedHelperStatus {
+            state: "outdated".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper package version does not match this ClamUI version.".to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+        Err(_) if !flatpak_host => installed_helper_status(version),
+        Err(_) => PrivilegedHelperStatus {
+            state: "unsupported".to_owned(),
+            package_name: HELPER_PACKAGE.to_owned(),
+            version,
+            detail: Some(
+                "The host helper was found, but its installed package version could not be verified."
+                    .to_owned(),
+            ),
+            installed: false,
+            installable: false,
+            needs_onboarding: true,
+        },
+    }
+}
+
 pub fn status() -> PrivilegedHelperStatus {
     let version = app_version();
+    let flatpak_host = flatpak();
     let backend = helper_backend();
     match trusted_helper_path() {
         Ok(_) => {
@@ -2417,29 +2561,12 @@ pub fn status() -> PrivilegedHelperStatus {
                         installed_backend_version_matches(backend, &architecture)
                     })
                 });
-            match package_matches {
-                Ok(true) => PrivilegedHelperStatus {
-                    state: "installed".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: true, installable: false, needs_onboarding: false,
-                },
-                Ok(false) if flatpak() && backend.is_some_and(helper_backend_available) => PrivilegedHelperStatus {
-                    state: "installable".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: None, installed: false, installable: true, needs_onboarding: true,
-                },
-                Ok(false) => PrivilegedHelperStatus {
-                    state: "outdated".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper package version does not match this ClamUI version.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-                Err(_) => PrivilegedHelperStatus {
-                    state: "unsupported".to_owned(), package_name: HELPER_PACKAGE.to_owned(), version,
-                    detail: Some("The host helper was found, but its installed package version could not be verified.".to_owned()),
-                    installed: false, installable: false, needs_onboarding: true,
-                },
-            }
+            let backend_installable = flatpak_host
+                && package_matches.as_ref().is_ok_and(|matches| !*matches)
+                && backend.is_some_and(helper_backend_available);
+            trusted_helper_status(version, flatpak_host, backend_installable, package_matches)
         }
         Err(detail) => {
-            let flatpak_host = flatpak();
             let state = if flatpak_host {
                 CanonicalHelperState::Missing
             } else {
@@ -3183,6 +3310,40 @@ mod installed_deb_package_tests {
     }
 
     #[test]
+    fn installed_debian_package_identity_accepts_conventional_revisions() {
+        let version = app_version();
+        for revision in ["1", "1ubuntu1", "1~noble1", "1+deb12u1", "1.2"] {
+            let installed = format!("{version}-{revision}");
+            assert!(installed_deb_package_identity_matches(
+                ["ii ", installed.as_str(), "amd64"].into_iter(),
+                "amd64"
+            ));
+        }
+    }
+
+    #[test]
+    fn installed_debian_version_rejects_other_upstream_versions_and_malformed_revisions() {
+        for installed in [
+            "0.5.0",
+            "0.5.10",
+            "0.5.1-rc1",
+            "0.5.1-",
+            "0.5.1-ubuntu1",
+            "0.5.1-~noble1",
+            "0.5.1-1-ubuntu1",
+            "0.5.1-1_ubuntu1",
+            "0.5.1-1é",
+        ] {
+            assert!(
+                !installed_deb_version_matches("0.5.1", installed),
+                "must reject {installed}"
+            );
+        }
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1"));
+        assert!(installed_deb_version_matches("0.5.1-rc1", "0.5.1-rc1-1"));
+    }
+
+    #[test]
     fn installed_debian_package_identity_rejects_invalid_status_version_or_architecture() {
         let version = app_version();
         assert!(!installed_deb_package_identity_matches(
@@ -3205,6 +3366,108 @@ mod installed_deb_package_tests {
             ["ii ", version.as_str(), "amd64", "unexpected-field"].into_iter(),
             "amd64"
         ));
+    }
+}
+
+#[cfg(test)]
+mod helper_status_tests {
+    use super::*;
+
+    fn assert_status(
+        status: PrivilegedHelperStatus,
+        state: &str,
+        installed: bool,
+        installable: bool,
+        needs_onboarding: bool,
+    ) {
+        assert_eq!(status.state, state);
+        assert_eq!(status.installed, installed);
+        assert_eq!(status.installable, installable);
+        assert_eq!(status.needs_onboarding, needs_onboarding);
+    }
+
+    #[test]
+    fn trusted_native_helper_is_installed_without_an_install_backend() {
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                false,
+                false,
+                Err("the host package manager is unavailable".to_owned()),
+            ),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn known_native_helper_mismatch_remains_outdated() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), false, true, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn verified_flatpak_helper_match_is_installed() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(true)),
+            "installed",
+            true,
+            false,
+            false,
+        );
+    }
+
+    #[test]
+    fn flatpak_package_checks_remain_strict() {
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, true, Ok(false)),
+            "installable",
+            false,
+            true,
+            true,
+        );
+        assert_status(
+            trusted_helper_status("0.5.1".to_owned(), true, false, Ok(false)),
+            "outdated",
+            false,
+            false,
+            true,
+        );
+        assert_status(
+            trusted_helper_status(
+                "0.5.1".to_owned(),
+                true,
+                true,
+                Err("cannot inspect host package metadata".to_owned()),
+            ),
+            "unsupported",
+            false,
+            false,
+            true,
+        );
+    }
+
+    #[test]
+    fn unavailable_native_helpers_remain_unavailable() {
+        for (state, expected_state) in [
+            (CanonicalHelperState::Missing, "unsupported"),
+            (CanonicalHelperState::Untrusted, "untrusted"),
+        ] {
+            assert_status(
+                unavailable_helper_status("0.5.1".to_owned(), state, "unavailable".to_owned()),
+                expected_state,
+                false,
+                false,
+                true,
+            );
+        }
     }
 }
 
@@ -3293,6 +3556,211 @@ mod helper_failure_tests {
 #[cfg(test)]
 mod bounded_output_tests {
     use super::*;
+    use std::io::Read;
+    use std::os::fd::{FromRawFd, OwnedFd};
+
+    const SLEEP_PATH: &[u8] = b"/bin/sleep\0";
+    const SLEEP_ARG0: &[u8] = b"sleep\0";
+    const SLEEP_ARG1: &[u8] = b"5\0";
+
+    type CapturedOutput = AppResult<(std::process::ExitStatus, Vec<u8>, Vec<u8>)>;
+
+    struct EscapedWriter {
+        pid: libc::pid_t,
+    }
+
+    impl Drop for EscapedWriter {
+        fn drop(&mut self) {
+            // SAFETY: pid is the escaped fixture process created below.
+            unsafe {
+                libc::kill(self.pid, libc::SIGKILL);
+            }
+        }
+    }
+
+    impl EscapedWriter {
+        fn holds_output_pipes_in_own_session(&self) -> bool {
+            let Ok(stdout) = fs::read_link(format!("/proc/{}/fd/1", self.pid)) else {
+                return false;
+            };
+            let Ok(stderr) = fs::read_link(format!("/proc/{}/fd/2", self.pid)) else {
+                return false;
+            };
+            // SAFETY: getsid only reads session metadata for the owned fixture PID.
+            let in_own_session = unsafe { libc::getsid(self.pid) == self.pid };
+            in_own_session
+                && stdout != stderr
+                && stdout.to_string_lossy().starts_with("pipe:[")
+                && stderr.to_string_lossy().starts_with("pipe:[")
+        }
+    }
+
+    struct EscapedWriterFixture {
+        command: Command,
+        ready_read: OwnedFd,
+        ready_write: OwnedFd,
+        pid_read: OwnedFd,
+        pid_write: OwnedFd,
+    }
+
+    impl EscapedWriterFixture {
+        fn new(startup_delay: Duration) -> io::Result<Self> {
+            let (ready_read, ready_write) = pipe()?;
+            let (pid_read, pid_write) = pipe()?;
+            let ready_read_fd = ready_read.as_raw_fd();
+            let ready_write_fd = ready_write.as_raw_fd();
+            let pid_read_fd = pid_read.as_raw_fd();
+            let pid_write_fd = pid_write.as_raw_fd();
+            let startup_delay = libc::timespec {
+                tv_sec: startup_delay.as_secs().min(libc::time_t::MAX as u64) as libc::time_t,
+                tv_nsec: startup_delay.subsec_nanos().into(),
+            };
+            let mut command = shell("exec >/dev/null 2>&1; sleep 5");
+
+            // SAFETY: The callback captures only raw file descriptors and a prepared timespec.
+            // After fork it uses only async-signal-safe libc calls, without Rust allocation or locks.
+            unsafe {
+                command.pre_exec(move || {
+                    let escaped = libc::fork();
+                    if escaped < 0 {
+                        return Err(io::Error::last_os_error());
+                    }
+                    if escaped == 0 {
+                        libc::close(ready_read_fd);
+                        libc::close(pid_read_fd);
+                        if !sleep_after_fork(startup_delay) {
+                            let _ = write_all_after_fork(ready_write_fd, &[2]);
+                            libc::_exit(127);
+                        }
+                        if libc::setsid() == -1 {
+                            let _ = write_all_after_fork(ready_write_fd, &[2]);
+                            libc::_exit(127);
+                        }
+
+                        let pid = libc::getpid();
+                        if !write_all_after_fork(pid_write_fd, &pid.to_ne_bytes())
+                            || !write_all_after_fork(ready_write_fd, &[1])
+                        {
+                            libc::_exit(127);
+                        }
+                        libc::close(ready_write_fd);
+                        libc::close(pid_write_fd);
+                        libc::execl(
+                            SLEEP_PATH.as_ptr().cast::<libc::c_char>(),
+                            SLEEP_ARG0.as_ptr().cast::<libc::c_char>(),
+                            SLEEP_ARG1.as_ptr().cast::<libc::c_char>(),
+                            std::ptr::null::<libc::c_char>(),
+                        );
+                        libc::_exit(127);
+                    }
+
+                    libc::close(ready_write_fd);
+                    libc::close(pid_read_fd);
+                    libc::close(pid_write_fd);
+                    let mut state = 0_u8;
+                    loop {
+                        let read = libc::read(ready_read_fd, (&mut state as *mut u8).cast(), 1);
+                        if read == 1 {
+                            break;
+                        }
+                        if read < 0 && was_interrupted_after_fork() {
+                            continue;
+                        }
+                        libc::close(ready_read_fd);
+                        return Err(io::Error::from_raw_os_error(libc::EIO));
+                    }
+                    libc::close(ready_read_fd);
+                    if state == 1 {
+                        Ok(())
+                    } else {
+                        Err(io::Error::from_raw_os_error(libc::EIO))
+                    }
+                });
+            }
+
+            Ok(Self {
+                command,
+                ready_read,
+                ready_write,
+                pid_read,
+                pid_write,
+            })
+        }
+
+        fn run(
+            self,
+            max: usize,
+            deadline: Duration,
+        ) -> (CapturedOutput, io::Result<EscapedWriter>) {
+            let Self {
+                command,
+                ready_read,
+                ready_write,
+                pid_read,
+                pid_write,
+            } = self;
+            let output = bounded_child_output(command, max, deadline);
+            drop(ready_read);
+            drop(ready_write);
+            drop(pid_write);
+
+            let mut pid_reader = File::from(pid_read);
+            let mut pid = [0_u8; std::mem::size_of::<libc::pid_t>()];
+            let escaped_writer = pid_reader.read_exact(&mut pid).map(|()| EscapedWriter {
+                pid: libc::pid_t::from_ne_bytes(pid),
+            });
+            (output, escaped_writer)
+        }
+    }
+
+    fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
+        let mut fds = [-1; 2];
+        // SAFETY: fds points to two valid c_int slots and pipe2 atomically marks them close-on-exec.
+        if unsafe { libc::pipe2(fds.as_mut_ptr(), libc::O_CLOEXEC) } == -1 {
+            return Err(io::Error::last_os_error());
+        }
+        // SAFETY: pipe2 returned two newly owned file descriptors.
+        Ok(unsafe { (OwnedFd::from_raw_fd(fds[0]), OwnedFd::from_raw_fd(fds[1])) })
+    }
+
+    unsafe fn write_all_after_fork(fd: libc::c_int, mut bytes: &[u8]) -> bool {
+        while !bytes.is_empty() {
+            // SAFETY: fd is an inherited pipe descriptor and bytes is valid for its length.
+            let written = unsafe { libc::write(fd, bytes.as_ptr().cast(), bytes.len()) };
+            if written > 0 {
+                bytes = &bytes[written as usize..];
+                continue;
+            }
+            if written < 0 && unsafe { was_interrupted_after_fork() } {
+                continue;
+            }
+            return false;
+        }
+        true
+    }
+
+    unsafe fn sleep_after_fork(mut remaining: libc::timespec) -> bool {
+        loop {
+            let mut interrupted = libc::timespec {
+                tv_sec: 0,
+                tv_nsec: 0,
+            };
+            // SAFETY: both pointers refer to initialized stack values for nanosleep to read/write.
+            if unsafe { libc::nanosleep(&remaining, &mut interrupted) } == 0 {
+                return true;
+            }
+            if unsafe { was_interrupted_after_fork() } {
+                remaining = interrupted;
+                continue;
+            }
+            return false;
+        }
+    }
+
+    unsafe fn was_interrupted_after_fork() -> bool {
+        // SAFETY: Linux exposes this thread-local errno accessor without allocating or locking.
+        unsafe { *libc::__errno_location() == libc::EINTR }
+    }
 
     fn shell(script: &str) -> Command {
         let mut command = Command::new("/bin/sh");
@@ -3350,37 +3818,18 @@ mod bounded_output_tests {
 
     #[test]
     fn returns_after_deadline_when_an_escaped_silent_writer_keeps_pipes_open() {
-        let pid_file = format!(
-            "/tmp/clamui-bounded-output-escaped-{}-{}.pid",
-            std::process::id(),
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("clock")
-                .as_nanos()
-        );
-        let script = format!(
-            "/usr/bin/setsid /bin/sh -c 'echo $$ > {pid_file}; sleep 5' & exec >/dev/null 2>&1; sleep 5"
-        );
+        // This exceeds the command deadline, so a test that races escaped-writer startup fails
+        // reliably while the handshake establishes the writer before that deadline begins.
+        let fixture = EscapedWriterFixture::new(Duration::from_millis(150))
+            .expect("create escaped writer fixture");
         let started = Instant::now();
-        let result = bounded_child_output(shell(&script), 1024, Duration::from_millis(100));
+        let (result, escaped_writer) = fixture.run(1024, Duration::from_millis(100));
+        let escaped_writer = escaped_writer.expect("escaped pipe writer did not start");
+        assert!(
+            escaped_writer.holds_output_pipes_in_own_session(),
+            "escaped writer did not retain both output pipes in its own session"
+        );
 
-        let mut escaped_pid = None;
-        for _ in 0..100 {
-            if let Ok(pid) = std::fs::read_to_string(&pid_file) {
-                let pid = pid.trim().to_owned();
-                if !pid.is_empty() {
-                    escaped_pid = Some(pid);
-                    break;
-                }
-            }
-            thread::sleep(Duration::from_millis(10));
-        }
-        if let Some(pid) = &escaped_pid {
-            let _ = Command::new("/bin/kill").args(["-KILL", pid]).status();
-        }
-        let _ = std::fs::remove_file(&pid_file);
-
-        assert!(escaped_pid.is_some(), "escaped pipe writer did not start");
         assert!(matches!(result, Err(error) if error.contains("deadline")));
         assert!(started.elapsed() < Duration::from_secs(2));
     }

@@ -58,7 +58,7 @@ type HelperStatus = {
   needsOnboarding: boolean;
 };
 
-const pageComponents: Record<Exclude<PageId, "database">, ComponentType> = {
+const pageComponents: Record<Exclude<PageId, "database">, ComponentType<{ active: boolean }>> = {
   scan: Scan,
   logs: Logs,
   components: Components,
@@ -852,7 +852,7 @@ export default function App(): ReactNode {
       const Page = pageComponents[page];
       return (
         <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
-          <Page />
+          <Page active={selected} />
         </section>
       );
     });
