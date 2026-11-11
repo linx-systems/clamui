@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-11
+
 ### Added
 
 - Added a Vietnamese (`vi`) translation.
@@ -13,10 +15,8 @@
 - Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
 - Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
 - Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
-- Updated Rust dependencies: `glib` to 0.22.10, bundled `rusqlite` to 0.41.1, `base64` to 0.23.1, `rfd` to 0.17.2, and the locked `tauri` resolution to 2.12.5. The `rfd` update removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
-- Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@vitejs/plugin-react` to 5.2.0, and TypeScript to 7.0.2. Gettext extraction now uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
-- Updated Rust dependencies: `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, and `zip` to 9.4.1.
-- Updated desktop tooling: `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources.
+- Updated Rust dependencies: `glib` to 0.22.10, bundled `rusqlite` to 0.41.1, `base64` to 0.23.1, `rfd` to 0.17.2, `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, `zip` to 9.4.1, and the locked `tauri` resolution to 2.12.5. The `rfd` update removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
+- Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, TypeScript to 7.0.2, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources. Gettext extraction uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
 
 ### Fixed
 
@@ -206,7 +206,9 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.6.0...HEAD
+
+[0.6.0]: https://github.com/linx-systems/clamui/compare/v0.5.1...v0.6.0
 
 [0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0

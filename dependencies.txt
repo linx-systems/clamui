@@ -1,0 +1,123 @@
+ClamUI 0.6.0 — release dependency inventory
+Date: 2026-11-11
+
+Scope and version notation
+--------------------------
+This is an inventory, not an installation mechanism. The versions in the
+Rust and desktop JavaScript lists below are exact versions resolved in the
+release locks, not minimum system requirements. Cargo.toml and
+desktop/package.json declare the corresponding requirements/ranges; consult
+those files for their precise semantics. Cargo.lock and desktop/bun.lock are
+the canonical, complete transitive dependency records. desktop/yarn.lock is a
+Bun-generated export for the Flatpak offline build, not a separate version
+selection. The website is a separate project with its own package.json and
+bun.lock and is not part of the desktop application runtime.
+
+Host runtime and optional integrations
+--------------------------------------
+- All application formats use host ClamAV: clamscan for scanning and
+  freshclam for updating the host's virus definitions. Available, current
+  signatures are needed for scanning. ClamUI does not ship the engine or
+  its database. Flatpak invokes host tools via flatpak-spawn --host.
+- Daemon scanning additionally needs host clamd, clamdscan and a reachable
+  configured daemon. Scheduling uses a systemd user timer where available,
+  otherwise cron. The network-socket audit uses host ss (iproute2).
+- Applying protected host ClamAV settings requires the trusted host
+  clamui-apply-preferences helper, its polkit policy and pkexec/Polkit
+  authorization. The helper protocol is v4. Debian application and helper
+  packages must match in version and architecture; the Fedora RPM is a helper
+  package, not an application package.
+- Secret Service on the session D-Bus provides the preferred desktop keyring
+  for VirusTotal keys. Plaintext fallback requires explicit user consent.
+  Notifications use the desktop notification service. The optional tray uses
+  a StatusNotifierItem watcher; file-manager integrations require the
+  corresponding Nautilus, Dolphin or Nemo environment.
+
+Desktop and Flatpak runtime
+---------------------------
+- Native Linux desktop packages use GTK 3 and WebKitGTK 4.1 (including their
+  system library dependencies). The Debian application control file names
+  libgtk-3-0 and libwebkit2gtk-4.1-0; its package dependencies also include
+  clamav, clamav-freshclam, pkexec or policykit-1, and the matching helper.
+- The x86_64 AppImage bundles its GTK/WebKitGTK runtime; host ClamAV and
+  optional host integrations remain separate.
+- Flatpak app ID: io.github.linx_systems.ClamUI. Runtime: org.gnome.Platform
+  51. Recipes target x86_64 and aarch64. The GNOME runtime supplies the
+  sandbox desktop libraries, not the host ClamAV engine or definitions.
+  Session D-Bus access is declared for Secret Service, notifications and
+  StatusNotifier watchers; host integration uses org.freedesktop.Flatpak.
+
+Build and release tooling (not end-user interpreter requirements)
+------------------------------------------------------------------
+- Rust stable and Cargo; native Debian/AppImage CI pins Bun 1.3.14. The
+  workspace uses Rust edition 2021. CI uses locked Cargo dependencies and the
+  desktop frontend lock; no exact Rust compiler version is pinned there.
+- Native desktop builds need a C/C++ build toolchain, pkg-config and development
+  files for GTK 3, WebKitGTK 4.1, JavaScriptCoreGTK 4.1, libsoup 3, librsvg,
+  OpenSSL and libxdo. Debian packaging additionally uses gettext, dpkg-dev,
+  fakeroot and dpkg-sig for signed packages. Release CI builds Debian on the
+  Ubuntu 22.04-compatible amd64 and arm64 baseline.
+- AppImage release CI builds x86_64 on Ubuntu 22.04, uses appimagetool 1.9.1,
+  FUSE 2 and patchelf, and signs with GnuPG when requested. Helper RPM builds
+  use the Rust core, GLib development files, pkg-config, rpm and GnuPG.
+- Flatpak builds use org.gnome.Sdk 51, Flatpak Builder, and the
+  org.freedesktop.Sdk.Extension.node24 and rust-stable extensions, both 26.08.
+  The recipe uses Yarn 1 with the generated offline mirror and frozen export,
+  plus Cargo offline with the locked generated sources. Bun is used to export
+  the canonical desktop lock for Flatpak source generation; it is not an
+  application runtime requirement.
+
+Direct Rust dependencies — resolved Cargo.lock versions
+--------------------------------------------------------
+clamui-core runtime/direct (tempfile is also a dev dependency):
+  base64 0.23.1                  chrono 0.4.45
+  clap 4.6.7                     csv 1.4.0
+  fs2 0.4.3                      gio 0.18.4
+  glib 0.22.10                   globset 0.4.21
+  hex 0.4.3                      icu_casemap 2.3.0
+  icu_locale_core 2.4.0          libc 0.2.191
+  log 0.4.35                     percent-encoding 2.3.2
+  regex 1.13.1                   reqwest 0.12.28
+  rusqlite 0.41.1                secret-service 5.2.0
+  semver 1.0.28                  serde 1.0.229
+  serde_json 1.0.154             sha2 0.10.9
+  signal-hook 0.4.6               tempfile 3.27.0
+  url 2.5.8                      uuid 1.29.1
+  walkdir 2.5.0                  zip 9.4.1
+
+clamui desktop runtime/direct (in addition to local clamui-core 0.6.0):
+  base64 0.23.1                  ksni 0.3.7
+  open 5.4.5                     rfd 0.17.2
+  serde 1.0.229                  serde_json 1.0.154
+  tauri 2.12.5                   tauri-plugin-clipboard-manager 2.5.0
+  tauri-plugin-notification 2.8.0
+  tauri-plugin-single-instance 2.5.5
+  url 2.5.8
+Desktop build dependency: tauri-build 2.7.4.
+The Cargo feature configuration includes bundled SQLite via rusqlite and
+rustls TLS for reqwest; see the manifests and lock for full feature selection.
+
+Direct desktop frontend dependencies — resolved desktop/bun.lock versions
+--------------------------------------------------------------------------
+Application dependencies:
+  @tauri-apps/api 2.12.4
+  react 19.3.1
+  react-dom 19.3.1
+Build/development dependencies:
+  @babel/parser 8.1.0
+  @tauri-apps/cli 2.12.4
+  @types/react 19.3.0
+  @types/react-dom 19.3.0
+  @vitejs/plugin-react 6.2.1
+  typescript 7.0.2
+  vite 8.3.5
+
+Sources
+-------
+Cargo.toml; crates/clamui-core/Cargo.toml; desktop/src-tauri/Cargo.toml;
+Cargo.lock; desktop/package.json; desktop/bun.lock; desktop/yarn.lock;
+debian/DEBIAN/control and control.helper; debian/build-deb.sh;
+rpm/clamui-privileged-helper.spec; appimage/build-appimage.sh;
+flathub/io.github.linx_systems.ClamUI.yml; .github/workflows/build-deb.yml,
+build-rpm.yml, build-appimage.yml and build-flatpak.yml; and the installation,
+scheduling, settings and security-audit guides under website/src/content/docs.
