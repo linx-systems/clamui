@@ -14,7 +14,7 @@ A modern Linux desktop interface for ClamAV, built with Rust, Tauri, and a React
 
 ## ClamUI v0.6.0
 
-v0.6.0 is a minor release. After the matching artifacts are attached to [GitHub Releases](https://github.com/linx-systems/clamui/releases), download the native packages, AppImage, or Flatpak bundle there and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
+v0.6.0 is a minor release. Download the native packages, AppImage, or Flatpak bundle for your architecture from [GitHub Releases](https://github.com/linx-systems/clamui/releases), and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
 
 Every package format uses **host** ClamAV. Install host `clamscan` and `freshclam`; daemon scans also require host `clamd` and `clamdscan`.
 

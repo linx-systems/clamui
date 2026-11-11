@@ -97,7 +97,7 @@ The helper package supplies the native `/usr/bin/clamui-apply-preferences` execu
 
 ### Fedora RPM packages
 
-The v0.6.0 helper RPM release-asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with an adjacent `.rpm.asc`. Verify a matching downloaded asset only after it is attached to the GitHub release. The RPM does not contain the ClamUI GUI or ClamAV. Use a temporary GPG home and RPM database so verification does not alter your user or system trust stores:
+The v0.6.0 helper RPM release-asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with an adjacent `.rpm.asc`. Download the RPM for your architecture and its matching signature from the [GitHub release](https://github.com/linx-systems/clamui/releases), then verify both before installing. The RPM does not contain the ClamUI GUI or ClamAV. Use a temporary GPG home and RPM database so verification does not alter your user or system trust stores:
 
 ```bash
 set -euo pipefail

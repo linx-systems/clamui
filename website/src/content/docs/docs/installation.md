@@ -40,7 +40,7 @@ You can also update them from ClamUI's **Database** view. See [scan backends](/d
 
 ## Flatpak
 
-After the v0.6.0 GitHub Flatpak bundles are attached, choose `clamui-x86_64.flatpak` or `clamui-aarch64.flatpak` for your architecture:
+Download `clamui-x86_64.flatpak` or `clamui-aarch64.flatpak` for your architecture from [GitHub Releases](https://github.com/linx-systems/clamui/releases), and [verify its release provenance](/docs/contributing/signing/#flathub-and-github-flatpak-bundles) before installing. The example below uses the x86_64 bundle; substitute the aarch64 filename if needed:
 
 ```bash
 flatpak install --user ./clamui-x86_64.flatpak
@@ -75,7 +75,7 @@ If authorization is cancelled or installation fails, the settings draft remains 
 
 ## Debian packages
 
-After the v0.6.0 GitHub application and privileged-helper packages are attached, download and [verify](/docs/contributing/signing/#debian-packages) the pair for the same Debian architecture. The asset patterns are `clamui_0.6.0_<debarch>.deb` and `clamui-privileged-helper_0.6.0_<debarch>.deb`; the application package provides `/usr/bin/clamui` and `/usr/bin/clamui-scheduled-scan`, while the companion package provides `/usr/bin/clamui-apply-preferences` and its polkit policy.
+Download and [verify](/docs/contributing/signing/#debian-packages) the v0.6.0 GitHub application and privileged-helper pair for the same Debian architecture. The asset patterns are `clamui_0.6.0_<debarch>.deb` and `clamui-privileged-helper_0.6.0_<debarch>.deb`; the application package provides `/usr/bin/clamui` and `/usr/bin/clamui-scheduled-scan`, while the companion package provides `/usr/bin/clamui-apply-preferences` and its polkit policy.
 
 ```bash
 DEB_ARCH="$(dpkg --print-architecture)"
@@ -87,7 +87,7 @@ Do not mix upstream release versions or substitute a foreign-architecture packag
 
 ## Fedora helper RPM
 
-The v0.6.0 helper-only RPM asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with a matching `.rpm.asc`. After the matching asset is attached, it contains `/usr/bin/clamui-apply-preferences` and its polkit policy, not the ClamUI GUI or ClamAV engine. Verify the RPM and detached signature first with the [package-signing guide](/docs/contributing/signing/#fedora-rpm-packages).
+Download the v0.6.0 helper-only RPM for your architecture and its matching `.rpm.asc`: `clamui-privileged-helper-0.6.0-1.x86_64.rpm` or `clamui-privileged-helper-0.6.0-1.aarch64.rpm`. The RPM contains `/usr/bin/clamui-apply-preferences` and its polkit policy, not the ClamUI GUI or ClamAV engine. Verify the RPM and detached signature first with the [package-signing guide](/docs/contributing/signing/#fedora-rpm-packages).
 
 On Fedora Workstation or Server, the explicit native or Flatpak-host offer uses DNF only after you accept its notice that the pinned ClamUI public key will become persistent system RPM-key trust. On [Fedora Atomic desktops](https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/) (such as Silverblue or Kinoite), it uses [`rpm-ostree install -y --apply-live ./clamui-privileged-helper-0.6.0-1.<ARCH>.rpm`](https://coreos.github.io/rpm-ostree/administrator-handbook/) only for an absent helper and no unrelated pending deployment. After a successful live install, it runs the bounded `systemctl try-restart polkit.service` refresh and verifies the ClamUI polkit action is available; it never imports a host RPM key or reboots automatically. An existing, outdated, corrupt, or unavailable live Atomic helper needs the verified manual layering-and-reboot repair in [troubleshooting](/docs/troubleshooting/#privileged-helper-is-not-trusted).
 
@@ -95,7 +95,7 @@ A native Tauri build needs WebKitGTK 4.1 and GTK 3. Build release artifacts on t
 
 ## AppImage
 
-After `ClamUI-0.6.0-x86_64.AppImage` is attached to [GitHub Releases](https://github.com/linx-systems/clamui/releases), verify it, make it executable, then run it:
+Download `ClamUI-0.6.0-x86_64.AppImage` from [GitHub Releases](https://github.com/linx-systems/clamui/releases), verify it, make it executable, then run it:
 
 ```bash
 chmod +x ClamUI-0.6.0-x86_64.AppImage

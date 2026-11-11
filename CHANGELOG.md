@@ -35,6 +35,7 @@
 
 ### Maintenance
 
+- Clarified user-facing download, installation, and upgrade guidance for GitHub packages and Flathub.
 - Switched native Debian, RPM, and AppImage CI to authenticated HTTPS Ubuntu Jammy mirrors and made repository update errors fatal, retaining the Ubuntu 22.04 build baseline, dependencies, and package signing.
 - Updated GitHub Actions artifact upload to 7.0.2 and artifact download to 8.0.2.
 - Added concise GitHub bug report, feature request, and pull request templates.
