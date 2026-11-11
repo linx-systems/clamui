@@ -175,6 +175,9 @@ function BehaviorPage({ settings, saveSetting, trayAvailable, isFlatpak }: { set
   const [dialogOpen, setDialogOpen] = useState(false);
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [busyManager, setBusyManager] = useState<string | null>(null);
+  const [timeoutDraft, setTimeoutDraft] = useState<string | null>(null);
+  const configuredTimeout = valueNumber(settings, "update_inactivity_timeout_minutes", 10);
+  const timeoutMinutes = Number.isInteger(configuredTimeout) && configuredTimeout >= 1 && configuredTimeout <= 1440 ? configuredTimeout : 10;
 
   useEffect(() => {
     void request<{ languages?: Array<{ code: string; name: string }> }>("i18n.catalog")
@@ -236,6 +239,20 @@ function BehaviorPage({ settings, saveSetting, trayAvailable, isFlatpak }: { set
     <Section title={_("Scan Behavior")}>
       <Field label={_("Show Live Scan Progress")} detail={_("Display files being scanned in real time.")}><input type="checkbox" checked={valueBoolean(settings, "show_live_progress", true)} onChange={(event) => void saveSetting("show_live_progress", event.target.checked)} /></Field>
       <Field label={_("Desktop Notifications")} detail={_("Allow scan, update, device, and VirusTotal notifications.")}><input type="checkbox" checked={valueBoolean(settings, "notifications_enabled", true)} onChange={(event) => void saveSetting("notifications_enabled", event.target.checked)} /></Field>
+    </Section>
+    <Section title={_("Database Updates")}>
+      <Field label={_("Update inactivity timeout (minutes)")} detail={_("Minutes without output before stopping a manual database update. Active updates have no total time limit.")}>
+        <input type="number" min="1" max="1440" step="1" value={timeoutDraft ?? String(timeoutMinutes)} onChange={(event) => setTimeoutDraft(event.target.value)} onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }} onBlur={(event) => {
+          const raw = event.target.value;
+          const minutes = Number(raw);
+          if (/^\d+$/.test(raw) && Number.isSafeInteger(minutes) && minutes >= 1 && minutes <= 1440 && minutes !== timeoutMinutes) {
+            void saveSetting("update_inactivity_timeout_minutes", minutes);
+          }
+          setTimeoutDraft(null);
+        }} />
+      </Field>
     </Section>
     {isFlatpak && <Section title={_("File Manager Integration")} description={_("Add context menu actions for supported file managers.")}><button type="button" onClick={() => setDialogOpen(true)}>{_("Configure Integration")}</button></Section>}
     {dialogOpen && <Modal title={_("File Manager Integration")} onClose={() => setDialogOpen(false)}>

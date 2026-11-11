@@ -15,6 +15,16 @@ use std::{
 const SETTINGS_FILE: &str = "settings.json";
 const SETTINGS_LOCK_FILE: &str = ".settings.lock";
 const SECRET_SETTING_KEYS: &[&str] = &["virustotal_api_key", "portmaster_api_token"];
+const DEFAULT_UPDATE_INACTIVITY_TIMEOUT_MINUTES: u64 = 10;
+const UPDATE_INACTIVITY_TIMEOUT_KEY: &str = "update_inactivity_timeout_minutes";
+
+pub(crate) fn update_inactivity_timeout_minutes(settings: &Value) -> u64 {
+    settings
+        .get(UPDATE_INACTIVITY_TIMEOUT_KEY)
+        .and_then(Value::as_u64)
+        .filter(|minutes| (1..=1440).contains(minutes))
+        .unwrap_or(DEFAULT_UPDATE_INACTIVITY_TIMEOUT_MINUTES)
+}
 
 pub fn dispatch(ctx: &crate::common::Context, action: &str, args: Value) -> AppResult<Value> {
     match action {
@@ -93,6 +103,7 @@ pub fn default_settings() -> Value {
         "daemon_socket_path": "",
         "clamd_conf_path": "",
         "freshclam_conf_path": "",
+        "update_inactivity_timeout_minutes": DEFAULT_UPDATE_INACTIVITY_TIMEOUT_MINUTES,
         "clamd_size_limit_unit_migration_done": false,
         "privileged_helper_prompt_skipped_version": "",
         "virustotal_api_key": null,
@@ -223,17 +234,24 @@ fn read_unlocked(paths: &Paths) -> AppResult<(Value, bool)> {
         .expect("defaults are an object")
         .extend(loaded.as_object().expect("validated object").clone());
     let before = merged.get("exclusion_patterns").cloned();
+    let timeout_before = merged.get(UPDATE_INACTIVITY_TIMEOUT_KEY).cloned();
     normalize_settings(&mut merged);
-    let normalized = before.as_ref() != merged.get("exclusion_patterns");
+    let normalized = before.as_ref() != merged.get("exclusion_patterns")
+        || timeout_before.as_ref() != merged.get(UPDATE_INACTIVITY_TIMEOUT_KEY);
     Ok((merged, normalized))
 }
 
 fn normalize_settings(settings: &mut Value) {
+    let timeout = update_inactivity_timeout_minutes(settings);
     let Some(object) = settings.as_object_mut() else {
         return;
     };
     let exclusions = normalize_exclusion_patterns(object.get("exclusion_patterns"));
     object.insert("exclusion_patterns".to_owned(), exclusions);
+    object.insert(
+        UPDATE_INACTIVITY_TIMEOUT_KEY.to_owned(),
+        Value::from(timeout),
+    );
 }
 
 fn write_unlocked(paths: &Paths, settings: &Value) -> AppResult<()> {
@@ -319,6 +337,76 @@ mod tests {
             settings["exclusion_patterns"][2],
             json!({"pattern":"ignored", "type":"pattern", "enabled":true})
         );
+    }
+
+    #[test]
+    fn update_inactivity_timeout_round_trips_and_preserves_unknown_settings() {
+        let temp = TempDir::new().expect("temporary directory");
+        let context = Context::with_paths(paths(&temp)).expect("context");
+        for minutes in [1, 10, 1440] {
+            context
+                .update_settings(json!({
+                    "update_inactivity_timeout_minutes": minutes,
+                    "future_setting": {"retained": true}
+                }))
+                .expect("settings saved");
+            let settings = context.settings().expect("settings read");
+            assert_eq!(settings["update_inactivity_timeout_minutes"], minutes);
+            assert_eq!(settings["future_setting"], json!({"retained": true}));
+        }
+    }
+
+    #[test]
+    fn legacy_settings_without_update_inactivity_timeout_use_default() {
+        let temp = TempDir::new().expect("temporary directory");
+        let paths = paths(&temp);
+        fs::create_dir_all(&paths.config_dir).expect("config directory");
+        fs::write(
+            paths.config_dir.join(SETTINGS_FILE),
+            br#"{"future_setting":{"retained":true}}"#,
+        )
+        .expect("write legacy settings");
+        let settings = read(&paths).expect("read settings");
+        assert_eq!(settings["update_inactivity_timeout_minutes"], 10);
+        assert_eq!(settings["future_setting"], json!({"retained": true}));
+    }
+
+    #[test]
+    fn invalid_update_inactivity_timeout_is_normalized_and_persisted() {
+        let temp = TempDir::new().expect("temporary directory");
+        let paths = paths(&temp);
+        fs::create_dir_all(&paths.config_dir).expect("config directory");
+        let settings_path = paths.config_dir.join(SETTINGS_FILE);
+        for invalid in [
+            json!(null),
+            json!(0),
+            json!(-1),
+            json!(1.5),
+            json!(1441),
+            json!("10"),
+            json!([]),
+        ] {
+            fs::write(
+                &settings_path,
+                serde_json::to_vec(&json!({
+                    "update_inactivity_timeout_minutes": invalid,
+                    "future_setting": {"retained": true}
+                }))
+                .expect("encode settings"),
+            )
+            .expect("write settings");
+            let settings = read(&paths).expect("read settings");
+            let persisted: Value =
+                serde_json::from_slice(&fs::read(&settings_path).expect("read file"))
+                    .expect("decode settings");
+            assert_eq!(settings["update_inactivity_timeout_minutes"], 10);
+            assert_eq!(persisted["update_inactivity_timeout_minutes"], 10);
+            assert_eq!(persisted["future_setting"], json!({"retained": true}));
+        }
+        let updated = update(&paths, json!({"update_inactivity_timeout_minutes": 0}))
+            .expect("update settings");
+        assert_eq!(updated["update_inactivity_timeout_minutes"], 10);
+        assert_eq!(updated["future_setting"], json!({"retained": true}));
     }
 
     #[test]

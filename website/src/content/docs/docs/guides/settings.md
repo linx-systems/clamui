@@ -9,7 +9,7 @@ Open **Preferences** with `Ctrl+,`. Most app preferences and exclusions save imm
 
 | Task | Page |
 | --- | --- |
-| Language, close behavior, tray startup, live progress | Behavior |
+| Language, close behavior, tray startup, live progress, manual update timeout | Behavior |
 | Select ClamAV mode and socket | Scanner |
 | Schedule recurring scans | Scheduled Scans |
 | Definition update settings | Database |
@@ -24,6 +24,12 @@ For every raw key, default, location, and host boundary see [Configuration](/doc
 ## Language
 
 Open **Preferences → Behavior → Language** to use **Automatic (System)** or choose `de`, `en`, `es`, `fr`, `hu`, `it`, `nb`, `pt_BR`, `vi`, or `zh_CN`. Restart ClamUI after changing the selection so the core, CLI, tray, and desktop load the same catalog. See [translation](/docs/contributing/translating/) for regional locale normalization and plural-form conventions.
+
+## Database update timeout
+
+In **Preferences → Behavior → Database Updates**, set **Update inactivity timeout (minutes)** to a whole number from 1 to 1440. It saves automatically and applies to manual and forced updates started afterwards. The default is 10 minutes; zero does not disable the timeout.
+
+The timeout measures time without any `freshclam` standard-output or standard-error bytes, not total update duration. An update that continues producing output can run longer than the configured limit. Updates requested by signaling the existing service do not use this limit.
 
 ## Global scan exclusions
 

@@ -71,6 +71,8 @@ flatpak override --user --filesystem=/path/to/directory io.github.linx_systems.C
 
 Database updates use host `freshclam`, which may need the host service's usual permissions. ClamUI cannot modify host configuration without the trusted canonical native helper and polkit policy; failure leaves protected files unchanged.
 
+If a manual or forced update stops for inactivity, check host `freshclam` output and connectivity. **Preferences → Behavior → Database Updates** controls the allowed time without stdout or stderr output (10 minutes by default). Active updates have no total time limit; signaling an existing update service is not subject to this setting.
+
 
 ## Privileged helper is not trusted
 

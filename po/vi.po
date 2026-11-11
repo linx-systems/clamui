@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-05 10:55+0100\n"
+"POT-Creation-Date: 2026-11-11 20:15+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -1604,37 +1604,37 @@ msgstr ""
 "Không tìm thấy tệp cơ sở dữ liệu ClamAV nào ở các vị trí tiêu chuẩn trên hệ "
 "thống chủ"
 
-#: crates/clamui-core/src/scanner.rs:1747
+#: crates/clamui-core/src/scanner.rs:1752
 msgid "Scan cancelled by user"
 msgstr "Người dùng đã hủy quá trình quét"
 
-#: crates/clamui-core/src/scanner.rs:1754
+#: crates/clamui-core/src/scanner.rs:1759
 msgid "No files could be scanned"
 msgstr "Không thể quét tệp nào"
 
-#: crates/clamui-core/src/scanner.rs:1760
+#: crates/clamui-core/src/scanner.rs:1765
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "Mục tiêu quét không tồn tại hoặc chứa byte NUL không hợp lệ"
 
-#: crates/clamui-core/src/scanner.rs:1767
+#: crates/clamui-core/src/scanner.rs:1772
 msgid "Scan target is not a regular file or directory"
 msgstr "Mục tiêu quét không phải là tệp hoặc thư mục thông thường"
 
-#: crates/clamui-core/src/scanner.rs:1776
+#: crates/clamui-core/src/scanner.rs:1781
 msgid "Threats were detected, but details are unavailable."
 msgstr "Đã phát hiện các mối đe dọa, nhưng không có thông tin chi tiết."
 
-#: crates/clamui-core/src/scanner.rs:1788
+#: crates/clamui-core/src/scanner.rs:1793
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "Không thể truy cập {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1801
+#: crates/clamui-core/src/scanner.rs:1806
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "Không thể đọc {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1820
+#: crates/clamui-core/src/scanner.rs:1825
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -1800,11 +1800,11 @@ msgstr "Bỏ qua lượt quét: đang dùng pin ({percent:.0f}%)"
 msgid "Skipping scan: running on battery power"
 msgstr "Bỏ qua lượt quét: đang dùng pin"
 
-#: crates/clamui-core/src/updater.rs:132
+#: crates/clamui-core/src/updater.rs:131
 msgid "Update cancelled by user"
 msgstr "Người dùng đã hủy cập nhật"
 
-#: crates/clamui-core/src/updater.rs:137
+#: crates/clamui-core/src/updater.rs:136
 msgid ""
 "Update process output did not close after cleanup; result cannot be "
 "classified."
@@ -1813,12 +1813,12 @@ msgstr ""
 "định kết quả."
 
 #. Translators: Keep `freshclam` and `PID` unchanged; preserve `{pid}` as the process identifier.
-#: crates/clamui-core/src/updater.rs:505
+#: crates/clamui-core/src/updater.rs:503
 msgid "Update signal sent to freshclam service (PID {pid})"
 msgstr "Đã gửi tín hiệu cập nhật đến dịch vụ freshclam (PID {pid})"
 
 #. Translators: Keep `freshclam`, `PID`, and `sudo systemctl stop clamav-freshclam` unchanged; preserve `{pid}` as the process identifier.
-#: crates/clamui-core/src/updater.rs:711
+#: crates/clamui-core/src/updater.rs:793
 msgid ""
 "Another freshclam instance is running (PID {pid}). Stop it first: sudo "
 "systemctl stop clamav-freshclam"
@@ -1826,30 +1826,35 @@ msgstr ""
 "Một tiến trình freshclam khác đang chạy (PID {pid}). Hãy dừng nó trước: sudo "
 "systemctl stop clamav-freshclam"
 
+#: crates/clamui-core/src/updater.rs:823
+msgid "Update timed out after {minutes} minute without output"
+msgid_plural "Update timed out after {minutes} minutes without output"
+msgstr[0] "Cập nhật hết thời gian chờ sau {minutes} phút không có đầu ra"
+
 #. Translators: The em dash separates the completion state from the count; preserve `{count}`.
 #. Translators: The em dash separates the completion state from the count; preserve `{count}`.
-#: crates/clamui-core/src/updater.rs:829
+#: crates/clamui-core/src/updater.rs:962
 msgid "Database update completed — {count} database updated"
 msgid_plural "Database update completed — {count} databases updated"
 msgstr[0] ""
 "Cập nhật cơ sở dữ liệu đã hoàn tất — đã cập nhật {count} cơ sở dữ liệu"
 
 #. Translators: The em dash separates the completion state from the result.
-#: crates/clamui-core/src/updater.rs:839
+#: crates/clamui-core/src/updater.rs:972
 msgid "Database update completed — Already up to date"
 msgstr "Cập nhật cơ sở dữ liệu đã hoàn tất — đã là phiên bản mới nhất"
 
-#: crates/clamui-core/src/updater.rs:906
+#: crates/clamui-core/src/updater.rs:1039
 msgid "Selected freshclam config does not exist: {path}"
 msgstr "Tệp cấu hình freshclam đã chọn không tồn tại: {path}"
 
 #. Translators: Keep `freshclam` and `PID` unchanged; they name the service and its process identifier.
-#: crates/clamui-core/src/updater.rs:938
+#: crates/clamui-core/src/updater.rs:1071
 msgid "Could not determine freshclam PID"
 msgstr "Không thể xác định PID của freshclam"
 
 #. Translators: Keep `sudo systemctl restart clamav-freshclam` unchanged and preserve `{error}` as the raw diagnostic.
-#: crates/clamui-core/src/updater.rs:948
+#: crates/clamui-core/src/updater.rs:1081
 msgid ""
 "Could not trigger freshclam service update. Try restarting the service: sudo "
 "systemctl restart clamav-freshclam ({error})"
@@ -2156,8 +2161,8 @@ msgstr "Giao diện máy tính để bàn gốc dành cho ClamAV."
 msgid "Version"
 msgstr "Phiên bản"
 
-#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:227
-#: desktop/src/pages/SettingsPreferences.tsx:228
+#: desktop/src/App.tsx:1025 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "Ngôn ngữ"
 
@@ -2209,8 +2214,8 @@ msgstr "Ghi nhớ lựa chọn của tôi"
 #: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
 #: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
 #: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
-#: desktop/src/pages/SettingsPreferences.tsx:368
-#: desktop/src/pages/SettingsPreferences.tsx:457
+#: desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
 msgstr "Hủy"
 
@@ -2236,7 +2241,7 @@ msgstr "Hủy quét và đóng"
 
 #: desktop/src/App.tsx:1058 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
-#: desktop/src/pages/SettingsPreferences.tsx:257
+#: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "Đóng"
 
@@ -2460,8 +2465,8 @@ msgstr "Đã hủy"
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
-#: desktop/src/pages/SettingsPreferences.tsx:431
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:448
+#: desktop/src/pages/SettingsPreferences.tsx:472
 #: desktop/src/pages/Statistics.tsx:142
 msgid "Unknown"
 msgstr "Không xác định"
@@ -2649,7 +2654,7 @@ msgstr "Không thể sao chép lệnh: {error}"
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Sao chép"
 
@@ -2737,7 +2742,7 @@ msgid "Running"
 msgstr "Đang chạy"
 
 #: desktop/src/pages/Components.tsx:143
-#: desktop/src/pages/SettingsPreferences.tsx:248
+#: desktop/src/pages/SettingsPreferences.tsx:265
 msgid "Installed"
 msgstr "Đã cài đặt"
 
@@ -2746,7 +2751,7 @@ msgid "Stopped"
 msgstr "Đã dừng"
 
 #: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
-#: desktop/src/pages/SettingsPreferences.tsx:250
+#: desktop/src/pages/SettingsPreferences.tsx:267
 msgid "Not installed"
 msgstr "Chưa cài đặt"
 
@@ -2892,7 +2897,7 @@ msgstr ""
 
 #: desktop/src/pages/ConfigPreferences.tsx:294
 #: desktop/src/pages/ConfigPreferences.tsx:341
-#: desktop/src/pages/SettingsPreferences.tsx:324
+#: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Thêm"
 
@@ -2900,7 +2905,7 @@ msgstr "Thêm"
 #: desktop/src/pages/ConfigPreferences.tsx:345
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
-#: desktop/src/pages/SettingsPreferences.tsx:254
+#: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Gỡ bỏ"
 
@@ -3009,6 +3014,7 @@ msgid "Scan Archive Files"
 msgstr "Quét tệp nén"
 
 #: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Cập nhật cơ sở dữ liệu"
 
@@ -3367,7 +3373,7 @@ msgstr ""
 "bạn mà không lưu thư mục đó thành mục tiêu cụ thể."
 
 #: desktop/src/pages/ConfigPreferences.tsx:854
-#: desktop/src/pages/SettingsPreferences.tsx:346
+#: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Bỏ qua khi dùng pin"
 
@@ -3789,8 +3795,8 @@ msgstr "Các lượt quét và cập nhật trước đây"
 
 #: desktop/src/pages/Logs.tsx:367 desktop/src/pages/Logs.tsx:400
 #: desktop/src/pages/Network.tsx:397 desktop/src/pages/Quarantine.tsx:296
-#: desktop/src/pages/SettingsPreferences.tsx:368
-#: desktop/src/pages/SettingsPreferences.tsx:450
+#: desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/SettingsPreferences.tsx:467
 #: desktop/src/pages/Statistics.tsx:234
 msgid "Refresh"
 msgstr "Làm mới"
@@ -3982,8 +3988,8 @@ msgid "Refreshing…"
 msgstr "Đang làm mới…"
 
 #: desktop/src/pages/Network.tsx:397
-#: desktop/src/pages/SettingsPreferences.tsx:447
-#: desktop/src/pages/SettingsPreferences.tsx:450
+#: desktop/src/pages/SettingsPreferences.tsx:464
+#: desktop/src/pages/SettingsPreferences.tsx:467
 msgid "Loading…"
 msgstr "Đang tải…"
 
@@ -4081,7 +4087,7 @@ msgid "Opening…"
 msgstr "Đang mở…"
 
 #: desktop/src/pages/Preferences.tsx:13
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Behavior"
 msgstr "Hành vi"
 
@@ -4266,7 +4272,7 @@ msgstr "Nhân bản"
 
 #: desktop/src/pages/Profiles.tsx:237 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Quarantine.tsx:307 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Delete"
 msgstr "Xóa"
 
@@ -4792,7 +4798,7 @@ msgstr "Đang quét…"
 msgid "Scan with VirusTotal"
 msgstr "Quét bằng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "Khóa API"
 
@@ -5011,63 +5017,63 @@ msgid "{count} byte"
 msgid_plural "{count} bytes"
 msgstr[0] "{count} byte"
 
-#: desktop/src/pages/SettingsPreferences.tsx:192
+#: desktop/src/pages/SettingsPreferences.tsx:195
 msgid "Unable to read file manager integrations: {error}"
 msgstr "Không thể đọc thông tin tích hợp trình quản lý tệp: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:209
+#: desktop/src/pages/SettingsPreferences.tsx:212
 msgid "{name} integration removed"
 msgstr "Đã gỡ bỏ tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:211
+#: desktop/src/pages/SettingsPreferences.tsx:214
 msgid "{name} integration repaired"
 msgstr "Đã sửa tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:212
+#: desktop/src/pages/SettingsPreferences.tsx:215
 msgid "{name} integration installed"
 msgstr "Đã cài đặt tích hợp {name}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:215
+#: desktop/src/pages/SettingsPreferences.tsx:218
 msgid "Integration {action} failed: {error}"
 msgstr "Thao tác tích hợp {action} thất bại: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:227
+#: desktop/src/pages/SettingsPreferences.tsx:230
 msgid ""
 "Override the application language. Restart ClamUI to apply a language change."
 msgstr ""
 "Thay đổi ngôn ngữ của ứng dụng. Khởi động lại ClamUI để áp dụng thay đổi "
 "ngôn ngữ."
 
-#: desktop/src/pages/SettingsPreferences.tsx:229
+#: desktop/src/pages/SettingsPreferences.tsx:232
 msgid "Restart ClamUI to apply the new language"
 msgstr "Khởi động lại ClamUI để áp dụng ngôn ngữ mới"
 
-#: desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/pages/SettingsPreferences.tsx:233
 msgid "Automatic (System)"
 msgstr "Tự động (theo hệ thống)"
 
-#: desktop/src/pages/SettingsPreferences.tsx:232
 #: desktop/src/pages/SettingsPreferences.tsx:235
+#: desktop/src/pages/SettingsPreferences.tsx:238
 msgid "Window Behavior"
 msgstr "Hành vi cửa sổ"
 
-#: desktop/src/pages/SettingsPreferences.tsx:232
+#: desktop/src/pages/SettingsPreferences.tsx:235
 msgid "Configure what happens when closing the main window."
 msgstr "Thiết lập hành động khi đóng cửa sổ chính."
 
-#: desktop/src/pages/SettingsPreferences.tsx:233
+#: desktop/src/pages/SettingsPreferences.tsx:236
 msgid "When closing window"
 msgstr "Khi đóng cửa sổ"
 
-#: desktop/src/pages/SettingsPreferences.tsx:234
+#: desktop/src/pages/SettingsPreferences.tsx:237
 msgid "Start in System Tray"
 msgstr "Khởi động trong khay hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:234
+#: desktop/src/pages/SettingsPreferences.tsx:237
 msgid "Launch in the background and show only the tray icon."
 msgstr "Chạy ở chế độ nền và chỉ hiện biểu tượng trên khay hệ thống."
 
-#: desktop/src/pages/SettingsPreferences.tsx:235
+#: desktop/src/pages/SettingsPreferences.tsx:238
 msgid ""
 "System tray is not available. Window behavior settings require an active "
 "system tray."
@@ -5075,84 +5081,96 @@ msgstr ""
 "Không có khay hệ thống. Các thiết lập hành vi cửa sổ yêu cầu khay hệ thống "
 "đang hoạt động."
 
-#: desktop/src/pages/SettingsPreferences.tsx:236
+#: desktop/src/pages/SettingsPreferences.tsx:239
 msgid "Scan Behavior"
 msgstr "Hành vi quét"
 
-#: desktop/src/pages/SettingsPreferences.tsx:237
+#: desktop/src/pages/SettingsPreferences.tsx:240
 msgid "Show Live Scan Progress"
 msgstr "Hiện tiến trình quét trực tiếp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:237
+#: desktop/src/pages/SettingsPreferences.tsx:240
 msgid "Display files being scanned in real time."
 msgstr "Hiển thị các tệp đang được quét theo thời gian thực."
 
-#: desktop/src/pages/SettingsPreferences.tsx:238
+#: desktop/src/pages/SettingsPreferences.tsx:241
 msgid "Desktop Notifications"
 msgstr "Thông báo trên màn hình"
 
-#: desktop/src/pages/SettingsPreferences.tsx:238
+#: desktop/src/pages/SettingsPreferences.tsx:241
 msgid "Allow scan, update, device, and VirusTotal notifications."
 msgstr "Cho phép thông báo về quét, cập nhật, thiết bị và VirusTotal."
 
-#: desktop/src/pages/SettingsPreferences.tsx:240
-#: desktop/src/pages/SettingsPreferences.tsx:241
+#: desktop/src/pages/SettingsPreferences.tsx:244
+msgid "Update inactivity timeout (minutes)"
+msgstr "Thời gian chờ khi cập nhật không hoạt động (phút)"
+
+#: desktop/src/pages/SettingsPreferences.tsx:244
+msgid ""
+"Minutes without output before stopping a manual database update. Active "
+"updates have no total time limit."
+msgstr ""
+"Số phút không có đầu ra trước khi dừng cập nhật cơ sở dữ liệu thủ công. Các "
+"bản cập nhật đang hoạt động không có giới hạn tổng thời gian."
+
+#: desktop/src/pages/SettingsPreferences.tsx:257
+#: desktop/src/pages/SettingsPreferences.tsx:258
 msgid "File Manager Integration"
 msgstr "Tích hợp trình quản lý tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:240
+#: desktop/src/pages/SettingsPreferences.tsx:257
 msgid "Add context menu actions for supported file managers."
 msgstr "Thêm thao tác vào menu ngữ cảnh của các trình quản lý tệp được hỗ trợ."
 
-#: desktop/src/pages/SettingsPreferences.tsx:240
+#: desktop/src/pages/SettingsPreferences.tsx:257
 msgid "Configure Integration"
 msgstr "Thiết lập tích hợp"
 
 #. Translators: 'Scan with ClamUI' is the installed file-manager menu label; keep it in English.
-#: desktop/src/pages/SettingsPreferences.tsx:242
+#: desktop/src/pages/SettingsPreferences.tsx:259
 msgid "Install, repair, or remove 'Scan with ClamUI' context menu actions."
 msgstr ""
 "Cài đặt, sửa chữa hoặc gỡ bỏ các mục “Scan with ClamUI” trong menu ngữ cảnh."
 
-#: desktop/src/pages/SettingsPreferences.tsx:251
+#: desktop/src/pages/SettingsPreferences.tsx:268
 msgid "Partially installed"
 msgstr "Đã cài đặt một phần"
 
-#: desktop/src/pages/SettingsPreferences.tsx:253
+#: desktop/src/pages/SettingsPreferences.tsx:270
 msgid "Not available"
 msgstr "Không khả dụng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:253
+#: desktop/src/pages/SettingsPreferences.tsx:270
 msgid "missing"
 msgstr "thiếu"
 
-#: desktop/src/pages/SettingsPreferences.tsx:254
+#: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Repair"
 msgstr "Sửa chữa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:281
+#: desktop/src/pages/SettingsPreferences.tsx:298
 msgid "This exclusion already exists"
 msgstr "Ngoại lệ này đã tồn tại"
 
-#: desktop/src/pages/SettingsPreferences.tsx:297
+#: desktop/src/pages/SettingsPreferences.tsx:314
 msgid "Unable to choose exclusions: {error}"
 msgstr "Không thể chọn ngoại lệ: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:306
+#: desktop/src/pages/SettingsPreferences.tsx:323
 msgid "Preset Exclusions"
 msgstr "Ngoại lệ có sẵn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:306
+#: desktop/src/pages/SettingsPreferences.tsx:323
 msgid "Common directories to exclude from scanning. Changes save immediately."
 msgstr ""
 "Các thư mục thường được loại trừ khỏi quá trình quét. Thay đổi được lưu ngay "
 "lập tức."
 
-#: desktop/src/pages/SettingsPreferences.tsx:317
+#: desktop/src/pages/SettingsPreferences.tsx:334
 msgid "Custom Exclusions"
 msgstr "Ngoại lệ tùy chỉnh"
 
-#: desktop/src/pages/SettingsPreferences.tsx:317
+#: desktop/src/pages/SettingsPreferences.tsx:334
 msgid ""
 "Select files or folders, or enter an absolute file path or pattern. Changes "
 "save immediately."
@@ -5160,90 +5178,90 @@ msgstr ""
 "Chọn tệp hoặc thư mục, hoặc nhập đường dẫn tuyệt đối hay mẫu tên tệp. Thay "
 "đổi được lưu ngay lập tức."
 
-#: desktop/src/pages/SettingsPreferences.tsx:323
+#: desktop/src/pages/SettingsPreferences.tsx:340
 msgid "/path/to/exclude or *.tmp"
 msgstr "/đường/dẫn/cần/loại/trừ hoặc *.tmp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:331
+#: desktop/src/pages/SettingsPreferences.tsx:348
 msgid "Remove {pattern}"
 msgstr "Gỡ bỏ {pattern}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "General"
 msgstr "Chung"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Automatically scan storage devices when they are connected."
 msgstr "Tự động quét thiết bị lưu trữ khi được kết nối."
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Enable Device Auto-Scan"
 msgstr "Bật tự động quét thiết bị"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Device Types"
 msgstr "Loại thiết bị"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Select which kinds of mounted devices may be scanned."
 msgstr "Chọn những loại thiết bị đã gắn kết được phép quét."
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Options"
 msgstr "Tùy chọn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Max Device Size (GB)"
 msgstr "Dung lượng thiết bị tối đa (GB)"
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "0 means no size limit; devices larger than 10,000 GB are not accepted."
 msgstr ""
 "0 nghĩa là không giới hạn dung lượng; không chấp nhận thiết bị lớn hơn "
 "10.000 GB."
 
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Scan Delay (seconds)"
 msgstr "Độ trễ quét (giây)"
 
 #. Translators: The en dash marks the inclusive 0–60-second delay range; use your language's usual range typography.
-#: desktop/src/pages/SettingsPreferences.tsx:343
+#: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Wait after mounting before scanning (0–60 seconds)."
 msgstr "Thời gian chờ sau khi gắn kết trước khi quét (0–60 giây)."
 
-#: desktop/src/pages/SettingsPreferences.tsx:346
+#: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Auto-Quarantine Threats"
 msgstr "Tự động cách ly mối đe dọa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:346
+#: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Notifications"
 msgstr "Thông báo"
 
-#: desktop/src/pages/SettingsPreferences.tsx:346
+#: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Show desktop notifications for device scan events."
 msgstr "Hiển thị thông báo trên màn hình cho các sự kiện quét thiết bị."
 
-#: desktop/src/pages/SettingsPreferences.tsx:346
+#: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Desktop notifications are globally disabled in Behavior."
 msgstr "Thông báo trên màn hình đang bị tắt toàn cục trong mục Hành vi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:359
+#: desktop/src/pages/SettingsPreferences.tsx:376
 msgid "VirusTotal API keys must be exactly 64 hexadecimal characters"
 msgstr "Khóa API VirusTotal phải gồm đúng 64 ký tự thập lục phân"
 
-#: desktop/src/pages/SettingsPreferences.tsx:361
+#: desktop/src/pages/SettingsPreferences.tsx:378
 msgid "Unable to save the API key"
 msgstr "Không thể lưu khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:365
+#: desktop/src/pages/SettingsPreferences.tsx:382
 msgid "API key deleted"
 msgstr "Đã xóa khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:365
+#: desktop/src/pages/SettingsPreferences.tsx:382
 msgid "Unable to delete the API key"
 msgstr "Không thể xóa khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid ""
 "Keys are stored in the operating system keyring or the explicitly enabled "
 "compatibility fallback; they are never returned to the interface."
@@ -5251,63 +5269,63 @@ msgstr ""
 "Khóa được lưu trong kho khóa của hệ điều hành hoặc phương án dự phòng tương "
 "thích đã được bật rõ ràng; khóa không bao giờ được trả về giao diện."
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Configured ({masked}) using {backend}"
 msgstr "Đã cấu hình ({masked}) qua {backend}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "masked"
 msgstr "đã ẩn"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Keyring is locked"
 msgstr "Kho khóa đang bị khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Keyring unavailable"
 msgstr "Kho khóa không khả dụng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Not configured"
 msgstr "Chưa cấu hình"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Exactly 64 hexadecimal characters."
 msgstr "Đúng 64 ký tự thập lục phân."
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Save Key"
 msgstr "Lưu khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Get a free API key"
 msgstr "Nhận khóa API miễn phí"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Delete Key"
 msgstr "Xóa khóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "When API key is missing"
 msgstr "Khi chưa có khóa API"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Always ask"
 msgstr "Luôn hỏi"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Open VirusTotal website"
 msgstr "Mở trang web VirusTotal"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Show notification only"
 msgstr "Chỉ hiển thị thông báo"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Information"
 msgstr "Thông tin"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid ""
 "Free tier: 4 requests per minute, 500 per day. Files up to 650 MB can be "
 "scanned."
@@ -5315,11 +5333,11 @@ msgstr ""
 "Gói miễn phí: 4 yêu cầu mỗi phút, 500 yêu cầu mỗi ngày. Có thể quét tệp có "
 "dung lượng tối đa 650 MB."
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Delete VirusTotal API key"
 msgstr "Xóa khóa API VirusTotal"
 
-#: desktop/src/pages/SettingsPreferences.tsx:368
+#: desktop/src/pages/SettingsPreferences.tsx:385
 msgid ""
 "This removes the key from secure storage. You will need to enter it again to "
 "use VirusTotal scanning."
@@ -5327,189 +5345,189 @@ msgstr ""
 "Thao tác này xóa khóa khỏi kho lưu trữ bảo mật. Bạn sẽ cần nhập lại khóa để "
 "dùng tính năng quét bằng VirusTotal."
 
-#: desktop/src/pages/SettingsPreferences.tsx:376
+#: desktop/src/pages/SettingsPreferences.tsx:393
 msgid "{count} file"
 msgid_plural "{count} files"
 msgstr[0] "{count} tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:383
+#: desktop/src/pages/SettingsPreferences.tsx:400
 msgid "Unable to read debug logs: {error}"
 msgstr "Không thể đọc nhật ký gỡ lỗi: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:391
+#: desktop/src/pages/SettingsPreferences.tsx:408
 msgid "Unable to read system information: {error}"
 msgstr "Không thể đọc thông tin hệ thống: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:398
+#: desktop/src/pages/SettingsPreferences.tsx:415
 msgid "ZIP archives"
 msgstr "Tệp nén ZIP"
 
-#: desktop/src/pages/SettingsPreferences.tsx:399
+#: desktop/src/pages/SettingsPreferences.tsx:416
 msgid "All files"
 msgstr "Tất cả tệp"
 
-#: desktop/src/pages/SettingsPreferences.tsx:401
+#: desktop/src/pages/SettingsPreferences.tsx:418
 msgid "Logs exported successfully"
 msgstr "Đã xuất nhật ký thành công"
 
-#: desktop/src/pages/SettingsPreferences.tsx:403
+#: desktop/src/pages/SettingsPreferences.tsx:420
 msgid "Unable to export logs: {error}"
 msgstr "Không thể xuất nhật ký: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:415
+#: desktop/src/pages/SettingsPreferences.tsx:432
 msgid "{count} log file cleared"
 msgid_plural "{count} log files cleared"
 msgstr[0] "Đã xóa {count} tệp nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:418
+#: desktop/src/pages/SettingsPreferences.tsx:435
 msgid "Unable to clear logs: {error}"
 msgstr "Không thể xóa nhật ký: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:425
+#: desktop/src/pages/SettingsPreferences.tsx:442
 msgid "ClamUI System Information"
 msgstr "Thông tin hệ thống ClamUI"
 
-#: desktop/src/pages/SettingsPreferences.tsx:427
+#: desktop/src/pages/SettingsPreferences.tsx:444
 msgid "Installation Type: {value}"
 msgstr "Kiểu cài đặt: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:428
+#: desktop/src/pages/SettingsPreferences.tsx:445
 msgid "Distribution: {value}"
 msgstr "Bản phân phối: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:429
+#: desktop/src/pages/SettingsPreferences.tsx:446
 msgid "Desktop Environment: {value}"
 msgstr "Môi trường desktop: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:430
+#: desktop/src/pages/SettingsPreferences.tsx:447
 msgid "Rust Runtime: {value}"
 msgstr "Môi trường chạy Rust: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:431
+#: desktop/src/pages/SettingsPreferences.tsx:448
 msgid "Tauri Runtime: {value}"
 msgstr "Môi trường chạy Tauri: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:432
+#: desktop/src/pages/SettingsPreferences.tsx:449
 msgid "Platform: {value}"
 msgstr "Nền tảng: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:433
+#: desktop/src/pages/SettingsPreferences.tsx:450
 msgid "Architecture: {value}"
 msgstr "Kiến trúc: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:434
+#: desktop/src/pages/SettingsPreferences.tsx:451
 msgid "Version: {value}"
 msgstr "Phiên bản: {value}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:438
+#: desktop/src/pages/SettingsPreferences.tsx:455
 msgid "System information copied to clipboard"
 msgstr "Đã sao chép thông tin hệ thống vào bộ nhớ tạm"
 
-#: desktop/src/pages/SettingsPreferences.tsx:440
+#: desktop/src/pages/SettingsPreferences.tsx:457
 msgid "Unable to copy system information: {error}"
 msgstr "Không thể sao chép thông tin hệ thống: {error}"
 
-#: desktop/src/pages/SettingsPreferences.tsx:445
+#: desktop/src/pages/SettingsPreferences.tsx:462
 msgid "Logging Settings"
 msgstr "Cài đặt ghi nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:445
+#: desktop/src/pages/SettingsPreferences.tsx:462
 msgid "Higher levels produce more detailed logs and apply immediately."
 msgstr ""
 "Mức càng cao thì nhật ký càng chi tiết; thay đổi được áp dụng ngay lập tức."
 
-#: desktop/src/pages/SettingsPreferences.tsx:446
+#: desktop/src/pages/SettingsPreferences.tsx:463
 msgid "Log Level"
 msgstr "Mức nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:447
+#: desktop/src/pages/SettingsPreferences.tsx:464
 msgid "Log File Location"
 msgstr "Vị trí tệp nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:449
+#: desktop/src/pages/SettingsPreferences.tsx:466
 msgid "Log Management"
 msgstr "Quản lý nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:449
+#: desktop/src/pages/SettingsPreferences.tsx:466
 msgid ""
 "Export a ZIP archive for support or permanently clear the application logs."
 msgstr ""
 "Xuất tệp nén ZIP để gửi hỗ trợ hoặc xóa vĩnh viễn nhật ký của ứng dụng."
 
-#: desktop/src/pages/SettingsPreferences.tsx:450
+#: desktop/src/pages/SettingsPreferences.tsx:467
 msgid "Current Log Size"
 msgstr "Dung lượng nhật ký hiện tại"
 
-#: desktop/src/pages/SettingsPreferences.tsx:451
+#: desktop/src/pages/SettingsPreferences.tsx:468
 msgid "Export Logs"
 msgstr "Xuất nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:451
+#: desktop/src/pages/SettingsPreferences.tsx:468
 msgid "Save all sanitized debug logs to a ZIP archive."
 msgstr ""
 "Lưu toàn bộ nhật ký gỡ lỗi đã lọc thông tin nhạy cảm vào một tệp nén ZIP."
 
-#: desktop/src/pages/SettingsPreferences.tsx:452
+#: desktop/src/pages/SettingsPreferences.tsx:469
 msgid "Clear Logs"
 msgstr "Xóa nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:452
+#: desktop/src/pages/SettingsPreferences.tsx:469
 msgid "This permanently deletes all debug log files."
 msgstr "Thao tác này xóa vĩnh viễn toàn bộ tệp nhật ký gỡ lỗi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:452
+#: desktop/src/pages/SettingsPreferences.tsx:469
 msgid "Clear"
 msgstr "Xóa"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:471
 msgid "System Information"
 msgstr "Thông tin hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:454
+#: desktop/src/pages/SettingsPreferences.tsx:471
 msgid "Useful for troubleshooting and bug reports."
 msgstr "Hữu ích khi khắc phục sự cố và báo cáo lỗi."
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Installation Type"
 msgstr "Kiểu cài đặt"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Distribution"
 msgstr "Bản phân phối"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Desktop Environment"
 msgstr "Môi trường desktop"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Rust Runtime"
 msgstr "Môi trường chạy Rust"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Tauri Runtime"
 msgstr "Môi trường chạy Tauri"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Platform"
 msgstr "Nền tảng"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy System Info"
 msgstr "Sao chép thông tin hệ thống"
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy all system information to the clipboard."
 msgstr "Sao chép toàn bộ thông tin hệ thống vào bộ nhớ tạm."
 
-#: desktop/src/pages/SettingsPreferences.tsx:455
+#: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Loading system information…"
 msgstr "Đang tải thông tin hệ thống…"
 
-#: desktop/src/pages/SettingsPreferences.tsx:457
+#: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Clear logs"
 msgstr "Xóa nhật ký"
 
-#: desktop/src/pages/SettingsPreferences.tsx:457
+#: desktop/src/pages/SettingsPreferences.tsx:474
 msgid ""
 "This permanently deletes {count} log file totaling {size}. This action "
 "cannot be undone."
@@ -5520,7 +5538,7 @@ msgstr[0] ""
 "Thao tác này xóa vĩnh viễn {count} tệp nhật ký, tổng dung lượng {size}. "
 "Không thể hoàn tác thao tác này."
 
-#: desktop/src/pages/SettingsPreferences.tsx:457
+#: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Delete Logs"
 msgstr "Xóa nhật ký"
 

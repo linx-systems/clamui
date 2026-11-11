@@ -7,13 +7,12 @@ use crate::AppResult;
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
-use std::io::{BufRead, BufReader};
+use std::io::Read;
 use std::process::{Command, Stdio};
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
-const UPDATE_TIMEOUT: Duration = Duration::from_secs(600);
 const TERMINATE_GRACE: Duration = Duration::from_secs(5);
 const KILL_WAIT: Duration = Duration::from_secs(2);
 const OUTPUT_DRAIN_GRACE: Duration = Duration::from_secs(2);
@@ -152,7 +151,6 @@ fn localize_result(ctx: &Context, result: &mut UpdateResult) {
             | "Connection error. Please check your network connection."
             | "DNS resolution failed. Please check your network settings."
             | "Update failed with an unknown error. Check the logs for details."
-            | "Update timed out after 10 minutes"
             | "Update cancelled by user" => Some(crate::i18n::translate(ctx, message)),
             _ => None,
         };
@@ -646,16 +644,99 @@ fn terminate_group(pid: u32, signal: &str) {
     );
 }
 
-fn pipe_lines<R: std::io::Read + Send + 'static>(
-    reader: R,
+enum UpdateOutput {
+    Bytes(bool, Vec<u8>),
+    End(bool),
+}
+
+fn pipe_output<R: Read + Send + 'static>(
+    mut reader: R,
     stderr: bool,
-    sender: mpsc::Sender<(bool, String)>,
+    sender: mpsc::Sender<UpdateOutput>,
+    last_activity: Arc<Mutex<Instant>>,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
-        for line in BufReader::new(reader).lines().map_while(Result::ok) {
-            let _ = sender.send((stderr, line));
+        let mut buffer = [0; 8192];
+        loop {
+            match reader.read(&mut buffer) {
+                Ok(0) => break,
+                Ok(count) => {
+                    *last_activity
+                        .lock()
+                        .unwrap_or_else(|error| error.into_inner()) = Instant::now();
+                    if sender
+                        .send(UpdateOutput::Bytes(stderr, buffer[..count].to_vec()))
+                        .is_err()
+                    {
+                        return;
+                    }
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                Err(_) => break,
+            }
         }
+        let _ = sender.send(UpdateOutput::End(stderr));
     })
+}
+
+#[derive(Default)]
+struct UpdateOutputBuffer {
+    stdout: String,
+    stderr: String,
+    stdout_pending: Vec<u8>,
+    stderr_pending: Vec<u8>,
+}
+
+impl UpdateOutputBuffer {
+    fn receive(&mut self, ctx: &Context, id: &str, output: UpdateOutput) {
+        let (is_stderr, bytes, finished) = match output {
+            UpdateOutput::Bytes(is_stderr, bytes) => (is_stderr, bytes, false),
+            UpdateOutput::End(is_stderr) => (is_stderr, Vec::new(), true),
+        };
+        let pending = if is_stderr {
+            &mut self.stderr_pending
+        } else {
+            &mut self.stdout_pending
+        };
+        let search_from = pending.len();
+        pending.extend_from_slice(&bytes);
+        let mut start = 0;
+        for (index, byte) in pending.iter().enumerate().skip(search_from) {
+            if *byte == b'\n' {
+                let mut line = &pending[start..index];
+                if line.last() == Some(&b'\r') {
+                    line = &line[..line.len() - 1];
+                }
+                append_update_line(
+                    ctx,
+                    id,
+                    &mut self.stdout,
+                    &mut self.stderr,
+                    (is_stderr, String::from_utf8_lossy(line).as_ref()),
+                );
+                start = index + 1;
+            }
+        }
+        if start != 0 {
+            pending.drain(..start);
+        }
+        if finished && !pending.is_empty() {
+            let line = String::from_utf8_lossy(pending);
+            append_update_line(
+                ctx,
+                id,
+                &mut self.stdout,
+                &mut self.stderr,
+                (is_stderr, line.as_ref()),
+            );
+            pending.clear();
+        }
+    }
+
+    fn finish(&mut self, ctx: &Context, id: &str) {
+        self.receive(ctx, id, UpdateOutput::End(false));
+        self.receive(ctx, id, UpdateOutput::End(true));
+    }
 }
 
 fn append_update_line(
@@ -663,31 +744,32 @@ fn append_update_line(
     id: &str,
     stdout: &mut String,
     stderr: &mut String,
-    (is_stderr, line): (bool, String),
+    (is_stderr, line): (bool, &str),
 ) {
     ctx.emit(
         "update-progress",
-        json!({"id": id, "line": sanitize_line(&line)}),
+        json!({"id": id, "line": sanitize_line(line)}),
     );
     let target = if is_stderr { stderr } else { stdout };
-    target.push_str(&line);
+    target.push_str(line);
     target.push('\n');
 }
 
 fn drain_update_output(
     ctx: &Context,
     id: &str,
-    receiver: &mpsc::Receiver<(bool, String)>,
-    stdout: &mut String,
-    stderr: &mut String,
+    receiver: &mpsc::Receiver<UpdateOutput>,
+    output: &mut UpdateOutputBuffer,
     wait: Duration,
 ) -> bool {
     let deadline = Instant::now() + wait;
     loop {
+        if Instant::now() >= deadline {
+            return false;
+        }
         match receiver.recv_timeout(Duration::from_millis(50)) {
-            Ok(line) => append_update_line(ctx, id, stdout, stderr, line),
+            Ok(chunk) => output.receive(ctx, id, chunk),
             Err(mpsc::RecvTimeoutError::Disconnected) => return true,
-            Err(mpsc::RecvTimeoutError::Timeout) if Instant::now() >= deadline => return false,
             Err(mpsc::RecvTimeoutError::Timeout) => {}
         }
     }
@@ -716,10 +798,50 @@ fn run_manual(
             .replace("{pid}", &pid),
         );
     }
-    let mut command = match update_command(force, config_path) {
+    let command = match update_command(force, config_path) {
         Ok(command) => command,
         Err(error) => return UpdateResult::error(error),
     };
+    let settings = ctx.settings().unwrap_or(Value::Null);
+    let minutes = crate::settings::update_inactivity_timeout_minutes(&settings);
+    run_update_command(
+        ctx,
+        id,
+        command,
+        cancelled,
+        Duration::from_secs(minutes * 60),
+        minutes,
+    )
+}
+
+fn timeout_result(
+    ctx: &Context,
+    output: UpdateOutputBuffer,
+    exit_code: i32,
+    minutes: u64,
+) -> UpdateResult {
+    let message = trnf(
+        ctx,
+        "Update timed out after {minutes} minute without output",
+        "Update timed out after {minutes} minutes without output",
+        minutes,
+        &[("{minutes}", &minutes.to_string())],
+    );
+    let mut result = UpdateResult::error(message);
+    result.stdout = sanitize_text(&output.stdout);
+    result.stderr = sanitize_text(&output.stderr);
+    result.exit_code = exit_code;
+    result
+}
+
+fn run_update_command(
+    ctx: &Context,
+    id: &str,
+    mut command: Command,
+    cancelled: &std::sync::atomic::AtomicBool,
+    inactivity_timeout: Duration,
+    timeout_minutes: u64,
+) -> UpdateResult {
     command.stdout(Stdio::piped()).stderr(Stdio::piped());
     isolate_process_group(&mut command);
     let mut child = match command.spawn() {
@@ -728,25 +850,41 @@ fn run_manual(
     };
     let (sender, receiver) = mpsc::channel();
     let mut readers = Vec::new();
+    let last_activity = Arc::new(Mutex::new(Instant::now()));
     if let Some(stdout) = child.stdout.take() {
-        readers.push(pipe_lines(stdout, false, sender.clone()));
+        readers.push(pipe_output(
+            stdout,
+            false,
+            sender.clone(),
+            Arc::clone(&last_activity),
+        ));
     }
     if let Some(stderr) = child.stderr.take() {
-        readers.push(pipe_lines(stderr, true, sender.clone()));
+        readers.push(pipe_output(
+            stderr,
+            true,
+            sender.clone(),
+            Arc::clone(&last_activity),
+        ));
     }
     drop(sender);
-    let started = Instant::now();
-    let mut stdout = String::new();
-    let mut stderr = String::new();
+    let mut output = UpdateOutputBuffer::default();
     let mut terminated = None;
     let mut killed = false;
     let mut timed_out = false;
     loop {
-        while let Ok(line) = receiver.try_recv() {
-            append_update_line(ctx, id, &mut stdout, &mut stderr, line);
+        for _ in 0..256 {
+            match receiver.try_recv() {
+                Ok(chunk) => output.receive(ctx, id, chunk),
+                Err(_) => break,
+            }
         }
         let should_terminate = cancelled.load(std::sync::atomic::Ordering::Acquire)
-            || started.elapsed() >= UPDATE_TIMEOUT;
+            || last_activity
+                .lock()
+                .unwrap_or_else(|error| error.into_inner())
+                .elapsed()
+                >= inactivity_timeout;
         if should_terminate && terminated.is_none() {
             timed_out = !cancelled.load(std::sync::atomic::Ordering::Acquire);
             terminate_group(child.id(), "TERM");
@@ -762,58 +900,53 @@ fn run_manual(
                         }
                         terminate_group(child.id(), "KILL");
                     }
-                    drain_update_output(ctx, id, &receiver, &mut stdout, &mut stderr, KILL_WAIT)
+                    drain_update_output(ctx, id, &receiver, &mut output, KILL_WAIT)
                 } else {
-                    let drained = drain_update_output(
-                        ctx,
-                        id,
-                        &receiver,
-                        &mut stdout,
-                        &mut stderr,
-                        OUTPUT_DRAIN_GRACE,
-                    );
+                    let drained =
+                        drain_update_output(ctx, id, &receiver, &mut output, OUTPUT_DRAIN_GRACE);
                     if drained {
                         true
                     } else {
                         terminate_group(child.id(), "KILL");
-                        drain_update_output(ctx, id, &receiver, &mut stdout, &mut stderr, KILL_WAIT)
+                        drain_update_output(ctx, id, &receiver, &mut output, KILL_WAIT)
                     }
                 };
                 if output_complete {
                     join_readers(readers);
                 }
+                output.finish(ctx, id);
                 let code = status.code().unwrap_or(-1);
                 if cancelled.load(std::sync::atomic::Ordering::Acquire) {
-                    return UpdateResult::cancelled(stdout, stderr, code);
+                    return UpdateResult::cancelled(output.stdout, output.stderr, code);
                 }
                 if timed_out {
-                    return UpdateResult::error("Update timed out after 10 minutes");
+                    return timeout_result(ctx, output, code, timeout_minutes);
                 }
                 if !output_complete {
-                    return UpdateResult::output_incomplete(stdout, stderr, code);
+                    return UpdateResult::output_incomplete(output.stdout, output.stderr, code);
                 }
-                return interpret_result(stdout, stderr, code);
+                return interpret_result(output.stdout, output.stderr, code);
             }
             Ok(None) if terminated.is_some_and(|at| at.elapsed() >= TERMINATE_GRACE) && !killed => {
                 terminate_group(child.id(), "KILL");
                 killed = true;
                 thread::sleep(KILL_WAIT);
                 if child.try_wait().ok().flatten().is_none() {
-                    if drain_update_output(ctx, id, &receiver, &mut stdout, &mut stderr, KILL_WAIT)
-                    {
+                    if drain_update_output(ctx, id, &receiver, &mut output, KILL_WAIT) {
                         join_readers(readers);
                     }
+                    output.finish(ctx, id);
                     return if cancelled.load(std::sync::atomic::Ordering::Acquire) {
-                        UpdateResult::cancelled(stdout, stderr, -1)
+                        UpdateResult::cancelled(output.stdout, output.stderr, -1)
                     } else {
-                        UpdateResult::error("Update timed out after 10 minutes")
+                        timeout_result(ctx, output, -1, timeout_minutes)
                     };
                 }
             }
             Ok(None) => thread::sleep(Duration::from_millis(50)),
             Err(error) => {
                 terminate_group(child.id(), "KILL");
-                if drain_update_output(ctx, id, &receiver, &mut stdout, &mut stderr, KILL_WAIT) {
+                if drain_update_output(ctx, id, &receiver, &mut output, KILL_WAIT) {
                     join_readers(readers);
                 }
                 return UpdateResult::error(format!("Update failed: {error}"));
@@ -975,28 +1108,134 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
 
 #[cfg(test)]
 mod tests {
-    use super::pipe_lines;
+    use super::{pipe_output, run_update_command, UpdateOutputBuffer, UpdateStatus};
+    use crate::{Context, Paths};
     use std::io::Cursor;
-    use std::sync::mpsc;
+    use std::process::Command;
+    use std::sync::atomic::AtomicBool;
+    use std::sync::{mpsc, Arc, Mutex};
+    use std::time::{Duration, Instant};
+
+    fn context(root: &std::path::Path) -> Context {
+        Context::with_paths(Paths {
+            home: root.join("home"),
+            config_dir: root.join("config"),
+            data_dir: root.join("data"),
+        })
+        .unwrap()
+    }
 
     #[test]
     fn pipe_reader_delivers_final_line_before_eof() {
+        let root = tempfile::tempdir().unwrap();
+        let ctx = context(root.path());
         let (sender, receiver) = mpsc::channel();
-        let reader = pipe_lines(
+        let reader = pipe_output(
             Cursor::new(b"final update marker\n".to_vec()),
             false,
             sender,
+            Arc::new(Mutex::new(Instant::now())),
         );
-
-        assert_eq!(
-            receiver.recv().unwrap(),
-            (false, "final update marker".to_owned())
-        );
+        let mut output = UpdateOutputBuffer::default();
+        while let Ok(chunk) = receiver.recv() {
+            output.receive(&ctx, "test", chunk);
+        }
         reader.join().unwrap();
-        assert!(matches!(
-            receiver.recv_timeout(std::time::Duration::from_millis(10)),
-            Err(mpsc::RecvTimeoutError::Disconnected)
-        ));
+        assert_eq!(output.stdout, "final update marker\n");
+    }
+
+    #[test]
+    fn raw_partial_stdout_and_stderr_keep_long_updates_alive() {
+        let root = tempfile::tempdir().unwrap();
+        let ctx = context(root.path());
+        for (script, is_stderr) in [
+            (
+                "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do printf 'part\\r'; sleep 0.1; done",
+                false,
+            ),
+            (
+                "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do printf 'part\\r' >&2; sleep 0.1; done",
+                true,
+            ),
+        ] {
+            let mut command = Command::new("sh");
+            command.args(["-c", script]);
+            let started = Instant::now();
+            let result = run_update_command(
+                &ctx,
+                "active",
+                command,
+                &AtomicBool::new(false),
+                Duration::from_secs(1),
+                1,
+            );
+            assert_eq!(result.status, UpdateStatus::UpToDate, "{result:?}");
+            assert!(started.elapsed() > Duration::from_secs(1));
+            let stream = if is_stderr {
+                &result.stderr
+            } else {
+                &result.stdout
+            };
+            assert_eq!(stream, &format!("{}\n", "part\r".repeat(15)));
+        }
+    }
+
+    #[test]
+    fn inactivity_after_streams_close_stops_process_and_preserves_diagnostics() {
+        let root = tempfile::tempdir().unwrap();
+        let ctx = context(root.path());
+        let mut command = Command::new("sh");
+        command.args([
+            "-c",
+            "printf '\\033[31mpartial\\033[0m'; printf '\\033[31merror\\033[0m' >&2; exec 1>&- 2>&-; sleep 30",
+        ]);
+        let started = Instant::now();
+        let result = run_update_command(
+            &ctx,
+            "idle",
+            command,
+            &AtomicBool::new(false),
+            Duration::from_millis(300),
+            2,
+        );
+        assert_eq!(result.status, UpdateStatus::Error);
+        assert_ne!(result.exit_code, 0);
+        assert!(started.elapsed() < Duration::from_secs(15));
+        assert!(result.error_message.is_some());
+        assert_eq!(result.stdout, "partial\n");
+        assert_eq!(result.stderr, "error\n");
+    }
+
+    #[test]
+    fn cancellation_is_scoped_and_kills_stubborn_process_group() {
+        let root = tempfile::tempdir().unwrap();
+        let ctx = context(root.path());
+        let job = ctx.job("cancelled").unwrap();
+        let other = ctx.job("other").unwrap();
+        let marker = root.path().join("survived");
+        let mut command = Command::new("sh");
+        command
+            .arg("-c")
+            .arg("trap '' TERM; (sleep 7; printf leaked > \"$1\") & wait")
+            .arg("sh")
+            .arg(&marker);
+        let cancelling = ctx.clone();
+        let worker = std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(300));
+            assert!(cancelling.cancel("cancelled"));
+        });
+        let result = run_update_command(
+            &ctx,
+            "cancelled",
+            command,
+            &job.cancelled,
+            Duration::from_secs(20),
+            1,
+        );
+        worker.join().unwrap();
+        assert_eq!(result.status, UpdateStatus::Cancelled);
+        assert!(!other.cancelled.load(std::sync::atomic::Ordering::Acquire));
+        assert!(!marker.exists());
     }
 
     #[test]
