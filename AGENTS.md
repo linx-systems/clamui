@@ -2,6 +2,16 @@
 
 ClamUI is a Linux desktop frontend for **host-installed ClamAV**. The production application is Rust: a headless core, a Tauri 2 native runtime, and a React/TypeScript frontend. Preserve the public desktop, AppStream, and Flatpak ID `io.github.linx_systems.ClamUI`, persisted user data, and the `clamui` command family. Tauri's private bundle identifier is `io.github.linx-systems.ClamUI`; do not substitute it into public identity assets.
 
+## Security first
+
+Security takes precedence over convenience, performance, and package size.
+
+- **Least privilege:** define explicit capabilities in `desktop/src-tauri/capabilities/` for each window or webview and select them in `tauri.conf.json`. Grant only required permissions; do not use broad default permission sets or wildcard grants.
+- **CSP and navigation:** keep a restrictive CSP in `desktop/src-tauri/tauri.conf.json`, with `script-src`, `connect-src`, and other directives limited to required sources. Avoid `unsafe-inline` and `unsafe-eval`; reject untrusted webview/window navigation.
+- **IPC trust boundary:** treat all frontend arguments as untrusted. Validate every argument in Rust before dispatch or side effects, including operation IDs, paths, URLs, and value bounds; sanitize untrusted text before display or logging. Frontend checks are not authorization.
+- **Scoped native access:** scope filesystem, shell, and network plugin permissions narrowly. Custom commands must enforce their own allowlists and operation ownership. Keep native opening, exports, clipboard actions, and external URLs tied to explicit user requests; prefer maintained, scoped Tauri plugins where they fit the existing core and privileged-helper boundaries.
+- **Isolation:** prefer Tauri's isolation pattern when frontend dependencies expand the attack surface; it supplements rather than replaces Rust-side validation and capability restrictions.
+
 ## Architecture and boundaries
 
 | Area | Responsibility |
@@ -16,6 +26,13 @@ ClamUI is a Linux desktop frontend for **host-installed ClamAV**. The production
 The frontend has one request path to the native runtime; the runtime forwards only allowlisted operations to the core. Core events use `{ event, data }` on `clamui-event`. Do not add arbitrary frontend filesystem, shell, process, remote-navigation, or generic IPC access. Keep slow work off the UI thread and scope cancellation to its operation ID.
 
 The Rust core and desktop are the only application implementation. Make behavior changes in their owned source boundaries and preserve the established core-to-runtime-to-frontend contract.
+
+## Native commands and state
+
+- Expose IPC handlers with `#[tauri::command]` and register them only through `tauri::generate_handler!`. Return `Result<T, E>` with serializable errors; use `thiserror` for structured Rust errors and expose only sanitized frontend details.
+- Use `async fn` for I/O-bound handlers; offload blocking core scans, SQLite operations, and process work rather than blocking the UI or async executor. Preserve the headless core boundary.
+- Manage shared runtime state through `tauri::State`, with `Arc` and `Mutex`/`RwLock` where needed. Prefer `tokio::sync` primitives for asynchronous contention; never hold blocking lock guards across `.await`.
+- Keep implementation details private or `pub(crate)`; export only APIs required across crate boundaries.
 
 ## Build and test entry points
 
@@ -57,6 +74,12 @@ bun run build
 
 CI builds native artifacts on the Ubuntu 22.04-compatible baseline. A build on a newer host does not establish that compatibility.
 
+## Release builds and dependency hygiene
+
+- Configure workspace-root `[profile.release]` settings in `Cargo.toml` for size: `lto = true`, `codegen-units = 1`, `opt-level = "z"` (or `"s"` when measurements justify it), `panic = "abort"`, and `strip = true`. Check scan responsiveness and failure handling under the release profile.
+- Set `build.removeUnusedCommands = true` in the Tauri configuration. Use the system WebKitGTK WebView; do not bundle a browser runtime.
+- Keep Tauri, Rust dependencies, and frontend packages current through the repository's locked dependency workflows. Run `cargo audit` and `bun audit` when updating dependencies and address relevant advisories.
+
 ## Coding-agent skills
 
 Project-local coding-agent skills are optional development aids, not build or runtime dependencies. Their canonical imports are in `.agents/skills`; `.claude/skills` provides compatibility links. For installation details, see the published [Development guide](https://clamui.com/docs/contributing/development/).
@@ -75,7 +98,6 @@ Refresh only a deliberately selected upstream skill. `skills-lock.json` records 
 - **Durable data:** retain the existing XDG JSON and SQLite layouts, including settings, profiles, logs, quarantine records/payloads, debug logs, and scheduler-owned system state. Writes must be atomic where the existing contract requires it; preserve unknown settings and existing migration behavior.
 - **Privileges:** protected host configuration goes only through `/usr/bin/clamui-apply-preferences`, its polkit policy, destination allowlists, and `PKEXEC_UID` checks. Maintain protocol-v4 compatibility with a trusted installed helper during upgrades. Do not weaken the boundary or bootstrap trust.
 - **Secrets and untrusted input:** keep VirusTotal keys out of settings payloads, errors, events, and logs; use the established keyring contract. Sanitize external process text before persistence or presentation. Keep quarantine file operations no-follow, integrity-checked, and rollback-safe.
-- **Tauri:** preserve the strict CSP, reject untrusted webview/window navigation, and use native helpers only for explicit user-requested paths, exports, clipboard actions, and approved external URLs.
 
 ## User-facing compatibility
 
