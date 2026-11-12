@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-11 22:58+0100\n"
+"POT-Creation-Date: 2026-11-12 18:08+0100\n"
 "PO-Revision-Date: 2026-06-30 13:00+0200\n"
 "Last-Translator: Robin GUY <contact@robinguy.fr>\n"
 "Language-Team: French\n"
@@ -1632,45 +1632,45 @@ msgid "File hash mismatch — file may be corrupted"
 msgstr ""
 "L’empreinte du fichier ne correspond pas — le fichier est peut-être corrompu"
 
-#: crates/clamui-core/src/scanner.rs:393
+#: crates/clamui-core/src/scanner.rs:436
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 "Aucun fichier de base de données ClamAV n’a été trouvé dans les emplacements "
 "standard de l’hôte"
 
-#: crates/clamui-core/src/scanner.rs:1752
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "Scan cancelled by user"
 msgstr "Analyse interrompue par l'utilisateur"
 
-#: crates/clamui-core/src/scanner.rs:1759
+#: crates/clamui-core/src/scanner.rs:1862
 msgid "No files could be scanned"
 msgstr "Aucun fichier n’a pu être analysé"
 
-#: crates/clamui-core/src/scanner.rs:1765
+#: crates/clamui-core/src/scanner.rs:1868
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "La cible d’analyse n’existe pas ou contient un octet NUL non valide"
 
-#: crates/clamui-core/src/scanner.rs:1772
+#: crates/clamui-core/src/scanner.rs:1875
 msgid "Scan target is not a regular file or directory"
 msgstr "La cible d’analyse n’est ni un fichier ordinaire ni un dossier"
 
-#: crates/clamui-core/src/scanner.rs:1781
+#: crates/clamui-core/src/scanner.rs:1884
 msgid "Threats were detected, but details are unavailable."
 msgstr "Des menaces ont été détectées, mais aucun détail n’est disponible."
 
-#: crates/clamui-core/src/scanner.rs:1793
+#: crates/clamui-core/src/scanner.rs:1896
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "Impossible d’accéder à {count} fichier"
 msgstr[1] "Impossible d’accéder à {count} fichiers"
 
-#: crates/clamui-core/src/scanner.rs:1806
+#: crates/clamui-core/src/scanner.rs:1909
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "Impossible de lire {count} fichier"
 msgstr[1] "Impossible de lire {count} fichiers"
 
-#: crates/clamui-core/src/scanner.rs:1825
+#: crates/clamui-core/src/scanner.rs:1928
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2078,8 +2078,8 @@ msgstr "Exporter"
 msgid "Open"
 msgstr "Ouvrir"
 
-#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:539
+#: desktop/src/pages/Scan.tsx:541
 msgid "Scan"
 msgstr "Analyse"
 
@@ -2128,7 +2128,7 @@ msgstr "Impossible d’ouvrir le lien"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
-#: desktop/src/pages/Scan.tsx:322
+#: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Analyse en cours — attendez qu’elle soit terminée avant de modifier les "
@@ -2258,16 +2258,16 @@ msgstr ""
 "Choisissez de garder ClamUI disponible dans la zone de notification ou de le "
 "quitter complètement."
 
-#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Se souvenir de mon choix"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
-#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
-#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
+#: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
+#: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
+#: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
+#: desktop/src/pages/Results.tsx:206 desktop/src/pages/Scan.tsx:568
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2487,6 +2487,63 @@ msgstr "Ouvrir les instructions de réparation"
 #: desktop/src/pages/ConfigPreferences.tsx:890
 msgid "See Configuration"
 msgstr "Voir la configuration"
+
+#: desktop/src/ScanProgressPanel.tsx:18
+msgid "Target {index}/{count}: {path}"
+msgstr "Cible {index}/{count} : {path}"
+
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
+#: desktop/src/pages/Scan.tsx:530
+msgid "Scan target"
+msgstr "Cible d’analyse"
+
+#: desktop/src/ScanProgressPanel.tsx:22
+msgid "Scanning"
+msgstr "Analyse en cours"
+
+#: desktop/src/ScanProgressPanel.tsx:24
+msgid "{count} file scanned overall"
+msgid_plural "{count} files scanned overall"
+msgstr[0] "{count} fichier analysé au total"
+msgstr[1] "{count} fichiers analysés au total"
+
+#: desktop/src/ScanProgressPanel.tsx:26
+msgid "Waiting for scan data…"
+msgstr "En attente des données d’analyse…"
+
+#: desktop/src/ScanProgressPanel.tsx:27
+msgid "Scan progress"
+msgstr "Progression de l’analyse"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+msgid "{count} file scanned"
+msgid_plural "{count} files scanned"
+msgstr[0] "{count} fichier analysé"
+msgstr[1] "{count} fichiers analysés"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Statistics.tsx:161
+msgid "{count} threat"
+msgid_plural "{count} threats"
+msgstr[0] "{count} menace"
+msgstr[1] "{count} menaces"
+
+#: desktop/src/ScanProgressPanel.tsx:29
+msgid "File estimate is approximate; progress is indeterminate."
+msgstr ""
+"Le nombre estimé de fichiers est approximatif ; la progression est "
+"indéterminée."
+
+#: desktop/src/ScanProgressPanel.tsx:31
+msgid ""
+"Live progress is disabled. The completed scan result will remain available."
+msgstr ""
+"Le suivi de la progression en temps réel est désactivé. Le résultat final de "
+"l’analyse restera disponible."
+
+#: desktop/src/ScanProgressPanel.tsx:32
+msgid "Cancel All"
+msgstr "Tout annuler"
 
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
@@ -2720,7 +2777,7 @@ msgstr "Impossible de copier la commande : {error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Copier"
@@ -2841,7 +2898,7 @@ msgid "Checking…"
 msgstr "Vérification en cours…"
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Refresh status"
 msgstr "Actualiser l’état"
 
@@ -2974,7 +3031,7 @@ msgstr "Ajouter"
 #: desktop/src/pages/ConfigPreferences.tsx:299
 #: desktop/src/pages/ConfigPreferences.tsx:343
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Supprimer"
@@ -3432,7 +3489,7 @@ msgid "Used for monthly scans."
 msgstr "Utilisé pour les analyses mensuelles."
 
 #: desktop/src/pages/ConfigPreferences.tsx:862
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
 msgid "Scan Targets"
 msgstr "Cibles de l'analyse"
 
@@ -3496,7 +3553,7 @@ msgstr ""
 "l’autre."
 
 #: desktop/src/pages/ConfigPreferences.tsx:880
-#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "Enregistrement…"
 
@@ -3904,7 +3961,7 @@ msgid "Export JSON"
 msgstr "Exporter en JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Clear All"
 msgstr "Tout effacer"
 
@@ -3939,7 +3996,7 @@ msgid "Export Text"
 msgstr "Exporter au format texte"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:566
 msgid "Fullscreen"
 msgstr "Plein écran"
 
@@ -4276,7 +4333,7 @@ msgstr "Les noms de profils par défaut sont protégés"
 msgid "Description"
 msgstr "Description"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
 msgid "No targets added"
 msgstr "Aucune cible n'a été ajoutée"
 
@@ -4710,10 +4767,6 @@ msgstr "Malveillant"
 msgid "Suspicious"
 msgstr "Suspect"
 
-#: desktop/src/pages/Results.tsx:110 desktop/src/pages/Scan.tsx:522
-msgid "Scan target"
-msgstr "Cible d’analyse"
-
 #: desktop/src/pages/Results.tsx:116
 msgid "No scan output is available"
 msgstr "Aucune sortie d’analyse n’est disponible"
@@ -4779,7 +4832,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr "D’autres fichiers inaccessibles ne sont pas affichés dans cette vue."
 
 #: desktop/src/pages/Results.tsx:200 desktop/src/pages/Results.tsx:201
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 msgid "Scan details"
 msgstr "Détails de l’analyse"
 
@@ -4863,44 +4916,44 @@ msgstr "Aucun résultat pour le moment"
 msgid "Start a scan to see its results here."
 msgstr "Lancez une analyse pour voir ses résultats ici."
 
-#: desktop/src/pages/Scan.tsx:89
+#: desktop/src/pages/Scan.tsx:96
 msgid "Scan complete with warnings"
 msgstr "Analyse terminée avec des avertissements"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:90
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete — no threats found"
 msgstr "Analyse terminée — aucune menace détectée"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:98
+#: desktop/src/pages/Scan.tsx:105
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "Analyse terminée — {count} menace détectée"
 msgstr[1] "Analyse terminée — {count} menaces détectées"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:108
+#: desktop/src/pages/Scan.tsx:115
 msgid "Scan cancelled — partial results are available"
 msgstr "Analyse annulée — des résultats partiels sont disponibles"
 
-#: desktop/src/pages/Scan.tsx:113 desktop/src/pages/Scan.tsx:524
+#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
 msgid "Scan error"
 msgstr "Erreur d’analyse"
 
-#: desktop/src/pages/Scan.tsx:113
+#: desktop/src/pages/Scan.tsx:120
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: desktop/src/pages/Scan.tsx:148
+#: desktop/src/pages/Scan.tsx:155
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr "La clé API doit contenir exactement 64 caractères hexadécimaux"
 
-#: desktop/src/pages/Scan.tsx:176
+#: desktop/src/pages/Scan.tsx:183
 msgid "VirusTotal Scan"
 msgstr "Analyse VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:177
+#: desktop/src/pages/Scan.tsx:184
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
@@ -4908,58 +4961,58 @@ msgstr ""
 "VirusTotal téléverse un fichier à la fois. N’envoyez que les fichiers que "
 "vous êtes autorisé à partager."
 
-#: desktop/src/pages/Scan.tsx:181
+#: desktop/src/pages/Scan.tsx:188
 msgid "API key available"
 msgstr "Clé API disponible"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scanning…"
 msgstr "Analyse en cours…"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scan with VirusTotal"
 msgstr "Analyser avec VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "Clé d’API"
 
-#: desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Scan.tsx:192
 msgid "Save & Scan"
 msgstr "Enregistrer et analyser"
 
-#: desktop/src/pages/Scan.tsx:187
+#: desktop/src/pages/Scan.tsx:194
 msgid "Upload file manually"
 msgstr "Envoyer un fichier manuellement"
 
-#: desktop/src/pages/Scan.tsx:218
+#: desktop/src/pages/Scan.tsx:226
 msgid "Unable to load scan profiles"
 msgstr "Impossible de charger les profils d’analyse"
 
-#: desktop/src/pages/Scan.tsx:225
+#: desktop/src/pages/Scan.tsx:233
 msgid "Unable to check scanner status"
 msgstr "Impossible de vérifier l’état du moteur d’analyse"
 
-#: desktop/src/pages/Scan.tsx:259 desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
 msgid "Please select a file or folder to scan"
 msgstr "Veuillez sélectionner un fichier ou un dossier à analyser"
 
-#: desktop/src/pages/Scan.tsx:273
+#: desktop/src/pages/Scan.tsx:281
 msgid "Starting scan…"
 msgstr "Démarrage de l’analyse…"
 
-#: desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:348
 msgid "Quick Scan profile has no valid targets"
 msgstr "Le profil « Analyse rapide » ne contient aucune cible valide"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:354 desktop/src/pages/Scan.tsx:457
-#: desktop/src/pages/Scan.tsx:508
+#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
+#: desktop/src/pages/Scan.tsx:516
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr ""
 "Analyse en cours — attendez qu’elle se termine avant d’ajouter des cibles"
 
-#: desktop/src/pages/Scan.tsx:374
+#: desktop/src/pages/Scan.tsx:382
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
@@ -4969,120 +5022,80 @@ msgstr[1] ""
 "VirusTotal analyse un fichier à la fois ; {count} sélections ont été "
 "ignorées."
 
-#: desktop/src/pages/Scan.tsx:389 desktop/src/pages/Scan.tsx:517
+#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
 msgid "Only local files and folders can be scanned"
 msgstr "Seuls les fichiers et dossiers locaux peuvent être analysés"
 
-#: desktop/src/pages/Scan.tsx:466
+#: desktop/src/pages/Scan.tsx:474
 msgid "Unable to choose scan targets"
 msgstr "Impossible de sélectionner les cibles de l’analyse"
 
-#: desktop/src/pages/Scan.tsx:473
+#: desktop/src/pages/Scan.tsx:481
 msgid "Cancelling scan…"
 msgstr "Annulation de l’analyse…"
 
-#: desktop/src/pages/Scan.tsx:475
+#: desktop/src/pages/Scan.tsx:483
 msgid "Unable to cancel scan"
 msgstr "Impossible d’annuler l’analyse"
 
-#: desktop/src/pages/Scan.tsx:491
+#: desktop/src/pages/Scan.tsx:499
 msgid "Running EICAR test…"
 msgstr "Exécution du test EICAR…"
 
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/pages/Scan.tsx:541
 msgid "Backend"
 msgstr "Moteur"
 
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Manage Profiles"
 msgstr "Gérer les profils"
 
-#: desktop/src/pages/Scan.tsx:539 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
 msgid "Details"
 msgstr "Détails"
 
-#: desktop/src/pages/Scan.tsx:543
+#: desktop/src/pages/Scan.tsx:548
 msgid "Profile"
 msgstr "Profil"
 
-#: desktop/src/pages/Scan.tsx:549
+#: desktop/src/pages/Scan.tsx:554
 msgid "No Profile (Manual)"
 msgstr "Aucun profil (manuel)"
 
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Drop local files or folders here, or add them below."
 msgstr ""
 "Déposez des fichiers ou dossiers locaux ici, ou ajoutez-les ci-dessous."
 
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scanning"
-msgstr "Analyse en cours"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Waiting for scan data…"
-msgstr "En attente des données d’analyse…"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scan progress"
-msgstr "Progression de l’analyse"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-msgid "{count} file scanned"
-msgid_plural "{count} files scanned"
-msgstr[0] "{count} fichier analysé"
-msgstr[1] "{count} fichiers analysés"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:161
-msgid "{count} threat"
-msgid_plural "{count} threats"
-msgstr[0] "{count} menace"
-msgstr[1] "{count} menaces"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Estimated file count exceeded"
-msgstr "Nombre estimé de fichiers dépassé"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid ""
-"Live progress is disabled. The completed scan result will remain available."
-msgstr ""
-"Le suivi de la progression en temps réel est désactivé. Le résultat final de "
-"l’analyse restera disponible."
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Cancel All"
-msgstr "Tout annuler"
-
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Start Scan"
 msgstr "Lancer l’analyse"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Run EICAR Test"
 msgstr "Exécuter le test EICAR"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Select one file before using VirusTotal"
 msgstr "Sélectionnez un seul fichier avant d’utiliser VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "Latest scan"
 msgstr "Dernière analyse"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "View Results"
 msgstr "Afficher les résultats"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Virus database is not available"
 msgstr "La base de données virale n’est pas disponible"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Update the database before starting a scan."
 msgstr "Mettez à jour la base de données avant de lancer une analyse."
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Open Database Updates"
 msgstr "Ouvrir les mises à jour de la base de données"
 
@@ -5950,3 +5963,6 @@ msgstr "Analyse complète de tous les répertoires accessibles du système"
 msgid "Scan of the user's home directory and personal files"
 msgstr ""
 "Analyse du répertoire personnel et des fichiers personnels de l’utilisateur"
+
+#~ msgid "Estimated file count exceeded"
+#~ msgstr "Nombre estimé de fichiers dépassé"

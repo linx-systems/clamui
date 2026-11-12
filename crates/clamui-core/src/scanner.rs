@@ -21,6 +21,8 @@ use std::sync::{LazyLock, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+mod host_count;
+
 const OUTPUT_LIMIT: usize = 64 * 1024 * 1024;
 const EICAR: &[u8] = b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
 static REQUEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -74,6 +76,16 @@ pub struct ScanProgress {
     pub bytes_scanned: u64,
     pub estimate_exceeded: bool,
     pub percentage: Option<f64>,
+    #[serde(default)]
+    pub target_index: usize,
+    #[serde(default)]
+    pub target_count: usize,
+    #[serde(default)]
+    pub files_scanned_total: u64,
+    #[serde(default)]
+    pub total_estimate: Option<u64>,
+    #[serde(default)]
+    pub estimate_approximate: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -320,6 +332,37 @@ struct ProgressState {
     infected_count: u64,
 }
 
+struct ProgressReporter<'a> {
+    ctx: &'a Context,
+    job: &'a Job,
+    path: &'a str,
+    backend: &'a str,
+    target_index: usize,
+    target_count: usize,
+    previous_files: u64,
+    last: ScanProgress,
+}
+
+impl ProgressReporter<'_> {
+    fn emit(&mut self, mut event: ScanProgress) {
+        event.target_index = self.target_index;
+        event.target_count = self.target_count;
+        event.files_scanned_total = self.previous_files.saturating_add(event.files_scanned);
+        event.total_estimate = if self.target_count == 1 {
+            event.files_total
+        } else {
+            None
+        };
+        emit_scan_progress(self.ctx, self.job, self.path, self.backend, &event);
+        event.new_threats.clear();
+        self.last = event;
+    }
+
+    fn snapshot(&mut self) {
+        self.emit(self.last.clone());
+    }
+}
+
 pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
     match action {
         "status" => status(ctx),
@@ -433,6 +476,7 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
     }
     let selected_backend = select_backend(ctx, &configured);
     let mut results = Vec::with_capacity(request.paths.len());
+    let mut previous_files = 0u64;
 
     for (index, path) in request.paths.iter().enumerate() {
         if job.cancelled.load(Ordering::Acquire) {
@@ -441,15 +485,51 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
             results.push(result);
             continue;
         }
-        let mut result = scan_target(
+        let mut reporter = ProgressReporter {
             ctx,
-            &job,
+            job: &job,
             path,
+            backend: &selected_backend,
+            target_index: index + 1,
+            target_count: request.paths.len(),
+            previous_files,
+            last: ScanProgress {
+                current_file: String::new(),
+                files_scanned: 0,
+                files_total: None,
+                total_files: None,
+                infected_count: 0,
+                new_threats: Vec::new(),
+                bytes_scanned: 0,
+                estimate_exceeded: false,
+                percentage: None,
+                target_index: index + 1,
+                target_count: request.paths.len(),
+                files_scanned_total: previous_files,
+                total_estimate: None,
+                estimate_approximate: true,
+            },
+        };
+        reporter.snapshot();
+        let mut result = scan_target(
+            &mut reporter,
             request.recursive,
-            &selected_backend,
             request.force_stream,
             &exclusions,
         );
+        // Summaries can account for files that never produced a live line.
+        // Reconcile only after finalization so per-target hints stay independent.
+        reporter.last.files_scanned = reporter.last.files_scanned.max(result.scanned_files);
+        let total = reporter.last.files_total;
+        reporter.last.estimate_exceeded =
+            total.is_some_and(|total| reporter.last.files_scanned > total);
+        reporter.last.estimate_approximate =
+            total.is_none_or(|total| total == 0) || reporter.last.estimate_exceeded;
+        reporter.last.percentage = total
+            .filter(|total| *total > 0 && !reporter.last.estimate_exceeded)
+            .map(|total| (reporter.last.files_scanned as f64 / total as f64) * 100.0);
+        reporter.snapshot();
+        previous_files = reporter.last.files_scanned_total;
         localize_result(ctx, &mut result);
         results.push(result);
         if job.cancelled.load(Ordering::Acquire) {
@@ -518,19 +598,21 @@ fn eicar(ctx: &Context, args: Value) -> AppResult<Value> {
 }
 
 fn scan_target(
-    ctx: &Context,
-    job: &Job,
-    raw_path: &str,
+    reporter: &mut ProgressReporter<'_>,
     recursive: bool,
-    backend: &str,
     force_stream: bool,
     exclusions: &Exclusions,
 ) -> ScanResult {
+    let ctx = reporter.ctx;
+    let job = reporter.job;
+    let raw_path = reporter.path;
+    let backend = reporter.backend;
     let path = match scan_path_from_wire(ctx, raw_path) {
         Ok(path) => path,
         Err(error) => return ScanResult::error(raw_path, error, backend),
     };
-    if raw_path.contains('\0') || !path.exists() {
+    let flatpak_clamscan = backend == "clamscan" && crate::common::is_flatpak();
+    if raw_path.contains('\0') || (!flatpak_clamscan && !path.exists()) {
         return ScanResult::error(
             raw_path,
             "Scan target does not exist or contains an invalid NUL byte",
@@ -542,19 +624,39 @@ fn scan_target(
     } else {
         TraversalMode::CountOnly
     };
+    // Avoid an unbounded prewalk of an entire root-level filesystem.
     let count = if backend != "daemon" && is_root_level(&path) {
-        TargetCount::default()
+        None
+    } else if flatpak_clamscan {
+        host_count::count(&path, recursive, exclusions, &job.cancelled)
+            .ok()
+            .map(|files| TargetCount {
+                files,
+                ..TargetCount::default()
+            })
     } else {
         match count_targets(&path, exclusions, &job.cancelled, traversal_mode) {
-            Ok(count) => count,
+            Ok(count) => Some(count),
             Err(error) => return ScanResult::error(raw_path, error, backend),
         }
     };
     if job.cancelled.load(Ordering::Acquire) {
         return ScanResult::cancelled(raw_path, backend);
     }
+    let total = count
+        .as_ref()
+        .map(|count| count.files)
+        .filter(|total| *total > 0);
+    reporter.last.files_total = total;
+    reporter.last.total_files = total;
+    reporter.last.estimate_approximate = total.is_none();
+    reporter.last.percentage = total.map(|_| 0.0);
+    reporter.snapshot();
 
     if backend == "daemon" {
+        let Some(count) = count else {
+            return ScanResult::error(raw_path, "Unable to count scan targets", backend);
+        };
         if count.files == 0 {
             return ScanResult {
                 status: ScanStatus::Clean,
@@ -575,16 +677,15 @@ fn scan_target(
                 backend: backend.into(),
             };
         }
-        return scan_daemon_target(ctx, job, raw_path, &count, force_stream);
+        return scan_daemon_target(reporter, &count, force_stream);
     }
 
     let command = "clamscan".to_owned();
-    let args = clamscan_arguments(ctx, &path, recursive, exclusions);
+    let args = clamscan_arguments(ctx, &path, recursive, flatpak_clamscan, exclusions);
     let mut progress = ProgressState::default();
-    let total = Some(count.files).filter(|total| *total > 0);
     let output = execute(&command, &args, None, &job.cancelled, |line| {
         update_progress(line, backend, None, &mut progress, total, |event| {
-            emit_scan_progress(ctx, job, raw_path, backend, event);
+            reporter.emit(event);
         });
     });
     let output = match output {
@@ -612,12 +713,13 @@ fn finalize_clamscan(raw_path: &str, output: CapturedOutput, scanned_files: u64)
 }
 
 fn scan_daemon_target(
-    ctx: &Context,
-    job: &Job,
-    raw_path: &str,
+    reporter: &mut ProgressReporter<'_>,
     count: &TargetCount,
     force_stream: bool,
 ) -> ScanResult {
+    let ctx = reporter.ctx;
+    let job = reporter.job;
+    let raw_path = reporter.path;
     let base_arguments = match daemon_arguments(ctx, force_stream) {
         Ok(arguments) => arguments,
         Err(error) => return ScanResult::error(raw_path, error, "daemon"),
@@ -640,9 +742,7 @@ fn scan_daemon_target(
         let mut arguments = base_arguments;
         arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
         let result = run_daemon_phase(
-            ctx,
-            job,
-            raw_path,
+            reporter,
             DaemonPhase {
                 arguments: &arguments,
                 stdin: None,
@@ -677,9 +777,7 @@ fn scan_daemon_target(
                 let mut arguments = base_arguments.clone();
                 arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
                 let phase = run_daemon_phase(
-                    ctx,
-                    job,
-                    raw_path,
+                    reporter,
                     DaemonPhase {
                         arguments: &arguments,
                         stdin: None,
@@ -720,9 +818,7 @@ fn scan_daemon_target(
         let mut arguments = base_arguments.clone();
         arguments.push("-".into());
         let phase = run_daemon_phase(
-            ctx,
-            job,
-            raw_path,
+            reporter,
             DaemonPhase {
                 arguments: &arguments,
                 stdin: Some(file),
@@ -753,13 +849,13 @@ fn scan_daemon_target(
 }
 
 fn run_daemon_phase(
-    ctx: &Context,
-    job: &Job,
-    raw_path: &str,
+    reporter: &mut ProgressReporter<'_>,
     phase: DaemonPhase<'_>,
     total: u64,
     progress: &mut ProgressState,
 ) -> ScanResult {
+    let job = reporter.job;
+    let raw_path = reporter.path;
     let DaemonPhase {
         arguments,
         stdin,
@@ -770,7 +866,7 @@ fn run_daemon_phase(
     let before_files = progress.files_scanned;
     let output = execute("clamdscan", arguments, stdin, &job.cancelled, |line| {
         update_progress(line, "daemon", stdin_path, progress, Some(total), |event| {
-            emit_scan_progress(ctx, job, raw_path, "daemon", event)
+            reporter.emit(event)
         });
     });
     let output = match output {
@@ -880,7 +976,7 @@ fn emit_scan_progress(
     job: &Job,
     raw_path: &str,
     backend: &str,
-    event: ScanProgress,
+    event: &ScanProgress,
 ) {
     let mut data = serde_json::to_value(event).unwrap_or(Value::Null);
     if let Some(object) = data.as_object_mut() {
@@ -955,10 +1051,11 @@ fn clamscan_arguments(
     ctx: &Context,
     path: &Path,
     recursive: bool,
+    flatpak: bool,
     exclusions: &Exclusions,
 ) -> Vec<String> {
     let mut args = Vec::new();
-    if recursive && path.is_dir() {
+    if recursive && (flatpak || path.is_dir()) {
         args.push("-r".into());
     }
     args.push("-v".into());
@@ -1295,9 +1392,10 @@ fn update_progress(
     } else {
         return;
     }
+    let estimate_exceeded = total.is_some_and(|total| state.files_scanned > total);
     let percentage = total
-        .filter(|total| *total > 0)
-        .map(|total| ((state.files_scanned as f64 / total as f64) * 100.0).clamp(0.0, 100.0));
+        .filter(|total| *total > 0 && !estimate_exceeded)
+        .map(|total| (state.files_scanned as f64 / total as f64) * 100.0);
     emit(ScanProgress {
         current_file: current.unwrap_or_default(),
         files_scanned: state.files_scanned,
@@ -1306,8 +1404,13 @@ fn update_progress(
         infected_count: state.infected_count,
         new_threats: threat.into_iter().collect(),
         bytes_scanned: 0,
-        estimate_exceeded: total.is_some_and(|total| state.files_scanned > total),
+        estimate_exceeded,
         percentage,
+        target_index: 0,
+        target_count: 0,
+        files_scanned_total: 0,
+        total_estimate: None,
+        estimate_approximate: total.is_none_or(|total| total == 0) || estimate_exceeded,
     });
 }
 
@@ -1964,6 +2067,104 @@ fn directory_regex(pattern: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn flatpak_recursive_scan_does_not_depend_on_sandbox_path_visibility() {
+        let temp = tempfile::tempdir().expect("temporary workspace");
+        let context = Context::with_paths(crate::common::Paths {
+            home: temp.path().join("home"),
+            config_dir: temp.path().join("config/clamui"),
+            data_dir: temp.path().join("data/clamui"),
+        })
+        .expect("context");
+        let host_only = temp.path().join("host-only");
+        let exclusions = Exclusions::default();
+        let args = |recursive, flatpak| {
+            clamscan_arguments(&context, &host_only, recursive, flatpak, &exclusions)
+        };
+
+        assert!(args(true, true).iter().any(|arg| arg == "-r"));
+        assert!(!args(false, true).iter().any(|arg| arg == "-r"));
+        assert!(!args(true, false).iter().any(|arg| arg == "-r"));
+        assert_eq!(
+            args(true, true).last(),
+            Some(&host_only.to_string_lossy().into_owned())
+        );
+    }
+
+    #[test]
+    fn progress_estimate_becomes_indeterminate_only_when_exceeded() {
+        let mut state = ProgressState::default();
+        let mut events = Vec::new();
+        for line in [
+            b"Scanning /one".as_slice(),
+            b"/one: Test.Signature FOUND".as_slice(),
+            b"Scanning /two".as_slice(),
+            b"Scanning /three".as_slice(),
+        ] {
+            update_progress(line, "clamscan", None, &mut state, Some(2), |event| {
+                events.push(event);
+            });
+        }
+        assert_eq!(
+            events
+                .iter()
+                .map(|event| event.files_scanned)
+                .collect::<Vec<_>>(),
+            [1, 1, 2, 3]
+        );
+        assert_eq!(events[0].percentage, Some(50.0));
+        assert_eq!(events[1].percentage, Some(50.0));
+        assert_eq!(events[2].percentage, Some(100.0));
+        assert!(!events[2].estimate_exceeded);
+        assert!(!events[2].estimate_approximate);
+        assert_eq!(events[3].percentage, None);
+        assert!(events[3].estimate_exceeded);
+        assert!(events[3].estimate_approximate);
+    }
+
+    #[test]
+    fn unknown_estimate_reports_indeterminate_progress() {
+        let mut state = ProgressState::default();
+        let mut event = None;
+        update_progress(
+            b"Scanning /one",
+            "clamscan",
+            None,
+            &mut state,
+            None,
+            |progress| {
+                event = Some(progress);
+            },
+        );
+        let event = event.expect("progress");
+        assert_eq!(event.files_scanned, 1);
+        assert_eq!(event.files_total, None);
+        assert_eq!(event.percentage, None);
+        assert!(event.estimate_approximate);
+        assert!(!event.estimate_exceeded);
+    }
+
+    #[test]
+    fn old_progress_payload_deserializes_with_default_request_fields() {
+        let event: ScanProgress = serde_json::from_value(json!({
+            "current_file": "/one",
+            "files_scanned": 1,
+            "files_total": null,
+            "total_files": null,
+            "infected_count": 0,
+            "new_threats": [],
+            "bytes_scanned": 0,
+            "estimate_exceeded": false,
+            "percentage": null
+        }))
+        .expect("legacy progress event");
+        assert_eq!(event.target_index, 0);
+        assert_eq!(event.target_count, 0);
+        assert_eq!(event.files_scanned_total, 0);
+        assert_eq!(event.total_estimate, None);
+        assert!(!event.estimate_approximate);
+    }
 
     #[test]
     fn caret_is_literal_in_fnmatch_character_classes_for_daemon_and_clamscan() {

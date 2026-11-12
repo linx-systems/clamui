@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-11 22:58+0100\n"
+"POT-Creation-Date: 2026-11-12 18:08+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -1598,43 +1598,43 @@ msgstr "Không thể cách ly {path}: {error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "Mã băm của tệp không khớp — tệp có thể đã bị hỏng"
 
-#: crates/clamui-core/src/scanner.rs:393
+#: crates/clamui-core/src/scanner.rs:436
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 "Không tìm thấy tệp cơ sở dữ liệu ClamAV nào ở các vị trí tiêu chuẩn trên hệ "
 "thống chủ"
 
-#: crates/clamui-core/src/scanner.rs:1752
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "Scan cancelled by user"
 msgstr "Người dùng đã hủy quá trình quét"
 
-#: crates/clamui-core/src/scanner.rs:1759
+#: crates/clamui-core/src/scanner.rs:1862
 msgid "No files could be scanned"
 msgstr "Không thể quét tệp nào"
 
-#: crates/clamui-core/src/scanner.rs:1765
+#: crates/clamui-core/src/scanner.rs:1868
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "Mục tiêu quét không tồn tại hoặc chứa byte NUL không hợp lệ"
 
-#: crates/clamui-core/src/scanner.rs:1772
+#: crates/clamui-core/src/scanner.rs:1875
 msgid "Scan target is not a regular file or directory"
 msgstr "Mục tiêu quét không phải là tệp hoặc thư mục thông thường"
 
-#: crates/clamui-core/src/scanner.rs:1781
+#: crates/clamui-core/src/scanner.rs:1884
 msgid "Threats were detected, but details are unavailable."
 msgstr "Đã phát hiện các mối đe dọa, nhưng không có thông tin chi tiết."
 
-#: crates/clamui-core/src/scanner.rs:1793
+#: crates/clamui-core/src/scanner.rs:1896
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "Không thể truy cập {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1806
+#: crates/clamui-core/src/scanner.rs:1909
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "Không thể đọc {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1825
+#: crates/clamui-core/src/scanner.rs:1928
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2024,8 +2024,8 @@ msgstr "Xuất"
 msgid "Open"
 msgstr "Mở"
 
-#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:539
+#: desktop/src/pages/Scan.tsx:541
 msgid "Scan"
 msgstr "Quét"
 
@@ -2074,7 +2074,7 @@ msgstr "Không thể mở liên kết"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
-#: desktop/src/pages/Scan.tsx:322
+#: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Đang quét — hãy đợi quá trình quét hoàn tất trước khi thay đổi mục tiêu"
@@ -2204,16 +2204,16 @@ msgid ""
 "completely."
 msgstr "Chọn giữ ClamUI chạy trong khay hệ thống hay thoát hoàn toàn."
 
-#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Ghi nhớ lựa chọn của tôi"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
-#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
-#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
+#: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
+#: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
+#: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
+#: desktop/src/pages/Results.tsx:206 desktop/src/pages/Scan.tsx:568
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2427,6 +2427,59 @@ msgstr "Mở hướng dẫn khắc phục"
 #: desktop/src/pages/ConfigPreferences.tsx:890
 msgid "See Configuration"
 msgstr "Xem cấu hình"
+
+#: desktop/src/ScanProgressPanel.tsx:18
+msgid "Target {index}/{count}: {path}"
+msgstr "Đối tượng {index}/{count}: {path}"
+
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
+#: desktop/src/pages/Scan.tsx:530
+msgid "Scan target"
+msgstr "Mục tiêu quét"
+
+#: desktop/src/ScanProgressPanel.tsx:22
+msgid "Scanning"
+msgstr "Đang quét"
+
+#: desktop/src/ScanProgressPanel.tsx:24
+msgid "{count} file scanned overall"
+msgid_plural "{count} files scanned overall"
+msgstr[0] "Đã quét tổng cộng {count} tệp"
+
+#: desktop/src/ScanProgressPanel.tsx:26
+msgid "Waiting for scan data…"
+msgstr "Đang chờ dữ liệu quét…"
+
+#: desktop/src/ScanProgressPanel.tsx:27
+msgid "Scan progress"
+msgstr "Tiến trình quét"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+msgid "{count} file scanned"
+msgid_plural "{count} files scanned"
+msgstr[0] "Đã quét {count} tệp"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Statistics.tsx:161
+msgid "{count} threat"
+msgid_plural "{count} threats"
+msgstr[0] "{count} mối đe dọa"
+
+#: desktop/src/ScanProgressPanel.tsx:29
+msgid "File estimate is approximate; progress is indeterminate."
+msgstr ""
+"Số lượng tệp ước tính chỉ mang tính tương đối; không thể xác định tiến độ."
+
+#: desktop/src/ScanProgressPanel.tsx:31
+msgid ""
+"Live progress is disabled. The completed scan result will remain available."
+msgstr ""
+"Đã tắt hiển thị tiến trình trực tiếp. Kết quả quét sau khi hoàn tất vẫn sẽ "
+"có sẵn."
+
+#: desktop/src/ScanProgressPanel.tsx:32
+msgid "Cancel All"
+msgstr "Hủy tất cả"
 
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
@@ -2653,7 +2706,7 @@ msgstr "Không thể sao chép lệnh: {error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Sao chép"
@@ -2772,7 +2825,7 @@ msgid "Checking…"
 msgstr "Đang kiểm tra…"
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Refresh status"
 msgstr "Làm mới trạng thái"
 
@@ -2904,7 +2957,7 @@ msgstr "Thêm"
 #: desktop/src/pages/ConfigPreferences.tsx:299
 #: desktop/src/pages/ConfigPreferences.tsx:343
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Gỡ bỏ"
@@ -3356,7 +3409,7 @@ msgid "Used for monthly scans."
 msgstr "Dùng cho quét hằng tháng."
 
 #: desktop/src/pages/ConfigPreferences.tsx:862
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
 msgid "Scan Targets"
 msgstr "Mục tiêu quét"
 
@@ -3415,7 +3468,7 @@ msgstr ""
 "biểu mẫu kia."
 
 #: desktop/src/pages/ConfigPreferences.tsx:880
-#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "Đang lưu…"
 
@@ -3807,7 +3860,7 @@ msgid "Export JSON"
 msgstr "Xuất JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Clear All"
 msgstr "Xóa tất cả"
 
@@ -3841,7 +3894,7 @@ msgid "Export Text"
 msgstr "Xuất văn bản"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:566
 msgid "Fullscreen"
 msgstr "Toàn màn hình"
 
@@ -4165,7 +4218,7 @@ msgstr "Tên hồ sơ quét mặc định được bảo vệ"
 msgid "Description"
 msgstr "Mô tả"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
 msgid "No targets added"
 msgstr "Chưa thêm mục tiêu nào"
 
@@ -4588,10 +4641,6 @@ msgstr "Độc hại"
 msgid "Suspicious"
 msgstr "Đáng ngờ"
 
-#: desktop/src/pages/Results.tsx:110 desktop/src/pages/Scan.tsx:522
-msgid "Scan target"
-msgstr "Mục tiêu quét"
-
 #: desktop/src/pages/Results.tsx:116
 msgid "No scan output is available"
 msgstr "Không có kết quả đầu ra của lượt quét"
@@ -4657,7 +4706,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr "Các tệp không truy cập được khác đã bị lược bỏ khỏi chế độ xem này."
 
 #: desktop/src/pages/Results.tsx:200 desktop/src/pages/Results.tsx:201
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 msgid "Scan details"
 msgstr "Chi tiết lượt quét"
 
@@ -4739,216 +4788,178 @@ msgstr "Chưa có kết quả"
 msgid "Start a scan to see its results here."
 msgstr "Hãy bắt đầu quét để xem kết quả tại đây."
 
-#: desktop/src/pages/Scan.tsx:89
+#: desktop/src/pages/Scan.tsx:96
 msgid "Scan complete with warnings"
 msgstr "Quét xong nhưng có cảnh báo"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:90
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete — no threats found"
 msgstr "Quét xong — không tìm thấy mối đe dọa nào"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:98
+#: desktop/src/pages/Scan.tsx:105
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "Quét xong — phát hiện {count} mối đe dọa"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:108
+#: desktop/src/pages/Scan.tsx:115
 msgid "Scan cancelled — partial results are available"
 msgstr "Đã hủy quét — có sẵn một phần kết quả"
 
-#: desktop/src/pages/Scan.tsx:113 desktop/src/pages/Scan.tsx:524
+#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
 msgid "Scan error"
 msgstr "Lỗi quét"
 
-#: desktop/src/pages/Scan.tsx:113
+#: desktop/src/pages/Scan.tsx:120
 msgid "Unknown error"
 msgstr "Lỗi không xác định"
 
-#: desktop/src/pages/Scan.tsx:148
+#: desktop/src/pages/Scan.tsx:155
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr "Khóa API phải gồm đúng 64 ký tự thập lục phân"
 
-#: desktop/src/pages/Scan.tsx:176
+#: desktop/src/pages/Scan.tsx:183
 msgid "VirusTotal Scan"
 msgstr "Quét bằng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:177
+#: desktop/src/pages/Scan.tsx:184
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
 msgstr ""
 "VirusTotal tải lên từng tệp một. Chỉ gửi những tệp bạn được phép chia sẻ."
 
-#: desktop/src/pages/Scan.tsx:181
+#: desktop/src/pages/Scan.tsx:188
 msgid "API key available"
 msgstr "Đã có khóa API"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scanning…"
 msgstr "Đang quét…"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scan with VirusTotal"
 msgstr "Quét bằng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "Khóa API"
 
-#: desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Scan.tsx:192
 msgid "Save & Scan"
 msgstr "Lưu và quét"
 
-#: desktop/src/pages/Scan.tsx:187
+#: desktop/src/pages/Scan.tsx:194
 msgid "Upload file manually"
 msgstr "Tải tệp lên thủ công"
 
-#: desktop/src/pages/Scan.tsx:218
+#: desktop/src/pages/Scan.tsx:226
 msgid "Unable to load scan profiles"
 msgstr "Không thể tải hồ sơ quét"
 
-#: desktop/src/pages/Scan.tsx:225
+#: desktop/src/pages/Scan.tsx:233
 msgid "Unable to check scanner status"
 msgstr "Không thể kiểm tra trạng thái trình quét"
 
-#: desktop/src/pages/Scan.tsx:259 desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
 msgid "Please select a file or folder to scan"
 msgstr "Vui lòng chọn tệp hoặc thư mục để quét"
 
-#: desktop/src/pages/Scan.tsx:273
+#: desktop/src/pages/Scan.tsx:281
 msgid "Starting scan…"
 msgstr "Đang bắt đầu quét…"
 
-#: desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:348
 msgid "Quick Scan profile has no valid targets"
 msgstr "Hồ sơ quét nhanh không có mục tiêu hợp lệ"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:354 desktop/src/pages/Scan.tsx:457
-#: desktop/src/pages/Scan.tsx:508
+#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
+#: desktop/src/pages/Scan.tsx:516
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr "Đang quét — hãy chờ quét xong rồi mới thêm mục tiêu"
 
-#: desktop/src/pages/Scan.tsx:374
+#: desktop/src/pages/Scan.tsx:382
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
 msgstr[0] "VirusTotal quét từng tệp một; đã bỏ qua {count} mục được chọn."
 
-#: desktop/src/pages/Scan.tsx:389 desktop/src/pages/Scan.tsx:517
+#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
 msgid "Only local files and folders can be scanned"
 msgstr "Chỉ có thể quét tệp và thư mục cục bộ"
 
-#: desktop/src/pages/Scan.tsx:466
+#: desktop/src/pages/Scan.tsx:474
 msgid "Unable to choose scan targets"
 msgstr "Không thể chọn mục tiêu quét"
 
-#: desktop/src/pages/Scan.tsx:473
+#: desktop/src/pages/Scan.tsx:481
 msgid "Cancelling scan…"
 msgstr "Đang hủy quét…"
 
-#: desktop/src/pages/Scan.tsx:475
+#: desktop/src/pages/Scan.tsx:483
 msgid "Unable to cancel scan"
 msgstr "Không thể hủy quét"
 
-#: desktop/src/pages/Scan.tsx:491
+#: desktop/src/pages/Scan.tsx:499
 msgid "Running EICAR test…"
 msgstr "Đang chạy thử nghiệm EICAR…"
 
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/pages/Scan.tsx:541
 msgid "Backend"
 msgstr "Cơ chế quét"
 
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Manage Profiles"
 msgstr "Quản lý hồ sơ quét"
 
-#: desktop/src/pages/Scan.tsx:539 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
 msgid "Details"
 msgstr "Chi tiết"
 
-#: desktop/src/pages/Scan.tsx:543
+#: desktop/src/pages/Scan.tsx:548
 msgid "Profile"
 msgstr "Hồ sơ quét"
 
-#: desktop/src/pages/Scan.tsx:549
+#: desktop/src/pages/Scan.tsx:554
 msgid "No Profile (Manual)"
 msgstr "Không dùng hồ sơ (thủ công)"
 
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Drop local files or folders here, or add them below."
 msgstr "Thả tệp hoặc thư mục cục bộ vào đây, hoặc thêm ở bên dưới."
 
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scanning"
-msgstr "Đang quét"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Waiting for scan data…"
-msgstr "Đang chờ dữ liệu quét…"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scan progress"
-msgstr "Tiến trình quét"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-msgid "{count} file scanned"
-msgid_plural "{count} files scanned"
-msgstr[0] "Đã quét {count} tệp"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:161
-msgid "{count} threat"
-msgid_plural "{count} threats"
-msgstr[0] "{count} mối đe dọa"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Estimated file count exceeded"
-msgstr "Đã vượt quá số tệp ước tính"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid ""
-"Live progress is disabled. The completed scan result will remain available."
-msgstr ""
-"Đã tắt hiển thị tiến trình trực tiếp. Kết quả quét sau khi hoàn tất vẫn sẽ "
-"có sẵn."
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Cancel All"
-msgstr "Hủy tất cả"
-
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Start Scan"
 msgstr "Bắt đầu quét"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Run EICAR Test"
 msgstr "Chạy thử nghiệm EICAR"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Select one file before using VirusTotal"
 msgstr "Hãy chọn một tệp trước khi dùng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "Latest scan"
 msgstr "Lượt quét gần nhất"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "View Results"
 msgstr "Xem kết quả"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Virus database is not available"
 msgstr "Không có cơ sở dữ liệu virus"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Update the database before starting a scan."
 msgstr "Hãy cập nhật cơ sở dữ liệu virus trước khi bắt đầu quét."
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Open Database Updates"
 msgstr "Mở trang cập nhật cơ sở dữ liệu"
 
@@ -5782,3 +5793,6 @@ msgstr "Quét toàn diện toàn hệ thống, bao gồm mọi thư mục có th
 #: desktop/src/profilePresentation.ts:38
 msgid "Scan of the user's home directory and personal files"
 msgstr "Quét thư mục cá nhân và các tệp riêng của người dùng"
+
+#~ msgid "Estimated file count exceeded"
+#~ msgstr "Đã vượt quá số tệp ước tính"
