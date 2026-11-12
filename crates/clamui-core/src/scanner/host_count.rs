@@ -124,7 +124,8 @@ fn run_count(command: &mut Command, cancelled: &AtomicBool, timeout: Duration) -
                     .map_err(|error| format!("Unable to wait for host file count: {error}"))?;
             }
             if let Some(exit) = status {
-                if !exit.success() {
+                // GNU find can report inaccessible paths while still counting other files.
+                if !matches!(exit.code(), Some(0 | 1)) {
                     return Err(format!("Host file count failed: {exit}"));
                 }
                 if closed {
@@ -173,7 +174,7 @@ mod tests {
     use std::ffi::OsString;
     use std::fs;
     use std::os::unix::ffi::OsStringExt;
-    use std::os::unix::fs::symlink;
+    use std::os::unix::fs::{symlink, PermissionsExt};
 
     #[test]
     fn markers_stream_across_chunks_without_retaining_output() {
@@ -186,17 +187,87 @@ mod tests {
     }
 
     #[test]
-    fn process_rejects_malformed_output_and_unsuccessful_exit() {
+    fn process_accepts_well_formed_output_with_exit_one() {
         let cancelled = AtomicBool::new(false);
-        let mut malformed = Command::new("printf");
-        malformed.arg("111x");
-        assert!(run_count(&mut malformed, &cancelled, Duration::from_secs(5)).is_err());
+        let mut partial = Command::new("sh");
+        partial.args(["-c", "printf 111; exit 1"]);
+        assert_eq!(
+            run_count(&mut partial, &cancelled, Duration::from_secs(5)).unwrap(),
+            3
+        );
+        assert_eq!(
+            run_count(
+                &mut Command::new("false"),
+                &cancelled,
+                Duration::from_secs(5)
+            )
+            .unwrap(),
+            0
+        );
+    }
+
+    #[test]
+    fn process_rejects_malformed_output_with_exit_one() {
+        let mut malformed = Command::new("sh");
+        malformed.args(["-c", "printf 111; (sleep 0.1; printf x) & exit 1"]);
         assert!(run_count(
-            &mut Command::new("false"),
-            &cancelled,
+            &mut malformed,
+            &AtomicBool::new(false),
             Duration::from_secs(5)
         )
         .is_err());
+    }
+
+    #[test]
+    fn process_rejects_fatal_exit_signal_and_spawn_failure() {
+        let cancelled = AtomicBool::new(false);
+        let mut fatal = Command::new("sh");
+        fatal.args(["-c", "printf 111; exit 2"]);
+        assert!(run_count(&mut fatal, &cancelled, Duration::from_secs(5)).is_err());
+
+        let mut signalled = Command::new("sh");
+        signalled.args(["-c", "kill -TERM $$"]);
+        assert!(run_count(&mut signalled, &cancelled, Duration::from_secs(5)).is_err());
+
+        let fixture = tempfile::tempdir().unwrap();
+        let mut missing = Command::new(fixture.path().join("missing-command"));
+        assert!(run_count(&mut missing, &cancelled, Duration::from_secs(5)).is_err());
+    }
+
+    #[test]
+    fn host_count_keeps_accessible_files_when_a_directory_is_unreadable() {
+        let root_user = unsafe { libc::geteuid() } == 0;
+        let fixture = if root_user {
+            tempfile::tempdir_in("/tmp").unwrap()
+        } else {
+            tempfile::tempdir().unwrap()
+        };
+        fs::set_permissions(fixture.path(), fs::Permissions::from_mode(0o755)).unwrap();
+        let root = fixture.path().join("root");
+        fs::create_dir(&root).unwrap();
+        fs::set_permissions(&root, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::write(root.join("before"), b"").unwrap();
+        let restricted = root.join("restricted");
+        fs::create_dir(&restricted).unwrap();
+        fs::write(restricted.join("hidden"), b"").unwrap();
+        fs::write(root.join("after"), b"").unwrap();
+        fs::set_permissions(&restricted, fs::Permissions::from_mode(0o000)).unwrap();
+
+        let mut command = Command::new("find");
+        command
+            .arg("-H")
+            .arg(&root)
+            .args(find_expression(true, &Exclusions::default()));
+        if root_user {
+            command.gid(65534).uid(65534);
+        }
+        let result = run_count(
+            &mut command,
+            &AtomicBool::new(false),
+            Duration::from_secs(5),
+        );
+        fs::set_permissions(&restricted, fs::Permissions::from_mode(0o755)).unwrap();
+        assert_eq!(result.unwrap(), 2);
     }
 
     #[test]
@@ -301,15 +372,18 @@ mod tests {
     }
 
     #[test]
-    fn missing_target_and_pre_cancelled_count_are_errors() {
+    fn missing_target_returns_zero_and_pre_cancelled_count_is_an_error() {
         let fixture = tempfile::tempdir().unwrap();
-        assert!(count(
-            &fixture.path().join("missing"),
-            true,
-            &Exclusions::default(),
-            &AtomicBool::new(false)
-        )
-        .is_err());
+        assert_eq!(
+            count(
+                &fixture.path().join("missing"),
+                true,
+                &Exclusions::default(),
+                &AtomicBool::new(false)
+            )
+            .unwrap(),
+            0
+        );
         assert!(count(
             fixture.path(),
             true,
