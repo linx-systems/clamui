@@ -19,6 +19,8 @@
 - Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@vitejs/plugin-react` to 5.2.0, and TypeScript to 7.0.2. Gettext extraction now uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
 - Updated Rust dependencies: `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, and `zip` to 9.4.1.
 - Updated desktop tooling: `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources.
+- Updated Rust dependencies to `gio` 0.22.10, `sha2` 0.11.1, `rfd` 0.18.0, `uuid` 1.29.2, and `zip` 9.5.1; preserved existing lowercase SHA-256 hashes for quarantine records and VirusTotal lookups.
+- Updated desktop tooling to `@vitejs/plugin-react` 6.3.0 and Vite 8.3.7, refreshed Flatpak dependency sources, and updated website dependencies with a matching Node.js 22.23.4 minimum.
 
 ### Fixed
 
