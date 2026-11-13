@@ -21,6 +21,7 @@
 - Updated desktop tooling: `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources.
 - Updated Rust dependencies to `gio` 0.22.10, `sha2` 0.11.1, `rfd` 0.18.0, `uuid` 1.29.2, and `zip` 9.5.1; preserved existing lowercase SHA-256 hashes for quarantine records and VirusTotal lookups.
 - Updated desktop tooling to `@vitejs/plugin-react` 6.3.0 and Vite 8.3.7, refreshed Flatpak dependency sources, and updated website dependencies with a matching Node.js 22.23.4 minimum.
+- Refreshed compatible website transitive dependencies to address security advisories without forcing unsupported dependency major versions.
 
 ### Fixed
 
