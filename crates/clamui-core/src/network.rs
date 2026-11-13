@@ -22,6 +22,16 @@ const SS_ARGUMENTS: [&str; 7] = [
     "--oneline",
 ];
 
+const SS_LISTENER_ARGUMENTS: [&str; 7] = [
+    "--no-header",
+    "--numeric",
+    "--listening",
+    "--tcp",
+    "--udp",
+    "--processes",
+    "--oneline",
+];
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum NetworkSnapshotStatus {
@@ -99,6 +109,77 @@ fn snapshot(ctx: &Context) -> NetworkSnapshot {
     snapshot_from_output(ctx, &output)
 }
 
+pub(crate) fn listener_snapshot(ctx: &Context) -> NetworkSnapshot {
+    let output = run_limited_command(
+        "ss",
+        &SS_LISTENER_ARGUMENTS,
+        SOCKET_TIMEOUT,
+        SOCKET_OUTPUT_LIMIT,
+    );
+    listener_snapshot_from_output(ctx, &output)
+}
+
+pub(crate) fn listener_snapshot_from_output(
+    ctx: &Context,
+    output: &LimitedCommandOutput,
+) -> NetworkSnapshot {
+    let mut snapshot = snapshot_from_output(ctx, output);
+    if snapshot.status == NetworkSnapshotStatus::Unavailable && !output.invalid_utf8 {
+        if let Some(end) = output.stdout.rfind('\n') {
+            let parsed = parse_sockets(&output.stdout[..end]);
+            if !parsed.sockets.is_empty() {
+                snapshot.status = NetworkSnapshotStatus::Partial;
+                snapshot.sockets = parsed.sockets;
+                snapshot.unparsed_lines = parsed.unparsed_lines
+                    + usize::from(!output.stdout[end + 1..].trim().is_empty());
+                snapshot.limited = parsed.limited;
+            }
+        }
+    }
+    let mut unexpected = 0;
+    snapshot.sockets.retain(|socket| {
+        if socket.kind != NetworkSocketKind::Listener {
+            unexpected += 1;
+            return false;
+        }
+        if socket.local.port.is_none() {
+            unexpected += 1;
+        }
+        true
+    });
+    if unexpected > 0 {
+        snapshot.unparsed_lines += unexpected;
+        snapshot.status = NetworkSnapshotStatus::Partial;
+        if snapshot.message.is_none()
+            || !output.timed_out
+                && !output.truncated
+                && !output.invalid_utf8
+                && output.code == Some(0)
+        {
+            snapshot.message = partial_message(ctx, snapshot.unparsed_lines, snapshot.limited);
+        }
+    }
+    snapshot.sockets.sort_by(|a, b| {
+        let protocol_order = |protocol| match protocol {
+            NetworkProtocol::Tcp => 0,
+            NetworkProtocol::Udp => 1,
+        };
+        (
+            a.local.port.is_none(),
+            a.local.port,
+            protocol_order(a.protocol),
+            &a.local.address,
+        )
+            .cmp(&(
+                b.local.port.is_none(),
+                b.local.port,
+                protocol_order(b.protocol),
+                &b.local.address,
+            ))
+    });
+    snapshot
+}
+
 fn snapshot_from_output(ctx: &Context, output: &LimitedCommandOutput) -> NetworkSnapshot {
     let captured_at = now_iso();
     if let Some(message) = unavailable_message(ctx, output) {
@@ -113,24 +194,7 @@ fn snapshot_from_output(ctx: &Context, output: &LimitedCommandOutput) -> Network
     }
 
     let parsed = parse_sockets(&output.stdout);
-    let message = match (parsed.unparsed_lines > 0, parsed.limited) {
-        (true, true) => {
-            let message = tr(
-                ctx,
-                "Some network socket rows could not be read, and the list was limited to 4096 rows.",
-            );
-            Some(message)
-        }
-        (true, false) => {
-            let message = tr(ctx, "Some network socket rows could not be read.");
-            Some(message)
-        }
-        (false, true) => {
-            let message = tr(ctx, "Network socket list was limited to 4096 rows.");
-            Some(message)
-        }
-        (false, false) => None,
-    };
+    let message = partial_message(ctx, parsed.unparsed_lines, parsed.limited);
     let status = if message.is_some() {
         NetworkSnapshotStatus::Partial
     } else {
@@ -144,6 +208,18 @@ fn snapshot_from_output(ctx: &Context, output: &LimitedCommandOutput) -> Network
         unparsed_lines: parsed.unparsed_lines,
         limited: parsed.limited,
         message,
+    }
+}
+
+fn partial_message(ctx: &Context, unparsed_lines: usize, limited: bool) -> Option<String> {
+    match (unparsed_lines > 0, limited) {
+        (true, true) => Some(tr(
+            ctx,
+            "Some network socket rows could not be read, and the list was limited to 4096 rows.",
+        )),
+        (true, false) => Some(tr(ctx, "Some network socket rows could not be read.")),
+        (false, true) => Some(tr(ctx, "Network socket list was limited to 4096 rows.")),
+        (false, false) => None,
     }
 }
 

@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-12 18:08+0100\n"
+"POT-Creation-Date: 2026-11-13 15:36+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -45,82 +45,86 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: crates/clamui-core/src/audit.rs:293
+#: crates/clamui-core/src/audit.rs:301
 msgid "ClamAV is not installed"
 msgstr "ClamAV chưa được cài đặt"
 
-#: crates/clamui-core/src/audit.rs:295
+#: crates/clamui-core/src/audit.rs:303
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Cài đặt ClamAV để có thể quét virus"
 
-#: crates/clamui-core/src/audit.rs:312
+#: crates/clamui-core/src/audit.rs:320
 msgid "Installed: {version}"
 msgstr "Đã cài đặt: {version}"
 
-#: crates/clamui-core/src/audit.rs:323
+#: crates/clamui-core/src/audit.rs:331
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "Đã cập nhật ({days} ngày tuổi, tạo ngày {date})"
 
-#: crates/clamui-core/src/audit.rs:339 crates/clamui-core/src/audit.rs:357
+#: crates/clamui-core/src/audit.rs:347 crates/clamui-core/src/audit.rs:365
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "Cơ sở dữ liệu đã {days} ngày tuổi (tạo ngày {date})"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:355
 msgid "Update virus database to ensure protection"
 msgstr "Cập nhật cơ sở dữ liệu virus để đảm bảo được bảo vệ"
 
-#: crates/clamui-core/src/audit.rs:365
+#: crates/clamui-core/src/audit.rs:373
 msgid "Database is critically outdated. Update immediately."
 msgstr "Cơ sở dữ liệu đã lỗi thời nghiêm trọng. Hãy cập nhật ngay."
 
-#: crates/clamui-core/src/audit.rs:384
+#: crates/clamui-core/src/audit.rs:392
 msgid "Database files exist but age could not be determined"
 msgstr "Đã có tệp cơ sở dữ liệu nhưng không xác định được tuổi của chúng"
 
-#: crates/clamui-core/src/audit.rs:386
+#: crates/clamui-core/src/audit.rs:394
 msgid "No virus database found"
 msgstr "Không tìm thấy cơ sở dữ liệu virus"
 
-#: crates/clamui-core/src/audit.rs:390
+#: crates/clamui-core/src/audit.rs:398
 msgid "Download virus database"
 msgstr "Tải xuống cơ sở dữ liệu virus"
 
-#: crates/clamui-core/src/audit.rs:406
+#: crates/clamui-core/src/audit.rs:414
 msgid "Service {name} is running"
 msgstr "Dịch vụ {name} đang chạy"
 
-#: crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:425
 msgid "Daemon is responding"
 msgstr "Dịch vụ đang phản hồi"
 
-#: crates/clamui-core/src/audit.rs:424
+#: crates/clamui-core/src/audit.rs:432
 msgid "ClamAV daemon is not running"
 msgstr "Dịch vụ ClamAV không chạy"
 
-#: crates/clamui-core/src/audit.rs:426
+#: crates/clamui-core/src/audit.rs:434
 msgid "Start the daemon for faster scanning"
 msgstr "Khởi động dịch vụ để quét nhanh hơn"
 
-#: crates/clamui-core/src/audit.rs:441
+#: crates/clamui-core/src/audit.rs:449
 msgid "Freshclam service is active"
 msgstr "Dịch vụ Freshclam đang hoạt động"
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:456
 msgid "Freshclam automatic update service is not running"
 msgstr "Dịch vụ cập nhật tự động Freshclam không chạy"
 
-#: crates/clamui-core/src/audit.rs:450
+#: crates/clamui-core/src/audit.rs:458
 msgid "Enable automatic database updates"
 msgstr "Bật cập nhật cơ sở dữ liệu tự động"
 
-#: crates/clamui-core/src/audit.rs:645
+#: crates/clamui-core/src/audit.rs:641
+msgid "Open Ports"
+msgstr "Các cổng đang mở"
+
+#: crates/clamui-core/src/audit.rs:646
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} cổng đang lắng nghe, các cổng rủi ro: {ports}"
 
-#: crates/clamui-core/src/audit.rs:656
+#: crates/clamui-core/src/audit.rs:657
 msgid "Review if these services need to be exposed"
 msgstr "Xem xét liệu các dịch vụ này có thật sự cần được mở ra ngoài hay không"
 
@@ -133,247 +137,255 @@ msgstr[0] "{count} cổng đang lắng nghe"
 msgid "Review open ports and close unnecessary services"
 msgstr "Xem lại các cổng đang mở và tắt các dịch vụ không cần thiết"
 
-#: crates/clamui-core/src/audit.rs:678
+#: crates/clamui-core/src/audit.rs:680 crates/clamui-core/src/network.rs:220
+msgid "Some network socket rows could not be read."
+msgstr "Không thể đọc một số dòng socket mạng."
+
+#: crates/clamui-core/src/audit.rs:683
 msgid "No open ports detected"
 msgstr "Không phát hiện cổng nào đang mở"
 
-#: crates/clamui-core/src/audit.rs:709
+#: crates/clamui-core/src/audit.rs:714
 msgid "AppArmor is enabled"
 msgstr "AppArmor đã bật"
 
-#: crates/clamui-core/src/audit.rs:716
+#: crates/clamui-core/src/audit.rs:721
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Mô-đun AppArmor đã được nạp nhưng chưa bật"
 
-#: crates/clamui-core/src/audit.rs:718
+#: crates/clamui-core/src/audit.rs:723
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Bật AppArmor để chạy ứng dụng trong môi trường cô lập"
 
-#: crates/clamui-core/src/audit.rs:733
+#: crates/clamui-core/src/audit.rs:738
 msgid "SELinux is enforcing"
 msgstr "SELinux đang ở chế độ thực thi (enforcing)"
 
-#: crates/clamui-core/src/audit.rs:740
+#: crates/clamui-core/src/audit.rs:745
 msgid "SELinux is in permissive mode"
 msgstr "SELinux đang ở chế độ cho phép (permissive)"
 
-#: crates/clamui-core/src/audit.rs:742
+#: crates/clamui-core/src/audit.rs:747
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Nên cân nhắc chuyển sang chế độ thực thi (enforcing) để bảo vệ tốt hơn"
 
-#: crates/clamui-core/src/audit.rs:753
+#: crates/clamui-core/src/audit.rs:758
 msgid "SELinux is disabled"
 msgstr "SELinux đã tắt"
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:760
 msgid "Enable SELinux for mandatory access control"
 msgstr "Bật SELinux để kiểm soát truy cập bắt buộc"
 
-#: crates/clamui-core/src/audit.rs:769
+#: crates/clamui-core/src/audit.rs:774
 msgid "No mandatory access control framework detected"
 msgstr "Không phát hiện cơ chế kiểm soát truy cập bắt buộc nào"
 
-#: crates/clamui-core/src/audit.rs:771
+#: crates/clamui-core/src/audit.rs:776
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Nên cân nhắc bật AppArmor hoặc SELinux"
 
-#: crates/clamui-core/src/audit.rs:796
+#: crates/clamui-core/src/audit.rs:801
 msgid "Automatic security updates are enabled"
 msgstr "Cập nhật bảo mật tự động đã bật"
 
-#: crates/clamui-core/src/audit.rs:806
+#: crates/clamui-core/src/audit.rs:811
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Unattended upgrades đã được cài đặt nhưng đang tắt"
 
-#: crates/clamui-core/src/audit.rs:808
+#: crates/clamui-core/src/audit.rs:813
 msgid "Enable automatic security updates"
 msgstr "Bật cập nhật bảo mật tự động"
 
-#: crates/clamui-core/src/audit.rs:821
+#: crates/clamui-core/src/audit.rs:826
 msgid "DNF automatic updates are enabled"
 msgstr "Cập nhật tự động của DNF đã bật"
 
-#: crates/clamui-core/src/audit.rs:831
+#: crates/clamui-core/src/audit.rs:836
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF automatic đã được cài đặt nhưng bộ hẹn giờ chưa hoạt động"
 
-#: crates/clamui-core/src/audit.rs:833
+#: crates/clamui-core/src/audit.rs:838
 msgid "Enable automatic updates"
 msgstr "Bật cập nhật tự động"
 
-#: crates/clamui-core/src/audit.rs:846
+#: crates/clamui-core/src/audit.rs:851
 msgid "Could not determine automatic update status"
 msgstr "Không thể xác định trạng thái cập nhật tự động"
 
-#: crates/clamui-core/src/audit.rs:848
+#: crates/clamui-core/src/audit.rs:853
 msgid "Configure automatic security updates"
 msgstr "Cấu hình cập nhật bảo mật tự động"
 
-#: crates/clamui-core/src/audit.rs:862
+#: crates/clamui-core/src/audit.rs:867
 msgid "System reboot required to apply updates"
 msgstr "Cần khởi động lại hệ thống để áp dụng bản cập nhật"
 
-#: crates/clamui-core/src/audit.rs:864
+#: crates/clamui-core/src/audit.rs:869
 msgid "Reboot the system to apply pending security updates"
 msgstr "Khởi động lại hệ thống để áp dụng các bản cập nhật bảo mật đang chờ"
 
-#: crates/clamui-core/src/audit.rs:909
+#: crates/clamui-core/src/audit.rs:914
 msgid "{name} is installed but not running"
 msgstr "{name} đã được cài đặt nhưng không chạy"
 
-#: crates/clamui-core/src/audit.rs:927
+#: crates/clamui-core/src/audit.rs:932
 msgid "No intrusion detection system found"
 msgstr "Không tìm thấy hệ thống phát hiện xâm nhập"
 
-#: crates/clamui-core/src/audit.rs:929
+#: crates/clamui-core/src/audit.rs:934
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "Cài đặt fail2ban hoặc CrowdSec để bảo vệ trước các cuộc tấn công"
 
-#: crates/clamui-core/src/audit.rs:955
+#: crates/clamui-core/src/audit.rs:960
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "Máy chủ SSH không chạy (không có bề mặt tấn công từ xa)"
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:970
 msgid "SSH server is running"
 msgstr "Máy chủ SSH đang chạy"
 
-#: crates/clamui-core/src/audit.rs:974
+#: crates/clamui-core/src/audit.rs:979
 msgid "Could not read SSH configuration"
 msgstr "Không thể đọc cấu hình SSH"
 
-#: crates/clamui-core/src/audit.rs:992
+#: crates/clamui-core/src/audit.rs:997
 msgid "Root login: {value}"
 msgstr "Đăng nhập root: {value}"
 
-#: crates/clamui-core/src/audit.rs:999
+#: crates/clamui-core/src/audit.rs:1004
 msgid "Root login is allowed ({value})"
 msgstr "Đăng nhập root đang được cho phép ({value})"
 
-#: crates/clamui-core/src/audit.rs:1005
+#: crates/clamui-core/src/audit.rs:1010
 msgid "Disable root SSH login for security"
 msgstr "Tắt đăng nhập SSH bằng root để bảo mật"
 
-#: crates/clamui-core/src/audit.rs:1019
+#: crates/clamui-core/src/audit.rs:1024
 msgid "Password authentication is disabled (key-only)"
 msgstr "Xác thực bằng mật khẩu đã tắt (chỉ dùng khóa)"
 
-#: crates/clamui-core/src/audit.rs:1026
+#: crates/clamui-core/src/audit.rs:1031
 msgid "Password authentication is enabled"
 msgstr "Xác thực bằng mật khẩu đã bật"
 
-#: crates/clamui-core/src/audit.rs:1028
+#: crates/clamui-core/src/audit.rs:1033
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Nên cân nhắc tắt xác thực bằng mật khẩu và chuyển sang dùng khóa SSH"
 
-#: crates/clamui-core/src/audit.rs:1045
+#: crates/clamui-core/src/audit.rs:1050
 msgid "X11 forwarding is disabled"
 msgstr "Chuyển tiếp X11 đã tắt"
 
-#: crates/clamui-core/src/audit.rs:1052
+#: crates/clamui-core/src/audit.rs:1057
 msgid "X11 forwarding is enabled"
 msgstr "Chuyển tiếp X11 đã bật"
 
-#: crates/clamui-core/src/audit.rs:1054
+#: crates/clamui-core/src/audit.rs:1059
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Tắt chuyển tiếp X11 để thu hẹp bề mặt tấn công"
 
-#: crates/clamui-core/src/audit.rs:1129
+#: crates/clamui-core/src/audit.rs:1119
+msgid "Application firewalls"
+msgstr "Tường lửa ứng dụng"
+
+#: crates/clamui-core/src/audit.rs:1141
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster đang chạy và bảo vệ các kết nối"
 
-#: crates/clamui-core/src/audit.rs:1153
+#: crates/clamui-core/src/audit.rs:1167
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 "Cấp quyền cho ClamUI trong Portmaster để xem tình trạng của từng mô-đun"
 
-#: crates/clamui-core/src/audit.rs:1156
+#: crates/clamui-core/src/audit.rs:1170
 msgid "Authorize"
 msgstr "Cấp quyền"
 
-#: crates/clamui-core/src/audit.rs:1166
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster đã được cài đặt nhưng không chạy"
 
-#: crates/clamui-core/src/audit.rs:1168
+#: crates/clamui-core/src/audit.rs:1182
 msgid "Start the Portmaster service to enable network protection"
 msgstr "Khởi động dịch vụ Portmaster để bật bảo vệ mạng"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1181
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Không phát hiện — trình giám sát mạng và tường lửa ứng dụng tùy chọn"
 
-#: crates/clamui-core/src/audit.rs:1195
+#: crates/clamui-core/src/audit.rs:1210
 msgid "Could not probe Portmaster: {error}"
 msgstr "Không thể kiểm tra Portmaster: {error}"
 
-#: crates/clamui-core/src/audit.rs:1245
+#: crates/clamui-core/src/audit.rs:1259
 msgid "{name} is not installed"
 msgstr "{name} chưa được cài đặt"
 
-#: crates/clamui-core/src/audit.rs:1251
+#: crates/clamui-core/src/audit.rs:1266
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Cài đặt {name} để kiểm tra bảo mật toàn diện"
 
-#: crates/clamui-core/src/audit.rs:1257
+#: crates/clamui-core/src/audit.rs:1272
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Cài đặt chkrootkit để phát hiện rootkit"
 
-#: crates/clamui-core/src/audit.rs:1276
+#: crates/clamui-core/src/audit.rs:1291
 msgid "Authentication was cancelled"
 msgstr "Đã hủy xác thực"
 
-#: crates/clamui-core/src/audit.rs:1284
+#: crates/clamui-core/src/audit.rs:1299
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "Kiểm tra bảo mật bằng Lynis đã hết thời gian chờ sau 5 phút"
 
-#: crates/clamui-core/src/audit.rs:1286
+#: crates/clamui-core/src/audit.rs:1301
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "Quét rootkit đã hết thời gian chờ sau 5 phút"
 
-#: crates/clamui-core/src/audit.rs:1304 crates/clamui-core/src/audit.rs:1348
+#: crates/clamui-core/src/audit.rs:1319 crates/clamui-core/src/audit.rs:1363
 msgid "Failed to run Lynis: {error}"
 msgstr "Không thể chạy Lynis: {error}"
 
-#: crates/clamui-core/src/audit.rs:1310
+#: crates/clamui-core/src/audit.rs:1325
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Không thể chạy chkrootkit: {error}"
 
-#: crates/clamui-core/src/audit.rs:1376
+#: crates/clamui-core/src/audit.rs:1391
 msgid "Score: {score}/100"
 msgstr "Điểm: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1379
+#: crates/clamui-core/src/audit.rs:1394
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "Chạy “sudo lynis audit system” để xem các khuyến nghị chi tiết"
 
-#: crates/clamui-core/src/audit.rs:1395
+#: crates/clamui-core/src/audit.rs:1410
 msgid "Audit completed (exit code {code})"
 msgstr "Đã hoàn tất kiểm tra bảo mật (mã thoát {code})"
 
-#: crates/clamui-core/src/audit.rs:1433 crates/clamui-core/src/audit.rs:1447
+#: crates/clamui-core/src/audit.rs:1448 crates/clamui-core/src/audit.rs:1462
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "Không thể hoàn tất quét rootkit (mã thoát {code})"
 
-#: crates/clamui-core/src/audit.rs:1477
+#: crates/clamui-core/src/audit.rs:1492
 msgid "No rootkits detected"
 msgstr "Không phát hiện rootkit nào"
 
-#: crates/clamui-core/src/audit.rs:1488
+#: crates/clamui-core/src/audit.rs:1503
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "Phát hiện {count} rootkit tiềm ẩn"
 
-#: crates/clamui-core/src/audit.rs:1496
+#: crates/clamui-core/src/audit.rs:1511
 msgid "Investigate the detected threats immediately"
 msgstr "Hãy điều tra ngay các mối đe dọa đã phát hiện"
 
-#: crates/clamui-core/src/audit/firewall.rs:53
+#: crates/clamui-core/src/audit/firewall.rs:60
 msgid "Firewall manager overlap"
 msgstr "Các trình quản lý tường lửa chồng chéo"
 
-#: crates/clamui-core/src/audit/firewall.rs:54
+#: crates/clamui-core/src/audit/firewall.rs:61
 msgid ""
 "UFW is active while Firewalld owns its D-Bus name; their rule interaction "
 "was not evaluated."
@@ -381,11 +393,38 @@ msgstr ""
 "UFW đang hoạt động trong khi Firewalld đang giữ tên D-Bus của nó; tương tác "
 "giữa các quy tắc của hai bên chưa được đánh giá."
 
-#: crates/clamui-core/src/audit/firewall.rs:157
+#: crates/clamui-core/src/audit/firewall.rs:179
+msgid "UFW was not found at a trusted system path."
+msgstr "Không tìm thấy UFW tại đường dẫn hệ thống đáng tin cậy."
+
+#. Translators: UFW is the name of the firewall application.
+#: crates/clamui-core/src/audit/firewall.rs:182
+#: crates/clamui-core/src/audit/firewall.rs:216
+msgid ""
+"Administrator authorization for the UFW status check was denied or "
+"unavailable."
+msgstr ""
+"Quyền quản trị để kiểm tra trạng thái UFW đã bị từ chối hoặc không khả dụng."
+
+#: crates/clamui-core/src/audit/firewall.rs:204
+msgid "The UFW status check timed out."
+msgstr "Đã hết thời gian kiểm tra trạng thái UFW."
+
+#. Translators: UFW is the name of the firewall application.
+#: crates/clamui-core/src/audit/firewall.rs:207
+#: crates/clamui-core/src/audit/firewall.rs:237
+msgid "The UFW status check returned incomplete or invalid output."
+msgstr "Kiểm tra trạng thái UFW trả về kết quả không đầy đủ hoặc không hợp lệ."
+
+#: crates/clamui-core/src/audit/firewall.rs:225
+msgid "The UFW status check failed."
+msgstr "Không thể kiểm tra trạng thái UFW."
+
+#: crates/clamui-core/src/audit/firewall.rs:348
 msgid "UFW Firewall"
 msgstr "Tường lửa UFW"
 
-#: crates/clamui-core/src/audit/firewall.rs:162
+#: crates/clamui-core/src/audit/firewall.rs:353
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
@@ -393,7 +432,7 @@ msgstr ""
 "UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny). Các "
 "quy tắc được liệt kê có thể cho phép ngoại lệ."
 
-#: crates/clamui-core/src/audit/firewall.rs:169
+#: crates/clamui-core/src/audit/firewall.rs:360
 msgid ""
 "UFW is active; the default incoming policy is reject. Listed rules may allow "
 "exceptions."
@@ -401,41 +440,53 @@ msgstr ""
 "UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject). "
 "Các quy tắc được liệt kê có thể cho phép ngoại lệ."
 
-#: crates/clamui-core/src/audit/firewall.rs:176
+#: crates/clamui-core/src/audit/firewall.rs:367
 msgid "UFW is active; the default incoming policy is deny."
 msgstr ""
 "UFW đang hoạt động; chính sách mặc định cho kết nối đến là chặn (deny)."
 
-#: crates/clamui-core/src/audit/firewall.rs:180
+#: crates/clamui-core/src/audit/firewall.rs:371
 msgid "UFW is active; the default incoming policy is reject."
 msgstr ""
 "UFW đang hoạt động; chính sách mặc định cho kết nối đến là từ chối (reject)."
 
-#: crates/clamui-core/src/audit/firewall.rs:184
+#: crates/clamui-core/src/audit/firewall.rs:375
 msgid "UFW is active, but the default incoming policy allows traffic."
 msgstr ""
 "UFW đang hoạt động nhưng chính sách mặc định cho kết nối đến lại cho phép "
 "lưu lượng đi qua."
 
-#: crates/clamui-core/src/audit/firewall.rs:191
+#: crates/clamui-core/src/audit/firewall.rs:382
 msgid "UFW is active, but its default incoming policy could not be verified."
 msgstr ""
 "UFW đang hoạt động nhưng không thể xác minh chính sách mặc định cho kết nối "
 "đến."
 
-#: crates/clamui-core/src/audit/firewall.rs:195
+#: crates/clamui-core/src/audit/firewall.rs:386
 msgid "UFW reports inactive."
 msgstr "UFW cho biết đang không hoạt động."
 
-#: crates/clamui-core/src/audit/firewall.rs:196
+#: crates/clamui-core/src/audit/firewall.rs:387
 msgid "UFW status could not be inspected safely."
 msgstr "Không thể kiểm tra trạng thái UFW một cách an toàn."
 
-#: crates/clamui-core/src/audit/firewall.rs:234
+#: crates/clamui-core/src/audit/firewall.rs:392
+msgid "Check UFW with administrator access"
+msgstr "Kiểm tra UFW bằng quyền quản trị"
+
+#: crates/clamui-core/src/audit/firewall.rs:394
+msgid ""
+"Administrator access may be required to read UFW status. This check does not "
+"change firewall settings."
+msgstr ""
+"Có thể cần quyền quản trị để đọc trạng thái UFW. Việc kiểm tra này không "
+"thay đổi cài đặt tường lửa."
+
+#: crates/clamui-core/src/audit/firewall.rs:432
 msgid "Firewalld"
 msgstr "Firewalld"
 
-#: crates/clamui-core/src/audit/firewall.rs:236
+#: crates/clamui-core/src/audit/firewall.rs:434
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
@@ -443,7 +494,7 @@ msgstr ""
 "Firewalld đang giữ tên D-Bus của nó; chưa truy vấn trạng thái sẵn sàng và "
 "chính sách tường lửa."
 
-#: crates/clamui-core/src/audit/firewall.rs:240
+#: crates/clamui-core/src/audit/firewall.rs:438
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
@@ -451,7 +502,7 @@ msgstr ""
 "Không thấy tiến trình nào giữ tên D-Bus của Firewalld; điều này không đủ để "
 "xác định chính sách tường lửa của nhân hệ điều hành."
 
-#: crates/clamui-core/src/audit/firewall.rs:244
+#: crates/clamui-core/src/audit/firewall.rs:442
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
@@ -459,23 +510,23 @@ msgstr ""
 "Không thể xác minh Firewalld có đang giữ tên D-Bus hay không; chưa truy vấn "
 "trạng thái sẵn sàng và chính sách tường lửa."
 
-#: crates/clamui-core/src/audit/firewall.rs:259
+#: crates/clamui-core/src/audit/firewall.rs:457
 msgid "firewall-cmd"
 msgstr "firewall-cmd"
 
-#: crates/clamui-core/src/audit/firewall.rs:264
+#: crates/clamui-core/src/audit/firewall.rs:462
 msgid "firewall-cmd is installed; it was not executed."
 msgstr "firewall-cmd đã được cài đặt; công cụ này chưa được chạy."
 
-#: crates/clamui-core/src/audit/firewall.rs:270
+#: crates/clamui-core/src/audit/firewall.rs:468
 msgid "firewall-cmd could not be confirmed without executing it."
 msgstr "Không thể xác nhận firewall-cmd nếu không chạy nó."
 
-#: crates/clamui-core/src/audit/firewall.rs:408
+#: crates/clamui-core/src/audit/firewall.rs:606
 msgid "nftables (native rules)"
 msgstr "nftables (quy tắc gốc)"
 
-#: crates/clamui-core/src/audit/firewall.rs:410
+#: crates/clamui-core/src/audit/firewall.rs:608
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
@@ -483,7 +534,7 @@ msgstr ""
 "nftables có chính sách mặc định hạn chế cho lưu lượng vào trên IPv4 và IPv6; "
 "từng quy tắc riêng lẻ có thể cho phép ngoại lệ."
 
-#: crates/clamui-core/src/audit/firewall.rs:414
+#: crates/clamui-core/src/audit/firewall.rs:612
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
@@ -491,18 +542,18 @@ msgstr ""
 "nftables báo cáo chính sách mặc định cho lưu lượng vào là cho phép; phạm vi "
 "kiểm tra còn lại có thể chưa đầy đủ"
 
-#: crates/clamui-core/src/audit/firewall.rs:418
+#: crates/clamui-core/src/audit/firewall.rs:616
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
 msgstr ""
 "Không thể xác minh phạm vi chính sách lưu lượng vào của nftables cho cả IPv4 "
 "và IPv6"
 
-#: crates/clamui-core/src/audit/firewall.rs:478
+#: crates/clamui-core/src/audit/firewall.rs:676
 msgid "iptables (IPv4)"
 msgstr "iptables (IPv4)"
 
-#: crates/clamui-core/src/audit/firewall.rs:480
+#: crates/clamui-core/src/audit/firewall.rs:678
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
@@ -510,19 +561,19 @@ msgstr ""
 "iptables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc riêng "
 "lẻ có thể cho phép ngoại lệ."
 
-#: crates/clamui-core/src/audit/firewall.rs:484
+#: crates/clamui-core/src/audit/firewall.rs:682
 msgid "iptables has a permissive INPUT default policy"
 msgstr "iptables có chính sách mặc định cho phép trên chuỗi INPUT"
 
-#: crates/clamui-core/src/audit/firewall.rs:485
+#: crates/clamui-core/src/audit/firewall.rs:683
 msgid "iptables INPUT policy could not be verified"
 msgstr "Không thể xác minh chính sách chuỗi INPUT của iptables"
 
-#: crates/clamui-core/src/audit/firewall.rs:491
+#: crates/clamui-core/src/audit/firewall.rs:689
 msgid "iptables (IPv6)"
 msgstr "iptables (IPv6)"
 
-#: crates/clamui-core/src/audit/firewall.rs:493
+#: crates/clamui-core/src/audit/firewall.rs:691
 msgid ""
 "ip6tables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
@@ -530,23 +581,23 @@ msgstr ""
 "ip6tables có chính sách mặc định hạn chế trên chuỗi INPUT; từng quy tắc "
 "riêng lẻ có thể cho phép ngoại lệ."
 
-#: crates/clamui-core/src/audit/firewall.rs:497
+#: crates/clamui-core/src/audit/firewall.rs:695
 msgid "ip6tables has a permissive INPUT default policy"
 msgstr "ip6tables có chính sách mặc định cho phép trên chuỗi INPUT"
 
-#: crates/clamui-core/src/audit/firewall.rs:498
+#: crates/clamui-core/src/audit/firewall.rs:696
 msgid "ip6tables INPUT policy could not be verified"
 msgstr "Không thể xác minh chính sách chuỗi INPUT của ip6tables"
 
-#: crates/clamui-core/src/audit/firewall.rs:508
+#: crates/clamui-core/src/audit/firewall.rs:706
 msgid "Gufw"
 msgstr "Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:510
+#: crates/clamui-core/src/audit/firewall.rs:708
 msgid "Gufw is available."
 msgstr "Gufw có sẵn."
 
-#: crates/clamui-core/src/audit/firewall.rs:512
+#: crates/clamui-core/src/audit/firewall.rs:710
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
@@ -554,19 +605,19 @@ msgstr ""
 "Chưa xác nhận được Gufw; mục kiểm kê tùy chọn này không ảnh hưởng đến việc "
 "phân tích chính sách tường lửa."
 
-#: crates/clamui-core/src/audit/firewall.rs:519
+#: crates/clamui-core/src/audit/firewall.rs:718
 msgid "Open Gufw"
 msgstr "Mở Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:525
+#: crates/clamui-core/src/audit/firewall.rs:724
 msgid "Firewall Config"
 msgstr "Firewall Config"
 
-#: crates/clamui-core/src/audit/firewall.rs:530
+#: crates/clamui-core/src/audit/firewall.rs:729
 msgid "Firewall Config is available."
 msgstr "Firewall Config có sẵn."
 
-#: crates/clamui-core/src/audit/firewall.rs:533
+#: crates/clamui-core/src/audit/firewall.rs:732
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
@@ -574,23 +625,105 @@ msgstr ""
 "Chưa xác nhận được Firewall Config; mục kiểm kê tùy chọn này không ảnh hưởng "
 "đến việc phân tích chính sách tường lửa."
 
-#: crates/clamui-core/src/audit/firewall.rs:540
+#: crates/clamui-core/src/audit/firewall.rs:740
 msgid "Open Firewall Config"
 msgstr "Mở Firewall Config"
 
-#: crates/clamui-core/src/audit/firewall.rs:578
+#: crates/clamui-core/src/audit/firewall.rs:778
 msgid "Plasma Firewall"
 msgstr "Plasma Firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:583
+#: crates/clamui-core/src/audit/firewall.rs:783
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
 msgstr ""
 "Plasma Firewall đã được cài đặt; công cụ này quản lý một hệ thống tường lửa "
 "có sẵn."
 
-#: crates/clamui-core/src/audit/firewall.rs:592
+#: crates/clamui-core/src/audit/firewall.rs:792
 msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr "Chưa xác nhận được Plasma Firewall; đây chỉ là một mô-đun quản lý."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:188
+msgid "OpenSnitch service"
+msgstr "Dịch vụ OpenSnitch"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:194
+msgid ""
+"An OpenSnitch system service is active and running. This does not verify "
+"filtering."
+msgstr ""
+"Một dịch vụ hệ thống OpenSnitch đang hoạt động và chạy. Điều này không xác "
+"minh việc lọc."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:197
+msgid "An installed OpenSnitch system service is inactive or failed."
+msgstr ""
+"Một dịch vụ hệ thống OpenSnitch đã cài đặt không hoạt động hoặc gặp lỗi."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:200
+msgid "An OpenSnitch system service is changing state; its status is unknown."
+msgstr ""
+"Một dịch vụ hệ thống OpenSnitch đang chuyển trạng thái; chưa rõ trạng thái "
+"của dịch vụ."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:203
+msgid ""
+"No local OpenSnitch system service was detected. A manually started daemon "
+"was not checked."
+msgstr ""
+"Không phát hiện dịch vụ hệ thống OpenSnitch trên máy này. Chưa kiểm tra tiến "
+"trình nền được khởi động thủ công."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:206
+msgid "OpenSnitch system service status could not be determined."
+msgstr "Không thể xác định trạng thái dịch vụ hệ thống OpenSnitch."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:216
+msgid "OpenSnitch graphical interface"
+msgstr "Giao diện đồ họa OpenSnitch"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:222
+msgid ""
+"The OpenSnitch graphical interface is available. Its connection status was "
+"not checked."
+msgstr ""
+"Giao diện đồ họa OpenSnitch khả dụng. Chưa kiểm tra trạng thái kết nối của "
+"giao diện."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:225
+msgid "No local OpenSnitch graphical interface launch target was detected."
+msgstr ""
+"Không phát hiện mục khởi chạy giao diện đồ họa OpenSnitch trên máy này."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:228
+#: crates/clamui-core/src/audit/opensnitch.rs:257
+msgid "OpenSnitch graphical interface availability could not be determined."
+msgstr "Không thể xác định giao diện đồ họa OpenSnitch có khả dụng hay không."
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:236
+msgid "Open OpenSnitch"
+msgstr "Mở OpenSnitch"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:250
+msgid "OpenSnitch graphical interface is not available."
+msgstr "Giao diện đồ họa OpenSnitch không khả dụng."
+
+#. Translators: Keep the product name OpenSnitch and the {error} placeholder unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:271
+msgid "Could not launch OpenSnitch graphical interface: {error}"
+msgstr "Không thể khởi chạy giao diện đồ họa OpenSnitch: {error}"
 
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
 #: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
@@ -1326,15 +1459,15 @@ msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Số mối đe dọa tìm thấy: {count}"
 
-#: crates/clamui-core/src/network.rs:86
+#: crates/clamui-core/src/network.rs:96
 msgid "Network action is not supported."
 msgstr "Không hỗ trợ thao tác mạng này."
 
-#: crates/clamui-core/src/network.rs:90
+#: crates/clamui-core/src/network.rs:100
 msgid "Network snapshot accepts no arguments."
 msgstr "Thao tác chụp trạng thái mạng không nhận tham số nào."
 
-#: crates/clamui-core/src/network.rs:118
+#: crates/clamui-core/src/network.rs:216
 msgid ""
 "Some network socket rows could not be read, and the list was limited to 4096 "
 "rows."
@@ -1342,31 +1475,27 @@ msgstr ""
 "Không thể đọc một số dòng socket mạng và danh sách đã bị giới hạn ở 4096 "
 "dòng."
 
-#: crates/clamui-core/src/network.rs:125
-msgid "Some network socket rows could not be read."
-msgstr "Không thể đọc một số dòng socket mạng."
-
-#: crates/clamui-core/src/network.rs:129
+#: crates/clamui-core/src/network.rs:221
 msgid "Network socket list was limited to 4096 rows."
 msgstr "Danh sách socket mạng đã bị giới hạn ở 4096 dòng."
 
-#: crates/clamui-core/src/network.rs:152
+#: crates/clamui-core/src/network.rs:228
 msgid "Network socket listing timed out. Try again."
 msgstr "Quá thời gian chờ khi liệt kê socket mạng. Hãy thử lại."
 
-#: crates/clamui-core/src/network.rs:156
+#: crates/clamui-core/src/network.rs:232
 msgid "Network socket listing could not be completed safely. Try again."
 msgstr ""
 "Không thể hoàn tất việc liệt kê socket mạng một cách an toàn. Hãy thử lại."
 
-#: crates/clamui-core/src/network.rs:163
+#: crates/clamui-core/src/network.rs:239
 msgid ""
 "Network socket listing returned invalid text and could not be read safely."
 msgstr ""
 "Kết quả liệt kê socket mạng chứa văn bản không hợp lệ nên không thể đọc một "
 "cách an toàn."
 
-#: crates/clamui-core/src/network.rs:170
+#: crates/clamui-core/src/network.rs:246
 msgid ""
 "Network socket listing is unavailable. Check that the system socket tool is "
 "installed and try again."
@@ -1598,43 +1727,43 @@ msgstr "Không thể cách ly {path}: {error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "Mã băm của tệp không khớp — tệp có thể đã bị hỏng"
 
-#: crates/clamui-core/src/scanner.rs:436
+#: crates/clamui-core/src/scanner.rs:461
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 "Không tìm thấy tệp cơ sở dữ liệu ClamAV nào ở các vị trí tiêu chuẩn trên hệ "
 "thống chủ"
 
-#: crates/clamui-core/src/scanner.rs:1855
+#: crates/clamui-core/src/scanner.rs:1886
 msgid "Scan cancelled by user"
 msgstr "Người dùng đã hủy quá trình quét"
 
-#: crates/clamui-core/src/scanner.rs:1862
+#: crates/clamui-core/src/scanner.rs:1893
 msgid "No files could be scanned"
 msgstr "Không thể quét tệp nào"
 
-#: crates/clamui-core/src/scanner.rs:1868
+#: crates/clamui-core/src/scanner.rs:1899
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "Mục tiêu quét không tồn tại hoặc chứa byte NUL không hợp lệ"
 
-#: crates/clamui-core/src/scanner.rs:1875
+#: crates/clamui-core/src/scanner.rs:1906
 msgid "Scan target is not a regular file or directory"
 msgstr "Mục tiêu quét không phải là tệp hoặc thư mục thông thường"
 
-#: crates/clamui-core/src/scanner.rs:1884
+#: crates/clamui-core/src/scanner.rs:1915
 msgid "Threats were detected, but details are unavailable."
 msgstr "Đã phát hiện các mối đe dọa, nhưng không có thông tin chi tiết."
 
-#: crates/clamui-core/src/scanner.rs:1896
+#: crates/clamui-core/src/scanner.rs:1927
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "Không thể truy cập {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1909
+#: crates/clamui-core/src/scanner.rs:1940
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "Không thể đọc {count} tệp"
 
-#: crates/clamui-core/src/scanner.rs:1928
+#: crates/clamui-core/src/scanner.rs:1959
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2343,7 +2472,7 @@ msgstr "Sao chép nội dung"
 msgid "Configuration content"
 msgstr "Nội dung cấu hình"
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:484
 msgid "Could not open documentation: {error}"
 msgstr "Không thể mở tài liệu: {error}"
 
@@ -2514,7 +2643,7 @@ msgstr "Lỗi"
 msgid "Cancelled"
 msgstr "Đã hủy"
 
-#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
+#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:66
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
@@ -2533,102 +2662,125 @@ msgstr "Không thể khởi động ClamUI"
 msgid "Retry"
 msgstr "Thử lại"
 
-#: desktop/src/pages/Audit.tsx:43
+#: desktop/src/pages/Audit.tsx:45
 msgid "ClamAV Health"
 msgstr "Tình trạng ClamAV"
 
-#: desktop/src/pages/Audit.tsx:44
+#: desktop/src/pages/Audit.tsx:46
 msgid "Firewall"
 msgstr "Tường lửa"
 
-#: desktop/src/pages/Audit.tsx:45
+#: desktop/src/pages/Audit.tsx:47
 msgid "Access Control"
 msgstr "Kiểm soát truy cập"
 
-#: desktop/src/pages/Audit.tsx:46
+#: desktop/src/pages/Audit.tsx:48
 msgid "Automatic Updates"
 msgstr "Cập nhật tự động"
 
-#: desktop/src/pages/Audit.tsx:47
+#: desktop/src/pages/Audit.tsx:49
 msgid "Intrusion Detection"
 msgstr "Phát hiện xâm nhập"
 
-#: desktop/src/pages/Audit.tsx:48
+#: desktop/src/pages/Audit.tsx:50
 msgid "SSH Security"
 msgstr "Bảo mật SSH"
 
-#: desktop/src/pages/Audit.tsx:49
-msgid "Portmaster"
-msgstr "Portmaster"
-
-#: desktop/src/pages/Audit.tsx:59 desktop/src/pages/Audit.tsx:267
+#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:404
 msgid "Checking"
 msgstr "Đang kiểm tra"
 
-#: desktop/src/pages/Audit.tsx:60 desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:400
 msgid "Pass"
 msgstr "Đạt"
 
-#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:400
 msgid "Warning"
 msgstr "Cảnh báo"
 
-#: desktop/src/pages/Audit.tsx:62
+#: desktop/src/pages/Audit.tsx:64
 msgid "Fail"
 msgstr "Không đạt"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:120
+#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "Đã bỏ qua"
 
 #: desktop/src/pages/Audit.tsx:164
+msgid "Local only"
+msgstr "Chỉ cục bộ"
+
+#: desktop/src/pages/Audit.tsx:166
+msgid "All interfaces"
+msgstr "Mọi giao diện mạng"
+
+#: desktop/src/pages/Audit.tsx:167
+msgid "Specific address or interface"
+msgstr "Địa chỉ hoặc giao diện mạng cụ thể"
+
+#: desktop/src/pages/Audit.tsx:246
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] "{count} vấn đề bảo mật cần chú ý"
 
-#: desktop/src/pages/Audit.tsx:165
+#: desktop/src/pages/Audit.tsx:247
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] "{count} mục kiểm tra bảo mật cần xem lại"
 
-#: desktop/src/pages/Audit.tsx:166
+#: desktop/src/pages/Audit.tsx:248
 msgid "Security audit completed"
 msgstr "Đã hoàn tất kiểm tra bảo mật"
 
-#: desktop/src/pages/Audit.tsx:189
+#: desktop/src/pages/Audit.tsx:281
 msgid "Could not receive progressive audit results: {error}"
 msgstr "Không thể nhận kết quả kiểm tra bảo mật theo từng phần: {error}"
 
-#: desktop/src/pages/Audit.tsx:208
+#: desktop/src/pages/Audit.tsx:301
 msgid "{tool} check completed"
 msgstr "Đã hoàn tất kiểm tra {tool}"
 
-#: desktop/src/pages/Audit.tsx:218
+#: desktop/src/pages/Audit.tsx:312
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr ""
 "Kết quả kiểm tra bảo mật chứa thao tác khởi chạy giao diện không được hỗ trợ."
 
-#: desktop/src/pages/Audit.tsx:223
+#: desktop/src/pages/Audit.tsx:317
 msgid "The selected application did not start"
 msgstr "Ứng dụng đã chọn không khởi động được"
 
-#: desktop/src/pages/Audit.tsx:236
+#: desktop/src/pages/Audit.tsx:331
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr "Đã cấp quyền Portmaster; đang kiểm tra lại."
 
-#: desktop/src/pages/Audit.tsx:239
+#: desktop/src/pages/Audit.tsx:334
 msgid "Portmaster authorization was cancelled."
 msgstr "Đã hủy yêu cầu cấp quyền Portmaster."
 
-#: desktop/src/pages/Audit.tsx:241
+#: desktop/src/pages/Audit.tsx:336
 msgid "Portmaster authorization was not granted."
 msgstr "Quyền Portmaster không được cấp."
 
-#: desktop/src/pages/Audit.tsx:258
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:356
+msgid "UFW status authorization was cancelled."
+msgstr "Đã hủy yêu cầu cấp quyền kiểm tra trạng thái UFW."
+
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:364
+msgid "The UFW status check did not return a firewall result."
+msgstr "Kiểm tra trạng thái UFW không trả về kết quả tường lửa."
+
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:371
+msgid "UFW status check completed"
+msgstr "Đã hoàn tất kiểm tra trạng thái UFW"
+
+#: desktop/src/pages/Audit.tsx:393
 msgid "System security audit"
 msgstr "Kiểm tra bảo mật hệ thống"
 
-#: desktop/src/pages/Audit.tsx:259
+#: desktop/src/pages/Audit.tsx:394
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
@@ -2636,29 +2788,33 @@ msgstr ""
 "Đánh giá tình trạng bảo mật và sao chép các khuyến nghị. Các bước kiểm tra "
 "bảo mật không bao giờ thay đổi cấu hình hệ thống."
 
-#: desktop/src/pages/Audit.tsx:261
+#: desktop/src/pages/Audit.tsx:396
 msgid "Auditing…"
 msgstr "Đang kiểm tra bảo mật…"
 
-#: desktop/src/pages/Audit.tsx:261
+#: desktop/src/pages/Audit.tsx:396
 msgid "Refresh audit"
 msgstr "Kiểm tra lại"
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:400
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] "{count} vấn đề"
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:400
 msgid "unavailable or skipped"
 msgstr "không khả dụng hoặc đã bỏ qua"
 
-#: desktop/src/pages/Audit.tsx:271
+#: desktop/src/pages/Audit.tsx:402
+msgid "Hide missing optional items"
+msgstr "Ẩn các mục tùy chọn không có"
+
+#: desktop/src/pages/Audit.tsx:408
 msgid "Deep scans"
 msgstr "Quét chuyên sâu"
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:271
+#: desktop/src/pages/Audit.tsx:408
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
@@ -2666,60 +2822,113 @@ msgstr ""
 "Lynis và chkrootkit không bao giờ tự động chạy. Mỗi bước kiểm tra chỉ yêu "
 "cầu quyền quản trị sau khi bạn chủ động bắt đầu bước kiểm tra đó."
 
-#: desktop/src/pages/Audit.tsx:276
+#: desktop/src/pages/Audit.tsx:413
 msgid "Running Lynis…"
 msgstr "Đang chạy Lynis…"
 
-#: desktop/src/pages/Audit.tsx:276
+#: desktop/src/pages/Audit.tsx:413
 msgid "Run Lynis security audit"
 msgstr "Chạy kiểm tra bảo mật Lynis"
 
-#: desktop/src/pages/Audit.tsx:277
+#: desktop/src/pages/Audit.tsx:414
 msgid "Running chkrootkit…"
 msgstr "Đang chạy chkrootkit…"
 
-#: desktop/src/pages/Audit.tsx:277
+#: desktop/src/pages/Audit.tsx:414
 msgid "Run rootkit detection"
 msgstr "Chạy phát hiện rootkit"
 
-#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Audit.tsx:300
-msgid "Portmaster — not detected (optional)"
-msgstr "Portmaster — không phát hiện (không bắt buộc)"
-
-#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Audit.tsx:305
-msgid "Portmaster — could not probe"
-msgstr "Portmaster — không thể kiểm tra"
-
-#: desktop/src/pages/Audit.tsx:314
+#: desktop/src/pages/Audit.tsx:442
 msgid "No audit details were returned."
 msgstr "Không nhận được chi tiết kiểm tra bảo mật nào."
 
-#: desktop/src/pages/Audit.tsx:323 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:448 desktop/src/pages/Audit.tsx:458
+#: desktop/src/pages/Database.tsx:285
+msgid "Unavailable"
+msgstr "Không khả dụng"
+
+#: desktop/src/pages/Audit.tsx:451 desktop/src/pages/Network.tsx:403
+msgid ""
+"Network information is unavailable. Check that the system socket tool is "
+"installed and try again."
+msgstr ""
+"Không có thông tin mạng. Hãy kiểm tra xem công cụ socket của hệ thống đã "
+"được cài đặt chưa rồi thử lại."
+
+#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+msgid "The socket list was limited. This snapshot may be incomplete."
+msgstr "Danh sách socket đã bị giới hạn. Ảnh chụp này có thể không đầy đủ."
+
+#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+msgid "Some socket records could not be read. This snapshot may be incomplete."
+msgstr ""
+"Không đọc được một số bản ghi socket. Ảnh chụp này có thể không đầy đủ."
+
+#: desktop/src/pages/Audit.tsx:453
+msgid ""
+"Listening sockets do not prove that a port is reachable through the firewall."
+msgstr ""
+"Socket đang lắng nghe không chứng minh rằng cổng có thể truy cập được qua "
+"tường lửa."
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Protocol"
+msgstr "Giao thức"
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Port"
+msgstr "Cổng"
+
+#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:282
+msgid "Local address"
+msgstr "Địa chỉ cục bộ"
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Binding"
+msgstr "Phạm vi liên kết"
+
+#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:287
+msgid "Process"
+msgstr "Tiến trình"
+
+#. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
+#: desktop/src/pages/Audit.tsx:461 desktop/src/pages/Network.tsx:289
+msgid "PID {pid}"
+msgstr "PID {pid}"
+
+#: desktop/src/pages/Audit.tsx:465 desktop/src/pages/Network.tsx:294
+msgid "Process information unavailable"
+msgstr "Không có thông tin tiến trình"
+
+#: desktop/src/pages/Audit.tsx:475 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr "Đã sao chép lệnh vào bộ nhớ tạm"
 
-#: desktop/src/pages/Audit.tsx:325 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:477 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr "Không thể sao chép lệnh: {error}"
 
-#: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Audit.tsx:492 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Sao chép"
 
-#: desktop/src/pages/Audit.tsx:340
+#: desktop/src/pages/Audit.tsx:494
 msgid "Authorizing…"
 msgstr "Đang cấp quyền…"
 
-#: desktop/src/pages/Audit.tsx:340 desktop/src/pages/Network.tsx:441
+#. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
+#: desktop/src/pages/Audit.tsx:495
+msgid "Checking UFW…"
+msgstr "Đang kiểm tra UFW…"
+
+#: desktop/src/pages/Audit.tsx:500 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr "Mở trong trình duyệt"
 
-#: desktop/src/pages/Audit.tsx:340
+#: desktop/src/pages/Audit.tsx:500
 msgid "Learn more"
 msgstr "Tìm hiểu thêm"
 
@@ -3642,10 +3851,6 @@ msgstr "freshclam không trả về trạng thái"
 msgid "Available"
 msgstr "Khả dụng"
 
-#: desktop/src/pages/Database.tsx:285
-msgid "Unavailable"
-msgstr "Không khả dụng"
-
 #: desktop/src/pages/Database.tsx:288
 msgid "Update service"
 msgstr "Dịch vụ cập nhật"
@@ -3987,26 +4192,9 @@ msgstr "Không ghi nhận địa chỉ từ xa"
 msgid "No remote address is available to copy."
 msgstr "Không có địa chỉ từ xa để sao chép."
 
-#: desktop/src/pages/Network.tsx:282
-msgid "Local address"
-msgstr "Địa chỉ cục bộ"
-
 #: desktop/src/pages/Network.tsx:283
 msgid "Remote address"
 msgstr "Địa chỉ từ xa"
-
-#: desktop/src/pages/Network.tsx:287
-msgid "Process"
-msgstr "Tiến trình"
-
-#. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Network.tsx:289
-msgid "PID {pid}"
-msgstr "PID {pid}"
-
-#: desktop/src/pages/Network.tsx:294
-msgid "Process information unavailable"
-msgstr "Không có thông tin tiến trình"
 
 #: desktop/src/pages/Network.tsx:328
 msgid "Could not load network connections. Try again."
@@ -4045,23 +4233,6 @@ msgstr "Đang tải…"
 #: desktop/src/pages/Network.tsx:401
 msgid "Loading network connections…"
 msgstr "Đang tải các kết nối mạng…"
-
-#: desktop/src/pages/Network.tsx:403
-msgid ""
-"Network information is unavailable. Check that the system socket tool is "
-"installed and try again."
-msgstr ""
-"Không có thông tin mạng. Hãy kiểm tra xem công cụ socket của hệ thống đã "
-"được cài đặt chưa rồi thử lại."
-
-#: desktop/src/pages/Network.tsx:406
-msgid "The socket list was limited. This snapshot may be incomplete."
-msgstr "Danh sách socket đã bị giới hạn. Ảnh chụp này có thể không đầy đủ."
-
-#: desktop/src/pages/Network.tsx:406
-msgid "Some socket records could not be read. This snapshot may be incomplete."
-msgstr ""
-"Không đọc được một số bản ghi socket. Ảnh chụp này có thể không đầy đủ."
 
 #. Translators: Preserve the {time} placeholder. It is the native UTC/ISO snapshot timestamp.
 #: desktop/src/pages/Network.tsx:407
@@ -5793,6 +5964,15 @@ msgstr "Quét toàn diện toàn hệ thống, bao gồm mọi thư mục có th
 #: desktop/src/profilePresentation.ts:38
 msgid "Scan of the user's home directory and personal files"
 msgstr "Quét thư mục cá nhân và các tệp riêng của người dùng"
+
+#~ msgid "Portmaster"
+#~ msgstr "Portmaster"
+
+#~ msgid "Portmaster — not detected (optional)"
+#~ msgstr "Portmaster — không phát hiện (không bắt buộc)"
+
+#~ msgid "Portmaster — could not probe"
+#~ msgstr "Portmaster — không thể kiểm tra"
 
 #~ msgid "Estimated file count exceeded"
 #~ msgstr "Đã vượt quá số tệp ước tính"

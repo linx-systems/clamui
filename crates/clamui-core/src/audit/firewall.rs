@@ -4,13 +4,21 @@ use super::{
 };
 use crate::host_probe::{run_limited_command, LimitedCommandOutput};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 const PROBE_TIMEOUT: Duration = Duration::from_secs(2);
+const AUTH_TIMEOUT: Duration = Duration::from_secs(120);
 const PROBE_OUTPUT_LIMIT: usize = 256 * 1024;
+const UFW_PATHS: [&str; 3] = ["/usr/sbin/ufw", "/usr/bin/ufw", "/sbin/ufw"];
 
 pub(super) fn check_firewall(ctx: &Context) -> AuditSection {
+    let ufw = inspect_ufw(&probe("ufw", &["status", "verbose"]));
+    build_firewall(ctx, ufw)
+}
+
+fn build_firewall(ctx: &Context, ufw: UfwState) -> AuditSection {
     let mut section = AuditSection::new(
         ctx,
         AuditCategory::Firewall,
@@ -18,8 +26,7 @@ pub(super) fn check_firewall(ctx: &Context) -> AuditSection {
         "security-medium-symbolic",
     );
 
-    let ufw = inspect_ufw(&probe("ufw", &["status", "verbose"]));
-    add_ufw(ctx, &mut section, ufw);
+    add_ufw(ctx, &mut section, ufw, || trusted_ufw_path().is_some());
 
     let firewalld = inspect_firewalld_owner(&probe(
         "busctl",
@@ -68,6 +75,179 @@ fn probe(program: &str, args: &[&str]) -> LimitedCommandOutput {
     run_limited_command(program, args, PROBE_TIMEOUT, PROBE_OUTPUT_LIMIT)
 }
 
+fn trusted_ufw_path() -> Option<&'static str> {
+    UFW_PATHS
+        .into_iter()
+        .find(|path| trusted_host_executable(path))
+}
+
+fn trusted_host_executable(path: &str) -> bool {
+    trusted_path_with(
+        path,
+        |path| {
+            let path = path.to_str()?;
+            let output = probe("/usr/bin/stat", &["--format=%u:%f", "--", path]);
+            if !usable(&output) {
+                return None;
+            }
+            let (uid, mode) = output.stdout.trim().split_once(':')?;
+            Some((
+                uid.parse::<u32>().ok()?,
+                u32::from_str_radix(mode, 16).ok()?,
+            ))
+        },
+        |path| {
+            let path = path.to_str()?;
+            let output = probe("/usr/bin/readlink", &["--", path]);
+            if !usable(&output) {
+                return None;
+            }
+            Some(output.stdout.strip_suffix('\n')?.to_owned())
+        },
+    )
+}
+
+fn trusted_path_with(
+    path: &str,
+    metadata: impl Fn(&Path) -> Option<(u32, u32)>,
+    read_link: impl Fn(&Path) -> Option<String>,
+) -> bool {
+    fn components(path: &str) -> Option<VecDeque<String>> {
+        Path::new(path)
+            .components()
+            .map(|part| part.as_os_str().to_str().map(str::to_owned))
+            .collect()
+    }
+    let Some(mut pending) = components(path) else {
+        return false;
+    };
+    let Some((0, root_mode)) = metadata(Path::new("/")) else {
+        return false;
+    };
+    if root_mode & 0o170000 != 0o040000 || root_mode & 0o022 != 0 {
+        return false;
+    }
+    let mut current = PathBuf::from("/");
+    // Bound both symlink cycles and hostile host path lengths.
+    for _ in 0..40 {
+        let Some(part) = pending.pop_front() else {
+            return false;
+        };
+        match part.as_str() {
+            "/" => {
+                current = PathBuf::from("/");
+                continue;
+            }
+            "." => continue,
+            ".." => {
+                current.pop();
+                continue;
+            }
+            _ => current.push(part),
+        }
+        let Some((0, mode)) = metadata(&current) else {
+            return false;
+        };
+        match mode & 0o170000 {
+            0o120000 => {
+                let Some(target) = read_link(&current) else {
+                    return false;
+                };
+                let Some(mut target_parts) = components(&target) else {
+                    return false;
+                };
+                if target_parts.is_empty() {
+                    return false;
+                }
+                current.pop();
+                target_parts.append(&mut pending);
+                pending = target_parts;
+            }
+            0o040000 if !pending.is_empty() && mode & 0o022 == 0 => {}
+            0o100000 if pending.is_empty() && mode & 0o022 == 0 && mode & 0o100 != 0 => {
+                return true;
+            }
+            _ => return false,
+        }
+    }
+    false
+}
+
+pub(super) fn request_ufw_status(ctx: &Context) -> crate::AppResult<Value> {
+    let Some(path) = trusted_ufw_path() else {
+        // Translators: UFW is the name of the firewall application.
+        return Err(tr(ctx, "UFW was not found at a trusted system path."));
+    };
+    if !trusted_host_executable("/usr/bin/pkexec") {
+        return Err(tr(
+            ctx,
+            // Translators: UFW is the name of the firewall application.
+            "Administrator authorization for the UFW status check was denied or unavailable.",
+        ));
+    }
+    let output = run_limited_command(
+        "/usr/bin/pkexec",
+        &["--disable-internal-agent", path, "status", "verbose"],
+        AUTH_TIMEOUT,
+        PROBE_OUTPUT_LIMIT,
+    );
+    finish_ufw_status(ctx, &output, |state| build_firewall(ctx, state))
+}
+
+fn finish_ufw_status(
+    ctx: &Context,
+    output: &LimitedCommandOutput,
+    build: impl FnOnce(UfwState) -> AuditSection,
+) -> crate::AppResult<Value> {
+    if output.timed_out {
+        // Translators: UFW is the name of the firewall application.
+        return Err(tr(ctx, "The UFW status check timed out."));
+    }
+    if output.truncated || output.invalid_utf8 || output.code.is_none() {
+        return Err(tr(
+            ctx,
+            // Translators: UFW is the name of the firewall application.
+            "The UFW status check returned incomplete or invalid output.",
+        ));
+    }
+    match output.code {
+        Some(126) => return Ok(serde_json::json!({"cancelled": true})),
+        Some(127) => {
+            return Err(tr(
+                ctx,
+                // Translators: UFW is the name of the firewall application.
+                "Administrator authorization for the UFW status check was denied or unavailable.",
+            ));
+        }
+        Some(0) => {}
+        _ => {
+            // Translators: UFW is the name of the firewall application.
+            return Err(tr(ctx, "The UFW status check failed."));
+        }
+    }
+    let state = inspect_ufw(output);
+    if matches!(
+        state,
+        UfwState::Unknown
+            | UfwState::Active {
+                incoming: InputPolicy::Unverified,
+                ..
+            }
+    ) {
+        return Err(tr(
+            ctx,
+            // Translators: UFW is the name of the firewall application.
+            "The UFW status check returned incomplete or invalid output.",
+        ));
+    }
+    let section = build(state);
+    ctx.emit(
+        "audit-progress",
+        serde_json::json!({"section": section, "index": 0, "total": 1}),
+    );
+    Ok(serde_json::json!({"cancelled": false, "section": section}))
+}
+
 fn usable(output: &LimitedCommandOutput) -> bool {
     probe_is_usable(
         output.code,
@@ -96,7 +276,12 @@ enum UfwState {
 }
 
 fn inspect_ufw(output: &LimitedCommandOutput) -> UfwState {
-    if !usable(output) {
+    if !usable(output)
+        || output
+            .stdout
+            .chars()
+            .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+    {
         return UfwState::Unknown;
     }
     parse_ufw_status(&output.stdout)
@@ -120,22 +305,23 @@ fn parse_ufw_status(text: &str) -> UfwState {
     if !active {
         return UfwState::Inactive;
     }
-    let incoming = text
+    let mut defaults = text
         .lines()
-        .find_map(|line| line.strip_prefix("Default: "))
-        .and_then(|line| {
-            line.split(',').find_map(|part| {
-                let part = part.trim();
-                let value = part.strip_suffix(" (incoming)")?;
-                Some(match value {
-                    "deny" => InputPolicy::Deny,
-                    "reject" => InputPolicy::Reject,
-                    "allow" => InputPolicy::Allow,
-                    _ => InputPolicy::Unverified,
-                })
-            })
-        })
-        .unwrap_or(InputPolicy::Unverified);
+        .filter_map(|line| line.strip_prefix("Default: "));
+    let incoming = match (defaults.next(), defaults.next()) {
+        (Some(line), None) => {
+            let mut policies = line
+                .split(',')
+                .filter_map(|part| part.trim().strip_suffix(" (incoming)"));
+            match (policies.next(), policies.next()) {
+                (Some("deny"), None) => InputPolicy::Deny,
+                (Some("reject"), None) => InputPolicy::Reject,
+                (Some("allow"), None) => InputPolicy::Allow,
+                _ => InputPolicy::Unverified,
+            }
+        }
+        _ => InputPolicy::Unverified,
+    };
     let listed_exceptions = text.lines().any(|line| {
         let mut action_seen = false;
         for field in line.split_whitespace() {
@@ -153,7 +339,12 @@ fn parse_ufw_status(text: &str) -> UfwState {
     }
 }
 
-fn add_ufw(ctx: &Context, section: &mut AuditSection, state: UfwState) {
+fn add_ufw(
+    ctx: &Context,
+    section: &mut AuditSection,
+    state: UfwState,
+    trusted_available: impl FnOnce() -> bool,
+) {
     let name = tr(ctx, "UFW Firewall");
     let mut row = match state {
         UfwState::Active {
@@ -195,6 +386,13 @@ fn add_ufw(ctx: &Context, section: &mut AuditSection, state: UfwState) {
         UfwState::Inactive => AuditCheck::new(name, AuditStatus::Warning, tr(ctx, "UFW reports inactive.")),
         UfwState::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(ctx, "UFW status could not be inspected safely.")),
     };
+    if state == UfwState::Unknown && trusted_available() {
+        row.launch_command = Some("__ufw_status__".to_owned());
+        // Translators: UFW is the name of the firewall application.
+        row.launch_label = Some(tr(ctx, "Check UFW with administrator access"));
+        // Translators: UFW is the name of the firewall application.
+        row.recommendation = Some(tr(ctx, "Administrator access may be required to read UFW status. This check does not change firewall settings."));
+    }
     row.info_url = Some(URL_UFW.to_owned());
     section.push(row);
 }
@@ -514,6 +712,7 @@ fn add_gufw(ctx: &Context, section: &mut AuditSection, present: bool) {
             "Gufw was not confirmed; this optional inventory does not affect firewall policy analysis.",
         ))
     };
+    row.optional_missing = !present;
     if present {
         row.launch_command = Some("gufw".to_owned());
         row.launch_label = Some(tr(ctx, "Open Gufw"));
@@ -535,6 +734,7 @@ fn add_firewall_config(ctx: &Context, section: &mut AuditSection, present: bool)
             "Firewall Config was not confirmed; this optional inventory does not affect firewall policy analysis.",
         ))
     };
+    row.optional_missing = !present;
     if present {
         row.launch_command = Some("firewall-config".to_owned());
         row.launch_label = Some(tr(ctx, "Open Firewall Config"));
@@ -576,7 +776,7 @@ fn dpkg_status_installed(text: &str) -> bool {
 
 fn add_plasma_firewall(ctx: &Context, section: &mut AuditSection, installed: bool) {
     let name = tr(ctx, "Plasma Firewall");
-    let row = if installed {
+    let mut row = if installed {
         AuditCheck::new(
             name,
             AuditStatus::Pass,
@@ -595,6 +795,7 @@ fn add_plasma_firewall(ctx: &Context, section: &mut AuditSection, installed: boo
             ),
         )
     };
+    row.optional_missing = !installed;
     section.push(row);
 }
 
@@ -660,6 +861,209 @@ mod tests {
     }
 
     #[test]
+    fn trusted_ufw_path_rejects_unsafe_owners_modes_and_symlink_resolution() {
+        let mut entries = BTreeMap::from([
+            ("/", (0, 0o040755)),
+            ("/usr", (0, 0o040755)),
+            ("/usr/sbin", (0, 0o040755)),
+            ("/usr/sbin/ufw", (0, 0o120777)),
+            ("/usr/lib", (0, 0o040755)),
+            ("/usr/lib/ufw", (0, 0o100755)),
+            ("/tmp", (0, 0o041777)),
+        ]);
+        let trusted = |entries: &BTreeMap<&str, (u32, u32)>, target: &str| {
+            trusted_path_with(
+                "/usr/sbin/ufw",
+                |path| entries.get(path.to_str()?).copied(),
+                |_| Some(target.to_owned()),
+            )
+        };
+        assert!(trusted(&entries, "../lib/ufw"));
+        assert!(!trusted(&entries, "/tmp/ufw"));
+        assert!(!trusted(&entries, "/usr/sbin/ufw"));
+        entries.insert("/usr/lib/ufw", (1000, 0o100755));
+        assert!(!trusted(&entries, "../lib/ufw"));
+        entries.insert("/usr/lib/ufw", (0, 0o100775));
+        assert!(!trusted(&entries, "../lib/ufw"));
+        entries.insert("/usr/lib/ufw", (0, 0o100757));
+        assert!(!trusted(&entries, "../lib/ufw"));
+        entries.insert("/usr/lib/ufw", (0, 0o100644));
+        assert!(!trusted(&entries, "../lib/ufw"));
+        entries.insert("/usr/lib/ufw", (0, 0o100755));
+        entries.insert("/usr/lib", (0, 0o040775));
+        assert!(!trusted(&entries, "../lib/ufw"));
+        entries.insert("/usr/lib", (0, 0o040755));
+        entries.insert("/usr/sbin/ufw", (1000, 0o120777));
+        assert!(!trusted(&entries, "../lib/ufw"));
+    }
+
+    #[test]
+    fn ufw_admin_action_requires_unknown_state_and_trusted_executable() {
+        let temp = TempDir::new().expect("create temporary context root");
+        let ctx = test_context(&temp);
+        let mut section = AuditSection::new(
+            &ctx,
+            AuditCategory::Firewall,
+            "Firewall",
+            "security-medium-symbolic",
+        );
+        add_ufw(&ctx, &mut section, UfwState::Unknown, || false);
+        add_ufw(&ctx, &mut section, UfwState::Unknown, || true);
+        add_ufw(&ctx, &mut section, UfwState::Inactive, || true);
+
+        assert_eq!(section.checks[0].launch_command, None);
+        assert_eq!(section.checks[0].recommendation, None);
+        assert_eq!(
+            section.checks[1].launch_command.as_deref(),
+            Some("__ufw_status__")
+        );
+        assert_eq!(
+            section.checks[1].launch_label.as_deref(),
+            Some("Check UFW with administrator access")
+        );
+        assert_eq!(section.checks[2].launch_command, None);
+    }
+
+    #[test]
+    fn authenticated_ufw_output_controls_returned_and_emitted_firewall_rows() {
+        use std::sync::{Arc, Mutex};
+
+        let temp = TempDir::new().expect("create temporary context root");
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let received = Arc::clone(&events);
+        let ctx = test_context(&temp).with_emitter(move |event| {
+            received.lock().expect("event lock").push(event);
+        });
+        for (output, expected) in [
+            (
+                "Status: active\nDefault: deny (incoming), allow (outgoing)\n",
+                AuditStatus::Pass,
+            ),
+            (
+                "Status: active\nDefault: reject (incoming), allow (outgoing)\n",
+                AuditStatus::Pass,
+            ),
+            (
+                "Status: active\nDefault: allow (incoming), allow (outgoing)\n",
+                AuditStatus::Warning,
+            ),
+            ("Status: inactive\n", AuditStatus::Warning),
+        ] {
+            let result = finish_ufw_status(
+                &ctx,
+                &completed_output(output.as_bytes().to_vec()),
+                |state| {
+                    let mut section = AuditSection::new(
+                        &ctx,
+                        AuditCategory::Firewall,
+                        "Firewall",
+                        "security-medium-symbolic",
+                    );
+                    add_ufw(&ctx, &mut section, state, || false);
+                    section
+                },
+            )
+            .expect("valid UFW status");
+            assert_eq!(result["cancelled"], false);
+            let section: AuditSection =
+                serde_json::from_value(result["section"].clone()).expect("section");
+            assert_eq!(section.category, AuditCategory::Firewall);
+            assert_eq!(section.checks[0].status, expected);
+            assert_eq!(section.overall_status, expected);
+            let mut events = events.lock().expect("event lock");
+            let event = events.pop().expect("progress event");
+            assert_eq!(event.event, "audit-progress");
+            assert_eq!(event.data["section"], result["section"]);
+            assert!(events.is_empty());
+        }
+    }
+
+    #[test]
+    fn authenticated_ufw_cancellation_denial_and_bad_output_never_emit_sections() {
+        use std::sync::{Arc, Mutex};
+
+        let temp = TempDir::new().expect("create temporary context root");
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let received = Arc::clone(&events);
+        let ctx = test_context(&temp).with_emitter(move |event| {
+            received.lock().expect("event lock").push(event);
+        });
+        let mut output = completed_output(b"Status: active\nDefault: deny (incoming)\n".to_vec());
+        output.code = Some(126);
+        let cancelled = finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild"));
+        assert_eq!(
+            cancelled.expect("cancelled"),
+            serde_json::json!({"cancelled": true})
+        );
+
+        output.code = Some(127);
+        assert_eq!(
+            finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).unwrap_err(),
+            "Administrator authorization for the UFW status check was denied or unavailable."
+        );
+        output.code = Some(1);
+        assert_eq!(
+            finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).unwrap_err(),
+            "The UFW status check failed."
+        );
+        output.code = Some(0);
+        output.timed_out = true;
+        assert_eq!(
+            finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).unwrap_err(),
+            "The UFW status check timed out."
+        );
+        output.timed_out = false;
+        output.truncated = true;
+        assert_eq!(
+            finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).unwrap_err(),
+            "The UFW status check returned incomplete or invalid output."
+        );
+        output.truncated = false;
+        output.invalid_utf8 = true;
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.invalid_utf8 = false;
+        output.code = None;
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.code = Some(0);
+        output.stdout = "Status: active-ish\n".to_owned();
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.stdout = "Status: active\n".to_owned();
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.stdout = "Status: active\nDefault: deny (incoming)\n\0".to_owned();
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.stdout =
+            "Status: active\nDefault: deny (incoming)\nDefault: allow (incoming)\n".to_owned();
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        output.stdout = "Status: active\nDefault: deny (incoming), allow (incoming)\n".to_owned();
+        assert!(finish_ufw_status(&ctx, &output, |_| panic!("must not rebuild")).is_err());
+        assert!(events.lock().expect("event lock").is_empty());
+    }
+
+    #[test]
+    fn optional_missing_marks_only_unconfirmed_management_inventory() {
+        let temp = TempDir::new().expect("create temporary context root");
+        let ctx = test_context(&temp);
+        let mut section = AuditSection::new(
+            &ctx,
+            AuditCategory::Firewall,
+            "Firewall",
+            "security-medium-symbolic",
+        );
+
+        for present in [false, true] {
+            add_gufw(&ctx, &mut section, present);
+            add_firewall_config(&ctx, &mut section, present);
+            add_plasma_firewall(&ctx, &mut section, present);
+        }
+        add_ufw(&ctx, &mut section, UfwState::Inactive, || false);
+        add_ufw(&ctx, &mut section, UfwState::Unknown, || false);
+        add_nftables(&ctx, &mut section, None);
+
+        assert!(section.checks[..3].iter().all(|row| row.optional_missing));
+        assert!(section.checks[3..].iter().all(|row| !row.optional_missing));
+    }
+
+    #[test]
     fn ufw_requires_an_exact_successful_status_header() {
         assert_eq!(
             parse_ufw_status("Status: active\nDefault: deny (incoming), allow (outgoing)\n"),
@@ -708,7 +1112,7 @@ mod tests {
             "Firewall",
             "security-medium-symbolic",
         );
-        add_ufw(&ctx, &mut qualified, with_ipv6_exception);
+        add_ufw(&ctx, &mut qualified, with_ipv6_exception, || false);
         let qualified = qualified.checks.pop().expect("qualified UFW row");
 
         let mut unqualified = AuditSection::new(
@@ -717,7 +1121,7 @@ mod tests {
             "Firewall",
             "security-medium-symbolic",
         );
-        add_ufw(&ctx, &mut unqualified, without_exception);
+        add_ufw(&ctx, &mut unqualified, without_exception, || false);
         let unqualified = unqualified.checks.pop().expect("unqualified UFW row");
 
         assert_eq!(qualified.status, AuditStatus::Pass);

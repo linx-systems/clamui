@@ -4,6 +4,10 @@
 
 ### Added
 
+- Expanded the Audit Open Ports details with listener addresses, binding scope, and available process information.
+- Added an explicit administrator-authorized UFW status check for unknown Audit results without changing firewall settings.
+- Added an Audit checkbox to hide missing optional items without changing audit totals.
+- Added independent OpenSnitch service and graphical-interface checks to the application-firewall audit, with an explicit GUI launch action when available; Portmaster remains a separate check. (#241)
 - Added a Vietnamese (`vi`) translation.
 
 ### Changed
@@ -25,7 +29,7 @@
 
 ### Fixed
 
-- Fixed Flatpak standalone scan progress estimates to count host files, including hidden app data, while retaining valid partial counts when subdirectories are unreadable; unavailable or exceeded estimates now use an approximate, indeterminate state, and multi-target progress labels each target while keeping the overall scanned count cumulative. (#304)
+- Fixed Flatpak standalone scan progress estimates to count host files, including hidden app data, while retaining valid partial counts when subdirectories are unreadable. Multi-target scans now label each target and preserve cumulative file and threat counters, incomplete or exceeded estimates remain approximate and indeterminate, and genuine estimate warnings and final per-target results are preserved. (#304)
 - Fixed active manual and forced database updates timing out after a fixed total duration; a configurable output-inactivity limit now stops stalled updates instead. (#307)
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
 - Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)

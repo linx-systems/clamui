@@ -840,6 +840,26 @@ details.audit-row > .audit-details {
   padding: 10px 12px;
 }
 
+.audit-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.audit-ports-table {
+  min-width: 600px;
+}
+
+.audit-ports-table th:nth-child(-n + 2),
+.audit-ports-table td:nth-child(-n + 2) {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.audit-process-list {
+  margin: 0;
+  padding-inline-start: 1.2em;
+}
+
 .field,
 .field-control {
   display: grid;

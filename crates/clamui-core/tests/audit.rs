@@ -5,18 +5,43 @@ use clamui_core::audit::{
     AuditCheck, AuditStatus,
 };
 use clamui_core::portmaster::{parse_authorization_response, parse_modules_status};
+use clamui_core::{audit, Context, Paths};
+use serde_json::json;
+use tempfile::TempDir;
 
 fn audit_check(status: AuditStatus) -> AuditCheck {
     AuditCheck {
         name: "fixture".to_owned(),
         status,
         detail: "fixture".to_owned(),
+        optional_missing: false,
         recommendation: None,
         install_command: None,
         info_url: None,
         launch_command: None,
         launch_label: None,
+        listening_ports: None,
     }
+}
+
+#[test]
+fn audit_check_optional_missing_defaults_for_legacy_payloads() {
+    let legacy = json!({
+        "name": "required",
+        "status": "fail",
+        "detail": "not installed"
+    });
+    let check: AuditCheck = serde_json::from_value(legacy).expect("legacy audit check");
+    assert!(!check.optional_missing);
+    assert!(check.listening_ports.is_none());
+    assert!(serde_json::to_value(&check)
+        .unwrap()
+        .get("listening_ports")
+        .is_none());
+    assert_eq!(
+        serde_json::to_value(check).unwrap()["optional_missing"],
+        false
+    );
 }
 
 #[test]
@@ -112,4 +137,33 @@ fn portmaster_authorization_response_fixture_accepts_only_real_tokens() {
         parse_authorization_response("plain-token\n").as_deref(),
         Some("plain-token")
     );
+}
+
+#[test]
+fn audit_launch_rejects_paths_arguments_and_unlisted_commands() {
+    let temp = TempDir::new().expect("temporary audit root");
+    let root = temp.path();
+    let ctx = Context::with_paths(Paths {
+        home: root.join("home"),
+        config_dir: root.join("config/clamui"),
+        data_dir: root.join("data/clamui"),
+    })
+    .expect("context");
+
+    for command in [
+        "/usr/bin/opensnitch-ui",
+        "opensnitch-ui --help",
+        "opensnitch_ui",
+        "gtk-launch",
+        "sh",
+        "gufw;echo injected",
+        "",
+    ] {
+        assert_eq!(
+            audit::dispatch(&ctx, "launch", json!({ "command": command })).unwrap_err(),
+            "Unsupported audit launch action",
+            "unexpected launch acceptance for {command:?}"
+        );
+    }
+    assert!(audit::dispatch(&ctx, "launch", json!({})).is_err());
 }

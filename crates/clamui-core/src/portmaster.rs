@@ -3,7 +3,6 @@ use std::process::Command;
 use std::time::Duration;
 
 use crate::common::{host_command, sanitize_line};
-use crate::AppResult;
 
 pub const API_BASE: &str = "http://127.0.0.1:817/api/v1";
 pub const PROBE_TIMEOUT: Duration = Duration::from_millis(1_500);
@@ -252,19 +251,4 @@ pub fn parse_authorization_response(body: &str) -> Option<String> {
             (!token.is_empty()).then(|| token.to_owned())
         }
     }
-}
-
-pub fn launch(command: &str) -> AppResult<bool> {
-    // This is intentionally a strict allowlist, not a generic process endpoint.
-    if !matches!(command, "gufw" | "firewall-config") {
-        return Err("Unsupported audit launch action".to_owned());
-    }
-    let mut process = host_command(command, &[]);
-    process
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn()
-        .map(|_| true)
-        .map_err(|error| sanitize_line(&error.to_string()))
 }

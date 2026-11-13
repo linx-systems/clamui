@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-12 18:08+0100\n"
+"POT-Creation-Date: 2026-11-13 15:36+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -17,82 +17,86 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Lokalize 23.08.5\n"
 
-#: crates/clamui-core/src/audit.rs:293
+#: crates/clamui-core/src/audit.rs:301
 msgid "ClamAV is not installed"
 msgstr "未安装 ClamAV"
 
-#: crates/clamui-core/src/audit.rs:295
+#: crates/clamui-core/src/audit.rs:303
 msgid "Install ClamAV to enable virus scanning"
 msgstr "安装 ClamAV 以启用病毒扫描"
 
-#: crates/clamui-core/src/audit.rs:312
+#: crates/clamui-core/src/audit.rs:320
 msgid "Installed: {version}"
 msgstr "已安装：{version}"
 
-#: crates/clamui-core/src/audit.rs:323
+#: crates/clamui-core/src/audit.rs:331
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "已是最新（构建于 {date}，距今 {days} 天）"
 
-#: crates/clamui-core/src/audit.rs:339 crates/clamui-core/src/audit.rs:357
+#: crates/clamui-core/src/audit.rs:347 crates/clamui-core/src/audit.rs:365
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "病毒库构建于 {date}（距今 {days} 天）"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:355
 msgid "Update virus database to ensure protection"
 msgstr "更新病毒库以确保防护"
 
-#: crates/clamui-core/src/audit.rs:365
+#: crates/clamui-core/src/audit.rs:373
 msgid "Database is critically outdated. Update immediately."
 msgstr "病毒库已严重过期，请立即更新。"
 
-#: crates/clamui-core/src/audit.rs:384
+#: crates/clamui-core/src/audit.rs:392
 msgid "Database files exist but age could not be determined"
 msgstr "病毒库文件存在，但无法确定其生成时间"
 
-#: crates/clamui-core/src/audit.rs:386
+#: crates/clamui-core/src/audit.rs:394
 msgid "No virus database found"
 msgstr "未找到病毒库"
 
-#: crates/clamui-core/src/audit.rs:390
+#: crates/clamui-core/src/audit.rs:398
 msgid "Download virus database"
 msgstr "下载病毒库"
 
-#: crates/clamui-core/src/audit.rs:406
+#: crates/clamui-core/src/audit.rs:414
 msgid "Service {name} is running"
 msgstr "服务 {name} 正在运行"
 
-#: crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:425
 msgid "Daemon is responding"
 msgstr "守护进程响应正常"
 
-#: crates/clamui-core/src/audit.rs:424
+#: crates/clamui-core/src/audit.rs:432
 msgid "ClamAV daemon is not running"
 msgstr "ClamAV 守护进程未运行"
 
-#: crates/clamui-core/src/audit.rs:426
+#: crates/clamui-core/src/audit.rs:434
 msgid "Start the daemon for faster scanning"
 msgstr "启动守护进程以加快扫描速度"
 
-#: crates/clamui-core/src/audit.rs:441
+#: crates/clamui-core/src/audit.rs:449
 msgid "Freshclam service is active"
 msgstr "Freshclam 服务正在运行"
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:456
 msgid "Freshclam automatic update service is not running"
 msgstr "Freshclam 自动更新服务未运行"
 
-#: crates/clamui-core/src/audit.rs:450
+#: crates/clamui-core/src/audit.rs:458
 msgid "Enable automatic database updates"
 msgstr "启用病毒库自动更新"
 
-#: crates/clamui-core/src/audit.rs:645
+#: crates/clamui-core/src/audit.rs:641
+msgid "Open Ports"
+msgstr "开放端口"
+
+#: crates/clamui-core/src/audit.rs:646
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} 个端口正在监听，风险端口：{ports}"
 
-#: crates/clamui-core/src/audit.rs:656
+#: crates/clamui-core/src/audit.rs:657
 msgid "Review if these services need to be exposed"
 msgstr "确认这些服务是否需要对外开放"
 
@@ -105,332 +109,376 @@ msgstr[0] "{count} 个端口正在监听"
 msgid "Review open ports and close unnecessary services"
 msgstr "检查开放端口并关闭不必要的服务"
 
-#: crates/clamui-core/src/audit.rs:678
+#: crates/clamui-core/src/audit.rs:680 crates/clamui-core/src/network.rs:220
+msgid "Some network socket rows could not be read."
+msgstr "部分网络套接字记录无法读取。"
+
+#: crates/clamui-core/src/audit.rs:683
 msgid "No open ports detected"
 msgstr "未检测到开放端口"
 
-#: crates/clamui-core/src/audit.rs:709
+#: crates/clamui-core/src/audit.rs:714
 msgid "AppArmor is enabled"
 msgstr "AppArmor 已启用"
 
-#: crates/clamui-core/src/audit.rs:716
+#: crates/clamui-core/src/audit.rs:721
 msgid "AppArmor module is loaded but not enabled"
 msgstr "AppArmor 模块已加载但未启用"
 
-#: crates/clamui-core/src/audit.rs:718
+#: crates/clamui-core/src/audit.rs:723
 msgid "Enable AppArmor for application sandboxing"
 msgstr "启用 AppArmor 以实现应用程序沙箱隔离"
 
-#: crates/clamui-core/src/audit.rs:733
+#: crates/clamui-core/src/audit.rs:738
 msgid "SELinux is enforcing"
 msgstr "SELinux 处于强制模式"
 
-#: crates/clamui-core/src/audit.rs:740
+#: crates/clamui-core/src/audit.rs:745
 msgid "SELinux is in permissive mode"
 msgstr "SELinux 处于宽容模式"
 
-#: crates/clamui-core/src/audit.rs:742
+#: crates/clamui-core/src/audit.rs:747
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "建议切换到强制模式以增强防护"
 
-#: crates/clamui-core/src/audit.rs:753
+#: crates/clamui-core/src/audit.rs:758
 msgid "SELinux is disabled"
 msgstr "SELinux 已禁用"
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:760
 msgid "Enable SELinux for mandatory access control"
 msgstr "启用 SELinux 以实施强制访问控制"
 
-#: crates/clamui-core/src/audit.rs:769
+#: crates/clamui-core/src/audit.rs:774
 msgid "No mandatory access control framework detected"
 msgstr "未检测到强制访问控制框架"
 
-#: crates/clamui-core/src/audit.rs:771
+#: crates/clamui-core/src/audit.rs:776
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "建议启用 AppArmor 或 SELinux"
 
-#: crates/clamui-core/src/audit.rs:796
+#: crates/clamui-core/src/audit.rs:801
 msgid "Automatic security updates are enabled"
 msgstr "已启用自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:806
+#: crates/clamui-core/src/audit.rs:811
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Unattended upgrades 已安装但已禁用"
 
-#: crates/clamui-core/src/audit.rs:808
+#: crates/clamui-core/src/audit.rs:813
 msgid "Enable automatic security updates"
 msgstr "启用自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:821
+#: crates/clamui-core/src/audit.rs:826
 msgid "DNF automatic updates are enabled"
 msgstr "已启用 DNF 自动更新"
 
-#: crates/clamui-core/src/audit.rs:831
+#: crates/clamui-core/src/audit.rs:836
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF automatic 已安装，但定时器未激活"
 
-#: crates/clamui-core/src/audit.rs:833
+#: crates/clamui-core/src/audit.rs:838
 msgid "Enable automatic updates"
 msgstr "启用自动更新"
 
-#: crates/clamui-core/src/audit.rs:846
+#: crates/clamui-core/src/audit.rs:851
 msgid "Could not determine automatic update status"
 msgstr "无法确定自动更新状态"
 
-#: crates/clamui-core/src/audit.rs:848
+#: crates/clamui-core/src/audit.rs:853
 msgid "Configure automatic security updates"
 msgstr "配置自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:862
+#: crates/clamui-core/src/audit.rs:867
 msgid "System reboot required to apply updates"
 msgstr "需要重启系统以应用更新"
 
-#: crates/clamui-core/src/audit.rs:864
+#: crates/clamui-core/src/audit.rs:869
 msgid "Reboot the system to apply pending security updates"
 msgstr "重启系统以应用待处理的安全更新"
 
-#: crates/clamui-core/src/audit.rs:909
+#: crates/clamui-core/src/audit.rs:914
 msgid "{name} is installed but not running"
 msgstr "{name} 已安装但未运行"
 
-#: crates/clamui-core/src/audit.rs:927
+#: crates/clamui-core/src/audit.rs:932
 msgid "No intrusion detection system found"
 msgstr "未找到入侵检测系统"
 
-#: crates/clamui-core/src/audit.rs:929
+#: crates/clamui-core/src/audit.rs:934
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "安装 fail2ban 或 CrowdSec 以抵御攻击"
 
-#: crates/clamui-core/src/audit.rs:955
+#: crates/clamui-core/src/audit.rs:960
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "SSH 服务器未运行（无远程攻击面）"
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:970
 msgid "SSH server is running"
 msgstr "SSH 服务器正在运行"
 
-#: crates/clamui-core/src/audit.rs:974
+#: crates/clamui-core/src/audit.rs:979
 msgid "Could not read SSH configuration"
 msgstr "无法读取 SSH 配置"
 
-#: crates/clamui-core/src/audit.rs:992
+#: crates/clamui-core/src/audit.rs:997
 msgid "Root login: {value}"
 msgstr "root 登录：{value}"
 
-#: crates/clamui-core/src/audit.rs:999
+#: crates/clamui-core/src/audit.rs:1004
 msgid "Root login is allowed ({value})"
 msgstr "允许 root 登录（{value}）"
 
-#: crates/clamui-core/src/audit.rs:1005
+#: crates/clamui-core/src/audit.rs:1010
 msgid "Disable root SSH login for security"
 msgstr "禁用 root 用户的 SSH 登录以提高安全性"
 
-#: crates/clamui-core/src/audit.rs:1019
+#: crates/clamui-core/src/audit.rs:1024
 msgid "Password authentication is disabled (key-only)"
 msgstr "已禁用密码认证（仅允许密钥认证）"
 
-#: crates/clamui-core/src/audit.rs:1026
+#: crates/clamui-core/src/audit.rs:1031
 msgid "Password authentication is enabled"
 msgstr "已启用密码认证"
 
-#: crates/clamui-core/src/audit.rs:1028
+#: crates/clamui-core/src/audit.rs:1033
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "建议禁用密码认证，改用 SSH 密钥"
 
-#: crates/clamui-core/src/audit.rs:1045
+#: crates/clamui-core/src/audit.rs:1050
 msgid "X11 forwarding is disabled"
 msgstr "已禁用 X11 转发"
 
-#: crates/clamui-core/src/audit.rs:1052
+#: crates/clamui-core/src/audit.rs:1057
 msgid "X11 forwarding is enabled"
 msgstr "已启用 X11 转发"
 
-#: crates/clamui-core/src/audit.rs:1054
+#: crates/clamui-core/src/audit.rs:1059
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "禁用 X11 转发以缩小攻击面"
 
-#: crates/clamui-core/src/audit.rs:1129
+#: crates/clamui-core/src/audit.rs:1119
+msgid "Application firewalls"
+msgstr "应用程序防火墙"
+
+#: crates/clamui-core/src/audit.rs:1141
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster 正在运行并保护网络连接"
 
-#: crates/clamui-core/src/audit.rs:1153
+#: crates/clamui-core/src/audit.rs:1167
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr "在 Portmaster 中授权 ClamUI，以查看各模块的运行状况"
 
-#: crates/clamui-core/src/audit.rs:1156
+#: crates/clamui-core/src/audit.rs:1170
 msgid "Authorize"
 msgstr "授权"
 
-#: crates/clamui-core/src/audit.rs:1166
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster 已安装但未运行"
 
-#: crates/clamui-core/src/audit.rs:1168
+#: crates/clamui-core/src/audit.rs:1182
 msgid "Start the Portmaster service to enable network protection"
 msgstr "启动 Portmaster 服务以启用网络保护"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1181
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "未检测到 — 可选的网络监控工具和应用程序防火墙"
 
-#: crates/clamui-core/src/audit.rs:1195
+#: crates/clamui-core/src/audit.rs:1210
 msgid "Could not probe Portmaster: {error}"
 msgstr "无法探测 Portmaster：{error}"
 
-#: crates/clamui-core/src/audit.rs:1245
+#: crates/clamui-core/src/audit.rs:1259
 msgid "{name} is not installed"
 msgstr "未安装 {name}"
 
-#: crates/clamui-core/src/audit.rs:1251
+#: crates/clamui-core/src/audit.rs:1266
 msgid "Install {name} for comprehensive security auditing"
 msgstr "安装 {name} 以进行全面的安全审计"
 
-#: crates/clamui-core/src/audit.rs:1257
+#: crates/clamui-core/src/audit.rs:1272
 msgid "Install chkrootkit for rootkit detection"
 msgstr "安装 chkrootkit 以检测 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1276
+#: crates/clamui-core/src/audit.rs:1291
 msgid "Authentication was cancelled"
 msgstr "身份验证已取消"
 
-#: crates/clamui-core/src/audit.rs:1284
+#: crates/clamui-core/src/audit.rs:1299
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "Lynis 审计在 5 分钟后超时"
 
-#: crates/clamui-core/src/audit.rs:1286
+#: crates/clamui-core/src/audit.rs:1301
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "rootkit 扫描在 5 分钟后超时"
 
-#: crates/clamui-core/src/audit.rs:1304 crates/clamui-core/src/audit.rs:1348
+#: crates/clamui-core/src/audit.rs:1319 crates/clamui-core/src/audit.rs:1363
 msgid "Failed to run Lynis: {error}"
 msgstr "运行 Lynis 失败：{error}"
 
-#: crates/clamui-core/src/audit.rs:1310
+#: crates/clamui-core/src/audit.rs:1325
 msgid "Failed to run chkrootkit: {error}"
 msgstr "运行 chkrootkit 失败：{error}"
 
-#: crates/clamui-core/src/audit.rs:1376
+#: crates/clamui-core/src/audit.rs:1391
 msgid "Score: {score}/100"
 msgstr "得分：{score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1379
+#: crates/clamui-core/src/audit.rs:1394
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "运行 'sudo lynis audit system' 以获取详细建议"
 
-#: crates/clamui-core/src/audit.rs:1395
+#: crates/clamui-core/src/audit.rs:1410
 msgid "Audit completed (exit code {code})"
 msgstr "审计已完成（退出码 {code}）"
 
-#: crates/clamui-core/src/audit.rs:1433 crates/clamui-core/src/audit.rs:1447
+#: crates/clamui-core/src/audit.rs:1448 crates/clamui-core/src/audit.rs:1462
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "无法完成 rootkit 扫描（退出码 {code}）"
 
-#: crates/clamui-core/src/audit.rs:1477
+#: crates/clamui-core/src/audit.rs:1492
 msgid "No rootkits detected"
 msgstr "未检测到 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1488
+#: crates/clamui-core/src/audit.rs:1503
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "检测到 {count} 个疑似 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1496
+#: crates/clamui-core/src/audit.rs:1511
 msgid "Investigate the detected threats immediately"
 msgstr "请立即调查检测到的威胁"
 
-#: crates/clamui-core/src/audit/firewall.rs:53
+#: crates/clamui-core/src/audit/firewall.rs:60
 msgid "Firewall manager overlap"
 msgstr "防火墙管理器并存"
 
-#: crates/clamui-core/src/audit/firewall.rs:54
+#: crates/clamui-core/src/audit/firewall.rs:61
 msgid ""
 "UFW is active while Firewalld owns its D-Bus name; their rule interaction "
 "was not evaluated."
 msgstr ""
 "UFW 已启用，同时 Firewalld 持有其 D-Bus 名称；未评估两者规则之间的相互影响。"
 
-#: crates/clamui-core/src/audit/firewall.rs:157
+#: crates/clamui-core/src/audit/firewall.rs:179
+msgid "UFW was not found at a trusted system path."
+msgstr "未在可信的系统路径中找到 UFW。"
+
+#. Translators: UFW is the name of the firewall application.
+#: crates/clamui-core/src/audit/firewall.rs:182
+#: crates/clamui-core/src/audit/firewall.rs:216
+msgid ""
+"Administrator authorization for the UFW status check was denied or "
+"unavailable."
+msgstr "检查 UFW 状态所需的管理员授权被拒绝或不可用。"
+
+#: crates/clamui-core/src/audit/firewall.rs:204
+msgid "The UFW status check timed out."
+msgstr "检查 UFW 状态超时。"
+
+#. Translators: UFW is the name of the firewall application.
+#: crates/clamui-core/src/audit/firewall.rs:207
+#: crates/clamui-core/src/audit/firewall.rs:237
+msgid "The UFW status check returned incomplete or invalid output."
+msgstr "检查 UFW 状态返回了不完整或无效的输出。"
+
+#: crates/clamui-core/src/audit/firewall.rs:225
+msgid "The UFW status check failed."
+msgstr "检查 UFW 状态失败。"
+
+#: crates/clamui-core/src/audit/firewall.rs:348
 msgid "UFW Firewall"
 msgstr "UFW 防火墙"
 
-#: crates/clamui-core/src/audit/firewall.rs:162
+#: crates/clamui-core/src/audit/firewall.rs:353
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
 msgstr "UFW 已启用；默认入站策略为丢弃。列出的规则可能会例外放行部分流量。"
 
-#: crates/clamui-core/src/audit/firewall.rs:169
+#: crates/clamui-core/src/audit/firewall.rs:360
 msgid ""
 "UFW is active; the default incoming policy is reject. Listed rules may allow "
 "exceptions."
 msgstr "UFW 已启用；默认入站策略为拒绝。列出的规则可能会例外放行部分流量。"
 
-#: crates/clamui-core/src/audit/firewall.rs:176
+#: crates/clamui-core/src/audit/firewall.rs:367
 msgid "UFW is active; the default incoming policy is deny."
 msgstr "UFW 已启用；默认入站策略为丢弃。"
 
-#: crates/clamui-core/src/audit/firewall.rs:180
+#: crates/clamui-core/src/audit/firewall.rs:371
 msgid "UFW is active; the default incoming policy is reject."
 msgstr "UFW 已启用；默认入站策略为拒绝。"
 
-#: crates/clamui-core/src/audit/firewall.rs:184
+#: crates/clamui-core/src/audit/firewall.rs:375
 msgid "UFW is active, but the default incoming policy allows traffic."
 msgstr "UFW 已启用，但默认入站策略允许流量通过。"
 
-#: crates/clamui-core/src/audit/firewall.rs:191
+#: crates/clamui-core/src/audit/firewall.rs:382
 msgid "UFW is active, but its default incoming policy could not be verified."
 msgstr "UFW 已启用，但无法验证其默认入站策略。"
 
-#: crates/clamui-core/src/audit/firewall.rs:195
+#: crates/clamui-core/src/audit/firewall.rs:386
 msgid "UFW reports inactive."
 msgstr "UFW 报告状态为未启用。"
 
-#: crates/clamui-core/src/audit/firewall.rs:196
+#: crates/clamui-core/src/audit/firewall.rs:387
 msgid "UFW status could not be inspected safely."
 msgstr "无法安全地检查 UFW 状态。"
 
-#: crates/clamui-core/src/audit/firewall.rs:234
+#: crates/clamui-core/src/audit/firewall.rs:392
+msgid "Check UFW with administrator access"
+msgstr "使用管理员权限检查 UFW"
+
+#: crates/clamui-core/src/audit/firewall.rs:394
+msgid ""
+"Administrator access may be required to read UFW status. This check does not "
+"change firewall settings."
+msgstr "读取 UFW 状态可能需要管理员权限。此检查不会更改防火墙设置。"
+
+#: crates/clamui-core/src/audit/firewall.rs:432
 msgid "Firewalld"
 msgstr "Firewalld"
 
-#: crates/clamui-core/src/audit/firewall.rs:236
+#: crates/clamui-core/src/audit/firewall.rs:434
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
 msgstr "Firewalld 持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
 
-#: crates/clamui-core/src/audit/firewall.rs:240
+#: crates/clamui-core/src/audit/firewall.rs:438
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
 msgstr "未检测到 Firewalld 的 D-Bus 名称所有者；不能据此判定内核的防火墙策略。"
 
-#: crates/clamui-core/src/audit/firewall.rs:244
+#: crates/clamui-core/src/audit/firewall.rs:442
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
 msgstr ""
 "无法确认 Firewalld 是否持有其 D-Bus 名称；未查询其就绪状态和防火墙策略。"
 
-#: crates/clamui-core/src/audit/firewall.rs:259
+#: crates/clamui-core/src/audit/firewall.rs:457
 msgid "firewall-cmd"
 msgstr "firewall-cmd"
 
-#: crates/clamui-core/src/audit/firewall.rs:264
+#: crates/clamui-core/src/audit/firewall.rs:462
 msgid "firewall-cmd is installed; it was not executed."
 msgstr "firewall-cmd 已安装；未执行该命令。"
 
-#: crates/clamui-core/src/audit/firewall.rs:270
+#: crates/clamui-core/src/audit/firewall.rs:468
 msgid "firewall-cmd could not be confirmed without executing it."
 msgstr "在不执行 firewall-cmd 的前提下，未能确认其是否已安装。"
 
-#: crates/clamui-core/src/audit/firewall.rs:408
+#: crates/clamui-core/src/audit/firewall.rs:606
 msgid "nftables (native rules)"
 msgstr "nftables（原生规则）"
 
-#: crates/clamui-core/src/audit/firewall.rs:410
+#: crates/clamui-core/src/audit/firewall.rs:608
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
@@ -438,103 +486,177 @@ msgstr ""
 "nftables 对 IPv4 和 IPv6 均采用限制性的默认入站策略；个别规则可能会例外放行部"
 "分流量。"
 
-#: crates/clamui-core/src/audit/firewall.rs:414
+#: crates/clamui-core/src/audit/firewall.rs:612
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
 msgstr "nftables 报告其默认入站策略为宽松策略；其余部分的策略覆盖可能不完整"
 
-#: crates/clamui-core/src/audit/firewall.rs:418
+#: crates/clamui-core/src/audit/firewall.rs:616
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
 msgstr "无法验证 nftables 的入站策略是否同时覆盖 IPv4 和 IPv6"
 
-#: crates/clamui-core/src/audit/firewall.rs:478
+#: crates/clamui-core/src/audit/firewall.rs:676
 msgid "iptables (IPv4)"
 msgstr "iptables（IPv4）"
 
-#: crates/clamui-core/src/audit/firewall.rs:480
+#: crates/clamui-core/src/audit/firewall.rs:678
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
 msgstr ""
 "iptables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
 
-#: crates/clamui-core/src/audit/firewall.rs:484
+#: crates/clamui-core/src/audit/firewall.rs:682
 msgid "iptables has a permissive INPUT default policy"
 msgstr "iptables 的 INPUT 默认策略为宽松策略"
 
-#: crates/clamui-core/src/audit/firewall.rs:485
+#: crates/clamui-core/src/audit/firewall.rs:683
 msgid "iptables INPUT policy could not be verified"
 msgstr "无法验证 iptables 的 INPUT 策略"
 
-#: crates/clamui-core/src/audit/firewall.rs:491
+#: crates/clamui-core/src/audit/firewall.rs:689
 msgid "iptables (IPv6)"
 msgstr "iptables（IPv6）"
 
-#: crates/clamui-core/src/audit/firewall.rs:493
+#: crates/clamui-core/src/audit/firewall.rs:691
 msgid ""
 "ip6tables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
 msgstr ""
 "ip6tables 的 INPUT 默认策略为限制性策略；个别规则可能会例外放行部分流量。"
 
-#: crates/clamui-core/src/audit/firewall.rs:497
+#: crates/clamui-core/src/audit/firewall.rs:695
 msgid "ip6tables has a permissive INPUT default policy"
 msgstr "ip6tables 的 INPUT 默认策略为宽松策略"
 
-#: crates/clamui-core/src/audit/firewall.rs:498
+#: crates/clamui-core/src/audit/firewall.rs:696
 msgid "ip6tables INPUT policy could not be verified"
 msgstr "无法验证 ip6tables 的 INPUT 策略"
 
-#: crates/clamui-core/src/audit/firewall.rs:508
+#: crates/clamui-core/src/audit/firewall.rs:706
 msgid "Gufw"
 msgstr "Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:510
+#: crates/clamui-core/src/audit/firewall.rs:708
 msgid "Gufw is available."
 msgstr "Gufw 可用。"
 
-#: crates/clamui-core/src/audit/firewall.rs:512
+#: crates/clamui-core/src/audit/firewall.rs:710
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
 msgstr "未能确认 Gufw 是否可用；此项可选的软件盘点不会影响防火墙策略分析。"
 
-#: crates/clamui-core/src/audit/firewall.rs:519
+#: crates/clamui-core/src/audit/firewall.rs:718
 msgid "Open Gufw"
 msgstr "打开 Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:525
+#: crates/clamui-core/src/audit/firewall.rs:724
 msgid "Firewall Config"
 msgstr "防火墙配置"
 
-#: crates/clamui-core/src/audit/firewall.rs:530
+#: crates/clamui-core/src/audit/firewall.rs:729
 msgid "Firewall Config is available."
 msgstr "Firewall Config 可用。"
 
-#: crates/clamui-core/src/audit/firewall.rs:533
+#: crates/clamui-core/src/audit/firewall.rs:732
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
 msgstr ""
 "未确认 Firewall Config 是否可用；此项可选的组件检查不影响防火墙策略分析。"
 
-#: crates/clamui-core/src/audit/firewall.rs:540
+#: crates/clamui-core/src/audit/firewall.rs:740
 msgid "Open Firewall Config"
 msgstr "打开 Firewall Config"
 
-#: crates/clamui-core/src/audit/firewall.rs:578
+#: crates/clamui-core/src/audit/firewall.rs:778
 msgid "Plasma Firewall"
 msgstr "Plasma Firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:583
+#: crates/clamui-core/src/audit/firewall.rs:783
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
 msgstr "已安装 Plasma Firewall；它用于管理现有的防火墙后端。"
 
-#: crates/clamui-core/src/audit/firewall.rs:592
+#: crates/clamui-core/src/audit/firewall.rs:792
 msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr "未确认 Plasma Firewall 是否可用；它只是一个管理模块。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:188
+msgid "OpenSnitch service"
+msgstr "OpenSnitch 服务"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:194
+msgid ""
+"An OpenSnitch system service is active and running. This does not verify "
+"filtering."
+msgstr ""
+"一个 OpenSnitch 系统服务处于活动状态并正在运行。这并不能确认过滤功能是否生"
+"效。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:197
+msgid "An installed OpenSnitch system service is inactive or failed."
+msgstr "一个已安装的 OpenSnitch 系统服务未运行或运行失败。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:200
+msgid "An OpenSnitch system service is changing state; its status is unknown."
+msgstr "一个 OpenSnitch 系统服务正在更改状态；其状态未知。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:203
+msgid ""
+"No local OpenSnitch system service was detected. A manually started daemon "
+"was not checked."
+msgstr "未检测到本地 OpenSnitch 系统服务。未检查手动启动的守护进程。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:206
+msgid "OpenSnitch system service status could not be determined."
+msgstr "无法确定 OpenSnitch 系统服务的状态。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:216
+msgid "OpenSnitch graphical interface"
+msgstr "OpenSnitch 图形界面"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:222
+msgid ""
+"The OpenSnitch graphical interface is available. Its connection status was "
+"not checked."
+msgstr "OpenSnitch 图形界面可用。未检查其连接状态。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:225
+msgid "No local OpenSnitch graphical interface launch target was detected."
+msgstr "未检测到本地 OpenSnitch 图形界面的启动目标。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:228
+#: crates/clamui-core/src/audit/opensnitch.rs:257
+msgid "OpenSnitch graphical interface availability could not be determined."
+msgstr "无法确定 OpenSnitch 图形界面是否可用。"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:236
+msgid "Open OpenSnitch"
+msgstr "打开 OpenSnitch"
+
+#. Translators: Keep the product name OpenSnitch unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:250
+msgid "OpenSnitch graphical interface is not available."
+msgstr "OpenSnitch 图形界面不可用。"
+
+#. Translators: Keep the product name OpenSnitch and the {error} placeholder unchanged.
+#: crates/clamui-core/src/audit/opensnitch.rs:271
+msgid "Could not launch OpenSnitch graphical interface: {error}"
+msgstr "无法启动 OpenSnitch 图形界面：{error}"
 
 #: crates/clamui-core/src/cli.rs:56 crates/clamui-core/src/cli.rs:250
 #: crates/clamui-core/src/cli.rs:418 crates/clamui-core/src/cli.rs:427
@@ -1262,42 +1384,38 @@ msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "发现威胁：{count} 个"
 
-#: crates/clamui-core/src/network.rs:86
+#: crates/clamui-core/src/network.rs:96
 msgid "Network action is not supported."
 msgstr "不支持网络操作。"
 
-#: crates/clamui-core/src/network.rs:90
+#: crates/clamui-core/src/network.rs:100
 msgid "Network snapshot accepts no arguments."
 msgstr "网络快照不接受任何参数。"
 
-#: crates/clamui-core/src/network.rs:118
+#: crates/clamui-core/src/network.rs:216
 msgid ""
 "Some network socket rows could not be read, and the list was limited to 4096 "
 "rows."
 msgstr "部分网络套接字记录无法读取，且列表已限制为 4096 行。"
 
-#: crates/clamui-core/src/network.rs:125
-msgid "Some network socket rows could not be read."
-msgstr "部分网络套接字记录无法读取。"
-
-#: crates/clamui-core/src/network.rs:129
+#: crates/clamui-core/src/network.rs:221
 msgid "Network socket list was limited to 4096 rows."
 msgstr "网络套接字列表已限制为 4096 行。"
 
-#: crates/clamui-core/src/network.rs:152
+#: crates/clamui-core/src/network.rs:228
 msgid "Network socket listing timed out. Try again."
 msgstr "获取网络套接字列表超时。请重试。"
 
-#: crates/clamui-core/src/network.rs:156
+#: crates/clamui-core/src/network.rs:232
 msgid "Network socket listing could not be completed safely. Try again."
 msgstr "获取网络套接字列表的操作无法安全完成。请重试。"
 
-#: crates/clamui-core/src/network.rs:163
+#: crates/clamui-core/src/network.rs:239
 msgid ""
 "Network socket listing returned invalid text and could not be read safely."
 msgstr "获取网络套接字列表时返回了无效文本，无法安全读取。"
 
-#: crates/clamui-core/src/network.rs:170
+#: crates/clamui-core/src/network.rs:246
 msgid ""
 "Network socket listing is unavailable. Check that the system socket tool is "
 "installed and try again."
@@ -1522,41 +1640,41 @@ msgstr "无法隔离 {path}：{error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "文件哈希值不匹配 — 文件可能已损坏"
 
-#: crates/clamui-core/src/scanner.rs:436
+#: crates/clamui-core/src/scanner.rs:461
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "未在宿主机的标准位置找到 ClamAV 数据库文件"
 
-#: crates/clamui-core/src/scanner.rs:1855
+#: crates/clamui-core/src/scanner.rs:1886
 msgid "Scan cancelled by user"
 msgstr "用户已取消扫描"
 
-#: crates/clamui-core/src/scanner.rs:1862
+#: crates/clamui-core/src/scanner.rs:1893
 msgid "No files could be scanned"
 msgstr "未能扫描任何文件"
 
-#: crates/clamui-core/src/scanner.rs:1868
+#: crates/clamui-core/src/scanner.rs:1899
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "扫描目标不存在或包含无效的 NUL 字节"
 
-#: crates/clamui-core/src/scanner.rs:1875
+#: crates/clamui-core/src/scanner.rs:1906
 msgid "Scan target is not a regular file or directory"
 msgstr "扫描目标不是普通文件或目录"
 
-#: crates/clamui-core/src/scanner.rs:1884
+#: crates/clamui-core/src/scanner.rs:1915
 msgid "Threats were detected, but details are unavailable."
 msgstr "检测到威胁，但无法提供详细信息。"
 
-#: crates/clamui-core/src/scanner.rs:1896
+#: crates/clamui-core/src/scanner.rs:1927
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "无法访问 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1909
+#: crates/clamui-core/src/scanner.rs:1940
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "无法读取 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1928
+#: crates/clamui-core/src/scanner.rs:1959
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2246,7 +2364,7 @@ msgstr "复制内容"
 msgid "Configuration content"
 msgstr "配置内容"
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:332
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:484
 msgid "Could not open documentation: {error}"
 msgstr "无法打开文档：{error}"
 
@@ -2403,7 +2521,7 @@ msgstr "错误"
 msgid "Cancelled"
 msgstr "已取消"
 
-#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:64
+#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:66
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
@@ -2422,129 +2540,156 @@ msgstr "ClamUI 无法启动"
 msgid "Retry"
 msgstr "重试"
 
-#: desktop/src/pages/Audit.tsx:43
+#: desktop/src/pages/Audit.tsx:45
 msgid "ClamAV Health"
 msgstr "ClamAV 运行状况"
 
-#: desktop/src/pages/Audit.tsx:44
+#: desktop/src/pages/Audit.tsx:46
 msgid "Firewall"
 msgstr "防火墙"
 
-#: desktop/src/pages/Audit.tsx:45
+#: desktop/src/pages/Audit.tsx:47
 msgid "Access Control"
 msgstr "访问控制"
 
-#: desktop/src/pages/Audit.tsx:46
+#: desktop/src/pages/Audit.tsx:48
 msgid "Automatic Updates"
 msgstr "自动更新"
 
-#: desktop/src/pages/Audit.tsx:47
+#: desktop/src/pages/Audit.tsx:49
 msgid "Intrusion Detection"
 msgstr "入侵检测"
 
-#: desktop/src/pages/Audit.tsx:48
+#: desktop/src/pages/Audit.tsx:50
 msgid "SSH Security"
 msgstr "SSH 安全"
 
-#: desktop/src/pages/Audit.tsx:49
-msgid "Portmaster"
-msgstr "Portmaster"
-
-#: desktop/src/pages/Audit.tsx:59 desktop/src/pages/Audit.tsx:267
+#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:404
 msgid "Checking"
 msgstr "正在检查"
 
-#: desktop/src/pages/Audit.tsx:60 desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:400
 msgid "Pass"
 msgstr "通过"
 
-#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:400
 msgid "Warning"
 msgstr "警告"
 
-#: desktop/src/pages/Audit.tsx:62
+#: desktop/src/pages/Audit.tsx:64
 msgid "Fail"
 msgstr "未通过"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Logs.tsx:120
+#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "已跳过"
 
 #: desktop/src/pages/Audit.tsx:164
+msgid "Local only"
+msgstr "仅限本地"
+
+#: desktop/src/pages/Audit.tsx:166
+msgid "All interfaces"
+msgstr "所有网络接口"
+
+#: desktop/src/pages/Audit.tsx:167
+msgid "Specific address or interface"
+msgstr "特定地址或网络接口"
+
+#: desktop/src/pages/Audit.tsx:246
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] "{count} 个安全问题需要关注"
 
-#: desktop/src/pages/Audit.tsx:165
+#: desktop/src/pages/Audit.tsx:247
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] "{count} 项审计检查需要复核"
 
-#: desktop/src/pages/Audit.tsx:166
+#: desktop/src/pages/Audit.tsx:248
 msgid "Security audit completed"
 msgstr "安全审计已完成"
 
-#: desktop/src/pages/Audit.tsx:189
+#: desktop/src/pages/Audit.tsx:281
 msgid "Could not receive progressive audit results: {error}"
 msgstr "无法接收逐步返回的审计结果：{error}"
 
-#: desktop/src/pages/Audit.tsx:208
+#: desktop/src/pages/Audit.tsx:301
 msgid "{tool} check completed"
 msgstr "{tool} 检查已完成"
 
-#: desktop/src/pages/Audit.tsx:218
+#: desktop/src/pages/Audit.tsx:312
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr "审计提供的 GUI 启动操作不受支持。"
 
-#: desktop/src/pages/Audit.tsx:223
+#: desktop/src/pages/Audit.tsx:317
 msgid "The selected application did not start"
 msgstr "所选应用程序未能启动"
 
-#: desktop/src/pages/Audit.tsx:236
+#: desktop/src/pages/Audit.tsx:331
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr "已获得 Portmaster 授权，正在刷新审计结果。"
 
-#: desktop/src/pages/Audit.tsx:239
+#: desktop/src/pages/Audit.tsx:334
 msgid "Portmaster authorization was cancelled."
 msgstr "Portmaster 授权已取消。"
 
-#: desktop/src/pages/Audit.tsx:241
+#: desktop/src/pages/Audit.tsx:336
 msgid "Portmaster authorization was not granted."
 msgstr "未获得 Portmaster 授权。"
 
-#: desktop/src/pages/Audit.tsx:258
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:356
+msgid "UFW status authorization was cancelled."
+msgstr "UFW 状态检查授权已取消。"
+
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:364
+msgid "The UFW status check did not return a firewall result."
+msgstr "UFW 状态检查未返回防火墙结果。"
+
+#. Translators: Keep UFW unchanged; it is a tool name.
+#: desktop/src/pages/Audit.tsx:371
+msgid "UFW status check completed"
+msgstr "UFW 状态检查已完成"
+
+#: desktop/src/pages/Audit.tsx:393
 msgid "System security audit"
 msgstr "系统安全审计"
 
-#: desktop/src/pages/Audit.tsx:259
+#: desktop/src/pages/Audit.tsx:394
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
 msgstr "检查系统安全状况并复制建议。审计检查不会更改系统配置。"
 
-#: desktop/src/pages/Audit.tsx:261
+#: desktop/src/pages/Audit.tsx:396
 msgid "Auditing…"
 msgstr "正在审计…"
 
-#: desktop/src/pages/Audit.tsx:261
+#: desktop/src/pages/Audit.tsx:396
 msgid "Refresh audit"
 msgstr "刷新审计结果"
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:400
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] "{count} 个问题"
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:400
 msgid "unavailable or skipped"
 msgstr "不可用或已跳过"
 
-#: desktop/src/pages/Audit.tsx:271
+#: desktop/src/pages/Audit.tsx:402
+msgid "Hide missing optional items"
+msgstr "隐藏缺失的可选项目"
+
+#: desktop/src/pages/Audit.tsx:408
 msgid "Deep scans"
 msgstr "深度扫描"
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:271
+#: desktop/src/pages/Audit.tsx:408
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
@@ -2552,60 +2697,108 @@ msgstr ""
 "Lynis 和 chkrootkit 绝不会自动运行。只有在您主动启动某项检查后，该检查才可能"
 "请求管理员授权。"
 
-#: desktop/src/pages/Audit.tsx:276
+#: desktop/src/pages/Audit.tsx:413
 msgid "Running Lynis…"
 msgstr "正在运行 Lynis…"
 
-#: desktop/src/pages/Audit.tsx:276
+#: desktop/src/pages/Audit.tsx:413
 msgid "Run Lynis security audit"
 msgstr "运行 Lynis 安全审计"
 
-#: desktop/src/pages/Audit.tsx:277
+#: desktop/src/pages/Audit.tsx:414
 msgid "Running chkrootkit…"
 msgstr "正在运行 chkrootkit…"
 
-#: desktop/src/pages/Audit.tsx:277
+#: desktop/src/pages/Audit.tsx:414
 msgid "Run rootkit detection"
 msgstr "运行 rootkit 检测"
 
-#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Audit.tsx:300
-msgid "Portmaster — not detected (optional)"
-msgstr "Portmaster——未检测到（可选）"
-
-#. Translators: Portmaster is a product name. The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Audit.tsx:305
-msgid "Portmaster — could not probe"
-msgstr "Portmaster——无法探测"
-
-#: desktop/src/pages/Audit.tsx:314
+#: desktop/src/pages/Audit.tsx:442
 msgid "No audit details were returned."
 msgstr "未返回任何审计详情。"
 
-#: desktop/src/pages/Audit.tsx:323 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:448 desktop/src/pages/Audit.tsx:458
+#: desktop/src/pages/Database.tsx:285
+msgid "Unavailable"
+msgstr "不可用"
+
+#: desktop/src/pages/Audit.tsx:451 desktop/src/pages/Network.tsx:403
+msgid ""
+"Network information is unavailable. Check that the system socket tool is "
+"installed and try again."
+msgstr "无法获取网络信息。请确认已安装系统套接字工具，然后重试。"
+
+#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+msgid "The socket list was limited. This snapshot may be incomplete."
+msgstr "套接字列表受到限制。此快照可能不完整。"
+
+#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+msgid "Some socket records could not be read. This snapshot may be incomplete."
+msgstr "部分套接字记录无法读取。此快照可能不完整。"
+
+#: desktop/src/pages/Audit.tsx:453
+msgid ""
+"Listening sockets do not prove that a port is reachable through the firewall."
+msgstr "侦听套接字并不能证明端口可穿过防火墙访问。"
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Protocol"
+msgstr "协议"
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Port"
+msgstr "端口"
+
+#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:282
+msgid "Local address"
+msgstr "本地地址"
+
+#: desktop/src/pages/Audit.tsx:455
+msgid "Binding"
+msgstr "绑定范围"
+
+#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:287
+msgid "Process"
+msgstr "进程"
+
+#. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
+#: desktop/src/pages/Audit.tsx:461 desktop/src/pages/Network.tsx:289
+msgid "PID {pid}"
+msgstr "进程号 {pid}"
+
+#: desktop/src/pages/Audit.tsx:465 desktop/src/pages/Network.tsx:294
+msgid "Process information unavailable"
+msgstr "进程信息不可用"
+
+#: desktop/src/pages/Audit.tsx:475 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr "命令已复制到剪贴板"
 
-#: desktop/src/pages/Audit.tsx:325 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:477 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr "无法复制命令：{error}"
 
-#: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Audit.tsx:492 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "复制"
 
-#: desktop/src/pages/Audit.tsx:340
+#: desktop/src/pages/Audit.tsx:494
 msgid "Authorizing…"
 msgstr "正在授权…"
 
-#: desktop/src/pages/Audit.tsx:340 desktop/src/pages/Network.tsx:441
+#. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
+#: desktop/src/pages/Audit.tsx:495
+msgid "Checking UFW…"
+msgstr "正在检查 UFW…"
+
+#: desktop/src/pages/Audit.tsx:500 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr "在浏览器中打开"
 
-#: desktop/src/pages/Audit.tsx:340
+#: desktop/src/pages/Audit.tsx:500
 msgid "Learn more"
 msgstr "了解更多"
 
@@ -3512,10 +3705,6 @@ msgstr "未返回 freshclam 状态"
 msgid "Available"
 msgstr "可用"
 
-#: desktop/src/pages/Database.tsx:285
-msgid "Unavailable"
-msgstr "不可用"
-
 #: desktop/src/pages/Database.tsx:288
 msgid "Update service"
 msgstr "更新服务"
@@ -3851,26 +4040,9 @@ msgstr "未发现远程地址"
 msgid "No remote address is available to copy."
 msgstr "没有可供复制的远程地址。"
 
-#: desktop/src/pages/Network.tsx:282
-msgid "Local address"
-msgstr "本地地址"
-
 #: desktop/src/pages/Network.tsx:283
 msgid "Remote address"
 msgstr "远程地址"
-
-#: desktop/src/pages/Network.tsx:287
-msgid "Process"
-msgstr "进程"
-
-#. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Network.tsx:289
-msgid "PID {pid}"
-msgstr "进程号 {pid}"
-
-#: desktop/src/pages/Network.tsx:294
-msgid "Process information unavailable"
-msgstr "进程信息不可用"
 
 #: desktop/src/pages/Network.tsx:328
 msgid "Could not load network connections. Try again."
@@ -3907,20 +4079,6 @@ msgstr "正在加载…"
 #: desktop/src/pages/Network.tsx:401
 msgid "Loading network connections…"
 msgstr "正在加载网络连接…"
-
-#: desktop/src/pages/Network.tsx:403
-msgid ""
-"Network information is unavailable. Check that the system socket tool is "
-"installed and try again."
-msgstr "无法获取网络信息。请确认已安装系统套接字工具，然后重试。"
-
-#: desktop/src/pages/Network.tsx:406
-msgid "The socket list was limited. This snapshot may be incomplete."
-msgstr "套接字列表受到限制。此快照可能不完整。"
-
-#: desktop/src/pages/Network.tsx:406
-msgid "Some socket records could not be read. This snapshot may be incomplete."
-msgstr "部分套接字记录无法读取。此快照可能不完整。"
 
 #. Translators: Preserve the {time} placeholder. It is the native UTC/ISO snapshot timestamp.
 #: desktop/src/pages/Network.tsx:407
@@ -5624,6 +5782,15 @@ msgstr "对系统中所有可访问的目录进行全面扫描"
 #: desktop/src/profilePresentation.ts:38
 msgid "Scan of the user's home directory and personal files"
 msgstr "扫描用户主目录和个人文件"
+
+#~ msgid "Portmaster"
+#~ msgstr "Portmaster"
+
+#~ msgid "Portmaster — not detected (optional)"
+#~ msgstr "Portmaster——未检测到（可选）"
+
+#~ msgid "Portmaster — could not probe"
+#~ msgstr "Portmaster——无法探测"
 
 #~ msgid "Estimated file count exceeded"
 #~ msgstr "已超出预估文件数"

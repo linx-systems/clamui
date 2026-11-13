@@ -340,22 +340,47 @@ struct ProgressReporter<'a> {
     target_index: usize,
     target_count: usize,
     previous_files: u64,
+    previous_infected: u64,
+    previous_bytes: u64,
+    previous_total: Option<u64>,
+    estimate_exceeded: bool,
     last: ScanProgress,
 }
 
 impl ProgressReporter<'_> {
     fn emit(&mut self, mut event: ScanProgress) {
-        event.target_index = self.target_index;
-        event.target_count = self.target_count;
-        event.files_scanned_total = self.previous_files.saturating_add(event.files_scanned);
-        event.total_estimate = if self.target_count == 1 {
-            event.files_total
+        self.estimate_exceeded |= event.estimate_exceeded
+            || event
+                .files_total
+                .is_some_and(|total| event.files_scanned > total);
+        let mut outgoing = event.clone();
+        event.new_threats.clear();
+        self.last = event;
+        outgoing.target_index = self.target_index;
+        outgoing.target_count = self.target_count;
+        outgoing.files_scanned = self.previous_files.saturating_add(outgoing.files_scanned);
+        outgoing.files_scanned_total = outgoing.files_scanned;
+        outgoing.infected_count = self
+            .previous_infected
+            .saturating_add(outgoing.infected_count);
+        outgoing.bytes_scanned = self.previous_bytes.saturating_add(outgoing.bytes_scanned);
+        let total = if self.target_index == self.target_count {
+            self.previous_total
+                .zip(self.last.files_total)
+                .and_then(|(previous, current)| previous.checked_add(current))
         } else {
             None
         };
-        emit_scan_progress(self.ctx, self.job, self.path, self.backend, &event);
-        event.new_threats.clear();
-        self.last = event;
+        outgoing.files_total = total;
+        outgoing.total_files = total;
+        outgoing.total_estimate = if self.target_count == 1 { total } else { None };
+        outgoing.estimate_exceeded = self.estimate_exceeded;
+        outgoing.estimate_approximate =
+            total.is_none_or(|total| total == 0) || self.estimate_exceeded;
+        outgoing.percentage = total
+            .filter(|total| *total > 0 && !self.estimate_exceeded)
+            .map(|total| (outgoing.files_scanned as f64 / total as f64) * 100.0);
+        emit_scan_progress(self.ctx, self.job, self.path, self.backend, &outgoing);
     }
 
     fn snapshot(&mut self) {
@@ -459,12 +484,12 @@ fn status(ctx: &Context) -> AppResult<Value> {
     }))
 }
 
-fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
+fn scan(ctx: &Context, mut request: ScanRequest) -> AppResult<Value> {
     if request.paths.is_empty() {
         return Err("scanner.scan requires at least one path".into());
     }
     let exclusions = merged_exclusions(ctx, &request)?;
-    let id = request.id.unwrap_or_else(new_scan_id);
+    let id = request.id.take().unwrap_or_else(new_scan_id);
     let job = ctx.job(&id)?;
     let started = Instant::now();
     let configured = request
@@ -476,7 +501,11 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
     }
     let selected_backend = select_backend(ctx, &configured);
     let mut results = Vec::with_capacity(request.paths.len());
-    let mut previous_files = 0u64;
+    let mut completed_files = 0_u64;
+    let mut completed_infected = 0_u64;
+    let mut completed_bytes = 0_u64;
+    let mut completed_total = Some(0_u64);
+    let mut estimate_exceeded = false;
 
     for (index, path) in request.paths.iter().enumerate() {
         if job.cancelled.load(Ordering::Acquire) {
@@ -492,7 +521,11 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
             backend: &selected_backend,
             target_index: index + 1,
             target_count: request.paths.len(),
-            previous_files,
+            previous_files: completed_files,
+            previous_infected: completed_infected,
+            previous_bytes: completed_bytes,
+            previous_total: completed_total,
+            estimate_exceeded,
             last: ScanProgress {
                 current_file: String::new(),
                 files_scanned: 0,
@@ -505,7 +538,7 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
                 percentage: None,
                 target_index: index + 1,
                 target_count: request.paths.len(),
-                files_scanned_total: previous_files,
+                files_scanned_total: completed_files,
                 total_estimate: None,
                 estimate_approximate: true,
             },
@@ -518,18 +551,16 @@ fn scan(ctx: &Context, request: ScanRequest) -> AppResult<Value> {
             &exclusions,
         );
         // Summaries can account for files that never produced a live line.
-        // Reconcile only after finalization so per-target hints stay independent.
         reporter.last.files_scanned = reporter.last.files_scanned.max(result.scanned_files);
-        let total = reporter.last.files_total;
-        reporter.last.estimate_exceeded =
-            total.is_some_and(|total| reporter.last.files_scanned > total);
-        reporter.last.estimate_approximate =
-            total.is_none_or(|total| total == 0) || reporter.last.estimate_exceeded;
-        reporter.last.percentage = total
-            .filter(|total| *total > 0 && !reporter.last.estimate_exceeded)
-            .map(|total| (reporter.last.files_scanned as f64 / total as f64) * 100.0);
+        reporter.last.infected_count = reporter.last.infected_count.max(result.infected_count);
         reporter.snapshot();
-        previous_files = reporter.last.files_scanned_total;
+        completed_files = completed_files.saturating_add(reporter.last.files_scanned);
+        completed_infected = completed_infected.saturating_add(reporter.last.infected_count);
+        completed_bytes = completed_bytes.saturating_add(reporter.last.bytes_scanned);
+        completed_total = completed_total
+            .zip(reporter.last.files_total)
+            .and_then(|(previous, current)| previous.checked_add(current));
+        estimate_exceeded = reporter.estimate_exceeded;
         localize_result(ctx, &mut result);
         results.push(result);
         if job.cancelled.load(Ordering::Acquire) {
@@ -646,7 +677,7 @@ fn scan_target(
     let total = count
         .as_ref()
         .map(|count| count.files)
-        .filter(|total| *total > 0);
+        .filter(|total| backend == "daemon" || *total > 0);
     reporter.last.files_total = total;
     reporter.last.total_files = total;
     reporter.last.estimate_approximate = total.is_none();
@@ -2143,6 +2174,67 @@ mod tests {
         assert_eq!(event.percentage, None);
         assert!(event.estimate_approximate);
         assert!(!event.estimate_exceeded);
+    }
+
+    #[test]
+    fn request_progress_keeps_unknown_and_overflowed_estimates_indeterminate() {
+        use std::sync::{Arc, Mutex};
+
+        let temp = tempfile::tempdir().expect("temporary workspace");
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let captured = Arc::clone(&events);
+        let context = Context::with_paths(crate::common::Paths {
+            home: temp.path().join("home"),
+            config_dir: temp.path().join("config/clamui"),
+            data_dir: temp.path().join("data/clamui"),
+        })
+        .expect("context")
+        .with_emitter(move |event| captured.lock().expect("events").push(event));
+        let job = context.job("estimate-test").expect("job");
+        for previous_total in [None, Some(u64::MAX)] {
+            let mut reporter = ProgressReporter {
+                ctx: &context,
+                job: &job,
+                path: "/second",
+                backend: "clamscan",
+                target_index: 2,
+                target_count: 2,
+                previous_files: 4,
+                previous_infected: 2,
+                previous_bytes: 8,
+                previous_total,
+                estimate_exceeded: false,
+                last: ScanProgress {
+                    current_file: "/second/file".into(),
+                    files_scanned: 1,
+                    files_total: Some(1),
+                    total_files: Some(1),
+                    infected_count: 0,
+                    new_threats: Vec::new(),
+                    bytes_scanned: 3,
+                    estimate_exceeded: false,
+                    percentage: Some(100.0),
+                    target_index: 0,
+                    target_count: 0,
+                    files_scanned_total: 0,
+                    total_estimate: None,
+                    estimate_approximate: false,
+                },
+            };
+            reporter.snapshot();
+        }
+        let events = events.lock().expect("events");
+        assert_eq!(events.len(), 2);
+        for event in events.iter() {
+            assert_eq!(event.data["files_scanned"], 5);
+            assert_eq!(event.data["files_scanned_total"], 5);
+            assert_eq!(event.data["infected_count"], 2);
+            assert_eq!(event.data["bytes_scanned"], 11);
+            assert!(event.data["files_total"].is_null());
+            assert!(event.data["percentage"].is_null());
+            assert_eq!(event.data["estimate_approximate"], true);
+            assert_eq!(event.data["estimate_exceeded"], false);
+        }
     }
 
     #[test]

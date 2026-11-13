@@ -40,20 +40,20 @@ pub(crate) fn run_limited_command(
         return incomplete_limited_output();
     };
     let Some(mut stdout_reader) = child.stdout.take() else {
-        terminate_limited_process_group(&mut child);
+        terminate_limited_process_group(child);
         return incomplete_limited_output();
     };
     let Some(mut stderr_reader) = child.stderr.take() else {
         drop(stdout_reader);
-        terminate_limited_process_group(&mut child);
+        terminate_limited_process_group(child);
         return incomplete_limited_output();
     };
     if set_limited_nonblocking(&stdout_reader).is_err()
         || set_limited_nonblocking(&stderr_reader).is_err()
     {
-        terminate_limited_process_group(&mut child);
         drop(stdout_reader);
         drop(stderr_reader);
+        terminate_limited_process_group(child);
         return incomplete_limited_output();
     }
 
@@ -133,11 +133,11 @@ pub(crate) fn run_limited_command(
     }
 
     let complete = !timed_out && !truncated && !incomplete && status.is_some();
-    if !complete {
-        terminate_limited_process_group(&mut child);
-    }
     drop(stdout_reader);
     drop(stderr_reader);
+    if !complete {
+        terminate_limited_process_group(child);
+    }
     let (stdout, stdout_invalid_utf8) = limited_output_text(stdout);
     let stderr_invalid_utf8 = std::str::from_utf8(&stderr).is_err();
     LimitedCommandOutput {
@@ -246,11 +246,24 @@ fn drain_limited_pipe<R: Read>(
     }
 }
 
-fn terminate_limited_process_group(child: &mut Child) {
+fn terminate_limited_process_group(mut child: Child) {
     let group = child.id() as libc::pid_t;
     let _ = unsafe { libc::kill(-group, libc::SIGKILL) };
     let _ = child.kill();
-    let _ = child.wait();
+    reap_limited_child(child);
+}
+
+fn reap_limited_child(mut child: Child) {
+    if matches!(child.try_wait(), Ok(Some(_))) {
+        return;
+    }
+    // An elevated or uninterruptible child may outlive both kill attempts.
+    // Never wait for it on the request thread after the probe deadline.
+    let _ = std::thread::Builder::new()
+        .name("clamui-probe-reaper".to_owned())
+        .spawn(move || {
+            let _ = child.wait();
+        });
 }
 
 pub(crate) fn limited_output_text(bytes: Vec<u8>) -> (String, bool) {
@@ -263,6 +276,50 @@ pub(crate) fn limited_output_text(bytes: Vec<u8>) -> (String, bool) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn still_running_child_is_reaped_off_thread_without_blocking_cleanup() {
+        let child = Command::new("/bin/sleep")
+            .arg("30")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("start controlled child");
+        let pid = child.id() as libc::pid_t;
+        let (sent, received) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            reap_limited_child(child);
+            let _ = sent.send(());
+        });
+
+        let returned_promptly = received.recv_timeout(Duration::from_millis(500)).is_ok();
+        // Always release the controlled child, including when cleanup regresses.
+        let killed = unsafe { libc::kill(pid, libc::SIGKILL) } == 0;
+        let returned_after_release =
+            returned_promptly || received.recv_timeout(Duration::from_secs(3)).is_ok();
+        if returned_after_release {
+            worker.join().expect("cleanup worker");
+        }
+        let deadline = Instant::now() + Duration::from_secs(3);
+        let mut reaped = false;
+        while Instant::now() < deadline {
+            if unsafe { libc::kill(pid, 0) } != 0
+                && std::io::Error::last_os_error().raw_os_error() == Some(libc::ESRCH)
+            {
+                reaped = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert!(killed, "controlled child must be released");
+        assert!(
+            returned_after_release,
+            "cleanup did not finish after release"
+        );
+        assert!(reaped, "controlled child was not reaped");
+        assert!(returned_promptly, "cleanup blocked on a running child");
+    }
 
     #[test]
     fn limited_runner_times_out_when_a_descendant_holds_the_pipe() {

@@ -154,17 +154,76 @@ exit 0
     prepend_fixture_path(&bin)
 }
 
+fn install_clamscan_progress_fixture(temp: &TempDir) {
+    let executable = temp.path().join("bin/clamscan");
+    fs::write(
+        &executable,
+        r#"#!/bin/sh
+for target; do :; done
+if [ "${CLAMUI_FIXTURE_GROW_TARGET:-}" = "$target" ]; then
+    printf 'clean\n' > "$target/extra.txt"
+fi
+scanned=0
+infected=0
+for file in "$target"/*; do
+    [ -f "$file" ] || continue
+    printf 'Scanning %s\n' "$file"
+    if grep -q INFECTED -- "$file"; then
+        printf '%s: Fixture.Signature FOUND\n' "$file"
+        infected=$((infected + 1))
+    fi
+    scanned=$((scanned + 1))
+done
+printf 'Scanned files: %s\nInfected files: %s\n' "$scanned" "$infected"
+if [ "$infected" -gt 0 ]; then exit 1; fi
+exit 0
+"#,
+    )
+    .expect("clamscan fixture scanner");
+    fs::set_permissions(&executable, fs::Permissions::from_mode(0o700))
+        .expect("clamscan fixture mode");
+}
+
 fn scan_progress(events: &[Event]) -> Vec<&Value> {
-    let mut seen = BTreeSet::new();
-    events
+    let mut progress: Vec<&Value> = Vec::new();
+    for event in events
         .iter()
         .filter(|event| event.event == "scan-progress")
         .map(|event| &event.data)
         .filter(|event| {
-            let count = event["files_scanned"].as_u64().unwrap_or_default();
-            count > 0 && seen.insert((event["target_index"].as_u64(), count))
+            event["current_file"]
+                .as_str()
+                .is_some_and(|path| !path.is_empty())
         })
-        .collect()
+    {
+        let key = (
+            event["target_index"].as_u64(),
+            event["files_scanned"].as_u64(),
+        );
+        let has_threat = event["new_threats"]
+            .as_array()
+            .is_some_and(|threats| !threats.is_empty());
+        if let Some(previous) = progress.last_mut().filter(|previous| {
+            (
+                previous["target_index"].as_u64(),
+                previous["files_scanned"].as_u64(),
+            ) == key
+        }) {
+            if has_threat {
+                if previous["new_threats"]
+                    .as_array()
+                    .is_some_and(|threats| !threats.is_empty())
+                {
+                    progress.push(event);
+                } else {
+                    *previous = event;
+                }
+            }
+        } else {
+            progress.push(event);
+        }
+    }
+    progress
 }
 
 fn progress_paths(events: &[Event]) -> BTreeSet<String> {
@@ -514,9 +573,9 @@ fn multiple_targets_report_cumulative_live_counts_without_changing_summaries() {
     assert_eq!(first_final["percentage"], Value::Null);
     assert_eq!(first_final["estimate_exceeded"], true);
     assert_eq!(first_final["estimate_approximate"], true);
-    assert_eq!(second_initial["files_scanned"], 0);
+    assert_eq!(second_initial["files_scanned"], 7);
     assert_eq!(second_initial["files_scanned_total"], 7);
-    assert_eq!(last["files_scanned"], 11);
+    assert_eq!(last["files_scanned"], 18);
     assert_eq!(last["files_scanned_total"], 18);
     assert_eq!(last["percentage"], Value::Null);
     assert_eq!(last["estimate_exceeded"], true);
@@ -595,6 +654,169 @@ fn directly_selected_daemon_file_respects_pattern_exclusions() {
     assert_eq!(result["scanned_files"], 0);
 }
 
+#[test]
+fn multi_target_progress_is_cumulative_for_both_backends() {
+    let _environment = environment_lock();
+    for backend in ["clamscan", "daemon"] {
+        let (temp, context) = fixture_context();
+        let mut environment = install_daemon_fixture(&temp);
+        environment.set("CLAMUI_FIXTURE_GROW_TARGET", "");
+        install_clamscan_progress_fixture(&temp);
+        let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+        let captured_events = Arc::clone(&events);
+        let context = context.with_emitter(move |event| {
+            captured_events.lock().expect("event lock").push(event);
+        });
+        let first = temp.path().join("first");
+        let second = temp.path().join("second");
+        fs::create_dir_all(&first).expect("first directory");
+        fs::create_dir_all(&second).expect("second directory");
+        let infected = first.join("infected.txt");
+        let clean = second.join("clean.txt");
+        fs::write(&infected, b"INFECTED").expect("infected target");
+        fs::write(&clean, b"clean").expect("clean target");
+        let first_wire = first.to_string_lossy();
+        let second_wire = second.to_string_lossy();
+        let infected_wire = infected.to_string_lossy();
+        let clean_wire = clean.to_string_lossy();
+
+        let result = scanner::dispatch(
+            &context,
+            "scan",
+            json!({
+                "id": "multi-target-progress",
+                "paths": [first, second],
+                "backend_override": backend,
+            }),
+        )
+        .expect("scan result");
+
+        assert_eq!(result["id"], "multi-target-progress");
+        assert_eq!(result["status"], "infected");
+        assert_eq!(result["scanned_files"], 2);
+        assert_eq!(result["infected_count"], 1);
+        assert_eq!(result["per_target_results"][0]["path"], first_wire.as_ref());
+        assert_eq!(result["per_target_results"][0]["scanned_files"], 1);
+        assert_eq!(result["per_target_results"][0]["infected_count"], 1);
+        assert_eq!(
+            result["per_target_results"][1]["path"],
+            second_wire.as_ref()
+        );
+        assert_eq!(result["per_target_results"][1]["scanned_files"], 1);
+        assert_eq!(result["per_target_results"][1]["infected_count"], 0);
+
+        let events = events.lock().expect("event lock");
+        let progress = scan_progress(&events);
+        assert!(progress.iter().all(|event| {
+            event["id"] == "multi-target-progress" && event["backend"] == backend
+        }));
+        let first_events: Vec<_> = progress
+            .iter()
+            .filter(|event| event["path"] == first_wire.as_ref())
+            .collect();
+        let second_events: Vec<_> = progress
+            .iter()
+            .filter(|event| event["path"] == second_wire.as_ref())
+            .collect();
+        assert!(
+            !first_events.is_empty(),
+            "{backend}: no first-target progress"
+        );
+        assert!(
+            !second_events.is_empty(),
+            "{backend}: no second-target progress"
+        );
+        assert_eq!(first_events.len() + second_events.len(), progress.len());
+        assert!(progress.windows(2).all(|pair| {
+            pair[0]["files_scanned"].as_u64() <= pair[1]["files_scanned"].as_u64()
+                && pair[0]["infected_count"].as_u64() <= pair[1]["infected_count"].as_u64()
+        }));
+        assert!(first_events.iter().all(|event| {
+            event["current_file"] == infected_wire.as_ref()
+                && event["files_total"].is_null()
+                && event["total_files"].is_null()
+                && event["percentage"].is_null()
+        }));
+        let first_last = first_events.last().expect("first-target progress");
+        assert_eq!(first_last["files_scanned"], 1);
+        assert_eq!(first_last["infected_count"], 1);
+        assert_eq!(
+            first_last["new_threats"][0]["file_path"],
+            infected_wire.as_ref()
+        );
+        assert!(second_events.iter().all(|event| {
+            event["current_file"] == clean_wire.as_ref()
+                && event["files_scanned"] == 2
+                && event["infected_count"] == 1
+                && event["files_total"] == 2
+                && event["total_files"] == 2
+                && event["percentage"] == 100.0
+                && event["new_threats"] == json!([])
+                && event["estimate_exceeded"] == false
+        }));
+        assert_eq!(
+            progress
+                .iter()
+                .map(|event| event["new_threats"]
+                    .as_array()
+                    .expect("threat deltas")
+                    .len())
+                .sum::<usize>(),
+            1
+        );
+    }
+}
+
+#[test]
+fn multi_target_progress_retains_exceeded_estimate_from_earlier_target() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let mut environment = install_daemon_fixture(&temp);
+    install_clamscan_progress_fixture(&temp);
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    let first = temp.path().join("first");
+    let second = temp.path().join("second");
+    fs::create_dir_all(&first).expect("first directory");
+    fs::create_dir_all(&second).expect("second directory");
+    fs::write(first.join("initial.txt"), b"clean").expect("initial target");
+    fs::write(second.join("clean.txt"), b"clean").expect("second target");
+    environment.set("CLAMUI_FIXTURE_GROW_TARGET", first.as_os_str());
+    let first_wire = first.to_string_lossy();
+    let second_wire = second.to_string_lossy();
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({
+            "id": "multi-target-exceeded",
+            "paths": [first, second],
+            "backend_override": "clamscan",
+        }),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["scanned_files"], 3);
+    assert_eq!(result["per_target_results"][0]["scanned_files"], 2);
+    assert_eq!(result["per_target_results"][1]["scanned_files"], 1);
+    let events = events.lock().expect("event lock");
+    let progress = scan_progress(&events);
+    assert!(progress.iter().any(|event| {
+        event["path"] == first_wire.as_ref() && event["estimate_exceeded"] == true
+    }));
+    let later = progress
+        .iter()
+        .find(|event| event["path"] == second_wire.as_ref())
+        .expect("second-target progress");
+    assert_eq!(later["files_scanned"], 3);
+    assert_eq!(later["files_total"], 2);
+    assert_eq!(later["total_files"], 2);
+    assert_eq!(later["percentage"], Value::Null);
+    assert_eq!(later["estimate_exceeded"], true);
+}
 #[test]
 fn daemon_long_paths_preserve_detections_and_progress_across_batch_and_stdin() {
     let _environment = environment_lock();

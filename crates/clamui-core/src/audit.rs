@@ -8,10 +8,12 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::common::{host_command, is_flatpak, sanitize_line, sanitize_text, Context};
+use crate::network::{self, NetworkSnapshot, NetworkSnapshotStatus};
 use crate::portmaster::{self, PortmasterStatus};
 use crate::AppResult;
 
 mod firewall;
+mod opensnitch;
 
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 const DEEP_SCAN_TIMEOUT: Duration = Duration::from_secs(300);
@@ -57,7 +59,7 @@ pub enum AuditCategory {
     AutoUpdates,
     IntrusionDetection,
     SshHardening,
-    Portmaster,
+    ApplicationFirewalls,
     DeepScanLynis,
     DeepScanRootkit,
 }
@@ -67,6 +69,8 @@ pub struct AuditCheck {
     pub name: String,
     pub status: AuditStatus,
     pub detail: String,
+    #[serde(default)]
+    pub optional_missing: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommendation: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,6 +81,8 @@ pub struct AuditCheck {
     pub launch_command: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub launch_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub listening_ports: Option<NetworkSnapshot>,
 }
 
 impl AuditCheck {
@@ -85,11 +91,13 @@ impl AuditCheck {
             name,
             status,
             detail,
+            optional_missing: false,
             recommendation: None,
             install_command: None,
             info_url: None,
             launch_command: None,
             launch_label: None,
+            listening_ports: None,
         }
     }
 }
@@ -606,10 +614,10 @@ fn check_firewall(ctx: &Context) -> AuditSection {
 }
 
 fn check_open_ports(ctx: &Context, section: &mut AuditSection) {
-    let output = run_command("ss", &["-tulnH"], COMMAND_TIMEOUT);
-    if output.code != Some(0) {
-        return;
-    }
+    section.push(open_ports_check(ctx, network::listener_snapshot(ctx)));
+}
+
+fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
     let risky = BTreeMap::from([
         (23, "Telnet"),
         (3389, "RDP"),
@@ -620,15 +628,8 @@ fn check_open_ports(ctx: &Context, section: &mut AuditSection) {
     ]);
     let mut ports = std::collections::BTreeSet::new();
     let mut exposed = Vec::new();
-    for line in output.stdout.lines() {
-        let words = line.split_whitespace().collect::<Vec<_>>();
-        let Some(address) = words.get(4) else {
-            continue;
-        };
-        let Some(port) = address
-            .rsplit_once(':')
-            .and_then(|(_, value)| value.parse::<i32>().ok())
-        else {
+    for socket in &snapshot.sockets {
+        let Some(port) = socket.local.port else {
             continue;
         };
         ports.insert(port);
@@ -637,10 +638,10 @@ fn check_open_ports(ctx: &Context, section: &mut AuditSection) {
         }
     }
     let count = ports.len() as u64;
+    let name = tr(ctx, "Open Ports");
     let mut row = if !exposed.is_empty() {
-        let mut row = check(
-            ctx,
-            "Open Ports",
+        let mut row = AuditCheck::new(
+            name,
             AuditStatus::Fail,
             trnf(
                 ctx,
@@ -656,9 +657,8 @@ fn check_open_ports(ctx: &Context, section: &mut AuditSection) {
         row.recommendation = Some(tr(ctx, "Review if these services need to be exposed"));
         row
     } else if !ports.is_empty() {
-        let mut row = check(
-            ctx,
-            "Open Ports",
+        let mut row = AuditCheck::new(
+            name,
             AuditStatus::Warning,
             trnf(
                 ctx,
@@ -670,16 +670,21 @@ fn check_open_ports(ctx: &Context, section: &mut AuditSection) {
         );
         row.recommendation = Some(tr(ctx, "Review open ports and close unnecessary services"));
         row
-    } else {
-        check(
-            ctx,
-            "Open Ports",
-            AuditStatus::Pass,
-            tr(ctx, "No open ports detected"),
+    } else if snapshot.status != NetworkSnapshotStatus::Available {
+        AuditCheck::new(
+            name,
+            AuditStatus::Unknown,
+            snapshot
+                .message
+                .clone()
+                .unwrap_or_else(|| tr(ctx, "Some network socket rows could not be read.")),
         )
+    } else {
+        AuditCheck::new(name, AuditStatus::Pass, tr(ctx, "No open ports detected"))
     };
     row.info_url = Some(URL_PORTS.to_owned());
-    section.push(row);
+    row.listening_ports = Some(snapshot);
+    row
 }
 
 fn check_mac_framework(ctx: &Context) -> AuditSection {
@@ -1108,13 +1113,20 @@ fn effective_sshd_config() -> Option<BTreeMap<String, String>> {
     Some(parse_sshd_file(&content))
 }
 
-fn check_portmaster(ctx: &Context) -> AuditSection {
-    let mut section = AuditSection::new(
-        ctx,
-        AuditCategory::Portmaster,
-        "Portmaster",
-        "network-vpn-symbolic",
-    );
+fn check_application_firewalls(ctx: &Context) -> AuditSection {
+    let mut section = AuditSection {
+        category: AuditCategory::ApplicationFirewalls,
+        title: tr(ctx, "Application firewalls"),
+        icon_name: "network-vpn-symbolic".to_owned(),
+        checks: Vec::new(),
+        overall_status: AuditStatus::Unknown,
+    };
+    append_portmaster_checks(ctx, &mut section);
+    opensnitch::append_checks(ctx, &mut section);
+    section
+}
+
+fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
     let token = crate::credentials::get_portmaster_token(ctx).ok().flatten();
     let result = portmaster::probe(token.as_deref());
     if result.modules_unauthorized {
@@ -1136,11 +1148,13 @@ fn check_portmaster(ctx: &Context) -> AuditSection {
                         name: module.name,
                         status: portmaster_module_status(&module.status),
                         detail: module.failure_msg.unwrap_or(module.status),
+                        optional_missing: false,
                         recommendation: None,
                         install_command: None,
                         info_url: Some(URL_PORTMASTER_API.to_owned()),
                         launch_command: None,
                         launch_label: None,
+                        listening_ports: None,
                     };
                     row.detail = sanitize_line(&row.detail);
                     section.push(row);
@@ -1184,6 +1198,7 @@ fn check_portmaster(ctx: &Context) -> AuditSection {
                     "Not detected — optional network monitor and application firewall",
                 ),
             );
+            row.optional_missing = true;
             row.info_url = Some(URL_PORTMASTER_INSTALL.to_owned());
             section.push(row);
         }
@@ -1202,7 +1217,6 @@ fn check_portmaster(ctx: &Context) -> AuditSection {
             section.push(row);
         }
     }
-    section
 }
 
 pub fn portmaster_module_status(status: &str) -> AuditStatus {
@@ -1248,6 +1262,7 @@ fn run_deep(ctx: &Context, tool: &str) -> AuditSection {
                 &[("{name}", name.to_owned())],
             ),
         );
+        row.optional_missing = true;
         row.recommendation = Some(text(
             ctx,
             "Install {name} for comprehensive security auditing",
@@ -1512,14 +1527,15 @@ fn run_tier1(ctx: &Context) -> AuditReport {
         check_auto_updates,
         check_intrusion_detection,
         check_ssh_hardening,
-        check_portmaster,
+        check_application_firewalls,
     ];
     let mut sections = Vec::with_capacity(checks.len());
+    let total = checks.len();
     for (index, audit) in checks.into_iter().enumerate() {
         let section = audit(ctx);
         ctx.emit(
             "audit-progress",
-            json!({"section": section, "index": index, "total": 7}),
+            json!({"section": section, "index": index, "total": total}),
         );
         sections.push(section);
     }
@@ -1532,9 +1548,27 @@ fn run_tier1(ctx: &Context) -> AuditReport {
     }
 }
 
+fn launch(ctx: &Context, command: &str) -> AppResult<bool> {
+    match command {
+        "opensnitch-ui" => opensnitch::launch_gui(ctx),
+        "gufw" | "firewall-config" => {
+            let mut process = host_command(command, &[]);
+            process
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .spawn()
+                .map(|_| true)
+                .map_err(|error| sanitize_line(&error.to_string()))
+        }
+        _ => Err("Unsupported audit launch action".to_owned()),
+    }
+}
+
 pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
     match action {
         "run" => serde_json::to_value(run_tier1(ctx)).map_err(|error| error.to_string()),
+        "ufw_status" => firewall::request_ufw_status(ctx),
         "deep" => {
             let tool = args
                 .get("tool")
@@ -1569,8 +1603,153 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
                 .get("command")
                 .and_then(Value::as_str)
                 .ok_or_else(|| "audit.launch requires an allowlisted command".to_owned())?;
-            portmaster::launch(command).map(|launched| json!({"launched": launched}))
+            launch(ctx, command).map(|launched| json!({"launched": launched}))
         }
         _ => Err(format!("Unknown audit action: {action}")),
+    }
+}
+
+#[cfg(test)]
+mod open_ports_tests {
+    use super::*;
+    use crate::common::Paths;
+    use crate::host_probe::LimitedCommandOutput;
+    use tempfile::TempDir;
+
+    fn context(temp: &TempDir) -> Context {
+        Context::with_paths(Paths {
+            home: temp.path().join("home"),
+            config_dir: temp.path().join("config"),
+            data_dir: temp.path().join("data"),
+        })
+        .expect("test context")
+    }
+
+    fn output(stdout: &str) -> LimitedCommandOutput {
+        LimitedCommandOutput {
+            code: Some(0),
+            stdout: stdout.to_owned(),
+            timed_out: false,
+            truncated: false,
+            invalid_utf8: false,
+        }
+    }
+
+    fn assess(ctx: &Context, output: &LimitedCommandOutput) -> AuditCheck {
+        open_ports_check(ctx, network::listener_snapshot_from_output(ctx, output))
+    }
+
+    #[test]
+    fn open_ports_count_unique_numbers_and_preserve_each_sorted_binding() {
+        let temp = TempDir::new().unwrap();
+        let ctx = context(&temp);
+        let row = assess(
+            &ctx,
+            &output(concat!(
+                "tcp LISTEN 0 128 127.0.0.1:8080 0.0.0.0:*\n",
+                "udp UNCONN 0 0 [::1]:53 [::]:*\n",
+                "tcp LISTEN 0 128 [::]:53 [::]:* users:((\"dns\",pid=42,fd=3))\n",
+                "tcp LISTEN 0 128 0.0.0.0:53 0.0.0.0:*\n",
+            )),
+        );
+        assert_eq!(row.status, AuditStatus::Warning);
+        assert!(row.detail.contains('2'));
+        let payload = serde_json::to_value(&row).unwrap();
+        let sockets = payload["listening_ports"]["sockets"].as_array().unwrap();
+        assert_eq!(sockets.len(), 4);
+        assert_eq!(sockets[0]["protocol"], "tcp");
+        assert_eq!(sockets[0]["local"]["address"], "0.0.0.0");
+        assert_eq!(sockets[1]["local"]["address"], "::");
+        assert_eq!(sockets[1]["processes"][0]["name"], "dns");
+        assert_eq!(sockets[1]["processes"][0]["pid"], 42);
+        assert_eq!(sockets[2]["protocol"], "udp");
+        assert_eq!(sockets[2]["local"]["address"], "::1");
+        assert_eq!(sockets[3]["local"]["port"], 8080);
+        assert!(sockets[0]["processes"].as_array().unwrap().is_empty());
+        assert_eq!(payload["listening_ports"]["status"], "available");
+    }
+
+    #[test]
+    fn unexpected_connections_are_excluded_and_mark_snapshot_partial() {
+        let temp = TempDir::new().unwrap();
+        let ctx = context(&temp);
+        let row = assess(
+            &ctx,
+            &output(concat!(
+                "tcp ESTAB 0 0 127.0.0.1:23 192.0.2.1:50000\n",
+                "udp ESTAB 0 0 127.0.0.1:445 192.0.2.1:53\n",
+                "tcp LISTEN 0 128 127.0.0.1:8080 0.0.0.0:*\n",
+            )),
+        );
+        assert_eq!(row.status, AuditStatus::Warning);
+        let snapshot = row.listening_ports.unwrap();
+        assert_eq!(snapshot.status, NetworkSnapshotStatus::Partial);
+        assert_eq!(snapshot.unparsed_lines, 2);
+        assert_eq!(snapshot.sockets.len(), 1);
+        assert_eq!(snapshot.sockets[0].local.port, Some(8080));
+        assert!(snapshot.message.is_some());
+
+        let row = assess(
+            &ctx,
+            &output("tcp ESTAB 0 0 127.0.0.1:23 192.0.2.1:50000\n"),
+        );
+        assert_eq!(row.status, AuditStatus::Unknown);
+        assert!(row.listening_ports.unwrap().sockets.is_empty());
+    }
+
+    #[test]
+    fn empty_succeeds_but_malformed_missing_port_and_failed_snapshots_are_unknown() {
+        let temp = TempDir::new().unwrap();
+        let ctx = context(&temp);
+        let empty = assess(&ctx, &output(""));
+        assert_eq!(empty.status, AuditStatus::Pass);
+
+        for data in ["bad row\n", "tcp LISTEN 0 128 *:* *:*\n"] {
+            let row = assess(&ctx, &output(data));
+            assert_eq!(row.status, AuditStatus::Unknown);
+            let snapshot = row.listening_ports.unwrap();
+            assert_eq!(snapshot.status, NetworkSnapshotStatus::Partial);
+            assert!(snapshot.message.is_some());
+        }
+
+        let mut failed = output("");
+        failed.code = Some(1);
+        let row = assess(&ctx, &failed);
+        assert_eq!(row.status, AuditStatus::Unknown);
+        assert_eq!(
+            row.listening_ports.unwrap().status,
+            NetworkSnapshotStatus::Unavailable
+        );
+    }
+
+    #[test]
+    fn partial_results_keep_valid_risky_listeners_and_diagnostics() {
+        let temp = TempDir::new().unwrap();
+        let ctx = context(&temp);
+        let row = assess(
+            &ctx,
+            &output(concat!(
+                "bad row\n",
+                "tcp LISTEN 0 128 127.0.0.1:23 0.0.0.0:*\n",
+            )),
+        );
+        assert_eq!(row.status, AuditStatus::Fail);
+        let snapshot = row.listening_ports.unwrap();
+        assert_eq!(snapshot.status, NetworkSnapshotStatus::Partial);
+        assert_eq!(snapshot.sockets[0].local.port, Some(23));
+        assert!(snapshot.message.is_some());
+
+        let mut interrupted = output(concat!(
+            "tcp LISTEN 0 128 127.0.0.1:8080 0.0.0.0:*\n",
+            "tcp LISTEN 0 128 127.0.0.1:80"
+        ));
+        interrupted.truncated = true;
+        let row = assess(&ctx, &interrupted);
+        assert_eq!(row.status, AuditStatus::Warning);
+        let snapshot = row.listening_ports.unwrap();
+        assert_eq!(snapshot.status, NetworkSnapshotStatus::Partial);
+        assert_eq!(snapshot.sockets.len(), 1);
+        assert_eq!(snapshot.sockets[0].local.port, Some(8080));
+        assert!(snapshot.message.is_some());
     }
 }
