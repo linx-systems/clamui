@@ -1251,7 +1251,7 @@ fn copy_hash_fsync(source: &mut File, destination: &mut File, mode: u32) -> io::
     }
     destination.sync_all()?;
     fchmod(destination.as_raw_fd(), mode)?;
-    Ok(format!("{:x}", hash.finalize()))
+    Ok(hex::encode(hash.finalize()))
 }
 
 fn verify_hash(path: &Path, expected: &str) -> io::Result<()> {
@@ -1277,7 +1277,7 @@ fn copy_hash(file: &mut File) -> io::Result<String> {
         }
         hash.update(&buffer[..read]);
     }
-    Ok(format!("{:x}", hash.finalize()))
+    Ok(hex::encode(hash.finalize()))
 }
 
 fn quarantine_name(source: &Path) -> Vec<u8> {

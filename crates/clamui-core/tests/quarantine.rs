@@ -2,7 +2,6 @@ use clamui_core::common::{Context, Paths};
 use clamui_core::quarantine::dispatch;
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
-use sha2::{Digest, Sha256};
 use std::fs;
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{symlink, PermissionsExt};
@@ -94,10 +93,6 @@ fn listed_ids(response: &Value) -> Vec<i64> {
         .collect()
 }
 
-fn sha256(bytes: &[u8]) -> String {
-    format!("{:x}", Sha256::digest(bytes))
-}
-
 #[test]
 fn quarantines_and_restores_with_hash_permissions_and_secure_payload_modes() {
     let test = TestContext::new();
@@ -109,6 +104,12 @@ fn quarantines_and_restores_with_hash_permissions_and_secure_payload_modes() {
     assert_eq!(quarantined["status"], "success");
     assert!(!source.exists());
     let entry = quarantined["entry"].clone();
+    assert_eq!(
+        entry["file_hash"],
+        "6fb27411e338c2c78f684a089aca430df725720411393642d8bd1321fc3818bd"
+    );
+    let listed = dispatch(&test.context, "list", json!({})).unwrap();
+    assert_eq!(listed["entries"][0]["file_hash"], entry["file_hash"]);
     let payload = PathBuf::from(entry["quarantine_path"].as_str().unwrap());
     assert_eq!(fs::read(&payload).unwrap(), b"malicious bytes");
     assert_eq!(
@@ -176,7 +177,7 @@ fn restores_legacy_blob_paths_and_in_place_schema_without_path_conversion() {
             "Legacy.Signature",
             "2000-01-01T00:00:00",
             bytes.len() as i64,
-            sha256(bytes),
+            "cf72d791425128735e440e877b45424baa22fc0496c97b226570ab0de1053fa6",
         ],
     ).unwrap();
     drop(connection);
@@ -333,7 +334,7 @@ fn startup_reconciles_durable_pending_intent_only_when_original_is_confirmed_mis
                 payload.as_os_str().as_bytes(),
                 original.as_os_str().as_bytes(),
                 bytes.len() as i64,
-                sha256(bytes)
+                "4dc92063247bfa3717b5be267566dbc71a87e2dec8682bfc40c08cac04f08564"
             ],
         )
         .unwrap();
@@ -379,7 +380,7 @@ fn startup_preserves_pending_payload_when_an_original_replacement_exists() {
                 payload.as_os_str().as_bytes(),
                 original.as_os_str().as_bytes(),
                 bytes.len() as i64,
-                sha256(bytes)
+                "4dc92063247bfa3717b5be267566dbc71a87e2dec8682bfc40c08cac04f08564"
             ],
         )
         .unwrap();

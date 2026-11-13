@@ -169,7 +169,10 @@ fn fake_http_hash_lookup_projects_all_engine_buckets_without_uploading() {
     );
     let requests = fake.requests();
     assert_eq!(requests.len(), 1);
-    assert!(requests[0].url.contains("/files/"));
+    assert_eq!(
+        requests[0].url,
+        "http://fake/api/v3/files/7117fff2d0fd294462b3c802b7cb8753579f23f3946b99cf55f38e873f013f10"
+    );
     assert!(matches!(requests[0].body, HttpBody::Empty));
 }
 
@@ -206,11 +209,14 @@ fn fake_http_unknown_file_uses_direct_streaming_upload_then_poll_and_hash_lookup
     assert_eq!(result.status, VTScanStatus::Clean);
     let requests = fake.requests();
     assert_eq!(requests.len(), 4);
-    assert!(requests[0].url.contains("/files/"));
+    assert_eq!(
+        requests[0].url,
+        "http://fake/api/v3/files/a2e375fe91c9bfe12c181baf395184f0b38dc596ed12a78acbea2dde456b12dd"
+    );
     assert!(requests[1].url.ends_with("/files"));
     assert!(matches!(requests[1].body, HttpBody::File { .. }));
     assert!(requests[2].url.ends_with("/analyses/analysis-123"));
-    assert!(requests[3].url.contains("/files/"));
+    assert_eq!(requests[3].url, requests[0].url);
 }
 
 #[test]
