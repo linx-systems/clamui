@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- Fixed Flatpak standalone scan progress estimates to count host files, including hidden app data, while retaining valid partial counts when subdirectories are unreadable; unavailable or exceeded estimates now use an approximate, indeterminate state, and multi-target progress labels each target while keeping the overall scanned count cumulative. (#304)
 - Fixed active manual and forced database updates timing out after a fixed total duration; a configurable output-inactivity limit now stops stalled updates instead. (#307)
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
 - Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)

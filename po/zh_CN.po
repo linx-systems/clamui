@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-11 22:58+0100\n"
+"POT-Creation-Date: 2026-11-12 18:08+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -1522,41 +1522,41 @@ msgstr "无法隔离 {path}：{error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "文件哈希值不匹配 — 文件可能已损坏"
 
-#: crates/clamui-core/src/scanner.rs:393
+#: crates/clamui-core/src/scanner.rs:436
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "未在宿主机的标准位置找到 ClamAV 数据库文件"
 
-#: crates/clamui-core/src/scanner.rs:1752
+#: crates/clamui-core/src/scanner.rs:1855
 msgid "Scan cancelled by user"
 msgstr "用户已取消扫描"
 
-#: crates/clamui-core/src/scanner.rs:1759
+#: crates/clamui-core/src/scanner.rs:1862
 msgid "No files could be scanned"
 msgstr "未能扫描任何文件"
 
-#: crates/clamui-core/src/scanner.rs:1765
+#: crates/clamui-core/src/scanner.rs:1868
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "扫描目标不存在或包含无效的 NUL 字节"
 
-#: crates/clamui-core/src/scanner.rs:1772
+#: crates/clamui-core/src/scanner.rs:1875
 msgid "Scan target is not a regular file or directory"
 msgstr "扫描目标不是普通文件或目录"
 
-#: crates/clamui-core/src/scanner.rs:1781
+#: crates/clamui-core/src/scanner.rs:1884
 msgid "Threats were detected, but details are unavailable."
 msgstr "检测到威胁，但无法提供详细信息。"
 
-#: crates/clamui-core/src/scanner.rs:1793
+#: crates/clamui-core/src/scanner.rs:1896
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "无法访问 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1806
+#: crates/clamui-core/src/scanner.rs:1909
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "无法读取 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:1825
+#: crates/clamui-core/src/scanner.rs:1928
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -1938,8 +1938,8 @@ msgstr "导出"
 msgid "Open"
 msgstr "打开"
 
-#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:534
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:539
+#: desktop/src/pages/Scan.tsx:541
 msgid "Scan"
 msgstr "扫描"
 
@@ -1988,7 +1988,7 @@ msgstr "无法打开链接"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
-#: desktop/src/pages/Scan.tsx:322
+#: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr "正在扫描——请等待扫描完成后再更改扫描目标"
 
@@ -2112,16 +2112,16 @@ msgid ""
 "completely."
 msgstr "选择将 ClamUI 保留在系统托盘中，或完全退出。"
 
-#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:186
+#: desktop/src/App.tsx:1053 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "记住我的选择"
 
 #: desktop/src/App.tsx:1054 desktop/src/App.tsx:1058
-#: desktop/src/pages/Database.tsx:313 desktop/src/pages/Database.tsx:339
-#: desktop/src/pages/Logs.tsx:412 desktop/src/pages/Network.tsx:441
-#: desktop/src/pages/Profiles.tsx:245 desktop/src/pages/Profiles.tsx:246
-#: desktop/src/pages/Quarantine.tsx:319 desktop/src/pages/Results.tsx:206
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:563
+#: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
+#: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
+#: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
+#: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
+#: desktop/src/pages/Results.tsx:206 desktop/src/pages/Scan.tsx:568
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2319,6 +2319,56 @@ msgstr "打开修复说明"
 #: desktop/src/pages/ConfigPreferences.tsx:890
 msgid "See Configuration"
 msgstr "查看配置"
+
+#: desktop/src/ScanProgressPanel.tsx:18
+msgid "Target {index}/{count}: {path}"
+msgstr "目标 {index}/{count}：{path}"
+
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
+#: desktop/src/pages/Scan.tsx:530
+msgid "Scan target"
+msgstr "扫描目标"
+
+#: desktop/src/ScanProgressPanel.tsx:22
+msgid "Scanning"
+msgstr "正在扫描"
+
+#: desktop/src/ScanProgressPanel.tsx:24
+msgid "{count} file scanned overall"
+msgid_plural "{count} files scanned overall"
+msgstr[0] "总共扫描了 {count} 个文件"
+
+#: desktop/src/ScanProgressPanel.tsx:26
+msgid "Waiting for scan data…"
+msgstr "正在等待扫描数据…"
+
+#: desktop/src/ScanProgressPanel.tsx:27
+msgid "Scan progress"
+msgstr "扫描进度"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+msgid "{count} file scanned"
+msgid_plural "{count} files scanned"
+msgstr[0] "已扫描 {count} 个文件"
+
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Statistics.tsx:161
+msgid "{count} threat"
+msgid_plural "{count} threats"
+msgstr[0] "{count} 个威胁"
+
+#: desktop/src/ScanProgressPanel.tsx:29
+msgid "File estimate is approximate; progress is indeterminate."
+msgstr "文件数量只是估计值；无法确定进度。"
+
+#: desktop/src/ScanProgressPanel.tsx:31
+msgid ""
+"Live progress is disabled. The completed scan result will remain available."
+msgstr "实时进度已禁用。扫描完成后仍可查看结果。"
+
+#: desktop/src/ScanProgressPanel.tsx:32
+msgid "Cancel All"
+msgstr "全部取消"
 
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
@@ -2542,7 +2592,7 @@ msgstr "无法复制命令：{error}"
 
 #: desktop/src/pages/Audit.tsx:339 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "复制"
@@ -2658,7 +2708,7 @@ msgid "Checking…"
 msgstr "正在检查…"
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Refresh status"
 msgstr "刷新状态"
 
@@ -2787,7 +2837,7 @@ msgstr "添加"
 #: desktop/src/pages/ConfigPreferences.tsx:299
 #: desktop/src/pages/ConfigPreferences.tsx:343
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "移除"
@@ -3236,7 +3286,7 @@ msgid "Used for monthly scans."
 msgstr "用于每月扫描。"
 
 #: desktop/src/pages/ConfigPreferences.tsx:862
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
 msgid "Scan Targets"
 msgstr "扫描目标"
 
@@ -3292,7 +3342,7 @@ msgstr ""
 "盖对方单独保留的更改。"
 
 #: desktop/src/pages/ConfigPreferences.tsx:880
-#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "正在保存…"
 
@@ -3676,7 +3726,7 @@ msgid "Export JSON"
 msgstr "导出 JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Clear All"
 msgstr "全部清除"
 
@@ -3710,7 +3760,7 @@ msgid "Export Text"
 msgstr "导出文本"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:566
 msgid "Fullscreen"
 msgstr "全屏"
 
@@ -4027,7 +4077,7 @@ msgstr "默认配置文件的名称受保护"
 msgid "Description"
 msgstr "描述"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
 msgid "No targets added"
 msgstr "未添加目标"
 
@@ -4445,10 +4495,6 @@ msgstr "恶意"
 msgid "Suspicious"
 msgstr "可疑"
 
-#: desktop/src/pages/Results.tsx:110 desktop/src/pages/Scan.tsx:522
-msgid "Scan target"
-msgstr "扫描目标"
-
 #: desktop/src/pages/Results.tsx:116
 msgid "No scan output is available"
 msgstr "无可用的扫描输出"
@@ -4514,7 +4560,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr "其他无法访问的文件未在此视图中显示。"
 
 #: desktop/src/pages/Results.tsx:200 desktop/src/pages/Results.tsx:201
-#: desktop/src/pages/Scan.tsx:561 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 msgid "Scan details"
 msgstr "扫描详情"
 
@@ -4596,213 +4642,177 @@ msgstr "暂无结果"
 msgid "Start a scan to see its results here."
 msgstr "开始扫描后即可在此查看结果。"
 
-#: desktop/src/pages/Scan.tsx:89
+#: desktop/src/pages/Scan.tsx:96
 msgid "Scan complete with warnings"
 msgstr "扫描完成，但有警告"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:90
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete — no threats found"
 msgstr "扫描完成——未发现威胁"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:98
+#: desktop/src/pages/Scan.tsx:105
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "扫描完成——检测到 {count} 个威胁"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:108
+#: desktop/src/pages/Scan.tsx:115
 msgid "Scan cancelled — partial results are available"
 msgstr "扫描已取消——可查看部分结果"
 
-#: desktop/src/pages/Scan.tsx:113 desktop/src/pages/Scan.tsx:524
+#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
 msgid "Scan error"
 msgstr "扫描出错"
 
-#: desktop/src/pages/Scan.tsx:113
+#: desktop/src/pages/Scan.tsx:120
 msgid "Unknown error"
 msgstr "未知错误"
 
-#: desktop/src/pages/Scan.tsx:148
+#: desktop/src/pages/Scan.tsx:155
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr "API 密钥必须由 64 个十六进制字符组成"
 
-#: desktop/src/pages/Scan.tsx:176
+#: desktop/src/pages/Scan.tsx:183
 msgid "VirusTotal Scan"
 msgstr "VirusTotal 扫描"
 
-#: desktop/src/pages/Scan.tsx:177
+#: desktop/src/pages/Scan.tsx:184
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
 msgstr "VirusTotal 每次只能上传一个文件。请仅上传您有权共享的文件。"
 
-#: desktop/src/pages/Scan.tsx:181
+#: desktop/src/pages/Scan.tsx:188
 msgid "API key available"
 msgstr "API 密钥可用"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scanning…"
 msgstr "正在扫描…"
 
-#: desktop/src/pages/Scan.tsx:182 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
 msgid "Scan with VirusTotal"
 msgstr "使用 VirusTotal 扫描"
 
-#: desktop/src/pages/Scan.tsx:184 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "API 密钥"
 
-#: desktop/src/pages/Scan.tsx:185
+#: desktop/src/pages/Scan.tsx:192
 msgid "Save & Scan"
 msgstr "保存并扫描"
 
-#: desktop/src/pages/Scan.tsx:187
+#: desktop/src/pages/Scan.tsx:194
 msgid "Upload file manually"
 msgstr "手动上传文件"
 
-#: desktop/src/pages/Scan.tsx:218
+#: desktop/src/pages/Scan.tsx:226
 msgid "Unable to load scan profiles"
 msgstr "无法加载扫描配置文件"
 
-#: desktop/src/pages/Scan.tsx:225
+#: desktop/src/pages/Scan.tsx:233
 msgid "Unable to check scanner status"
 msgstr "无法检查扫描器状态"
 
-#: desktop/src/pages/Scan.tsx:259 desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
 msgid "Please select a file or folder to scan"
 msgstr "请选择要扫描的文件或文件夹"
 
-#: desktop/src/pages/Scan.tsx:273
+#: desktop/src/pages/Scan.tsx:281
 msgid "Starting scan…"
 msgstr "正在启动扫描…"
 
-#: desktop/src/pages/Scan.tsx:340
+#: desktop/src/pages/Scan.tsx:348
 msgid "Quick Scan profile has no valid targets"
 msgstr "“快速扫描”配置文件中没有有效的扫描目标"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:354 desktop/src/pages/Scan.tsx:457
-#: desktop/src/pages/Scan.tsx:508
+#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
+#: desktop/src/pages/Scan.tsx:516
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr "正在扫描——请等待扫描完成后再添加目标"
 
-#: desktop/src/pages/Scan.tsx:374
+#: desktop/src/pages/Scan.tsx:382
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
 msgstr[0] "VirusTotal 每次只能扫描一个文件；已忽略 {count} 个选中项。"
 
-#: desktop/src/pages/Scan.tsx:389 desktop/src/pages/Scan.tsx:517
+#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
 msgid "Only local files and folders can be scanned"
 msgstr "只能扫描本地文件和文件夹"
 
-#: desktop/src/pages/Scan.tsx:466
+#: desktop/src/pages/Scan.tsx:474
 msgid "Unable to choose scan targets"
 msgstr "无法选择扫描目标"
 
-#: desktop/src/pages/Scan.tsx:473
+#: desktop/src/pages/Scan.tsx:481
 msgid "Cancelling scan…"
 msgstr "正在取消扫描…"
 
-#: desktop/src/pages/Scan.tsx:475
+#: desktop/src/pages/Scan.tsx:483
 msgid "Unable to cancel scan"
 msgstr "无法取消扫描"
 
-#: desktop/src/pages/Scan.tsx:491
+#: desktop/src/pages/Scan.tsx:499
 msgid "Running EICAR test…"
 msgstr "正在运行 EICAR 测试…"
 
-#: desktop/src/pages/Scan.tsx:536
+#: desktop/src/pages/Scan.tsx:541
 msgid "Backend"
 msgstr "后端"
 
-#: desktop/src/pages/Scan.tsx:537
+#: desktop/src/pages/Scan.tsx:542
 msgid "Manage Profiles"
 msgstr "管理配置文件"
 
-#: desktop/src/pages/Scan.tsx:539 desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
 msgid "Details"
 msgstr "详情"
 
-#: desktop/src/pages/Scan.tsx:543
+#: desktop/src/pages/Scan.tsx:548
 msgid "Profile"
 msgstr "配置文件"
 
-#: desktop/src/pages/Scan.tsx:549
+#: desktop/src/pages/Scan.tsx:554
 msgid "No Profile (Manual)"
 msgstr "无配置文件（手动）"
 
-#: desktop/src/pages/Scan.tsx:553
+#: desktop/src/pages/Scan.tsx:558
 msgid "Drop local files or folders here, or add them below."
 msgstr "将本地文件或文件夹拖放到此处，或在下方添加。"
 
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scanning"
-msgstr "正在扫描"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Waiting for scan data…"
-msgstr "正在等待扫描数据…"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Scan progress"
-msgstr "扫描进度"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-msgid "{count} file scanned"
-msgid_plural "{count} files scanned"
-msgstr[0] "已扫描 {count} 个文件"
-
-#: desktop/src/pages/Scan.tsx:557 desktop/src/pages/Scan.tsx:561
-#: desktop/src/pages/Statistics.tsx:161
-msgid "{count} threat"
-msgid_plural "{count} threats"
-msgstr[0] "{count} 个威胁"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Estimated file count exceeded"
-msgstr "已超出预估文件数"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid ""
-"Live progress is disabled. The completed scan result will remain available."
-msgstr "实时进度已禁用。扫描完成后仍可查看结果。"
-
-#: desktop/src/pages/Scan.tsx:557
-msgid "Cancel All"
-msgstr "全部取消"
-
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Start Scan"
 msgstr "开始扫描"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Run EICAR Test"
 msgstr "运行 EICAR 测试"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:564
 msgid "Select one file before using VirusTotal"
 msgstr "使用 VirusTotal 前请先选择一个文件"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "Latest scan"
 msgstr "最近一次扫描"
 
-#: desktop/src/pages/Scan.tsx:561
+#: desktop/src/pages/Scan.tsx:566
 msgid "View Results"
 msgstr "查看结果"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Virus database is not available"
 msgstr "病毒库不可用"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Update the database before starting a scan."
 msgstr "开始扫描前请先更新病毒库。"
 
-#: desktop/src/pages/Scan.tsx:563
+#: desktop/src/pages/Scan.tsx:568
 msgid "Open Database Updates"
 msgstr "打开病毒库更新页面"
 
@@ -5614,3 +5624,6 @@ msgstr "对系统中所有可访问的目录进行全面扫描"
 #: desktop/src/profilePresentation.ts:38
 msgid "Scan of the user's home directory and personal files"
 msgstr "扫描用户主目录和个人文件"
+
+#~ msgid "Estimated file count exceeded"
+#~ msgstr "已超出预估文件数"

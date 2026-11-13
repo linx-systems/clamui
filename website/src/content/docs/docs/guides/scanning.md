@@ -28,6 +28,12 @@ Headless use is available through `clamui scan`; run `clamui scan --help` for th
 
 **Quick Scan** targets `~/Downloads`. **Full Scan** targets `/` and excludes `/proc`, `/sys`, `/dev`, `/run`, `/tmp`, `/var/cache`, and `/var/tmp`. **Home Folder** targets `~` and excludes `~/.cache` and `~/.local/share/Trash`.
 
+## Scan progress
+
+For scans with multiple targets, **Target i/n** identifies the target shown by the progress bar. The overall files scanned count is cumulative and does not restart for each target.
+
+Flatpak standalone scans estimate files on the host, including hidden app data. Estimates count candidates, not guaranteed results: filesystem conditions and ClamAV filtering can change the actual count. If an estimate is unavailable or exceeded, progress is shown as approximate or indeterminate while the scan continues. Root-level targets may intentionally use indeterminate progress. These estimates do not change what native or daemon scans cover or the inputs they use.
+
 ## Results and detections
 
 ClamUI displays clean, infected, error, or cancelled results with a file path and ClamAV detection name. A cancelled scan keeps the partial result collected before cancellation. Severity badges are guidance derived from detection names, not proof of actual malware behavior. Treat critical/high detections urgently; for uncertain, low, or heuristic detections, quarantine first and investigate.

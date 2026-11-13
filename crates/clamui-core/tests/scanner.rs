@@ -155,10 +155,15 @@ exit 0
 }
 
 fn scan_progress(events: &[Event]) -> Vec<&Value> {
+    let mut seen = BTreeSet::new();
     events
         .iter()
         .filter(|event| event.event == "scan-progress")
         .map(|event| &event.data)
+        .filter(|event| {
+            let count = event["files_scanned"].as_u64().unwrap_or_default();
+            count > 0 && seen.insert((event["target_index"].as_u64(), count))
+        })
         .collect()
 }
 
@@ -377,6 +382,11 @@ fn classifier_preserves_priority_and_all_user_visible_severity_levels() {
 fn scanner_process_fixture_drains_stderr_and_keeps_found_output() {
     let _environment = environment_lock();
     let (temp, context) = fixture_context();
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
     let bin = temp.path().join("bin");
     fs::create_dir_all(&bin).expect("bin directory");
     let executable = bin.join("clamscan");
@@ -409,6 +419,109 @@ fn scanner_process_fixture_drains_stderr_and_keeps_found_output() {
         result["per_target_results"][0]["threat_details"][0]["file_path"],
         target.to_string_lossy().as_ref()
     );
+    let events = events.lock().expect("event lock");
+    let progress = events
+        .iter()
+        .filter(|event| event.event == "scan-progress")
+        .map(|event| &event.data)
+        .collect::<Vec<_>>();
+    let last = progress.last().expect("final progress");
+    assert_eq!(last["target_index"], 1);
+    assert_eq!(last["target_count"], 1);
+    assert_eq!(last["files_scanned_total"], 1);
+    assert_eq!(last["total_estimate"], 1);
+    assert_eq!(last["percentage"], 100.0);
+    assert_eq!(
+        progress
+            .iter()
+            .map(|event| event["new_threats"].as_array().expect("threats").len())
+            .sum::<usize>(),
+        1
+    );
+}
+
+#[test]
+fn multiple_targets_report_cumulative_live_counts_without_changing_summaries() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    let bin = temp.path().join("bin");
+    fs::create_dir_all(&bin).expect("bin directory");
+    let executable = bin.join("clamscan");
+    fs::write(
+        &executable,
+        "#!/bin/sh\nfor last; do :; done\nprintf 'Scanning %s\\n' \"$last\"\ncase \"$last\" in *first) n=7 ;; *) n=11 ;; esac\nprintf 'Scanned files: %s\\nInfected files: 0\\n' \"$n\"\n",
+    )
+    .expect("fixture scanner");
+    fs::set_permissions(&executable, fs::Permissions::from_mode(0o700)).expect("fixture mode");
+    let first = temp.path().join("first");
+    let second = temp.path().join("second");
+    fs::write(&first, b"first").expect("first target");
+    fs::write(&second, b"second").expect("second target");
+    context
+        .update_settings(json!({"scan_backend": "clamscan"}))
+        .expect("settings");
+    let _path = prepend_fixture_path(&bin);
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "multi-progress", "paths": [first, second]}),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["per_target_results"][0]["scanned_files"], 7);
+    assert_eq!(result["per_target_results"][1]["scanned_files"], 11);
+    assert_eq!(result["scanned_files"], 18);
+    let events = events.lock().expect("event lock");
+    let progress = events
+        .iter()
+        .filter(|event| event.event == "scan-progress")
+        .map(|event| &event.data)
+        .collect::<Vec<_>>();
+    assert!(progress.iter().all(|event| {
+        event["target_count"] == 2
+            && event["total_estimate"].is_null()
+            && ((event["target_index"] == 1 && event["path"] == first.to_string_lossy().as_ref())
+                || (event["target_index"] == 2
+                    && event["path"] == second.to_string_lossy().as_ref()))
+    }));
+    let totals = progress
+        .iter()
+        .map(|event| {
+            event["files_scanned_total"]
+                .as_u64()
+                .expect("overall count")
+        })
+        .collect::<Vec<_>>();
+    assert!(totals.windows(2).all(|pair| pair[0] <= pair[1]));
+    let first_final = progress
+        .iter()
+        .rev()
+        .find(|event| event["target_index"] == 1)
+        .expect("first target event");
+    let second_initial = progress
+        .iter()
+        .find(|event| event["target_index"] == 2)
+        .expect("second target event");
+    let last = progress.last().expect("final progress");
+    assert_eq!(first_final["files_scanned"], 7);
+    assert_eq!(first_final["files_scanned_total"], 7);
+    assert_eq!(first_final["percentage"], Value::Null);
+    assert_eq!(first_final["estimate_exceeded"], true);
+    assert_eq!(first_final["estimate_approximate"], true);
+    assert_eq!(second_initial["files_scanned"], 0);
+    assert_eq!(second_initial["files_scanned_total"], 7);
+    assert_eq!(last["files_scanned"], 11);
+    assert_eq!(last["files_scanned_total"], 18);
+    assert_eq!(last["percentage"], Value::Null);
+    assert_eq!(last["estimate_exceeded"], true);
+    assert_eq!(last["estimate_approximate"], true);
+    assert_eq!(events.last().expect("last event").event, "scan-complete");
 }
 
 #[test]

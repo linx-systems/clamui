@@ -6,12 +6,12 @@ import { copyText, navigate, notify, onEvent, openExternal, openPaths, request, 
 import { formatScanOutput } from "../scanOutput";
 import { scanLogChunks } from "../scanLog";
 import { ScanLogViewport } from "../ScanLogViewport";
+import { ScanProgressPanel } from "../ScanProgressPanel";
+import type { ScanProgress, Threat } from "../ScanProgressPanel";
 import { profileDescription, profileLabel } from "../profilePresentation";
 
 
 type Profile = { id: string; name: string; targets: string[]; exclusions: { paths?: string[]; patterns?: string[] }; is_default: boolean; description: string; options: Record<string, unknown> };
-type Threat = { file_path: string; threat_name: string; category?: string; severity?: string };
-type ScanProgress = { current_file?: string; files_scanned?: number; scanned_files?: number; files_total?: number | null; total_files?: number | null; infected_count?: number; new_threats?: Threat[]; bytes_scanned?: number; estimate_exceeded?: boolean };
 type ScanResult = { status: string; path?: string; stdout?: string; stderr?: string; exit_code?: number; scanned_files?: number; scanned_dirs?: number; infected_count?: number; infected_files?: string[]; threat_details?: Threat[]; skipped_files?: string[]; skipped_count?: number; warning_message?: string; nonfatal_warnings?: string[]; error_message?: string | null; per_target_results?: ScanResult[] };
 type ScannerStatus = { available?: boolean; backend?: string; active_backend?: string; database_available?: boolean; database_error?: string; error?: string };
 type StatusNotice = { kind: "success" | "warning" | "error" | "info"; message: string; detail?: string };
@@ -38,6 +38,13 @@ function progressEvent(value: unknown): ProgressEvent | null {
   if (!record || typeof record.id !== "string") return null;
   return {
     id: record.id,
+    path: typeof record.path === "string" ? record.path : undefined,
+    target_index: typeof record.target_index === "number" ? record.target_index : undefined,
+    target_count: typeof record.target_count === "number" ? record.target_count : undefined,
+    files_scanned_total: typeof record.files_scanned_total === "number" ? record.files_scanned_total : undefined,
+    total_estimate: typeof record.total_estimate === "number" ? record.total_estimate : null,
+    estimate_approximate: record.estimate_approximate === true,
+    percentage: typeof record.percentage === "number" ? record.percentage : record.percentage === null ? null : undefined,
     current_file: typeof record.current_file === "string" ? record.current_file : undefined,
     files_scanned: typeof record.files_scanned === "number" ? record.files_scanned : undefined,
     scanned_files: typeof record.scanned_files === "number" ? record.scanned_files : undefined,
@@ -188,6 +195,7 @@ function VirusTotalDialog({ path, onClose }: { path: string; onClose: () => void
     </>}
   </Modal>;
 }
+
 
 export default function Scan() {
   const [paths, setPaths] = useState<string[]>([]);
@@ -525,9 +533,6 @@ export default function Scan() {
     }
   };
 
-  const filesScanned = progress.files_scanned ?? progress.scanned_files ?? 0;
-  const filesTotal = progress.files_total ?? progress.total_files;
-  const scanPercent = filesTotal && filesTotal > 0 ? Math.min(100, Math.max(0, (filesScanned / filesTotal) * 100)) : null;
   const detailChunks = useMemo<readonly string[]>(() => result ? scanLogChunks(result) : [], [result]);
   const resultStatus = result?.status === "infected" ? "warning" : result?.status === "error" ? "error" : result?.status === "clean" ? "success" : "";
 
@@ -554,7 +559,7 @@ export default function Scan() {
       <div className="grouped-list scan-targets target-list">{paths.length === 0 ? <p className="empty-state">{_("No targets added")}</p> : paths.map((path) => <div className="group-row target-row" key={path}><code className="path-value">{path}</code><button className="button danger icon-button" title={_("Remove")} aria-label={_("Remove")} onClick={() => setPaths((current) => current.filter((candidate) => candidate !== path))} disabled={scanning}><Icon name="trash" /></button></div>)}</div>
     </section>
 
-    {scanning && <section className="scan-progress grouped-list" aria-labelledby="scan-progress-title"><div className="group-row"><div className="row-copy"><h2 id="scan-progress-title" className="row-title">{_("Scanning")}</h2>{showLiveProgress ? <><p className="row-description path-value">{progress.current_file || _("Waiting for scan data…")}</p>{scanPercent === null ? <progress className="progress" aria-label={_("Scan progress")} /> : <progress className="progress" value={scanPercent} max="100" aria-label={_("Scan progress")}>{scanPercent}</progress>}<p className="muted inline-metadata"><span className="metadata-item">{ngettext("{count} file scanned", "{count} files scanned", filesScanned, { count: filesScanned })}</span><span className="metadata-item">{ngettext("{count} threat", "{count} threats", progress.infected_count ?? liveThreats.length, { count: progress.infected_count ?? liveThreats.length })}</span></p>{progress.estimate_exceeded && <p className="warning">{_("Estimated file count exceeded")}</p>}{liveThreats.length > 0 && <ul className="summary-list">{liveThreats.slice(-10).map((threat, index) => <li key={`${threat.file_path}-${index}`}><strong>{threat.threat_name}</strong><span className="path-value">{threat.file_path}</span></li>)}</ul>}</> : <p className="row-description">{_("Live progress is disabled. The completed scan result will remain available.")}</p>}</div><button className="button danger" onClick={() => void cancel()}>{paths.length > 1 ? _("Cancel All") : _("Cancel")}</button></div></section>}
+    {scanning && <ScanProgressPanel progress={progress} liveThreats={liveThreats} showLiveProgress={showLiveProgress} multipleTargets={paths.length > 1} onCancel={() => void cancel()} />}
 
     <div className="actions scan-actions"><button className="button primary icon-button" title={scanning ? _("Scanning…") : _("Start Scan")} aria-label={scanning ? _("Scanning…") : _("Start Scan")} onClick={() => void startScan()} disabled={scanning || paths.length === 0}><Icon name="play" /></button><button className="button icon-button" title={_("Run EICAR Test")} aria-label={_("Run EICAR Test")} onClick={() => void runEicar()} disabled={scanning}><Icon name="shield" /></button><button className="button icon-button" title={_("Scan with VirusTotal")} aria-label={_("Scan with VirusTotal")} onClick={() => { if (paths[0]) setVtPath(paths[0]); else setNotice({ kind: "warning", message: _("Select one file before using VirusTotal") }); }} disabled={scanning || paths.length === 0}><Icon name="upload" /></button></div>
 
