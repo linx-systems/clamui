@@ -4,6 +4,8 @@
 
 ## Work locally
 
+Install Bun and Node.js 22.23.4 or newer before running the site locally.
+
 ```bash
 cd website
 bun install --frozen-lockfile
