@@ -25,21 +25,27 @@ dpkg -l libwebkit2gtk-4.1-0 libgtk-3-0
 
 For a source build, install the development packages in [Development](/docs/contributing/development/#prerequisites). A build or launch on a newer host does not prove compatibility with the Ubuntu 22.04 baseline; use the project baseline build for release compatibility evidence.
 
-### Wayland `Error 71` in Flatpak
+### Blank window or Wayland `Error 71` in Flatpak
 
-WebKitGTK's DMA-BUF renderer path can fail during startup on some Wayland systems, especially with NVIDIA graphics, and report `Error 71`. The current Flatpak package configuration disables that WebKitGTK renderer path by default to avoid [issue #282](https://github.com/linx-systems/clamui/issues/282); it does not force X11 or set `WEBKIT_DISABLE_COMPOSITING_MODE`.
+A blank main window with a working tray can have several causes; see [issue #315](https://github.com/linx-systems/clamui/issues/315). Separately, WebKitGTK's hardware DMA-BUF path can fail on some Wayland systems with `Error 71` ([issue #282](https://github.com/linx-systems/clamui/issues/282)).
 
-For an older Flatpak package, disable the path for one launch:
+The updated Flatpak default forces WebKitGTK's shared-memory buffer transport instead of negotiating hardware DMA-BUF, preserving the #282 mitigation without forcing X11. The older 0.6.0 Flatpak fully disabled the DMA-BUF renderer; on affected WebKit versions this can leave no usable buffer transport ([upstream WebKit bug](https://bugs.webkit.org/show_bug.cgi?id=324730)). This does not establish the cause of every blank window.
 
-```bash
-flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=1 io.github.linx_systems.ClamUI
-```
-
-The workaround trades the potentially faster DMA-BUF path for compatibility and may reduce hardware acceleration, depending on the WebKitGTK runtime. To re-enable it for one launch on systems where it is not needed, use the following command; this can restore the startup failure:
+First quit ClamUI completely using **Quit** in the tray menu; closing the window may leave the existing instance running. To try shared-memory transport for one launch, including on the already released 0.6.0 Flatpak, run:
 
 ```bash
-flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=0 io.github.linx_systems.ClamUI
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=0 --env=WEBKIT_DMABUF_RENDERER_FORCE_SHM=1 io.github.linx_systems.ClamUI
 ```
+
+To opt out of the shared-memory workaround for one launch, quit fully again and run the following. Hardware DMA-BUF may be used and the Wayland `Error 71` can return:
+
+```bash
+flatpak run --env=WEBKIT_DISABLE_DMABUF_RENDERER=0 --env=WEBKIT_DMABUF_RENDERER_FORCE_SHM=0 io.github.linx_systems.ClamUI
+```
+
+Existing persistent app-scoped overrides can affect later launches. Inspect them with `flatpak override --user --show io.github.linx_systems.ClamUI` and `flatpak override --system --show io.github.linx_systems.ClamUI`; remove any obsolete renderer overrides using your Flatpak override manager without resetting unrelated permissions or settings.
+
+If the window is still blank, include the terminal output from the launch, ClamUI and Flatpak versions, GPU and driver, and desktop session type (Wayland or X11) when reporting it.
 
 ## Daemon backend unavailable
 

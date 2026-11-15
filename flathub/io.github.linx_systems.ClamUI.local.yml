@@ -16,8 +16,8 @@ finish-args:
   - --socket=wayland
   - --share=ipc
   - --device=dri
-  # Work around upstream WebKitGTK Wayland dmabuf protocol errors (#282).
-  - --env=WEBKIT_DISABLE_DMABUF_RENDERER=1
+  # Avoid hardware DMA-BUF issues without disabling WebKitGTK's backing store (#282, #315).
+  - --env=WEBKIT_DMABUF_RENDERER_FORCE_SHM=1
   - --share=network
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.freedesktop.secrets
