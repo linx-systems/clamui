@@ -29,6 +29,7 @@
 
 ### Fixed
 
+- Fixed Lynis audits waiting for ENTER after Homebrew ownership warnings by closing stdin while retaining cron mode. (#317)
 - Fixed Flatpak standalone scan progress estimates to count host files, including hidden app data, while retaining valid partial counts when subdirectories are unreadable. Multi-target scans now label each target and preserve cumulative file and threat counters, incomplete or exceeded estimates remain approximate and indeterminate, and genuine estimate warnings and final per-target results are preserved. (#304)
 - Fixed active manual and forced database updates timing out after a fixed total duration; a configurable output-inactivity limit now stops stalled updates instead. (#307)
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
