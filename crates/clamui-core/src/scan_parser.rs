@@ -42,6 +42,7 @@ pub(crate) struct StreamEvidence {
     daemon: bool,
     scanned_files: Option<u64>,
     scanned_dirs: u64,
+    infected_files_summary: Option<u64>,
     total_errors: Option<u64>,
     first_stdout_line: Option<String>,
 }
@@ -138,6 +139,10 @@ impl StreamEvidence {
                 self.scanned_files = value.trim().parse().ok();
             } else if let Some(value) = line.strip_prefix("Scanned directories:") {
                 self.scanned_dirs = value.trim().parse().unwrap_or(0);
+            } else if let Some(value) = line.strip_prefix("Infected files:") {
+                if self.infected_files_summary.is_none() {
+                    self.infected_files_summary = value.trim().parse().ok();
+                }
             } else if let Some(value) = line.strip_prefix("Total errors:") {
                 if self.total_errors.is_none() {
                     self.total_errors = value.trim().parse().ok();
@@ -346,11 +351,15 @@ fn interpret(scan: ScanEvidence<'_>) -> ScanResult {
     let StreamEvidence {
         warnings: evidence,
         threats: threat_details,
+        infected_files_summary,
         total_errors,
         first_stdout_line,
         ..
     } = stream;
     let total_errors = total_errors.unwrap_or(0);
+    let threat_count = threat_details.len() as u64;
+    let mut infected_count =
+        infected_files_summary.map_or(threat_count, |summary| summary.max(threat_count));
     let infected_files = threat_details
         .iter()
         .map(|threat| threat.file_path.clone())
@@ -381,6 +390,7 @@ fn interpret(scan: ScanEvidence<'_>) -> ScanResult {
         };
     } else if exit_code == 1 {
         status = ScanStatus::Infected;
+        infected_count = infected_files_summary.unwrap_or(1).max(1);
         warning_message = Some("Threats were detected, but details are unavailable.".into());
     } else if exit_code == 2 {
         let positive = !evidence.skipped_files.is_empty()
@@ -462,7 +472,7 @@ fn interpret(scan: ScanEvidence<'_>) -> ScanResult {
         infected_files,
         scanned_files,
         scanned_dirs,
-        infected_count: threat_details.len() as u64,
+        infected_count,
         error_message,
         threat_details,
         skipped_files: evidence.skipped_files,

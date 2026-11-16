@@ -265,6 +265,7 @@ impl DaemonResultAccumulator {
         }
         self.result.scanned_files += phase.scanned_files;
         self.result.scanned_dirs += phase.scanned_dirs;
+        self.result.infected_count += phase.infected_count;
         self.saw_infected |= phase.status == ScanStatus::Infected;
         self.saw_error |= phase.status == ScanStatus::Error;
         self.saw_cancelled |= phase.status == ScanStatus::Cancelled;
@@ -276,7 +277,7 @@ impl DaemonResultAccumulator {
         }
         if !self.saw_incomplete_warning
             && phase.status == ScanStatus::Infected
-            && phase.infected_count == 0
+            && phase.threat_details.is_empty()
             && phase.warning_message.is_some()
         {
             self.result.warning_message = phase.warning_message;
@@ -298,7 +299,6 @@ impl DaemonResultAccumulator {
             .iter()
             .map(|threat| threat.file_path.clone())
             .collect();
-        self.result.infected_count = self.result.threat_details.len() as u64;
         self.result.skipped_count = self.result.skipped_files.len() as u64;
         self.result.status = if self.saw_cancelled {
             ScanStatus::Cancelled
@@ -1696,7 +1696,7 @@ fn aggregate_result(
         "status": status.as_str(),
         "scanned_files": results.iter().map(|result| result.scanned_files).sum::<u64>(),
         "scanned_dirs": results.iter().map(|result| result.scanned_dirs).sum::<u64>(),
-        "infected_count": threats.len(),
+        "infected_count": results.iter().map(|result| result.infected_count).sum::<u64>(),
         "threat_details": threats,
         "infected_files": results.iter().flat_map(|result| result.infected_files.clone()).collect::<Vec<_>>(),
         "stdout": results.iter().map(|result| result.stdout.as_str()).collect::<Vec<_>>().join("\n"),
@@ -1706,7 +1706,7 @@ fn aggregate_result(
         "skipped_files": results.iter().flat_map(|result| result.skipped_files.clone()).collect::<Vec<_>>(),
         "skipped_count": results.iter().map(|result| result.skipped_count).sum::<u64>(),
         "warning_message": results.iter()
-            .filter(|result| result.status == ScanStatus::Infected && result.infected_count == 0)
+            .filter(|result| result.status == ScanStatus::Infected && result.threat_details.is_empty())
             .find_map(|result| result.warning_message.as_ref())
             .or_else(|| results.iter().find_map(|result| result.warning_message.as_ref())),
         "nonfatal_warnings": results.iter().flat_map(|result| result.nonfatal_warnings.clone()).collect::<Vec<_>>(),
@@ -2727,12 +2727,32 @@ mod tests {
                 finalize_clamscan("/tmp", output, progress.files_scanned)
             };
             assert_eq!(result.status, ScanStatus::Infected);
-            assert_eq!(result.infected_count, 0);
+            assert_eq!(result.infected_count, 1);
             assert_eq!(
                 result.warning_message.as_deref(),
                 Some("Threats were detected, but details are unavailable.")
             );
         }
+    }
+
+    #[test]
+    fn infection_summary_count_survives_missing_threat_details() {
+        let summary =
+            crate::scan_parser::interpret_clamscan("/tmp", "Infected files: 3\n", "", 1, 0);
+        assert_eq!(summary.status, ScanStatus::Infected);
+        assert_eq!(summary.infected_count, 3);
+        assert!(summary.threat_details.is_empty());
+
+        let detailed = crate::scan_parser::interpret_clamscan(
+            "/tmp",
+            "/tmp/a: Eicar FOUND\nInfected files: 4\n",
+            "",
+            1,
+            1,
+        );
+        assert_eq!(detailed.status, ScanStatus::Infected);
+        assert_eq!(detailed.infected_count, 4);
+        assert_eq!(detailed.threat_details.len(), 1);
     }
 
     #[test]
@@ -2748,7 +2768,7 @@ mod tests {
             accumulator.add(second);
             let result = accumulator.finish();
             assert_eq!(result.status, ScanStatus::Infected);
-            assert_eq!(result.infected_count, 0);
+            assert_eq!(result.infected_count, 1);
             assert_eq!(result.scanned_files, 3);
             assert_eq!(result.skipped_count, 1);
             assert_eq!(
@@ -2777,7 +2797,7 @@ mod tests {
         localize_result(&context, &mut incomplete);
         let result = aggregate_result("test", vec![benign, incomplete], Duration::ZERO, false);
         assert_eq!(result["status"], "infected");
-        assert_eq!(result["infected_count"], 0);
+        assert_eq!(result["infected_count"], 1);
         assert_eq!(result["scanned_files"], 3);
         assert_eq!(result["skipped_count"], 1);
         assert_eq!(

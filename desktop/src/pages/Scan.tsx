@@ -89,7 +89,8 @@ function localPath(value: string): string | null {
 }
 
 function resultNotice(result: ScanResult): StatusNotice {
-  const count = result.infected_count ?? result.threat_details?.length ?? 0;
+  const reportedCount = result.infected_count ?? result.threat_details?.length ?? 0;
+  const count = result.status === "infected" ? Math.max(reportedCount, 1) : reportedCount;
   if (result.status === "clean") return {
     kind: "success",
     message: result.warning_message
@@ -109,6 +110,7 @@ function resultNotice(result: ScanResult): StatusNotice {
       count,
       { count },
     ),
+    detail: result.warning_message,
   };
   if (result.status === "cancelled") return {
     kind: "warning",

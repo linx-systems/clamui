@@ -711,7 +711,7 @@ exit 1
     let result: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("parse infected scan JSON");
     assert_eq!(result["status"], "infected");
-    assert_eq!(result["infected_count"], 0);
+    assert_eq!(result["infected_count"], 1);
     assert_eq!(result["threats"], serde_json::json!([]));
     assert!(result.get("quarantined").is_none());
     assert!(
@@ -738,7 +738,7 @@ exit 1
     let result: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("parse mixed scan JSON");
     assert_eq!(result["status"], "infected");
-    assert_eq!(result["infected_count"], 0);
+    assert_eq!(result["infected_count"], 1);
     assert_eq!(result["threats"], serde_json::json!([]));
     assert!(!result["errors"].as_array().expect("scan errors").is_empty());
 
