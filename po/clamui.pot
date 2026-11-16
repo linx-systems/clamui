@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-13 15:36+0100\n"
+"POT-Creation-Date: 2026-11-16 14:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,343 +18,343 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: crates/clamui-core/src/audit.rs:301
+#: crates/clamui-core/src/audit.rs:309
 msgid "ClamAV is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:303
+#: crates/clamui-core/src/audit.rs:311
 msgid "Install ClamAV to enable virus scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:320
+#: crates/clamui-core/src/audit.rs:328
 msgid "Installed: {version}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:331
+#: crates/clamui-core/src/audit.rs:339
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:347 crates/clamui-core/src/audit.rs:365
+#: crates/clamui-core/src/audit.rs:355 crates/clamui-core/src/audit.rs:373
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:355
+#: crates/clamui-core/src/audit.rs:363
 msgid "Update virus database to ensure protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:373
+#: crates/clamui-core/src/audit.rs:381
 msgid "Database is critically outdated. Update immediately."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:392
+#: crates/clamui-core/src/audit.rs:400
 msgid "Database files exist but age could not be determined"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:394
+#: crates/clamui-core/src/audit.rs:402
 msgid "No virus database found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:398
+#: crates/clamui-core/src/audit.rs:406
 msgid "Download virus database"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:414
+#: crates/clamui-core/src/audit.rs:422
 msgid "Service {name} is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:425
+#: crates/clamui-core/src/audit.rs:433
 msgid "Daemon is responding"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:432
+#: crates/clamui-core/src/audit.rs:440
 msgid "ClamAV daemon is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:434
+#: crates/clamui-core/src/audit.rs:442
 msgid "Start the daemon for faster scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:449
+#: crates/clamui-core/src/audit.rs:457
 msgid "Freshclam service is active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:456
+#: crates/clamui-core/src/audit.rs:464
 msgid "Freshclam automatic update service is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:458
+#: crates/clamui-core/src/audit.rs:466
 msgid "Enable automatic database updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:641
+#: crates/clamui-core/src/audit.rs:649
 msgid "Open Ports"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:646
+#: crates/clamui-core/src/audit.rs:654
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:657
+#: crates/clamui-core/src/audit.rs:665
 msgid "Review if these services need to be exposed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:663
+#: crates/clamui-core/src/audit.rs:671
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:671
+#: crates/clamui-core/src/audit.rs:679
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:680 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:688 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:683
+#: crates/clamui-core/src/audit.rs:691
 msgid "No open ports detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:714
+#: crates/clamui-core/src/audit.rs:722
 msgid "AppArmor is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:721
+#: crates/clamui-core/src/audit.rs:729
 msgid "AppArmor module is loaded but not enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:723
+#: crates/clamui-core/src/audit.rs:731
 msgid "Enable AppArmor for application sandboxing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:738
+#: crates/clamui-core/src/audit.rs:746
 msgid "SELinux is enforcing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:745
+#: crates/clamui-core/src/audit.rs:753
 msgid "SELinux is in permissive mode"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:747
+#: crates/clamui-core/src/audit.rs:755
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:758
+#: crates/clamui-core/src/audit.rs:766
 msgid "SELinux is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:760
+#: crates/clamui-core/src/audit.rs:768
 msgid "Enable SELinux for mandatory access control"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:774
+#: crates/clamui-core/src/audit.rs:782
 msgid "No mandatory access control framework detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:776
+#: crates/clamui-core/src/audit.rs:784
 msgid "Consider enabling AppArmor or SELinux"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:801
+#: crates/clamui-core/src/audit.rs:809
 msgid "Automatic security updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:811
+#: crates/clamui-core/src/audit.rs:819
 msgid "Unattended upgrades is installed but disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:813
+#: crates/clamui-core/src/audit.rs:821
 msgid "Enable automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:826
+#: crates/clamui-core/src/audit.rs:834
 msgid "DNF automatic updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:836
+#: crates/clamui-core/src/audit.rs:844
 msgid "DNF automatic is installed but timer is not active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:838
+#: crates/clamui-core/src/audit.rs:846
 msgid "Enable automatic updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:851
+#: crates/clamui-core/src/audit.rs:859
 msgid "Could not determine automatic update status"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:853
+#: crates/clamui-core/src/audit.rs:861
 msgid "Configure automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:867
+#: crates/clamui-core/src/audit.rs:875
 msgid "System reboot required to apply updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:869
+#: crates/clamui-core/src/audit.rs:877
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:914
+#: crates/clamui-core/src/audit.rs:922
 msgid "{name} is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:932
+#: crates/clamui-core/src/audit.rs:940
 msgid "No intrusion detection system found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:934
+#: crates/clamui-core/src/audit.rs:942
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:960
+#: crates/clamui-core/src/audit.rs:968
 msgid "SSH server is not running (no remote attack surface)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:970
+#: crates/clamui-core/src/audit.rs:978
 msgid "SSH server is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:979
+#: crates/clamui-core/src/audit.rs:987
 msgid "Could not read SSH configuration"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:997
+#: crates/clamui-core/src/audit.rs:1005
 msgid "Root login: {value}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1004
+#: crates/clamui-core/src/audit.rs:1012
 msgid "Root login is allowed ({value})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1010
+#: crates/clamui-core/src/audit.rs:1018
 msgid "Disable root SSH login for security"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1024
+#: crates/clamui-core/src/audit.rs:1032
 msgid "Password authentication is disabled (key-only)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1031
+#: crates/clamui-core/src/audit.rs:1039
 msgid "Password authentication is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1033
+#: crates/clamui-core/src/audit.rs:1041
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1050
+#: crates/clamui-core/src/audit.rs:1058
 msgid "X11 forwarding is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1057
+#: crates/clamui-core/src/audit.rs:1065
 msgid "X11 forwarding is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1059
+#: crates/clamui-core/src/audit.rs:1067
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1119
+#: crates/clamui-core/src/audit.rs:1127
 msgid "Application firewalls"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1141
+#: crates/clamui-core/src/audit.rs:1149
 msgid "Portmaster is running and protecting connections"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1167
+#: crates/clamui-core/src/audit.rs:1175
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1170
+#: crates/clamui-core/src/audit.rs:1178
 msgid "Authorize"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1180
+#: crates/clamui-core/src/audit.rs:1188
 msgid "Portmaster is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1182
+#: crates/clamui-core/src/audit.rs:1190
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1195
+#: crates/clamui-core/src/audit.rs:1203
 msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1210
+#: crates/clamui-core/src/audit.rs:1218
 msgid "Could not probe Portmaster: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1267
 msgid "{name} is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1266
+#: crates/clamui-core/src/audit.rs:1274
 msgid "Install {name} for comprehensive security auditing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1272
+#: crates/clamui-core/src/audit.rs:1280
 msgid "Install chkrootkit for rootkit detection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1291
+#: crates/clamui-core/src/audit.rs:1299
 msgid "Authentication was cancelled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1299
+#: crates/clamui-core/src/audit.rs:1307
 msgid "Lynis audit timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1301
+#: crates/clamui-core/src/audit.rs:1309
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1319 crates/clamui-core/src/audit.rs:1363
+#: crates/clamui-core/src/audit.rs:1327 crates/clamui-core/src/audit.rs:1371
 msgid "Failed to run Lynis: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1325
+#: crates/clamui-core/src/audit.rs:1333
 msgid "Failed to run chkrootkit: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1391
+#: crates/clamui-core/src/audit.rs:1399
 msgid "Score: {score}/100"
 msgstr ""
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1394
+#: crates/clamui-core/src/audit.rs:1402
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1410
+#: crates/clamui-core/src/audit.rs:1418
 msgid "Audit completed (exit code {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1448 crates/clamui-core/src/audit.rs:1462
+#: crates/clamui-core/src/audit.rs:1456 crates/clamui-core/src/audit.rs:1470
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1492
+#: crates/clamui-core/src/audit.rs:1500
 msgid "No rootkits detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1503
+#: crates/clamui-core/src/audit.rs:1511
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:1511
+#: crates/clamui-core/src/audit.rs:1519
 msgid "Investigate the detected threats immediately"
 msgstr ""
 
@@ -1621,39 +1621,39 @@ msgstr ""
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1886
+#: crates/clamui-core/src/scanner.rs:2179
 msgid "Scan cancelled by user"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1893
+#: crates/clamui-core/src/scanner.rs:2186
 msgid "No files could be scanned"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1899
+#: crates/clamui-core/src/scanner.rs:2192
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1906
+#: crates/clamui-core/src/scanner.rs:2199
 msgid "Scan target is not a regular file or directory"
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1915
+#: crates/clamui-core/src/scanner.rs:2208
 msgid "Threats were detected, but details are unavailable."
 msgstr ""
 
-#: crates/clamui-core/src/scanner.rs:1927
+#: crates/clamui-core/src/scanner.rs:2220
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1940
+#: crates/clamui-core/src/scanner.rs:2233
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/scanner.rs:1959
+#: crates/clamui-core/src/scanner.rs:2252
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
