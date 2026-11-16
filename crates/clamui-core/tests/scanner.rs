@@ -731,6 +731,56 @@ fn daemon_file_list_is_split_across_concurrent_clamdscan_workers() {
 }
 
 #[test]
+fn concurrent_clamdscan_workers_report_unreadable_files_for_the_whole_scan() {
+    if thread::available_parallelism().map_or(1, usize::from) < 2 {
+        return;
+    }
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let _environment_guard = install_daemon_fixture(&temp);
+    let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+    let captured_events = Arc::clone(&events);
+    let context = context.with_emitter(move |event| {
+        captured_events.lock().expect("event lock").push(event);
+    });
+    context
+        .update_settings(json!({"scan_backend": "daemon", "language": "en"}))
+        .expect("settings");
+    let target = temp.path().join("target");
+    fs::create_dir_all(&target).expect("target directory");
+    for index in 0..96 {
+        fs::write(target.join(format!("file-{index:03}.txt")), b"clean").expect("fixture file");
+    }
+    // Neighbouring files land on different workers (round-robin sharding).
+    for index in [10, 11] {
+        fs::set_permissions(
+            target.join(format!("file-{index:03}.txt")),
+            fs::Permissions::from_mode(0o000),
+        )
+        .expect("unreadable fixture file");
+    }
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "parallel-unreadable", "paths": [target], "backend_override": "daemon"}),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["status"], "clean");
+    assert_eq!(result["scanned_files"], 96);
+    assert_eq!(result["skipped_count"], 2);
+    assert_eq!(result["warning_message"], "2 files could not be accessed");
+    let last = scan_progress(&events.lock().expect("event lock"))
+        .into_iter()
+        .last()
+        .cloned()
+        .expect("progress events");
+    assert_eq!(last["files_scanned"], 96);
+    assert_eq!(last["files_total"], 96);
+}
+
+#[test]
 fn multi_target_progress_is_cumulative_for_both_backends() {
     let _environment = environment_lock();
     for backend in ["clamscan", "daemon"] {

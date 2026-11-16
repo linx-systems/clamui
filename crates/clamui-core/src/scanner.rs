@@ -958,6 +958,7 @@ fn run_daemon_file_lists(
 
     let cancelled: &AtomicBool = &job.cancelled;
     let mut scanned = vec![0_u64; shards.len()];
+    let started = Instant::now();
     let outputs: Vec<AppResult<CapturedOutput>> = thread::scope(|scope| {
         let (sender, receiver) = mpsc::sync_channel::<(usize, Vec<u8>)>(256);
         let handles: Vec<_> = shard_arguments
@@ -989,27 +990,186 @@ fn run_daemon_file_lists(
             })
             .collect()
     });
+    let elapsed = started.elapsed();
     for list in &list_files {
         let _ = fs::remove_file(list);
     }
 
-    let mut accumulator = DaemonResultAccumulator::new(raw_path);
-    for (index, output) in outputs.into_iter().enumerate() {
+    // Interpret the workers' combined output once, exactly as for a single
+    // clamdscan run, so warnings, error counts and the raw output describe the
+    // whole scan rather than whichever worker happened to report first.
+    let mut combined = Vec::with_capacity(outputs.len());
+    let mut failures = Vec::new();
+    for output in outputs {
         match output {
-            Ok(output) => accumulator.add(finalize_daemon_phase(
-                raw_path,
-                DaemonPhaseEvidence {
-                    output,
-                    files: shards[index].len() as u64,
-                    directories: if index == 0 { directories } else { 0 },
-                    stdin_path: None,
-                    scanned_files: scanned[index],
-                },
-            )),
-            Err(error) => accumulator.add(ScanResult::error(raw_path, error, "daemon")),
+            Ok(output) => combined.push(output),
+            Err(error) => failures.push(error),
         }
     }
-    accumulator.finish()
+    let mut result = if combined.is_empty() {
+        None
+    } else {
+        Some(finalize_daemon_phase(
+            raw_path,
+            DaemonPhaseEvidence {
+                output: merge_daemon_worker_outputs(combined, elapsed),
+                files: paths.len() as u64,
+                directories,
+                stdin_path: None,
+                scanned_files: scanned.iter().sum(),
+            },
+        ))
+    };
+    if !failures.is_empty() {
+        let mut accumulator = DaemonResultAccumulator::new(raw_path);
+        if let Some(result) = result.take() {
+            accumulator.add(result);
+        }
+        for error in failures {
+            accumulator.add(ScanResult::error(raw_path, error, "daemon"));
+        }
+        return accumulator.finish();
+    }
+    result.unwrap_or_else(|| ScanResult::error(raw_path, "No clamdscan worker ran", "daemon"))
+}
+
+const CLAMDSCAN_SUMMARY_MARKER: &[u8] = b"----------- SCAN SUMMARY -----------";
+
+/// Splits clamdscan stdout into the per-file report and its trailing summary.
+fn split_clamdscan_summary(stdout: &[u8]) -> (&[u8], Option<&[u8]>) {
+    let mut search = stdout.len();
+    while let Some(position) = stdout[..search]
+        .windows(CLAMDSCAN_SUMMARY_MARKER.len())
+        .rposition(|window| window == CLAMDSCAN_SUMMARY_MARKER)
+    {
+        if position == 0 || stdout[position - 1] == b'\n' {
+            return (&stdout[..position], Some(&stdout[position..]));
+        }
+        search = position;
+    }
+    (stdout, None)
+}
+
+#[derive(Default)]
+struct ClamdscanSummary {
+    infected: u64,
+    errors: u64,
+    start: Option<String>,
+    end: Option<String>,
+}
+
+impl ClamdscanSummary {
+    fn add(&mut self, summary: &[u8]) {
+        for line in String::from_utf8_lossy(summary).lines() {
+            if let Some(value) = line.strip_prefix("Infected files:") {
+                self.infected += value.trim().parse::<u64>().unwrap_or(0);
+            } else if let Some(value) = line.strip_prefix("Total errors:") {
+                self.errors += value.trim().parse::<u64>().unwrap_or(0);
+            } else if let Some(value) = line.strip_prefix("Start Date:") {
+                // clamdscan dates are "YYYY:MM:DD HH:MM:SS", so they order as text.
+                let value = value.trim().to_owned();
+                if self.start.as_ref().is_none_or(|start| value < *start) {
+                    self.start = Some(value);
+                }
+            } else if let Some(value) = line.strip_prefix("End Date:") {
+                let value = value.trim().to_owned();
+                if self.end.as_ref().is_none_or(|end| value > *end) {
+                    self.end = Some(value);
+                }
+            }
+        }
+    }
+
+    fn render(&self, elapsed: Duration) -> String {
+        let seconds = elapsed.as_secs();
+        let mut text = format!(
+            "\n{}\nInfected files: {}\n",
+            String::from_utf8_lossy(CLAMDSCAN_SUMMARY_MARKER),
+            self.infected
+        );
+        if self.errors > 0 {
+            text.push_str(&format!("Total errors: {}\n", self.errors));
+        }
+        text.push_str(&format!(
+            "Time: {:.3} sec ({} m {} s)\n",
+            elapsed.as_secs_f64(),
+            seconds / 60,
+            seconds % 60
+        ));
+        if let Some(start) = &self.start {
+            text.push_str(&format!("Start Date: {start}\n"));
+        }
+        if let Some(end) = &self.end {
+            text.push_str(&format!("End Date:   {end}\n"));
+        }
+        text
+    }
+}
+
+/// Merges the outputs of concurrent clamdscan workers into one output with a
+/// single combined scan summary, as a single clamdscan process would print.
+fn merge_daemon_worker_outputs(outputs: Vec<CapturedOutput>, elapsed: Duration) -> CapturedOutput {
+    let mut stdout = Vec::new();
+    let mut truncated = false;
+    let mut stderr = String::new();
+    let mut evidence: Option<StreamEvidence> = None;
+    let mut summary = ClamdscanSummary::default();
+    let mut saw_summary = false;
+    let mut exit_codes = Vec::with_capacity(outputs.len());
+    let mut cancelled = false;
+    for output in outputs {
+        truncated |= output.stdout_truncated;
+        let (body, worker_summary) = split_clamdscan_summary(&output.stdout_bytes);
+        let end = body
+            .iter()
+            .rposition(|byte| *byte != b'\n')
+            .map_or(0, |position| position + 1);
+        if end > 0 {
+            stdout.extend_from_slice(&body[..end]);
+            stdout.push(b'\n');
+        }
+        if let Some(worker_summary) = worker_summary {
+            summary.add(worker_summary);
+            saw_summary = true;
+        }
+        append_bounded_text(&mut stderr, output.stderr.trim_end_matches('\n'));
+        match &mut evidence {
+            Some(evidence) => evidence.absorb_shard(output.evidence),
+            None => evidence = Some(output.evidence),
+        }
+        exit_codes.push(output.exit_code);
+        cancelled |= output.cancelled;
+    }
+    if saw_summary && !truncated {
+        stdout.extend_from_slice(summary.render(elapsed).as_bytes());
+    }
+    if stdout.len() > OUTPUT_LIMIT {
+        stdout.truncate(OUTPUT_LIMIT);
+        truncated = true;
+    }
+    if !stderr.is_empty() {
+        stderr.push('\n');
+    }
+    CapturedOutput {
+        stdout_bytes: stdout,
+        stdout_truncated: truncated,
+        stderr,
+        exit_code: combined_clamdscan_exit_code(&exit_codes),
+        cancelled,
+        evidence: evidence.unwrap_or_else(|| StreamEvidence::new(true)),
+    }
+}
+
+/// clamdscan exits 1 when any virus was found (even if errors occurred), 2 when
+/// only errors occurred and 0 otherwise; anything else is an abnormal exit.
+fn combined_clamdscan_exit_code(exit_codes: &[i32]) -> i32 {
+    exit_codes
+        .iter()
+        .copied()
+        .find(|code| !(0..=2).contains(code))
+        .or_else(|| exit_codes.iter().copied().find(|code| *code == 1))
+        .or_else(|| exit_codes.iter().copied().find(|code| *code == 2))
+        .unwrap_or(0)
 }
 
 fn run_daemon_phase(
@@ -2274,6 +2434,64 @@ mod tests {
         assert_eq!(seen, expected);
         assert_eq!(shard_paths(&paths[..2], 8).len(), 2);
         assert_eq!(shard_paths(&[], 4), vec![Vec::<&PathBuf>::new()]);
+    }
+
+    fn daemon_worker_output(stdout: &str, exit_code: i32) -> CapturedOutput {
+        let mut evidence = StreamEvidence::new(true);
+        for line in stdout.lines() {
+            evidence.observe(line.as_bytes(), true, true);
+        }
+        CapturedOutput {
+            stdout_bytes: stdout.as_bytes().to_vec(),
+            stdout_truncated: false,
+            stderr: String::new(),
+            exit_code,
+            cancelled: false,
+            evidence,
+        }
+    }
+
+    #[test]
+    fn concurrent_daemon_workers_are_reported_as_one_scan() {
+        let first = daemon_worker_output(
+            "/s/a: OK\n/s/locked1: Failed to open file ERROR\n\n----------- SCAN SUMMARY -----------\nInfected files: 0\nTotal errors: 1\nTime: 1.000 sec (0 m 1 s)\nStart Date: 2026:11:16 10:00:02\nEnd Date:   2026:11:16 10:00:03\n",
+            2,
+        );
+        let second = daemon_worker_output(
+            "/s/b: OK\n/s/locked2: Failed to open file ERROR\n\n----------- SCAN SUMMARY -----------\nInfected files: 0\nTotal errors: 1\nTime: 1.000 sec (0 m 1 s)\nStart Date: 2026:11:16 10:00:01\nEnd Date:   2026:11:16 10:00:04\n",
+            2,
+        );
+        let output = merge_daemon_worker_outputs(vec![first, second], Duration::from_millis(3_250));
+        let stdout = String::from_utf8(output.stdout_bytes.clone()).expect("utf-8 stdout");
+        assert_eq!(stdout.matches("SCAN SUMMARY").count(), 1, "{stdout}");
+        assert!(stdout.ends_with(
+            "/s/locked2: Failed to open file ERROR\n\n----------- SCAN SUMMARY -----------\nInfected files: 0\nTotal errors: 2\nTime: 3.250 sec (0 m 3 s)\nStart Date: 2026:11:16 10:00:01\nEnd Date:   2026:11:16 10:00:04\n"
+        ));
+        let result = finalize_daemon_phase(
+            "/s",
+            DaemonPhaseEvidence {
+                output,
+                files: 4,
+                directories: 1,
+                stdin_path: None,
+                scanned_files: 4,
+            },
+        );
+        assert_eq!(result.status, ScanStatus::Clean);
+        assert_eq!(result.scanned_files, 4);
+        assert_eq!(result.skipped_count, 2);
+        assert_eq!(
+            result.warning_message.as_deref(),
+            Some("2 files could not be accessed")
+        );
+    }
+
+    #[test]
+    fn concurrent_daemon_worker_exit_codes_follow_clamdscan_precedence() {
+        assert_eq!(combined_clamdscan_exit_code(&[0, 0]), 0);
+        assert_eq!(combined_clamdscan_exit_code(&[0, 2, 0]), 2);
+        assert_eq!(combined_clamdscan_exit_code(&[2, 1, 0]), 1);
+        assert_eq!(combined_clamdscan_exit_code(&[1, -1, 2]), -1);
     }
 
     #[test]
