@@ -15,6 +15,9 @@ use crate::AppResult;
 mod firewall;
 mod opensnitch;
 
+#[cfg(test)]
+mod tests;
+
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 const DEEP_SCAN_TIMEOUT: Duration = Duration::from_secs(300);
 
@@ -196,7 +199,12 @@ fn run_command(program: &str, args: &[&str], timeout: Duration) -> CommandOutput
         .map(|value| (*value).to_owned())
         .collect::<Vec<_>>();
     let mut command: Command = host_command(program, &arguments);
-    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    // Audits have no terminal input. Lynis can still prompt about ownership
+    // in cron mode when Homebrew installed its files under a non-root user.
+    command
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
     let Ok(mut child) = command.spawn() else {
         return CommandOutput {
             code: None,
