@@ -85,6 +85,9 @@ for argument; do
     fi
     previous=$argument
 done
+if [ -n "$file_list" ] && [ -n "${CLAMUI_FIXTURE_LIST_LOG:-}" ]; then
+    cat -- "$file_list" >> "$CLAMUI_FIXTURE_LIST_LOG.$$"
+fi
 
 infected=0
 errors=0
@@ -652,6 +655,79 @@ fn directly_selected_daemon_file_respects_pattern_exclusions() {
 
     assert_eq!(result["status"], "clean");
     assert_eq!(result["scanned_files"], 0);
+}
+
+#[test]
+fn daemon_file_list_is_split_across_concurrent_clamdscan_workers() {
+    let _environment = environment_lock();
+    for force_stream in [false, true] {
+        let (temp, context) = fixture_context();
+        let mut environment = install_daemon_fixture(&temp);
+        let log_dir = temp.path().join("lists");
+        fs::create_dir_all(&log_dir).expect("list log directory");
+        environment.set("CLAMUI_FIXTURE_LIST_LOG", log_dir.join("list").as_os_str());
+        let events = Arc::new(Mutex::new(Vec::<Event>::new()));
+        let captured_events = Arc::clone(&events);
+        let context = context.with_emitter(move |event| {
+            captured_events.lock().expect("event lock").push(event);
+        });
+        context
+            .update_settings(json!({"scan_backend": "daemon"}))
+            .expect("settings");
+        let target = temp.path().join("target");
+        fs::create_dir_all(&target).expect("target directory");
+        let mut expected = BTreeSet::new();
+        for index in 0..96 {
+            let file = target.join(format!("file-{index:03}.txt"));
+            let body: &[u8] = if index == 41 { b"INFECTED" } else { b"clean" };
+            fs::write(&file, body).expect("fixture file");
+            expected.insert(file.to_string_lossy().into_owned());
+        }
+
+        let result = scanner::dispatch(
+            &context,
+            "scan",
+            json!({
+                "id": "parallel-daemon",
+                "paths": [target],
+                "backend_override": "daemon",
+                "force_stream": force_stream,
+            }),
+        )
+        .expect("scan result");
+
+        assert_eq!(result["status"], "infected");
+        assert_eq!(result["scanned_files"], 96);
+        assert_eq!(result["infected_count"], 1);
+        assert_eq!(result["skipped_count"], 0);
+
+        let mut listed = Vec::new();
+        let mut workers = 0;
+        for entry in fs::read_dir(&log_dir).expect("list logs") {
+            workers += 1;
+            let text = fs::read_to_string(entry.expect("list log").path()).expect("list log");
+            listed.extend(text.lines().map(str::to_owned));
+        }
+        let unique: BTreeSet<String> = listed.iter().cloned().collect();
+        assert_eq!(listed.len(), 96, "every file is listed exactly once");
+        assert_eq!(unique, expected);
+        let cpus = thread::available_parallelism().map_or(1, usize::from);
+        if cpus > 1 {
+            assert!(
+                workers > 1,
+                "expected parallel clamdscan workers, got {workers}"
+            );
+        }
+
+        let events = events.lock().expect("event lock");
+        assert_eq!(progress_paths(&events), expected);
+        let last = scan_progress(&events)
+            .into_iter()
+            .last()
+            .expect("progress events");
+        assert_eq!(last["files_scanned"], 96);
+        assert_eq!(last["infected_count"], 1);
+    }
 }
 
 #[test]

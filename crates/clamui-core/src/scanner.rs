@@ -766,26 +766,17 @@ fn scan_daemon_target(
     let safe_files = count.files - stdin_files;
     let mut progress = ProgressState::default();
     if stdin_files == 0 {
-        let list = match write_private_file_list(ctx, &count.file_paths) {
-            Ok(list) => list,
-            Err(error) => return ScanResult::error(raw_path, error, "daemon"),
-        };
-        let mut arguments = base_arguments;
-        arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
-        let result = run_daemon_phase(
+        let paths: Vec<&PathBuf> = count.file_paths.iter().collect();
+        return run_daemon_file_lists(
             reporter,
-            DaemonPhase {
-                arguments: &arguments,
-                stdin: None,
-                files: safe_files,
+            DaemonFileLists {
+                base_arguments: &base_arguments,
+                paths: &paths,
                 directories: count.directories,
-                stdin_path: None,
             },
             count.files,
             &mut progress,
         );
-        let _ = fs::remove_file(list);
-        return result;
     }
 
     let mut accumulator = DaemonResultAccumulator::new(raw_path);
@@ -796,34 +787,22 @@ fn scan_daemon_target(
         0
     };
     if safe_files > 0 {
-        let list = write_private_file_list(
-            ctx,
-            count
-                .file_paths
-                .iter()
-                .filter(|path| !requires_daemon_stdin(path)),
+        let paths: Vec<&PathBuf> = count
+            .file_paths
+            .iter()
+            .filter(|path| !requires_daemon_stdin(path))
+            .collect();
+        let phase = run_daemon_file_lists(
+            reporter,
+            DaemonFileLists {
+                base_arguments: &base_arguments,
+                paths: &paths,
+                directories: count.directories,
+            },
+            count.files,
+            &mut progress,
         );
-        match list {
-            Ok(list) => {
-                let mut arguments = base_arguments.clone();
-                arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
-                let phase = run_daemon_phase(
-                    reporter,
-                    DaemonPhase {
-                        arguments: &arguments,
-                        stdin: None,
-                        files: safe_files,
-                        directories: count.directories,
-                        stdin_path: None,
-                    },
-                    count.files,
-                    &mut progress,
-                );
-                let _ = fs::remove_file(list);
-                accumulator.add(phase);
-            }
-            Err(error) => accumulator.add(ScanResult::error(raw_path, error, "daemon")),
-        }
+        accumulator.add(phase);
     }
 
     for path in count
@@ -877,6 +856,160 @@ fn scan_daemon_target(
         result.error_message = Some("Scan cancelled by user".into());
     }
     result
+}
+
+struct DaemonFileLists<'a> {
+    base_arguments: &'a [String],
+    paths: &'a [&'a PathBuf],
+    directories: u64,
+}
+
+// clamdscan opens a separate clamd session for every --file-list entry, so a
+// single clamdscan process keeps clamd on one scanning thread regardless of
+// MaxThreads or --multiscan (which only parallelizes clamdscan's own directory
+// walk). Splitting the private file list across a bounded set of concurrent
+// clamdscan processes lets clamd use its configured thread pool while keeping
+// ClamUI's exclusion-filtered file list and per-file progress.
+const DAEMON_MIN_FILES_PER_WORKER: usize = 16;
+const DAEMON_MAX_WORKERS: usize = 16;
+// clamd's documented MaxThreads default.
+const CLAMD_DEFAULT_MAX_THREADS: usize = 10;
+
+fn daemon_worker_count(clamd_max_threads: Option<&str>, cpus: usize, files: usize) -> usize {
+    let clamd_threads = clamd_max_threads
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|threads| *threads > 0)
+        .unwrap_or(CLAMD_DEFAULT_MAX_THREADS);
+    clamd_threads
+        .min(cpus.max(1))
+        .min(DAEMON_MAX_WORKERS)
+        .min(files.div_ceil(DAEMON_MIN_FILES_PER_WORKER))
+        .max(1)
+}
+
+fn shard_paths<'a>(paths: &[&'a PathBuf], workers: usize) -> Vec<Vec<&'a PathBuf>> {
+    let workers = workers.max(1);
+    let mut shards = vec![Vec::new(); workers];
+    for (index, path) in paths.iter().enumerate() {
+        shards[index % workers].push(*path);
+    }
+    shards.retain(|shard| !shard.is_empty());
+    if shards.is_empty() {
+        shards.push(Vec::new());
+    }
+    shards
+}
+
+fn run_daemon_file_lists(
+    reporter: &mut ProgressReporter<'_>,
+    lists: DaemonFileLists<'_>,
+    total: u64,
+    progress: &mut ProgressState,
+) -> ScanResult {
+    let ctx = reporter.ctx;
+    let job = reporter.job;
+    let raw_path = reporter.path;
+    let DaemonFileLists {
+        base_arguments,
+        paths,
+        directories,
+    } = lists;
+    let cpus = thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get);
+    let workers = daemon_worker_count(clamd_limit(ctx, "MaxThreads").as_deref(), cpus, paths.len());
+    let shards = shard_paths(paths, workers);
+
+    let mut list_files = Vec::with_capacity(shards.len());
+    for shard in &shards {
+        match write_private_file_list(ctx, shard.iter().copied()) {
+            Ok(list) => list_files.push(list),
+            Err(error) => {
+                for list in &list_files {
+                    let _ = fs::remove_file(list);
+                }
+                return ScanResult::error(raw_path, error, "daemon");
+            }
+        }
+    }
+    let shard_arguments: Vec<Vec<String>> = list_files
+        .iter()
+        .map(|list| {
+            let mut arguments = base_arguments.to_vec();
+            arguments.extend(["--file-list".into(), list.to_string_lossy().into_owned()]);
+            arguments
+        })
+        .collect();
+
+    if shards.len() == 1 {
+        let result = run_daemon_phase(
+            reporter,
+            DaemonPhase {
+                arguments: &shard_arguments[0],
+                stdin: None,
+                files: paths.len() as u64,
+                directories,
+                stdin_path: None,
+            },
+            total,
+            progress,
+        );
+        let _ = fs::remove_file(&list_files[0]);
+        return result;
+    }
+
+    let cancelled: &AtomicBool = &job.cancelled;
+    let mut scanned = vec![0_u64; shards.len()];
+    let outputs: Vec<AppResult<CapturedOutput>> = thread::scope(|scope| {
+        let (sender, receiver) = mpsc::sync_channel::<(usize, Vec<u8>)>(256);
+        let handles: Vec<_> = shard_arguments
+            .iter()
+            .enumerate()
+            .map(|(index, arguments)| {
+                let sender = sender.clone();
+                scope.spawn(move || {
+                    execute("clamdscan", arguments, None, cancelled, |line| {
+                        let _ = sender.send((index, line.to_vec()));
+                    })
+                })
+            })
+            .collect();
+        drop(sender);
+        for (index, line) in receiver {
+            let before = progress.files_scanned;
+            update_progress(&line, "daemon", None, progress, Some(total), |event| {
+                reporter.emit(event)
+            });
+            scanned[index] += progress.files_scanned.saturating_sub(before);
+        }
+        handles
+            .into_iter()
+            .map(|handle| {
+                handle
+                    .join()
+                    .unwrap_or_else(|_| Err("clamdscan worker panicked".into()))
+            })
+            .collect()
+    });
+    for list in &list_files {
+        let _ = fs::remove_file(list);
+    }
+
+    let mut accumulator = DaemonResultAccumulator::new(raw_path);
+    for (index, output) in outputs.into_iter().enumerate() {
+        match output {
+            Ok(output) => accumulator.add(finalize_daemon_phase(
+                raw_path,
+                DaemonPhaseEvidence {
+                    output,
+                    files: shards[index].len() as u64,
+                    directories: if index == 0 { directories } else { 0 },
+                    stdin_path: None,
+                    scanned_files: scanned[index],
+                },
+            )),
+            Err(error) => accumulator.add(ScanResult::error(raw_path, error, "daemon")),
+        }
+    }
+    accumulator.finish()
 }
 
 fn run_daemon_phase(
@@ -2098,6 +2231,50 @@ fn directory_regex(pattern: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn daemon_workers_follow_clamd_max_threads_cpus_and_file_count() {
+        assert_eq!(daemon_worker_count(Some("12"), 32, 10_000), 12);
+        assert_eq!(
+            daemon_worker_count(Some("64"), 32, 10_000),
+            DAEMON_MAX_WORKERS
+        );
+        assert_eq!(daemon_worker_count(Some("12"), 4, 10_000), 4);
+        assert_eq!(
+            daemon_worker_count(None, 32, 10_000),
+            CLAMD_DEFAULT_MAX_THREADS
+        );
+        assert_eq!(
+            daemon_worker_count(Some("bogus"), 32, 10_000),
+            CLAMD_DEFAULT_MAX_THREADS
+        );
+        assert_eq!(
+            daemon_worker_count(Some("0"), 32, 10_000),
+            CLAMD_DEFAULT_MAX_THREADS
+        );
+        assert_eq!(daemon_worker_count(Some("12"), 32, 40), 3);
+        assert_eq!(daemon_worker_count(Some("12"), 32, 1), 1);
+        assert_eq!(daemon_worker_count(Some("1"), 32, 10_000), 1);
+        assert_eq!(daemon_worker_count(Some("12"), 0, 0), 1);
+    }
+
+    #[test]
+    fn daemon_shards_cover_every_path_once_and_never_come_back_empty() {
+        let owned: Vec<PathBuf> = (0..10)
+            .map(|index| PathBuf::from(format!("/f{index}")))
+            .collect();
+        let paths: Vec<&PathBuf> = owned.iter().collect();
+        let shards = shard_paths(&paths, 3);
+        assert_eq!(shards.len(), 3);
+        assert_eq!(shards.iter().map(Vec::len).collect::<Vec<_>>(), [4, 3, 3]);
+        let mut seen: Vec<&PathBuf> = shards.into_iter().flatten().collect();
+        seen.sort();
+        let mut expected = paths.clone();
+        expected.sort();
+        assert_eq!(seen, expected);
+        assert_eq!(shard_paths(&paths[..2], 8).len(), 2);
+        assert_eq!(shard_paths(&[], 4), vec![Vec::<&PathBuf>::new()]);
+    }
 
     #[test]
     fn flatpak_recursive_scan_does_not_depend_on_sandbox_path_visibility() {
