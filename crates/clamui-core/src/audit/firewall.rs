@@ -26,8 +26,6 @@ fn build_firewall(ctx: &Context, ufw: UfwState) -> AuditSection {
         "security-medium-symbolic",
     );
 
-    add_ufw(ctx, &mut section, ufw, || trusted_ufw_path().is_some());
-
     let firewalld = inspect_firewalld_owner(&probe(
         "busctl",
         &[
@@ -45,6 +43,16 @@ fn build_firewall(ctx: &Context, ufw: UfwState) -> AuditSection {
             "org.fedoraproject.FirewallD1",
         ],
     ));
+
+    add_active_firewall(ctx, &mut section, ufw, firewalld);
+
+    add_ufw(
+        ctx,
+        &mut section,
+        ufw,
+        firewalld == FirewalldOwner::Present,
+        || trusted_ufw_path().is_some(),
+    );
     add_firewalld(ctx, &mut section, firewalld);
     add_firewalld_command(ctx, &mut section, command_available("firewall-cmd"));
 
@@ -339,14 +347,13 @@ fn parse_ufw_status(text: &str) -> UfwState {
     }
 }
 
-fn add_ufw(
+fn ufw_status_check(
     ctx: &Context,
-    section: &mut AuditSection,
+    name: String,
     state: UfwState,
-    trusted_available: impl FnOnce() -> bool,
-) {
-    let name = tr(ctx, "UFW Firewall");
-    let mut row = match state {
+    other_manager_active: bool,
+) -> AuditCheck {
+    match state {
         UfwState::Active {
             incoming: InputPolicy::Deny,
             listed_exceptions: true,
@@ -383,9 +390,24 @@ fn add_ufw(
             ctx,
             "UFW is active, but its default incoming policy could not be verified.",
         )),
+        UfwState::Inactive if other_manager_active => AuditCheck::new(name, AuditStatus::Pass, tr(
+            ctx,
+            "UFW is inactive, but another firewall manager is active and protecting the system.",
+        )),
         UfwState::Inactive => AuditCheck::new(name, AuditStatus::Warning, tr(ctx, "UFW reports inactive.")),
         UfwState::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(ctx, "UFW status could not be inspected safely.")),
-    };
+    }
+}
+
+fn add_ufw(
+    ctx: &Context,
+    section: &mut AuditSection,
+    state: UfwState,
+    other_manager_active: bool,
+    trusted_available: impl FnOnce() -> bool,
+) {
+    let name = tr(ctx, "UFW Firewall");
+    let mut row = ufw_status_check(ctx, name, state, other_manager_active);
     if state == UfwState::Unknown && trusted_available() {
         row.launch_command = Some("__ufw_status__".to_owned());
         // Translators: UFW is the name of the firewall application.
@@ -702,6 +724,69 @@ fn manager_overlap(ufw: UfwState, firewalld: FirewalldOwner) -> bool {
     matches!(ufw, UfwState::Active { .. }) && firewalld == FirewalldOwner::Present
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ActiveManager {
+    Ufw,
+    Firewalld,
+    Both,
+    None,
+    Unknown,
+}
+
+fn active_manager(ufw: UfwState, firewalld: FirewalldOwner) -> ActiveManager {
+    match (ufw, firewalld) {
+        (UfwState::Active { .. }, FirewalldOwner::Present) => ActiveManager::Both,
+        (UfwState::Active { .. }, _) => ActiveManager::Ufw,
+        (_, FirewalldOwner::Present) => ActiveManager::Firewalld,
+        (UfwState::Inactive, FirewalldOwner::Absent) => ActiveManager::None,
+        (UfwState::Inactive, FirewalldOwner::Unknown) => ActiveManager::Unknown,
+        (UfwState::Unknown, _) => ActiveManager::Unknown,
+    }
+}
+
+/// A single synthesized row for the Essentials summary: exactly one active
+/// firewall manager, instead of per-backend rows that would otherwise
+/// compete with each other (see the detailed, non-essential rows below).
+fn add_active_firewall(
+    ctx: &Context,
+    section: &mut AuditSection,
+    ufw: UfwState,
+    firewalld: FirewalldOwner,
+) {
+    let name = tr(ctx, "Firewall");
+    let manager = active_manager(ufw, firewalld);
+    let mut row = match manager {
+        ActiveManager::Both => AuditCheck::new(name, AuditStatus::Warning, tr(
+            ctx,
+            "UFW and Firewalld are both active; review which one is meant to control your firewall rules.",
+        )),
+        ActiveManager::Ufw => ufw_status_check(ctx, name, ufw, false),
+        ActiveManager::Firewalld => AuditCheck::new(name, AuditStatus::Pass, tr(
+            ctx,
+            "Firewalld is active and managing the firewall.",
+        )),
+        ActiveManager::None => {
+            let mut row = AuditCheck::new(name, AuditStatus::Warning, tr(
+                ctx,
+                "No active firewall manager was detected.",
+            ));
+            row.recommendation = Some(tr(ctx, "Enable UFW or Firewalld to protect the system."));
+            row
+        }
+        ActiveManager::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(
+            ctx,
+            "The active firewall manager could not be verified.",
+        )),
+    };
+    row.essential = true;
+    row.info_url = Some(if manager == ActiveManager::Firewalld {
+        URL_FIREWALLD.to_owned()
+    } else {
+        URL_UFW.to_owned()
+    });
+    section.push(row);
+}
+
 fn add_gufw(ctx: &Context, section: &mut AuditSection, present: bool) {
     let name = tr(ctx, "Gufw");
     let mut row = if present {
@@ -907,9 +992,9 @@ mod tests {
             "Firewall",
             "security-medium-symbolic",
         );
-        add_ufw(&ctx, &mut section, UfwState::Unknown, || false);
-        add_ufw(&ctx, &mut section, UfwState::Unknown, || true);
-        add_ufw(&ctx, &mut section, UfwState::Inactive, || true);
+        add_ufw(&ctx, &mut section, UfwState::Unknown, false, || false);
+        add_ufw(&ctx, &mut section, UfwState::Unknown, false, || true);
+        add_ufw(&ctx, &mut section, UfwState::Inactive, false, || true);
 
         assert_eq!(section.checks[0].launch_command, None);
         assert_eq!(section.checks[0].recommendation, None);
@@ -959,7 +1044,7 @@ mod tests {
                         "Firewall",
                         "security-medium-symbolic",
                     );
-                    add_ufw(&ctx, &mut section, state, || false);
+                    add_ufw(&ctx, &mut section, state, false, || false);
                     section
                 },
             )
@@ -1055,8 +1140,8 @@ mod tests {
             add_firewall_config(&ctx, &mut section, present);
             add_plasma_firewall(&ctx, &mut section, present);
         }
-        add_ufw(&ctx, &mut section, UfwState::Inactive, || false);
-        add_ufw(&ctx, &mut section, UfwState::Unknown, || false);
+        add_ufw(&ctx, &mut section, UfwState::Inactive, false, || false);
+        add_ufw(&ctx, &mut section, UfwState::Unknown, false, || false);
         add_nftables(&ctx, &mut section, None);
 
         assert!(section.checks[..3].iter().all(|row| row.optional_missing));
@@ -1112,7 +1197,7 @@ mod tests {
             "Firewall",
             "security-medium-symbolic",
         );
-        add_ufw(&ctx, &mut qualified, with_ipv6_exception, || false);
+        add_ufw(&ctx, &mut qualified, with_ipv6_exception, false, || false);
         let qualified = qualified.checks.pop().expect("qualified UFW row");
 
         let mut unqualified = AuditSection::new(
@@ -1121,7 +1206,7 @@ mod tests {
             "Firewall",
             "security-medium-symbolic",
         );
-        add_ufw(&ctx, &mut unqualified, without_exception, || false);
+        add_ufw(&ctx, &mut unqualified, without_exception, false, || false);
         let unqualified = unqualified.checks.pop().expect("unqualified UFW row");
 
         assert_eq!(qualified.status, AuditStatus::Pass);
@@ -1176,6 +1261,111 @@ mod tests {
             FirewalldOwner::Present
         ));
         assert!(!manager_overlap(active, FirewalldOwner::Absent));
+    }
+
+    #[test]
+    fn active_manager_picks_exactly_one_backend_or_flags_the_unclear_cases() {
+        let active = UfwState::Active {
+            incoming: InputPolicy::Deny,
+            listed_exceptions: false,
+        };
+        // None active: no protection at all.
+        assert_eq!(
+            active_manager(UfwState::Inactive, FirewalldOwner::Absent),
+            ActiveManager::None
+        );
+        // UFW only.
+        assert_eq!(
+            active_manager(active, FirewalldOwner::Absent),
+            ActiveManager::Ufw
+        );
+        // Firewalld only.
+        assert_eq!(
+            active_manager(UfwState::Inactive, FirewalldOwner::Present),
+            ActiveManager::Firewalld
+        );
+        // Both active.
+        assert_eq!(
+            active_manager(active, FirewalldOwner::Present),
+            ActiveManager::Both
+        );
+        // Unknown: neither backend could be verified.
+        assert_eq!(
+            active_manager(UfwState::Unknown, FirewalldOwner::Absent),
+            ActiveManager::Unknown
+        );
+        assert_eq!(
+            active_manager(UfwState::Unknown, FirewalldOwner::Unknown),
+            ActiveManager::Unknown
+        );
+        assert_eq!(
+            active_manager(UfwState::Inactive, FirewalldOwner::Unknown),
+            ActiveManager::Unknown
+        );
+    }
+
+    #[test]
+    fn add_active_firewall_produces_one_essential_row_per_case() {
+        let temp = TempDir::new().expect("create temporary context root");
+        let ctx = test_context(&temp);
+        let active = UfwState::Active {
+            incoming: InputPolicy::Deny,
+            listed_exceptions: false,
+        };
+        let cases = [
+            (
+                UfwState::Inactive,
+                FirewalldOwner::Absent,
+                AuditStatus::Warning,
+            ),
+            (active, FirewalldOwner::Absent, AuditStatus::Pass),
+            (
+                UfwState::Inactive,
+                FirewalldOwner::Present,
+                AuditStatus::Pass,
+            ),
+            (active, FirewalldOwner::Present, AuditStatus::Warning),
+            (
+                UfwState::Unknown,
+                FirewalldOwner::Absent,
+                AuditStatus::Unknown,
+            ),
+        ];
+        for (ufw, firewalld, expected) in cases {
+            let mut section = AuditSection::new(
+                &ctx,
+                AuditCategory::Firewall,
+                "Firewall",
+                "security-medium-symbolic",
+            );
+            add_active_firewall(&ctx, &mut section, ufw, firewalld);
+            assert_eq!(section.checks.len(), 1);
+            assert!(section.checks[0].essential);
+            assert_eq!(section.checks[0].status, expected);
+        }
+    }
+
+    #[test]
+    fn inactive_ufw_does_not_warn_when_firewalld_is_protecting_the_system() {
+        let temp = TempDir::new().expect("create temporary context root");
+        let ctx = test_context(&temp);
+        let mut protected = AuditSection::new(
+            &ctx,
+            AuditCategory::Firewall,
+            "Firewall",
+            "security-medium-symbolic",
+        );
+        add_ufw(&ctx, &mut protected, UfwState::Inactive, true, || false);
+        assert_eq!(protected.checks[0].status, AuditStatus::Pass);
+
+        let mut unprotected = AuditSection::new(
+            &ctx,
+            AuditCategory::Firewall,
+            "Firewall",
+            "security-medium-symbolic",
+        );
+        add_ufw(&ctx, &mut unprotected, UfwState::Inactive, false, || false);
+        assert_eq!(unprotected.checks[0].status, AuditStatus::Warning);
     }
 
     #[test]
