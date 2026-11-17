@@ -261,13 +261,13 @@ function HeroBanner({ sections, running }: { sections: AuditSection[]; running: 
   </div>;
 }
 
-function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean }): JSX.Element | null {
+function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, actionErrors }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string> }): JSX.Element | null {
   const checks = essentialChecks(sections);
   if (checks.length === 0) return null;
   return <section className="audit-category audit-essentials" aria-labelledby="audit-essentials-heading">
     <header className="section-header"><div><h2 id="audit-essentials-heading">{_("Essentials")}</h2></div></header>
     <div className="grouped-list audit-list" role="list">
-      {checks.map((check, index) => <CheckView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`essential-${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />)}
+      {checks.map((check, index) => <CheckView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`essential-${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />)}
     </div>
   </section>;
 }
@@ -280,6 +280,11 @@ export default function Audit(): JSX.Element {
   const [authorizationRunning, setAuthorizationRunning] = useState(false);
   const [ufwChecking, setUfwChecking] = useState(false);
   const [hideMissingOptional, setHideMissingOptional] = useState(false);
+  // Errors from a specific check row's own action (UFW admin check, Portmaster
+  // authorization, a GUI launch), keyed by that check's launch_command. These
+  // render next to the button that triggered them, never in the page banner,
+  // and never affect the hero or any check's status.
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   const runSequence = useRef(0);
   const activeOperation = useRef<"audit" | "deep" | "portmaster" | "ufw" | null>(null);
 
@@ -287,11 +292,25 @@ export default function Audit(): JSX.Element {
     setSections((current) => replaceSection(current, section));
   };
 
+  const clearActionError = (key: string): void => {
+    setActionErrors((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const setActionError = (key: string, message: string): void => {
+    setActionErrors((current) => ({ ...current, [key]: message }));
+  };
+
 
   const performAudit = async (): Promise<void> => {
     const sequence = ++runSequence.current;
     setRunning(true);
     setError(null);
+    setActionErrors({});
     setSections([]);
     try {
       const report = await request<AuditReport>("audit.run");
@@ -363,15 +382,16 @@ export default function Audit(): JSX.Element {
   };
 
   const launch = async (command: string): Promise<void> => {
+    clearActionError(command);
     if (command !== "gufw" && command !== "firewall-config" && command !== "opensnitch-ui") {
-      setError(_("The audit supplied an unsupported GUI launch action."));
+      setActionError(command, _("The audit supplied an unsupported GUI launch action."));
       return;
     }
     try {
       const response = await request<{ launched: boolean; error?: string }>("audit.launch", { command });
       if (!response.launched) throw new Error(response.error || _("The selected application did not start"));
     } catch (launchError) {
-      setError(errorText(launchError));
+      setActionError(command, errorText(launchError));
     }
   };
 
@@ -379,7 +399,7 @@ export default function Audit(): JSX.Element {
     if (activeOperation.current) return;
     activeOperation.current = "portmaster";
     setAuthorizationRunning(true);
-    setError(null);
+    clearActionError("__portmaster_authorize__");
     try {
       const response = await request<{ authorized: boolean; cancelled: boolean; message?: string }>("audit.portmaster_authorize");
       if (response.authorized) {
@@ -388,10 +408,10 @@ export default function Audit(): JSX.Element {
       } else if (response.cancelled) {
         notify(_("Portmaster authorization was cancelled."), "info");
       } else {
-        setError(response.message || _("Portmaster authorization was not granted."));
+        setActionError("__portmaster_authorize__", response.message || _("Portmaster authorization was not granted."));
       }
     } catch (authorizationError) {
-      setError(errorText(authorizationError));
+      setActionError("__portmaster_authorize__", errorText(authorizationError));
     } finally {
       setAuthorizationRunning(false);
       activeOperation.current = null;
@@ -403,7 +423,7 @@ export default function Audit(): JSX.Element {
     activeOperation.current = "ufw";
     const sequence = runSequence.current;
     setUfwChecking(true);
-    setError(null);
+    clearActionError("__ufw_status__");
     try {
       const response = await request<{ cancelled: boolean; section?: AuditSection }>("audit.ufw_status");
       if (runSequence.current !== sequence) return;
@@ -416,7 +436,7 @@ export default function Audit(): JSX.Element {
       }
       const section = parseAuditProgress(response);
       if (!section || section.category !== "firewall") {
-        setError(_(
+        setActionError("__ufw_status__", _(
           // Translators: Keep UFW unchanged; it is a tool name.
           "The UFW status check did not return a firewall result.",
         ));
@@ -428,7 +448,7 @@ export default function Audit(): JSX.Element {
         "UFW status check completed",
       ), "success");
     } catch (requestError) {
-      if (runSequence.current === sequence) setError(errorText(requestError));
+      if (runSequence.current === sequence) setActionError("__ufw_status__", errorText(requestError));
     } finally {
       activeOperation.current = null;
       setUfwChecking(false);
@@ -467,7 +487,7 @@ export default function Audit(): JSX.Element {
         {_("tab.")}
       </p>
 
-      <EssentialsList actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
+      <EssentialsList actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
 
       {running && CATEGORY_ORDER.filter((category) => !sections.some((section) => section.category === category)).map((category) => <section className="audit-category" aria-labelledby={`audit-${category}`} key={category}><header className="section-header"><div><h2 id={`audit-${category}`}>{categoryTitle(category)}</h2></div><AuditStatusIndicator status="checking" /></header><div className="grouped-list"><div className="group-row muted">{_("Checking")}</div></div></section>)}
 
@@ -479,7 +499,7 @@ export default function Audit(): JSX.Element {
 
         <label className="check-row"><input type="checkbox" checked={hideMissingOptional} onChange={(event) => setHideMissingOptional(event.target.checked)} /> {_("Hide missing optional items")}</label>
 
-        {tierSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {tierSections.map((section) => <SectionView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
 
         <section className="audit-category" aria-labelledby="deep-scans-heading">
           <header className="section-header"><div><h2 id="deep-scans-heading">{_("Deep scans")}</h2><p>{_(
@@ -491,7 +511,7 @@ export default function Audit(): JSX.Element {
             <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("chkrootkit")} type="button">{deepRunning === "chkrootkit" ? _("Running chkrootkit…") : _("Run rootkit detection")}</button>
           </div>
         </section>
-        {deepSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {deepSections.map((section) => <SectionView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
       </details>
     </main>
   );
@@ -510,14 +530,14 @@ function countSummary(sections: AuditSection[]): Record<"pass" | "warning" | "fa
   return summary;
 }
 
-function SectionView({ section, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, hideMissingOptional }: { section: AuditSection; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; hideMissingOptional: boolean }): JSX.Element | null {
+function SectionView({ section, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, hideMissingOptional, actionErrors }: { section: AuditSection; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; hideMissingOptional: boolean; actionErrors: Record<string, string> }): JSX.Element | null {
   const label = section.title;
   const headingId = `audit-${section.category}`;
   if (hideMissingOptional && section.checks.length > 0 && section.checks.every((check) => check.optional_missing === true)) return null;
   return <section className="audit-category" aria-labelledby={headingId}>
     <header className="section-header"><div><h2 id={headingId}>{label}</h2></div><AuditStatusIndicator status={section.overall_status} /></header>
     <div className="grouped-list audit-list" role="list">
-      {section.checks.length > 0 ? section.checks.map((check, index) => hideMissingOptional && check.optional_missing === true ? null : <CheckView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />) : <div className="group-row muted" role="listitem">{_("No audit details were returned.")}</div>}
+      {section.checks.length > 0 ? section.checks.map((check, index) => hideMissingOptional && check.optional_missing === true ? null : <CheckView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />) : <div className="group-row muted" role="listitem">{_("No audit details were returned.")}</div>}
     </div>
   </section>;
 }
@@ -546,7 +566,7 @@ function ListeningPorts({ value, label }: { value: unknown; label: string }): JS
   </>;
 }
 
-function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking }: { check: AuditCheck; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean }): JSX.Element {
+function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, actionErrors }: { check: AuditCheck; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string> }): JSX.Element {
   const copy = async (): Promise<void> => {
     try {
       await copyText(check.install_command!);
@@ -563,6 +583,7 @@ function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, 
     }
   };
   const hasDetails = Boolean((check.recommendation && check.status !== "pass") || check.install_command || check.launch_command || check.info_url || check.listening_ports != null);
+  const rowError = check.launch_command ? actionErrors[check.launch_command] : undefined;
   const overview = <><span className="row-copy"><span className="row-title">{check.name}</span><span className="row-description">{check.detail}</span></span><AuditStatusIndicator status={check.status} /></>;
   const details = <div className="audit-details">
     {check.recommendation && check.status !== "pass" && <p className="notice warning">{check.recommendation}</p>}
@@ -577,6 +598,7 @@ function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, 
       {check.launch_command && check.launch_command !== "__portmaster_authorize__" && check.launch_command !== "__ufw_status__" && <button className="button" onClick={() => void onLaunch(check.launch_command!)} type="button">{check.launch_label || _("Open")}</button>}
       {check.info_url && <button className="button audit-external-link" onClick={() => void learn()} title={_("Open in browser")} type="button"><Icon name="external-link" />{_("Learn more")}</button>}
     </div>}
+    {rowError && <p className="notice warning audit-row-error" role="status">{rowError}</p>}
   </div>;
   if (!hasDetails) return <article className="group-row audit-row" role="listitem">{overview}</article>;
   return <details className="group-row audit-row" open={check.status !== "pass" && check.status !== "checking"} role="listitem"><summary className="audit-summary">{overview}<Icon className="audit-disclosure-icon" name="chevron-down" /></summary>{details}</details>;
