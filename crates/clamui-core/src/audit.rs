@@ -492,18 +492,18 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         .get("available")
         .and_then(Value::as_bool)
         .unwrap_or(false);
-    let mut scheduled_scans = if schedule_active {
+    let scheduled_scans = if schedule_active {
         check(
             ctx,
-            "Scheduled scans",
+            "Scheduled Scans",
             AuditStatus::Pass,
             tr(ctx, "Scheduled scans are enabled"),
         )
     } else if schedule_available {
         let mut row = check(
             ctx,
-            "Scheduled scans",
-            AuditStatus::Warning,
+            "Scheduled Scans",
+            AuditStatus::Unknown,
             tr(ctx, "Scheduled scans are not enabled"),
         );
         row.recommendation = Some(tr(ctx, "Enable scheduled scans in Preferences → Schedule"));
@@ -511,8 +511,8 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else {
         let mut row = check(
             ctx,
-            "Scheduled scans",
-            AuditStatus::Warning,
+            "Scheduled Scans",
+            AuditStatus::Unknown,
             tr(ctx, "No scheduling backend is available on this system"),
         );
         row.recommendation = Some(tr(
@@ -521,7 +521,8 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         ));
         row
     };
-    scheduled_scans.essential = true;
+    // Optional hardening: scheduled scans are convenient but not required for
+    // protection, so this check must never flip the Essentials hero status.
     section.push(scheduled_scans);
     section
 }
