@@ -17,6 +17,7 @@ type AuditCheck = {
   launch_command?: string | null;
   launch_label?: string | null;
   optional_missing?: boolean;
+  essential?: boolean;
   listening_ports?: NetworkSnapshot | null;
 };
 
@@ -89,6 +90,27 @@ function categoryIndex(category: AuditCategory): number {
   const tierIndex = (CATEGORY_ORDER as readonly AuditCategory[]).indexOf(category);
   if (tierIndex >= 0) return tierIndex;
   return category === "deep_scan_lynis" ? 100 : 101;
+}
+
+// Mirrors the backend's overall_status() priority order so the hero and the
+// essentials-only view can be derived purely from already-fetched checks.
+function overallOf(checks: AuditCheck[]): AuditStatus {
+  for (const candidate of ["fail", "warning", "unknown", "pass", "skipped", "checking"] as const) {
+    if (checks.some((check) => check.status === candidate)) return candidate;
+  }
+  return "unknown";
+}
+
+function essentialChecks(sections: AuditSection[]): AuditCheck[] {
+  return sections.flatMap((section) => section.checks.filter((check) => check.essential === true));
+}
+
+// The Optional hardening view shows everything that is not part of the
+// Essentials list, with its badge recomputed so it only reflects what is
+// actually shown there.
+function withoutEssential(section: AuditSection): AuditSection {
+  const checks = section.checks.filter((check) => check.essential !== true);
+  return { ...section, checks, overall_status: overallOf(checks) };
 }
 
 // Validate the network fields used here at both the progressive and final-response boundaries.
@@ -211,10 +233,43 @@ function parseAuditProgress(value: unknown): AuditSection | null {
       ("launch_command" in check && check.launch_command !== null && typeof check.launch_command !== "string") ||
       ("launch_label" in check && check.launch_label !== null && typeof check.launch_label !== "string") ||
       ("optional_missing" in check && typeof check.optional_missing !== "boolean") ||
+      ("essential" in check && typeof check.essential !== "boolean") ||
       ("listening_ports" in check && check.listening_ports !== null && !listeningSnapshot(check.listening_ports))
     ) return null;
   }
   return section as AuditSection;
+}
+
+function HeroBanner({ sections, running }: { sections: AuditSection[]; running: boolean }): JSX.Element {
+  const essentials = essentialChecks(sections);
+  if (running && essentials.length === 0) {
+    return <div className="audit-hero checking" role="status">
+      <Icon name="refresh" />
+      <div><h2>{_("Checking your system…")}</h2><p>{_("Running the essential security checks.")}</p></div>
+    </div>;
+  }
+  const status = overallOf(essentials);
+  const protected_ = status === "pass";
+  return <div className={`audit-hero ${protected_ ? "protected" : "attention"}`} role="status">
+    <Icon name={protected_ ? "check-circle" : "warning"} />
+    <div>
+      <h2>{protected_ ? _("Protected") : _("Action recommended")}</h2>
+      <p>{protected_
+        ? _("Your firewall, virus scanner and definitions are active and up to date. No action is needed right now.")
+        : _("One or more essential checks need your attention. Review Essentials below.")}</p>
+    </div>
+  </div>;
+}
+
+function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean }): JSX.Element | null {
+  const checks = essentialChecks(sections);
+  if (checks.length === 0) return null;
+  return <section className="audit-category audit-essentials" aria-labelledby="audit-essentials-heading">
+    <header className="section-header"><div><h2 id="audit-essentials-heading">{_("Essentials")}</h2></div></header>
+    <div className="grouped-list audit-list" role="list">
+      {checks.map((check, index) => <CheckView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`essential-${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />)}
+    </div>
+  </section>;
 }
 
 export default function Audit(): JSX.Element {
@@ -397,24 +452,45 @@ export default function Audit(): JSX.Element {
       </header>
 
       {error && <p className="error-banner" role="alert">{error}</p>}
-      {(sections.length > 0 || running) && <div className="status-banner audit-overview" role="status"><span className="audit-overview-result"><Icon name={statusIcon("fail")} /><strong>{ngettext("{count} issue", "{count} issues", summary.fail, { count: summary.fail })}</strong></span><span className="audit-overview-metrics"><span aria-label={`${_("Warning")}: ${summary.warning}`} className="audit-metric warning" title={_("Warning")}><Icon name={statusIcon("warning")} /><span>{summary.warning}</span></span><span aria-label={`${_("Pass")}: ${summary.pass}`} className="audit-metric success" title={_("Pass")}><Icon name={statusIcon("pass")} /><span>{summary.pass}</span></span><span aria-label={`${_("unavailable or skipped")}: ${summary.unknown}`} className="audit-metric" title={_("unavailable or skipped")}><Icon name={statusIcon("unknown")} /><span>{summary.unknown}</span></span></span></div>}
+      <HeroBanner running={running} sections={sections} />
+      <p className="audit-components-hint">
+        {_("Install and configure your firewall and virus scanner from the")}{" "}
+        <button
+          className="link-button"
+          onClick={() => window.dispatchEvent(new CustomEvent("clamui-navigate", { detail: { page: "components" } }))}
+          type="button"
+        >
+          {_("Components")}
+        </button>{" "}
+        {_("tab.")}
+      </p>
 
-      <label className="check-row"><input type="checkbox" checked={hideMissingOptional} onChange={(event) => setHideMissingOptional(event.target.checked)} /> {_("Hide missing optional items")}</label>
+      <EssentialsList actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
 
       {running && CATEGORY_ORDER.filter((category) => !sections.some((section) => section.category === category)).map((category) => <section className="audit-category" aria-labelledby={`audit-${category}`} key={category}><header className="section-header"><div><h2 id={`audit-${category}`}>{categoryTitle(category)}</h2></div><AuditStatusIndicator status="checking" /></header><div className="grouped-list"><div className="group-row muted">{_("Checking")}</div></div></section>)}
-      {tierSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={section} ufwChecking={ufwChecking} />)}
 
-      <section className="audit-category" aria-labelledby="deep-scans-heading">
-        <header className="section-header"><div><h2 id="deep-scans-heading">{_("Deep scans")}</h2><p>{_(
-          // Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-          "Lynis and chkrootkit are never run automatically. Each check may request administrator authorization only after you explicitly start that check.",
-        )}</p></div></header>
-        <div className="actions">
-          <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("lynis")} type="button">{deepRunning === "lynis" ? _("Running Lynis…") : _("Run Lynis security audit")}</button>
-          <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("chkrootkit")} type="button">{deepRunning === "chkrootkit" ? _("Running chkrootkit…") : _("Run rootkit detection")}</button>
-        </div>
-      </section>
-      {deepSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={section} ufwChecking={ufwChecking} />)}
+      <details className="audit-optional" open={false}>
+        <summary>{_("Optional hardening")}</summary>
+        <p className="notice">{_("These checks are informational. They do not affect the Protected status above.")}</p>
+
+        <div className="status-banner audit-overview" role="status"><span className="audit-overview-result"><Icon name={statusIcon("fail")} /><strong>{ngettext("{count} issue", "{count} issues", summary.fail, { count: summary.fail })}</strong></span><span className="audit-overview-metrics"><span aria-label={`${_("Warning")}: ${summary.warning}`} className="audit-metric warning" title={_("Warning")}><Icon name={statusIcon("warning")} /><span>{summary.warning}</span></span><span aria-label={`${_("Pass")}: ${summary.pass}`} className="audit-metric success" title={_("Pass")}><Icon name={statusIcon("pass")} /><span>{summary.pass}</span></span><span aria-label={`${_("unavailable or skipped")}: ${summary.unknown}`} className="audit-metric" title={_("unavailable or skipped")}><Icon name={statusIcon("unknown")} /><span>{summary.unknown}</span></span></span></div>
+
+        <label className="check-row"><input type="checkbox" checked={hideMissingOptional} onChange={(event) => setHideMissingOptional(event.target.checked)} /> {_("Hide missing optional items")}</label>
+
+        {tierSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+
+        <section className="audit-category" aria-labelledby="deep-scans-heading">
+          <header className="section-header"><div><h2 id="deep-scans-heading">{_("Deep scans")}</h2><p>{_(
+            // Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
+            "Lynis and chkrootkit are never run automatically. Each check may request administrator authorization only after you explicitly start that check.",
+          )}</p></div></header>
+          <div className="actions">
+            <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("lynis")} type="button">{deepRunning === "lynis" ? _("Running Lynis…") : _("Run Lynis security audit")}</button>
+            <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("chkrootkit")} type="button">{deepRunning === "chkrootkit" ? _("Running chkrootkit…") : _("Run rootkit detection")}</button>
+          </div>
+        </section>
+        {deepSections.map((section) => <SectionView actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+      </details>
     </main>
   );
 }
