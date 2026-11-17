@@ -74,6 +74,11 @@ pub struct AuditCheck {
     pub detail: String,
     #[serde(default)]
     pub optional_missing: bool,
+    /// Marks a check as part of the minimal set that drives the top-level
+    /// "Protected" / "Action recommended" summary. Everything else is
+    /// informational hardening advice and must never flip that summary.
+    #[serde(default)]
+    pub essential: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommendation: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -95,6 +100,7 @@ impl AuditCheck {
             status,
             detail,
             optional_missing: false,
+            essential: false,
             recommendation: None,
             install_command: None,
             info_url: None,
@@ -345,6 +351,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
                 ),
             );
             database.info_url = Some(URL_FRESHCLAM.to_owned());
+            database.essential = true;
             section.push(database);
         }
         Some((days, date)) if days <= 7 => {
@@ -363,6 +370,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
             database.recommendation = Some(tr(ctx, "Update virus database to ensure protection"));
             database.install_command = Some("sudo freshclam".to_owned());
             database.info_url = Some(URL_FRESHCLAM.to_owned());
+            database.essential = true;
             section.push(database);
         }
         Some((days, date)) => {
@@ -384,6 +392,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
             ));
             database.install_command = Some("sudo freshclam".to_owned());
             database.info_url = Some(URL_FRESHCLAM.to_owned());
+            database.essential = true;
             section.push(database);
         }
         None => {
@@ -407,6 +416,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
                 database.install_command = Some("sudo freshclam".to_owned());
             }
             database.info_url = Some(URL_FRESHCLAM.to_owned());
+            database.essential = true;
             section.push(database);
         }
     }
@@ -444,6 +454,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         check
     };
     daemon.info_url = Some(URL_CLAMD.to_owned());
+    daemon.essential = true;
     section.push(daemon);
 
     let freshclam_active = ["clamav-freshclam", "clamav-freshclam.timer"]
@@ -469,6 +480,49 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     };
     freshclam.info_url = Some(URL_FRESHCLAM.to_owned());
     section.push(freshclam);
+
+    let schedule_status = crate::scheduler::status(ctx).unwrap_or_else(|error| {
+        json!({"backend": "none", "available": false, "active": false, "next_run": Value::Null, "error": error})
+    });
+    let schedule_active = schedule_status
+        .get("active")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let schedule_available = schedule_status
+        .get("available")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let mut scheduled_scans = if schedule_active {
+        check(
+            ctx,
+            "Scheduled scans",
+            AuditStatus::Pass,
+            tr(ctx, "Scheduled scans are enabled"),
+        )
+    } else if schedule_available {
+        let mut row = check(
+            ctx,
+            "Scheduled scans",
+            AuditStatus::Warning,
+            tr(ctx, "Scheduled scans are not enabled"),
+        );
+        row.recommendation = Some(tr(ctx, "Enable scheduled scans in Preferences → Schedule"));
+        row
+    } else {
+        let mut row = check(
+            ctx,
+            "Scheduled scans",
+            AuditStatus::Warning,
+            tr(ctx, "No scheduling backend is available on this system"),
+        );
+        row.recommendation = Some(tr(
+            ctx,
+            "Scheduled scans require a systemd user session or cron",
+        ));
+        row
+    };
+    scheduled_scans.essential = true;
+    section.push(scheduled_scans);
     section
 }
 
@@ -1157,6 +1211,7 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
                         status: portmaster_module_status(&module.status),
                         detail: module.failure_msg.unwrap_or(module.status),
                         optional_missing: false,
+                        essential: false,
                         recommendation: None,
                         install_command: None,
                         info_url: Some(URL_PORTMASTER_API.to_owned()),

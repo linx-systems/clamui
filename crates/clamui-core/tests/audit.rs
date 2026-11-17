@@ -15,6 +15,7 @@ fn audit_check(status: AuditStatus) -> AuditCheck {
         status,
         detail: "fixture".to_owned(),
         optional_missing: false,
+        essential: false,
         recommendation: None,
         install_command: None,
         info_url: None,
@@ -33,15 +34,17 @@ fn audit_check_optional_missing_defaults_for_legacy_payloads() {
     });
     let check: AuditCheck = serde_json::from_value(legacy).expect("legacy audit check");
     assert!(!check.optional_missing);
+    assert!(!check.essential);
     assert!(check.listening_ports.is_none());
     assert!(serde_json::to_value(&check)
         .unwrap()
         .get("listening_ports")
         .is_none());
     assert_eq!(
-        serde_json::to_value(check).unwrap()["optional_missing"],
+        serde_json::to_value(&check).unwrap()["optional_missing"],
         false
     );
+    assert_eq!(serde_json::to_value(check).unwrap()["essential"], false);
 }
 
 #[test]
