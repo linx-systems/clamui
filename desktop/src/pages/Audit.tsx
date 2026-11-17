@@ -316,7 +316,9 @@ export default function Audit(): JSX.Element {
       const report = await request<AuditReport>("audit.run");
       if (runSequence.current !== sequence) return;
       setSections(report.sections.sort((left, right) => categoryIndex(left.category) - categoryIndex(right.category)));
-      const summary = countSummary(report.sections);
+      // The toast must agree with the hero, which only reflects the essential
+      // checks; optional hardening findings are shown in their own section.
+      const summary = countSummary(report.sections.map((section) => ({ ...section, checks: section.checks.filter((check) => check.essential === true) })));
       if (summary.fail > 0) notify(ngettext("{count} security issue needs attention", "{count} security issues need attention", summary.fail, { count: summary.fail }), "warning");
       else if (summary.warning > 0) notify(ngettext("{count} audit check needs review", "{count} audit checks need review", summary.warning, { count: summary.warning }), "warning");
       else notify(_("Security audit completed"), "success");
