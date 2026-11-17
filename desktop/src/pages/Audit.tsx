@@ -249,12 +249,12 @@ function HeroBanner({ sections, running }: { sections: AuditSection[]; running: 
     </div>;
   }
   const status = overallOf(essentials);
-  const protected_ = status === "pass";
-  return <div className={`audit-hero ${protected_ ? "protected" : "attention"}`} role="status">
-    <Icon name={protected_ ? "check-circle" : "warning"} />
+  const isProtected = status === "pass";
+  return <div className={`audit-hero ${isProtected ? "protected" : "attention"}`} role="status">
+    <Icon name={isProtected ? "check-circle" : "warning"} />
     <div>
-      <h2>{protected_ ? _("Protected") : _("Action recommended")}</h2>
-      <p>{protected_
+      <h2>{isProtected ? _("Protected") : _("Action recommended")}</h2>
+      <p>{isProtected
         ? _("Your firewall, virus scanner and definitions are active and up to date. No action is needed right now.")
         : _("One or more essential checks need your attention. Review Essentials below.")}</p>
     </div>
@@ -437,9 +437,11 @@ export default function Audit(): JSX.Element {
 
   const actionsDisabled = running || deepRunning !== null || authorizationRunning || ufwChecking;
 
-  const summary = countSummary(sections);
   const tierSections = CATEGORY_ORDER.map((category) => sections.find((section) => section.category === category)).filter((section): section is AuditSection => section !== undefined);
   const deepSections = sections.filter((section) => section.category === "deep_scan_lynis" || section.category === "deep_scan_rootkit");
+  // The summary banner now lives inside "Optional hardening", so it must only
+  // count what that section actually shows, not the essential checks above it.
+  const summary = countSummary([...tierSections, ...deepSections].map(withoutEssential));
 
   return (
     <main className="page audit-page" aria-labelledby="audit-title">
