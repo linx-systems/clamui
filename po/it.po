@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-17 17:58+0100\n"
+"POT-Creation-Date: 2026-11-17 18:55+0100\n"
 "PO-Revision-Date: 2026-04-03 19:20+0200\n"
 "Last-Translator: Albano Battistella\n"
 "Language-Team: Italian\n"
@@ -108,289 +108,287 @@ msgstr "Nessun servizio di pianificazione è disponibile su questo sistema"
 
 #: crates/clamui-core/src/audit.rs:518
 msgid "Scheduled scans require a systemd user session or cron"
-msgstr ""
-"Le scansioni pianificate richiedono una sessione utente systemd o cron"
+msgstr "Le scansioni pianificate richiedono una sessione utente systemd o cron"
 
-#: crates/clamui-core/src/audit.rs:703
+#: crates/clamui-core/src/audit.rs:704
 msgid "Open Ports"
 msgstr "Porte aperte"
 
-#: crates/clamui-core/src/audit.rs:708
+#: crates/clamui-core/src/audit.rs:709
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} porta in ascolto, porta rischiosa: {ports}"
 msgstr[1] "{count} porte in ascolto, porte rischiose: {ports}"
 
-#: crates/clamui-core/src/audit.rs:719
+#: crates/clamui-core/src/audit.rs:720
 msgid "Review if these services need to be exposed"
 msgstr "Verifica se questi servizi devono essere esposti"
 
-#: crates/clamui-core/src/audit.rs:725
+#: crates/clamui-core/src/audit.rs:726
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] "{count} porta in ascolto"
 msgstr[1] "{count} porte in ascolto"
 
-#: crates/clamui-core/src/audit.rs:733
+#: crates/clamui-core/src/audit.rs:734
 msgid "Review open ports and close unnecessary services"
 msgstr "Esamina le porte aperte e chiudi i servizi non necessari"
 
-#: crates/clamui-core/src/audit.rs:742 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:743 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr "Impossibile leggere alcune righe dei socket di rete."
 
-#: crates/clamui-core/src/audit.rs:745
+#: crates/clamui-core/src/audit.rs:746
 msgid "No open ports detected"
 msgstr "Nessuna porta aperta rilevata"
 
-#: crates/clamui-core/src/audit.rs:776
+#: crates/clamui-core/src/audit.rs:777
 msgid "AppArmor is enabled"
 msgstr "AppArmor è abilitato"
 
-#: crates/clamui-core/src/audit.rs:783
+#: crates/clamui-core/src/audit.rs:784
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Il modulo AppArmor è caricato ma non abilitato"
 
-#: crates/clamui-core/src/audit.rs:785
+#: crates/clamui-core/src/audit.rs:786
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Abilita AppArmor per il sandboxing delle applicazioni"
 
-#: crates/clamui-core/src/audit.rs:800
+#: crates/clamui-core/src/audit.rs:801
 msgid "SELinux is enforcing"
 msgstr "SELinux è in modalità di applicazione forzata"
 
-#: crates/clamui-core/src/audit.rs:807
+#: crates/clamui-core/src/audit.rs:808
 msgid "SELinux is in permissive mode"
 msgstr "SELinux è in modalità permissiva"
 
-#: crates/clamui-core/src/audit.rs:809
+#: crates/clamui-core/src/audit.rs:810
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 "Valutare il passaggio alla modalità di applicazione per una protezione più "
 "efficace"
 
-#: crates/clamui-core/src/audit.rs:820
+#: crates/clamui-core/src/audit.rs:821
 msgid "SELinux is disabled"
 msgstr "SELinux è disabilitato"
 
-#: crates/clamui-core/src/audit.rs:822
+#: crates/clamui-core/src/audit.rs:823
 msgid "Enable SELinux for mandatory access control"
 msgstr "Abilita SELinux per il controllo degli accessi obbligatorio"
 
-#: crates/clamui-core/src/audit.rs:836
+#: crates/clamui-core/src/audit.rs:837
 msgid "No mandatory access control framework detected"
 msgstr "Nessun framework di controllo degli accessi obbligatorio rilevato"
 
-#: crates/clamui-core/src/audit.rs:838
+#: crates/clamui-core/src/audit.rs:839
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Valuta di abilitare AppArmor o SELinux"
 
-#: crates/clamui-core/src/audit.rs:863
+#: crates/clamui-core/src/audit.rs:864
 msgid "Automatic security updates are enabled"
 msgstr "Gli aggiornamenti automatici di sicurezza sono abilitati"
 
-#: crates/clamui-core/src/audit.rs:873
+#: crates/clamui-core/src/audit.rs:874
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Gli aggiornamenti automatici sono installati ma disabilitati"
 
-#: crates/clamui-core/src/audit.rs:875
+#: crates/clamui-core/src/audit.rs:876
 msgid "Enable automatic security updates"
 msgstr "Abilita gli aggiornamenti automatici di sicurezza"
 
-#: crates/clamui-core/src/audit.rs:888
+#: crates/clamui-core/src/audit.rs:889
 msgid "DNF automatic updates are enabled"
 msgstr "Gli aggiornamenti automatici DNF sono abilitati"
 
-#: crates/clamui-core/src/audit.rs:898
+#: crates/clamui-core/src/audit.rs:899
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF Automatic è installato ma il timer non è attivo"
 
-#: crates/clamui-core/src/audit.rs:900
+#: crates/clamui-core/src/audit.rs:901
 msgid "Enable automatic updates"
 msgstr "Abilita gli aggiornamenti automatici"
 
-#: crates/clamui-core/src/audit.rs:913
+#: crates/clamui-core/src/audit.rs:914
 msgid "Could not determine automatic update status"
 msgstr "Impossibile determinare lo stato degli aggiornamenti automatici"
 
-#: crates/clamui-core/src/audit.rs:915
+#: crates/clamui-core/src/audit.rs:916
 msgid "Configure automatic security updates"
 msgstr "Configura gli aggiornamenti automatici di sicurezza"
 
-#: crates/clamui-core/src/audit.rs:929
+#: crates/clamui-core/src/audit.rs:930
 msgid "System reboot required to apply updates"
 msgstr "È necessario riavviare il sistema per applicare gli aggiornamenti"
 
-#: crates/clamui-core/src/audit.rs:931
+#: crates/clamui-core/src/audit.rs:932
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 "Riavviare il sistema per applicare gli aggiornamenti di sicurezza in sospeso"
 
-#: crates/clamui-core/src/audit.rs:976
+#: crates/clamui-core/src/audit.rs:977
 msgid "{name} is installed but not running"
 msgstr "{name} è installato ma non è in esecuzione"
 
-#: crates/clamui-core/src/audit.rs:994
+#: crates/clamui-core/src/audit.rs:995
 msgid "No intrusion detection system found"
 msgstr "Nessun sistema di rilevamento delle intrusioni trovato"
 
-#: crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:997
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "Installa fail2ban o CrowdSec per proteggerti dagli attacchi"
 
-#: crates/clamui-core/src/audit.rs:1022
+#: crates/clamui-core/src/audit.rs:1023
 msgid "SSH server is not running (no remote attack surface)"
 msgstr ""
 "Il server SSH non è in esecuzione (nessuna superficie di attacco remota)"
 
-#: crates/clamui-core/src/audit.rs:1032
+#: crates/clamui-core/src/audit.rs:1033
 msgid "SSH server is running"
 msgstr "Il server SSH è in esecuzione"
 
-#: crates/clamui-core/src/audit.rs:1041
+#: crates/clamui-core/src/audit.rs:1042
 msgid "Could not read SSH configuration"
 msgstr "Impossibile leggere la configurazione SSH"
 
-#: crates/clamui-core/src/audit.rs:1059
+#: crates/clamui-core/src/audit.rs:1060
 msgid "Root login: {value}"
 msgstr "Accesso root: {value}"
 
-#: crates/clamui-core/src/audit.rs:1066
+#: crates/clamui-core/src/audit.rs:1067
 msgid "Root login is allowed ({value})"
 msgstr "L’accesso come root è consentito ({value})"
 
-#: crates/clamui-core/src/audit.rs:1072
+#: crates/clamui-core/src/audit.rs:1073
 msgid "Disable root SSH login for security"
 msgstr "Disabilita l'accesso SSH come root per maggiore sicurezza"
 
-#: crates/clamui-core/src/audit.rs:1086
+#: crates/clamui-core/src/audit.rs:1087
 msgid "Password authentication is disabled (key-only)"
 msgstr "L'autenticazione tramite password è disabilitata (solo chiave)"
 
-#: crates/clamui-core/src/audit.rs:1093
+#: crates/clamui-core/src/audit.rs:1094
 msgid "Password authentication is enabled"
 msgstr "L'autenticazione tramite password è abilitata"
 
-#: crates/clamui-core/src/audit.rs:1095
+#: crates/clamui-core/src/audit.rs:1096
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr ""
 "Valutare la disabilitazione dell'autenticazione tramite password a favore "
 "delle chiavi SSH"
 
-#: crates/clamui-core/src/audit.rs:1112
+#: crates/clamui-core/src/audit.rs:1113
 msgid "X11 forwarding is disabled"
 msgstr "L'inoltro X11 è disabilitato"
 
-#: crates/clamui-core/src/audit.rs:1119
+#: crates/clamui-core/src/audit.rs:1120
 msgid "X11 forwarding is enabled"
 msgstr "L'inoltro X11 è abilitato"
 
-#: crates/clamui-core/src/audit.rs:1121
+#: crates/clamui-core/src/audit.rs:1122
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Disabilita l'inoltro X11 per ridurre la superficie di attacco"
 
-#: crates/clamui-core/src/audit.rs:1181
+#: crates/clamui-core/src/audit.rs:1182
 msgid "Application firewalls"
 msgstr "Firewall delle applicazioni"
 
-#: crates/clamui-core/src/audit.rs:1203
+#: crates/clamui-core/src/audit.rs:1204
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster è in esecuzione e protegge le connessioni"
 
-#: crates/clamui-core/src/audit.rs:1230
+#: crates/clamui-core/src/audit.rs:1231
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr "Autorizza ClamUI in Portmaster per lo stato dei singoli moduli"
 
-#: crates/clamui-core/src/audit.rs:1233
+#: crates/clamui-core/src/audit.rs:1234
 msgid "Authorize"
 msgstr "Autorizza"
 
-#: crates/clamui-core/src/audit.rs:1243
+#: crates/clamui-core/src/audit.rs:1244
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster è installato ma non è in esecuzione"
 
-#: crates/clamui-core/src/audit.rs:1245
+#: crates/clamui-core/src/audit.rs:1246
 msgid "Start the Portmaster service to enable network protection"
 msgstr "Avvia il servizio Portmaster per abilitare la protezione della rete"
 
-#. Translators: The em dash separates the detection result from the component
-#. description.
-#: crates/clamui-core/src/audit.rs:1258
+#. Translators: The em dash separates the detection result from the component description.
+#: crates/clamui-core/src/audit.rs:1259
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Non rilevato — monitor di rete e firewall applicativo facoltativi"
 
-#: crates/clamui-core/src/audit.rs:1273
+#: crates/clamui-core/src/audit.rs:1274
 msgid "Could not probe Portmaster: {error}"
 msgstr "Impossibile analizzare Portmaster: {error}"
 
-#: crates/clamui-core/src/audit.rs:1322
+#: crates/clamui-core/src/audit.rs:1323
 msgid "{name} is not installed"
 msgstr "{name} non è installato"
 
-#: crates/clamui-core/src/audit.rs:1329
+#: crates/clamui-core/src/audit.rs:1330
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Installa {name} per una verifica completa della sicurezza"
 
-#: crates/clamui-core/src/audit.rs:1335
+#: crates/clamui-core/src/audit.rs:1336
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Installa chkrootkit per rilevare i rootkit"
 
-#: crates/clamui-core/src/audit.rs:1354
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Authentication was cancelled"
 msgstr "L'autenticazione è stata annullata"
 
-#: crates/clamui-core/src/audit.rs:1362
+#: crates/clamui-core/src/audit.rs:1363
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "La verifica Lynis ha superato il limite di 5 minuti"
 
-#: crates/clamui-core/src/audit.rs:1364
+#: crates/clamui-core/src/audit.rs:1365
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "La scansione dei rootkit ha superato il limite di 5 minuti"
 
-#: crates/clamui-core/src/audit.rs:1382 crates/clamui-core/src/audit.rs:1426
+#: crates/clamui-core/src/audit.rs:1383 crates/clamui-core/src/audit.rs:1427
 msgid "Failed to run Lynis: {error}"
 msgstr "Impossibile eseguire Lynis: {error}"
 
-#: crates/clamui-core/src/audit.rs:1388
+#: crates/clamui-core/src/audit.rs:1389
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Impossibile eseguire chkrootkit: {error}"
 
-#: crates/clamui-core/src/audit.rs:1454
+#: crates/clamui-core/src/audit.rs:1455
 msgid "Score: {score}/100"
 msgstr "Punteggio: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1457
+#: crates/clamui-core/src/audit.rs:1458
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "Esegui 'sudo lynis audit system' per raccomandazioni dettagliate"
 
-#: crates/clamui-core/src/audit.rs:1473
+#: crates/clamui-core/src/audit.rs:1474
 msgid "Audit completed (exit code {code})"
 msgstr "Verifica completata (codice di uscita {code})"
 
-#: crates/clamui-core/src/audit.rs:1511 crates/clamui-core/src/audit.rs:1525
+#: crates/clamui-core/src/audit.rs:1512 crates/clamui-core/src/audit.rs:1526
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "Impossibile completare la scansione dei rootkit (uscita {code})"
 
-#: crates/clamui-core/src/audit.rs:1555
+#: crates/clamui-core/src/audit.rs:1556
 msgid "No rootkits detected"
 msgstr "Nessun rootkit rilevato"
 
-#: crates/clamui-core/src/audit.rs:1566
+#: crates/clamui-core/src/audit.rs:1567
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "Rilevato {count} potenziale rootkit"
 msgstr[1] "Rilevati {count} potenziali rootkit"
 
-#: crates/clamui-core/src/audit.rs:1574
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Investigate the detected threats immediately"
 msgstr "Esamina immediatamente le minacce rilevate"
 
-#: crates/clamui-core/src/audit/firewall.rs:68
+#: crates/clamui-core/src/audit/firewall.rs:88
 msgid "Firewall manager overlap"
 msgstr "Sovrapposizione dei gestori firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:69
+#: crates/clamui-core/src/audit/firewall.rs:89
 msgid ""
 "UFW is active while Firewalld owns its D-Bus name; their rule interaction "
 "was not evaluated."
@@ -398,13 +396,13 @@ msgstr ""
 "UFW è attivo mentre Firewalld possiede il proprio nome D-Bus; l'interazione "
 "delle relative regole non è stata valutata."
 
-#: crates/clamui-core/src/audit/firewall.rs:187
+#: crates/clamui-core/src/audit/firewall.rs:207
 msgid "UFW was not found at a trusted system path."
 msgstr "UFW non è stato trovato in un percorso di sistema attendibile."
 
 #. Translators: UFW is the name of the firewall application.
-#: crates/clamui-core/src/audit/firewall.rs:190
-#: crates/clamui-core/src/audit/firewall.rs:224
+#: crates/clamui-core/src/audit/firewall.rs:210
+#: crates/clamui-core/src/audit/firewall.rs:244
 msgid ""
 "Administrator authorization for the UFW status check was denied or "
 "unavailable."
@@ -412,23 +410,23 @@ msgstr ""
 "L’autorizzazione amministrativa per il controllo dello stato di UFW è stata "
 "negata o non era disponibile."
 
-#: crates/clamui-core/src/audit/firewall.rs:212
+#: crates/clamui-core/src/audit/firewall.rs:232
 msgid "The UFW status check timed out."
 msgstr "Il controllo dello stato di UFW ha superato il tempo limite."
 
 #. Translators: UFW is the name of the firewall application.
-#: crates/clamui-core/src/audit/firewall.rs:215
-#: crates/clamui-core/src/audit/firewall.rs:245
+#: crates/clamui-core/src/audit/firewall.rs:235
+#: crates/clamui-core/src/audit/firewall.rs:265
 msgid "The UFW status check returned incomplete or invalid output."
 msgstr ""
 "Il controllo dello stato di UFW ha restituito un output incompleto o non "
 "valido."
 
-#: crates/clamui-core/src/audit/firewall.rs:233
+#: crates/clamui-core/src/audit/firewall.rs:253
 msgid "The UFW status check failed."
 msgstr "Il controllo dello stato di UFW non è riuscito."
 
-#: crates/clamui-core/src/audit/firewall.rs:355
+#: crates/clamui-core/src/audit/firewall.rs:381
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
@@ -436,39 +434,39 @@ msgstr ""
 "UFW è attivo; la politica predefinita per le connessioni in ingresso è di "
 "negazione. Le regole elencate potrebbero consentire eccezioni."
 
-#: crates/clamui-core/src/audit/firewall.rs:362
+#: crates/clamui-core/src/audit/firewall.rs:388
 msgid ""
-"UFW is active; the default incoming policy is reject. Listed rules may allow"
-" exceptions."
+"UFW is active; the default incoming policy is reject. Listed rules may allow "
+"exceptions."
 msgstr ""
 "UFW è attivo; la politica predefinita per le connessioni in ingresso è di "
 "rifiuto. Le regole elencate potrebbero consentire eccezioni."
 
-#: crates/clamui-core/src/audit/firewall.rs:369
+#: crates/clamui-core/src/audit/firewall.rs:395
 msgid "UFW is active; the default incoming policy is deny."
 msgstr ""
 "UFW è attivo; la politica predefinita per le connessioni in ingresso è di "
 "negazione."
 
-#: crates/clamui-core/src/audit/firewall.rs:373
+#: crates/clamui-core/src/audit/firewall.rs:399
 msgid "UFW is active; the default incoming policy is reject."
 msgstr ""
 "UFW è attivo; la politica predefinita per le connessioni in ingresso è di "
 "rifiuto."
 
-#: crates/clamui-core/src/audit/firewall.rs:377
+#: crates/clamui-core/src/audit/firewall.rs:403
 msgid "UFW is active, but the default incoming policy allows traffic."
 msgstr ""
 "UFW è attivo, ma il suo criterio predefinito per le connessioni in ingresso "
 "consente il traffico."
 
-#: crates/clamui-core/src/audit/firewall.rs:384
+#: crates/clamui-core/src/audit/firewall.rs:410
 msgid "UFW is active, but its default incoming policy could not be verified."
 msgstr ""
 "UFW è attivo, ma non è stato possibile verificare il suo criterio "
 "predefinito per le connessioni in ingresso."
 
-#: crates/clamui-core/src/audit/firewall.rs:388
+#: crates/clamui-core/src/audit/firewall.rs:414
 msgid ""
 "UFW is inactive, but another firewall manager is active and protecting the "
 "system."
@@ -476,35 +474,43 @@ msgstr ""
 "UFW è inattivo, ma un altro gestore del firewall è attivo e protegge il "
 "sistema."
 
-#: crates/clamui-core/src/audit/firewall.rs:392
+#: crates/clamui-core/src/audit/firewall.rs:418
 msgid "UFW reports inactive."
 msgstr "UFW segnala di essere inattivo."
 
-#: crates/clamui-core/src/audit/firewall.rs:393
+#: crates/clamui-core/src/audit/firewall.rs:419
+msgid ""
+"UFW's service is active, but its default firewall policy could not be "
+"verified without administrator access."
+msgstr ""
+"Il servizio UFW è attivo, ma non è stato possibile verificare la sua "
+"politica firewall predefinita senza accesso amministratore."
+
+#: crates/clamui-core/src/audit/firewall.rs:423
 msgid "UFW status could not be inspected safely."
 msgstr "Non è stato possibile esaminare in sicurezza lo stato di UFW."
 
-#: crates/clamui-core/src/audit/firewall.rs:404
+#: crates/clamui-core/src/audit/firewall.rs:435
 msgid "UFW Firewall"
 msgstr "Firewall UFW"
 
-#: crates/clamui-core/src/audit/firewall.rs:409
+#: crates/clamui-core/src/audit/firewall.rs:440
 msgid "Check UFW with administrator access"
 msgstr "Controlla UFW con accesso amministratore"
 
-#: crates/clamui-core/src/audit/firewall.rs:411
+#: crates/clamui-core/src/audit/firewall.rs:442
 msgid ""
-"Administrator access may be required to read UFW status. This check does not"
-" change firewall settings."
+"Administrator access may be required to read UFW status. This check does not "
+"change firewall settings."
 msgstr ""
 "Per leggere lo stato di UFW potrebbe essere necessario l’accesso "
 "amministratore. Questo controllo non modifica le impostazioni del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:449
+#: crates/clamui-core/src/audit/firewall.rs:480
 msgid "Firewalld"
 msgstr "Firewalld"
 
-#: crates/clamui-core/src/audit/firewall.rs:451
+#: crates/clamui-core/src/audit/firewall.rs:482
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
@@ -512,7 +518,7 @@ msgstr ""
 "Firewalld possiede il proprio nome D-Bus; non sono stati interrogati lo "
 "stato di disponibilità e il criterio del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:455
+#: crates/clamui-core/src/audit/firewall.rs:486
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
@@ -520,7 +526,7 @@ msgstr ""
 "Non è stato rilevato alcun proprietario D-Bus di Firewalld; ciò non "
 "stabilisce il criterio del firewall del kernel."
 
-#: crates/clamui-core/src/audit/firewall.rs:459
+#: crates/clamui-core/src/audit/firewall.rs:490
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
@@ -528,31 +534,31 @@ msgstr ""
 "Non è stato possibile verificare la proprietà di Firewalld; non sono stati "
 "interrogati lo stato di disponibilità e il criterio del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:474
+#: crates/clamui-core/src/audit/firewall.rs:505
 msgid "firewall-cmd"
 msgstr "firewall-cmd"
 
-#: crates/clamui-core/src/audit/firewall.rs:479
+#: crates/clamui-core/src/audit/firewall.rs:510
 msgid "firewall-cmd is installed; it was not executed."
 msgstr "firewall-cmd è installato; non è stato eseguito."
 
-#: crates/clamui-core/src/audit/firewall.rs:485
+#: crates/clamui-core/src/audit/firewall.rs:516
 msgid "firewall-cmd could not be confirmed without executing it."
 msgstr "Non è stato possibile confermare firewall-cmd senza eseguirlo."
 
-#: crates/clamui-core/src/audit/firewall.rs:623
+#: crates/clamui-core/src/audit/firewall.rs:654
 msgid "nftables (native rules)"
 msgstr "nftables (regole native)"
 
-#: crates/clamui-core/src/audit/firewall.rs:625
+#: crates/clamui-core/src/audit/firewall.rs:656
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
 msgstr ""
-"nftables dispone di criteri predefiniti restrittivi per l'input IPv4 e IPv6;"
-" singole regole potrebbero consentire eccezioni."
+"nftables dispone di criteri predefiniti restrittivi per l'input IPv4 e IPv6; "
+"singole regole potrebbero consentire eccezioni."
 
-#: crates/clamui-core/src/audit/firewall.rs:629
+#: crates/clamui-core/src/audit/firewall.rs:660
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
@@ -560,18 +566,18 @@ msgstr ""
 "nftables segnala un criterio predefinito permissivo per l'input; la "
 "copertura rimanente potrebbe essere incompleta"
 
-#: crates/clamui-core/src/audit/firewall.rs:633
+#: crates/clamui-core/src/audit/firewall.rs:664
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
 msgstr ""
 "Non è stato possibile verificare la copertura del criterio di input di "
 "nftables sia per IPv4 sia per IPv6"
 
-#: crates/clamui-core/src/audit/firewall.rs:693
+#: crates/clamui-core/src/audit/firewall.rs:724
 msgid "iptables (IPv4)"
 msgstr "iptables (IPv4)"
 
-#: crates/clamui-core/src/audit/firewall.rs:695
+#: crates/clamui-core/src/audit/firewall.rs:726
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
@@ -579,71 +585,71 @@ msgstr ""
 "iptables dispone di un criterio predefinito INPUT restrittivo; singole "
 "regole potrebbero consentire eccezioni."
 
-#: crates/clamui-core/src/audit/firewall.rs:699
+#: crates/clamui-core/src/audit/firewall.rs:730
 msgid "iptables has a permissive INPUT default policy"
 msgstr "iptables dispone di un criterio predefinito INPUT permissivo"
 
-#: crates/clamui-core/src/audit/firewall.rs:700
+#: crates/clamui-core/src/audit/firewall.rs:731
 msgid "iptables INPUT policy could not be verified"
 msgstr "Impossibile verificare la policy INPUT di iptables"
 
-#: crates/clamui-core/src/audit/firewall.rs:706
+#: crates/clamui-core/src/audit/firewall.rs:737
 msgid "iptables (IPv6)"
 msgstr "iptables (IPv6)"
 
-#: crates/clamui-core/src/audit/firewall.rs:708
+#: crates/clamui-core/src/audit/firewall.rs:739
 msgid ""
-"ip6tables has a restrictive INPUT default policy; individual rules may allow"
-" exceptions."
+"ip6tables has a restrictive INPUT default policy; individual rules may allow "
+"exceptions."
 msgstr ""
 "ip6tables ha una policy INPUT predefinita restrittiva; singole regole "
 "possono consentire eccezioni."
 
-#: crates/clamui-core/src/audit/firewall.rs:712
+#: crates/clamui-core/src/audit/firewall.rs:743
 msgid "ip6tables has a permissive INPUT default policy"
 msgstr "ip6tables ha una policy INPUT predefinita permissiva"
 
-#: crates/clamui-core/src/audit/firewall.rs:713
+#: crates/clamui-core/src/audit/firewall.rs:744
 msgid "ip6tables INPUT policy could not be verified"
 msgstr "Impossibile verificare la policy INPUT di ip6tables"
 
-#: crates/clamui-core/src/audit/firewall.rs:751
+#: crates/clamui-core/src/audit/firewall.rs:788
 msgid "Firewall"
 msgstr "Firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:754
+#: crates/clamui-core/src/audit/firewall.rs:791
 msgid ""
-"UFW and Firewalld are both active; review which one is meant to control your"
-" firewall rules."
+"UFW and Firewalld are both active; review which one is meant to control your "
+"firewall rules."
 msgstr ""
 "UFW e Firewalld sono entrambi attivi; verifica quale dei due deve "
 "controllare le regole del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:759
+#: crates/clamui-core/src/audit/firewall.rs:796
 msgid "Firewalld is active and managing the firewall."
 msgstr "Firewalld è attivo e gestisce il firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:764
+#: crates/clamui-core/src/audit/firewall.rs:801
 msgid "No active firewall manager was detected."
 msgstr "Non è stato rilevato alcun gestore del firewall attivo."
 
-#: crates/clamui-core/src/audit/firewall.rs:768
+#: crates/clamui-core/src/audit/firewall.rs:805
 msgid "Enable UFW or Firewalld to protect the system."
 msgstr "Attiva UFW o Firewalld per proteggere il sistema."
 
-#: crates/clamui-core/src/audit/firewall.rs:771
+#: crates/clamui-core/src/audit/firewall.rs:808
 msgid "The active firewall manager could not be verified."
 msgstr "Non è stato possibile verificare il gestore del firewall attivo."
 
-#: crates/clamui-core/src/audit/firewall.rs:786
+#: crates/clamui-core/src/audit/firewall.rs:823
 msgid "Gufw"
 msgstr "Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:788
+#: crates/clamui-core/src/audit/firewall.rs:825
 msgid "Gufw is available."
 msgstr "Gufw è disponibile."
 
-#: crates/clamui-core/src/audit/firewall.rs:790
+#: crates/clamui-core/src/audit/firewall.rs:827
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
@@ -651,19 +657,19 @@ msgstr ""
 "Gufw non è stato confermato; questo inventario facoltativo non influisce "
 "sull'analisi della policy del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:798
+#: crates/clamui-core/src/audit/firewall.rs:835
 msgid "Open Gufw"
 msgstr "Apri Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:804
+#: crates/clamui-core/src/audit/firewall.rs:841
 msgid "Firewall Config"
 msgstr "Configurazione firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:809
+#: crates/clamui-core/src/audit/firewall.rs:846
 msgid "Firewall Config is available."
 msgstr "Configurazione firewall è disponibile."
 
-#: crates/clamui-core/src/audit/firewall.rs:812
+#: crates/clamui-core/src/audit/firewall.rs:849
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
@@ -671,19 +677,19 @@ msgstr ""
 "Configurazione firewall non è stata confermata; questo inventario "
 "facoltativo non influisce sull'analisi della policy del firewall."
 
-#: crates/clamui-core/src/audit/firewall.rs:820
+#: crates/clamui-core/src/audit/firewall.rs:857
 msgid "Open Firewall Config"
 msgstr "Apri Configurazione firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:858
+#: crates/clamui-core/src/audit/firewall.rs:895
 msgid "Plasma Firewall"
 msgstr "Firewall Plasma"
 
-#: crates/clamui-core/src/audit/firewall.rs:863
+#: crates/clamui-core/src/audit/firewall.rs:900
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
 msgstr "Firewall Plasma è installato; gestisce un backend firewall esistente."
 
-#: crates/clamui-core/src/audit/firewall.rs:872
+#: crates/clamui-core/src/audit/firewall.rs:909
 msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr "Firewall Plasma non è stato confermato; è solo un modulo di gestione."
 
@@ -705,8 +711,7 @@ msgstr ""
 #: crates/clamui-core/src/audit/opensnitch.rs:197
 msgid "An installed OpenSnitch system service is inactive or failed."
 msgstr ""
-"Un servizio di sistema OpenSnitch installato è inattivo o in stato di "
-"errore."
+"Un servizio di sistema OpenSnitch installato è inattivo o in stato di errore."
 
 #. Translators: Keep the product name OpenSnitch unchanged.
 #: crates/clamui-core/src/audit/opensnitch.rs:200
@@ -755,8 +760,7 @@ msgstr ""
 #: crates/clamui-core/src/audit/opensnitch.rs:257
 msgid "OpenSnitch graphical interface availability could not be determined."
 msgstr ""
-"Impossibile determinare la disponibilità dell'interfaccia grafica "
-"OpenSnitch."
+"Impossibile determinare la disponibilità dell'interfaccia grafica OpenSnitch."
 
 #. Translators: Keep the product name OpenSnitch unchanged.
 #: crates/clamui-core/src/audit/opensnitch.rs:236
@@ -768,8 +772,7 @@ msgstr "Apri OpenSnitch"
 msgid "OpenSnitch graphical interface is not available."
 msgstr "L'interfaccia grafica OpenSnitch non è disponibile."
 
-#. Translators: Keep the product name OpenSnitch and the {error} placeholder
-#. unchanged.
+#. Translators: Keep the product name OpenSnitch and the {error} placeholder unchanged.
 #: crates/clamui-core/src/audit/opensnitch.rs:271
 msgid "Could not launch OpenSnitch graphical interface: {error}"
 msgstr "Impossibile avviare l'interfaccia grafica OpenSnitch: {error}"
@@ -786,8 +789,7 @@ msgstr "errore"
 msgid "Unknown command: {command}"
 msgstr "Comando sconosciuto: {command}"
 
-#. Translators: The em dash separates the application name from its
-#. description.
+#. Translators: The em dash separates the application name from its description.
 #: crates/clamui-core/src/cli.rs:140
 msgid "ClamUI — ClamAV antivirus management\n"
 msgstr "ClamUI — gestione dell'antivirus ClamAV\n"
@@ -801,8 +803,7 @@ msgstr "Utilizzo:"
 msgid "  clamui                   Launch the graphical interface"
 msgstr "  clamui                   Avvia l’interfaccia grafica"
 
-#. Translators: Keep `clamui`, `<command>`, and `[args]` unchanged; they are
-#. command syntax.
+#. Translators: Keep `clamui`, `<command>`, and `[args]` unchanged; they are command syntax.
 #: crates/clamui-core/src/cli.rs:157
 msgid "  clamui <command> [args]   Run a CLI command\n"
 msgstr "  clamui <command> [args]   Esegui un comando CLI\n"
@@ -819,8 +820,7 @@ msgstr ""
 "\n"
 "Opzioni globali:"
 
-#. Translators: Keep `--json` and `JSON` unchanged; they are a CLI flag and
-#. data format.
+#. Translators: Keep `--json` and `JSON` unchanged; they are a CLI flag and data format.
 #: crates/clamui-core/src/cli.rs:170
 msgid "  --json                   Machine-readable JSON output"
 msgstr "  --json                   Output JSON leggibile dalla macchina"
@@ -867,8 +867,7 @@ msgstr "Visualizza la cronologia delle scansioni"
 
 #: crates/clamui-core/src/cli.rs:219
 msgid ""
-"Install the polkit helper for saving system ClamAV configs (native host "
-"only)"
+"Install the polkit helper for saving system ClamAV configs (native host only)"
 msgstr ""
 "Installa l'helper polkit per salvare le configurazioni di sistema di ClamAV "
 "(solo host nativo)"
@@ -877,8 +876,7 @@ msgstr ""
 msgid "Show this help message"
 msgstr "Mostra questo messaggio di aiuto"
 
-#. Translators: Keep `clamui` and `[COMMAND]` command syntax unchanged;
-#. translate the `Usage:` label.
+#. Translators: Keep `clamui` and `[COMMAND]` command syntax unchanged; translate the `Usage:` label.
 #: crates/clamui-core/src/cli.rs:232
 msgid "Usage: clamui help [COMMAND]"
 msgstr "Uso: clamui help [COMMAND]"
@@ -899,8 +897,7 @@ msgstr "help accetta al massimo un comando"
 msgid "Unknown command: {name}\n"
 msgstr "Comando sconosciuto: {name}\n"
 
-#. Translators: Keep `{name}` as the command name and `{summary}` as its
-#. translated description; the em dash separates them.
+#. Translators: Keep `{name}` as the command name and `{summary}` as its translated description; the em dash separates them.
 #: crates/clamui-core/src/cli.rs:281
 msgid "clamui {name} — {summary}\n"
 msgstr "clamui {name} — {summary}\n"
@@ -909,8 +906,7 @@ msgstr "clamui {name} — {summary}\n"
 msgid "Examples:"
 msgstr "Esempi:"
 
-#. Translators: Keep the quoted `clamui {name} --help` command unchanged;
-#. preserve `{name}` as the command name.
+#. Translators: Keep the quoted `clamui {name} --help` command unchanged; preserve `{name}` as the command name.
 #: crates/clamui-core/src/cli.rs:297
 msgid ""
 "\n"
@@ -943,15 +939,14 @@ msgstr "Utilizzo profilo: {name}"
 msgid "Scanning: {path}"
 msgstr "Scansione: {path}"
 
-#. Translators: Keep `clamui`, uppercase metavariables, brackets, and all `--`
-#. flags unchanged; they are CLI syntax.
+#. Translators: Keep `clamui`, uppercase metavariables, brackets, and all `--` flags unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:572
 msgid ""
-"Usage: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] "
-"[--quarantine] [--json] [--verbose]"
+"Usage: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
+"quarantine] [--json] [--verbose]"
 msgstr ""
-"Uso: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] "
-"[--quarantine] [--json] [--verbose]"
+"Uso: clamui scan PATH [PATH ...] [--no-recursive] [--profile NAME] [--"
+"quarantine] [--json] [--verbose]"
 
 #. Translators: Preserve the numeric exit-code meanings.
 #: crates/clamui-core/src/cli.rs:580
@@ -1028,26 +1023,22 @@ msgstr ""
 msgid "No threats found."
 msgstr "Nessuna minaccia trovata."
 
-#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged;
-#. they are CLI syntax.
+#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:797 crates/clamui-core/src/cli.rs:819
 msgid "Usage: clamui quarantine <list|restore|delete> [args]"
 msgstr "Uso: clamui quarantine <list|restore|delete> [args]"
 
-#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI
-#. syntax.
+#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:807
 msgid "Usage: clamui quarantine list [--json]"
 msgstr "Uso: clamui quarantine list [--json]"
 
-#. Translators: Keep `clamui`, `restore`, and `ID` unchanged; they are CLI
-#. syntax.
+#. Translators: Keep `clamui`, `restore`, and `ID` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:811
 msgid "Usage: clamui quarantine restore ID"
 msgstr "Uso: clamui quarantine restore ID"
 
-#. Translators: Keep `clamui`, `delete`, and `ID` unchanged; they are CLI
-#. syntax.
+#. Translators: Keep `clamui`, `delete`, and `ID` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:815
 msgid "Usage: clamui quarantine delete ID"
 msgstr "Uso: clamui quarantine delete ID"
@@ -1082,8 +1073,7 @@ msgid_plural "{count} entries ({size} total)"
 msgstr[0] "{count} voce ({size} totali)"
 msgstr[1] "{count} voci ({size} totali)"
 
-#. Translators: Keep `quarantine`, command-valued `{action}`, and `ID`
-#. unchanged.
+#. Translators: Keep `quarantine`, command-valued `{action}`, and `ID` unchanged.
 #: crates/clamui-core/src/cli.rs:901 crates/clamui-core/src/cli.rs:915
 msgid "quarantine {action} requires ID"
 msgstr "quarantine {action} richiede ID"
@@ -1117,32 +1107,27 @@ msgstr "{prefix}: {error}"
 msgid "Quarantine entry not found: {id}"
 msgstr "Voce quarantena non trovata: {id}"
 
-#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged;
-#. they are CLI syntax.
+#. Translators: Keep `clamui`, angle-bracket choices, and `[args]` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1070 crates/clamui-core/src/cli.rs:1096
 msgid "Usage: clamui profile <list|show|export|import> [args]"
 msgstr "Uso: clamui profile <list|show|export|import> [args]"
 
-#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI
-#. syntax.
+#. Translators: Keep `clamui`, `list`, and `--json` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1080
 msgid "Usage: clamui profile list [--json]"
 msgstr "Uso: clamui profile list [--json]"
 
-#. Translators: Keep `clamui`, `show`, `NAME`, and `--json` unchanged; they
-#. are CLI syntax.
+#. Translators: Keep `clamui`, `show`, `NAME`, and `--json` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1084
 msgid "Usage: clamui profile show NAME [--json]"
 msgstr "Uso: clamui profile show NAME [--json]"
 
-#. Translators: Keep `clamui`, `export`, `NAME`, and `FILE` unchanged; they
-#. are CLI syntax.
+#. Translators: Keep `clamui`, `export`, `NAME`, and `FILE` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1088
 msgid "Usage: clamui profile export NAME FILE"
 msgstr "Uso: clamui profile export NAME FILE"
 
-#. Translators: Keep `clamui`, `import`, and `FILE` unchanged; they are CLI
-#. syntax.
+#. Translators: Keep `clamui`, `import`, and `FILE` unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1092
 msgid "Usage: clamui profile import FILE"
 msgstr "Uso: clamui profile import FILE"
@@ -1189,8 +1174,7 @@ msgid_plural "{count} profiles"
 msgstr[0] "{count} profilo"
 msgstr[1] "{count} profili"
 
-#. Translators: Preserve `{name}` as the profile name and `{path}` as its
-#. destination; quotation marks may be localized.
+#. Translators: Preserve `{name}` as the profile name and `{path}` as its destination; quotation marks may be localized.
 #: crates/clamui-core/src/cli.rs:1229
 msgid "Exported '{name}' to {path}"
 msgstr "Esportato '{name}' in {path}"
@@ -1199,8 +1183,7 @@ msgstr "Esportato '{name}' in {path}"
 msgid "Imported profile: {name}"
 msgstr "Profilo importato: {name}"
 
-#. Translators: Preserve command-valued `{usage}`, `NAME`, and the `--json`
-#. CLI flag.
+#. Translators: Preserve command-valued `{usage}`, `NAME`, and the `--json` CLI flag.
 #: crates/clamui-core/src/cli.rs:1278 crates/clamui-core/src/cli.rs:1291
 msgid "{usage} requires NAME and optional --json"
 msgstr "{usage} richiede NAME e l’opzione facoltativa --json"
@@ -1298,8 +1281,7 @@ msgstr "  Dimensione: {size}"
 msgid "Scan History"
 msgstr "Cronologia scansioni"
 
-#. Translators: Keep `clamui`, all `--` flags, `N`, and type choices
-#. unchanged; they are CLI syntax.
+#. Translators: Keep `clamui`, all `--` flags, `N`, and type choices unchanged; they are CLI syntax.
 #: crates/clamui-core/src/cli.rs:1541
 msgid ""
 "Usage: clamui history [--limit N] [--type scan|update|virustotal] [--json]"
@@ -1326,10 +1308,8 @@ msgstr "Stato"
 msgid "Summary"
 msgstr "Riepilogo"
 
-#. Translators: Preserve `{shown}` and `{total}` as counts and keep the
-#. `--limit` CLI flag unchanged.
-#. Translators: Preserve `{shown}` and `{total}` as counts and keep the
-#. `--limit` CLI flag unchanged.
+#. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
+#. Translators: Preserve `{shown}` and `{total}` as counts and keep the `--limit` CLI flag unchanged.
 #: crates/clamui-core/src/cli.rs:1678
 msgid "Showing {shown} of {total} entry. Use --limit to see more."
 msgid_plural "Showing {shown} of {total} entries. Use --limit to see more."
@@ -1338,8 +1318,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Visualizzate {shown} voci su {total}. Usa --limit per vederne altre."
 
-#. Translators: Keep `clamui install-privileged-helper` unchanged; it is the
-#. CLI command.
+#. Translators: Keep `clamui install-privileged-helper` unchanged; it is the CLI command.
 #: crates/clamui-core/src/cli.rs:1713
 msgid "Usage: clamui install-privileged-helper"
 msgstr "Uso: clamui install-privileged-helper"
@@ -1355,8 +1334,8 @@ msgstr "Configurazione della scansione pianificata non valida: {error}"
 #: crates/clamui-core/src/config.rs:462 crates/clamui-core/src/config.rs:520
 msgid "Not attempted because an earlier direct configuration write failed"
 msgstr ""
-"Non tentato perché una precedente scrittura diretta della configurazione non"
-" è riuscita"
+"Non tentato perché una precedente scrittura diretta della configurazione non "
+"è riuscita"
 
 #: crates/clamui-core/src/config.rs:500
 msgid "Protected configuration write failed"
@@ -1368,8 +1347,7 @@ msgstr "Impossibile salvare i percorsi di configurazione: {error}"
 
 #: crates/clamui-core/src/config.rs:605 crates/clamui-core/src/config.rs:639
 msgid "Cannot save scheduled scan preferences: {error}"
-msgstr ""
-"Impossibile salvare le preferenze delle scansioni pianificate: {error}"
+msgstr "Impossibile salvare le preferenze delle scansioni pianificate: {error}"
 
 #: crates/clamui-core/src/config.rs:618 crates/clamui-core/src/config.rs:627
 msgid "Failed to apply scheduled scan configuration: {error}"
@@ -1446,16 +1424,14 @@ msgstr "{key}: il valore della stringa non può essere vuoto"
 msgid "{key}: URL must start with http(s)://, ftp(s)://, or file://"
 msgstr "{key}: l'URL deve iniziare con http(s)://, ftp(s):// o file://"
 
-#. Translators: The em dash separates the fallback state from its security
-#. warning.
+#. Translators: The em dash separates the fallback state from its security warning.
 #: crates/clamui-core/src/credentials.rs:158
 msgid "Stored in settings file (keyring unavailable — less secure)"
 msgstr ""
 "Memorizzato nel file delle impostazioni (portachiavi non disponibile — meno "
 "sicuro)"
 
-#. Translators: replace with your name(s) and optionally <email> or a URL, one
-#. translator per line. Leave untranslated if you do not want to be credited.
+#. Translators: replace with your name(s) and optionally <email> or a URL, one translator per line. Leave untranslated if you do not want to be credited.
 #: crates/clamui-core/src/credits.rs:15
 msgid "translator-credits"
 msgstr "Albano Battistella <albanobattistella@gmail.com>"
@@ -1489,8 +1465,8 @@ msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
 msgstr ""
-"{binary} non è installato. Installa il pacchetto ClamAV richiesto per la tua"
-" distribuzione."
+"{binary} non è installato. Installa il pacchetto ClamAV richiesto per la tua "
+"distribuzione."
 
 #: crates/clamui-core/src/logs.rs:1101
 msgid "SCAN LOG"
@@ -1567,8 +1543,8 @@ msgstr "L'istantanea di rete non accetta argomenti."
 
 #: crates/clamui-core/src/network.rs:216
 msgid ""
-"Some network socket rows could not be read, and the list was limited to 4096"
-" rows."
+"Some network socket rows could not be read, and the list was limited to 4096 "
+"rows."
 msgstr ""
 "Impossibile leggere alcune righe dei socket di rete e l'elenco è stato "
 "limitato a 4096 righe."
@@ -1605,37 +1581,31 @@ msgstr ""
 msgid "Not running as Flatpak"
 msgstr "Non in esecuzione come Flatpak"
 
-#. Translators: keep the {operation} placeholder; it is a localized operation
-#. name.
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
 #: crates/clamui-core/src/privileged.rs:1052
 msgid "Authorization was cancelled while {operation}."
 msgstr "L'autorizzazione è stata annullata durante {operation}."
 
-#. Translators: keep the {operation} placeholder; it is a localized operation
-#. name.
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
 #: crates/clamui-core/src/privileged.rs:1058
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "L'helper con privilegi non è disponibile durante {operation}."
 
-#. Translators: PKEXEC_UID is a technical environment-variable name; keep it
-#. unchanged.
+#. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
 #: crates/clamui-core/src/privileged.rs:1064
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr "L'helper con privilegi ha rifiutato PKEXEC_UID durante {operation}."
 
-#. Translators: keep the {operation} placeholder; it is a localized operation
-#. name.
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
 #: crates/clamui-core/src/privileged.rs:1070
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr ""
-"L'helper con privilegi ha segnalato un'incompatibilità di protocollo durante"
-" {operation}."
+"L'helper con privilegi ha segnalato un'incompatibilità di protocollo durante "
+"{operation}."
 
-#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic
-#. {detail}.
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
 #: crates/clamui-core/src/privileged.rs:1076
-msgid ""
-"The privileged helper failed while {operation} (exit {code}): {detail}."
+msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr ""
 "L'helper con privilegi non è riuscito durante {operation} (uscita {code}): "
 "{detail}."
@@ -1646,8 +1616,7 @@ msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr ""
 "L'helper con privilegi non è riuscito durante {operation} (uscita {code})."
 
-#. Translators: keep the {operation} placeholder; it is a localized operation
-#. name.
+#. Translators: keep the {operation} placeholder; it is a localized operation name.
 #: crates/clamui-core/src/privileged.rs:1091
 msgid "The privileged helper was terminated while {operation}."
 msgstr "L'helper con privilegi è stato terminato durante {operation}."
@@ -1685,8 +1654,7 @@ msgstr ""
 "sull'host. Installa invece il pacchetto clamui-privileged-helper "
 "corrispondente sul sistema host."
 
-#. Translators: keep the paths and "sudo clamui install-privileged-helper"
-#. command unchanged.
+#. Translators: keep the paths and "sudo clamui install-privileged-helper" command unchanged.
 #: crates/clamui-core/src/privileged/cli_install.rs:33
 msgid ""
 "This command installs files under /usr and /usr/share and must be run as "
@@ -1695,14 +1663,12 @@ msgstr ""
 "Questo comando installa file in /usr e /usr/share e deve essere eseguito "
 "come root. Prova: sudo clamui install-privileged-helper"
 
-#. Translators: keep the {error} placeholder; it is a sanitized installation
-#. error.
+#. Translators: keep the {error} placeholder; it is a sanitized installation error.
 #: crates/clamui-core/src/privileged/cli_install.rs:119
 msgid "Failed to install privileged helper: {error}"
 msgstr "Impossibile installare l'helper con privilegi: {error}"
 
-#. Translators: keep the {bin} and {policy} placeholders; they are installed
-#. file paths.
+#. Translators: keep the {bin} and {policy} placeholders; they are installed file paths.
 #: crates/clamui-core/src/privileged/cli_install.rs:129
 msgid ""
 "Installed privileged helper at {bin} and polkit policy at {policy}. Saving "
@@ -1729,8 +1695,7 @@ msgstr "Impossibile modificare se un profilo è predefinito"
 msgid "Cannot delete default profile"
 msgstr "Impossibile eliminare il profilo predefinito"
 
-#. Translators: Preserve `{path}` exactly as a user-provided file path and
-#. `{error}` as the filesystem diagnostic.
+#. Translators: Preserve `{path}` exactly as a user-provided file path and `{error}` as the filesystem diagnostic.
 #: crates/clamui-core/src/profiles.rs:336
 msgid "Could not read import file '{path}': {error}"
 msgstr "Impossibile leggere il file di importazione '{path}': {error}"
@@ -1743,8 +1708,7 @@ msgstr "Impossibile serializzare l'esportazione del profilo: {error}"
 msgid "Export path must be a non-empty string"
 msgstr "Il percorso di esportazione deve essere una stringa non vuota"
 
-#. Translators: Preserve `{id}` exactly; it is the profile's technical
-#. identifier.
+#. Translators: Preserve `{id}` exactly; it is the profile's technical identifier.
 #: crates/clamui-core/src/profiles.rs:490
 msgid "Profile with ID '{id}' not found"
 msgstr "Profilo con ID '{id}' non trovato"
@@ -1811,15 +1775,14 @@ msgstr ""
 "Impossibile registrare la voce di quarantena nel database. Il file è stato "
 "ripristinato nella posizione originale."
 
-#. Translators: Preserve `{error}` as a localized failure description and
-#. `{path}` as a user-provided file path.
+#. Translators: Preserve `{error}` as a localized failure description and `{path}` as a user-provided file path.
 #: crates/clamui-core/src/quarantine.rs:420
 msgid ""
 "Failed to record quarantine entry in database. Rollback also failed: "
 "{error}. File may be orphaned at: {path}"
 msgstr ""
-"Impossibile registrare la voce di quarantena nel database. Anche il rollback"
-" non è riuscito: {error}. Il file potrebbe essere orfano in: {path}"
+"Impossibile registrare la voce di quarantena nel database. Anche il rollback "
+"non è riuscito: {error}. Il file potrebbe essere orfano in: {path}"
 
 #: crates/clamui-core/src/quarantine.rs:468
 msgid ""
@@ -1827,35 +1790,30 @@ msgid ""
 "may still appear in the list until cleaned up."
 msgstr ""
 "File ripristinato correttamente, ma non è stato possibile rimuovere la voce "
-"dal database. Potrebbe ancora apparire nell'elenco finché non verrà "
-"ripulito."
+"dal database. Potrebbe ancora apparire nell'elenco finché non verrà ripulito."
 
 #: crates/clamui-core/src/quarantine.rs:495
 msgid ""
 "File deleted successfully, but the database entry could not be removed. It "
 "may still appear in the list until cleaned up."
 msgstr ""
-"File eliminato correttamente, ma non è stato possibile rimuovere la voce dal"
-" database. Potrebbe ancora apparire nell'elenco finché non verrà ripulito."
+"File eliminato correttamente, ma non è stato possibile rimuovere la voce dal "
+"database. Potrebbe ancora apparire nell'elenco finché non verrà ripulito."
 
-#. Translators: Preserve `{path}` as a user-provided file path and `{error}`
-#. as the filesystem diagnostic.
+#. Translators: Preserve `{path}` as a user-provided file path and `{error}` as the filesystem diagnostic.
 #: crates/clamui-core/src/quarantine.rs:1411
 msgid "Cannot quarantine {path}: {error}"
 msgstr "Impossibile mettere in quarantena {path}: {error}"
 
-#. Translators: The em dash separates the integrity failure from its
-#. consequence.
+#. Translators: The em dash separates the integrity failure from its consequence.
 #: crates/clamui-core/src/quarantine.rs:1429
 msgid "File hash mismatch — file may be corrupted"
-msgstr ""
-"Hash del file non corrispondente — il file potrebbe essere danneggiato"
+msgstr "Hash del file non corrispondente — il file potrebbe essere danneggiato"
 
 #: crates/clamui-core/src/scanner.rs:461
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
-"Non sono stati trovati file del database ClamAV nelle posizioni host "
-"standard"
+"Non sono stati trovati file del database ClamAV nelle posizioni host standard"
 
 #: crates/clamui-core/src/scanner.rs:2179
 msgid "Scan cancelled by user"
@@ -1872,8 +1830,7 @@ msgstr ""
 
 #: crates/clamui-core/src/scanner.rs:2199
 msgid "Scan target is not a regular file or directory"
-msgstr ""
-"La destinazione della scansione non è un file o una directory regolare"
+msgstr "La destinazione della scansione non è un file o una directory regolare"
 
 #: crates/clamui-core/src/scanner.rs:2208
 msgid "Threats were detected, but details are unavailable."
@@ -1909,15 +1866,14 @@ msgstr[1] ""
 msgid "Scheduled scan cancelled"
 msgstr "Scansione pianificata annullata"
 
-#. Translators: Keep `clamui-scheduled-scan`, flags, `PATH`, and command
-#. syntax unchanged; translate the `Usage:` label.
+#. Translators: Keep `clamui-scheduled-scan`, flags, `PATH`, and command syntax unchanged; translate the `Usage:` label.
 #: crates/clamui-core/src/scheduler.rs:824
 msgid ""
-"Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] "
-"[--target PATH] [--dry-run] [--verbose|-v]"
+"Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
+"target PATH] [--dry-run] [--verbose|-v]"
 msgstr ""
-"Uso: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--target"
-" PATH] [--dry-run] [--verbose|-v]"
+"Uso: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--target "
+"PATH] [--dry-run] [--verbose|-v]"
 
 #. Translators: The ellipsis indicates that the scheduled scan is starting.
 #: crates/clamui-core/src/scheduler.rs:865
@@ -1959,8 +1915,7 @@ msgstr[1] "  {count} destinazioni: {targets:?}"
 msgid "Scheduled scan failed: ClamAV not available"
 msgstr "Scansione programmata fallita: ClamAV non disponibile"
 
-#. Translators: The em dash separates the unavailable component from
-#. `{error}`; preserve the raw diagnostic placeholder.
+#. Translators: The em dash separates the unavailable component from `{error}`; preserve the raw diagnostic placeholder.
 #: crates/clamui-core/src/scheduler.rs:962
 msgid "Error: ClamAV not available — {error}"
 msgstr "Errore: ClamAV non disponibile — {error}"
@@ -1994,10 +1949,8 @@ msgstr[1] "La scansione pianificata ha rilevato {count} minacce"
 msgid "Scheduled scan completed with errors"
 msgstr "Scansione programmata completata con errori"
 
-#. Translators: The em dash separates the summary from the count; preserve
-#. `{count}`.
-#. Translators: The em dash separates the summary from the count; preserve
-#. `{count}`.
+#. Translators: The em dash separates the summary from the count; preserve `{count}`.
+#. Translators: The em dash separates the summary from the count; preserve `{count}`.
 #: crates/clamui-core/src/scheduler.rs:1058
 msgid "Scheduled scan completed — {count} file scanned, no threats"
 msgid_plural "Scheduled scan completed — {count} files scanned, no threats"
@@ -2087,14 +2040,12 @@ msgstr ""
 "L'output del processo di aggiornamento non si è chiuso dopo la pulizia; "
 "impossibile classificare il risultato."
 
-#. Translators: Keep `freshclam` and `PID` unchanged; preserve `{pid}` as the
-#. process identifier.
+#. Translators: Keep `freshclam` and `PID` unchanged; preserve `{pid}` as the process identifier.
 #: crates/clamui-core/src/updater.rs:503
 msgid "Update signal sent to freshclam service (PID {pid})"
 msgstr "Segnale di aggiornamento inviato al servizio freshclam (PID {pid})"
 
-#. Translators: Keep `freshclam`, `PID`, and `sudo systemctl stop clamav-
-#. freshclam` unchanged; preserve `{pid}` as the process identifier.
+#. Translators: Keep `freshclam`, `PID`, and `sudo systemctl stop clamav-freshclam` unchanged; preserve `{pid}` as the process identifier.
 #: crates/clamui-core/src/updater.rs:793
 msgid ""
 "Another freshclam instance is running (PID {pid}). Stop it first: sudo "
@@ -2111,17 +2062,13 @@ msgstr[0] ""
 msgstr[1] ""
 "Tempo limite dell’aggiornamento raggiunto dopo {minutes} minuti senza output"
 
-#. Translators: The em dash separates the completion state from the count;
-#. preserve `{count}`.
-#. Translators: The em dash separates the completion state from the count;
-#. preserve `{count}`.
+#. Translators: The em dash separates the completion state from the count; preserve `{count}`.
+#. Translators: The em dash separates the completion state from the count; preserve `{count}`.
 #: crates/clamui-core/src/updater.rs:962
 msgid "Database update completed — {count} database updated"
 msgid_plural "Database update completed — {count} databases updated"
-msgstr[0] ""
-"Aggiornamento del database completato — {count} database aggiornato"
-msgstr[1] ""
-"Aggiornamento del database completato — {count} database aggiornati"
+msgstr[0] "Aggiornamento del database completato — {count} database aggiornato"
+msgstr[1] "Aggiornamento del database completato — {count} database aggiornati"
 
 #. Translators: The em dash separates the completion state from the result.
 #: crates/clamui-core/src/updater.rs:972
@@ -2132,18 +2079,16 @@ msgstr "Aggiornamento del database completato — Già aggiornato"
 msgid "Selected freshclam config does not exist: {path}"
 msgstr "La configurazione freshclam selezionata non esiste: {path}"
 
-#. Translators: Keep `freshclam` and `PID` unchanged; they name the service
-#. and its process identifier.
+#. Translators: Keep `freshclam` and `PID` unchanged; they name the service and its process identifier.
 #: crates/clamui-core/src/updater.rs:1071
 msgid "Could not determine freshclam PID"
 msgstr "Impossibile determinare il PID di freshclam"
 
-#. Translators: Keep `sudo systemctl restart clamav-freshclam` unchanged and
-#. preserve `{error}` as the raw diagnostic.
+#. Translators: Keep `sudo systemctl restart clamav-freshclam` unchanged and preserve `{error}` as the raw diagnostic.
 #: crates/clamui-core/src/updater.rs:1081
 msgid ""
-"Could not trigger freshclam service update. Try restarting the service: sudo"
-" systemctl restart clamav-freshclam ({error})"
+"Could not trigger freshclam service update. Try restarting the service: sudo "
+"systemctl restart clamav-freshclam ({error})"
 msgstr ""
 "Impossibile attivare l'aggiornamento del servizio freshclam. Prova a "
 "riavviare il servizio: sudo systemctl restart clamav-freshclam ({error})"
@@ -2212,8 +2157,7 @@ msgstr "Rilevazioni: {detections}/{total}"
 msgid "Error: {error}"
 msgstr "Errore: {error}"
 
-#. Translators: Keep `API` unchanged as the abbreviation for application
-#. programming interface.
+#. Translators: Keep `API` unchanged as the abbreviation for application programming interface.
 #: crates/clamui-core/src/virustotal.rs:986
 msgid "API key saved"
 msgstr "Chiave API salvata"
@@ -2328,7 +2272,7 @@ msgstr "Database"
 msgid "Logs"
 msgstr "Registri"
 
-#: desktop/src/App.tsx:124 desktop/src/pages/Audit.tsx:463
+#: desktop/src/App.tsx:124 desktop/src/pages/Audit.tsx:485
 msgid "Components"
 msgstr "Componenti"
 
@@ -2362,8 +2306,7 @@ msgstr "Risultati"
 msgid "Could not open link"
 msgstr "Impossibile aprire il collegamento"
 
-#. Translators: The em dash separates the two clauses; use your language's
-#. usual dash and spacing.
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:390 desktop/src/App.tsx:405 desktop/src/App.tsx:423
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
@@ -2374,8 +2317,7 @@ msgstr ""
 #: desktop/src/App.tsx:469
 msgid "The privileged-helper installation returned an invalid status."
 msgstr ""
-"L'installazione dell'helper con privilegi ha restituito uno stato non "
-"valido."
+"L'installazione dell'helper con privilegi ha restituito uno stato non valido."
 
 #: desktop/src/App.tsx:476
 msgid "The privileged helper was installed successfully."
@@ -2383,8 +2325,7 @@ msgstr "L'helper con privilegi è stato installato correttamente."
 
 #: desktop/src/App.tsx:478
 msgid ""
-"The privileged helper is still unavailable. Try again or install it "
-"manually."
+"The privileged helper is still unavailable. Try again or install it manually."
 msgstr ""
 "L'helper con privilegi non è ancora disponibile. Riprova o installalo "
 "manualmente."
@@ -2558,8 +2499,7 @@ msgid "Installing the helper requires administrator authorization."
 msgstr ""
 "L'installazione dell'helper richiede l'autorizzazione dell'amministratore."
 
-#. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's
-#. package manager.
+#. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
 #: desktop/src/App.tsx:1064 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
@@ -2643,7 +2583,7 @@ msgstr "Copia contenuto"
 msgid "Configuration content"
 msgstr "Contenuto della configurazione"
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:560
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:582
 msgid "Could not open documentation: {error}"
 msgstr "Impossibile aprire la documentazione: {error}"
 
@@ -2661,8 +2601,8 @@ msgstr ""
 
 #: desktop/src/HelperTrustErrorDialog.tsx:47
 msgid ""
-"ClamUI blocked this operation because its system helper is missing or is not"
-" securely installed."
+"ClamUI blocked this operation because its system helper is missing or is not "
+"securely installed."
 msgstr ""
 "ClamUI ha bloccato questa operazione perché il suo helper di sistema è "
 "mancante o non è installato in modo sicuro."
@@ -2857,15 +2797,15 @@ msgstr "Rilevamento intrusioni"
 msgid "SSH Security"
 msgstr "Sicurezza SSH"
 
-#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:470
+#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:492
 msgid "Checking"
 msgstr "Controllo in corso"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:476
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:498
 msgid "Pass"
 msgstr "Superato"
 
-#: desktop/src/pages/Audit.tsx:64 desktop/src/pages/Audit.tsx:476
+#: desktop/src/pages/Audit.tsx:64 desktop/src/pages/Audit.tsx:498
 msgid "Warning"
 msgstr "Avviso"
 
@@ -2924,73 +2864,73 @@ msgstr ""
 msgid "Essentials"
 msgstr "Elementi essenziali"
 
-#: desktop/src/pages/Audit.tsx:301
+#: desktop/src/pages/Audit.tsx:320
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] "{count} problema di sicurezza richiede attenzione"
 msgstr[1] "{count} problemi di sicurezza richiedono attenzione"
 
-#: desktop/src/pages/Audit.tsx:302
+#: desktop/src/pages/Audit.tsx:321
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] "{count} controllo di verifica richiede una revisione"
 msgstr[1] "{count} controlli di verifica richiedono una revisione"
 
-#: desktop/src/pages/Audit.tsx:303
+#: desktop/src/pages/Audit.tsx:322
 msgid "Security audit completed"
 msgstr "Verifica di sicurezza completata"
 
-#: desktop/src/pages/Audit.tsx:336
+#: desktop/src/pages/Audit.tsx:355
 msgid "Could not receive progressive audit results: {error}"
 msgstr "Impossibile ricevere i risultati progressivi della verifica: {error}"
 
-#: desktop/src/pages/Audit.tsx:356
+#: desktop/src/pages/Audit.tsx:375
 msgid "{tool} check completed"
 msgstr "Controllo di {tool} completato"
 
-#: desktop/src/pages/Audit.tsx:367
+#: desktop/src/pages/Audit.tsx:387
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr "La verifica ha fornito un'azione di avvio della GUI non supportata."
 
-#: desktop/src/pages/Audit.tsx:372
+#: desktop/src/pages/Audit.tsx:392
 msgid "The selected application did not start"
 msgstr "L'applicazione selezionata non è stata avviata"
 
-#: desktop/src/pages/Audit.tsx:386
+#: desktop/src/pages/Audit.tsx:406
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr "Autorizzazione Portmaster concessa; aggiornamento della verifica."
 
-#: desktop/src/pages/Audit.tsx:389
+#: desktop/src/pages/Audit.tsx:409
 msgid "Portmaster authorization was cancelled."
 msgstr "L'autorizzazione Portmaster è stata annullata."
 
-#: desktop/src/pages/Audit.tsx:391
+#: desktop/src/pages/Audit.tsx:411
 msgid "Portmaster authorization was not granted."
 msgstr "L'autorizzazione Portmaster non è stata concessa."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:411
+#: desktop/src/pages/Audit.tsx:431
 msgid "UFW status authorization was cancelled."
 msgstr ""
 "L’autorizzazione per il controllo dello stato di UFW è stata annullata."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:419
+#: desktop/src/pages/Audit.tsx:439
 msgid "The UFW status check did not return a firewall result."
 msgstr ""
 "Il controllo dello stato di UFW non ha restituito un risultato per il "
 "firewall."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:426
+#: desktop/src/pages/Audit.tsx:446
 msgid "UFW status check completed"
 msgstr "Controllo dello stato di UFW completato"
 
-#: desktop/src/pages/Audit.tsx:448
+#: desktop/src/pages/Audit.tsx:470
 msgid "System security audit"
 msgstr "Verifica della sicurezza del sistema"
 
-#: desktop/src/pages/Audit.tsx:449
+#: desktop/src/pages/Audit.tsx:471
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
@@ -2998,27 +2938,27 @@ msgstr ""
 "Esamina il tuo livello di sicurezza e copia le raccomandazioni. I controlli "
 "di audit non modificano mai la configurazione di sistema."
 
-#: desktop/src/pages/Audit.tsx:451
+#: desktop/src/pages/Audit.tsx:473
 msgid "Auditing…"
 msgstr "Verifica in corso…"
 
-#: desktop/src/pages/Audit.tsx:451
+#: desktop/src/pages/Audit.tsx:473
 msgid "Refresh audit"
 msgstr "Aggiorna verifica"
 
-#: desktop/src/pages/Audit.tsx:457
+#: desktop/src/pages/Audit.tsx:479
 msgid "Install and configure your firewall and virus scanner from the"
 msgstr "Installa e configura il firewall e l'antivirus dalla scheda"
 
-#: desktop/src/pages/Audit.tsx:465
+#: desktop/src/pages/Audit.tsx:487
 msgid "tab."
 msgstr "."
 
-#: desktop/src/pages/Audit.tsx:473
+#: desktop/src/pages/Audit.tsx:495
 msgid "Optional hardening"
 msgstr "Protezione opzionale"
 
-#: desktop/src/pages/Audit.tsx:474
+#: desktop/src/pages/Audit.tsx:496
 msgid ""
 "These checks are informational. They do not affect the Protected status "
 "above."
@@ -3026,26 +2966,26 @@ msgstr ""
 "Questi controlli hanno solo scopo informativo. Non influiscono sullo stato "
 "\"Protetto\" indicato sopra."
 
-#: desktop/src/pages/Audit.tsx:476
+#: desktop/src/pages/Audit.tsx:498
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] "{count} problema"
 msgstr[1] "{count} problemi"
 
-#: desktop/src/pages/Audit.tsx:476
+#: desktop/src/pages/Audit.tsx:498
 msgid "unavailable or skipped"
 msgstr "non disponibile o ignorato"
 
-#: desktop/src/pages/Audit.tsx:478
+#: desktop/src/pages/Audit.tsx:500
 msgid "Hide missing optional items"
 msgstr "Nascondi elementi facoltativi mancanti"
 
-#: desktop/src/pages/Audit.tsx:483
+#: desktop/src/pages/Audit.tsx:505
 msgid "Deep scans"
 msgstr "Scansioni approfondite"
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:483
+#: desktop/src/pages/Audit.tsx:505
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
@@ -3054,32 +2994,32 @@ msgstr ""
 "può richiedere l'autorizzazione dell'amministratore solo dopo che lo avvii "
 "esplicitamente."
 
-#: desktop/src/pages/Audit.tsx:488
+#: desktop/src/pages/Audit.tsx:510
 msgid "Running Lynis…"
 msgstr "Esecuzione di Lynis…"
 
-#: desktop/src/pages/Audit.tsx:488
+#: desktop/src/pages/Audit.tsx:510
 msgid "Run Lynis security audit"
 msgstr "Esegui la verifica di sicurezza Lynis"
 
-#: desktop/src/pages/Audit.tsx:489
+#: desktop/src/pages/Audit.tsx:511
 msgid "Running chkrootkit…"
 msgstr "Esecuzione di chkrootkit…"
 
-#: desktop/src/pages/Audit.tsx:489
+#: desktop/src/pages/Audit.tsx:511
 msgid "Run rootkit detection"
 msgstr "Esegui il rilevamento dei rootkit"
 
-#: desktop/src/pages/Audit.tsx:518
+#: desktop/src/pages/Audit.tsx:540
 msgid "No audit details were returned."
 msgstr "Non sono stati restituiti dettagli dell'audit."
 
-#: desktop/src/pages/Audit.tsx:524 desktop/src/pages/Audit.tsx:534
+#: desktop/src/pages/Audit.tsx:546 desktop/src/pages/Audit.tsx:556
 #: desktop/src/pages/Database.tsx:285
 msgid "Unavailable"
 msgstr "Non disponibile"
 
-#: desktop/src/pages/Audit.tsx:527 desktop/src/pages/Network.tsx:403
+#: desktop/src/pages/Audit.tsx:549 desktop/src/pages/Network.tsx:403
 msgid ""
 "Network information is unavailable. Check that the system socket tool is "
 "installed and try again."
@@ -3087,86 +3027,83 @@ msgstr ""
 "Le informazioni di rete non sono disponibili. Verifica che lo strumento "
 "socket di sistema sia installato e riprova."
 
-#: desktop/src/pages/Audit.tsx:528 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:550 desktop/src/pages/Network.tsx:406
 msgid "The socket list was limited. This snapshot may be incomplete."
 msgstr ""
 "L'elenco dei socket era limitato. Questa istantanea potrebbe essere "
 "incompleta."
 
-#: desktop/src/pages/Audit.tsx:528 desktop/src/pages/Network.tsx:406
-msgid ""
-"Some socket records could not be read. This snapshot may be incomplete."
+#: desktop/src/pages/Audit.tsx:550 desktop/src/pages/Network.tsx:406
+msgid "Some socket records could not be read. This snapshot may be incomplete."
 msgstr ""
 "Impossibile leggere alcuni record socket. Questa istantanea potrebbe essere "
 "incompleta."
 
-#: desktop/src/pages/Audit.tsx:529
+#: desktop/src/pages/Audit.tsx:551
 msgid ""
-"Listening sockets do not prove that a port is reachable through the "
-"firewall."
+"Listening sockets do not prove that a port is reachable through the firewall."
 msgstr ""
 "I socket in ascolto non dimostrano che una porta sia raggiungibile "
 "attraverso il firewall."
 
-#: desktop/src/pages/Audit.tsx:531
+#: desktop/src/pages/Audit.tsx:553
 msgid "Protocol"
 msgstr "Protocollo"
 
-#: desktop/src/pages/Audit.tsx:531
+#: desktop/src/pages/Audit.tsx:553
 msgid "Port"
 msgstr "Porta"
 
-#: desktop/src/pages/Audit.tsx:531 desktop/src/pages/Network.tsx:282
+#: desktop/src/pages/Audit.tsx:553 desktop/src/pages/Network.tsx:282
 msgid "Local address"
 msgstr "Indirizzo locale"
 
-#: desktop/src/pages/Audit.tsx:531
+#: desktop/src/pages/Audit.tsx:553
 msgid "Binding"
 msgstr "Associazione"
 
-#: desktop/src/pages/Audit.tsx:531 desktop/src/pages/Network.tsx:287
+#: desktop/src/pages/Audit.tsx:553 desktop/src/pages/Network.tsx:287
 msgid "Process"
 msgstr "Processo"
 
 #. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Audit.tsx:537 desktop/src/pages/Network.tsx:289
+#: desktop/src/pages/Audit.tsx:559 desktop/src/pages/Network.tsx:289
 msgid "PID {pid}"
 msgstr "PID {pid}"
 
-#: desktop/src/pages/Audit.tsx:541 desktop/src/pages/Network.tsx:294
+#: desktop/src/pages/Audit.tsx:563 desktop/src/pages/Network.tsx:294
 msgid "Process information unavailable"
 msgstr "Informazioni sul processo non disponibili"
 
-#: desktop/src/pages/Audit.tsx:551 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:573 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr "Comando copiato negli appunti"
 
-#: desktop/src/pages/Audit.tsx:553 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:575 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr "Impossibile copiare il comando: {error}"
 
-#: desktop/src/pages/Audit.tsx:568 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Audit.tsx:591 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Copia"
 
-#: desktop/src/pages/Audit.tsx:570
+#: desktop/src/pages/Audit.tsx:593
 msgid "Authorizing…"
 msgstr "Autorizzazione in corso…"
 
-#. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis
-#. appropriate for the target language.
-#: desktop/src/pages/Audit.tsx:571
+#. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
+#: desktop/src/pages/Audit.tsx:594
 msgid "Checking UFW…"
 msgstr "Controllo di UFW…"
 
-#: desktop/src/pages/Audit.tsx:576 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Audit.tsx:599 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr "Apri nel browser"
 
-#: desktop/src/pages/Audit.tsx:576
+#: desktop/src/pages/Audit.tsx:599
 msgid "Learn more"
 msgstr "Scopri di più"
 
@@ -3191,14 +3128,12 @@ msgstr "Demone dello scanner"
 msgid "clamscan performs on-demand virus scans."
 msgstr "clamscan esegue scansioni antivirus su richiesta."
 
-#. Translators: Keep freshclam unchanged; it is the database-updater command
-#. name.
+#. Translators: Keep freshclam unchanged; it is the database-updater command name.
 #: desktop/src/pages/Components.tsx:96
 msgid "freshclam downloads current virus definitions."
 msgstr "freshclam scarica le definizioni antivirus aggiornate."
 
-#. Translators: Keep clamdscan and clamd unchanged; they are command and
-#. service names.
+#. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
 #: desktop/src/pages/Components.tsx:101
 msgid "clamdscan uses the clamd daemon for faster scanning."
 msgstr "clamdscan usa il demone clamd per scansioni più rapide."
@@ -3208,12 +3143,10 @@ msgstr "clamdscan usa il demone clamd per scansioni più rapide."
 msgid "clamd is the ClamAV daemon for faster scans."
 msgstr "clamd è il demone ClamAV per scansioni più rapide."
 
-#. Translators: Keep freshclam unchanged; it is the database-updater command
-#. name.
+#. Translators: Keep freshclam unchanged; it is the database-updater command name.
 #: desktop/src/pages/Components.tsx:116
 msgid "After installation, update virus definitions with freshclam."
-msgstr ""
-"Dopo l'installazione, aggiorna le definizioni antivirus con freshclam."
+msgstr "Dopo l'installazione, aggiorna le definizioni antivirus con freshclam."
 
 #. Translators: Keep the embedded shell commands and service name unchanged.
 #: desktop/src/pages/Components.tsx:121
@@ -3229,12 +3162,11 @@ msgstr ""
 msgid "Requires the clamd daemon to be running."
 msgstr "Richiede che il demone clamd sia in esecuzione."
 
-#. Translators: Keep the embedded file path, command, and command-line options
-#. unchanged.
+#. Translators: Keep the embedded file path, command, and command-line options unchanged.
 #: desktop/src/pages/Components.tsx:131
 msgid ""
-"Configuration is auto-detected in Preferences. On Fedora, ClamUI uses "
-"/etc/clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
+"Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
+"clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
 "permissions and run: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
 msgstr ""
 "La configurazione viene rilevata automaticamente nelle Preferenze. Su "
@@ -3389,8 +3321,7 @@ msgstr "Sfoglia"
 msgid "Authorize read"
 msgstr "Autorizza lettura"
 
-#. Translators: Save & Apply and Authorize read are button labels; use their
-#. translations.
+#. Translators: Save & Apply and Authorize read are button labels; use their translations.
 #: desktop/src/pages/ConfigPreferences.tsx:216
 msgid ""
 "Selecting a file keeps the path in this pending proposal. Save & Apply "
@@ -3433,8 +3364,8 @@ msgstr "Aggiungi URL"
 #. Translators: Keep the URI schemes unchanged.
 #: desktop/src/pages/ConfigPreferences.tsx:350
 msgid ""
-"Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider"
-" URL as a separate entry."
+"Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
+"URL as a separate entry."
 msgstr ""
 "Schemi URL supportati: http, https, ftp, ftps e file. Incolla l'URL di "
 "ciascun fornitore come voce separata."
@@ -3540,8 +3471,7 @@ msgstr "Scansiona file archivio"
 msgid "Database Updates"
 msgstr "Aggiornamenti del database"
 
-#. Translators: Keep freshclam.conf unchanged; it is a configuration file
-#. name.
+#. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
 #: desktop/src/pages/ConfigPreferences.tsx:748
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
@@ -3598,8 +3528,7 @@ msgstr "Mirror del database"
 msgid "Suggested"
 msgstr "Suggerito"
 
-#. Translators: Suggested and Save & Apply are button labels; use their
-#. translations. Keep InterServer unchanged.
+#. Translators: Suggested and Save & Apply are button labels; use their translations. Keep InterServer unchanged.
 #: desktop/src/pages/ConfigPreferences.tsx:770
 msgid ""
 "Suggested adds three InterServer databases to this draft. Save & Apply is "
@@ -3623,8 +3552,7 @@ msgstr ""
 msgid "Open provider"
 msgstr "Apri fornitore"
 
-#. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are
-#. tool names.
+#. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
 #: desktop/src/pages/ConfigPreferences.tsx:780
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
@@ -3674,8 +3602,7 @@ msgstr "Backend di scansione"
 msgid "Auto (prefer daemon)"
 msgstr "Automatico (preferisci il demone)"
 
-#. Translators: Keep clamd unchanged; it is the daemon command and service
-#. name.
+#. Translators: Keep clamd unchanged; it is the daemon command and service name.
 #: desktop/src/pages/ConfigPreferences.tsx:798
 msgid "ClamAV Daemon (clamd)"
 msgstr "Demone ClamAV (clamd)"
@@ -4132,8 +4059,8 @@ msgid ""
 "force update bypasses the service and stages replacements before promoting "
 "them, restoring prior databases if that replacement fails."
 msgstr ""
-"Un aggiornamento normale chiede a un servizio freshclam attivo di aggiornare"
-" quando possibile. Un aggiornamento forzato aggira il servizio e prepara le "
+"Un aggiornamento normale chiede a un servizio freshclam attivo di aggiornare "
+"quando possibile. Un aggiornamento forzato aggira il servizio e prepara le "
 "sostituzioni prima di renderle effettive, ripristinando i database "
 "precedenti se la sostituzione non riesce."
 
@@ -4168,8 +4095,8 @@ msgstr "Forzare l'aggiornamento del database?"
 #: desktop/src/pages/Database.tsx:337
 msgid ""
 "This bypasses the freshclam service and stages replacement databases. "
-"Existing definitions remain available until a replacement succeeds; they are"
-" restored if promotion fails."
+"Existing definitions remain available until a replacement succeeds; they are "
+"restored if promotion fails."
 msgstr ""
 "Questa operazione aggira il servizio freshclam e prepara i database "
 "sostitutivi. Le definizioni esistenti rimangono disponibili finché una "
@@ -4431,16 +4358,15 @@ msgstr "In ascolto e associato"
 msgid "Connection"
 msgstr "Connessione"
 
-#. Translators: Preserve the {label} placeholder. It is the translated
-#. endpoint label, such as “Local address”.
+#. Translators: Preserve the {label} placeholder. It is the translated endpoint label, such as “Local address”.
 #: desktop/src/pages/Network.tsx:230
 msgid "Copy {label}"
 msgstr "Copia {label}"
 
 #: desktop/src/pages/Network.tsx:235
 msgid ""
-"VirusTotal reports are unavailable for private, special, scoped, or wildcard"
-" addresses."
+"VirusTotal reports are unavailable for private, special, scoped, or wildcard "
+"addresses."
 msgstr ""
 "I rapporti VirusTotal non sono disponibili per indirizzi privati, speciali, "
 "con ambito o con caratteri jolly."
@@ -4449,8 +4375,7 @@ msgstr ""
 msgid "Address copied to clipboard"
 msgstr "Indirizzo copiato negli appunti"
 
-#. Translators: Preserve the {error} placeholder. It is a technical clipboard
-#. error.
+#. Translators: Preserve the {error} placeholder. It is a technical clipboard error.
 #: desktop/src/pages/Network.tsx:244
 msgid "Could not copy address: {error}"
 msgstr "Impossibile copiare l'indirizzo: {error}"
@@ -4479,8 +4404,7 @@ msgstr "Impossibile caricare le connessioni di rete. Riprova."
 msgid "The VirusTotal report address was invalid."
 msgstr "L'indirizzo del rapporto VirusTotal non era valido."
 
-#. Translators: Preserve the {error} placeholder. It is a technical browser-
-#. opening error.
+#. Translators: Preserve the {error} placeholder. It is a technical browser-opening error.
 #: desktop/src/pages/Network.tsx:375
 msgid "Could not open VirusTotal: {error}"
 msgstr "Impossibile aprire VirusTotal: {error}"
@@ -4510,8 +4434,7 @@ msgstr "Caricamento…"
 msgid "Loading network connections…"
 msgstr "Caricamento delle connessioni di rete…"
 
-#. Translators: Preserve the {time} placeholder. It is the native UTC/ISO
-#. snapshot timestamp.
+#. Translators: Preserve the {time} placeholder. It is the native UTC/ISO snapshot timestamp.
 #: desktop/src/pages/Network.tsx:407
 msgid "Captured at {time}"
 msgstr "Acquisito alle {time}"
@@ -4562,16 +4485,14 @@ msgstr "Nessun socket corrisponde ai filtri correnti."
 msgid "Network sockets"
 msgstr "Socket di rete"
 
-#. Translators: Preserve the {shown} and {count} placeholders. Both are socket
-#. counts.
+#. Translators: Preserve the {shown} and {count} placeholders. Both are socket counts.
 #: desktop/src/pages/Network.tsx:424
 msgid "Showing {shown} of {count} matching socket"
 msgid_plural "Showing {shown} of {count} matching sockets"
 msgstr[0] "Visualizzazione di {shown} socket corrispondente su {count}"
 msgstr[1] "Visualizzazione di {shown} socket corrispondenti su {count}"
 
-#. Translators: Preserve the {address} placeholder; it is an IP address that
-#. will be disclosed to VirusTotal through the browser.
+#. Translators: Preserve the {address} placeholder; it is an IP address that will be disclosed to VirusTotal through the browser.
 #: desktop/src/pages/Network.tsx:434
 msgid ""
 "Opening this report sends the IP address {address} to VirusTotal through "
@@ -4582,8 +4503,7 @@ msgstr ""
 
 #: desktop/src/pages/Network.tsx:439
 msgid "No port, process information, or API key is sent by ClamUI."
-msgstr ""
-"ClamUI non invia alcuna porta, informazione sul processo o chiave API."
+msgstr "ClamUI non invia alcuna porta, informazione sul processo o chiave API."
 
 #: desktop/src/pages/Network.tsx:441
 msgid "Opening…"
@@ -4785,8 +4705,7 @@ msgstr "Elimina"
 msgid "Delete Profile"
 msgstr "Elimina profilo"
 
-#. Translators: Preserve the {name} placeholder; it is a user-provided profile
-#. name. Use quotation marks appropriate for your language.
+#. Translators: Preserve the {name} placeholder; it is a user-provided profile name. Use quotation marks appropriate for your language.
 #: desktop/src/pages/Profiles.tsx:241
 msgid "Delete profile '{name}'? This cannot be undone."
 msgstr "Eliminare il profilo '{name}'? L'operazione non può essere annullata."
@@ -4985,17 +4904,13 @@ msgstr "Ripristinare il file in quarantena?"
 msgid "Permanently Delete File?"
 msgstr "Eliminare definitivamente il file?"
 
-#. Translators: Preserve the {threat} and {path} placeholders; they are
-#. runtime threat and file-path values. Use quotation marks appropriate for
-#. your language.
+#. Translators: Preserve the {threat} and {path} placeholders; they are runtime threat and file-path values. Use quotation marks appropriate for your language.
 #: desktop/src/pages/Quarantine.tsx:311
 msgid "This file was detected as '{threat}'. It will be restored to {path}."
 msgstr ""
 "Questo file è stato rilevato come '{threat}'. Verrà ripristinato in {path}."
 
-#. Translators: Preserve the {path} and {threat} placeholders; they are
-#. runtime file-path and threat values. Use quotation marks appropriate for
-#. your language.
+#. Translators: Preserve the {path} and {threat} placeholders; they are runtime file-path and threat values. Use quotation marks appropriate for your language.
 #: desktop/src/pages/Quarantine.tsx:315
 msgid ""
 "The quarantined file from {path} ('{threat}') will be permanently deleted. "
@@ -5187,8 +5102,7 @@ msgstr "Metti il file in quarantena"
 msgid "Quarantine All Threats"
 msgstr "Metti tutte le minacce in quarantena"
 
-#. Translators: Preserve the {path} placeholder; it is a file path, not
-#. translatable. Use quotation marks appropriate for your language.
+#. Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
 #: desktop/src/pages/Results.tsx:202
 msgid "Move '{path}' to quarantine?"
 msgstr "Spostare '{path}' in quarantena?"
@@ -5239,8 +5153,8 @@ msgstr "Dettagli del rilevamento"
 #: desktop/src/pages/Results.tsx:228
 msgid "Large result set: displaying detections in batches."
 msgstr ""
-"Set di risultati di grandi dimensioni: i rilevamenti vengono visualizzati in"
-" gruppi."
+"Set di risultati di grandi dimensioni: i rilevamenti vengono visualizzati in "
+"gruppi."
 
 #: desktop/src/pages/Results.tsx:228
 msgid "No result"
@@ -5267,22 +5181,19 @@ msgstr "Avviare una scansione per visualizzarne qui i risultati."
 msgid "Scan complete with warnings"
 msgstr "Scansione completata con avvisi"
 
-#. Translators: The em dash separates the two clauses; use your language's
-#. usual dash and spacing.
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete — no threats found"
 msgstr "Scansione completata — nessuna minaccia trovata"
 
-#. Translators: The em dash separates the two clauses; use your language's
-#. usual dash and spacing.
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/pages/Scan.tsx:105
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "Scansione completata — rilevata {count} minaccia"
 msgstr[1] "Scansione completata — rilevate {count} minacce"
 
-#. Translators: The em dash separates the two clauses; use your language's
-#. usual dash and spacing.
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/pages/Scan.tsx:115
 msgid "Scan cancelled — partial results are available"
 msgstr "Scansione annullata — sono disponibili risultati parziali"
@@ -5305,11 +5216,11 @@ msgstr "Scansione VirusTotal"
 
 #: desktop/src/pages/Scan.tsx:184
 msgid ""
-"VirusTotal uploads one file at a time. Only send files you are authorized to"
-" share."
+"VirusTotal uploads one file at a time. Only send files you are authorized to "
+"share."
 msgstr ""
-"VirusTotal carica un file alla volta. Inviare solo file che si è autorizzati"
-" a condividere."
+"VirusTotal carica un file alla volta. Inviare solo file che si è autorizzati "
+"a condividere."
 
 #: desktop/src/pages/Scan.tsx:188
 msgid "API key available"
@@ -5323,8 +5234,7 @@ msgstr "Scansione in corso…"
 msgid "Scan with VirusTotal"
 msgstr "Scansiona con VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:191
-#: desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "Chiave API"
 
@@ -5356,8 +5266,7 @@ msgstr "Avvio della scansione…"
 msgid "Quick Scan profile has no valid targets"
 msgstr "Il profilo Scansione rapida non contiene destinazioni valide"
 
-#. Translators: The em dash separates the two clauses; use your language's
-#. usual dash and spacing.
+#. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
 #: desktop/src/pages/Scan.tsx:516
 msgid "Scan in progress — wait for it to finish before adding targets"
@@ -5373,8 +5282,8 @@ msgstr[0] ""
 "VirusTotal esegue la scansione di un file alla volta; {count} selezione è "
 "stata ignorata."
 msgstr[1] ""
-"VirusTotal esegue la scansione di un file alla volta; {count} selezioni sono"
-" state ignorate."
+"VirusTotal esegue la scansione di un file alla volta; {count} selezioni sono "
+"state ignorate."
 
 #: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
 msgid "Only local files and folders can be scanned"
@@ -5536,8 +5445,7 @@ msgstr "L'azione {action} dell'integrazione non è riuscita: {error}"
 
 #: desktop/src/pages/SettingsPreferences.tsx:230
 msgid ""
-"Override the application language. Restart ClamUI to apply a language "
-"change."
+"Override the application language. Restart ClamUI to apply a language change."
 msgstr ""
 "Sovrascrivere la lingua dell'applicazione. Riavviare ClamUI per applicare "
 "una modifica della lingua."
@@ -5625,13 +5533,11 @@ msgstr "Aggiungi azioni al menu contestuale per i gestori di file supportati."
 msgid "Configure Integration"
 msgstr "Configura Integrazione"
 
-#. Translators: 'Scan with ClamUI' is the installed file-manager menu label;
-#. keep it in English.
+#. Translators: 'Scan with ClamUI' is the installed file-manager menu label; keep it in English.
 #: desktop/src/pages/SettingsPreferences.tsx:259
 msgid "Install, repair, or remove 'Scan with ClamUI' context menu actions."
 msgstr ""
-"Installa, ripara o rimuovi le azioni del menu contestuale 'Scan with "
-"ClamUI'."
+"Installa, ripara o rimuovi le azioni del menu contestuale 'Scan with ClamUI'."
 
 #: desktop/src/pages/SettingsPreferences.tsx:268
 msgid "Partially installed"
@@ -5729,8 +5635,7 @@ msgstr ""
 msgid "Scan Delay (seconds)"
 msgstr "Ritardo della scansione (secondi)"
 
-#. Translators: The en dash marks the inclusive 0–60-second delay range; use
-#. your language's usual range typography.
+#. Translators: The en dash marks the inclusive 0–60-second delay range; use your language's usual range typography.
 #: desktop/src/pages/SettingsPreferences.tsx:360
 msgid "Wait after mounting before scanning (0–60 seconds)."
 msgstr "Attendere dopo il montaggio prima della scansione (0–60 secondi)."
@@ -5839,8 +5744,8 @@ msgid ""
 "Free tier: 4 requests per minute, 500 per day. Files up to 650 MB can be "
 "scanned."
 msgstr ""
-"Piano gratuito: 4 richieste al minuto, 500 al giorno. È possibile sottoporre"
-" a scansione file fino a 650 MB."
+"Piano gratuito: 4 richieste al minuto, 500 al giorno. È possibile sottoporre "
+"a scansione file fino a 650 MB."
 
 #: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Delete VirusTotal API key"
@@ -5848,8 +5753,8 @@ msgstr "Elimina la chiave API VirusTotal"
 
 #: desktop/src/pages/SettingsPreferences.tsx:385
 msgid ""
-"This removes the key from secure storage. You will need to enter it again to"
-" use VirusTotal scanning."
+"This removes the key from secure storage. You will need to enter it again to "
+"use VirusTotal scanning."
 msgstr ""
 "Questa operazione rimuove la chiave dall'archiviazione sicura. Sarà "
 "necessario immetterla nuovamente per utilizzare la scansione VirusTotal."
@@ -6246,8 +6151,7 @@ msgstr "Sempre"
 msgid "Scan Statistics"
 msgstr "Statistiche di scansione"
 
-#. Translators: Preserve the {range} placeholder; it contains a localized
-#. start–end date range.
+#. Translators: Preserve the {range} placeholder; it contains a localized start–end date range.
 #: desktop/src/pages/Statistics.tsx:252
 msgid "Statistics for: {range}"
 msgstr "Statistiche per: {range}"
