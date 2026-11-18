@@ -477,17 +477,6 @@ export default function Audit(): JSX.Element {
 
       {error && <p className="error-banner" role="alert">{error}</p>}
       <HeroBanner running={running} sections={sections} />
-      <p className="audit-components-hint">
-        {_("Install and configure your firewall and virus scanner from the")}{" "}
-        <button
-          className="link-button"
-          onClick={() => window.dispatchEvent(new CustomEvent("clamui-navigate", { detail: { page: "components" } }))}
-          type="button"
-        >
-          {_("Components")}
-        </button>{" "}
-        {_("tab.")}
-      </p>
 
       <EssentialsList actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
 
