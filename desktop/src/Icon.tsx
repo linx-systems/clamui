@@ -16,6 +16,8 @@ const paths = {
   "minus-circle": "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M8 12h8",
   info: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 11v5 M12 7.5h.01",
   "chevron-down": "m6 9 6 6 6-6",
+  "chevron-up": "m6 15 6-6 6 6",
+  grip: "M9 6h.01 M15 6h.01 M9 12h.01 M15 12h.01 M9 18h.01 M15 18h.01",
   "external-link": "M14 3h7v7 M21 3l-9 9 M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
   settings: "M9 3h6l1 4 4 1v8l-4 1-1 4H9l-1-4-4-1V8l4-1z M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0",
   menu: "M4 6h16 M4 12h16 M4 18h16",

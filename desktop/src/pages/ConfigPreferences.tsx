@@ -5,6 +5,7 @@ import { type ManualConfiguration, useConfigurationRecovery } from "../Configura
 import { isHelperTrustError } from "../helperTrustError";
 import { Icon } from "../Icon";
 import { _ } from "../i18n";
+import { addNewestFirst, moveEntry, parseListDraft } from "../pathList";
 
 type ConfigKind = "freshclam" | "clamd";
 type ConfigValues = Record<string, string[]>;
@@ -275,14 +276,28 @@ function StringListField({ label, field, values, onChange, placeholder }: {
   placeholder: string;
 }) {
   const [draft, setDraft] = useState("");
+  const [dragging, setDragging] = useState<string | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const id = fieldId(field);
   const add = () => {
-    const candidates = draft.split(",").map((candidate) => candidate.trim()).filter(Boolean);
+    const candidates = parseListDraft(draft);
     if (candidates.length === 0) return;
-    onChange([...values, ...candidates.filter((candidate) => !values.includes(candidate))]);
+    onChange(addNewestFirst(values, candidates));
     setDraft("");
   };
-  return <div className="form-grid">
+  const move = (from: number, to: number) => {
+    const next = moveEntry(values, from, to);
+    if (next !== values) onChange(next);
+  };
+  const dragTo = (clientY: number) => {
+    if (dragging === null || !listRef.current) return;
+    const from = values.indexOf(dragging);
+    const rows = Array.from(listRef.current.children);
+    let to = rows.findIndex((row) => clientY < row.getBoundingClientRect().bottom);
+    if (to < 0) to = rows.length - 1;
+    move(from, to);
+  };
+  return <div className="form-grid string-list-field">
     <label className="field field-control" htmlFor={id}>{label}</label>
     <div className="inline-form">
       <input id={id} value={draft} placeholder={placeholder} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => {
@@ -293,10 +308,36 @@ function StringListField({ label, field, values, onChange, placeholder }: {
       }} />
       <button className="button" type="button" onClick={add}>{_("Add")}</button>
     </div>
-    {values.length > 0 && <ul className="table">
-      {values.map((item) => <li className="row setting-row" key={item}>
+    {values.length > 0 && <ul className="table string-list" ref={listRef}>
+      {values.map((item, index) => <li className={`row setting-row string-list-row${dragging === item ? " dragging" : ""}`} key={item}>
+        <button
+          className="button icon-button drag-handle"
+          type="button"
+          title={_("Drag to reorder")}
+          aria-label={_("Drag to reorder")}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            setDragging(item);
+          }}
+          onPointerMove={(event) => dragTo(event.clientY)}
+          onPointerUp={() => setDragging(null)}
+          onPointerCancel={() => setDragging(null)}
+          onLostPointerCapture={() => setDragging(null)}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+              event.preventDefault();
+              move(index, index + (event.key === "ArrowUp" ? -1 : 1));
+            }
+          }}
+        ><Icon name="grip" className="grip-icon" /></button>
         <code className="monospace">{item}</code>
-        <button className="button danger" type="button" onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}>{_("Remove")}</button>
+        <div className="actions string-list-actions">
+          <button className="button icon-button" type="button" title={_("Move up")} aria-label={_("Move up")} disabled={index === 0} onClick={() => move(index, index - 1)}><Icon name="chevron-up" /></button>
+          <button className="button icon-button" type="button" title={_("Move down")} aria-label={_("Move down")} disabled={index === values.length - 1} onClick={() => move(index, index + 1)}><Icon name="chevron-down" /></button>
+          <button className="button danger" type="button" onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}>{_("Remove")}</button>
+        </div>
       </li>)}
     </ul>}
   </div>;
