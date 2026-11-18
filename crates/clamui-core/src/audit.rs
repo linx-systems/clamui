@@ -12,6 +12,7 @@ use crate::network::{self, NetworkSnapshot, NetworkSnapshotStatus};
 use crate::portmaster::{self, PortmasterStatus};
 use crate::AppResult;
 
+mod acknowledgements;
 mod firewall;
 mod opensnitch;
 
@@ -69,6 +70,12 @@ pub enum AuditCategory {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct AuditCheck {
+    #[serde(default)]
+    pub id: String,
+    #[serde(default)]
+    pub fingerprint: String,
+    #[serde(default)]
+    pub acknowledged: bool,
     pub name: String,
     pub status: AuditStatus,
     pub detail: String,
@@ -94,8 +101,25 @@ pub struct AuditCheck {
 }
 
 impl AuditCheck {
-    fn new(name: String, status: AuditStatus, detail: String) -> Self {
+    fn result_fingerprint(&self) -> String {
+        let Some(snapshot) = &self.listening_ports else {
+            return json!([self.status, &self.detail]).to_string();
+        };
+        // Endpoint changes matter even when the number of listening ports is
+        // unchanged. Capture time and process IDs must not invalidate consent.
+        let endpoints = snapshot
+            .sockets
+            .iter()
+            .map(|socket| json!([socket.protocol, socket.local]).to_string())
+            .collect::<std::collections::BTreeSet<_>>();
+        json!([self.status, &self.detail, endpoints]).to_string()
+    }
+
+    fn new(id: &str, name: String, status: AuditStatus, detail: String) -> Self {
         Self {
+            id: id.to_owned(),
+            fingerprint: json!([status, &detail]).to_string(),
+            acknowledged: false,
             name,
             status,
             detail,
@@ -173,8 +197,8 @@ impl AuditSection {
     }
 }
 
-fn check(ctx: &Context, name: &str, status: AuditStatus, detail: String) -> AuditCheck {
-    AuditCheck::new(tr(ctx, name), status, detail)
+fn check(ctx: &Context, id: &str, name: &str, status: AuditStatus, detail: String) -> AuditCheck {
+    AuditCheck::new(id, tr(ctx, name), status, detail)
 }
 pub fn overall_status(checks: &[AuditCheck]) -> AuditStatus {
     for candidate in [
@@ -185,11 +209,18 @@ pub fn overall_status(checks: &[AuditCheck]) -> AuditStatus {
         AuditStatus::Skipped,
         AuditStatus::Checking,
     ] {
-        if checks.iter().any(|check| check.status == candidate) {
+        if checks
+            .iter()
+            .any(|check| !check.acknowledged && check.status == candidate)
+        {
             return candidate;
         }
     }
-    AuditStatus::Unknown
+    if checks.iter().any(|check| check.acknowledged) {
+        AuditStatus::Pass
+    } else {
+        AuditStatus::Unknown
+    }
 }
 
 #[derive(Debug)]
@@ -310,6 +341,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     if version.code != Some(0) {
         let mut missing = check(
             ctx,
+            "clamav_installation",
             "ClamAV Installation",
             AuditStatus::Fail,
             tr(ctx, "ClamAV is not installed"),
@@ -329,6 +361,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         .to_owned();
     let mut installed = check(
         ctx,
+        "clamav_installation",
         "ClamAV Installation",
         AuditStatus::Pass,
         text(ctx, "Installed: {version}", &[("{version}", version_text)]),
@@ -340,6 +373,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         Some((days, date)) if days <= 3 => {
             let mut database = check(
                 ctx,
+                "virus_database",
                 "Virus Database",
                 AuditStatus::Pass,
                 trnf(
@@ -357,6 +391,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         Some((days, date)) if days <= 7 => {
             let mut database = check(
                 ctx,
+                "virus_database",
                 "Virus Database",
                 AuditStatus::Warning,
                 trnf(
@@ -376,6 +411,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
         Some((days, date)) => {
             let mut database = check(
                 ctx,
+                "virus_database",
                 "Virus Database",
                 AuditStatus::Fail,
                 trnf(
@@ -399,6 +435,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
             let found = find_daily_cvd(ctx).is_some();
             let mut database = check(
                 ctx,
+                "virus_database",
                 "Virus Database",
                 if found {
                     AuditStatus::Unknown
@@ -427,6 +464,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     let mut daemon = if let Some(service) = daemon_active {
         check(
             ctx,
+            "clamav_daemon",
             "ClamAV Daemon",
             AuditStatus::Pass,
             text(
@@ -438,6 +476,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else if clamd_connection() {
         check(
             ctx,
+            "clamav_daemon",
             "ClamAV Daemon",
             AuditStatus::Pass,
             tr(ctx, "Daemon is responding"),
@@ -445,6 +484,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else {
         let mut check = check(
             ctx,
+            "clamav_daemon",
             "ClamAV Daemon",
             AuditStatus::Warning,
             tr(ctx, "ClamAV daemon is not running"),
@@ -463,6 +503,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     let mut freshclam = if freshclam_active {
         check(
             ctx,
+            "freshclam_updates",
             "Automatic Updates",
             AuditStatus::Pass,
             tr(ctx, "Freshclam service is active"),
@@ -470,6 +511,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else {
         let mut check = check(
             ctx,
+            "freshclam_updates",
             "Automatic Updates",
             AuditStatus::Warning,
             tr(ctx, "Freshclam automatic update service is not running"),
@@ -495,6 +537,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     let scheduled_scans = if schedule_active {
         check(
             ctx,
+            "scheduled_scans",
             "Scheduled Scans",
             AuditStatus::Pass,
             tr(ctx, "Scheduled scans are enabled"),
@@ -502,6 +545,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else if schedule_available {
         let mut row = check(
             ctx,
+            "scheduled_scans",
             "Scheduled Scans",
             AuditStatus::Unknown,
             tr(ctx, "Scheduled scans are not enabled"),
@@ -511,6 +555,7 @@ fn check_clamav_health(ctx: &Context) -> AuditSection {
     } else {
         let mut row = check(
             ctx,
+            "scheduled_scans",
             "Scheduled Scans",
             AuditStatus::Unknown,
             tr(ctx, "No scheduling backend is available on this system"),
@@ -704,6 +749,7 @@ fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
     let name = tr(ctx, "Open Ports");
     let mut row = if !exposed.is_empty() {
         let mut row = AuditCheck::new(
+            "open_ports",
             name,
             AuditStatus::Fail,
             trnf(
@@ -721,6 +767,7 @@ fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
         row
     } else if !ports.is_empty() {
         let mut row = AuditCheck::new(
+            "open_ports",
             name,
             AuditStatus::Warning,
             trnf(
@@ -735,6 +782,7 @@ fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
         row
     } else if snapshot.status != NetworkSnapshotStatus::Available {
         AuditCheck::new(
+            "open_ports",
             name,
             AuditStatus::Unknown,
             snapshot
@@ -743,10 +791,16 @@ fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
                 .unwrap_or_else(|| tr(ctx, "Some network socket rows could not be read.")),
         )
     } else {
-        AuditCheck::new(name, AuditStatus::Pass, tr(ctx, "No open ports detected"))
+        AuditCheck::new(
+            "open_ports",
+            name,
+            AuditStatus::Pass,
+            tr(ctx, "No open ports detected"),
+        )
     };
     row.info_url = Some(URL_PORTS.to_owned());
     row.listening_ports = Some(snapshot);
+    row.fingerprint = row.result_fingerprint();
     row
 }
 
@@ -772,6 +826,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
         let mut row = if value.trim() == "Y" {
             check(
                 ctx,
+                "apparmor",
                 "AppArmor",
                 AuditStatus::Pass,
                 tr(ctx, "AppArmor is enabled"),
@@ -779,6 +834,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
         } else {
             let mut row = check(
                 ctx,
+                "apparmor",
                 "AppArmor",
                 AuditStatus::Warning,
                 tr(ctx, "AppArmor module is loaded but not enabled"),
@@ -796,6 +852,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
         let mut row = match mode.as_str() {
             "enforcing" => check(
                 ctx,
+                "selinux",
                 "SELinux",
                 AuditStatus::Pass,
                 tr(ctx, "SELinux is enforcing"),
@@ -803,6 +860,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
             "permissive" => {
                 let mut row = check(
                     ctx,
+                    "selinux",
                     "SELinux",
                     AuditStatus::Warning,
                     tr(ctx, "SELinux is in permissive mode"),
@@ -816,6 +874,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
             "disabled" => {
                 let mut row = check(
                     ctx,
+                    "selinux",
                     "SELinux",
                     AuditStatus::Fail,
                     tr(ctx, "SELinux is disabled"),
@@ -832,6 +891,7 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
     if !found {
         let mut row = check(
             ctx,
+            "mac_framework",
             "MAC Framework",
             AuditStatus::Unknown,
             tr(ctx, "No mandatory access control framework detected"),
@@ -859,6 +919,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         if apt.stdout.contains("\"1\"") || apt.stdout.to_ascii_lowercase().contains("\"true\"") {
             let mut row = check(
                 ctx,
+                "unattended_upgrades",
                 "Unattended Upgrades",
                 AuditStatus::Pass,
                 tr(ctx, "Automatic security updates are enabled"),
@@ -869,6 +930,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         } else if apt.stdout.contains("\"0\"") {
             let mut row = check(
                 ctx,
+                "unattended_upgrades",
                 "Unattended Upgrades",
                 AuditStatus::Warning,
                 tr(ctx, "Unattended upgrades is installed but disabled"),
@@ -884,6 +946,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         if service_active("dnf-automatic.timer").0 {
             let mut row = check(
                 ctx,
+                "dnf_automatic",
                 "DNF Automatic",
                 AuditStatus::Pass,
                 tr(ctx, "DNF automatic updates are enabled"),
@@ -894,6 +957,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         } else if service_installed("dnf-automatic.timer") {
             let mut row = check(
                 ctx,
+                "dnf_automatic",
                 "DNF Automatic",
                 AuditStatus::Warning,
                 tr(ctx, "DNF automatic is installed but timer is not active"),
@@ -909,6 +973,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
     if !found {
         let mut row = check(
             ctx,
+            "automatic_updates",
             "Automatic Updates",
             AuditStatus::Unknown,
             tr(ctx, "Could not determine automatic update status"),
@@ -925,6 +990,7 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
     if reboot_required {
         let mut row = check(
             ctx,
+            "pending_reboot",
             "Pending Reboot",
             AuditStatus::Warning,
             tr(ctx, "System reboot required to apply updates"),
@@ -965,13 +1031,14 @@ fn check_intrusion_detection(ctx: &Context) -> AuditSection {
         ),
     ] {
         if service_active(service).0 {
-            let mut row = check(ctx, name, AuditStatus::Pass, tr(ctx, detail));
+            let mut row = check(ctx, service, name, AuditStatus::Pass, tr(ctx, detail));
             row.info_url = Some(url.to_owned());
             section.push(row);
             found = true;
         } else if host_binary(binary).is_some() {
             let mut row = check(
                 ctx,
+                service,
                 name,
                 AuditStatus::Warning,
                 text(
@@ -990,6 +1057,7 @@ fn check_intrusion_detection(ctx: &Context) -> AuditSection {
     if !found {
         let mut row = check(
             ctx,
+            "intrusion_prevention",
             "Intrusion Prevention",
             AuditStatus::Unknown,
             tr(ctx, "No intrusion detection system found"),
@@ -1018,6 +1086,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     {
         let mut row = check(
             ctx,
+            "ssh_server",
             "SSH Server",
             AuditStatus::Pass,
             tr(ctx, "SSH server is not running (no remote attack surface)"),
@@ -1028,6 +1097,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     }
     let mut server = check(
         ctx,
+        "ssh_server",
         "SSH Server",
         AuditStatus::Pass,
         tr(ctx, "SSH server is running"),
@@ -1037,6 +1107,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     let Some(config) = effective_sshd_config() else {
         let mut row = check(
             ctx,
+            "ssh_configuration",
             "SSH Configuration",
             AuditStatus::Unknown,
             tr(ctx, "Could not read SSH configuration"),
@@ -1055,6 +1126,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     ) {
         check(
             ctx,
+            "root_login",
             "Root Login",
             AuditStatus::Pass,
             text(ctx, "Root login: {value}", &[("{value}", root.to_owned())]),
@@ -1062,6 +1134,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     } else {
         let mut row = check(
             ctx,
+            "root_login",
             "Root Login",
             AuditStatus::Fail,
             text(
@@ -1082,6 +1155,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     let mut password_row = if password == "no" {
         check(
             ctx,
+            "password_auth",
             "Password Auth",
             AuditStatus::Pass,
             tr(ctx, "Password authentication is disabled (key-only)"),
@@ -1089,6 +1163,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     } else {
         let mut row = check(
             ctx,
+            "password_auth",
             "Password Auth",
             AuditStatus::Warning,
             tr(ctx, "Password authentication is enabled"),
@@ -1108,6 +1183,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     let mut x11_row = if x11 == "no" {
         check(
             ctx,
+            "x11_forwarding",
             "X11 Forwarding",
             AuditStatus::Pass,
             tr(ctx, "X11 forwarding is disabled"),
@@ -1115,6 +1191,7 @@ fn check_ssh_hardening(ctx: &Context) -> AuditSection {
     } else {
         let mut row = check(
             ctx,
+            "x11_forwarding",
             "X11 Forwarding",
             AuditStatus::Warning,
             tr(ctx, "X11 forwarding is enabled"),
@@ -1199,6 +1276,7 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
         PortmasterStatus::Running => {
             let mut running = check(
                 ctx,
+                "portmaster",
                 "Portmaster",
                 AuditStatus::Pass,
                 tr(ctx, "Portmaster is running and protecting connections"),
@@ -1207,25 +1285,21 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
             section.push(running);
             if !result.module_rows.is_empty() {
                 for module in result.module_rows.into_iter().take(8) {
-                    let mut row = AuditCheck {
-                        name: module.name,
-                        status: portmaster_module_status(&module.status),
-                        detail: module.failure_msg.unwrap_or(module.status),
-                        optional_missing: false,
-                        essential: false,
-                        recommendation: None,
-                        install_command: None,
-                        info_url: Some(URL_PORTMASTER_API.to_owned()),
-                        launch_command: None,
-                        launch_label: None,
-                        listening_ports: None,
-                    };
-                    row.detail = sanitize_line(&row.detail);
+                    let status = portmaster_module_status(&module.status);
+                    let detail = sanitize_line(&module.failure_msg.unwrap_or(module.status));
+                    let mut row = AuditCheck::new(
+                        &format!("portmaster_module_{}", hex::encode(module.name.as_bytes())),
+                        module.name,
+                        status,
+                        detail,
+                    );
+                    row.info_url = Some(URL_PORTMASTER_API.to_owned());
                     section.push(row);
                 }
             } else if token.is_none() || result.modules_unauthorized {
                 let mut row = check(
                     ctx,
+                    "module_status",
                     "Module Status",
                     AuditStatus::Skipped,
                     tr(ctx, "Authorize ClamUI in Portmaster for per-module health"),
@@ -1239,6 +1313,7 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
         PortmasterStatus::InstalledNotRunning => {
             let mut row = check(
                 ctx,
+                "portmaster",
                 "Portmaster",
                 AuditStatus::Warning,
                 tr(ctx, "Portmaster is installed but not running"),
@@ -1254,6 +1329,7 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
         PortmasterStatus::NotInstalled => {
             let mut row = check(
                 ctx,
+                "portmaster",
                 "Portmaster",
                 AuditStatus::Skipped,
                 tr(
@@ -1269,6 +1345,7 @@ fn append_portmaster_checks(ctx: &Context, section: &mut AuditSection) {
         PortmasterStatus::Error => {
             let mut row = check(
                 ctx,
+                "portmaster",
                 "Portmaster",
                 AuditStatus::Unknown,
                 text(
@@ -1318,6 +1395,7 @@ fn run_deep(ctx: &Context, tool: &str) -> AuditSection {
     let Some(path) = host_binary(executable) else {
         let mut row = check(
             ctx,
+            tool,
             name,
             AuditStatus::Unknown,
             text(
@@ -1346,6 +1424,7 @@ fn run_deep(ctx: &Context, tool: &str) -> AuditSection {
     if matches!(output.code, Some(126 | 127)) {
         let mut row = check(
             ctx,
+            tool,
             if tool == "lynis" {
                 "Lynis Audit"
             } else {
@@ -1366,6 +1445,7 @@ fn run_deep(ctx: &Context, tool: &str) -> AuditSection {
         };
         let mut row = check(
             ctx,
+            tool,
             if tool == "lynis" {
                 "Lynis Audit"
             } else {
@@ -1394,6 +1474,7 @@ fn run_deep(ctx: &Context, tool: &str) -> AuditSection {
         };
         let mut row = check(
             ctx,
+            tool,
             if tool == "lynis" {
                 "Lynis Audit"
             } else {
@@ -1422,6 +1503,7 @@ fn unknown_deep(ctx: &Context, tool: &str) -> AuditSection {
     );
     section.push(check(
         ctx,
+        "lynis",
         "Lynis Audit",
         AuditStatus::Unknown,
         text(
@@ -1450,6 +1532,7 @@ fn deep_lynis(
         };
         let mut row = check(
             ctx,
+            "lynis",
             "Hardening Index",
             status,
             text(ctx, "Score: {score}/100", &[("{score}", score.to_string())]),
@@ -1465,6 +1548,7 @@ fn deep_lynis(
     } else {
         check(
             ctx,
+            "lynis",
             "Lynis Audit",
             if output.code == Some(0) {
                 AuditStatus::Pass
@@ -1537,7 +1621,13 @@ fn deep_rootkit(
                 output.stderr
             )
         };
-        let mut row = check(ctx, "Rootkit Scan", AuditStatus::Unknown, detail);
+        let mut row = check(
+            ctx,
+            "chkrootkit",
+            "Rootkit Scan",
+            AuditStatus::Unknown,
+            detail,
+        );
         row.info_url = Some(url.to_owned());
         section.push(row);
         return section;
@@ -1551,6 +1641,7 @@ fn deep_rootkit(
     if findings.is_empty() {
         let mut row = check(
             ctx,
+            "chkrootkit",
             "Rootkit Scan",
             AuditStatus::Pass,
             tr(ctx, "No rootkits detected"),
@@ -1562,6 +1653,7 @@ fn deep_rootkit(
     let count = findings.len() as u64;
     let mut row = check(
         ctx,
+        "chkrootkit",
         "Rootkit Scan",
         AuditStatus::Fail,
         trnf(
@@ -1576,7 +1668,13 @@ fn deep_rootkit(
     row.info_url = Some(url.to_owned());
     section.push(row);
     for finding in findings.into_iter().take(5) {
-        let mut row = check(ctx, "Finding", AuditStatus::Fail, finding);
+        let mut row = check(
+            ctx,
+            &format!("rootkit_finding_{}", hex::encode(finding.as_bytes())),
+            "Finding",
+            AuditStatus::Fail,
+            finding,
+        );
         row.info_url = Some(url.to_owned());
         section.push(row);
     }
@@ -1596,7 +1694,8 @@ fn run_tier1(ctx: &Context) -> AuditReport {
     let mut sections = Vec::with_capacity(checks.len());
     let total = checks.len();
     for (index, audit) in checks.into_iter().enumerate() {
-        let section = audit(ctx);
+        let mut section = audit(ctx);
+        acknowledgements::apply(ctx, &mut section);
         ctx.emit(
             "audit-progress",
             json!({"section": section, "index": index, "total": total}),
@@ -1632,6 +1731,7 @@ fn launch(ctx: &Context, command: &str) -> AppResult<bool> {
 pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
     match action {
         "run" => serde_json::to_value(run_tier1(ctx)).map_err(|error| error.to_string()),
+        "acknowledge" | "revoke" => acknowledgements::dispatch(ctx, action, &args),
         "ufw_status" => firewall::request_ufw_status(ctx),
         "deep" => {
             let tool = args
@@ -1641,7 +1741,8 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
             if !matches!(tool, "lynis" | "chkrootkit") {
                 return Err("audit.deep requires tool 'lynis' or 'chkrootkit'".to_owned());
             }
-            let section = run_deep(ctx, tool);
+            let mut section = run_deep(ctx, tool);
+            acknowledgements::apply(ctx, &mut section);
             ctx.emit(
                 "audit-progress",
                 json!({"section": section, "index": 0, "total": 1}),
@@ -1701,6 +1802,36 @@ mod open_ports_tests {
 
     fn assess(ctx: &Context, output: &LimitedCommandOutput) -> AuditCheck {
         open_ports_check(ctx, network::listener_snapshot_from_output(ctx, output))
+    }
+
+    #[test]
+    fn port_acknowledgement_ignores_capture_time_and_process_but_tracks_endpoints() {
+        let temp = TempDir::new().unwrap();
+        let ctx = context(&temp);
+        let original = assess(&ctx, &output("tcp LISTEN 0 128 127.0.0.1:8080 0.0.0.0:*\n"));
+        dispatch(
+            &ctx,
+            "acknowledge",
+            json!({"id": original.id, "fingerprint": original.fingerprint}),
+        )
+        .unwrap();
+        let mut unchanged = assess(
+            &ctx,
+            &output("tcp LISTEN 0 128 127.0.0.1:8080 0.0.0.0:* users:((\"web\",pid=99,fd=3))\n"),
+        );
+        unchanged.listening_ports.as_mut().unwrap().captured_at = "different capture".into();
+        let mut section = AuditSection::new(&ctx, AuditCategory::Firewall, "Firewall", "firewall");
+        section.push(unchanged);
+        acknowledgements::apply(&ctx, &mut section);
+        assert!(section.checks[0].acknowledged);
+        let changed = assess(&ctx, &output("tcp LISTEN 0 128 0.0.0.0:9090 0.0.0.0:*\n"));
+        assert_eq!(original.detail, changed.detail);
+        section.checks = vec![changed];
+        acknowledgements::apply(&ctx, &mut section);
+        assert!(!section.checks[0].acknowledged);
+        section.checks = vec![original];
+        acknowledgements::apply(&ctx, &mut section);
+        assert!(!section.checks[0].acknowledged);
     }
 
     #[test]

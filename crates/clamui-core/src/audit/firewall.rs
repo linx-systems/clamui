@@ -86,7 +86,7 @@ fn build_firewall(ctx: &Context, ufw: UfwState, ufw_service_active: bool) -> Aud
 
     if manager_overlap(ufw, firewalld) {
         let name = tr(ctx, "Firewall manager overlap");
-        section.push(AuditCheck::new(name, AuditStatus::Warning, tr(
+        section.push(AuditCheck::new("firewall_manager_overlap", name, AuditStatus::Warning, tr(
             ctx,
             "UFW is active while Firewalld owns its D-Bus name; their rule interaction was not evaluated.",
         )));
@@ -268,7 +268,8 @@ fn finish_ufw_status(
             "The UFW status check returned incomplete or invalid output.",
         ));
     }
-    let section = build(state);
+    let mut section = build(state);
+    super::acknowledgements::apply(ctx, &mut section);
     ctx.emit(
         "audit-progress",
         serde_json::json!({"section": section, "index": 0, "total": 1}),
@@ -378,49 +379,49 @@ fn ufw_status_check(
         UfwState::Active {
             incoming: InputPolicy::Deny,
             listed_exceptions: true,
-        } => AuditCheck::new(name, AuditStatus::Pass, tr(
+        } => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(
             ctx,
             "UFW is active; the default incoming policy is deny. Listed rules may allow exceptions.",
         )),
         UfwState::Active {
             incoming: InputPolicy::Reject,
             listed_exceptions: true,
-        } => AuditCheck::new(name, AuditStatus::Pass, tr(
+        } => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(
             ctx,
             "UFW is active; the default incoming policy is reject. Listed rules may allow exceptions.",
         )),
         UfwState::Active {
             incoming: InputPolicy::Deny,
             listed_exceptions: false,
-        } => AuditCheck::new(name, AuditStatus::Pass, tr(ctx, "UFW is active; the default incoming policy is deny.")),
+        } => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(ctx, "UFW is active; the default incoming policy is deny.")),
         UfwState::Active {
             incoming: InputPolicy::Reject,
             listed_exceptions: false,
-        } => AuditCheck::new(name, AuditStatus::Pass, tr(ctx, "UFW is active; the default incoming policy is reject.")),
+        } => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(ctx, "UFW is active; the default incoming policy is reject.")),
         UfwState::Active {
             incoming: InputPolicy::Allow,
             ..
-        } => AuditCheck::new(name, AuditStatus::Warning, tr(
+        } => AuditCheck::new("ufw", name, AuditStatus::Warning, tr(
             ctx,
             "UFW is active, but the default incoming policy allows traffic.",
         )),
         UfwState::Active {
             incoming: InputPolicy::Unverified,
             ..
-        } => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        } => AuditCheck::new("ufw", name, AuditStatus::Unknown, tr(
             ctx,
             "UFW is active, but its default incoming policy could not be verified.",
         )),
-        UfwState::Inactive if other_manager_active => AuditCheck::new(name, AuditStatus::Pass, tr(
+        UfwState::Inactive if other_manager_active => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(
             ctx,
             "UFW is inactive, but another firewall manager is active and protecting the system.",
         )),
-        UfwState::Inactive => AuditCheck::new(name, AuditStatus::Warning, tr(ctx, "UFW reports inactive.")),
-        UfwState::Unknown if service_active => AuditCheck::new(name, AuditStatus::Pass, tr(
+        UfwState::Inactive => AuditCheck::new("ufw", name, AuditStatus::Warning, tr(ctx, "UFW reports inactive.")),
+        UfwState::Unknown if service_active => AuditCheck::new("ufw", name, AuditStatus::Pass, tr(
             ctx,
             "UFW's service is active, but its default firewall policy could not be verified without administrator access.",
         )),
-        UfwState::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(ctx, "UFW status could not be inspected safely.")),
+        UfwState::Unknown => AuditCheck::new("ufw", name, AuditStatus::Unknown, tr(ctx, "UFW status could not be inspected safely.")),
     }
 }
 
@@ -479,15 +480,15 @@ fn parse_firewalld_owner(text: &str) -> FirewalldOwner {
 fn add_firewalld(ctx: &Context, section: &mut AuditSection, owner: FirewalldOwner) {
     let name = tr(ctx, "Firewalld");
     let mut row = match owner {
-        FirewalldOwner::Present => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        FirewalldOwner::Present => AuditCheck::new("firewalld", name, AuditStatus::Unknown, tr(
             ctx,
             "Firewalld owns its D-Bus name; readiness and firewall policy were not queried.",
         )),
-        FirewalldOwner::Absent => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        FirewalldOwner::Absent => AuditCheck::new("firewalld", name, AuditStatus::Unknown, tr(
             ctx,
             "No Firewalld D-Bus owner was observed; this does not establish kernel firewall policy.",
         )),
-        FirewalldOwner::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        FirewalldOwner::Unknown => AuditCheck::new("firewalld", name, AuditStatus::Unknown, tr(
             ctx,
             "Firewalld ownership could not be verified; readiness and firewall policy were not queried.",
         )),
@@ -505,12 +506,14 @@ fn add_firewalld_command(ctx: &Context, section: &mut AuditSection, present: boo
     let name = tr(ctx, "firewall-cmd");
     let row = if present {
         AuditCheck::new(
+            "firewall_cmd",
             name,
             AuditStatus::Pass,
             tr(ctx, "firewall-cmd is installed; it was not executed."),
         )
     } else {
         AuditCheck::new(
+            "firewall_cmd",
             name,
             AuditStatus::Unknown,
             tr(
@@ -653,15 +656,15 @@ fn combine_family_evidence(policies: &[FamilyEvidence]) -> FamilyEvidence {
 fn add_nftables(ctx: &Context, section: &mut AuditSection, assessment: Option<NativeAssessment>) {
     let name = tr(ctx, "nftables (native rules)");
     let mut row = match assessment.map(nft_status) {
-        Some(AuditStatus::Pass) => AuditCheck::new(name, AuditStatus::Pass, tr(
+        Some(AuditStatus::Pass) => AuditCheck::new("nftables", name, AuditStatus::Pass, tr(
             ctx,
             "nftables has restrictive default input policies for IPv4 and IPv6; individual rules may allow exceptions.",
         )),
-        Some(AuditStatus::Warning) => AuditCheck::new(name, AuditStatus::Warning, tr(
+        Some(AuditStatus::Warning) => AuditCheck::new("nftables", name, AuditStatus::Warning, tr(
             ctx,
             "nftables reports a permissive default input policy; remaining coverage may be incomplete",
         )),
-        _ => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        _ => AuditCheck::new("nftables", name, AuditStatus::Unknown, tr(
             ctx,
             "nftables input policy coverage could not be verified for both IPv4 and IPv6",
         )),
@@ -723,12 +726,12 @@ fn parse_iptables_save(text: &str) -> Option<FamilyEvidence> {
 fn add_iptables4(ctx: &Context, section: &mut AuditSection, evidence: Option<FamilyEvidence>) {
     let name = tr(ctx, "iptables (IPv4)");
     let row = match evidence {
-        Some(FamilyEvidence::Restrictive) => AuditCheck::new(name, AuditStatus::Pass, tr(
+        Some(FamilyEvidence::Restrictive) => AuditCheck::new("iptables_ipv4", name, AuditStatus::Pass, tr(
             ctx,
             "iptables has a restrictive INPUT default policy; individual rules may allow exceptions.",
         )),
-        Some(FamilyEvidence::Permissive) => AuditCheck::new(name, AuditStatus::Warning, tr(ctx, "iptables has a permissive INPUT default policy")),
-        _ => AuditCheck::new(name, AuditStatus::Unknown, tr(ctx, "iptables INPUT policy could not be verified")),
+        Some(FamilyEvidence::Permissive) => AuditCheck::new("iptables_ipv4", name, AuditStatus::Warning, tr(ctx, "iptables has a permissive INPUT default policy")),
+        _ => AuditCheck::new("iptables_ipv4", name, AuditStatus::Unknown, tr(ctx, "iptables INPUT policy could not be verified")),
     };
     section.push(row);
 }
@@ -736,12 +739,12 @@ fn add_iptables4(ctx: &Context, section: &mut AuditSection, evidence: Option<Fam
 fn add_iptables6(ctx: &Context, section: &mut AuditSection, evidence: Option<FamilyEvidence>) {
     let name = tr(ctx, "iptables (IPv6)");
     let row = match evidence {
-        Some(FamilyEvidence::Restrictive) => AuditCheck::new(name, AuditStatus::Pass, tr(
+        Some(FamilyEvidence::Restrictive) => AuditCheck::new("iptables_ipv6", name, AuditStatus::Pass, tr(
             ctx,
             "ip6tables has a restrictive INPUT default policy; individual rules may allow exceptions.",
         )),
-        Some(FamilyEvidence::Permissive) => AuditCheck::new(name, AuditStatus::Warning, tr(ctx, "ip6tables has a permissive INPUT default policy")),
-        _ => AuditCheck::new(name, AuditStatus::Unknown, tr(ctx, "ip6tables INPUT policy could not be verified")),
+        Some(FamilyEvidence::Permissive) => AuditCheck::new("iptables_ipv6", name, AuditStatus::Warning, tr(ctx, "ip6tables has a permissive INPUT default policy")),
+        _ => AuditCheck::new("iptables_ipv6", name, AuditStatus::Unknown, tr(ctx, "ip6tables INPUT policy could not be verified")),
     };
     section.push(row);
 }
@@ -788,28 +791,29 @@ fn add_active_firewall(
     let name = tr(ctx, "Firewall");
     let manager = active_manager(ufw, firewalld, ufw_service_active);
     let mut row = match manager {
-        ActiveManager::Both => AuditCheck::new(name, AuditStatus::Warning, tr(
+        ActiveManager::Both => AuditCheck::new("firewall", name, AuditStatus::Warning, tr(
             ctx,
             "UFW and Firewalld are both active; review which one is meant to control your firewall rules.",
         )),
         ActiveManager::Ufw => ufw_status_check(ctx, name, ufw, false, ufw_service_active),
-        ActiveManager::Firewalld => AuditCheck::new(name, AuditStatus::Pass, tr(
+        ActiveManager::Firewalld => AuditCheck::new("firewall", name, AuditStatus::Pass, tr(
             ctx,
             "Firewalld is active and managing the firewall.",
         )),
         ActiveManager::None => {
-            let mut row = AuditCheck::new(name, AuditStatus::Warning, tr(
+            let mut row = AuditCheck::new("firewall", name, AuditStatus::Warning, tr(
                 ctx,
                 "No active firewall manager was detected.",
             ));
             row.recommendation = Some(tr(ctx, "Enable UFW or Firewalld to protect the system."));
             row
         }
-        ActiveManager::Unknown => AuditCheck::new(name, AuditStatus::Unknown, tr(
+        ActiveManager::Unknown => AuditCheck::new("firewall", name, AuditStatus::Unknown, tr(
             ctx,
             "The active firewall manager could not be verified.",
         )),
     };
+    row.id = "firewall".to_owned();
     row.essential = true;
     row.info_url = Some(if manager == ActiveManager::Firewalld {
         URL_FIREWALLD.to_owned()
@@ -822,9 +826,14 @@ fn add_active_firewall(
 fn add_gufw(ctx: &Context, section: &mut AuditSection, present: bool) {
     let name = tr(ctx, "Gufw");
     let mut row = if present {
-        AuditCheck::new(name, AuditStatus::Pass, tr(ctx, "Gufw is available."))
+        AuditCheck::new(
+            "gufw",
+            name,
+            AuditStatus::Pass,
+            tr(ctx, "Gufw is available."),
+        )
     } else {
-        AuditCheck::new(name, AuditStatus::Skipped, tr(
+        AuditCheck::new("gufw", name, AuditStatus::Skipped, tr(
             ctx,
             "Gufw was not confirmed; this optional inventory does not affect firewall policy analysis.",
         ))
@@ -841,12 +850,13 @@ fn add_firewall_config(ctx: &Context, section: &mut AuditSection, present: bool)
     let name = tr(ctx, "Firewall Config");
     let mut row = if present {
         AuditCheck::new(
+            "firewall_config",
             name,
             AuditStatus::Pass,
             tr(ctx, "Firewall Config is available."),
         )
     } else {
-        AuditCheck::new(name, AuditStatus::Skipped, tr(
+        AuditCheck::new("firewall_config", name, AuditStatus::Skipped, tr(
             ctx,
             "Firewall Config was not confirmed; this optional inventory does not affect firewall policy analysis.",
         ))
@@ -895,6 +905,7 @@ fn add_plasma_firewall(ctx: &Context, section: &mut AuditSection, installed: boo
     let name = tr(ctx, "Plasma Firewall");
     let mut row = if installed {
         AuditCheck::new(
+            "plasma_firewall",
             name,
             AuditStatus::Pass,
             tr(
@@ -904,6 +915,7 @@ fn add_plasma_firewall(ctx: &Context, section: &mut AuditSection, installed: boo
         )
     } else {
         AuditCheck::new(
+            "plasma_firewall",
             name,
             AuditStatus::Skipped,
             tr(

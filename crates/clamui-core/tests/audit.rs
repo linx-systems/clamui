@@ -11,6 +11,9 @@ use tempfile::TempDir;
 
 fn audit_check(status: AuditStatus) -> AuditCheck {
     AuditCheck {
+        id: "test".to_owned(),
+        fingerprint: String::new(),
+        acknowledged: false,
         name: "fixture".to_owned(),
         status,
         detail: "fixture".to_owned(),
@@ -33,6 +36,9 @@ fn audit_check_optional_missing_defaults_for_legacy_payloads() {
         "detail": "not installed"
     });
     let check: AuditCheck = serde_json::from_value(legacy).expect("legacy audit check");
+    assert!(check.id.is_empty());
+    assert!(check.fingerprint.is_empty());
+    assert!(!check.acknowledged);
     assert!(!check.optional_missing);
     assert!(!check.essential);
     assert!(check.listening_ports.is_none());
@@ -169,4 +175,31 @@ fn audit_launch_rejects_paths_arguments_and_unlisted_commands() {
         );
     }
     assert!(audit::dispatch(&ctx, "launch", json!({})).is_err());
+}
+
+#[test]
+fn acknowledged_results_leave_only_outstanding_checks_in_status_and_counts() {
+    let mut acknowledged_warning = audit_check(AuditStatus::Warning);
+    acknowledged_warning.acknowledged = true;
+    let mut acknowledged_failure = audit_check(AuditStatus::Fail);
+    acknowledged_failure.acknowledged = true;
+    let checks = [
+        acknowledged_warning,
+        acknowledged_failure,
+        audit_check(AuditStatus::Warning),
+    ];
+    let outstanding = checks
+        .iter()
+        .filter(|check| !check.acknowledged)
+        .collect::<Vec<_>>();
+    assert_eq!(outstanding.len(), 1);
+    assert_eq!(
+        outstanding
+            .iter()
+            .filter(|check| check.status == AuditStatus::Warning)
+            .count(),
+        1
+    );
+    assert_eq!(overall_status(&checks), AuditStatus::Warning);
+    assert_eq!(overall_status(&checks[..2]), AuditStatus::Pass);
 }

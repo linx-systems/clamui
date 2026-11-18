@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-17 18:55+0100\n"
+"POT-Creation-Date: 2026-11-18 11:06+0100\n"
 "PO-Revision-Date: 2026-09-13 09:59+0200\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -17,372 +17,372 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: crates/clamui-core/src/audit.rs:315
+#: crates/clamui-core/src/audit.rs:347
 msgid "ClamAV is not installed"
 msgstr "A ClamAV nincs telepítve"
 
-#: crates/clamui-core/src/audit.rs:317
+#: crates/clamui-core/src/audit.rs:349
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Telepítse a ClamAV-ot a víruskeresés engedélyezéséhez"
 
-#: crates/clamui-core/src/audit.rs:334
+#: crates/clamui-core/src/audit.rs:367
 msgid "Installed: {version}"
 msgstr "Telepítve: {version}"
 
-#: crates/clamui-core/src/audit.rs:345
+#: crates/clamui-core/src/audit.rs:379
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "Naprakész ({days} napos, létrehozva: {date})"
 msgstr[1] "Naprakész ({days} napos, létrehozva: {date})"
 
-#: crates/clamui-core/src/audit.rs:362 crates/clamui-core/src/audit.rs:381
+#: crates/clamui-core/src/audit.rs:397 crates/clamui-core/src/audit.rs:417
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "Az adatbázis {days} napos (létrehozva: {date})"
 msgstr[1] "Az adatbázis {days} napos (létrehozva: {date})"
 
-#: crates/clamui-core/src/audit.rs:370
+#: crates/clamui-core/src/audit.rs:405
 msgid "Update virus database to ensure protection"
 msgstr "Frissítse a vírusadatbázist a védelem biztosításához"
 
-#: crates/clamui-core/src/audit.rs:389
+#: crates/clamui-core/src/audit.rs:425
 msgid "Database is critically outdated. Update immediately."
 msgstr "Az adatbázis kritikusan elavult. Azonnal frissítse."
 
-#: crates/clamui-core/src/audit.rs:409
+#: crates/clamui-core/src/audit.rs:446
 msgid "Database files exist but age could not be determined"
 msgstr "Léteznek adatbázisfájlok, de a koruk nem állapítható meg"
 
-#: crates/clamui-core/src/audit.rs:411
+#: crates/clamui-core/src/audit.rs:448
 msgid "No virus database found"
 msgstr "Nem található vírusadatbázis"
 
-#: crates/clamui-core/src/audit.rs:415
+#: crates/clamui-core/src/audit.rs:452
 msgid "Download virus database"
 msgstr "Vírusadatbázis letöltése"
 
-#: crates/clamui-core/src/audit.rs:432
+#: crates/clamui-core/src/audit.rs:470
 msgid "Service {name} is running"
 msgstr "A(z) {name} szolgáltatás fut"
 
-#: crates/clamui-core/src/audit.rs:443
+#: crates/clamui-core/src/audit.rs:482
 msgid "Daemon is responding"
 msgstr "A démon válaszol"
 
-#: crates/clamui-core/src/audit.rs:450
+#: crates/clamui-core/src/audit.rs:490
 msgid "ClamAV daemon is not running"
 msgstr "A ClamAV démon nem fut"
 
-#: crates/clamui-core/src/audit.rs:452
+#: crates/clamui-core/src/audit.rs:492
 msgid "Start the daemon for faster scanning"
 msgstr "Indítsa el a démont a gyorsabb vizsgálathoz"
 
-#: crates/clamui-core/src/audit.rs:468
+#: crates/clamui-core/src/audit.rs:509
 msgid "Freshclam service is active"
 msgstr "A freshclam szolgáltatás aktív"
 
-#: crates/clamui-core/src/audit.rs:475
+#: crates/clamui-core/src/audit.rs:517
 msgid "Freshclam automatic update service is not running"
 msgstr "A freshclam automatikus frissítő szolgáltatás nem fut"
 
-#: crates/clamui-core/src/audit.rs:477
+#: crates/clamui-core/src/audit.rs:519
 msgid "Enable automatic database updates"
 msgstr "Automatikus adatbázis-frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:500
+#: crates/clamui-core/src/audit.rs:543
 msgid "Scheduled scans are enabled"
 msgstr "Az ütemezett vizsgálatok engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:507
+#: crates/clamui-core/src/audit.rs:551
 msgid "Scheduled scans are not enabled"
 msgstr "Az ütemezett vizsgálatok nincsenek engedélyezve"
 
-#: crates/clamui-core/src/audit.rs:509
+#: crates/clamui-core/src/audit.rs:553
 msgid "Enable scheduled scans in Preferences → Schedule"
 msgstr "Engedélyezze az ütemezett vizsgálatokat itt: Beállítások → Ütemezés"
 
-#: crates/clamui-core/src/audit.rs:516
+#: crates/clamui-core/src/audit.rs:561
 msgid "No scheduling backend is available on this system"
 msgstr "Ezen a rendszeren nem áll rendelkezésre ütemező szolgáltatás"
 
-#: crates/clamui-core/src/audit.rs:518
+#: crates/clamui-core/src/audit.rs:563
 msgid "Scheduled scans require a systemd user session or cron"
 msgstr ""
 "Az ütemezett vizsgálatokhoz systemd felhasználói munkamenet vagy cron "
 "szükséges"
 
-#: crates/clamui-core/src/audit.rs:704
+#: crates/clamui-core/src/audit.rs:749
 msgid "Open Ports"
 msgstr "Nyitott portok"
 
-#: crates/clamui-core/src/audit.rs:709
+#: crates/clamui-core/src/audit.rs:755
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} port figyel, kockázatos portok: {ports}"
 msgstr[1] "{count} port figyel, kockázatos portok: {ports}"
 
-#: crates/clamui-core/src/audit.rs:720
+#: crates/clamui-core/src/audit.rs:766
 msgid "Review if these services need to be exposed"
 msgstr ""
 "Ellenőrizze, hogy ezeket a szolgáltatásokat szükséges-e elérhetővé tenni"
 
-#: crates/clamui-core/src/audit.rs:726
+#: crates/clamui-core/src/audit.rs:773
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] "{count} port figyel"
 msgstr[1] "{count} port figyel"
 
-#: crates/clamui-core/src/audit.rs:734
+#: crates/clamui-core/src/audit.rs:781
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 "Ellenőrizze a nyitott portokat, és zárja le a felesleges szolgáltatásokat"
 
-#: crates/clamui-core/src/audit.rs:743 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:791 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr "Néhány hálózati foglalatsor nem volt olvasható."
 
-#: crates/clamui-core/src/audit.rs:746
+#: crates/clamui-core/src/audit.rs:798
 msgid "No open ports detected"
 msgstr "Nem található nyitott port"
 
-#: crates/clamui-core/src/audit.rs:777
+#: crates/clamui-core/src/audit.rs:832
 msgid "AppArmor is enabled"
 msgstr "Az AppArmor engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:784
+#: crates/clamui-core/src/audit.rs:840
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Az AppArmor modul betöltve, de nincs engedélyezve"
 
-#: crates/clamui-core/src/audit.rs:786
+#: crates/clamui-core/src/audit.rs:842
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Engedélyezze az AppArmort az alkalmazások elszigeteléséhez"
 
-#: crates/clamui-core/src/audit.rs:801
+#: crates/clamui-core/src/audit.rs:858
 msgid "SELinux is enforcing"
 msgstr "A SELinux kikényszerítő (enforcing) módban van"
 
-#: crates/clamui-core/src/audit.rs:808
+#: crates/clamui-core/src/audit.rs:866
 msgid "SELinux is in permissive mode"
 msgstr "A SELinux megengedő (permissive) módban van"
 
-#: crates/clamui-core/src/audit.rs:810
+#: crates/clamui-core/src/audit.rs:868
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Fontolja meg az enforcing módra váltást a fokozott védelem érdekében"
 
-#: crates/clamui-core/src/audit.rs:821
+#: crates/clamui-core/src/audit.rs:880
 msgid "SELinux is disabled"
 msgstr "A SELinux le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:823
+#: crates/clamui-core/src/audit.rs:882
 msgid "Enable SELinux for mandatory access control"
 msgstr "Engedélyezze a SELinuxot a kötelező hozzáférés-vezérléshez"
 
-#: crates/clamui-core/src/audit.rs:837
+#: crates/clamui-core/src/audit.rs:897
 msgid "No mandatory access control framework detected"
 msgstr "Nem található kötelező hozzáférés-vezérlési keretrendszer"
 
-#: crates/clamui-core/src/audit.rs:839
+#: crates/clamui-core/src/audit.rs:899
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Érdemes engedélyezni az AppArmort vagy a SELinuxot"
 
-#: crates/clamui-core/src/audit.rs:864
+#: crates/clamui-core/src/audit.rs:925
 msgid "Automatic security updates are enabled"
 msgstr "Az automatikus biztonsági frissítések engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:874
+#: crates/clamui-core/src/audit.rs:936
 msgid "Unattended upgrades is installed but disabled"
 msgstr "A felügyelet nélküli frissítések telepítve vannak, de le vannak tiltva"
 
-#: crates/clamui-core/src/audit.rs:876
+#: crates/clamui-core/src/audit.rs:938
 msgid "Enable automatic security updates"
 msgstr "Automatikus biztonsági frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:889
+#: crates/clamui-core/src/audit.rs:952
 msgid "DNF automatic updates are enabled"
 msgstr "A DNF automatikus frissítései engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:899
+#: crates/clamui-core/src/audit.rs:963
 msgid "DNF automatic is installed but timer is not active"
 msgstr "A DNF automatic telepítve van, de az időzítő nem aktív"
 
-#: crates/clamui-core/src/audit.rs:901
+#: crates/clamui-core/src/audit.rs:965
 msgid "Enable automatic updates"
 msgstr "Automatikus frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:914
+#: crates/clamui-core/src/audit.rs:979
 msgid "Could not determine automatic update status"
 msgstr "Nem sikerült megállapítani az automatikus frissítés állapotát"
 
-#: crates/clamui-core/src/audit.rs:916
+#: crates/clamui-core/src/audit.rs:981
 msgid "Configure automatic security updates"
 msgstr "Automatikus biztonsági frissítések beállítása"
 
-#: crates/clamui-core/src/audit.rs:930
+#: crates/clamui-core/src/audit.rs:996
 msgid "System reboot required to apply updates"
 msgstr "A frissítések alkalmazásához újra kell indítani a rendszert"
 
-#: crates/clamui-core/src/audit.rs:932
+#: crates/clamui-core/src/audit.rs:998
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 "Indítsa újra a rendszert a függőben lévő biztonsági frissítések "
 "alkalmazásához"
 
-#: crates/clamui-core/src/audit.rs:977
+#: crates/clamui-core/src/audit.rs:1044
 msgid "{name} is installed but not running"
 msgstr "A(z) {name} telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:995
+#: crates/clamui-core/src/audit.rs:1063
 msgid "No intrusion detection system found"
 msgstr "Nem található behatolásészlelő rendszer"
 
-#: crates/clamui-core/src/audit.rs:997
+#: crates/clamui-core/src/audit.rs:1065
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 "Telepítse a fail2ban vagy CrowdSec programot a támadások elleni védelemhez"
 
-#: crates/clamui-core/src/audit.rs:1023
+#: crates/clamui-core/src/audit.rs:1092
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "Az SSH-kiszolgáló nem fut (nincs távoli támadási felület)"
 
-#: crates/clamui-core/src/audit.rs:1033
+#: crates/clamui-core/src/audit.rs:1103
 msgid "SSH server is running"
 msgstr "Az SSH-kiszolgáló fut"
 
-#: crates/clamui-core/src/audit.rs:1042
+#: crates/clamui-core/src/audit.rs:1113
 msgid "Could not read SSH configuration"
 msgstr "Nem sikerült beolvasni az SSH-beállításokat"
 
-#: crates/clamui-core/src/audit.rs:1060
+#: crates/clamui-core/src/audit.rs:1132
 msgid "Root login: {value}"
 msgstr "Root bejelentkezés: {value}"
 
-#: crates/clamui-core/src/audit.rs:1067
+#: crates/clamui-core/src/audit.rs:1140
 msgid "Root login is allowed ({value})"
 msgstr "A root bejelentkezés engedélyezett ({value})"
 
-#: crates/clamui-core/src/audit.rs:1073
+#: crates/clamui-core/src/audit.rs:1146
 msgid "Disable root SSH login for security"
 msgstr "Biztonsági okból tiltsa le a root SSH-bejelentkezést"
 
-#: crates/clamui-core/src/audit.rs:1087
+#: crates/clamui-core/src/audit.rs:1161
 msgid "Password authentication is disabled (key-only)"
 msgstr "A jelszavas hitelesítés le van tiltva (csak kulcs alapú)"
 
-#: crates/clamui-core/src/audit.rs:1094
+#: crates/clamui-core/src/audit.rs:1169
 msgid "Password authentication is enabled"
 msgstr "A jelszavas hitelesítés engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1096
+#: crates/clamui-core/src/audit.rs:1171
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Fontolja meg a jelszavas hitelesítés letiltását SSH-kulcsok javára"
 
-#: crates/clamui-core/src/audit.rs:1113
+#: crates/clamui-core/src/audit.rs:1189
 msgid "X11 forwarding is disabled"
 msgstr "Az X11-továbbítás le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:1120
+#: crates/clamui-core/src/audit.rs:1197
 msgid "X11 forwarding is enabled"
 msgstr "Az X11-továbbítás engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1122
+#: crates/clamui-core/src/audit.rs:1199
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Tiltsa le az X11-továbbítást a támadási felület csökkentéséhez"
 
-#: crates/clamui-core/src/audit.rs:1182
+#: crates/clamui-core/src/audit.rs:1259
 msgid "Application firewalls"
 msgstr "Alkalmazástűzfalak"
 
-#: crates/clamui-core/src/audit.rs:1204
+#: crates/clamui-core/src/audit.rs:1282
 msgid "Portmaster is running and protecting connections"
 msgstr "A Portmaster fut, és védi a kapcsolatokat"
 
-#: crates/clamui-core/src/audit.rs:1231
+#: crates/clamui-core/src/audit.rs:1305
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 "Engedélyezze a ClamUI-t a Portmasterben a modulonkénti állapotlekérdezéshez"
 
-#: crates/clamui-core/src/audit.rs:1234
+#: crates/clamui-core/src/audit.rs:1308
 msgid "Authorize"
 msgstr "Engedélyezés"
 
-#: crates/clamui-core/src/audit.rs:1244
+#: crates/clamui-core/src/audit.rs:1319
 msgid "Portmaster is installed but not running"
 msgstr "A Portmaster telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:1246
+#: crates/clamui-core/src/audit.rs:1321
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 "Indítsa el a Portmaster szolgáltatást a hálózati védelem engedélyezéséhez"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1335
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Nem található — opcionális hálózati megfigyelő és alkalmazástűzfal"
 
-#: crates/clamui-core/src/audit.rs:1274
+#: crates/clamui-core/src/audit.rs:1351
 msgid "Could not probe Portmaster: {error}"
 msgstr "A Portmaster nem ellenőrizhető: {error}"
 
-#: crates/clamui-core/src/audit.rs:1323
+#: crates/clamui-core/src/audit.rs:1401
 msgid "{name} is not installed"
 msgstr "A(z) {name} nincs telepítve"
 
-#: crates/clamui-core/src/audit.rs:1330
+#: crates/clamui-core/src/audit.rs:1408
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Telepítse a(z) {name} programot az átfogó biztonsági ellenőrzéshez"
 
-#: crates/clamui-core/src/audit.rs:1336
+#: crates/clamui-core/src/audit.rs:1414
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Telepítse a chkrootkitet a rootkitek észleléséhez"
 
-#: crates/clamui-core/src/audit.rs:1355
+#: crates/clamui-core/src/audit.rs:1434
 msgid "Authentication was cancelled"
 msgstr "A hitelesítés megszakítva"
 
-#: crates/clamui-core/src/audit.rs:1363
+#: crates/clamui-core/src/audit.rs:1442
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "A Lynis ellenőrzés 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1365
+#: crates/clamui-core/src/audit.rs:1444
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "A rootkitvizsgálat 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1383 crates/clamui-core/src/audit.rs:1427
+#: crates/clamui-core/src/audit.rs:1463 crates/clamui-core/src/audit.rs:1509
 msgid "Failed to run Lynis: {error}"
 msgstr "Nem sikerült futtatni a Lynis programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1389
+#: crates/clamui-core/src/audit.rs:1469
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Nem sikerült futtatni a chkrootkit programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1455
+#: crates/clamui-core/src/audit.rs:1538
 msgid "Score: {score}/100"
 msgstr "Pontszám: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1458
+#: crates/clamui-core/src/audit.rs:1541
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "A részletes javaslatokért futtassa: 'sudo lynis audit system'"
 
-#: crates/clamui-core/src/audit.rs:1474
+#: crates/clamui-core/src/audit.rs:1558
 msgid "Audit completed (exit code {code})"
 msgstr "Az ellenőrzés befejeződött (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1512 crates/clamui-core/src/audit.rs:1526
+#: crates/clamui-core/src/audit.rs:1596 crates/clamui-core/src/audit.rs:1610
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "A rootkitvizsgálat nem fejezhető be (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1556
+#: crates/clamui-core/src/audit.rs:1647
 msgid "No rootkits detected"
 msgstr "Nem található rootkit"
 
-#: crates/clamui-core/src/audit.rs:1567
+#: crates/clamui-core/src/audit.rs:1659
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "{count} lehetséges rootkit észlelve"
 msgstr[1] "{count} lehetséges rootkit észlelve"
 
-#: crates/clamui-core/src/audit.rs:1575
+#: crates/clamui-core/src/audit.rs:1667
 msgid "Investigate the detected threats immediately"
 msgstr "Vizsgálja ki azonnal az észlelt fenyegetéseket"
 
@@ -427,7 +427,7 @@ msgstr ""
 msgid "The UFW status check failed."
 msgstr "Az UFW állapotának ellenőrzése sikertelen."
 
-#: crates/clamui-core/src/audit/firewall.rs:381
+#: crates/clamui-core/src/audit/firewall.rs:382
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
@@ -435,7 +435,7 @@ msgstr ""
 "Az UFW aktív; az alapértelmezett bejövő házirend tiltás. A felsorolt "
 "szabályok kivételeket engedélyezhetnek."
 
-#: crates/clamui-core/src/audit/firewall.rs:388
+#: crates/clamui-core/src/audit/firewall.rs:389
 msgid ""
 "UFW is active; the default incoming policy is reject. Listed rules may allow "
 "exceptions."
@@ -443,35 +443,35 @@ msgstr ""
 "Az UFW aktív; az alapértelmezett bejövő házirend elutasítás. A felsorolt "
 "szabályok kivételeket engedélyezhetnek."
 
-#: crates/clamui-core/src/audit/firewall.rs:395
+#: crates/clamui-core/src/audit/firewall.rs:396
 msgid "UFW is active; the default incoming policy is deny."
 msgstr "Az UFW aktív; az alapértelmezett bejövő házirend tiltás."
 
-#: crates/clamui-core/src/audit/firewall.rs:399
+#: crates/clamui-core/src/audit/firewall.rs:400
 msgid "UFW is active; the default incoming policy is reject."
 msgstr "Az UFW aktív; az alapértelmezett bejövő házirend elutasítás."
 
-#: crates/clamui-core/src/audit/firewall.rs:403
+#: crates/clamui-core/src/audit/firewall.rs:404
 msgid "UFW is active, but the default incoming policy allows traffic."
 msgstr ""
 "Az UFW aktív, de az alapértelmezett bejövő házirend engedélyezi a forgalmat."
 
-#: crates/clamui-core/src/audit/firewall.rs:410
+#: crates/clamui-core/src/audit/firewall.rs:411
 msgid "UFW is active, but its default incoming policy could not be verified."
 msgstr ""
 "Az UFW aktív, de az alapértelmezett bejövő házirendje nem volt ellenőrizhető."
 
-#: crates/clamui-core/src/audit/firewall.rs:414
+#: crates/clamui-core/src/audit/firewall.rs:415
 msgid ""
 "UFW is inactive, but another firewall manager is active and protecting the "
 "system."
 msgstr "Az UFW inaktív, de egy másik tűzfalkezelő aktív, és védi a rendszert."
 
-#: crates/clamui-core/src/audit/firewall.rs:418
+#: crates/clamui-core/src/audit/firewall.rs:419
 msgid "UFW reports inactive."
 msgstr "Az UFW inaktív állapotot jelez."
 
-#: crates/clamui-core/src/audit/firewall.rs:419
+#: crates/clamui-core/src/audit/firewall.rs:420
 msgid ""
 "UFW's service is active, but its default firewall policy could not be "
 "verified without administrator access."
@@ -479,19 +479,19 @@ msgstr ""
 "Az UFW szolgáltatása aktív, de az alapértelmezett tűzfalszabályzatot "
 "rendszergazdai hozzáférés nélkül nem lehetett ellenőrizni."
 
-#: crates/clamui-core/src/audit/firewall.rs:423
+#: crates/clamui-core/src/audit/firewall.rs:424
 msgid "UFW status could not be inspected safely."
 msgstr "Az UFW állapotát nem lehetett biztonságosan ellenőrizni."
 
-#: crates/clamui-core/src/audit/firewall.rs:435
+#: crates/clamui-core/src/audit/firewall.rs:436
 msgid "UFW Firewall"
 msgstr "UFW tűzfal"
 
-#: crates/clamui-core/src/audit/firewall.rs:440
+#: crates/clamui-core/src/audit/firewall.rs:441
 msgid "Check UFW with administrator access"
 msgstr "UFW ellenőrzése rendszergazdai hozzáféréssel"
 
-#: crates/clamui-core/src/audit/firewall.rs:442
+#: crates/clamui-core/src/audit/firewall.rs:443
 msgid ""
 "Administrator access may be required to read UFW status. This check does not "
 "change firewall settings."
@@ -499,11 +499,11 @@ msgstr ""
 "Az UFW állapotának lekérdezéséhez rendszergazdai hozzáférésre lehet szükség. "
 "Az ellenőrzés nem módosítja a tűzfal beállításait."
 
-#: crates/clamui-core/src/audit/firewall.rs:480
+#: crates/clamui-core/src/audit/firewall.rs:481
 msgid "Firewalld"
 msgstr "Firewalld"
 
-#: crates/clamui-core/src/audit/firewall.rs:482
+#: crates/clamui-core/src/audit/firewall.rs:483
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
@@ -511,7 +511,7 @@ msgstr ""
 "A Firewalld birtokolja a D-Bus-nevét; a készenléti állapotot és a "
 "tűzfalházirendet nem kérdeztük le."
 
-#: crates/clamui-core/src/audit/firewall.rs:486
+#: crates/clamui-core/src/audit/firewall.rs:487
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
@@ -519,7 +519,7 @@ msgstr ""
 "Nem észleltünk Firewalld D-Bus-tulajdonost; ez nem igazolja a kernel "
 "tűzfalházirendjét."
 
-#: crates/clamui-core/src/audit/firewall.rs:490
+#: crates/clamui-core/src/audit/firewall.rs:491
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
@@ -527,23 +527,23 @@ msgstr ""
 "A Firewalld tulajdonjoga nem volt ellenőrizhető; a készenléti állapotot és a "
 "tűzfalházirendet nem kérdeztük le."
 
-#: crates/clamui-core/src/audit/firewall.rs:505
+#: crates/clamui-core/src/audit/firewall.rs:506
 msgid "firewall-cmd"
 msgstr "firewall-cmd"
 
-#: crates/clamui-core/src/audit/firewall.rs:510
+#: crates/clamui-core/src/audit/firewall.rs:512
 msgid "firewall-cmd is installed; it was not executed."
 msgstr "A firewall-cmd telepítve van; nem futtattuk."
 
-#: crates/clamui-core/src/audit/firewall.rs:516
+#: crates/clamui-core/src/audit/firewall.rs:519
 msgid "firewall-cmd could not be confirmed without executing it."
 msgstr "A firewall-cmd futtatás nélkül nem volt megerősíthető."
 
-#: crates/clamui-core/src/audit/firewall.rs:654
+#: crates/clamui-core/src/audit/firewall.rs:657
 msgid "nftables (native rules)"
 msgstr "nftables (natív szabályok)"
 
-#: crates/clamui-core/src/audit/firewall.rs:656
+#: crates/clamui-core/src/audit/firewall.rs:659
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
@@ -551,7 +551,7 @@ msgstr ""
 "Az nftables korlátozó alapértelmezett bemeneti házirendekkel rendelkezik "
 "IPv4 és IPv6 esetén; az egyes szabályok kivételeket engedélyezhetnek."
 
-#: crates/clamui-core/src/audit/firewall.rs:660
+#: crates/clamui-core/src/audit/firewall.rs:663
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
@@ -559,18 +559,18 @@ msgstr ""
 "Az nftables engedékeny alapértelmezett bemeneti házirendet jelez; a "
 "fennmaradó lefedettség hiányos lehet"
 
-#: crates/clamui-core/src/audit/firewall.rs:664
+#: crates/clamui-core/src/audit/firewall.rs:667
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
 msgstr ""
 "Az nftables bemeneti házirendjének lefedettsége nem volt ellenőrizhető mind "
 "IPv4, mind IPv6 esetén"
 
-#: crates/clamui-core/src/audit/firewall.rs:724
+#: crates/clamui-core/src/audit/firewall.rs:727
 msgid "iptables (IPv4)"
 msgstr "iptables (IPv4)"
 
-#: crates/clamui-core/src/audit/firewall.rs:726
+#: crates/clamui-core/src/audit/firewall.rs:729
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
@@ -578,19 +578,19 @@ msgstr ""
 "Az iptables korlátozó INPUT alapértelmezett házirenddel rendelkezik; az "
 "egyes szabályok kivételeket engedélyezhetnek."
 
-#: crates/clamui-core/src/audit/firewall.rs:730
+#: crates/clamui-core/src/audit/firewall.rs:733
 msgid "iptables has a permissive INPUT default policy"
 msgstr "Az iptables engedékeny INPUT alapértelmezett házirenddel rendelkezik"
 
-#: crates/clamui-core/src/audit/firewall.rs:731
+#: crates/clamui-core/src/audit/firewall.rs:734
 msgid "iptables INPUT policy could not be verified"
 msgstr "Az iptables INPUT házirendje nem volt ellenőrizhető"
 
-#: crates/clamui-core/src/audit/firewall.rs:737
+#: crates/clamui-core/src/audit/firewall.rs:740
 msgid "iptables (IPv6)"
 msgstr "iptables (IPv6)"
 
-#: crates/clamui-core/src/audit/firewall.rs:739
+#: crates/clamui-core/src/audit/firewall.rs:742
 msgid ""
 "ip6tables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
@@ -598,19 +598,19 @@ msgstr ""
 "Az ip6tables korlátozó INPUT alapértelmezett házirenddel rendelkezik; az "
 "egyes szabályok kivételeket engedélyezhetnek."
 
-#: crates/clamui-core/src/audit/firewall.rs:743
+#: crates/clamui-core/src/audit/firewall.rs:746
 msgid "ip6tables has a permissive INPUT default policy"
 msgstr "Az ip6tables engedékeny INPUT alapértelmezett házirenddel rendelkezik"
 
-#: crates/clamui-core/src/audit/firewall.rs:744
+#: crates/clamui-core/src/audit/firewall.rs:747
 msgid "ip6tables INPUT policy could not be verified"
 msgstr "Az ip6tables INPUT házirendje nem volt ellenőrizhető"
 
-#: crates/clamui-core/src/audit/firewall.rs:788
+#: crates/clamui-core/src/audit/firewall.rs:791
 msgid "Firewall"
 msgstr "Tűzfal"
 
-#: crates/clamui-core/src/audit/firewall.rs:791
+#: crates/clamui-core/src/audit/firewall.rs:794
 msgid ""
 "UFW and Firewalld are both active; review which one is meant to control your "
 "firewall rules."
@@ -618,31 +618,31 @@ msgstr ""
 "Az UFW és a Firewalld egyszerre aktív; ellenőrizze, melyiknek kell "
 "felügyelnie a tűzfalszabályokat."
 
-#: crates/clamui-core/src/audit/firewall.rs:796
+#: crates/clamui-core/src/audit/firewall.rs:799
 msgid "Firewalld is active and managing the firewall."
 msgstr "A Firewalld aktív, és kezeli a tűzfalat."
 
-#: crates/clamui-core/src/audit/firewall.rs:801
+#: crates/clamui-core/src/audit/firewall.rs:804
 msgid "No active firewall manager was detected."
 msgstr "Nem észlelhető aktív tűzfalkezelő."
 
-#: crates/clamui-core/src/audit/firewall.rs:805
+#: crates/clamui-core/src/audit/firewall.rs:808
 msgid "Enable UFW or Firewalld to protect the system."
 msgstr "Engedélyezze az UFW-t vagy a Firewalld-ot a rendszer védelméhez."
 
-#: crates/clamui-core/src/audit/firewall.rs:808
+#: crates/clamui-core/src/audit/firewall.rs:811
 msgid "The active firewall manager could not be verified."
 msgstr "Az aktív tűzfalkezelő nem ellenőrizhető."
 
-#: crates/clamui-core/src/audit/firewall.rs:823
+#: crates/clamui-core/src/audit/firewall.rs:827
 msgid "Gufw"
 msgstr "Gufw"
 
-#: crates/clamui-core/src/audit/firewall.rs:825
+#: crates/clamui-core/src/audit/firewall.rs:833
 msgid "Gufw is available."
 msgstr "A Gufw elérhető."
 
-#: crates/clamui-core/src/audit/firewall.rs:827
+#: crates/clamui-core/src/audit/firewall.rs:836
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
@@ -650,19 +650,19 @@ msgstr ""
 "A Gufw nem volt megerősíthető; ez az opcionális leltár nem befolyásolja a "
 "tűzfalházirend elemzését."
 
-#: crates/clamui-core/src/audit/firewall.rs:835
+#: crates/clamui-core/src/audit/firewall.rs:844
 msgid "Open Gufw"
 msgstr "Gufw megnyitása"
 
-#: crates/clamui-core/src/audit/firewall.rs:841
+#: crates/clamui-core/src/audit/firewall.rs:850
 msgid "Firewall Config"
 msgstr "Firewall Config"
 
-#: crates/clamui-core/src/audit/firewall.rs:846
+#: crates/clamui-core/src/audit/firewall.rs:856
 msgid "Firewall Config is available."
 msgstr "A Firewall Config elérhető."
 
-#: crates/clamui-core/src/audit/firewall.rs:849
+#: crates/clamui-core/src/audit/firewall.rs:859
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
@@ -670,20 +670,20 @@ msgstr ""
 "A Firewall Config nem volt megerősíthető; ez az opcionális leltár nem "
 "befolyásolja a tűzfalházirend elemzését."
 
-#: crates/clamui-core/src/audit/firewall.rs:857
+#: crates/clamui-core/src/audit/firewall.rs:867
 msgid "Open Firewall Config"
 msgstr "Firewall Config megnyitása"
 
-#: crates/clamui-core/src/audit/firewall.rs:895
+#: crates/clamui-core/src/audit/firewall.rs:905
 msgid "Plasma Firewall"
 msgstr "Plasma Firewall"
 
-#: crates/clamui-core/src/audit/firewall.rs:900
+#: crates/clamui-core/src/audit/firewall.rs:911
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
 msgstr ""
 "A Plasma Firewall telepítve van; egy meglévő tűzfalháttérrendszert kezel."
 
-#: crates/clamui-core/src/audit/firewall.rs:909
+#: crates/clamui-core/src/audit/firewall.rs:921
 msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr "A Plasma Firewall nem volt megerősíthető; csupán kezelőmodul."
 
@@ -2268,7 +2268,7 @@ msgstr "Adatbázis"
 msgid "Logs"
 msgstr "Naplók"
 
-#: desktop/src/App.tsx:124 desktop/src/pages/Audit.tsx:485
+#: desktop/src/App.tsx:124 desktop/src/pages/Audit.tsx:566
 msgid "Components"
 msgstr "Összetevők"
 
@@ -2578,7 +2578,7 @@ msgstr "Konfigurációs tartalom másolása"
 msgid "Configuration content"
 msgstr "Konfigurációs tartalom"
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:582
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:666
 msgid "Could not open documentation: {error}"
 msgstr "A dokumentáció nem nyitható meg: {error}"
 
@@ -2754,7 +2754,7 @@ msgstr "Hiba"
 msgid "Cancelled"
 msgstr "Megszakítva"
 
-#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:67
+#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
@@ -2773,75 +2773,75 @@ msgstr "A ClamUI nem tudott elindulni"
 msgid "Retry"
 msgstr "Újrapróbálás"
 
-#: desktop/src/pages/Audit.tsx:46
+#: desktop/src/pages/Audit.tsx:49
 msgid "ClamAV Health"
 msgstr "ClamAV állapota"
 
-#: desktop/src/pages/Audit.tsx:48
+#: desktop/src/pages/Audit.tsx:51
 msgid "Access Control"
 msgstr "Hozzáférés-vezérlés"
 
-#: desktop/src/pages/Audit.tsx:49
+#: desktop/src/pages/Audit.tsx:52
 msgid "Automatic Updates"
 msgstr "Automatikus frissítések"
 
-#: desktop/src/pages/Audit.tsx:50
+#: desktop/src/pages/Audit.tsx:53
 msgid "Intrusion Detection"
 msgstr "Behatolásészlelés"
 
-#: desktop/src/pages/Audit.tsx:51
+#: desktop/src/pages/Audit.tsx:54
 msgid "SSH Security"
 msgstr "SSH-biztonság"
 
-#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:492
+#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Audit.tsx:575
 msgid "Checking"
 msgstr "Ellenőrzés"
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:498
+#: desktop/src/pages/Audit.tsx:66 desktop/src/pages/Audit.tsx:581
 msgid "Pass"
 msgstr "Sikeres"
 
-#: desktop/src/pages/Audit.tsx:64 desktop/src/pages/Audit.tsx:498
+#: desktop/src/pages/Audit.tsx:67 desktop/src/pages/Audit.tsx:581
 msgid "Warning"
 msgstr "Figyelmeztetés"
 
-#: desktop/src/pages/Audit.tsx:65
+#: desktop/src/pages/Audit.tsx:68
 msgid "Fail"
 msgstr "Sikertelen"
 
-#: desktop/src/pages/Audit.tsx:66 desktop/src/pages/Logs.tsx:120
+#: desktop/src/pages/Audit.tsx:69 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr "Kihagyva"
 
-#: desktop/src/pages/Audit.tsx:186
+#: desktop/src/pages/Audit.tsx:197
 msgid "Local only"
 msgstr "Csak helyi"
 
-#: desktop/src/pages/Audit.tsx:188
+#: desktop/src/pages/Audit.tsx:199
 msgid "All interfaces"
 msgstr "Összes interfész"
 
-#: desktop/src/pages/Audit.tsx:189
+#: desktop/src/pages/Audit.tsx:200
 msgid "Specific address or interface"
 msgstr "Adott cím vagy interfész"
 
-#: desktop/src/pages/Audit.tsx:248
+#: desktop/src/pages/Audit.tsx:265
 msgid "Checking your system…"
 msgstr "A rendszer ellenőrzése…"
 
-#: desktop/src/pages/Audit.tsx:248
+#: desktop/src/pages/Audit.tsx:265
 msgid "Running the essential security checks."
 msgstr "A legfontosabb biztonsági ellenőrzések futnak."
 
-#: desktop/src/pages/Audit.tsx:256 desktop/src/pages/Statistics.tsx:137
+#: desktop/src/pages/Audit.tsx:273 desktop/src/pages/Statistics.tsx:137
 msgid "Protected"
 msgstr "Védett"
 
-#: desktop/src/pages/Audit.tsx:256
+#: desktop/src/pages/Audit.tsx:273
 msgid "Action recommended"
 msgstr "Beavatkozás javasolt"
 
-#: desktop/src/pages/Audit.tsx:258
+#: desktop/src/pages/Audit.tsx:275
 msgid ""
 "Your firewall, virus scanner and definitions are active and up to date. No "
 "action is needed right now."
@@ -2849,82 +2849,100 @@ msgstr ""
 "A tűzfal, a vírusvédelem és a vírusdefiníciók aktívak és naprakészek. "
 "Jelenleg nincs szükség beavatkozásra."
 
-#: desktop/src/pages/Audit.tsx:259
+#: desktop/src/pages/Audit.tsx:276
 msgid ""
 "One or more essential checks need your attention. Review Essentials below."
 msgstr ""
 "Egy vagy több fontos ellenőrzés figyelmet igényel. Nézze meg a „Legfontosabb "
 "ellenőrzések” részt lent."
 
-#: desktop/src/pages/Audit.tsx:268
+#: desktop/src/pages/Audit.tsx:285
 msgid "Essentials"
 msgstr "Legfontosabb ellenőrzések"
 
-#: desktop/src/pages/Audit.tsx:320
+#: desktop/src/pages/Audit.tsx:296
+msgid "Acknowledged"
+msgstr "Nyugtázva"
+
+#: desktop/src/pages/Audit.tsx:297
+msgid ""
+"These checks were reviewed and acknowledged. They no longer count toward the "
+"Protected status above."
+msgstr "Ezeket az ellenőrzéseket átnézték és nyugtázták. Már nem számítanak be a fent látható „Védett” állapotba."
+
+#: desktop/src/pages/Audit.tsx:302
+msgid "Revoking…"
+msgstr "Visszavonás…"
+
+#: desktop/src/pages/Audit.tsx:302
+msgid "Revoke"
+msgstr "Visszavonás"
+
+#: desktop/src/pages/Audit.tsx:357
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] "{count} biztonsági probléma igényel figyelmet"
 msgstr[1] "{count} biztonsági probléma igényel figyelmet"
 
-#: desktop/src/pages/Audit.tsx:321
+#: desktop/src/pages/Audit.tsx:358
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] "{count} ellenőrzés felülvizsgálatot igényel"
 msgstr[1] "{count} ellenőrzés felülvizsgálatot igényel"
 
-#: desktop/src/pages/Audit.tsx:322
+#: desktop/src/pages/Audit.tsx:359
 msgid "Security audit completed"
 msgstr "Biztonsági ellenőrzés befejezve"
 
-#: desktop/src/pages/Audit.tsx:355
+#: desktop/src/pages/Audit.tsx:392
 msgid "Could not receive progressive audit results: {error}"
 msgstr "Nem fogadhatók az ellenőrzés részleges eredményei: {error}"
 
-#: desktop/src/pages/Audit.tsx:375
+#: desktop/src/pages/Audit.tsx:412
 msgid "{tool} check completed"
 msgstr "A(z) {tool} ellenőrzése befejeződött"
 
-#: desktop/src/pages/Audit.tsx:387
+#: desktop/src/pages/Audit.tsx:424
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr ""
 "Az ellenőrzés nem támogatott grafikus felületi indítási műveletet adott meg."
 
-#: desktop/src/pages/Audit.tsx:392
+#: desktop/src/pages/Audit.tsx:429
 msgid "The selected application did not start"
 msgstr "A kiválasztott alkalmazás nem indult el"
 
-#: desktop/src/pages/Audit.tsx:406
+#: desktop/src/pages/Audit.tsx:443
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr "A Portmaster-engedélyt megadták; az ellenőrzés frissül."
 
-#: desktop/src/pages/Audit.tsx:409
+#: desktop/src/pages/Audit.tsx:446
 msgid "Portmaster authorization was cancelled."
 msgstr "A Portmaster engedélykérése megszakítva."
 
-#: desktop/src/pages/Audit.tsx:411
+#: desktop/src/pages/Audit.tsx:448
 msgid "Portmaster authorization was not granted."
 msgstr "A Portmaster nem kapott engedélyt."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:431
+#: desktop/src/pages/Audit.tsx:468
 msgid "UFW status authorization was cancelled."
 msgstr "Az UFW állapotának ellenőrzéséhez kért engedélyezést megszakították."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:439
+#: desktop/src/pages/Audit.tsx:476
 msgid "The UFW status check did not return a firewall result."
 msgstr "Az UFW állapotának ellenőrzése nem adott tűzfaleredményt."
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:446
+#: desktop/src/pages/Audit.tsx:483
 msgid "UFW status check completed"
 msgstr "Az UFW állapotának ellenőrzése befejeződött"
 
-#: desktop/src/pages/Audit.tsx:470
+#: desktop/src/pages/Audit.tsx:551
 msgid "System security audit"
 msgstr "Rendszerbiztonsági ellenőrzés"
 
-#: desktop/src/pages/Audit.tsx:471
+#: desktop/src/pages/Audit.tsx:552
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
@@ -2932,19 +2950,19 @@ msgstr ""
 "Vizsgálja meg a biztonsági helyzetét, és másolja ki a javaslatokat. Az "
 "ellenőrzések soha nem módosítják a rendszer konfigurációját."
 
-#: desktop/src/pages/Audit.tsx:473
+#: desktop/src/pages/Audit.tsx:554
 msgid "Auditing…"
 msgstr "Ellenőrzés…"
 
-#: desktop/src/pages/Audit.tsx:473
+#: desktop/src/pages/Audit.tsx:554
 msgid "Refresh audit"
 msgstr "Ellenőrzés frissítése"
 
-#: desktop/src/pages/Audit.tsx:495
+#: desktop/src/pages/Audit.tsx:578
 msgid "Optional hardening"
 msgstr "Opcionális megerősítés"
 
-#: desktop/src/pages/Audit.tsx:496
+#: desktop/src/pages/Audit.tsx:579
 msgid ""
 "These checks are informational. They do not affect the Protected status "
 "above."
@@ -2952,26 +2970,26 @@ msgstr ""
 "Ezek az ellenőrzések csak tájékoztató jellegűek. Nincs hatásuk a fent "
 "látható „Védett” állapotra."
 
-#: desktop/src/pages/Audit.tsx:498
+#: desktop/src/pages/Audit.tsx:581
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] "{count} probléma"
 msgstr[1] "{count} probléma"
 
-#: desktop/src/pages/Audit.tsx:498
+#: desktop/src/pages/Audit.tsx:581
 msgid "unavailable or skipped"
 msgstr "nem érhető el vagy kihagyva"
 
-#: desktop/src/pages/Audit.tsx:500
+#: desktop/src/pages/Audit.tsx:583
 msgid "Hide missing optional items"
 msgstr "Hiányzó opcionális elemek elrejtése"
 
-#: desktop/src/pages/Audit.tsx:505
+#: desktop/src/pages/Audit.tsx:588
 msgid "Deep scans"
 msgstr "Mély vizsgálatok"
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:505
+#: desktop/src/pages/Audit.tsx:588
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
@@ -2979,32 +2997,32 @@ msgstr ""
 "A Lynis és a chkrootkit soha nem fut automatikusan. Minden ellenőrzés csak "
 "azután kérhet rendszergazdai engedélyt, hogy kifejezetten elindította azt."
 
-#: desktop/src/pages/Audit.tsx:510
+#: desktop/src/pages/Audit.tsx:593
 msgid "Running Lynis…"
 msgstr "Lynis futtatása…"
 
-#: desktop/src/pages/Audit.tsx:510
+#: desktop/src/pages/Audit.tsx:593
 msgid "Run Lynis security audit"
 msgstr "Lynis biztonsági ellenőrzés futtatása"
 
-#: desktop/src/pages/Audit.tsx:511
+#: desktop/src/pages/Audit.tsx:594
 msgid "Running chkrootkit…"
 msgstr "chkrootkit futtatása…"
 
-#: desktop/src/pages/Audit.tsx:511
+#: desktop/src/pages/Audit.tsx:594
 msgid "Run rootkit detection"
 msgstr "Rootkit-észlelés futtatása"
 
-#: desktop/src/pages/Audit.tsx:540
+#: desktop/src/pages/Audit.tsx:624
 msgid "No audit details were returned."
 msgstr "Nem érkeztek ellenőrzési részletek."
 
-#: desktop/src/pages/Audit.tsx:546 desktop/src/pages/Audit.tsx:556
+#: desktop/src/pages/Audit.tsx:630 desktop/src/pages/Audit.tsx:640
 #: desktop/src/pages/Database.tsx:285
 msgid "Unavailable"
 msgstr "Nem érhető el"
 
-#: desktop/src/pages/Audit.tsx:549 desktop/src/pages/Network.tsx:403
+#: desktop/src/pages/Audit.tsx:633 desktop/src/pages/Network.tsx:403
 msgid ""
 "Network information is unavailable. Check that the system socket tool is "
 "installed and try again."
@@ -3012,82 +3030,90 @@ msgstr ""
 "A hálózati információk nem érhetők el. Ellenőrizze, hogy a rendszer socket-"
 "eszköze telepítve van-e, majd próbálja újra."
 
-#: desktop/src/pages/Audit.tsx:550 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:634 desktop/src/pages/Network.tsx:406
 msgid "The socket list was limited. This snapshot may be incomplete."
 msgstr "A socketlista korlátozott volt. Ez a pillanatkép hiányos lehet."
 
-#: desktop/src/pages/Audit.tsx:550 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:634 desktop/src/pages/Network.tsx:406
 msgid "Some socket records could not be read. This snapshot may be incomplete."
 msgstr ""
 "Egyes socket-rekordok nem voltak olvashatók. Ez a pillanatkép hiányos lehet."
 
-#: desktop/src/pages/Audit.tsx:551
+#: desktop/src/pages/Audit.tsx:635
 msgid ""
 "Listening sockets do not prove that a port is reachable through the firewall."
 msgstr ""
 "A figyelő socketek nem bizonyítják, hogy egy port a tűzfalon keresztül "
 "elérhető."
 
-#: desktop/src/pages/Audit.tsx:553
+#: desktop/src/pages/Audit.tsx:637
 msgid "Protocol"
 msgstr "Protokoll"
 
-#: desktop/src/pages/Audit.tsx:553
+#: desktop/src/pages/Audit.tsx:637
 msgid "Port"
 msgstr "Port"
 
-#: desktop/src/pages/Audit.tsx:553 desktop/src/pages/Network.tsx:282
+#: desktop/src/pages/Audit.tsx:637 desktop/src/pages/Network.tsx:282
 msgid "Local address"
 msgstr "Helyi cím"
 
-#: desktop/src/pages/Audit.tsx:553
+#: desktop/src/pages/Audit.tsx:637
 msgid "Binding"
 msgstr "Kötés"
 
-#: desktop/src/pages/Audit.tsx:553 desktop/src/pages/Network.tsx:287
+#: desktop/src/pages/Audit.tsx:637 desktop/src/pages/Network.tsx:287
 msgid "Process"
 msgstr "Folyamat"
 
 #. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Audit.tsx:559 desktop/src/pages/Network.tsx:289
+#: desktop/src/pages/Audit.tsx:643 desktop/src/pages/Network.tsx:289
 msgid "PID {pid}"
 msgstr "PID: {pid}"
 
-#: desktop/src/pages/Audit.tsx:563 desktop/src/pages/Network.tsx:294
+#: desktop/src/pages/Audit.tsx:647 desktop/src/pages/Network.tsx:294
 msgid "Process information unavailable"
 msgstr "A folyamat adatai nem érhetők el"
 
-#: desktop/src/pages/Audit.tsx:573 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr "A parancs a vágólapra másolva"
 
-#: desktop/src/pages/Audit.tsx:575 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:659 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr "Nem másolható a parancs: {error}"
 
-#: desktop/src/pages/Audit.tsx:591 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Audit.tsx:677 desktop/src/pages/Components.tsx:274
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Másolás"
 
-#: desktop/src/pages/Audit.tsx:593
+#: desktop/src/pages/Audit.tsx:679
 msgid "Authorizing…"
 msgstr "Engedélyezés…"
 
 #. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
-#: desktop/src/pages/Audit.tsx:594
+#: desktop/src/pages/Audit.tsx:680
 msgid "Checking UFW…"
 msgstr "UFW ellenőrzése…"
 
-#: desktop/src/pages/Audit.tsx:599 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Audit.tsx:685 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr "Megnyitás böngészőben"
 
-#: desktop/src/pages/Audit.tsx:599
+#: desktop/src/pages/Audit.tsx:685
 msgid "Learn more"
 msgstr "További információk"
+
+#: desktop/src/pages/Audit.tsx:686
+msgid "Acknowledging…"
+msgstr "Nyugtázás…"
+
+#: desktop/src/pages/Audit.tsx:686
+msgid "Acknowledge"
+msgstr "Nyugtázás"
 
 #: desktop/src/pages/Components.tsx:78
 msgid "Virus Scanner"
