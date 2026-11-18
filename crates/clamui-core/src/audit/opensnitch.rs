@@ -207,7 +207,7 @@ fn add_service(ctx: &Context, section: &mut AuditSection, state: ServiceState) {
             // Translators: Keep the product name OpenSnitch unchanged.
             "OpenSnitch system service status could not be determined.")),
     };
-    let mut row = AuditCheck::new(name, status, detail);
+    let mut row = AuditCheck::new("opensnitch_service", name, status, detail);
     row.optional_missing = state == ServiceState::Missing;
     section.push(row);
 }
@@ -229,7 +229,7 @@ fn add_gui(ctx: &Context, section: &mut AuditSection, target: GuiTarget) {
             // Translators: Keep the product name OpenSnitch unchanged.
             "OpenSnitch graphical interface availability could not be determined.")),
     };
-    let mut row = AuditCheck::new(name, status, detail);
+    let mut row = AuditCheck::new("opensnitch_gui", name, status, detail);
     row.optional_missing = target == GuiTarget::Missing;
     if matches!(target, GuiTarget::Command | GuiTarget::Desktop) {
         row.launch_command = Some("opensnitch-ui".to_owned());

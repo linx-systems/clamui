@@ -510,6 +510,46 @@ p.helper-install-error {
 
 .audit-external-link { gap: 6px; }
 
+.audit-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 14px 16px;
+}
+
+.audit-hero h2 { margin: 0 0 2px; font-size: 1.05rem; }
+.audit-hero p { margin: 0; color: var(--muted); }
+.audit-hero .ui-icon { inline-size: 28px; block-size: 28px; flex-shrink: 0; }
+
+.audit-hero.protected { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.audit-hero.protected .ui-icon { color: var(--success); }
+.audit-hero.attention { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
+.audit-hero.attention .ui-icon { color: var(--warning); }
+.audit-hero.checking { border-color: var(--control-border); }
+.audit-hero.checking .ui-icon { color: var(--muted); }
+
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.audit-essentials { margin-bottom: 16px; }
+
+.audit-optional summary {
+  cursor: pointer;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
 .notice.warning,
 p.warning,
 .preference-section.warning,
@@ -607,35 +647,6 @@ p.success,
   border-radius: 0;
   background: transparent;
 }
-
-.scan-result-toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  min-width: 0;
-  margin: 0 0 6px;
-}
-
-.scan-result-toolbar > .actions { margin-inline-start: auto; }
-
-.scan-summary-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  min-width: 0;
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.scan-summary-metrics > div {
-  display: inline-flex;
-  gap: 4px;
-  min-width: 0;
-}
-
-.scan-summary-metrics dt { color: var(--muted); }
-.scan-summary-metrics dd { margin: 0; font-weight: 700; }
 
 .scan-log-details {
   min-width: 0;
@@ -1067,11 +1078,11 @@ details.audit-row > .audit-details {
 .badge.error { border-color: var(--danger); color: var(--danger); }
 .status-badge.warning,
 .status-badge.at_risk,
-.status-badge.unknown,
-.status-badge.skipped,
 .badge.warning { border-color: var(--warning); color: var(--warning); }
 .status-badge.no_data,
-.status-badge.checking { border-color: var(--control-border); color: var(--muted); }
+.status-badge.checking,
+.status-badge.unknown,
+.status-badge.skipped { border-color: var(--control-border); color: var(--muted); }
 
 .progress { width: 100%; accent-color: var(--accent); }
 
@@ -2416,3 +2427,52 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
   .network-endpoints { grid-template-columns: minmax(0, 1fr); }
   .network-search { flex-basis: 100%; }
 }
+
+/* Scan result overview: one clear verdict, then the numbers. */
+.result-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 16px 18px;
+}
+.result-hero > .ui-icon { inline-size: 32px; block-size: 32px; flex-shrink: 0; }
+.result-hero-copy { flex: 1 1 auto; min-width: 0; }
+.result-hero h2 { margin: 0 0 2px; font-size: 1.15rem; }
+.result-hero p { margin: 0; color: var(--muted); }
+.result-hero .result-hero-target { display: flex; gap: 6px; margin-top: 6px; min-width: 0; }
+.result-hero .result-hero-target .path-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-hero > .actions { flex: 0 0 auto; margin-inline-start: auto; }
+.result-hero > .actions:empty { display: none; }
+.result-hero.success { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.result-hero.success > .ui-icon { color: var(--success); }
+.result-hero.danger { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.result-hero.danger > .ui-icon { color: var(--danger); }
+.result-hero.warning { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
+.result-hero.warning > .ui-icon { color: var(--warning); }
+.result-hero.neutral > .ui-icon { color: var(--muted); }
+
+.result-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+.result-metrics > div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 10px 12px;
+}
+.result-metrics dt { color: var(--muted); font-size: 12px; }
+.result-metrics dd { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.result-metrics > .danger dd { color: var(--danger); }
+.result-metrics > .warning dd { color: var(--warning); }
+
+/* Copy / fullscreen buttons above a scan log sit on the right. */
+.details-actions { justify-content: flex-end; margin: 0 0 6px; }

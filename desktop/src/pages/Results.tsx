@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Icon } from "../Icon";
+import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
 import { _, ngettext, scanStatusLabel } from "../i18n";
 import { copyText, navigate, onEvent, openExternal, request, saveText } from "../api";
@@ -90,6 +90,15 @@ function storedResult<T>(key: string, guard: (value: unknown) => value is T): T 
   }
 }
 
+type ScanHero = { tone: "success" | "danger" | "warning" | "neutral"; icon: IconName; title: string; description: string };
+function scanHero(status: string, threatCount: number): ScanHero {
+  if (status === "infected" || threatCount > 0) return { tone: "danger", icon: "warning", title: ngettext("{count} threat found", "{count} threats found", threatCount, { count: threatCount }), description: _("Review the files below and move them to quarantine or exclude them.") };
+  if (status === "clean") return { tone: "success", icon: "check-circle", title: _("No threats found"), description: _("ClamAV checked the scanned files and found nothing harmful.") };
+  if (status === "cancelled") return { tone: "warning", icon: "minus-circle", title: scanStatusLabel(status), description: _("The scan was stopped before it finished, so these results are incomplete.") };
+  if (status === "error") return { tone: "warning", icon: "warning", title: _("Scan failed"), description: _("The scan could not finish. Open the scan details below for more information.") };
+  return { tone: "neutral", icon: "info", title: scanStatusLabel(status), description: "" };
+}
+
 function ScanResultPanel({ result }: { result: ScanResult }) {
   const [shown, setShown] = useState(PAGE_SIZE);
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
@@ -102,7 +111,8 @@ function ScanResultPanel({ result }: { result: ScanResult }) {
   const threats = result.threat_details ?? [];
   const visibleThreats = threats.slice(0, shown);
   const logChunks = useMemo(() => scanLogChunks(result), [result]);
-  const status = result.status === "infected" ? "warning" : result.status === "clean" ? "success" : result.status === "error" ? "error" : "";
+  const threatCount = result.infected_count ?? threats.length;
+  const hero = scanHero(result.status, threatCount);
 
   const fullOutput = () => {
     const cached = outputCache.current;
@@ -169,19 +179,23 @@ function ScanResultPanel({ result }: { result: ScanResult }) {
 
   return <>
     <section className="results-summary scan-results-summary" aria-labelledby="scan-results-title">
-      <div className="scan-result-toolbar">
-        <div className="row"><h2 id="scan-results-title" className="row-title">{_("Scan Results")}</h2><span className={`status-badge ${status}`}>{scanStatusLabel(result.status)}</span></div>
+      <div className={`result-hero ${hero.tone}`} role="status">
+        <Icon name={hero.icon} />
+        <div className="result-hero-copy">
+          <h2 id="scan-results-title">{hero.title}</h2>
+          <p>{hero.description}</p>
+          {result.path && <p className="result-hero-target"><span>{_("Scan target")}</span><code className="path-value">{result.path}</code></p>}
+        </div>
         <div className="actions">
-          <button className="button" onClick={handleCopyOrExport}><Icon name="copy" />{_("Copy or Export")}</button>
-          {logChunks.length > 0 && <button className="button" onClick={() => setFullscreen(true)}><Icon name="expand" />{_("Fullscreen")}</button>}
+          {logChunks.length === 0 && <button className="button" onClick={handleCopyOrExport}><Icon name="copy" />{_("Copy or Export")}</button>}
           {threats.length > 0 && <button className="button primary" disabled={busy || threats.every((threat) => quarantined.has(threat.file_path))} onClick={() => setConfirmation({ kind: "all", threats: threats.filter((threat) => !quarantined.has(threat.file_path)) })}>{_("Quarantine All")}</button>}
         </div>
       </div>
-      <dl className="scan-summary-metrics">
+      <dl className="result-metrics">
         <div><dt>{_("Files scanned")}</dt><dd>{result.scanned_files ?? 0}</dd></div>
         <div><dt>{_("Directories")}</dt><dd>{result.scanned_dirs ?? 0}</dd></div>
-        <div><dt>{_("Threats found")}</dt><dd>{result.infected_count ?? threats.length}</dd></div>
-        {(result.skipped_count ?? 0) > 0 && <div><dt>{_("Not accessible")}</dt><dd>{result.skipped_count}</dd></div>}
+        <div className={threatCount > 0 ? "danger" : ""}><dt>{_("Threats found")}</dt><dd>{threatCount}</dd></div>
+        {(result.skipped_count ?? 0) > 0 && <div className="warning"><dt>{_("Not accessible")}</dt><dd>{result.skipped_count}</dd></div>}
       </dl>
       {result.warning_message && <p className="notice warning">{result.warning_message}</p>}
       {result.nonfatal_warnings?.map((warning, index) => <p className="notice warning" key={`${warning}-${index}`}>{warning}</p>)}
@@ -197,7 +211,7 @@ function ScanResultPanel({ result }: { result: ScanResult }) {
     })}{shown < threats.length && <button className="button" onClick={() => setShown((current) => current + PAGE_SIZE)}>{_("Show {count} more", { count: Math.min(PAGE_SIZE, threats.length - shown) })}</button>}</div></section>}
 
     {(result.skipped_files?.length ?? 0) > 0 && <details className="grouped-list"><summary>{_("Files Not Accessible")}</summary>{result.skipped_files!.slice(0, 100).map((path) => <div className="group-row" key={path}><code className="path-value">{path}</code></div>)}{result.skipped_files!.length > 100 && <p className="muted">{_("Additional inaccessible files are omitted from this view.")}</p>}</details>}
-    {logChunks.length > 0 && <details className="scan-log-details" onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>{_("Scan details")}</summary>{detailsOpen && <ScanLogViewport chunks={logChunks} label={_("Scan details")} />}</details>}
+    {logChunks.length > 0 && <details className="scan-log-details" onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>{_("Scan details")}</summary>{detailsOpen && <><div className="actions details-actions"><button className="button" onClick={handleCopyOrExport}><Icon name="copy" />{_("Copy or Export")}</button><button className="button" onClick={() => setFullscreen(true)}><Icon name="expand" />{_("Fullscreen")}</button></div><ScanLogViewport chunks={logChunks} label={_("Scan details")} /></>}</details>}
     {fullscreen && <FullscreenOutput title={_("Scan details")} chunks={logChunks} onCopyOrExport={copyOrExport} onClose={() => setFullscreen(false)} />}
     {confirmation && <Modal title={confirmation.kind === "single" ? _("Quarantine File") : _("Quarantine All Threats")} onClose={() => setConfirmation(null)}><p>{confirmation.kind === "single" ? _(
       // Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
