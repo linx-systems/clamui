@@ -962,6 +962,7 @@ export default function App(): ReactNode {
                     {_("Preferences")}
                   </button>
                   <button className="menu-item" role="menuitem" type="button" onClick={() => { setOpenMenu(null); openAbout(); }}>
+                    <Icon name="info" />
                     {_("About")}
                   </button>
                   <button className="menu-item" role="menuitem" type="button" onClick={() => { setOpenMenu(null); void requestQuit(); }}>
