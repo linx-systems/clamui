@@ -26,6 +26,7 @@ use tauri::{
     webview::NewWindowResponse, AppHandle, DragDropEvent, Emitter, Manager, RunEvent, State,
     WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+#[cfg(not(target_os = "linux"))]
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_notification::{Action, ActionType, NotificationExt};
 
@@ -477,13 +478,31 @@ async fn save_export(
 #[tauri::command]
 async fn copy_text(state: State<'_, AppState>, app: AppHandle, text: String) -> Result<(), String> {
     let _operation = state.active_jobs.register("native.copy_text".into())?;
-    tauri::async_runtime::spawn_blocking(move || {
-        app.clipboard()
-            .write_text(text)
-            .map_err(|error| error.to_string())
-    })
-    .await
-    .map_err(|error| error.to_string())?
+    #[cfg(target_os = "linux")]
+    {
+        // Arboard needs Wayland data-control or an X11 fallback. GNOME Flatpak
+        // sessions may expose neither; GTK already owns a usable display and
+        // uses the normal Wayland selection protocol. GTK must run on its thread.
+        let (sender, mut receiver) = tauri::async_runtime::channel(1);
+        app.run_on_main_thread(move || {
+            let _ = sender.try_send(crate::clipboard::write_text(&text));
+        })
+        .map_err(|error| error.to_string())?;
+        receiver
+            .recv()
+            .await
+            .ok_or_else(|| "clipboard operation did not complete".to_owned())?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        tauri::async_runtime::spawn_blocking(move || {
+            app.clipboard()
+                .write_text(text)
+                .map_err(|error| error.to_string())
+        })
+        .await
+        .map_err(|error| error.to_string())?
+    }
 }
 
 #[tauri::command]
