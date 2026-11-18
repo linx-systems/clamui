@@ -51,4 +51,8 @@ jobs:
 
       - name: Audit frontend dependencies
         working-directory: desktop
-        run: bun audit
+        # GHSA-fc5q-39xc-vjpf affects picomatch used only by the Vite build
+        # tooling, not the shipped frontend. No patched release exists for the
+        # affected versions <=4.0.7. Remove this exception when picomatch or
+        # Vite publishes a fix; keep all other advisories enforced.
+        run: bun audit --ignore GHSA-fc5q-39xc-vjpf
