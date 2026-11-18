@@ -118,10 +118,19 @@ function acknowledgedChecks(sections: AuditSection[]): AuditCheck[] {
 
 // The Optional hardening view shows everything that is not part of the
 // Essentials list, with its badge recomputed so it only reflects what is
-// actually shown there.
+// actually shown there. Acknowledged checks are listed only in the
+// Acknowledged section; the badge still sees them, so a section whose
+// remaining results are all acknowledged reads as pass.
 function withoutEssential(section: AuditSection): AuditSection {
-  const checks = section.checks.filter((check) => check.essential !== true);
-  return { ...section, checks, overall_status: overallOf(checks) };
+  const optional = section.checks.filter((check) => check.essential !== true);
+  return { ...section, checks: optional.filter((check) => !check.acknowledged), overall_status: overallOf(optional) };
+}
+
+// A section whose every optional result was acknowledged has nothing left
+// to show outside the Acknowledged section.
+function fullyAcknowledged(section: AuditSection): boolean {
+  const optional = section.checks.filter((check) => check.essential !== true);
+  return optional.length > 0 && optional.every((check) => check.acknowledged);
 }
 
 // Validate the network fields used here at both the progressive and final-response boundaries.
@@ -279,7 +288,7 @@ function HeroBanner({ sections, running }: { sections: AuditSection[]; running: 
 }
 
 function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, onAcknowledge, actionsDisabled, authorizationRunning, ufwChecking, actionErrors, acknowledgingIds }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; onAcknowledge: (check: AuditCheck) => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string>; acknowledgingIds: Set<string> }): JSX.Element | null {
-  const checks = essentialChecks(sections);
+  const checks = essentialChecks(sections).filter((check) => !check.acknowledged);
   if (checks.length === 0) return null;
   return <section className="audit-category audit-essentials" aria-labelledby="audit-essentials-heading">
     <header className="section-header"><div><h2 id="audit-essentials-heading">{_("Essentials")}</h2></div></header>
@@ -571,7 +580,7 @@ export default function Audit(): JSX.Element {
 
         <label className="check-row"><input type="checkbox" checked={hideMissingOptional} onChange={(event) => setHideMissingOptional(event.target.checked)} /> {_("Hide missing optional items")}</label>
 
-        {tierSections.map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {tierSections.filter((section) => !fullyAcknowledged(section)).map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
 
         <section className="audit-category" aria-labelledby="deep-scans-heading">
           <header className="section-header"><div><h2 id="deep-scans-heading">{_("Deep scans")}</h2><p>{_(
@@ -583,7 +592,7 @@ export default function Audit(): JSX.Element {
             <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("chkrootkit")} type="button">{deepRunning === "chkrootkit" ? _("Running chkrootkit…") : _("Run rootkit detection")}</button>
           </div>
         </section>
-        {deepSections.map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {deepSections.filter((section) => !fullyAcknowledged(section)).map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
       </details>
     </main>
   );

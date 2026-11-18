@@ -269,7 +269,7 @@ fn finish_ufw_status(
         ));
     }
     let mut section = build(state);
-    super::acknowledgements::apply(ctx, &mut section)?;
+    super::acknowledgements::apply(ctx, &mut section);
     ctx.emit(
         "audit-progress",
         serde_json::json!({"section": section, "index": 0, "total": 1}),

@@ -1,4 +1,4 @@
-use super::{overall_status, AuditSection};
+use super::{overall_status, AuditSection, AuditStatus};
 use crate::common::{atomic_write, now_iso, Context};
 use crate::AppResult;
 use fs2::FileExt;
@@ -53,22 +53,42 @@ fn update<T>(
     Ok(result)
 }
 
-pub(super) fn apply(ctx: &Context, section: &mut AuditSection) -> AppResult<()> {
-    update(ctx, |records| {
+/// Marks checks whose acknowledged result is unchanged. A missing, unreadable
+/// or corrupt store never aborts the audit: every check is then reported as
+/// outstanding and the store is left untouched for the user to repair.
+pub(super) fn apply(ctx: &Context, section: &mut AuditSection) {
+    for check in &mut section.checks {
+        // Recompute after construction so later detail changes are covered.
+        check.fingerprint = check.result_fingerprint();
+        check.acknowledged = false;
+    }
+    let result = update(ctx, |records| {
         let mut changed = false;
         for check in &mut section.checks {
-            // Recompute after construction so later detail changes are covered.
-            check.fingerprint = check.result_fingerprint();
-            check.acknowledged = records
-                .get(&check.id)
-                .is_some_and(|record| record.fingerprint == check.fingerprint);
+            // Only warnings can be acknowledged; the frontend is not trusted
+            // to have offered the action on a warning row.
+            check.acknowledged = check.status == AuditStatus::Warning
+                && records
+                    .get(&check.id)
+                    .is_some_and(|record| record.fingerprint == check.fingerprint);
             if !check.acknowledged && records.remove(&check.id).is_some() {
                 changed = true;
             }
         }
-        section.overall_status = overall_status(&section.checks);
         Ok(((), changed))
-    })
+    });
+    if let Err(error) = result {
+        for check in &mut section.checks {
+            check.acknowledged = false;
+        }
+        let _ = crate::logs::write_debug(
+            ctx,
+            "WARNING",
+            "clamui-core.audit",
+            &format!("Audit acknowledgements were not applied: {error}"),
+        );
+    }
+    section.overall_status = overall_status(&section.checks);
 }
 
 pub(super) fn dispatch(ctx: &Context, action: &str, args: &Value) -> AppResult<Value> {
@@ -158,7 +178,7 @@ mod tests {
         let mut report = section(&ctx, AuditStatus::Warning, "Disabled");
         acknowledge(&ctx, &report);
         let reloaded = context(&temp);
-        apply(&reloaded, &mut report).expect("apply persisted acknowledgement");
+        apply(&reloaded, &mut report);
         assert!(report.checks[0].acknowledged);
         assert_eq!(report.overall_status, AuditStatus::Pass);
         let path = ctx.paths.config_dir.join(FILE_NAME);
@@ -175,7 +195,7 @@ mod tests {
                 json!({"acknowledged": false})
             );
         }
-        apply(&context(&temp), &mut report).expect("apply revoked state");
+        apply(&context(&temp), &mut report);
         assert!(!report.checks[0].acknowledged);
         assert_eq!(report.overall_status, AuditStatus::Warning);
     }
@@ -191,14 +211,14 @@ mod tests {
             let mut original = section(&ctx, AuditStatus::Warning, "Disabled");
             acknowledge(&ctx, &original);
             let mut changed = section(&ctx, status, detail);
-            apply(&ctx, &mut changed).expect("apply changed result");
+            apply(&ctx, &mut changed);
             assert!(!changed.checks[0].acknowledged);
             let records: Records = serde_json::from_slice(
                 &fs::read(ctx.paths.config_dir.join(FILE_NAME)).expect("records"),
             )
             .expect("JSON");
             assert!(records.is_empty());
-            apply(&context(&temp), &mut original).expect("old result");
+            apply(&context(&temp), &mut original);
             assert!(!original.checks[0].acknowledged);
         }
     }
@@ -211,13 +231,35 @@ mod tests {
         acknowledge(&ctx, &report);
         let mut other = section(&ctx, AuditStatus::Warning, "Other");
         other.checks[0].id = "ssh_hardening".into();
-        apply(&ctx, &mut other).expect("unrelated section");
-        apply(&ctx, &mut report).expect("original section");
+        apply(&ctx, &mut other);
+        apply(&ctx, &mut report);
         assert!(report.checks[0].acknowledged);
         let path = ctx.paths.config_dir.join(FILE_NAME);
         fs::write(&path, b"invalid").expect("corrupt fixture");
         assert!(audit::dispatch(&ctx, "revoke", json!({"id": "firewall"})).is_err());
         assert_eq!(fs::read(&path).expect("read corrupt fixture"), b"invalid");
+        // A corrupt store must not abort the audit: the result stays
+        // outstanding and the file is left for the user to repair.
+        apply(&ctx, &mut report);
+        assert!(!report.checks[0].acknowledged);
+        assert_eq!(report.overall_status, AuditStatus::Warning);
+        assert_eq!(fs::read(&path).expect("read corrupt fixture"), b"invalid");
+    }
+
+    #[test]
+    fn only_warnings_honor_a_matching_acknowledgement() {
+        let temp = TempDir::new().expect("temporary directory");
+        let ctx = context(&temp);
+        for status in [AuditStatus::Fail, AuditStatus::Unknown, AuditStatus::Pass] {
+            let mut report = section(&ctx, status, "Disabled");
+            // The fingerprint is client-supplied, so a forged request can
+            // match a non-warning result exactly.
+            apply(&ctx, &mut report);
+            acknowledge(&ctx, &report);
+            apply(&ctx, &mut report);
+            assert!(!report.checks[0].acknowledged, "{status:?}");
+            assert_eq!(report.overall_status, status);
+        }
     }
 
     #[test]

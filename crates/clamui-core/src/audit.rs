@@ -1681,7 +1681,7 @@ fn deep_rootkit(
     section
 }
 
-fn run_tier1(ctx: &Context) -> AppResult<AuditReport> {
+fn run_tier1(ctx: &Context) -> AuditReport {
     let checks: [fn(&Context) -> AuditSection; 7] = [
         check_clamav_health,
         check_firewall,
@@ -1695,20 +1695,20 @@ fn run_tier1(ctx: &Context) -> AppResult<AuditReport> {
     let total = checks.len();
     for (index, audit) in checks.into_iter().enumerate() {
         let mut section = audit(ctx);
-        acknowledgements::apply(ctx, &mut section)?;
+        acknowledgements::apply(ctx, &mut section);
         ctx.emit(
             "audit-progress",
             json!({"section": section, "index": index, "total": total}),
         );
         sections.push(section);
     }
-    Ok(AuditReport {
+    AuditReport {
         sections,
         timestamp: SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|duration| duration.as_secs_f64())
             .unwrap_or_default(),
-    })
+    }
 }
 
 fn launch(ctx: &Context, command: &str) -> AppResult<bool> {
@@ -1730,7 +1730,7 @@ fn launch(ctx: &Context, command: &str) -> AppResult<bool> {
 
 pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
     match action {
-        "run" => serde_json::to_value(run_tier1(ctx)?).map_err(|error| error.to_string()),
+        "run" => serde_json::to_value(run_tier1(ctx)).map_err(|error| error.to_string()),
         "acknowledge" | "revoke" => acknowledgements::dispatch(ctx, action, &args),
         "ufw_status" => firewall::request_ufw_status(ctx),
         "deep" => {
@@ -1742,7 +1742,7 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
                 return Err("audit.deep requires tool 'lynis' or 'chkrootkit'".to_owned());
             }
             let mut section = run_deep(ctx, tool);
-            acknowledgements::apply(ctx, &mut section)?;
+            acknowledgements::apply(ctx, &mut section);
             ctx.emit(
                 "audit-progress",
                 json!({"section": section, "index": 0, "total": 1}),
@@ -1822,15 +1822,15 @@ mod open_ports_tests {
         unchanged.listening_ports.as_mut().unwrap().captured_at = "different capture".into();
         let mut section = AuditSection::new(&ctx, AuditCategory::Firewall, "Firewall", "firewall");
         section.push(unchanged);
-        acknowledgements::apply(&ctx, &mut section).unwrap();
+        acknowledgements::apply(&ctx, &mut section);
         assert!(section.checks[0].acknowledged);
         let changed = assess(&ctx, &output("tcp LISTEN 0 128 0.0.0.0:9090 0.0.0.0:*\n"));
         assert_eq!(original.detail, changed.detail);
         section.checks = vec![changed];
-        acknowledgements::apply(&ctx, &mut section).unwrap();
+        acknowledgements::apply(&ctx, &mut section);
         assert!(!section.checks[0].acknowledged);
         section.checks = vec![original];
-        acknowledgements::apply(&ctx, &mut section).unwrap();
+        acknowledgements::apply(&ctx, &mut section);
         assert!(!section.checks[0].acknowledged);
     }
 

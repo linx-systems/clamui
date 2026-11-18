@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-18 18:38+0100\n"
+"POT-Creation-Date: 2026-11-18 18:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2399,7 +2399,7 @@ msgstr ""
 msgid "Configuration content"
 msgstr ""
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:655
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:664
 msgid "Could not open documentation: {error}"
 msgstr ""
 
@@ -2596,15 +2596,15 @@ msgstr ""
 msgid "SSH Security"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Audit.tsx:564
+#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Audit.tsx:573
 msgid "Checking"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:66 desktop/src/pages/Audit.tsx:570
+#: desktop/src/pages/Audit.tsx:66 desktop/src/pages/Audit.tsx:579
 msgid "Pass"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:67 desktop/src/pages/Audit.tsx:570
+#: desktop/src/pages/Audit.tsx:67 desktop/src/pages/Audit.tsx:579
 msgid "Warning"
 msgstr ""
 
@@ -2616,289 +2616,289 @@ msgstr ""
 msgid "Skipped"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:197
+#: desktop/src/pages/Audit.tsx:206
 msgid "Local only"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:199
+#: desktop/src/pages/Audit.tsx:208
 msgid "All interfaces"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:200
+#: desktop/src/pages/Audit.tsx:209
 msgid "Specific address or interface"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:274
 msgid "Checking your system…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:265
+#: desktop/src/pages/Audit.tsx:274
 msgid "Running the essential security checks."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:273 desktop/src/pages/Statistics.tsx:137
+#: desktop/src/pages/Audit.tsx:282 desktop/src/pages/Statistics.tsx:137
 msgid "Protected"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:273
+#: desktop/src/pages/Audit.tsx:282
 msgid "Action recommended"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:275
+#: desktop/src/pages/Audit.tsx:284
 msgid ""
 "Your firewall, virus scanner and definitions are active and up to date. No "
 "action is needed right now."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:276
+#: desktop/src/pages/Audit.tsx:285
 msgid ""
 "One or more essential checks need your attention. Review Essentials below."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:285
+#: desktop/src/pages/Audit.tsx:294
 msgid "Essentials"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:296
+#: desktop/src/pages/Audit.tsx:305
 msgid "Acknowledged"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:297
+#: desktop/src/pages/Audit.tsx:306
 msgid ""
 "These checks were reviewed and acknowledged. They no longer count toward the "
 "Protected status above."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:302
+#: desktop/src/pages/Audit.tsx:311
 msgid "Revoking…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:302
+#: desktop/src/pages/Audit.tsx:311
 msgid "Revoke"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:357
+#: desktop/src/pages/Audit.tsx:366
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:358
+#: desktop/src/pages/Audit.tsx:367
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:359
+#: desktop/src/pages/Audit.tsx:368
 msgid "Security audit completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:392
+#: desktop/src/pages/Audit.tsx:401
 msgid "Could not receive progressive audit results: {error}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:412
+#: desktop/src/pages/Audit.tsx:421
 msgid "{tool} check completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:424
+#: desktop/src/pages/Audit.tsx:433
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:429
+#: desktop/src/pages/Audit.tsx:438
 msgid "The selected application did not start"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:443
+#: desktop/src/pages/Audit.tsx:452
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:446
+#: desktop/src/pages/Audit.tsx:455
 msgid "Portmaster authorization was cancelled."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:448
+#: desktop/src/pages/Audit.tsx:457
 msgid "Portmaster authorization was not granted."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:468
+#: desktop/src/pages/Audit.tsx:477
 msgid "UFW status authorization was cancelled."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:476
+#: desktop/src/pages/Audit.tsx:485
 msgid "The UFW status check did not return a firewall result."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:483
+#: desktop/src/pages/Audit.tsx:492
 msgid "UFW status check completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:551
+#: desktop/src/pages/Audit.tsx:560
 msgid "System security audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:552
+#: desktop/src/pages/Audit.tsx:561
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:554
+#: desktop/src/pages/Audit.tsx:563
 msgid "Auditing…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:554
+#: desktop/src/pages/Audit.tsx:563
 msgid "Refresh audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:567
+#: desktop/src/pages/Audit.tsx:576
 msgid "Optional hardening"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:568
+#: desktop/src/pages/Audit.tsx:577
 msgid ""
 "These checks are informational. They do not affect the Protected status "
 "above."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:570
+#: desktop/src/pages/Audit.tsx:579
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:570
+#: desktop/src/pages/Audit.tsx:579
 msgid "unavailable or skipped"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:572
+#: desktop/src/pages/Audit.tsx:581
 msgid "Hide missing optional items"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:577
+#: desktop/src/pages/Audit.tsx:586
 msgid "Deep scans"
 msgstr ""
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:577
+#: desktop/src/pages/Audit.tsx:586
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:582
+#: desktop/src/pages/Audit.tsx:591
 msgid "Running Lynis…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:582
+#: desktop/src/pages/Audit.tsx:591
 msgid "Run Lynis security audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:583
+#: desktop/src/pages/Audit.tsx:592
 msgid "Running chkrootkit…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:583
+#: desktop/src/pages/Audit.tsx:592
 msgid "Run rootkit detection"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:613
+#: desktop/src/pages/Audit.tsx:622
 msgid "No audit details were returned."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:619 desktop/src/pages/Audit.tsx:629
+#: desktop/src/pages/Audit.tsx:628 desktop/src/pages/Audit.tsx:638
 #: desktop/src/pages/Database.tsx:285
 msgid "Unavailable"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:622 desktop/src/pages/Network.tsx:403
+#: desktop/src/pages/Audit.tsx:631 desktop/src/pages/Network.tsx:403
 msgid ""
 "Network information is unavailable. Check that the system socket tool is "
 "installed and try again."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:623 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:632 desktop/src/pages/Network.tsx:406
 msgid "The socket list was limited. This snapshot may be incomplete."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:623 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:632 desktop/src/pages/Network.tsx:406
 msgid "Some socket records could not be read. This snapshot may be incomplete."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:624
+#: desktop/src/pages/Audit.tsx:633
 msgid ""
 "Listening sockets do not prove that a port is reachable through the firewall."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:626
+#: desktop/src/pages/Audit.tsx:635
 msgid "Protocol"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:626
+#: desktop/src/pages/Audit.tsx:635
 msgid "Port"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:626 desktop/src/pages/Network.tsx:282
+#: desktop/src/pages/Audit.tsx:635 desktop/src/pages/Network.tsx:282
 msgid "Local address"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:626
+#: desktop/src/pages/Audit.tsx:635
 msgid "Binding"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:626 desktop/src/pages/Network.tsx:287
+#: desktop/src/pages/Audit.tsx:635 desktop/src/pages/Network.tsx:287
 msgid "Process"
 msgstr ""
 
 #. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Audit.tsx:632 desktop/src/pages/Network.tsx:289
+#: desktop/src/pages/Audit.tsx:641 desktop/src/pages/Network.tsx:289
 msgid "PID {pid}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:636 desktop/src/pages/Network.tsx:294
+#: desktop/src/pages/Audit.tsx:645 desktop/src/pages/Network.tsx:294
 msgid "Process information unavailable"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:646 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:648 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:666 desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:668
+#: desktop/src/pages/Audit.tsx:677
 msgid "Authorizing…"
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
-#: desktop/src/pages/Audit.tsx:669
+#: desktop/src/pages/Audit.tsx:678
 msgid "Checking UFW…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:674 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Audit.tsx:683 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:674
+#: desktop/src/pages/Audit.tsx:683
 msgid "Learn more"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:675
+#: desktop/src/pages/Audit.tsx:684
 msgid "Acknowledging…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:675
+#: desktop/src/pages/Audit.tsx:684
 msgid "Acknowledge"
 msgstr ""
 
