@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-18 16:10+0100\n"
+"POT-Creation-Date: 2026-11-18 18:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,568 +18,626 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: crates/clamui-core/src/audit.rs:309
+#: crates/clamui-core/src/audit.rs:315
 msgid "ClamAV is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:311
+#: crates/clamui-core/src/audit.rs:317
 msgid "Install ClamAV to enable virus scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:328
+#: crates/clamui-core/src/audit.rs:334
 msgid "Installed: {version}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:339
+#: crates/clamui-core/src/audit.rs:345
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:355 crates/clamui-core/src/audit.rs:373
+#: crates/clamui-core/src/audit.rs:362 crates/clamui-core/src/audit.rs:381
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:363
+#: crates/clamui-core/src/audit.rs:370
 msgid "Update virus database to ensure protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:381
+#: crates/clamui-core/src/audit.rs:389
 msgid "Database is critically outdated. Update immediately."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:400
+#: crates/clamui-core/src/audit.rs:409
 msgid "Database files exist but age could not be determined"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:402
+#: crates/clamui-core/src/audit.rs:411
 msgid "No virus database found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:406
+#: crates/clamui-core/src/audit.rs:415
 msgid "Download virus database"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:422
+#: crates/clamui-core/src/audit.rs:432
 msgid "Service {name} is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:433
+#: crates/clamui-core/src/audit.rs:443
 msgid "Daemon is responding"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:440
+#: crates/clamui-core/src/audit.rs:450
 msgid "ClamAV daemon is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:442
+#: crates/clamui-core/src/audit.rs:452
 msgid "Start the daemon for faster scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:457
+#: crates/clamui-core/src/audit.rs:468
 msgid "Freshclam service is active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:464
+#: crates/clamui-core/src/audit.rs:475
 msgid "Freshclam automatic update service is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:466
+#: crates/clamui-core/src/audit.rs:477
 msgid "Enable automatic database updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:649
+#: crates/clamui-core/src/audit.rs:500
+msgid "Scheduled scans are enabled"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:507
+msgid "Scheduled scans are not enabled"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:509
+msgid "Enable scheduled scans in Preferences → Schedule"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:516
+msgid "No scheduling backend is available on this system"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:518
+msgid "Scheduled scans require a systemd user session or cron"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:704
 msgid "Open Ports"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:654
+#: crates/clamui-core/src/audit.rs:709
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:665
+#: crates/clamui-core/src/audit.rs:720
 msgid "Review if these services need to be exposed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:671
+#: crates/clamui-core/src/audit.rs:726
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:679
+#: crates/clamui-core/src/audit.rs:734
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:688 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:743 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:691
+#: crates/clamui-core/src/audit.rs:746
 msgid "No open ports detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:722
+#: crates/clamui-core/src/audit.rs:777
 msgid "AppArmor is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:729
+#: crates/clamui-core/src/audit.rs:784
 msgid "AppArmor module is loaded but not enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:731
+#: crates/clamui-core/src/audit.rs:786
 msgid "Enable AppArmor for application sandboxing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:746
+#: crates/clamui-core/src/audit.rs:801
 msgid "SELinux is enforcing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:753
+#: crates/clamui-core/src/audit.rs:808
 msgid "SELinux is in permissive mode"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:810
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:766
+#: crates/clamui-core/src/audit.rs:821
 msgid "SELinux is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:768
+#: crates/clamui-core/src/audit.rs:823
 msgid "Enable SELinux for mandatory access control"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:782
+#: crates/clamui-core/src/audit.rs:837
 msgid "No mandatory access control framework detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:784
+#: crates/clamui-core/src/audit.rs:839
 msgid "Consider enabling AppArmor or SELinux"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:809
+#: crates/clamui-core/src/audit.rs:864
 msgid "Automatic security updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:819
+#: crates/clamui-core/src/audit.rs:874
 msgid "Unattended upgrades is installed but disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:821
+#: crates/clamui-core/src/audit.rs:876
 msgid "Enable automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:834
+#: crates/clamui-core/src/audit.rs:889
 msgid "DNF automatic updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:844
+#: crates/clamui-core/src/audit.rs:899
 msgid "DNF automatic is installed but timer is not active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:846
+#: crates/clamui-core/src/audit.rs:901
 msgid "Enable automatic updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:859
+#: crates/clamui-core/src/audit.rs:914
 msgid "Could not determine automatic update status"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:861
+#: crates/clamui-core/src/audit.rs:916
 msgid "Configure automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:875
+#: crates/clamui-core/src/audit.rs:930
 msgid "System reboot required to apply updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:877
+#: crates/clamui-core/src/audit.rs:932
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:922
+#: crates/clamui-core/src/audit.rs:977
 msgid "{name} is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:940
+#: crates/clamui-core/src/audit.rs:995
 msgid "No intrusion detection system found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:942
+#: crates/clamui-core/src/audit.rs:997
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:968
+#: crates/clamui-core/src/audit.rs:1023
 msgid "SSH server is not running (no remote attack surface)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:978
+#: crates/clamui-core/src/audit.rs:1033
 msgid "SSH server is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:987
+#: crates/clamui-core/src/audit.rs:1042
 msgid "Could not read SSH configuration"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1005
+#: crates/clamui-core/src/audit.rs:1060
 msgid "Root login: {value}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1012
+#: crates/clamui-core/src/audit.rs:1067
 msgid "Root login is allowed ({value})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1018
+#: crates/clamui-core/src/audit.rs:1073
 msgid "Disable root SSH login for security"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1032
+#: crates/clamui-core/src/audit.rs:1087
 msgid "Password authentication is disabled (key-only)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1039
+#: crates/clamui-core/src/audit.rs:1094
 msgid "Password authentication is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1041
+#: crates/clamui-core/src/audit.rs:1096
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1058
+#: crates/clamui-core/src/audit.rs:1113
 msgid "X11 forwarding is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1065
+#: crates/clamui-core/src/audit.rs:1120
 msgid "X11 forwarding is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1067
+#: crates/clamui-core/src/audit.rs:1122
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1127
+#: crates/clamui-core/src/audit.rs:1182
 msgid "Application firewalls"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1149
+#: crates/clamui-core/src/audit.rs:1204
 msgid "Portmaster is running and protecting connections"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1175
+#: crates/clamui-core/src/audit.rs:1231
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1178
+#: crates/clamui-core/src/audit.rs:1234
 msgid "Authorize"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1188
+#: crates/clamui-core/src/audit.rs:1244
 msgid "Portmaster is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1190
+#: crates/clamui-core/src/audit.rs:1246
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1203
+#: crates/clamui-core/src/audit.rs:1259
 msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1218
+#: crates/clamui-core/src/audit.rs:1274
 msgid "Could not probe Portmaster: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1267
+#: crates/clamui-core/src/audit.rs:1323
 msgid "{name} is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1274
+#: crates/clamui-core/src/audit.rs:1330
 msgid "Install {name} for comprehensive security auditing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1280
+#: crates/clamui-core/src/audit.rs:1336
 msgid "Install chkrootkit for rootkit detection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1299
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Authentication was cancelled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1307
+#: crates/clamui-core/src/audit.rs:1363
 msgid "Lynis audit timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1309
+#: crates/clamui-core/src/audit.rs:1365
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1327 crates/clamui-core/src/audit.rs:1371
+#: crates/clamui-core/src/audit.rs:1383 crates/clamui-core/src/audit.rs:1427
 msgid "Failed to run Lynis: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1333
+#: crates/clamui-core/src/audit.rs:1389
 msgid "Failed to run chkrootkit: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1399
+#: crates/clamui-core/src/audit.rs:1455
 msgid "Score: {score}/100"
 msgstr ""
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1402
+#: crates/clamui-core/src/audit.rs:1458
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1418
+#: crates/clamui-core/src/audit.rs:1474
 msgid "Audit completed (exit code {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1456 crates/clamui-core/src/audit.rs:1470
+#: crates/clamui-core/src/audit.rs:1512 crates/clamui-core/src/audit.rs:1526
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1500
+#: crates/clamui-core/src/audit.rs:1556
 msgid "No rootkits detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1511
+#: crates/clamui-core/src/audit.rs:1567
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:1519
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Investigate the detected threats immediately"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:60
+#: crates/clamui-core/src/audit/firewall.rs:88
 msgid "Firewall manager overlap"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:61
+#: crates/clamui-core/src/audit/firewall.rs:89
 msgid ""
 "UFW is active while Firewalld owns its D-Bus name; their rule interaction "
 "was not evaluated."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:179
+#: crates/clamui-core/src/audit/firewall.rs:207
 msgid "UFW was not found at a trusted system path."
 msgstr ""
 
 #. Translators: UFW is the name of the firewall application.
-#: crates/clamui-core/src/audit/firewall.rs:182
-#: crates/clamui-core/src/audit/firewall.rs:216
+#: crates/clamui-core/src/audit/firewall.rs:210
+#: crates/clamui-core/src/audit/firewall.rs:244
 msgid ""
 "Administrator authorization for the UFW status check was denied or "
 "unavailable."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:204
+#: crates/clamui-core/src/audit/firewall.rs:232
 msgid "The UFW status check timed out."
 msgstr ""
 
 #. Translators: UFW is the name of the firewall application.
-#: crates/clamui-core/src/audit/firewall.rs:207
-#: crates/clamui-core/src/audit/firewall.rs:237
+#: crates/clamui-core/src/audit/firewall.rs:235
+#: crates/clamui-core/src/audit/firewall.rs:265
 msgid "The UFW status check returned incomplete or invalid output."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:225
+#: crates/clamui-core/src/audit/firewall.rs:253
 msgid "The UFW status check failed."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:348
-msgid "UFW Firewall"
-msgstr ""
-
-#: crates/clamui-core/src/audit/firewall.rs:353
+#: crates/clamui-core/src/audit/firewall.rs:381
 msgid ""
 "UFW is active; the default incoming policy is deny. Listed rules may allow "
 "exceptions."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:360
+#: crates/clamui-core/src/audit/firewall.rs:388
 msgid ""
 "UFW is active; the default incoming policy is reject. Listed rules may allow "
 "exceptions."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:367
+#: crates/clamui-core/src/audit/firewall.rs:395
 msgid "UFW is active; the default incoming policy is deny."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:371
+#: crates/clamui-core/src/audit/firewall.rs:399
 msgid "UFW is active; the default incoming policy is reject."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:375
+#: crates/clamui-core/src/audit/firewall.rs:403
 msgid "UFW is active, but the default incoming policy allows traffic."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:382
+#: crates/clamui-core/src/audit/firewall.rs:410
 msgid "UFW is active, but its default incoming policy could not be verified."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:386
+#: crates/clamui-core/src/audit/firewall.rs:414
+msgid ""
+"UFW is inactive, but another firewall manager is active and protecting the "
+"system."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:418
 msgid "UFW reports inactive."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:387
+#: crates/clamui-core/src/audit/firewall.rs:419
+msgid ""
+"UFW's service is active, but its default firewall policy could not be "
+"verified without administrator access."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:423
 msgid "UFW status could not be inspected safely."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:392
+#: crates/clamui-core/src/audit/firewall.rs:435
+msgid "UFW Firewall"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:440
 msgid "Check UFW with administrator access"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:394
+#: crates/clamui-core/src/audit/firewall.rs:442
 msgid ""
 "Administrator access may be required to read UFW status. This check does not "
 "change firewall settings."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:432
+#: crates/clamui-core/src/audit/firewall.rs:480
 msgid "Firewalld"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:434
+#: crates/clamui-core/src/audit/firewall.rs:482
 msgid ""
 "Firewalld owns its D-Bus name; readiness and firewall policy were not "
 "queried."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:438
+#: crates/clamui-core/src/audit/firewall.rs:486
 msgid ""
 "No Firewalld D-Bus owner was observed; this does not establish kernel "
 "firewall policy."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:442
+#: crates/clamui-core/src/audit/firewall.rs:490
 msgid ""
 "Firewalld ownership could not be verified; readiness and firewall policy "
 "were not queried."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:457
+#: crates/clamui-core/src/audit/firewall.rs:505
 msgid "firewall-cmd"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:462
+#: crates/clamui-core/src/audit/firewall.rs:510
 msgid "firewall-cmd is installed; it was not executed."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:468
+#: crates/clamui-core/src/audit/firewall.rs:516
 msgid "firewall-cmd could not be confirmed without executing it."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:606
+#: crates/clamui-core/src/audit/firewall.rs:654
 msgid "nftables (native rules)"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:608
+#: crates/clamui-core/src/audit/firewall.rs:656
 msgid ""
 "nftables has restrictive default input policies for IPv4 and IPv6; "
 "individual rules may allow exceptions."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:612
+#: crates/clamui-core/src/audit/firewall.rs:660
 msgid ""
 "nftables reports a permissive default input policy; remaining coverage may "
 "be incomplete"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:616
+#: crates/clamui-core/src/audit/firewall.rs:664
 msgid ""
 "nftables input policy coverage could not be verified for both IPv4 and IPv6"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:676
+#: crates/clamui-core/src/audit/firewall.rs:724
 msgid "iptables (IPv4)"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:678
+#: crates/clamui-core/src/audit/firewall.rs:726
 msgid ""
 "iptables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:682
+#: crates/clamui-core/src/audit/firewall.rs:730
 msgid "iptables has a permissive INPUT default policy"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:683
+#: crates/clamui-core/src/audit/firewall.rs:731
 msgid "iptables INPUT policy could not be verified"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:689
+#: crates/clamui-core/src/audit/firewall.rs:737
 msgid "iptables (IPv6)"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:691
+#: crates/clamui-core/src/audit/firewall.rs:739
 msgid ""
 "ip6tables has a restrictive INPUT default policy; individual rules may allow "
 "exceptions."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:695
+#: crates/clamui-core/src/audit/firewall.rs:743
 msgid "ip6tables has a permissive INPUT default policy"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:696
+#: crates/clamui-core/src/audit/firewall.rs:744
 msgid "ip6tables INPUT policy could not be verified"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:706
+#: crates/clamui-core/src/audit/firewall.rs:788
+msgid "Firewall"
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:791
+msgid ""
+"UFW and Firewalld are both active; review which one is meant to control your "
+"firewall rules."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:796
+msgid "Firewalld is active and managing the firewall."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:801
+msgid "No active firewall manager was detected."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:805
+msgid "Enable UFW or Firewalld to protect the system."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:808
+msgid "The active firewall manager could not be verified."
+msgstr ""
+
+#: crates/clamui-core/src/audit/firewall.rs:823
 msgid "Gufw"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:708
+#: crates/clamui-core/src/audit/firewall.rs:825
 msgid "Gufw is available."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:710
+#: crates/clamui-core/src/audit/firewall.rs:827
 msgid ""
 "Gufw was not confirmed; this optional inventory does not affect firewall "
 "policy analysis."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:718
+#: crates/clamui-core/src/audit/firewall.rs:835
 msgid "Open Gufw"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:724
+#: crates/clamui-core/src/audit/firewall.rs:841
 msgid "Firewall Config"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:729
+#: crates/clamui-core/src/audit/firewall.rs:846
 msgid "Firewall Config is available."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:732
+#: crates/clamui-core/src/audit/firewall.rs:849
 msgid ""
 "Firewall Config was not confirmed; this optional inventory does not affect "
 "firewall policy analysis."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:740
+#: crates/clamui-core/src/audit/firewall.rs:857
 msgid "Open Firewall Config"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:778
+#: crates/clamui-core/src/audit/firewall.rs:895
 msgid "Plasma Firewall"
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:783
+#: crates/clamui-core/src/audit/firewall.rs:900
 msgid "Plasma Firewall is installed; it manages an existing firewall backend."
 msgstr ""
 
-#: crates/clamui-core/src/audit/firewall.rs:792
+#: crates/clamui-core/src/audit/firewall.rs:909
 msgid "Plasma Firewall was not confirmed; it is only a management module."
 msgstr ""
 
@@ -2341,7 +2399,7 @@ msgstr ""
 msgid "Configuration content"
 msgstr ""
 
-#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:484
+#: desktop/src/HelperTrustErrorDialog.tsx:36 desktop/src/pages/Audit.tsx:573
 msgid "Could not open documentation: {error}"
 msgstr ""
 
@@ -2499,7 +2557,7 @@ msgstr ""
 msgid "Cancelled"
 msgstr ""
 
-#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:66
+#: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:67
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
@@ -2518,266 +2576,303 @@ msgstr ""
 msgid "Retry"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:45
+#: desktop/src/pages/Audit.tsx:46
 msgid "ClamAV Health"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:46
-msgid "Firewall"
-msgstr ""
-
-#: desktop/src/pages/Audit.tsx:47
+#: desktop/src/pages/Audit.tsx:48
 msgid "Access Control"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:48
+#: desktop/src/pages/Audit.tsx:49
 msgid "Automatic Updates"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:49
+#: desktop/src/pages/Audit.tsx:50
 msgid "Intrusion Detection"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:50
+#: desktop/src/pages/Audit.tsx:51
 msgid "SSH Security"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:61 desktop/src/pages/Audit.tsx:404
+#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:483
 msgid "Checking"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:62 desktop/src/pages/Audit.tsx:400
+#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:489
 msgid "Pass"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:63 desktop/src/pages/Audit.tsx:400
+#: desktop/src/pages/Audit.tsx:64 desktop/src/pages/Audit.tsx:489
 msgid "Warning"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:64
+#: desktop/src/pages/Audit.tsx:65
 msgid "Fail"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:65 desktop/src/pages/Logs.tsx:120
+#: desktop/src/pages/Audit.tsx:66 desktop/src/pages/Logs.tsx:120
 msgid "Skipped"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:164
+#: desktop/src/pages/Audit.tsx:186
 msgid "Local only"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:166
+#: desktop/src/pages/Audit.tsx:188
 msgid "All interfaces"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:167
+#: desktop/src/pages/Audit.tsx:189
 msgid "Specific address or interface"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:246
+#: desktop/src/pages/Audit.tsx:248
+msgid "Checking your system…"
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:248
+msgid "Running the essential security checks."
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:256 desktop/src/pages/Statistics.tsx:137
+msgid "Protected"
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:256
+msgid "Action recommended"
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:258
+msgid ""
+"Your firewall, virus scanner and definitions are active and up to date. No "
+"action is needed right now."
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:259
+msgid ""
+"One or more essential checks need your attention. Review Essentials below."
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:268
+msgid "Essentials"
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:322
 msgid "{count} security issue needs attention"
 msgid_plural "{count} security issues need attention"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:247
+#: desktop/src/pages/Audit.tsx:323
 msgid "{count} audit check needs review"
 msgid_plural "{count} audit checks need review"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:248
+#: desktop/src/pages/Audit.tsx:324
 msgid "Security audit completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:281
+#: desktop/src/pages/Audit.tsx:357
 msgid "Could not receive progressive audit results: {error}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:301
+#: desktop/src/pages/Audit.tsx:377
 msgid "{tool} check completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:312
+#: desktop/src/pages/Audit.tsx:389
 msgid "The audit supplied an unsupported GUI launch action."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:317
+#: desktop/src/pages/Audit.tsx:394
 msgid "The selected application did not start"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:331
+#: desktop/src/pages/Audit.tsx:408
 msgid "Portmaster authorization granted; refreshing audit."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:334
+#: desktop/src/pages/Audit.tsx:411
 msgid "Portmaster authorization was cancelled."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:336
+#: desktop/src/pages/Audit.tsx:413
 msgid "Portmaster authorization was not granted."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:356
+#: desktop/src/pages/Audit.tsx:433
 msgid "UFW status authorization was cancelled."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:364
+#: desktop/src/pages/Audit.tsx:441
 msgid "The UFW status check did not return a firewall result."
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name.
-#: desktop/src/pages/Audit.tsx:371
+#: desktop/src/pages/Audit.tsx:448
 msgid "UFW status check completed"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:393
+#: desktop/src/pages/Audit.tsx:472
 msgid "System security audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:394
+#: desktop/src/pages/Audit.tsx:473
 msgid ""
 "Inspect your security posture and copy recommendations. Audit checks never "
 "change system configuration."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:396
+#: desktop/src/pages/Audit.tsx:475
 msgid "Auditing…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:396
+#: desktop/src/pages/Audit.tsx:475
 msgid "Refresh audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:400
+#: desktop/src/pages/Audit.tsx:486
+msgid "Optional hardening"
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:487
+msgid ""
+"These checks are informational. They do not affect the Protected status "
+"above."
+msgstr ""
+
+#: desktop/src/pages/Audit.tsx:489
 msgid "{count} issue"
 msgid_plural "{count} issues"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Audit.tsx:400
+#: desktop/src/pages/Audit.tsx:489
 msgid "unavailable or skipped"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:402
+#: desktop/src/pages/Audit.tsx:491
 msgid "Hide missing optional items"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:408
+#: desktop/src/pages/Audit.tsx:496
 msgid "Deep scans"
 msgstr ""
 
 #. Translators: Keep Lynis and chkrootkit unchanged; they are tool names.
-#: desktop/src/pages/Audit.tsx:408
+#: desktop/src/pages/Audit.tsx:496
 msgid ""
 "Lynis and chkrootkit are never run automatically. Each check may request "
 "administrator authorization only after you explicitly start that check."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:413
+#: desktop/src/pages/Audit.tsx:501
 msgid "Running Lynis…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:413
+#: desktop/src/pages/Audit.tsx:501
 msgid "Run Lynis security audit"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:414
+#: desktop/src/pages/Audit.tsx:502
 msgid "Running chkrootkit…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:414
+#: desktop/src/pages/Audit.tsx:502
 msgid "Run rootkit detection"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:442
+#: desktop/src/pages/Audit.tsx:531
 msgid "No audit details were returned."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:448 desktop/src/pages/Audit.tsx:458
+#: desktop/src/pages/Audit.tsx:537 desktop/src/pages/Audit.tsx:547
 #: desktop/src/pages/Database.tsx:285
 msgid "Unavailable"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:451 desktop/src/pages/Network.tsx:403
+#: desktop/src/pages/Audit.tsx:540 desktop/src/pages/Network.tsx:403
 msgid ""
 "Network information is unavailable. Check that the system socket tool is "
 "installed and try again."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:541 desktop/src/pages/Network.tsx:406
 msgid "The socket list was limited. This snapshot may be incomplete."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:452 desktop/src/pages/Network.tsx:406
+#: desktop/src/pages/Audit.tsx:541 desktop/src/pages/Network.tsx:406
 msgid "Some socket records could not be read. This snapshot may be incomplete."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:453
+#: desktop/src/pages/Audit.tsx:542
 msgid ""
 "Listening sockets do not prove that a port is reachable through the firewall."
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:455
+#: desktop/src/pages/Audit.tsx:544
 msgid "Protocol"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:455
+#: desktop/src/pages/Audit.tsx:544
 msgid "Port"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:282
+#: desktop/src/pages/Audit.tsx:544 desktop/src/pages/Network.tsx:282
 msgid "Local address"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:455
+#: desktop/src/pages/Audit.tsx:544
 msgid "Binding"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:455 desktop/src/pages/Network.tsx:287
+#: desktop/src/pages/Audit.tsx:544 desktop/src/pages/Network.tsx:287
 msgid "Process"
 msgstr ""
 
 #. Translators: Preserve the {pid} placeholder. It is a numeric process ID.
-#: desktop/src/pages/Audit.tsx:461 desktop/src/pages/Network.tsx:289
+#: desktop/src/pages/Audit.tsx:550 desktop/src/pages/Network.tsx:289
 msgid "PID {pid}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:465 desktop/src/pages/Network.tsx:294
+#: desktop/src/pages/Audit.tsx:554 desktop/src/pages/Network.tsx:294
 msgid "Process information unavailable"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:475 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:564 desktop/src/pages/Components.tsx:188
 msgid "Command copied to clipboard"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:477 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:566 desktop/src/pages/Components.tsx:191
 msgid "Could not copy command: {error}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:492 desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Audit.tsx:582 desktop/src/pages/Components.tsx:273
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:494
+#: desktop/src/pages/Audit.tsx:584
 msgid "Authorizing…"
 msgstr ""
 
 #. Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
-#: desktop/src/pages/Audit.tsx:495
+#: desktop/src/pages/Audit.tsx:585
 msgid "Checking UFW…"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:500 desktop/src/pages/Network.tsx:441
+#: desktop/src/pages/Audit.tsx:590 desktop/src/pages/Network.tsx:441
 msgid "Open in browser"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:500
+#: desktop/src/pages/Audit.tsx:590
 msgid "Learn more"
 msgstr ""
 
@@ -2869,7 +2964,7 @@ msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:228
+#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:227
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
 msgid "Checking…"
 msgstr ""
@@ -2880,44 +2975,38 @@ msgid "Refresh status"
 msgstr ""
 
 #: desktop/src/pages/Components.tsx:208
-msgid ""
-"Setup instructions are copy-only. ClamUI never installs packages or starts "
-"services for you."
-msgstr ""
-
-#: desktop/src/pages/Components.tsx:209
 msgid "Could not check component status: {error}"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:210
+#: desktop/src/pages/Components.tsx:209
 msgid "Detected host family: {distro}."
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:215
+#: desktop/src/pages/Components.tsx:214
 msgid "Components Status"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:228
+#: desktop/src/pages/Components.tsx:227
 msgid "Version unavailable"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:245
+#: desktop/src/pages/Components.tsx:244
 msgid "Hide details"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:245
+#: desktop/src/pages/Components.tsx:244
 msgid "Show details"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:252
+#: desktop/src/pages/Components.tsx:251
 msgid "Suggested for the detected system:"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:255
+#: desktop/src/pages/Components.tsx:254
 msgid "Commands for supported distributions:"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:274
+#: desktop/src/pages/Components.tsx:273
 msgid "Copied"
 msgstr ""
 
@@ -5525,10 +5614,6 @@ msgid "{count} week ago"
 msgid_plural "{count} weeks ago"
 msgstr[0] ""
 msgstr[1] ""
-
-#: desktop/src/pages/Statistics.tsx:137
-msgid "Protected"
-msgstr ""
 
 #: desktop/src/pages/Statistics.tsx:138
 msgid "At Risk"

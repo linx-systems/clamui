@@ -510,6 +510,46 @@ p.helper-install-error {
 
 .audit-external-link { gap: 6px; }
 
+.audit-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 14px 16px;
+}
+
+.audit-hero h2 { margin: 0 0 2px; font-size: 1.05rem; }
+.audit-hero p { margin: 0; color: var(--muted); }
+.audit-hero .ui-icon { inline-size: 28px; block-size: 28px; flex-shrink: 0; }
+
+.audit-hero.protected { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.audit-hero.protected .ui-icon { color: var(--success); }
+.audit-hero.attention { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
+.audit-hero.attention .ui-icon { color: var(--warning); }
+.audit-hero.checking { border-color: var(--control-border); }
+.audit-hero.checking .ui-icon { color: var(--muted); }
+
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.audit-essentials { margin-bottom: 16px; }
+
+.audit-optional summary {
+  cursor: pointer;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
 .notice.warning,
 p.warning,
 .preference-section.warning,
@@ -1067,11 +1107,11 @@ details.audit-row > .audit-details {
 .badge.error { border-color: var(--danger); color: var(--danger); }
 .status-badge.warning,
 .status-badge.at_risk,
-.status-badge.unknown,
-.status-badge.skipped,
 .badge.warning { border-color: var(--warning); color: var(--warning); }
 .status-badge.no_data,
-.status-badge.checking { border-color: var(--control-border); color: var(--muted); }
+.status-badge.checking,
+.status-badge.unknown,
+.status-badge.skipped { border-color: var(--control-border); color: var(--muted); }
 
 .progress { width: 100%; accent-color: var(--accent); }
 
