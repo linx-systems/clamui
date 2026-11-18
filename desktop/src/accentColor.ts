@@ -1,4 +1,7 @@
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
+const ACCENT_PROPERTIES = ["--accent", "--accent-hover", "--focus"] as const;
+
+type StyleTarget = { style: Pick<CSSStyleDeclaration, "setProperty" | "removeProperty"> };
 
 function darken(hex: string, factor: number): string {
   const channels = [1, 3, 5].map((start) => {
@@ -8,11 +11,21 @@ function darken(hex: string, factor: number): string {
   return `#${channels.join("")}`;
 }
 
-export function applyAccentColor(hex: string): void {
-  if (!HEX_PATTERN.test(hex)) {
+/**
+ * Applies the system accent color, or restores the stylesheet defaults when the
+ * system reports no accent (`null`). Malformed values leave the current colors.
+ */
+export function applyAccentColor(accent: string | null, root: StyleTarget = document.documentElement): void {
+  if (accent === null) {
+    for (const property of ACCENT_PROPERTIES) {
+      root.style.removeProperty(property);
+    }
     return;
   }
-  const root = document.documentElement;
-  root.style.setProperty("--accent", hex);
-  root.style.setProperty("--accent-hover", darken(hex, 0.86));
+  if (!HEX_PATTERN.test(accent)) {
+    return;
+  }
+  root.style.setProperty("--accent", accent);
+  root.style.setProperty("--accent-hover", darken(accent, 0.86));
+  root.style.setProperty("--focus", accent);
 }

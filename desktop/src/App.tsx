@@ -725,7 +725,7 @@ export default function App(): ReactNode {
         typeof event.data === "object" &&
         event.data !== null &&
         "accent" in event.data &&
-        typeof event.data.accent === "string"
+        (typeof event.data.accent === "string" || event.data.accent === null)
       ) {
         applyAccentColor(event.data.accent);
         return;

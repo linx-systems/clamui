@@ -287,8 +287,8 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 .build()
                 .map_err(|error| error.to_string())?;
             *app_slot.lock().expect("app handle poisoned") = Some(app.handle().clone());
-            crate::accent_color::init(app.handle().clone());
             let state = app.state::<AppState>();
+            crate::accent_color::init(app.handle().clone(), state.ctx.clone());
             let _ = clamui_core::logs::write_debug(
                 &state.ctx,
                 "INFO",

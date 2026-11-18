@@ -1,3 +1,4 @@
+use clamui_core::common::Context;
 use futures_util::StreamExt;
 use serde_json::json;
 use std::{sync::Mutex, time::Duration};
@@ -18,15 +19,27 @@ impl AccentColor {
     }
 }
 
-pub(crate) fn init(app: AppHandle) {
+/// A portal accent value: a usable color, or the spec's explicit "no preference".
+#[derive(Debug, PartialEq)]
+enum PortalAccent {
+    Color(String),
+    Unset,
+}
+
+pub(crate) fn init(app: AppHandle, ctx: Context) {
     tauri::async_runtime::spawn(async move {
-        if watch(&app).await.is_err() {
-            log::warn!("System accent color portal is unavailable");
+        if let Err(error) = watch(&app, &ctx).await {
+            // Expected on desktops without the Settings portal; keep it out of default logs.
+            debug(
+                &ctx,
+                "INFO",
+                &format!("system accent color portal is unavailable: {error}"),
+            );
         }
     });
 }
 
-async fn watch(app: &AppHandle) -> zbus::Result<()> {
+async fn watch(app: &AppHandle, ctx: &Context) -> zbus::Result<()> {
     let connection = tokio::time::timeout(PORTAL_TIMEOUT, async {
         zbus::connection::Builder::session()?
             .method_timeout(PORTAL_TIMEOUT)
@@ -51,33 +64,51 @@ async fn watch(app: &AppHandle) -> zbus::Result<()> {
         .call::<_, _, OwnedValue>("Read", &(APPEARANCE, ACCENT_COLOR))
         .await
     {
-        Ok(value) => publish(app, value),
-        Err(_) => log::warn!("System accent color setting is unavailable"),
+        Ok(value) => publish(app, ctx, value),
+        Err(error) => debug(
+            ctx,
+            "INFO",
+            &format!("system accent color setting is unavailable: {error}"),
+        ),
     }
 
     while let Some(message) = changes.next().await {
         match message.body().deserialize::<(String, String, OwnedValue)>() {
             Ok((namespace, key, value)) if namespace == APPEARANCE && key == ACCENT_COLOR => {
-                publish(app, value);
+                publish(app, ctx, value);
             }
             Ok(_) => {}
-            Err(_) => log::warn!("System accent color signal has an invalid payload"),
+            Err(error) => debug(
+                ctx,
+                "WARNING",
+                &format!("system accent color signal has an invalid payload: {error}"),
+            ),
         }
     }
     Ok(())
 }
 
-fn publish(app: &AppHandle, value: OwnedValue) {
-    let Some(accent) = portal_color_to_hex(value) else {
-        log::warn!("System accent color has an unsupported value");
-        return;
+fn publish(app: &AppHandle, ctx: &Context, value: OwnedValue) {
+    let accent = match parse_portal_accent(value) {
+        Some(PortalAccent::Color(hex)) => Some(hex),
+        Some(PortalAccent::Unset) => None,
+        None => {
+            debug(
+                ctx,
+                "WARNING",
+                "system accent color has an unsupported value",
+            );
+            return;
+        }
     };
-    let state = app.state::<AccentColor>();
-    let Ok(mut current) = state.0.lock() else {
-        log::warn!("System accent color state is unavailable");
-        return;
-    };
-    *current = Some(accent.clone());
+    match app.state::<AccentColor>().0.lock() {
+        Ok(mut current) => current.clone_from(&accent),
+        Err(_) => {
+            debug(ctx, "WARNING", "system accent color state is unavailable");
+            return;
+        }
+    }
+    // `null` tells the frontend to fall back to its built-in accent.
     if app
         .emit(
             "clamui-event",
@@ -85,11 +116,15 @@ fn publish(app: &AppHandle, value: OwnedValue) {
         )
         .is_err()
     {
-        log::warn!("Could not emit the system accent color");
+        debug(ctx, "WARNING", "could not emit the system accent color");
     }
 }
 
-fn portal_color_to_hex(value: OwnedValue) -> Option<String> {
+fn debug(ctx: &Context, level: &str, message: &str) {
+    let _ = clamui_core::logs::write_debug(ctx, level, "accent-color", message);
+}
+
+fn parse_portal_accent(value: OwnedValue) -> Option<PortalAccent> {
     let mut value = Value::from(value);
     // Read may wrap its result in an extra variant; SettingChanged does not.
     while let Value::Value(inner) = value {
@@ -103,11 +138,13 @@ fn portal_color_to_hex(value: OwnedValue) -> Option<String> {
     let [red, green, blue] = rgb.fields() else {
         return None;
     };
-    rgb_to_hex([
+    let rgb = [
         f64::try_from(red).ok()?,
         f64::try_from(green).ok()?,
         f64::try_from(blue).ok()?,
-    ])
+    ];
+    // The portal spec treats out-of-range channels (e.g. -1, -1, -1) as unset.
+    Some(rgb_to_hex(rgb).map_or(PortalAccent::Unset, PortalAccent::Color))
 }
 
 fn rgb_to_hex(rgb: [f64; 3]) -> Option<String> {
@@ -171,19 +208,34 @@ mod tests {
         let rgb = Value::from((0.0, 0.5, 1.0));
         let direct = rgb.try_to_owned().unwrap();
         let nested = Value::Value(Box::new(rgb)).try_to_owned().unwrap();
-        assert_eq!(portal_color_to_hex(direct).as_deref(), Some("#0080ff"));
-        assert_eq!(portal_color_to_hex(nested).as_deref(), Some("#0080ff"));
+        let expected = Some(PortalAccent::Color("#0080ff".into()));
+        assert_eq!(parse_portal_accent(direct), expected);
+        assert_eq!(parse_portal_accent(nested), expected);
     }
 
     #[test]
-    fn rejects_unset_and_wrong_dbus_types() {
+    fn treats_out_of_range_rgb_as_unset() {
         for value in [
             Value::from((-1.0, -1.0, -1.0)),
+            Value::from((0.5, 1.5, 0.5)),
+            Value::Value(Box::new(Value::from((-1.0, -1.0, -1.0)))),
+        ] {
+            assert_eq!(
+                parse_portal_accent(value.try_to_owned().unwrap()),
+                Some(PortalAccent::Unset)
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_wrong_dbus_types() {
+        for value in [
             Value::from((1u32, 0u32, 0u32)),
             Value::from("blue"),
             Value::from((0.0, 1.0)),
+            Value::from((0.0, 1.0, 0.5, 1.0)),
         ] {
-            assert_eq!(portal_color_to_hex(value.try_to_owned().unwrap()), None);
+            assert_eq!(parse_portal_accent(value.try_to_owned().unwrap()), None);
         }
     }
 }
