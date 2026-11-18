@@ -746,7 +746,6 @@ p.success,
 .component-row > :first-child,
 .audit-row > :first-child,
 .target-row > :first-child,
-.scan-profile-row > :first-child,
 .integration-row > :first-child,
 .config-path-row > :first-child,
 .result-threat-row > :first-child { flex: 1 1 auto; }
@@ -760,7 +759,6 @@ p.success,
 .component-row > :last-child:not(:first-child),
 .audit-row > :last-child:not(:first-child),
 .target-row > :last-child:not(:first-child),
-.scan-profile-row > :last-child:not(:first-child),
 .integration-row > :last-child:not(:first-child),
 .config-path-row > :last-child:not(:first-child) {
   flex: 0 0 auto;
@@ -875,12 +873,17 @@ details.audit-row > .audit-details {
 .scan-profile-row > .field {
   grid-template-columns: minmax(100px, 160px) minmax(240px, 1fr);
   align-items: center;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   gap: 12px;
 }
 
 .scan-profile-row > .field > select { width: 100%; }
 .scan-profile-row > .row-copy:empty { display: none; }
+
+.scan-profile-row > .row-copy:last-child {
+  flex: 1 1 200px;
+  min-width: 0;
+}
 
 .check-row,
 .switch-control {
