@@ -199,8 +199,8 @@ function ConfigLocation({
   onAuthorize: (kind: ConfigKind) => Promise<void>;
 }) {
   const description = document?.path || _("No configuration file selected");
-  return <section className="preference-section form-section config-path-row">
-    <div className="setting-row">
+  return <section className="preference-section form-section">
+    <div className="setting-row config-path-row">
       <div className="row-copy">
         <h3 className="section-heading">{label}</h3>
         <p className="muted monospace">{description}</p>
