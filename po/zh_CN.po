@@ -4778,10 +4778,6 @@ msgstr "无可用的扫描输出"
 msgid "Text Files"
 msgstr "文本文件"
 
-#: desktop/src/pages/Results.tsx:173
-msgid "Scan Results"
-msgstr "扫描结果"
-
 #: desktop/src/pages/Results.tsx:175 desktop/src/pages/Results.tsx:238
 msgid "Copy or Export"
 msgstr "复制或导出"
@@ -5907,3 +5903,25 @@ msgstr "扫描用户主目录和个人文件"
 
 #~ msgid "Estimated file count exceeded"
 #~ msgstr "已超出预估文件数"
+
+msgid "No threats found"
+msgstr "未发现威胁"
+
+msgid "ClamAV checked the scanned files and found nothing harmful."
+msgstr "ClamAV 已检查扫描的文件，未发现任何有害内容。"
+
+msgid "Review the files below and move them to quarantine or exclude them."
+msgstr "请查看下方文件，并将其移至隔离区或排除。"
+
+msgid "The scan was stopped before it finished, so these results are incomplete."
+msgstr "扫描在完成前已停止，因此这些结果不完整。"
+
+msgid "Scan failed"
+msgstr "扫描失败"
+
+msgid "The scan could not finish. Open the scan details below for more information."
+msgstr "扫描无法完成。请打开下方的扫描详情了解更多信息。"
+
+msgid "{count} threat found"
+msgid_plural "{count} threats found"
+msgstr[0] "发现 {count} 个威胁"

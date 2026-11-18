@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-18 18:39+0100\n"
+"POT-Creation-Date: 2026-11-18 18:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2133,8 +2133,8 @@ msgstr ""
 msgid "Profiles"
 msgstr ""
 
-#: desktop/src/App.tsx:139 desktop/src/pages/Results.tsx:281
-#: desktop/src/pages/Results.tsx:282
+#: desktop/src/App.tsx:139 desktop/src/pages/Results.tsx:295
+#: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr ""
 
@@ -2277,7 +2277,7 @@ msgstr ""
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:206 desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:568
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2378,8 +2378,8 @@ msgstr ""
 msgid "Could not copy configuration path."
 msgstr ""
 
-#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:196
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:239
 msgid "Copy Path"
 msgstr ""
 
@@ -2475,8 +2475,8 @@ msgstr ""
 msgid "Target {index}/{count}: {path}"
 msgstr ""
 
-#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
-#: desktop/src/pages/Scan.tsx:530
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:120
+#: desktop/src/pages/Results.tsx:187 desktop/src/pages/Scan.tsx:530
 msgid "Scan target"
 msgstr ""
 
@@ -3983,7 +3983,7 @@ msgid "Export CSV"
 msgstr ""
 
 #: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "Export JSON"
 msgstr ""
 
@@ -4023,7 +4023,7 @@ msgid "Export Text"
 msgstr ""
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:176 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:566
 msgid "Fullscreen"
 msgstr ""
 
@@ -4353,7 +4353,7 @@ msgstr ""
 msgid "Profile export did not return data"
 msgstr ""
 
-#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:217
+#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:231
 msgid "JSON Files"
 msgstr ""
 
@@ -4585,7 +4585,7 @@ msgid "Unknown Threat"
 msgstr ""
 
 #: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
-#: desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:210
 msgid "Quarantined"
 msgstr ""
 
@@ -4725,151 +4725,180 @@ msgstr ""
 msgid "Suspicious"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:116
+#: desktop/src/pages/Results.tsx:95
+msgid "{count} threat found"
+msgid_plural "{count} threats found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: desktop/src/pages/Results.tsx:95
+msgid "Review the files below and move them to quarantine or exclude them."
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:96
+msgid "No threats found"
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:96
+msgid "ClamAV checked the scanned files and found nothing harmful."
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:97
+msgid ""
+"The scan was stopped before it finished, so these results are incomplete."
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:98
+msgid "Scan failed"
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:98
+msgid ""
+"The scan could not finish. Open the scan details below for more information."
+msgstr ""
+
+#: desktop/src/pages/Results.tsx:126
 msgid "No scan output is available"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:118
+#: desktop/src/pages/Results.tsx:128
 msgid "Text Files"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:173
-msgid "Scan Results"
-msgstr ""
-
-#: desktop/src/pages/Results.tsx:175 desktop/src/pages/Results.tsx:238
+#: desktop/src/pages/Results.tsx:190 desktop/src/pages/Results.tsx:214
+#: desktop/src/pages/Results.tsx:252
 msgid "Copy or Export"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:177
+#: desktop/src/pages/Results.tsx:191
 msgid "Quarantine All"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:181
+#: desktop/src/pages/Results.tsx:195
 msgid "Files scanned"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:182
+#: desktop/src/pages/Results.tsx:196
 msgid "Directories"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:183
+#: desktop/src/pages/Results.tsx:197
 msgid "Threats found"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:184
+#: desktop/src/pages/Results.tsx:198
 msgid "Not accessible"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:192
+#: desktop/src/pages/Results.tsx:206
 msgid "Detected Threats"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:192
+#: desktop/src/pages/Results.tsx:206
 msgid "Large result set: displaying threats in batches."
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:210
 msgid "Excluded"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:210
 msgid "Exclude"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:197 desktop/src/pages/Results.tsx:228
+#: desktop/src/pages/Results.tsx:211 desktop/src/pages/Results.tsx:242
 msgid "Show {count} more"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:199
+#: desktop/src/pages/Results.tsx:213
 msgid "Files Not Accessible"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:199
+#: desktop/src/pages/Results.tsx:213
 msgid "Additional inaccessible files are omitted from this view."
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:200 desktop/src/pages/Results.tsx:201
+#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
 #: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
 msgid "Scan details"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:202
+#: desktop/src/pages/Results.tsx:216
 msgid "Quarantine File"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:202
+#: desktop/src/pages/Results.tsx:216
 msgid "Quarantine All Threats"
 msgstr ""
 
 #. Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Results.tsx:202
+#: desktop/src/pages/Results.tsx:216
 msgid "Move '{path}' to quarantine?"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:220
 msgid "Move {count} detected file to quarantine?"
 msgid_plural "Move {count} detected files to quarantine?"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:220
 msgid "This removes each original file from its current location."
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:220
 msgid "Quarantining…"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "VirusTotal Results"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "Detections"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "Last scanned"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "Copy JSON"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "Copy Hash"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:225
+#: desktop/src/pages/Results.tsx:239
 msgid "View on VirusTotal"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:228
+#: desktop/src/pages/Results.tsx:242
 msgid "Detection Details"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:228
+#: desktop/src/pages/Results.tsx:242
 msgid "Large result set: displaying detections in batches."
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:228
+#: desktop/src/pages/Results.tsx:242
 msgid "No result"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:282
+#: desktop/src/pages/Results.tsx:296
 msgid "Review scan findings and take action on detected threats."
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:282
+#: desktop/src/pages/Results.tsx:296
 msgid "Back to Scan"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:283
+#: desktop/src/pages/Results.tsx:297
 msgid "No results yet"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:283
+#: desktop/src/pages/Results.tsx:297
 msgid "Start a scan to see its results here."
 msgstr ""
 
