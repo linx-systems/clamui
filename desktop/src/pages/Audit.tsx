@@ -603,5 +603,8 @@ function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, 
     {rowError && <p className="notice warning audit-row-error" role="status">{rowError}</p>}
   </div>;
   if (!hasDetails) return <article className="group-row audit-row" role="listitem">{overview}</article>;
-  return <details className="group-row audit-row" open={check.status !== "pass" && check.status !== "checking"} role="listitem"><summary className="audit-summary">{overview}<Icon className="audit-disclosure-icon" name="chevron-down" /></summary>{details}</details>;
+  // The listening-ports table can hold dozens of rows, so keep it collapsed until
+  // the user asks for it instead of expanding it with other non-passing checks.
+  const openByDefault = check.status !== "pass" && check.status !== "checking" && check.listening_ports == null;
+  return <details className="group-row audit-row" open={openByDefault} role="listitem"><summary className="audit-summary">{overview}<Icon className="audit-disclosure-icon" name="chevron-down" /></summary>{details}</details>;
 }
