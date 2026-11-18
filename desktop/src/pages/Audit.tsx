@@ -8,6 +8,9 @@ type AuditStatus = "pass" | "warning" | "fail" | "unknown" | "skipped" | "checki
 type AuditCategory = "clamav_health" | "firewall" | "mac_framework" | "auto_updates" | "intrusion_detection" | "ssh_hardening" | "application_firewalls" | "deep_scan_lynis" | "deep_scan_rootkit";
 
 type AuditCheck = {
+  id: string;
+  fingerprint: string;
+  acknowledged: boolean;
   name: string;
   status: AuditStatus;
   detail: string;
@@ -94,15 +97,23 @@ function categoryIndex(category: AuditCategory): number {
 
 // Mirrors the backend's overall_status() priority order so the hero and the
 // essentials-only view can be derived purely from already-fetched checks.
+// Acknowledged checks are excluded, same as the backend: a non-empty,
+// all-acknowledged selection resolves as pass rather than unknown.
 function overallOf(checks: AuditCheck[]): AuditStatus {
+  const outstanding = checks.filter((check) => !check.acknowledged);
+  if (checks.length > 0 && outstanding.length === 0) return "pass";
   for (const candidate of ["fail", "warning", "unknown", "pass", "skipped", "checking"] as const) {
-    if (checks.some((check) => check.status === candidate)) return candidate;
+    if (outstanding.some((check) => check.status === candidate)) return candidate;
   }
   return "unknown";
 }
 
 function essentialChecks(sections: AuditSection[]): AuditCheck[] {
   return sections.flatMap((section) => section.checks.filter((check) => check.essential === true));
+}
+
+function acknowledgedChecks(sections: AuditSection[]): AuditCheck[] {
+  return sections.flatMap((section) => section.checks.filter((check) => check.acknowledged === true));
 }
 
 // The Optional hardening view shows everything that is not part of the
@@ -220,9 +231,15 @@ function parseAuditProgress(value: unknown): AuditSection | null {
     if (
       typeof check !== "object" ||
       check === null ||
+      !("id" in check) ||
+      !("fingerprint" in check) ||
+      !("acknowledged" in check) ||
       !("name" in check) ||
       !("status" in check) ||
       !("detail" in check) ||
+      typeof check.id !== "string" ||
+      typeof check.fingerprint !== "string" ||
+      typeof check.acknowledged !== "boolean" ||
       typeof check.name !== "string" ||
       typeof check.status !== "string" ||
       !["pass", "warning", "fail", "unknown", "skipped", "checking"].includes(check.status) ||
@@ -261,15 +278,32 @@ function HeroBanner({ sections, running }: { sections: AuditSection[]; running: 
   </div>;
 }
 
-function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, actionErrors }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string> }): JSX.Element | null {
+function EssentialsList({ sections, onLaunch, onAuthorize, onCheckUfw, onAcknowledge, actionsDisabled, authorizationRunning, ufwChecking, actionErrors, acknowledgingIds }: { sections: AuditSection[]; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; onAcknowledge: (check: AuditCheck) => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string>; acknowledgingIds: Set<string> }): JSX.Element | null {
   const checks = essentialChecks(sections);
   if (checks.length === 0) return null;
   return <section className="audit-category audit-essentials" aria-labelledby="audit-essentials-heading">
     <header className="section-header"><div><h2 id="audit-essentials-heading">{_("Essentials")}</h2></div></header>
     <div className="grouped-list audit-list" role="list">
-      {checks.map((check, index) => <CheckView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`essential-${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />)}
+      {checks.map((check, index) => <CheckView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`essential-${check.name}-${index}`} onAcknowledge={onAcknowledge} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />)}
     </div>
   </section>;
+}
+
+function AcknowledgedSection({ sections, onRevoke, actionsDisabled, actionErrors, acknowledgingIds }: { sections: AuditSection[]; onRevoke: (check: AuditCheck) => Promise<void>; actionsDisabled: boolean; actionErrors: Record<string, string>; acknowledgingIds: Set<string> }): JSX.Element | null {
+  const checks = acknowledgedChecks(sections);
+  if (checks.length === 0) return null;
+  return <details className="audit-optional audit-acknowledged" open={false}>
+    <summary>{_("Acknowledged")}</summary>
+    <p className="notice">{_("These checks were reviewed and acknowledged. They no longer count toward the Protected status above.")}</p>
+    <div className="grouped-list audit-list" role="list">
+      {checks.map((check, index) => <article className="group-row audit-row" key={`acknowledged-${check.id}-${index}`} role="listitem">
+        <span className="row-copy"><span className="row-title">{check.name}</span><span className="row-description">{check.detail}</span></span>
+        <AuditStatusIndicator status={check.status} />
+        <button className="button" disabled={actionsDisabled || acknowledgingIds.has(check.id)} onClick={() => void onRevoke(check)} type="button">{acknowledgingIds.has(check.id) ? _("Revoking…") : _("Revoke")}</button>
+        {actionErrors[`ack:${check.id}`] && <p className="notice warning audit-row-error" role="status">{actionErrors[`ack:${check.id}`]}</p>}
+      </article>)}
+    </div>
+  </details>;
 }
 
 export default function Audit(): JSX.Element {
@@ -280,6 +314,7 @@ export default function Audit(): JSX.Element {
   const [authorizationRunning, setAuthorizationRunning] = useState(false);
   const [ufwChecking, setUfwChecking] = useState(false);
   const [hideMissingOptional, setHideMissingOptional] = useState(false);
+  const [acknowledgingIds, setAcknowledgingIds] = useState<Set<string>>(new Set());
   // Errors from a specific check row's own action (UFW admin check, Portmaster
   // authorization, a GUI launch), keyed by that check's launch_command. These
   // render next to the button that triggered them, never in the page banner,
@@ -457,6 +492,50 @@ export default function Audit(): JSX.Element {
     }
   };
 
+  const setCheckAcknowledged = (id: string, acknowledged: boolean): void => {
+    setSections((current) => current.map((section) => ({
+      ...section,
+      checks: section.checks.map((check) => check.id === id ? { ...check, acknowledged } : check),
+      overall_status: overallOf(section.checks.map((check) => check.id === id ? { ...check, acknowledged } : check)),
+    })));
+  };
+
+  const acknowledgeCheck = async (check: AuditCheck): Promise<void> => {
+    const key = `ack:${check.id}`;
+    clearActionError(key);
+    setAcknowledgingIds((current) => new Set(current).add(check.id));
+    try {
+      const response = await request<{ acknowledged: boolean }>("audit.acknowledge", { id: check.id, fingerprint: check.fingerprint });
+      setCheckAcknowledged(check.id, response.acknowledged);
+    } catch (acknowledgeError) {
+      setActionError(key, errorText(acknowledgeError));
+    } finally {
+      setAcknowledgingIds((current) => {
+        const next = new Set(current);
+        next.delete(check.id);
+        return next;
+      });
+    }
+  };
+
+  const revokeCheck = async (check: AuditCheck): Promise<void> => {
+    const key = `ack:${check.id}`;
+    clearActionError(key);
+    setAcknowledgingIds((current) => new Set(current).add(check.id));
+    try {
+      const response = await request<{ acknowledged: boolean }>("audit.revoke", { id: check.id });
+      setCheckAcknowledged(check.id, response.acknowledged);
+    } catch (revokeError) {
+      setActionError(key, errorText(revokeError));
+    } finally {
+      setAcknowledgingIds((current) => {
+        const next = new Set(current);
+        next.delete(check.id);
+        return next;
+      });
+    }
+  };
+
   const actionsDisabled = running || deepRunning !== null || authorizationRunning || ufwChecking;
 
   const tierSections = CATEGORY_ORDER.map((category) => sections.find((section) => section.category === category)).filter((section): section is AuditSection => section !== undefined);
@@ -478,7 +557,9 @@ export default function Audit(): JSX.Element {
       {error && <p className="error-banner" role="alert">{error}</p>}
       <HeroBanner running={running} sections={sections} />
 
-      <EssentialsList actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
+      <EssentialsList acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} sections={sections} ufwChecking={ufwChecking} />
+
+      <AcknowledgedSection acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} onRevoke={revokeCheck} sections={sections} />
 
       {running && CATEGORY_ORDER.filter((category) => !sections.some((section) => section.category === category)).map((category) => <section className="audit-category" aria-labelledby={`audit-${category}`} key={category}><header className="section-header"><div><h2 id={`audit-${category}`}>{categoryTitle(category)}</h2></div><AuditStatusIndicator status="checking" /></header><div className="grouped-list"><div className="group-row muted">{_("Checking")}</div></div></section>)}
 
@@ -490,7 +571,7 @@ export default function Audit(): JSX.Element {
 
         <label className="check-row"><input type="checkbox" checked={hideMissingOptional} onChange={(event) => setHideMissingOptional(event.target.checked)} /> {_("Hide missing optional items")}</label>
 
-        {tierSections.map((section) => <SectionView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {tierSections.map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
 
         <section className="audit-category" aria-labelledby="deep-scans-heading">
           <header className="section-header"><div><h2 id="deep-scans-heading">{_("Deep scans")}</h2><p>{_(
@@ -502,7 +583,7 @@ export default function Audit(): JSX.Element {
             <button className="button primary" disabled={actionsDisabled} onClick={() => void runDeep("chkrootkit")} type="button">{deepRunning === "chkrootkit" ? _("Running chkrootkit…") : _("Run rootkit detection")}</button>
           </div>
         </section>
-        {deepSections.map((section) => <SectionView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
+        {deepSections.map((section) => <SectionView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} hideMissingOptional={hideMissingOptional} key={section.category} onAcknowledge={acknowledgeCheck} onAuthorize={authorizePortmaster} onCheckUfw={checkUfw} onLaunch={launch} section={withoutEssential(section)} ufwChecking={ufwChecking} />)}
       </details>
     </main>
   );
@@ -512,6 +593,7 @@ function countSummary(sections: AuditSection[]): Record<"pass" | "warning" | "fa
   const summary = { pass: 0, warning: 0, fail: 0, unknown: 0 };
   for (const section of sections) {
     for (const check of section.checks) {
+      if (check.acknowledged) continue;
       if (check.status === "pass") summary.pass += 1;
       else if (check.status === "warning") summary.warning += 1;
       else if (check.status === "fail") summary.fail += 1;
@@ -521,14 +603,14 @@ function countSummary(sections: AuditSection[]): Record<"pass" | "warning" | "fa
   return summary;
 }
 
-function SectionView({ section, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, hideMissingOptional, actionErrors }: { section: AuditSection; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; hideMissingOptional: boolean; actionErrors: Record<string, string> }): JSX.Element | null {
+function SectionView({ section, onLaunch, onAuthorize, onCheckUfw, onAcknowledge, actionsDisabled, authorizationRunning, ufwChecking, hideMissingOptional, actionErrors, acknowledgingIds }: { section: AuditSection; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; onAcknowledge: (check: AuditCheck) => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; hideMissingOptional: boolean; actionErrors: Record<string, string>; acknowledgingIds: Set<string> }): JSX.Element | null {
   const label = section.title;
   const headingId = `audit-${section.category}`;
   if (hideMissingOptional && section.checks.length > 0 && section.checks.every((check) => check.optional_missing === true)) return null;
   return <section className="audit-category" aria-labelledby={headingId}>
     <header className="section-header"><div><h2 id={headingId}>{label}</h2></div><AuditStatusIndicator status={section.overall_status} /></header>
     <div className="grouped-list audit-list" role="list">
-      {section.checks.length > 0 ? section.checks.map((check, index) => hideMissingOptional && check.optional_missing === true ? null : <CheckView actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`${check.name}-${index}`} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />) : <div className="group-row muted" role="listitem">{_("No audit details were returned.")}</div>}
+      {section.checks.length > 0 ? section.checks.map((check, index) => hideMissingOptional && check.optional_missing === true ? null : <CheckView acknowledgingIds={acknowledgingIds} actionErrors={actionErrors} actionsDisabled={actionsDisabled} authorizationRunning={authorizationRunning} check={check} key={`${check.name}-${index}`} onAcknowledge={onAcknowledge} onAuthorize={onAuthorize} onCheckUfw={onCheckUfw} onLaunch={onLaunch} ufwChecking={ufwChecking} />) : <div className="group-row muted" role="listitem">{_("No audit details were returned.")}</div>}
     </div>
   </section>;
 }
@@ -557,7 +639,7 @@ function ListeningPorts({ value, label }: { value: unknown; label: string }): JS
   </>;
 }
 
-function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, authorizationRunning, ufwChecking, actionErrors }: { check: AuditCheck; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string> }): JSX.Element {
+function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, onAcknowledge, actionsDisabled, authorizationRunning, ufwChecking, actionErrors, acknowledgingIds }: { check: AuditCheck; onLaunch: (command: string) => Promise<void>; onAuthorize: () => Promise<void>; onCheckUfw: () => Promise<void>; onAcknowledge: (check: AuditCheck) => Promise<void>; actionsDisabled: boolean; authorizationRunning: boolean; ufwChecking: boolean; actionErrors: Record<string, string>; acknowledgingIds: Set<string> }): JSX.Element {
   const copy = async (): Promise<void> => {
     try {
       await copyText(check.install_command!);
@@ -573,14 +655,16 @@ function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, 
       notify(_("Could not open documentation: {error}", { error: errorText(openError) }), "error");
     }
   };
-  const hasDetails = Boolean((check.recommendation && check.status !== "pass") || check.install_command || check.launch_command || check.info_url || check.listening_ports != null);
-  const rowError = check.launch_command ? actionErrors[check.launch_command] : undefined;
+  const showAcknowledge = check.status === "warning" && !check.acknowledged;
+  const acknowledging = acknowledgingIds.has(check.id);
+  const hasDetails = Boolean((check.recommendation && check.status !== "pass") || check.install_command || check.launch_command || check.info_url || check.listening_ports != null || showAcknowledge);
+  const rowError = (check.launch_command ? actionErrors[check.launch_command] : undefined) ?? actionErrors[`ack:${check.id}`];
   const overview = <><span className="row-copy"><span className="row-title">{check.name}</span><span className="row-description">{check.detail}</span></span><AuditStatusIndicator status={check.status} /></>;
   const details = <div className="audit-details">
     {check.recommendation && check.status !== "pass" && <p className="notice warning">{check.recommendation}</p>}
     {check.listening_ports != null && <ListeningPorts label={check.name} value={check.listening_ports} />}
     {check.install_command && <div className="row"><code className="monospace path-value">{check.install_command}</code><button className="button" onClick={() => void copy()} type="button"><Icon name="copy" />{_("Copy")}</button></div>}
-    {(check.launch_command || check.info_url) && <div className="actions">
+    {(check.launch_command || check.info_url || showAcknowledge) && <div className="actions">
       {check.launch_command === "__portmaster_authorize__" && <button className="button primary" disabled={actionsDisabled} onClick={() => void onAuthorize()} type="button">{authorizationRunning ? _("Authorizing…") : check.launch_label || _("Authorize")}</button>}
       {check.launch_command === "__ufw_status__" && <button className="button primary" disabled={actionsDisabled} onClick={() => void onCheckUfw()} type="button">{ufwChecking ? _(
         // Translators: Keep UFW unchanged; it is a tool name. Use an ellipsis appropriate for the target language.
@@ -588,6 +672,7 @@ function CheckView({ check, onLaunch, onAuthorize, onCheckUfw, actionsDisabled, 
       ) : check.launch_label}</button>}
       {check.launch_command && check.launch_command !== "__portmaster_authorize__" && check.launch_command !== "__ufw_status__" && <button className="button" onClick={() => void onLaunch(check.launch_command!)} type="button">{check.launch_label || _("Open")}</button>}
       {check.info_url && <button className="button audit-external-link" onClick={() => void learn()} title={_("Open in browser")} type="button"><Icon name="external-link" />{_("Learn more")}</button>}
+      {showAcknowledge && <button className="button" disabled={actionsDisabled || acknowledging} onClick={() => void onAcknowledge(check)} type="button">{acknowledging ? _("Acknowledging…") : _("Acknowledge")}</button>}
     </div>}
     {rowError && <p className="notice warning audit-row-error" role="status">{rowError}</p>}
   </div>;
