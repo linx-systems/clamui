@@ -476,16 +476,23 @@ async fn save_export(
 }
 
 #[tauri::command]
-async fn copy_text(state: State<'_, AppState>, app: AppHandle, text: String) -> Result<(), String> {
-    let _operation = state.active_jobs.register("native.copy_text".into())?;
+async fn copy_text(app: AppHandle, text: String) -> Result<(), String> {
     #[cfg(target_os = "linux")]
     {
         // Arboard needs Wayland data-control or an X11 fallback. GNOME Flatpak
         // sessions may expose neither; GTK already owns a usable display and
         // uses the normal Wayland selection protocol. GTK must run on its thread.
         let (sender, mut receiver) = tauri::async_runtime::channel(1);
+        let clipboard_app = app.clone();
         app.run_on_main_thread(move || {
-            let _ = sender.try_send(crate::clipboard::write_text(&text));
+            let state = clipboard_app.state::<AppState>();
+            // Register only while executing: shutdown waits for active jobs on
+            // this thread and must never wait for work queued behind itself.
+            let result = state
+                .active_jobs
+                .register("native.copy_text".into())
+                .and_then(|_operation| crate::clipboard::write_text(&text));
+            let _ = sender.try_send(result);
         })
         .map_err(|error| error.to_string())?;
         receiver
@@ -495,6 +502,9 @@ async fn copy_text(state: State<'_, AppState>, app: AppHandle, text: String) -> 
     }
     #[cfg(not(target_os = "linux"))]
     {
+        let state_app = app.clone();
+        let state = state_app.state::<AppState>();
+        let _operation = state.active_jobs.register("native.copy_text".into())?;
         tauri::async_runtime::spawn_blocking(move || {
             app.clipboard()
                 .write_text(text)
