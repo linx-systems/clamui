@@ -5016,10 +5016,6 @@ msgstr "Nincs elérhető vizsgálati kimenet"
 msgid "Text Files"
 msgstr "Szövegfájlok"
 
-#: desktop/src/pages/Results.tsx:173
-msgid "Scan Results"
-msgstr "Vizsgálati eredmények"
-
 #: desktop/src/pages/Results.tsx:175 desktop/src/pages/Results.tsx:238
 msgid "Copy or Export"
 msgstr "Másolás vagy exportálás"
@@ -6196,3 +6192,26 @@ msgstr "A felhasználó saját könyvtárának és személyes fájljainak vizsg�
 
 #~ msgid "Estimated file count exceeded"
 #~ msgstr "A becsült fájlszám túllépve"
+
+msgid "No threats found"
+msgstr "Nem található fenyegetés"
+
+msgid "ClamAV checked the scanned files and found nothing harmful."
+msgstr "A ClamAV ellenőrizte a vizsgált fájlokat, és nem talált semmi ártalmasat."
+
+msgid "Review the files below and move them to quarantine or exclude them."
+msgstr "Tekintse át az alábbi fájlokat, és helyezze őket karanténba, vagy zárja ki őket."
+
+msgid "The scan was stopped before it finished, so these results are incomplete."
+msgstr "A vizsgálat a befejezés előtt leállt, ezért ezek az eredmények hiányosak."
+
+msgid "Scan failed"
+msgstr "A vizsgálat sikertelen"
+
+msgid "The scan could not finish. Open the scan details below for more information."
+msgstr "A vizsgálat nem tudott befejeződni. További információért nyissa meg alább a vizsgálat részleteit."
+
+msgid "{count} threat found"
+msgid_plural "{count} threats found"
+msgstr[0] "{count} fenyegetés található"
+msgstr[1] "{count} fenyegetés található"
