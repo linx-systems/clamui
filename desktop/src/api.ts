@@ -205,6 +205,7 @@ export type StartupState = {
   tray_available: boolean;
   version: string;
   active_jobs?: string[];
+  accent?: string;
 };
 
 export function startupState(): Promise<StartupState> {
