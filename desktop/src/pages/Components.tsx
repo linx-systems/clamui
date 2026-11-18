@@ -205,7 +205,6 @@ export default function Components(): JSX.Element {
         </button>
       </header>
 
-      <p className="notice warning">{_("Setup instructions are copy-only. ClamUI never installs packages or starts services for you.")}</p>
       {error && <p className="notice error" role="alert">{_("Could not check component status: {error}", { error })}</p>}
       {detectedDistro && detectedDistro !== "unknown" && <p className="muted">{_("Detected host family: {distro}.", { distro: detectedDistro.replace("_", " ") })}</p>}
 
