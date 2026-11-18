@@ -1,3 +1,4 @@
+mod accent_color;
 mod model;
 mod notifications;
 mod policy;

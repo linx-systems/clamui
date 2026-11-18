@@ -651,6 +651,7 @@ version = "0.5.1"
 dependencies = [
  "base64 0.23.1",
  "clamui-core",
+ "futures-util",
  "ksni",
  "open",
  "rfd",
@@ -661,7 +662,9 @@ dependencies = [
  "tauri-plugin-clipboard-manager",
  "tauri-plugin-notification",
  "tauri-plugin-single-instance",
+ "tokio",
  "url",
+ "zbus",
 ]
 
 [[package]]

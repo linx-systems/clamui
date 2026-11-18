@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
+import { applyAccentColor } from "./accentColor";
 import {
   closeApplication,
   credits as loadCredits,
@@ -719,6 +720,16 @@ export default function App(): ReactNode {
       if (event.event === "show-onboarding") {
         setOnboardingOpen(true);
       }
+      if (
+        event.event === "accent-color-changed" &&
+        typeof event.data === "object" &&
+        event.data !== null &&
+        "accent" in event.data &&
+        (typeof event.data.accent === "string" || event.data.accent === null)
+      ) {
+        applyAccentColor(event.data.accent);
+        return;
+      }
     };
 
     void onEvent(receiveEvent)
@@ -747,6 +758,9 @@ export default function App(): ReactNode {
 
       const state = startupResult.value;
       setStartupInfo({ version: state.version, trayAvailable: state.tray_available });
+      if (state.accent) {
+        applyAccentColor(state.accent);
+      }
       let skippedHelperVersion = "";
       if (settingsResult.status === "fulfilled") {
         const settings = settingsResult.value;

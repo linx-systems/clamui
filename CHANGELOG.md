@@ -9,6 +9,7 @@
 - Added an Audit checkbox to hide missing optional items without changing audit totals.
 - Added independent OpenSnitch service and graphical-interface checks to the application-firewall audit, with an explicit GUI launch action when available; Portmaster remains a separate check. (#241)
 - Added a Vietnamese (`vi`) translation.
+- The desktop app now follows the system accent color from the XDG desktop portal (`org.freedesktop.appearance` `accent-color`), including live changes without a restart, and keeps the built-in blue when no accent is set. (#325)
 
 ### Changed
 

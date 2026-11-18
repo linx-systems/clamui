@@ -216,6 +216,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             tray_available: false,
             version: env!("CARGO_PKG_VERSION").into(),
             active_jobs: Vec::new(),
+            accent: None,
         }),
         active_jobs: RunningJobs {
             entries: Mutex::new(HashMap::new()),
@@ -250,6 +251,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .manage(state)
+        .manage(crate::accent_color::AccentColor::default())
         .invoke_handler(tauri::generate_handler![
             request,
             choose_paths,
@@ -286,6 +288,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 .map_err(|error| error.to_string())?;
             *app_slot.lock().expect("app handle poisoned") = Some(app.handle().clone());
             let state = app.state::<AppState>();
+            crate::accent_color::init(app.handle().clone(), state.ctx.clone());
             let _ = clamui_core::logs::write_debug(
                 &state.ctx,
                 "INFO",
@@ -567,7 +570,7 @@ fn request_close(
 }
 
 #[tauri::command]
-fn startup_state(state: State<'_, AppState>) -> StartupState {
+fn startup_state(app: AppHandle, state: State<'_, AppState>) -> StartupState {
     let mut startup = state
         .initial
         .lock()
@@ -575,6 +578,7 @@ fn startup_state(state: State<'_, AppState>) -> StartupState {
         .clone();
     startup.tray_available = state.tray.available();
     startup.active_jobs = state.active_jobs.snapshot();
+    startup.accent = app.state::<crate::accent_color::AccentColor>().current();
     startup
 }
 

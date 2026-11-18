@@ -8,6 +8,8 @@ pub struct StartupState {
     pub version: String,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub active_jobs: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accent: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
