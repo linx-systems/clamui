@@ -2476,3 +2476,21 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
 
 /* Copy / fullscreen buttons above a scan log sit on the right. */
 .details-actions { justify-content: flex-end; margin: 0 0 6px; }
+
+/* Editable path lists (on-access include/exclude paths, scheduled scan targets) */
+.string-list-field > .string-list { grid-column: 1 / -1; margin: 0; }
+.string-list-row { gap: 8px; user-select: none; }
+.string-list-row > code { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; user-select: text; }
+.string-list-actions { flex: 0 0 auto; flex-wrap: nowrap; gap: 4px; }
+.string-list-row > .drag-handle {
+  flex: 0 0 28px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+}
+.string-list-row > .drag-handle:hover { color: var(--fg); }
+.string-list-row.dragging { background: var(--control-bg); }
+.string-list-row.dragging > .drag-handle { cursor: grabbing; }
+.ui-icon.grip-icon { stroke-width: 3.5; }
