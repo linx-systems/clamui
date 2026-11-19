@@ -5934,3 +5934,8 @@ msgstr "上移"
 
 msgid "Move down"
 msgstr "下移"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:1232
+msgid "The privileged helper could not use a required system tool while {operation}. Exit code: {code}. Details: {detail}"
+msgstr "特权助手在{operation}时无法使用必需的系统工具。退出代码：{code}。详细信息：{detail}"

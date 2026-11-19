@@ -6124,3 +6124,8 @@ msgstr "Di chuyển lên"
 
 msgid "Move down"
 msgstr "Di chuyển xuống"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:1232
+msgid "The privileged helper could not use a required system tool while {operation}. Exit code: {code}. Details: {detail}"
+msgstr "Trình trợ giúp đặc quyền không thể sử dụng một công cụ hệ thống cần thiết khi {operation}. Mã thoát: {code}. Chi tiết: {detail}"

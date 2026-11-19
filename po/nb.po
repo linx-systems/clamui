@@ -6213,3 +6213,8 @@ msgstr "Flytt opp"
 
 msgid "Move down"
 msgstr "Flytt ned"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:1232
+msgid "The privileged helper could not use a required system tool while {operation}. Exit code: {code}. Details: {detail}"
+msgstr "Den privilegerte hjelperen kunne ikke bruke et nødvendig systemverktøy under {operation}. Avslutningskode: {code}. Detaljer: {detail}"

@@ -30,6 +30,8 @@
 
 ### Fixed
 
+- Fixed On-Access configuration failing with trusted system-tool symlinks such as Ubuntu uutils `chown`; local tool execution now resolves symlinks, checks root ownership and safe permissions for the executable and every resolved parent directory, and reports the failing path and check. (#341)
+
 - Fixed copying Fail2ban installation commands and other text in native Wayland Flatpak sessions by using the application's GTK clipboard connection. (#328)
 - Fixed Lynis audits waiting for ENTER after Homebrew ownership warnings by closing stdin while retaining cron mode. (#317)
 - Daemon (clamd) scans now use clamd's thread pool instead of a single scanning thread: ClamUI splits its file list across up to 16 concurrent `clamdscan` workers, bounded by clamd's `MaxThreads`, the CPU count and the number of files. Exclusions, per-file progress, threat reporting and cancellation are unchanged, and the workers' output is combined into one scan report with a single summary and whole-scan warnings. (#225)
