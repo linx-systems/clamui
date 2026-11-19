@@ -382,6 +382,10 @@ div.header-title > h1 {
   color: #fff;
 }
 
+.navigation-item[aria-current="page"]:hover:not(:disabled) {
+  background: var(--brand-accent);
+}
+
 .preferences-navigation button.active {
   background: var(--surface);
   box-shadow: var(--card-shadow);
@@ -1647,7 +1651,7 @@ button.log-row:hover:not(:disabled),
    target the icon through the row to win on source order instead of !important. */
 .result-threat-row > .threat-symbol { flex: 0 0 38px; }
 
-.preferences-shell .header-title { flex: 1 1 auto; padding-inline-end: 88px; }
+.preferences-shell .header-title { flex: 1 1 auto; }
 
 .preferences-page {
   width: min(100%, 1124px);
