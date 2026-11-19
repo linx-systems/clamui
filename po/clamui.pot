@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 08:38+0100\n"
+"POT-Creation-Date: 2026-11-19 10:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2101,8 +2101,7 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-#: desktop/src/App.tsx:119 desktop/src/pages/Scan.tsx:539
-#: desktop/src/pages/Scan.tsx:541
+#: desktop/src/App.tsx:119 desktop/src/pages/Scan.tsx:542
 msgid "Scan"
 msgstr ""
 
@@ -2112,6 +2111,7 @@ msgid "Database"
 msgstr ""
 
 #: desktop/src/App.tsx:123 desktop/src/pages/Logs.tsx:358
+#: desktop/src/pages/ScanOverview.tsx:59
 msgid "Logs"
 msgstr ""
 
@@ -2131,7 +2131,7 @@ msgstr ""
 msgid "Network"
 msgstr ""
 
-#: desktop/src/App.tsx:135 desktop/src/App.tsx:888 desktop/src/App.tsx:976
+#: desktop/src/App.tsx:135 desktop/src/App.tsx:888 desktop/src/App.tsx:981
 #: desktop/src/pages/Preferences.tsx:117
 msgid "Preferences"
 msgstr ""
@@ -2151,7 +2151,7 @@ msgstr ""
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:391 desktop/src/App.tsx:406 desktop/src/App.tsx:424
-#: desktop/src/pages/Scan.tsx:330
+#: desktop/src/pages/Scan.tsx:333
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 
@@ -2176,187 +2176,191 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: desktop/src/App.tsx:911
+#: desktop/src/App.tsx:892
+msgid "Overview"
+msgstr ""
+
+#: desktop/src/App.tsx:901 desktop/src/App.tsx:902 desktop/src/App.tsx:916
 msgid "Scan File or Folder"
 msgstr ""
 
-#: desktop/src/App.tsx:918
+#: desktop/src/App.tsx:923
 msgid "Choose scan targets"
 msgstr ""
 
-#: desktop/src/App.tsx:928
+#: desktop/src/App.tsx:933
 msgid "Scan Files"
 msgstr ""
 
-#: desktop/src/App.tsx:932
+#: desktop/src/App.tsx:937
 msgid "Scan Folders"
 msgstr ""
 
-#: desktop/src/App.tsx:939
+#: desktop/src/App.tsx:942 desktop/src/App.tsx:944
 msgid "Scan System (Quick Scan)"
 msgstr ""
 
-#: desktop/src/App.tsx:946 desktop/src/App.tsx:947
+#: desktop/src/App.tsx:951 desktop/src/App.tsx:952 desktop/src/App.tsx:1016
 msgid "Menu"
 msgstr ""
 
-#: desktop/src/App.tsx:966
+#: desktop/src/App.tsx:971
 msgid "Application menu"
 msgstr ""
 
-#: desktop/src/App.tsx:980
+#: desktop/src/App.tsx:985
 msgid "About"
 msgstr ""
 
-#: desktop/src/App.tsx:993
+#: desktop/src/App.tsx:997
 msgid "Main navigation"
 msgstr ""
 
-#: desktop/src/App.tsx:994
+#: desktop/src/App.tsx:999
 msgid "Views"
 msgstr ""
 
-#: desktop/src/App.tsx:1014 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1027 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr ""
 
-#: desktop/src/App.tsx:1036
+#: desktop/src/App.tsx:1049
 msgid "About ClamUI"
 msgstr ""
 
-#: desktop/src/App.tsx:1037
+#: desktop/src/App.tsx:1050
 msgid "A native desktop interface for ClamAV."
 msgstr ""
 
-#: desktop/src/App.tsx:1039
+#: desktop/src/App.tsx:1052
 msgid "Version"
 msgstr ""
 
-#: desktop/src/App.tsx:1040 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1053 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr ""
 
-#: desktop/src/App.tsx:1041
+#: desktop/src/App.tsx:1054
 msgid "License"
 msgstr ""
 
-#: desktop/src/App.tsx:1044
+#: desktop/src/App.tsx:1057
 msgid "Project website"
 msgstr ""
 
-#: desktop/src/App.tsx:1045
+#: desktop/src/App.tsx:1058
 msgid "Issue tracker"
 msgstr ""
 
-#: desktop/src/App.tsx:1047
+#: desktop/src/App.tsx:1060
 msgid "Could not load contributor credits: {error}"
 msgstr ""
 
-#: desktop/src/App.tsx:1052
+#: desktop/src/App.tsx:1065
 msgid "Contributors"
 msgstr ""
 
-#: desktop/src/App.tsx:1061
+#: desktop/src/App.tsx:1074
 msgid "Translator credits"
 msgstr ""
 
-#: desktop/src/App.tsx:1064
+#: desktop/src/App.tsx:1077
 msgid "Loading contributor credits…"
 msgstr ""
 
-#: desktop/src/App.tsx:1066
+#: desktop/src/App.tsx:1079
 msgid "Close ClamUI?"
 msgstr ""
 
-#: desktop/src/App.tsx:1067
+#: desktop/src/App.tsx:1080
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
 msgstr ""
 
-#: desktop/src/App.tsx:1068 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1081 desktop/src/pages/Scan.tsx:194
 msgid "Remember my choice"
 msgstr ""
 
-#: desktop/src/App.tsx:1069 desktop/src/App.tsx:1073
+#: desktop/src/App.tsx:1082 desktop/src/App.tsx:1086
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:573
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
 msgstr ""
 
-#: desktop/src/App.tsx:1069
+#: desktop/src/App.tsx:1082
 msgid "Minimize to tray"
 msgstr ""
 
-#: desktop/src/App.tsx:1071
+#: desktop/src/App.tsx:1084 desktop/src/pages/ScanOverview.tsx:45
 msgid "Scan in Progress"
 msgstr ""
 
-#: desktop/src/App.tsx:1072
+#: desktop/src/App.tsx:1085
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr ""
 
-#: desktop/src/App.tsx:1073
+#: desktop/src/App.tsx:1086
 msgid "Keep Scanning"
 msgstr ""
 
-#: desktop/src/App.tsx:1073
+#: desktop/src/App.tsx:1086
 msgid "Cancel Scan and Close"
 msgstr ""
 
-#: desktop/src/App.tsx:1073 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1086 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr ""
 
-#: desktop/src/App.tsx:1075
+#: desktop/src/App.tsx:1088
 msgid "Install Privileged Helper"
 msgstr ""
 
-#: desktop/src/App.tsx:1076
+#: desktop/src/App.tsx:1089
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr ""
 
-#: desktop/src/App.tsx:1078 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1091 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr ""
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1079 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1092 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
 msgstr ""
 
-#: desktop/src/App.tsx:1084 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1097 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr ""
 
-#: desktop/src/App.tsx:1086
+#: desktop/src/App.tsx:1099
 msgid "Not now"
 msgstr ""
 
-#: desktop/src/App.tsx:1086 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1099 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr ""
 
-#: desktop/src/App.tsx:1086 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1099 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr ""
 
-#: desktop/src/App.tsx:1086 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1099 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr ""
 
-#: desktop/src/App.tsx:1086
+#: desktop/src/App.tsx:1099
 msgid "Open Preferences"
 msgstr ""
 
@@ -2483,7 +2487,7 @@ msgid "Target {index}/{count}: {path}"
 msgstr ""
 
 #: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:120
-#: desktop/src/pages/Results.tsx:187 desktop/src/pages/Scan.tsx:530
+#: desktop/src/pages/Results.tsx:187 desktop/src/pages/Scan.tsx:533
 msgid "Scan target"
 msgstr ""
 
@@ -2505,13 +2509,13 @@ msgstr ""
 msgid "Scan progress"
 msgstr ""
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:571
 msgid "{count} file scanned"
 msgid_plural "{count} files scanned"
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
@@ -2568,6 +2572,7 @@ msgstr ""
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/ScanOverview.tsx:38 desktop/src/pages/ScanOverview.tsx:39
 #: desktop/src/pages/SettingsPreferences.tsx:448
 #: desktop/src/pages/SettingsPreferences.tsx:472
 #: desktop/src/pages/Statistics.tsx:142
@@ -2879,7 +2884,7 @@ msgstr ""
 
 #: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:571 desktop/src/pages/Scan.tsx:575
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr ""
@@ -3003,7 +3008,7 @@ msgid "Checking…"
 msgstr ""
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:542
+#: desktop/src/pages/Scan.tsx:548
 msgid "Refresh status"
 msgstr ""
 
@@ -3137,7 +3142,7 @@ msgstr ""
 #: desktop/src/pages/ConfigPreferences.tsx:339
 #: desktop/src/pages/ConfigPreferences.tsx:384
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:564
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr ""
@@ -3225,10 +3230,12 @@ msgid "Daemon connected"
 msgstr ""
 
 #: desktop/src/pages/ConfigPreferences.tsx:767
+#: desktop/src/pages/ScanOverview.tsx:45
 msgid "Scanner available"
 msgstr ""
 
 #: desktop/src/pages/ConfigPreferences.tsx:767
+#: desktop/src/pages/ScanOverview.tsx:45
 msgid "Scanner unavailable"
 msgstr ""
 
@@ -3577,7 +3584,7 @@ msgid "Used for monthly scans."
 msgstr ""
 
 #: desktop/src/pages/ConfigPreferences.tsx:903
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:563
 msgid "Scan Targets"
 msgstr ""
 
@@ -3628,7 +3635,7 @@ msgid ""
 msgstr ""
 
 #: desktop/src/pages/ConfigPreferences.tsx:921
-#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:193
 msgid "Saving…"
 msgstr ""
 
@@ -4008,7 +4015,7 @@ msgid "Export JSON"
 msgstr ""
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:563
 msgid "Clear All"
 msgstr ""
 
@@ -4043,7 +4050,7 @@ msgid "Export Text"
 msgstr ""
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:571
 msgid "Fullscreen"
 msgstr ""
 
@@ -4163,7 +4170,8 @@ msgstr ""
 msgid "Refreshing…"
 msgstr ""
 
-#: desktop/src/pages/Network.tsx:397
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/ScanOverview.tsx:38
+#: desktop/src/pages/ScanOverview.tsx:45
 #: desktop/src/pages/SettingsPreferences.tsx:464
 #: desktop/src/pages/SettingsPreferences.tsx:467
 msgid "Loading…"
@@ -4325,7 +4333,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:564
 msgid "No targets added"
 msgstr ""
 
@@ -4794,7 +4802,7 @@ msgstr ""
 msgid "Quarantine All"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:195
+#: desktop/src/pages/Results.tsx:195 desktop/src/pages/ScanOverview.tsx:52
 msgid "Files scanned"
 msgstr ""
 
@@ -4802,7 +4810,7 @@ msgstr ""
 msgid "Directories"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:197
+#: desktop/src/pages/Results.tsx:197 desktop/src/pages/ScanOverview.tsx:53
 msgid "Threats found"
 msgstr ""
 
@@ -4839,7 +4847,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr ""
 
 #: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:571 desktop/src/pages/Scan.tsx:575
 msgid "Scan details"
 msgstr ""
 
@@ -4878,7 +4886,7 @@ msgstr ""
 msgid "Detections"
 msgstr ""
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:239 desktop/src/pages/ScanOverview.tsx:51
 msgid "Last scanned"
 msgstr ""
 
@@ -4922,180 +4930,188 @@ msgstr ""
 msgid "Start a scan to see its results here."
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:96
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete with warnings"
 msgstr ""
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:97
+#: desktop/src/pages/Scan.tsx:98
 msgid "Scan complete — no threats found"
 msgstr ""
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:105
+#: desktop/src/pages/Scan.tsx:106
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] ""
 msgstr[1] ""
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:115
+#: desktop/src/pages/Scan.tsx:116
 msgid "Scan cancelled — partial results are available"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
+#: desktop/src/pages/Scan.tsx:121 desktop/src/pages/Scan.tsx:535
 msgid "Scan error"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:120
+#: desktop/src/pages/Scan.tsx:121
 msgid "Unknown error"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:155
+#: desktop/src/pages/Scan.tsx:156
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:183
+#: desktop/src/pages/Scan.tsx:184
 msgid "VirusTotal Scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:184
+#: desktop/src/pages/Scan.tsx:185
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:188
+#: desktop/src/pages/Scan.tsx:189
 msgid "API key available"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:190 desktop/src/pages/Scan.tsx:569
 msgid "Scanning…"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:190 desktop/src/pages/Scan.tsx:569
 msgid "Scan with VirusTotal"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:192 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Scan.tsx:193
 msgid "Save & Scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:194
+#: desktop/src/pages/Scan.tsx:195
 msgid "Upload file manually"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:226
+#: desktop/src/pages/Scan.tsx:228
 msgid "Unable to load scan profiles"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:233
+#: desktop/src/pages/Scan.tsx:235
 msgid "Unable to check scanner status"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:270 desktop/src/pages/Scan.tsx:351
 msgid "Please select a file or folder to scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:281
+#: desktop/src/pages/Scan.tsx:284
 msgid "Starting scan…"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:351
 msgid "Quick Scan profile has no valid targets"
 msgstr ""
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
-#: desktop/src/pages/Scan.tsx:516
+#: desktop/src/pages/Scan.tsx:365 desktop/src/pages/Scan.tsx:468
+#: desktop/src/pages/Scan.tsx:519
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:382
+#: desktop/src/pages/Scan.tsx:385
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
 msgstr[0] ""
 msgstr[1] ""
 
-#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
+#: desktop/src/pages/Scan.tsx:400 desktop/src/pages/Scan.tsx:528
 msgid "Only local files and folders can be scanned"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:474
+#: desktop/src/pages/Scan.tsx:477
 msgid "Unable to choose scan targets"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:481
+#: desktop/src/pages/Scan.tsx:484
 msgid "Cancelling scan…"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:483
+#: desktop/src/pages/Scan.tsx:486
 msgid "Unable to cancel scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:499
+#: desktop/src/pages/Scan.tsx:502
 msgid "Running EICAR test…"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:541
-msgid "Backend"
-msgstr ""
-
-#: desktop/src/pages/Scan.tsx:542
-msgid "Manage Profiles"
-msgstr ""
-
-#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:571
 msgid "Details"
 msgstr ""
 
+#: desktop/src/pages/Scan.tsx:547
+msgid "Backend"
+msgstr ""
+
 #: desktop/src/pages/Scan.tsx:548
+msgid "Manage Profiles"
+msgstr ""
+
+#: desktop/src/pages/Scan.tsx:553
 msgid "Profile"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Scan.tsx:559
 msgid "No Profile (Manual)"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:563
 msgid "Drop local files or folders here, or add them below."
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:569
 msgid "Start Scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:569
 msgid "Run EICAR Test"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:569
 msgid "Select one file before using VirusTotal"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:571 desktop/src/pages/ScanOverview.tsx:56
 msgid "Latest scan"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:571 desktop/src/pages/ScanOverview.tsx:59
 msgid "View Results"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:573
 msgid "Virus database is not available"
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:573 desktop/src/pages/ScanOverview.tsx:46
 msgid "Update the database before starting a scan."
 msgstr ""
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:573
 msgid "Open Database Updates"
+msgstr ""
+
+#: desktop/src/pages/ScanOverview.tsx:38 desktop/src/pages/Statistics.tsx:120
+msgid "No scans recorded"
+msgstr ""
+
+#: desktop/src/pages/ScanOverview.tsx:46
+msgid "Scan files and folders with ClamAV."
 msgstr ""
 
 #: desktop/src/pages/SettingsPreferences.tsx:47
@@ -5662,10 +5678,6 @@ msgstr[1] ""
 
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Delete Logs"
-msgstr ""
-
-#: desktop/src/pages/Statistics.tsx:120
-msgid "No scans recorded"
 msgstr ""
 
 #: desktop/src/pages/Statistics.tsx:123

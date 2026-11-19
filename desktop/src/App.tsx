@@ -77,7 +77,7 @@ const destinations: Array<{
   shortcut: string;
   icon: IconName;
 }> = [
-  { id: "scan", shortcut: "Ctrl+1", icon: "folder" },
+  { id: "scan", shortcut: "Ctrl+1", icon: "search" },
   { id: "database", shortcut: "Ctrl+2", icon: "database" },
   { id: "logs", shortcut: "Ctrl+3", icon: "logs" },
   { id: "components", shortcut: "Ctrl+4", icon: "components" },
@@ -889,12 +889,17 @@ export default function App(): ReactNode {
           </div>
         ) : null}
         {!preferencesOpen ? (
+          <h1 className="header-title">{activePage === "scan" ? _("Overview") : pageLabel(activePage)}</h1>
+        ) : null}
+        {!preferencesOpen ? (
           <div className="header-actions">
             <div className="application-menu" ref={targetMenuRef}>
               <button
                 className="button"
                 type="button"
                 ref={targetMenuButtonRef}
+                aria-label={_("Scan File or Folder")}
+                title={_("Scan File or Folder")}
                 aria-haspopup="menu"
                 aria-expanded={openMenu === "targets"}
                 aria-controls="scan-targets-menu"
@@ -908,7 +913,7 @@ export default function App(): ReactNode {
                 disabled={scanJobId !== null}
               >
                 <Icon name="folder" className="header-action-icon" />
-                {_("Scan File or Folder")}
+                <span className="header-action-label">{_("Scan File or Folder")}</span>
               </button>
               {openMenu === "targets" ? (
                 <div
@@ -934,9 +939,9 @@ export default function App(): ReactNode {
                 </div>
               ) : null}
             </div>
-            <button className="button primary" type="button" onClick={quickScan} disabled={scanJobId !== null}>
-              <Icon name="system" className="header-action-icon" />
-              {_("Scan System (Quick Scan)")}
+            <button className="button primary" type="button" title={_("Scan System (Quick Scan)")} aria-label={_("Scan System (Quick Scan)")} onClick={quickScan} disabled={scanJobId !== null}>
+              <Icon name="bolt" className="header-action-icon" />
+              <span className="header-action-label">{_("Scan System (Quick Scan)")}</span>
             </button>
             <div className="application-menu" ref={applicationMenuRef}>
               <button
@@ -989,8 +994,8 @@ export default function App(): ReactNode {
           </div>
         ) : null}
       </header>
-      {!preferencesOpen ? (
         <aside className="sidebar" aria-label={_("Main navigation")}>
+          <div className="brand" aria-label="ClamUI"><span className="brand-mark" aria-hidden="true">C</span><span className="brand-name">ClamUI</span></div>
           <nav className="navigation" aria-label={_("Views")}>
             {destinations.map((destination) => (
               <button
@@ -999,7 +1004,8 @@ export default function App(): ReactNode {
                 type="button"
                 aria-current={activePage === destination.id ? "page" : undefined}
                 aria-keyshortcuts={destination.shortcut.replace("Ctrl", "Control")}
-                title={destination.shortcut}
+                aria-label={pageLabel(destination.id)}
+                title={`${pageLabel(destination.id)} (${destination.shortcut})`}
                 onClick={() => selectPage(destination.id)}
               >
                 <Icon name={destination.icon} />
@@ -1007,8 +1013,15 @@ export default function App(): ReactNode {
               </button>
             ))}
           </nav>
+          <nav className="sidebar-footer" aria-label={_("Menu")}>
+            {(["results", "profiles", "preferences"] as const).map((page) => (
+              <button className="navigation-item" key={page} type="button" aria-current={activePage === page ? "page" : undefined} aria-label={pageLabel(page)} title={pageLabel(page)} onClick={() => selectPage(page)}>
+                <Icon name={page === "preferences" ? "settings" : page === "profiles" ? "folder" : "logs"} />
+                <span className="navigation-label">{pageLabel(page)}</span>
+              </button>
+            ))}
+          </nav>
         </aside>
-      ) : null}
       <ConfigurationRecoveryProvider actions={configurationRecoveryActions}>
         <main className="main-content">
           {activity ? <div className="activity-banner notice" role="status"><span>{activity}</span><button className="button" type="button" onClick={() => setActivity(null)}>{_("Dismiss")}</button></div> : null}

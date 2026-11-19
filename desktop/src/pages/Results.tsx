@@ -192,9 +192,9 @@ function ScanResultPanel({ result }: { result: ScanResult }) {
         </div>
       </div>
       <dl className="result-metrics">
-        <div><dt>{_("Files scanned")}</dt><dd>{result.scanned_files ?? 0}</dd></div>
-        <div><dt>{_("Directories")}</dt><dd>{result.scanned_dirs ?? 0}</dd></div>
-        <div className={threatCount > 0 ? "danger" : ""}><dt>{_("Threats found")}</dt><dd>{threatCount}</dd></div>
+        <div><dt>{_("Files scanned")}</dt><dd>{new Intl.NumberFormat().format(result.scanned_files ?? 0)}</dd></div>
+        <div><dt>{_("Directories")}</dt><dd>{new Intl.NumberFormat().format(result.scanned_dirs ?? 0)}</dd></div>
+        <div className={threatCount > 0 ? "danger" : ""}><dt>{_("Threats found")}</dt><dd>{new Intl.NumberFormat().format(threatCount)}</dd></div>
         {(result.skipped_count ?? 0) > 0 && <div className="warning"><dt>{_("Not accessible")}</dt><dd>{result.skipped_count}</dd></div>}
       </dl>
       {result.warning_message && <p className="notice warning">{result.warning_message}</p>}
@@ -203,11 +203,11 @@ function ScanResultPanel({ result }: { result: ScanResult }) {
     </section>
     {error && <pre className="notice error" role="alert">{error}</pre>}
 
-    {threats.length > 0 && <section aria-labelledby="detected-threats-title"><header className="section-header"><div><h2 id="detected-threats-title">{_("Detected Threats")}</h2>{threats.length > PAGE_SIZE && <p className="notice warning">{_("Large result set: displaying threats in batches.")}</p>}</div></header><div className="grouped-list">{visibleThreats.map((threat, index) => {
+    {threats.length > 0 && <section className="threats-panel" aria-labelledby="detected-threats-title"><header className="section-header"><div><h2 id="detected-threats-title">{_("Detected Threats")}</h2>{threats.length > PAGE_SIZE && <p className="notice warning">{_("Large result set: displaying threats in batches.")}</p>}</div></header><div className="grouped-list">{visibleThreats.map((threat, index) => {
       const key = `${threat.file_path}-${index}`;
       const moved = quarantined.has(threat.file_path);
       const excluded = quarantined.has(`excluded:${threat.file_path}`);
-      return <article className="group-row result-threat-row" key={key}><div className="row-copy"><div className="row"><strong>{threat.threat_name}</strong><span className={`status-badge ${threat.severity === "critical" || threat.severity === "high" ? "error" : "warning"}`}>{threatLabel(threat.severity, threat.category)}</span></div><code className="path-value">{threat.file_path}</code></div><div className="actions"><button className="button primary" onClick={() => setConfirmation({ kind: "single", threat })} disabled={busy || moved}>{moved ? _("Quarantined") : _("Quarantine")}</button><button className="button" onClick={() => void exclude(threat)} disabled={busy || excluded}>{excluded ? _("Excluded") : _("Exclude")}</button><button className="button" onClick={() => void copyText(threat.file_path).catch((reason: unknown) => setError(String(reason)))}><Icon name="copy" />{_("Copy Path")}</button></div></article>;
+      return <article className="group-row result-threat-row" key={key}><span className="threat-symbol"><Icon name="warning" /></span><div className="row-copy"><div className="row"><strong>{threat.threat_name}</strong><span className={`status-badge ${threat.severity === "critical" || threat.severity === "high" ? "error" : "warning"}`}>{threatLabel(threat.severity, threat.category)}</span></div><code className="path-value">{threat.file_path}</code></div><div className="actions"><button className="button primary" onClick={() => setConfirmation({ kind: "single", threat })} disabled={busy || moved}>{moved ? _("Quarantined") : _("Quarantine")}</button><button className="button" onClick={() => void exclude(threat)} disabled={busy || excluded}>{excluded ? _("Excluded") : _("Exclude")}</button><button className="button" onClick={() => void copyText(threat.file_path).catch((reason: unknown) => setError(String(reason)))}><Icon name="copy" />{_("Copy Path")}</button></div></article>;
     })}{shown < threats.length && <button className="button" onClick={() => setShown((current) => current + PAGE_SIZE)}>{_("Show {count} more", { count: Math.min(PAGE_SIZE, threats.length - shown) })}</button>}</div></section>}
 
     {(result.skipped_files?.length ?? 0) > 0 && <details className="grouped-list"><summary>{_("Files Not Accessible")}</summary>{result.skipped_files!.slice(0, 100).map((path) => <div className="group-row" key={path}><code className="path-value">{path}</code></div>)}{result.skipped_files!.length > 100 && <p className="muted">{_("Additional inaccessible files are omitted from this view.")}</p>}</details>}
