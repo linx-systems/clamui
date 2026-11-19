@@ -140,6 +140,34 @@ fn save_migrates_legacy_history_and_never_persists_private_values() {
 }
 
 #[test]
+fn list_returns_scan_counts_for_dashboard_history() {
+    let (_temp, context) = context();
+    logs::save(
+        &context,
+        json!({
+            "type": "scan", "status": "infected",
+            "summary": "Scan complete", "details": "Threats found: 2",
+            "scanned_files": 42, "infected_count": 2,
+        }),
+    )
+    .expect("save scan with counts");
+
+    let entries = logs::dispatch(&context, "list", json!({"log_type": "scan", "limit": 1}))
+        .expect("list scans");
+    let latest = entries
+        .as_array()
+        .expect("entry array")
+        .first()
+        .expect("latest scan");
+    assert_eq!(latest["scanned_files"], 42);
+    assert_eq!(latest["infected_count"], 2);
+
+    let fetched = logs::dispatch(&context, "get", json!({"id": latest["id"]})).expect("get scan");
+    assert_eq!(fetched["scanned_files"], 42);
+    assert_eq!(fetched["infected_count"], 2);
+}
+
+#[test]
 fn list_recovers_from_missing_or_corrupt_index_and_skips_corrupt_entries() {
     let (_temp, context) = context();
     let saved = logs::save(
@@ -608,8 +636,8 @@ fn statistics_preserves_historical_localized_counts() {
         }),
     )
     .expect("save structured scan");
-    assert!(saved.get("scanned_files").is_none());
-    assert!(saved.get("infected_count").is_none());
+    assert_eq!(saved["scanned_files"], 9);
+    assert_eq!(saved["infected_count"], 3);
 
     let stats =
         logs::dispatch(&context, "statistics", json!({"timeframe":"all"})).expect("statistics");

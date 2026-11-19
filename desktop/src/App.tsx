@@ -22,7 +22,9 @@ import { HelperTrustErrorDialog } from "./HelperTrustErrorDialog";
 import { helperTrustFailure, isHelperTrustError } from "./helperTrustError";
 import { Icon, type IconName } from "./Icon";
 import { _, activeCatalog } from "./i18n";
+import { INITIAL_MOUNTED_PAGES } from "./initialMountedPages";
 import { Modal } from "./Modal";
+import type { PageId } from "./pageId";
 import Audit from "./pages/Audit";
 import Components from "./pages/Components";
 import Dashboard from "./pages/Dashboard";
@@ -35,20 +37,6 @@ import Quarantine from "./pages/Quarantine";
 import Results from "./pages/Results";
 import Scan from "./pages/Scan";
 import Statistics from "./pages/Statistics";
-
-type PageId =
-  | "dashboard"
-  | "scan"
-  | "database"
-  | "logs"
-  | "components"
-  | "quarantine"
-  | "statistics"
-  | "audit"
-  | "network"
-  | "preferences"
-  | "profiles"
-  | "results";
 
 type NavigationDetail = { page: PageId; args: Record<string, unknown> };
 type Toast = { id: number; message: string; type: "success" | "error" | "info" | "warning" };
@@ -234,7 +222,7 @@ export default function App(): ReactNode {
   const [activePage, setActivePage] = useState<PageId>("dashboard");
   const activePageRef = useRef<PageId>("dashboard");
   const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("dashboard");
-  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(["dashboard"]));
+  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(INITIAL_MOUNTED_PAGES));
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [helperTrustError, setHelperTrustError] = useState<string | null>(null);
   const [recoveryConfigurations, setRecoveryConfigurations] = useState<readonly ManualConfiguration[] | null>(null);

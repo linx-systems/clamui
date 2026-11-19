@@ -1,10 +1,14 @@
-import { useCallback, useState } from "react";
-import { navigate, request } from "../api";
+import { useCallback, useEffect, useState } from "react";
+import { navigate, notify, onEvent, request } from "../api";
 import { Icon } from "../Icon";
 import { _, scanStatusLabel } from "../i18n";
 
 import { parseLatestScan, type LatestScan } from "../scanHistory";
 import { useActivityRefresh } from "./useActivityRefresh";
+
+function readableError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 export function ScanOverview({ available, databaseAvailable, scanning, result, active = true, onQuickScan }: {
   available?: boolean;
@@ -28,7 +32,21 @@ export function ScanOverview({ available, databaseAvailable, scanning, result, a
       setHistoryState("error");
     }
   }, []);
-  useActivityRefresh(active, loadHistory);
+  const refreshHistory = useActivityRefresh(active, loadHistory);
+  useEffect(() => {
+    let dispose: (() => void) | undefined;
+    let listening = true;
+    void onEvent((event) => {
+      if (event.event === "scan-complete" || event.event === "update-complete") void refreshHistory(false);
+    }).then((unlisten) => {
+      if (listening) dispose = unlisten;
+      else unlisten();
+    }).catch((listenError: unknown) => notify(_("Scan overview updates are unavailable: {error}", { error: readableError(listenError) }), "warning"));
+    return () => {
+      listening = false;
+      dispose?.();
+    };
+  }, [refreshHistory]);
 
   const latest = result ?? history;
   const ready = available === true && databaseAvailable === true;
