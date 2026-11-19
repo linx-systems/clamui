@@ -31,7 +31,7 @@ import Dashboard from "./pages/Dashboard";
 import Database from "./pages/Database";
 import Logs from "./pages/Logs";
 import Network from "./pages/Network";
-import Preferences from "./pages/Preferences";
+import Preferences, { type PreferencesHandle } from "./pages/Preferences";
 import Profiles from "./pages/Profiles";
 import Quarantine from "./pages/Quarantine";
 import Results from "./pages/Results";
@@ -49,7 +49,7 @@ type HelperStatus = {
   needsOnboarding: boolean;
 };
 
-const pageComponents: Record<Exclude<PageId, "database" | "dashboard">, ComponentType<{ active: boolean }>> = {
+const pageComponents: Record<Exclude<PageId, "database" | "dashboard" | "preferences">, ComponentType<{ active: boolean }>> = {
   scan: Scan,
   logs: Logs,
   components: Components,
@@ -57,7 +57,6 @@ const pageComponents: Record<Exclude<PageId, "database" | "dashboard">, Componen
   statistics: Statistics,
   audit: Audit,
   network: Network,
-  preferences: Preferences,
   profiles: Profiles,
   results: Results,
 };
@@ -223,6 +222,18 @@ export default function App(): ReactNode {
   const activePageRef = useRef<PageId>("dashboard");
   const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("dashboard");
   const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(INITIAL_MOUNTED_PAGES));
+  const preferencesRef = useRef<PreferencesHandle>(null);
+  const [preferencesSaveStatus, setPreferencesSaveStatus] = useState<{ dirty: boolean; busy: boolean }>({ dirty: false, busy: false });
+  const flushPreferencesBeforeClose = useCallback(async (): Promise<void> => {
+    if (activePageRef.current !== "preferences") return;
+    try {
+      await preferencesRef.current?.flush("full");
+    } catch {
+      // Best-effort: still proceed with closing even if the batched apply
+      // failed. There is no Preferences UI left to show a persistent error
+      // in once the application has quit.
+    }
+  }, []);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [helperTrustError, setHelperTrustError] = useState<string | null>(null);
   const [recoveryConfigurations, setRecoveryConfigurations] = useState<readonly ManualConfiguration[] | null>(null);
@@ -334,20 +345,22 @@ export default function App(): ReactNode {
       return;
     }
     try {
+      await flushPreferencesBeforeClose();
       await closeApplication("quit");
     } catch (error) {
       notify(error instanceof Error ? error.message : String(error), "error");
     }
-  }, [scanJobId]);
+  }, [flushPreferencesBeforeClose, scanJobId]);
 
   const completeClose = useCallback(async (choice: "minimize" | "quit", remember: boolean): Promise<void> => {
     try {
+      await flushPreferencesBeforeClose();
       await closeApplication(choice, remember);
       setCloseOpen(false);
     } catch (error) {
       notify(error instanceof Error ? error.message : String(error), "error");
     }
-  }, []);
+  }, [flushPreferencesBeforeClose]);
 
   const cancelScanAndClose = useCallback(async (): Promise<void> => {
     try {
@@ -355,11 +368,12 @@ export default function App(): ReactNode {
         await request("scanner.cancel", { id: scanJobId });
       }
       setScanCloseOpen(false);
+      await flushPreferencesBeforeClose();
       await closeApplication(closeIntent === "quit" ? "quit" : undefined);
     } catch (error) {
       notify(error instanceof Error ? error.message : String(error), "error");
     }
-  }, [closeIntent, scanJobId]);
+  }, [closeIntent, flushPreferencesBeforeClose, scanJobId]);
   const startUpdate = useCallback((): void => {
     selectPage("database");
     setUpdateStartRequest((current) => current + 1);
@@ -671,7 +685,9 @@ export default function App(): ReactNode {
           setRememberCloseChoice(false);
           setCloseOpen(true);
         } else {
-          void closeApplication("quit").catch((error: unknown) => notify(error instanceof Error ? error.message : String(error), "error"));
+          void flushPreferencesBeforeClose()
+            .then(() => closeApplication("quit"))
+            .catch((error: unknown) => notify(error instanceof Error ? error.message : String(error), "error"));
         }
         return;
       }
@@ -793,7 +809,7 @@ export default function App(): ReactNode {
       disposed = true;
       stopEvents?.();
     };
-  }, [selectPage, startUpdate]);
+  }, [flushPreferencesBeforeClose, selectPage, startUpdate]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -864,6 +880,13 @@ export default function App(): ReactNode {
           </section>
         );
       }
+      if (page === "preferences") {
+        return (
+          <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
+            <Preferences ref={preferencesRef} active={selected} onSaveStatusChange={setPreferencesSaveStatus} />
+          </section>
+        );
+      }
       const Page = pageComponents[page];
       return (
         <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
@@ -887,6 +910,12 @@ export default function App(): ReactNode {
               {_("Back")}
             </button>
             <h1>{_("Preferences")}</h1>
+            <button
+              className="button primary preferences-save-button"
+              type="button"
+              disabled={!preferencesSaveStatus.dirty || preferencesSaveStatus.busy}
+              onClick={() => void preferencesRef.current?.flush("full")}
+            >{preferencesSaveStatus.busy ? _("Saving…") : _("Save")}</button>
           </div>
         ) : null}
         {!preferencesOpen ? (

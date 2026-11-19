@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 import { notify, onEvent, request, startupState } from "../api";
+import { type ManualConfiguration, useConfigurationRecovery } from "../ConfigurationRecovery";
 import { _ } from "../i18n";
-import ConfigPreferences from "./ConfigPreferences";
+import ConfigPreferences, { type ConfigPreferencesHandle, type SaveReport } from "./ConfigPreferences";
 import SettingsPreferences from "./SettingsPreferences";
 
 type Settings = Record<string, unknown>;
-type ConfigSection = "database" | "scanner" | "scheduled" | "onaccess" | "save";
-type PreferencePage = "behavior" | "exclusions" | "database" | "scanner" | "scheduled" | "device_scan" | "onaccess" | "virustotal" | "debug" | "save";
+type ConfigSection = "database" | "scanner" | "scheduled" | "onaccess";
+type PreferencePage = "behavior" | "exclusions" | "database" | "scanner" | "scheduled" | "device_scan" | "onaccess" | "virustotal" | "debug";
 
 const NAVIGATION: Array<{ id: PreferencePage; label: () => string; config?: ConfigSection }> = [
   { id: "behavior", label: () => _("Behavior") },
@@ -19,12 +20,20 @@ const NAVIGATION: Array<{ id: PreferencePage; label: () => string; config?: Conf
   { id: "onaccess", label: () => _("On-Access"), config: "onaccess" },
   { id: "virustotal", label: () => _("VirusTotal") },
   { id: "debug", label: () => _("Debug") },
-  { id: "save", label: () => _("Save"), config: "save" },
 ];
 
+export type PreferencesHandle = { flush: (mode: "direct" | "full") => Promise<void> };
 
-/** The ten-page preferences host. Config pages stay mounted to retain unsaved drafts. */
-export default function Preferences() {
+export type PreferencesProps = {
+  /** True while the Preferences page is the one the user is looking at. A
+   * true -> false transition means the user left/closed Preferences. */
+  active: boolean;
+  onSaveStatusChange?: (status: { dirty: boolean; busy: boolean }) => void;
+};
+
+/** The nine-page preferences host. Config pages stay mounted to retain unsaved drafts. */
+const Preferences = forwardRef<PreferencesHandle, PreferencesProps>(function Preferences({ active, onSaveStatusChange }, ref) {
+  const { open: openConfigurationRecovery } = useConfigurationRecovery();
   const [settings, setSettings] = useState<Settings | null>(null);
   const settingsRef = useRef<Settings>({});
   const confirmedSettingsRef = useRef<Settings>({});
@@ -34,6 +43,12 @@ export default function Preferences() {
   const [configSection, setConfigSection] = useState<ConfigSection>("database");
   const [trayAvailable, setTrayAvailable] = useState(false);
   const [flatpak, setFlatpak] = useState(false);
+  const [configDirty, setConfigDirty] = useState(false);
+  const [configBusy, setConfigBusy] = useState(false);
+  const [report, setReport] = useState<SaveReport>(null);
+  const [manualConfigurations, setManualConfigurations] = useState<readonly ManualConfiguration[]>([]);
+  const configRef = useRef<ConfigPreferencesHandle>(null);
+  const wasActive = useRef(active);
 
   useEffect(() => {
     let active = true;
@@ -103,6 +118,38 @@ export default function Preferences() {
     return saved;
   }, []);
 
+  const flush = useCallback(async (mode: "direct" | "full") => {
+    await configRef.current?.flush(mode);
+  }, []);
+
+  useImperativeHandle(ref, () => ({ flush }), [flush]);
+
+  // Autosave on leaving a settings section: everything that would not need
+  // an authorization prompt is flushed immediately. Anything else (and the
+  // full remaining queue) is only flushed by a batched "full" flush, below,
+  // which runs when Preferences itself is closed, or by the header Save
+  // button in App.tsx.
+  const selectedRef = useRef(selected);
+  useEffect(() => {
+    if (selectedRef.current !== selected) {
+      selectedRef.current = selected;
+      void flush("direct");
+    }
+  }, [selected, flush]);
+
+  // Closing Preferences (navigating away or the window closing) is the
+  // signal for the batched, single-authorization-prompt "full" flush.
+  useEffect(() => {
+    if (wasActive.current && !active) {
+      void flush("full");
+    }
+    wasActive.current = active;
+  }, [active, flush]);
+
+  useEffect(() => {
+    onSaveStatusChange?.({ dirty: configDirty, busy: configBusy });
+  }, [configDirty, configBusy, onSaveStatusChange]);
+
   const selectPage = (item: (typeof NAVIGATION)[number]) => {
     setSelected(item.id);
     if (item.config) setConfigSection(item.config);
@@ -128,6 +175,21 @@ export default function Preferences() {
           ))}
         </nav>
         <section className="preferences-content">
+          {report && <section className={`notice ${report.tone} preferences-save-report`} aria-live="polite">
+            <div className="preferences-save-report-content">
+              <p className="preferences-save-report-message">{report.message}</p>
+              {report.technicalDetails && <details className="preferences-save-report-details">
+                <summary>{_("Technical details")}</summary>
+                <pre>{report.technicalDetails}</pre>
+              </details>}
+              {manualConfigurations.length > 0 ? <div className="preferences-save-report-actions">
+                <button className="button" type="button" onClick={() => openConfigurationRecovery(manualConfigurations)}>{_(
+                  // Translators: This button opens the failed native configuration snapshot.
+                  "See Configuration",
+                )}</button>
+              </div> : null}
+            </div>
+          </section>}
           <div hidden={showsConfig}>
             <SettingsPreferences
               selectedPage={selected}
@@ -138,10 +200,21 @@ export default function Preferences() {
             />
           </div>
           <div hidden={!showsConfig}>
-            <ConfigPreferences section={configSection} />
+            <ConfigPreferences
+              ref={configRef}
+              section={configSection}
+              onDirtyChange={setConfigDirty}
+              onBusyChange={setConfigBusy}
+              onReportChange={(nextReport, nextManualConfigurations) => {
+                setReport(nextReport);
+                setManualConfigurations(nextManualConfigurations);
+              }}
+            />
           </div>
         </section>
       </div>
     </main>
   );
-}
+});
+
+export default Preferences;

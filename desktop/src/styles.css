@@ -247,9 +247,10 @@ small,
 }
 
 div.header-title {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
   overflow: visible;
   white-space: normal;
@@ -264,6 +265,7 @@ div.header-title > h1 {
 }
 
 .header-title .back-button { flex: 0 0 auto; }
+.header-title .preferences-save-button { flex: 0 0 auto; margin-inline-start: auto; }
 
 .header-actions,
 .toolbar,
@@ -363,6 +365,8 @@ div.header-title > h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Inherited button line-height (1.3) clips descenders (g, y, p, j, ß...) once overflow is hidden. */
+  line-height: 1.6;
 }
 
 .navigation-item {

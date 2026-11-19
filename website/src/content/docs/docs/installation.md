@@ -65,7 +65,7 @@ Database, Scanner, and On-Access preferences target host ClamAV configuration, n
 
 After you click, automatic installation can complete only when the official matching published package is available. Before requesting graphical administrator authorization through Polkit, ClamUI verifies its signature, identity, version, size, digest, and compatible architecture; a missing or invalid asset fails safely before authorization. On Debian, a signed same-version architecture-independent helper remains an accepted legacy fallback only when no exact-architecture helper exists. The UI never runs as root or collects an administrator password.
 
-If authorization is cancelled or installation fails, the settings draft remains available and you can retry or use the manual repair guidance. After installation succeeds, explicitly choose **Save & Apply** again; ClamUI does not automatically apply the protected changes.
+If authorization is cancelled or installation fails, the settings draft remains available and you can retry or use the manual repair guidance. After installation succeeds, leave the section again or click **Save** in the Preferences header to retry; ClamUI does not automatically apply the protected changes on its own.
 
 ## Debian packages
 

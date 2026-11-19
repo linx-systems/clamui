@@ -293,10 +293,24 @@ pub fn dispatch(ctx: &Context, action: &str, args: Value) -> AppResult<Value> {
         "load" => load(ctx, args),
         "read_authorized" => read_authorized(ctx, args),
         "validate" => validate(ctx, args),
+        "needs_elevation" => needs_elevation_check(ctx, args),
         "save" => save(ctx, args, false),
         "apply" => save(ctx, args, true),
         _ => Err(format!("Unknown config action: {action}")),
     }
+}
+
+/// Read-only probe so the frontend can decide, before proposing a write,
+/// whether persisting a given destination would require the privileged
+/// helper (pkexec). Used to flush drafts that are safely user-writable the
+/// moment a settings section is left, while deferring anything that would
+/// prompt for authorization to an explicit batched apply (Save button or
+/// closing Preferences) so navigating between sections never triggers an
+/// unexpected authorization prompt. Performs no write of its own.
+fn needs_elevation_check(_ctx: &Context, args: Value) -> AppResult<Value> {
+    let object = object(args)?;
+    let path = absolute_path(&required_string(&object, "path")?)?;
+    Ok(json!({ "needs_elevation": needs_elevation(&path) }))
 }
 
 fn detect(ctx: &Context, args: Value) -> AppResult<Value> {
@@ -1273,5 +1287,50 @@ mod tests {
                 }),
             ]
         );
+    }
+
+    fn test_context(directory: &std::path::Path) -> Context {
+        Context::with_paths(crate::common::Paths {
+            home: directory.to_path_buf(),
+            config_dir: directory.join("config"),
+            data_dir: directory.join("data"),
+        })
+        .expect("context")
+    }
+
+    #[test]
+    fn needs_elevation_is_false_for_a_user_writable_existing_file() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        let path = directory.path().join("freshclam.conf");
+        fs::write(&path, b"Checks 12\n").expect("write fixture file");
+
+        assert!(!needs_elevation(&path));
+    }
+
+    #[test]
+    fn needs_elevation_dispatch_reports_no_escalation_for_a_user_writable_file() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        let path = directory.path().join("clamd.conf");
+        fs::write(&path, b"LogVerbose yes\n").expect("write fixture file");
+        let ctx = test_context(directory.path());
+
+        let result = dispatch(
+            &ctx,
+            "needs_elevation",
+            json!({ "path": path.to_string_lossy() }),
+        )
+        .expect("dispatch succeeds");
+
+        assert_eq!(result, json!({ "needs_elevation": false }));
+    }
+
+    #[test]
+    fn needs_elevation_dispatch_requires_a_path_argument() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        let ctx = test_context(directory.path());
+
+        let result = dispatch(&ctx, "needs_elevation", json!({}));
+
+        assert!(result.is_err());
     }
 }

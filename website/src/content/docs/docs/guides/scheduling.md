@@ -3,7 +3,7 @@ title: Schedule scans
 description: Automate recurring scans without losing control of detections.
 ---
 
-Configure **Preferences → Scheduled Scans**, choose targets and a frequency, then use **Save & Apply**. ClamUI creates a user systemd timer where available, otherwise a cron job. It cannot run while the computer is off.
+Configure **Preferences → Scheduled Scans**, choose targets and a frequency, then leave the section or close Preferences to save—or click **Save** in the header. ClamUI creates a user systemd timer where available, otherwise a cron job. It cannot run while the computer is off.
 
 ## Recommended setup
 

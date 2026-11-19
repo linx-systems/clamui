@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 15:00+0100\n"
+"POT-Creation-Date: 2026-11-19 17:14+0100\n"
 "PO-Revision-Date: 2026-08-09 00:00-0300\n"
 "Last-Translator: ClamUI Contributors\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
@@ -1316,66 +1316,66 @@ msgstr[1] "Mostrando {shown} de {total} entradas. Use --limit para ver mais."
 msgid "Usage: clamui install-privileged-helper"
 msgstr "Uso: clamui install-privileged-helper"
 
-#: crates/clamui-core/src/config.rs:319 crates/clamui-core/src/config.rs:338
+#: crates/clamui-core/src/config.rs:333 crates/clamui-core/src/config.rs:352
 msgid "Configuration file not found"
 msgstr "Arquivo de configuração não encontrado"
 
-#: crates/clamui-core/src/config.rs:403
+#: crates/clamui-core/src/config.rs:417
 msgid "Invalid scheduled scan configuration: {error}"
 msgstr "Configuração de verificação agendada inválida: {error}"
 
-#: crates/clamui-core/src/config.rs:462 crates/clamui-core/src/config.rs:520
+#: crates/clamui-core/src/config.rs:476 crates/clamui-core/src/config.rs:534
 msgid "Not attempted because an earlier direct configuration write failed"
 msgstr "Não tentado porque uma gravação direta anterior da configuração falhou"
 
-#: crates/clamui-core/src/config.rs:500
+#: crates/clamui-core/src/config.rs:514
 msgid "Protected configuration write failed"
 msgstr "Falha ao gravar a configuração protegida"
 
-#: crates/clamui-core/src/config.rs:575
+#: crates/clamui-core/src/config.rs:589
 msgid "Cannot save configuration paths: {error}"
 msgstr "Não foi possível salvar os caminhos de configuração: {error}"
 
-#: crates/clamui-core/src/config.rs:605 crates/clamui-core/src/config.rs:639
+#: crates/clamui-core/src/config.rs:619 crates/clamui-core/src/config.rs:653
 msgid "Cannot save scheduled scan preferences: {error}"
 msgstr ""
 "Não foi possível salvar as preferências de verificação agendada: {error}"
 
-#: crates/clamui-core/src/config.rs:618 crates/clamui-core/src/config.rs:627
+#: crates/clamui-core/src/config.rs:632 crates/clamui-core/src/config.rs:641
 msgid "Failed to apply scheduled scan configuration: {error}"
 msgstr "Falha ao aplicar a configuração da verificação agendada: {error}"
 
-#: crates/clamui-core/src/config.rs:701
+#: crates/clamui-core/src/config.rs:715
 msgid "Configuration path appears more than once: {path}"
 msgstr "O caminho de configuração aparece mais de uma vez: {path}"
 
-#: crates/clamui-core/src/config.rs:709
+#: crates/clamui-core/src/config.rs:723
 msgid "Configuration kinds sharing {setting} must use the same path"
 msgstr ""
 "Os tipos de configuração que compartilham {setting} devem usar o mesmo "
 "caminho"
 
-#: crates/clamui-core/src/config.rs:720
+#: crates/clamui-core/src/config.rs:734
 msgid "Cannot prepare {path}: {error}"
 msgstr "Não foi possível preparar {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:810
+#: crates/clamui-core/src/config.rs:824
 msgid "Cannot read {path}: {error}"
 msgstr "Não foi possível ler {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:820
+#: crates/clamui-core/src/config.rs:834
 msgid "Configuration is not a regular file: {path}"
 msgstr "A configuração não é um arquivo regular: {path}"
 
-#: crates/clamui-core/src/config.rs:826
+#: crates/clamui-core/src/config.rs:840
 msgid "Cannot create {path}: {error}"
 msgstr "Não foi possível criar {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:835
+#: crates/clamui-core/src/config.rs:849
 msgid "Cannot write {path}: {error}"
 msgstr "Não foi possível gravar {path}: {error}"
 
-#: crates/clamui-core/src/config.rs:934
+#: crates/clamui-core/src/config.rs:948
 msgid ""
 "On-Access scanning requires at least one loop-prevention exclusion: Exclude "
 "Username, Exclude User ID, or Exclude Root User"
@@ -1383,35 +1383,35 @@ msgstr ""
 "A verificação em acesso requer pelo menos uma exclusão para prevenir loops: "
 "Excluir nome de usuário, Excluir ID de usuário ou Excluir usuário root"
 
-#: crates/clamui-core/src/config.rs:959
+#: crates/clamui-core/src/config.rs:973
 msgid "{key}: invalid boolean value: {value}"
 msgstr "{key}: valor booleano inválido: {value}"
 
-#: crates/clamui-core/src/config.rs:988
+#: crates/clamui-core/src/config.rs:1002
 msgid "{key}: value {value} is below minimum {minimum}"
 msgstr "{key}: o valor {value} está abaixo do mínimo de {minimum}"
 
-#: crates/clamui-core/src/config.rs:996
+#: crates/clamui-core/src/config.rs:1010
 msgid "{key}: value {value} exceeds maximum {maximum}"
 msgstr "{key}: o valor {value} excede o máximo de {maximum}"
 
-#: crates/clamui-core/src/config.rs:1005
+#: crates/clamui-core/src/config.rs:1019
 msgid "{key}: not a valid integer: {value}"
 msgstr "{key}: não é um inteiro válido: {value}"
 
-#: crates/clamui-core/src/config.rs:1014
+#: crates/clamui-core/src/config.rs:1028
 msgid "{key}: size must start with a number: {value}"
 msgstr "{key}: o tamanho deve começar com um número: {value}"
 
-#: crates/clamui-core/src/config.rs:1031
+#: crates/clamui-core/src/config.rs:1045
 msgid "{key}: path cannot be empty"
 msgstr "{key}: o caminho não pode estar vazio"
 
-#: crates/clamui-core/src/config.rs:1046
+#: crates/clamui-core/src/config.rs:1060
 msgid "{key}: string value cannot be empty"
 msgstr "{key}: o valor da string não pode estar vazio"
 
-#: crates/clamui-core/src/config.rs:1057
+#: crates/clamui-core/src/config.rs:1071
 msgid "{key}: URL must start with http(s)://, ftp(s)://, or file://"
 msgstr "{key}: a URL deve começar com http(s)://, ftp(s):// ou file://"
 
@@ -2257,186 +2257,195 @@ msgstr "Exportar"
 msgid "Open"
 msgstr "Abrir"
 
-#: desktop/src/App.tsx:110 desktop/src/pages/Dashboard.tsx:38
+#: desktop/src/App.tsx:109 desktop/src/pages/Dashboard.tsx:38
 msgid "Dashboard"
 msgstr "Painel"
 
-#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:539
+#: desktop/src/App.tsx:111 desktop/src/pages/Scan.tsx:539
 msgid "Scan"
 msgstr "Verificação"
 
-#: desktop/src/App.tsx:114 desktop/src/pages/Database.tsx:263
-#: desktop/src/pages/Preferences.tsx:15
+#: desktop/src/App.tsx:113 desktop/src/pages/Database.tsx:263
+#: desktop/src/pages/Preferences.tsx:16
 msgid "Database"
 msgstr "Banco de dados"
 
-#: desktop/src/App.tsx:116 desktop/src/pages/Logs.tsx:358
+#: desktop/src/App.tsx:115 desktop/src/pages/Logs.tsx:358
 #: desktop/src/pages/ScanOverview.tsx:80
 msgid "Logs"
 msgstr "Registros"
 
-#: desktop/src/App.tsx:118
+#: desktop/src/App.tsx:117
 msgid "Components"
 msgstr "Componentes"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Statistics.tsx:233
+#: desktop/src/App.tsx:121 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Estatísticas"
 
-#: desktop/src/App.tsx:124
+#: desktop/src/App.tsx:123
 msgid "Audit"
 msgstr "Auditoria"
 
-#: desktop/src/App.tsx:126
+#: desktop/src/App.tsx:125
 msgid "Network"
 msgstr "Rede"
 
-#: desktop/src/App.tsx:128 desktop/src/App.tsx:889 desktop/src/App.tsx:982
-#: desktop/src/pages/Preferences.tsx:117
+#: desktop/src/App.tsx:127 desktop/src/App.tsx:912 desktop/src/App.tsx:1011
+#: desktop/src/pages/Preferences.tsx:164
 msgid "Preferences"
 msgstr "Preferências"
 
-#: desktop/src/App.tsx:130
+#: desktop/src/App.tsx:129
 msgid "Profiles"
 msgstr "Perfis"
 
-#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:295
+#: desktop/src/App.tsx:131 desktop/src/pages/Results.tsx:295
 #: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr "Resultados"
 
-#: desktop/src/App.tsx:305 desktop/src/pages/ConfigPreferences.tsx:585
+#: desktop/src/App.tsx:316 desktop/src/pages/ConfigPreferences.tsx:566
 msgid "Could not open link"
 msgstr "Não foi possível abrir o link"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:385 desktop/src/App.tsx:400 desktop/src/App.tsx:418
+#: desktop/src/App.tsx:399 desktop/src/App.tsx:414 desktop/src/App.tsx:432
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Verificação em andamento — aguarde seu término antes de alterar os destinos"
 
-#: desktop/src/App.tsx:464
+#: desktop/src/App.tsx:478
 msgid "The privileged-helper installation returned an invalid status."
 msgstr "A instalação do auxiliar com privilégios retornou um status inválido."
 
-#: desktop/src/App.tsx:471
+#: desktop/src/App.tsx:485
 msgid "The privileged helper was installed successfully."
 msgstr "O auxiliar com privilégios foi instalado com sucesso."
 
-#: desktop/src/App.tsx:473
+#: desktop/src/App.tsx:487
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
 msgstr ""
 "O auxiliar com privilégios ainda não está disponível. Tente novamente ou "
 "instale-o manualmente."
 
-#: desktop/src/App.tsx:775
+#: desktop/src/App.tsx:791
 msgid "The privileged-helper status returned an invalid response."
 msgstr "O status do auxiliar com privilégios retornou uma resposta inválida."
 
-#: desktop/src/App.tsx:887
+#: desktop/src/App.tsx:910
 msgid "Back"
 msgstr "Voltar"
 
-#: desktop/src/App.tsx:893
+#: desktop/src/App.tsx:918 desktop/src/pages/Profiles.tsx:109
+#: desktop/src/pages/Scan.tsx:192
+msgid "Saving…"
+msgstr "Salvando…"
+
+#: desktop/src/App.tsx:918
+msgid "Save"
+msgstr "Salvar"
+
+#: desktop/src/App.tsx:922
 msgid "Overview"
 msgstr "Visão geral"
 
-#: desktop/src/App.tsx:902 desktop/src/App.tsx:903 desktop/src/App.tsx:917
+#: desktop/src/App.tsx:931 desktop/src/App.tsx:932 desktop/src/App.tsx:946
 msgid "Scan File or Folder"
 msgstr "Verificar arquivo ou pasta"
 
-#: desktop/src/App.tsx:924
+#: desktop/src/App.tsx:953
 msgid "Choose scan targets"
 msgstr "Escolha os alvos da verificação"
 
-#: desktop/src/App.tsx:934
+#: desktop/src/App.tsx:963
 msgid "Scan Files"
 msgstr "Verificar arquivos"
 
-#: desktop/src/App.tsx:938
+#: desktop/src/App.tsx:967
 msgid "Scan Folders"
 msgstr "Verificar pastas"
 
-#: desktop/src/App.tsx:943 desktop/src/App.tsx:945
+#: desktop/src/App.tsx:972 desktop/src/App.tsx:974
 msgid "Scan System (Quick Scan)"
 msgstr "Verificar sistema (verificação rápida)"
 
-#: desktop/src/App.tsx:952 desktop/src/App.tsx:953 desktop/src/App.tsx:1017
+#: desktop/src/App.tsx:981 desktop/src/App.tsx:982 desktop/src/App.tsx:1046
 msgid "Menu"
 msgstr "Menu"
 
-#: desktop/src/App.tsx:972
+#: desktop/src/App.tsx:1001
 msgid "Application menu"
 msgstr "Menu do aplicativo"
 
-#: desktop/src/App.tsx:986
+#: desktop/src/App.tsx:1015
 msgid "About"
 msgstr "Sobre"
 
-#: desktop/src/App.tsx:998
+#: desktop/src/App.tsx:1027
 msgid "Main navigation"
 msgstr "Navegação principal"
 
-#: desktop/src/App.tsx:1000
+#: desktop/src/App.tsx:1029
 msgid "Views"
 msgstr "Visualizações"
 
-#: desktop/src/App.tsx:1028 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1057 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Dispensar"
 
-#: desktop/src/App.tsx:1050
+#: desktop/src/App.tsx:1079
 msgid "About ClamUI"
 msgstr "Sobre o ClamUI"
 
-#: desktop/src/App.tsx:1051
+#: desktop/src/App.tsx:1080
 msgid "A native desktop interface for ClamAV."
 msgstr "Uma interface de desktop nativa para o ClamAV."
 
-#: desktop/src/App.tsx:1053
+#: desktop/src/App.tsx:1082
 msgid "Version"
 msgstr "Versão"
 
-#: desktop/src/App.tsx:1054 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1083 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "Idioma"
 
-#: desktop/src/App.tsx:1055
+#: desktop/src/App.tsx:1084
 msgid "License"
 msgstr "Licença"
 
-#: desktop/src/App.tsx:1058
+#: desktop/src/App.tsx:1087
 msgid "Project website"
 msgstr "Site do projeto"
 
-#: desktop/src/App.tsx:1059
+#: desktop/src/App.tsx:1088
 msgid "Issue tracker"
 msgstr "Rastreador de problemas"
 
-#: desktop/src/App.tsx:1061
+#: desktop/src/App.tsx:1090
 msgid "Could not load contributor credits: {error}"
 msgstr "Não foi possível carregar os créditos dos colaboradores: {error}"
 
-#: desktop/src/App.tsx:1066
+#: desktop/src/App.tsx:1095
 msgid "Contributors"
 msgstr "Colaboradores"
 
-#: desktop/src/App.tsx:1075
+#: desktop/src/App.tsx:1104
 msgid "Translator credits"
 msgstr "Créditos dos tradutores"
 
-#: desktop/src/App.tsx:1078
+#: desktop/src/App.tsx:1107
 msgid "Loading contributor credits…"
 msgstr "Carregando créditos dos colaboradores…"
 
-#: desktop/src/App.tsx:1080
+#: desktop/src/App.tsx:1109
 msgid "Close ClamUI?"
 msgstr "Fechar o ClamUI?"
 
-#: desktop/src/App.tsx:1081
+#: desktop/src/App.tsx:1110
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
@@ -2444,11 +2453,11 @@ msgstr ""
 "Escolha se o ClamUI deve permanecer disponível na bandeja do sistema ou ser "
 "encerrado completamente."
 
-#: desktop/src/App.tsx:1082 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1111 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Lembre-se da minha escolha"
 
-#: desktop/src/App.tsx:1083 desktop/src/App.tsx:1087
+#: desktop/src/App.tsx:1112 desktop/src/App.tsx:1116
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
@@ -2459,51 +2468,51 @@ msgstr "Lembre-se da minha escolha"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: desktop/src/App.tsx:1083
+#: desktop/src/App.tsx:1112
 msgid "Minimize to tray"
 msgstr "Minimizar para bandeja"
 
-#: desktop/src/App.tsx:1085 desktop/src/pages/ScanOverview.tsx:66
+#: desktop/src/App.tsx:1114 desktop/src/pages/ScanOverview.tsx:66
 msgid "Scan in Progress"
 msgstr "Verificação em andamento"
 
-#: desktop/src/App.tsx:1086
+#: desktop/src/App.tsx:1115
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr ""
 "Uma verificação ainda está em execução. Cancelá-la pode deixar resultados "
 "parciais."
 
-#: desktop/src/App.tsx:1087
+#: desktop/src/App.tsx:1116
 msgid "Keep Scanning"
 msgstr "Continuar verificando"
 
-#: desktop/src/App.tsx:1087
+#: desktop/src/App.tsx:1116
 msgid "Cancel Scan and Close"
 msgstr "Cancelar verificação e fechar"
 
-#: desktop/src/App.tsx:1087 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1116 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "Fechar"
 
-#: desktop/src/App.tsx:1089
+#: desktop/src/App.tsx:1118
 msgid "Install Privileged Helper"
 msgstr "Instalar auxiliar com privilégios"
 
-#: desktop/src/App.tsx:1090
+#: desktop/src/App.tsx:1119
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr ""
 "O ClamUI precisa do auxiliar com privilégios correspondente para salvar a "
 "configuração do sistema."
 
-#: desktop/src/App.tsx:1092 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1121 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr "A instalação do auxiliar requer autorização de administrador."
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1093 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
@@ -2511,27 +2520,27 @@ msgstr ""
 "No Fedora com DNF, a instalação também adiciona a chave de assinatura do "
 "ClamUI ao chaveiro RPM do sistema."
 
-#: desktop/src/App.tsx:1098 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1127 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr "Instalando auxiliar com privilégios…"
 
-#: desktop/src/App.tsx:1100
+#: desktop/src/App.tsx:1129
 msgid "Not now"
 msgstr "Agora não"
 
-#: desktop/src/App.tsx:1100 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr "Instalando…"
 
-#: desktop/src/App.tsx:1100 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr "Tentar novamente"
 
-#: desktop/src/App.tsx:1100 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr "Instalar auxiliar"
 
-#: desktop/src/App.tsx:1100
+#: desktop/src/App.tsx:1129
 msgid "Open Preferences"
 msgstr "Abrir preferências"
 
@@ -2655,7 +2664,7 @@ msgstr ""
 "verificação."
 
 #: desktop/src/HelperTrustErrorDialog.tsx:72
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/Preferences.tsx:182
 msgid "Technical details"
 msgstr "Detalhes técnicos"
 
@@ -2665,7 +2674,7 @@ msgstr "Abrir instruções de reparo"
 
 #. Translators: This button opens the failed native configuration snapshot.
 #: desktop/src/HelperTrustErrorDialog.tsx:80
-#: desktop/src/pages/ConfigPreferences.tsx:931
+#: desktop/src/pages/Preferences.tsx:186
 msgid "See Configuration"
 msgstr "Ver configuração"
 
@@ -3268,103 +3277,102 @@ msgstr "Comandos para distribuições compatíveis:"
 msgid "Copied"
 msgstr "Copiado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:78
+#: desktop/src/pages/ConfigPreferences.tsx:68
 msgid "Monday"
 msgstr "Segunda-feira"
 
-#: desktop/src/pages/ConfigPreferences.tsx:79
+#: desktop/src/pages/ConfigPreferences.tsx:69
 msgid "Tuesday"
 msgstr "Terça-feira"
 
-#: desktop/src/pages/ConfigPreferences.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:70
 msgid "Wednesday"
 msgstr "Quarta-feira"
 
-#: desktop/src/pages/ConfigPreferences.tsx:81
+#: desktop/src/pages/ConfigPreferences.tsx:71
 msgid "Thursday"
 msgstr "Quinta-feira"
 
-#: desktop/src/pages/ConfigPreferences.tsx:82
+#: desktop/src/pages/ConfigPreferences.tsx:72
 msgid "Friday"
 msgstr "Sexta-feira"
 
-#: desktop/src/pages/ConfigPreferences.tsx:83
+#: desktop/src/pages/ConfigPreferences.tsx:73
 msgid "Saturday"
 msgstr "Sábado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:84
+#: desktop/src/pages/ConfigPreferences.tsx:74
 msgid "Sunday"
 msgstr "Domingo"
 
-#: desktop/src/pages/ConfigPreferences.tsx:87
+#: desktop/src/pages/ConfigPreferences.tsx:77
 msgid "Hourly"
 msgstr "A cada hora"
 
-#: desktop/src/pages/ConfigPreferences.tsx:88
+#: desktop/src/pages/ConfigPreferences.tsx:78
 msgid "Daily"
 msgstr "Diariamente"
 
-#: desktop/src/pages/ConfigPreferences.tsx:89
+#: desktop/src/pages/ConfigPreferences.tsx:79
 msgid "Weekly"
 msgstr "Semanalmente"
 
-#: desktop/src/pages/ConfigPreferences.tsx:90
+#: desktop/src/pages/ConfigPreferences.tsx:80
 msgid "Monthly"
 msgstr "Mensalmente"
 
-#: desktop/src/pages/ConfigPreferences.tsx:202
+#: desktop/src/pages/ConfigPreferences.tsx:180
 msgid "No configuration file selected"
 msgstr "Nenhum arquivo de configuração selecionado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:209
+#: desktop/src/pages/ConfigPreferences.tsx:187
 msgid "The file is not currently readable."
 msgstr "No momento, não é possível ler o arquivo."
 
-#: desktop/src/pages/ConfigPreferences.tsx:212
+#: desktop/src/pages/ConfigPreferences.tsx:190
 msgid "Detect"
 msgstr "Detectar"
 
-#: desktop/src/pages/ConfigPreferences.tsx:213
+#: desktop/src/pages/ConfigPreferences.tsx:191
 msgid "Browse"
 msgstr "Navegar"
 
-#: desktop/src/pages/ConfigPreferences.tsx:214
+#: desktop/src/pages/ConfigPreferences.tsx:192
 msgid "Authorize read"
 msgstr "Autorizar leitura"
 
-#. Translators: Save & Apply and Authorize read are button labels; use their translations.
-#: desktop/src/pages/ConfigPreferences.tsx:217
+#. Translators: Authorize read is a button label; use its translation.
+#: desktop/src/pages/ConfigPreferences.tsx:195
 msgid ""
-"Selecting a file keeps the path in this pending proposal. Save & Apply "
-"persists it only after the complete proposal is valid. Authorization is "
+"Selecting a file keeps the path in this pending proposal, which is validated "
+"and saved automatically when you leave this section. Authorization is "
 "requested only when you explicitly choose Authorize read."
 msgstr ""
-"Selecionar um arquivo mantém o caminho nesta proposta pendente. Salvar e "
-"aplicar o persiste somente depois que a proposta completa for válida. A "
-"autorização é solicitada somente quando você escolhe explicitamente "
-"Autorizar leitura."
+"Selecionar um arquivo mantém o caminho nesta proposta pendente, que é "
+"validada e salva automaticamente ao sair desta seção. A autorização só é "
+"solicitada quando você escolhe explicitamente \"Autorizar leitura\"."
 
-#: desktop/src/pages/ConfigPreferences.tsx:309
-#: desktop/src/pages/ConfigPreferences.tsx:395
+#: desktop/src/pages/ConfigPreferences.tsx:287
+#: desktop/src/pages/ConfigPreferences.tsx:373
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Adicionar"
 
-#: desktop/src/pages/ConfigPreferences.tsx:316
-#: desktop/src/pages/ConfigPreferences.tsx:317
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:295
 msgid "Drag to reorder"
 msgstr "Arraste para reordenar"
 
-#: desktop/src/pages/ConfigPreferences.tsx:337
+#: desktop/src/pages/ConfigPreferences.tsx:315
 msgid "Move up"
 msgstr "Mover para cima"
 
-#: desktop/src/pages/ConfigPreferences.tsx:338
+#: desktop/src/pages/ConfigPreferences.tsx:316
 msgid "Move down"
 msgstr "Mover para baixo"
 
-#: desktop/src/pages/ConfigPreferences.tsx:339
-#: desktop/src/pages/ConfigPreferences.tsx:384
+#: desktop/src/pages/ConfigPreferences.tsx:317
+#: desktop/src/pages/ConfigPreferences.tsx:362
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3372,21 +3380,21 @@ msgid "Remove"
 msgstr "Remover"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:369
+#: desktop/src/pages/ConfigPreferences.tsx:347
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Informe uma URL http, https, ftp, ftps ou file."
 
-#: desktop/src/pages/ConfigPreferences.tsx:381
-#: desktop/src/pages/ConfigPreferences.tsx:808
+#: desktop/src/pages/ConfigPreferences.tsx:359
+#: desktop/src/pages/ConfigPreferences.tsx:830
 msgid "Custom Signature Databases"
 msgstr "Bancos de dados de assinaturas personalizados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:388
+#: desktop/src/pages/ConfigPreferences.tsx:366
 msgid "Add URLs"
 msgstr "Adicionar URLs"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:391
+#: desktop/src/pages/ConfigPreferences.tsx:369
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3394,32 +3402,44 @@ msgstr ""
 "Esquemas de URL compatíveis: http, https, ftp, ftps e file. Cole a URL de "
 "cada provedor como uma entrada separada."
 
-#. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:496
-msgid "Configuration file selection is pending Save & Apply."
-msgstr "A seleção do arquivo de configuração aguarda Salvar e aplicar."
+#: desktop/src/pages/ConfigPreferences.tsx:482
+msgid ""
+"Configuration file selection is saved automatically when you leave this "
+"section."
+msgstr ""
+"A seleção do arquivo de configuração é salva automaticamente ao sair desta "
+"seção."
 
-#: desktop/src/pages/ConfigPreferences.tsx:508
+#: desktop/src/pages/ConfigPreferences.tsx:489
 msgid "No configuration file was found."
 msgstr "Nenhum arquivo de configuração foi encontrado."
 
-#: desktop/src/pages/ConfigPreferences.tsx:522
+#: desktop/src/pages/ConfigPreferences.tsx:503
 msgid "Select a .conf configuration file."
 msgstr "Selecione um arquivo de configuração .conf."
 
-#: desktop/src/pages/ConfigPreferences.tsx:558
+#. Translators: Save is the button label in the Preferences header; use its translation.
+#: desktop/src/pages/ConfigPreferences.tsx:533
+msgid ""
+"Configuration authorized. Your unsaved changes were kept; use Save to "
+"persist them."
+msgstr ""
+"Configuração autorizada. Suas alterações não salvas foram mantidas; use "
+"Salvar para torná-las permanentes."
+
+#: desktop/src/pages/ConfigPreferences.tsx:537
 msgid "Configuration loaded with administrator authorization."
 msgstr "Configuração carregada com autorização de administrador."
 
-#: desktop/src/pages/ConfigPreferences.tsx:595
+#: desktop/src/pages/ConfigPreferences.tsx:576
 msgid "Scan backend saved."
 msgstr "Mecanismo de verificação salvo."
 
-#: desktop/src/pages/ConfigPreferences.tsx:628
+#: desktop/src/pages/ConfigPreferences.tsx:640
 msgid "Choose a configuration file before applying its changes."
 msgstr "Escolha um arquivo de configuração antes de aplicar suas alterações."
 
-#: desktop/src/pages/ConfigPreferences.tsx:640
+#: desktop/src/pages/ConfigPreferences.tsx:652
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3427,157 +3447,152 @@ msgstr ""
 "A verificação em acesso requer um nome de usuário, UID ou usuário root "
 "excluído para evitar loops de verificação."
 
-#: desktop/src/pages/ConfigPreferences.tsx:648
-#: desktop/src/pages/ConfigPreferences.tsx:738
-msgid "No changes to apply."
-msgstr "Nenhuma alteração a aplicar."
-
-#: desktop/src/pages/ConfigPreferences.tsx:663
+#: desktop/src/pages/ConfigPreferences.tsx:666
 msgid "Configuration validation failed."
 msgstr "A validação da configuração falhou."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
-msgid "Configuration saved and applied."
-msgstr "Configuração salva e aplicada."
+#: desktop/src/pages/ConfigPreferences.tsx:745
+msgid "All settings saved."
+msgstr "Todas as configurações salvas."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
-#: desktop/src/pages/ConfigPreferences.tsx:755
+#: desktop/src/pages/ConfigPreferences.tsx:745
+msgid "Changes saved."
+msgstr "Alterações salvas."
+
+#: desktop/src/pages/ConfigPreferences.tsx:751
+#: desktop/src/pages/ConfigPreferences.tsx:763
 msgid "Some changes could not be applied."
 msgstr "Algumas alterações não puderam ser aplicadas."
 
-#: desktop/src/pages/ConfigPreferences.tsx:739
-msgid "Saved groups"
-msgstr "Grupos salvos"
-
-#: desktop/src/pages/ConfigPreferences.tsx:764
+#: desktop/src/pages/ConfigPreferences.tsx:786
 msgid "Checking scanner status…"
 msgstr "Verificando o status do scanner…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:766
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Daemon connected"
 msgstr "Daemon conectado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:767
+#: desktop/src/pages/ConfigPreferences.tsx:789
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Scanner disponível"
 
-#: desktop/src/pages/ConfigPreferences.tsx:767
+#: desktop/src/pages/ConfigPreferences.tsx:789
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Scanner indisponível"
 
-#: desktop/src/pages/ConfigPreferences.tsx:777
+#: desktop/src/pages/ConfigPreferences.tsx:799
 msgid "Scan PE Files"
 msgstr "Verificar arquivos PE"
 
-#: desktop/src/pages/ConfigPreferences.tsx:778
+#: desktop/src/pages/ConfigPreferences.tsx:800
 msgid "Scan ELF Files"
 msgstr "Verificar arquivos ELF"
 
-#: desktop/src/pages/ConfigPreferences.tsx:779
+#: desktop/src/pages/ConfigPreferences.tsx:801
 msgid "Scan OLE2 Files"
 msgstr "Verificar arquivos OLE2"
 
-#: desktop/src/pages/ConfigPreferences.tsx:780
+#: desktop/src/pages/ConfigPreferences.tsx:802
 msgid "Scan PDF Files"
 msgstr "Verificar arquivos PDF"
 
-#: desktop/src/pages/ConfigPreferences.tsx:781
+#: desktop/src/pages/ConfigPreferences.tsx:803
 msgid "Scan HTML Files"
 msgstr "Verificar arquivos HTML"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:804
 msgid "Scan Archive Files"
 msgstr "Verificar arquivos compactados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:788
+#: desktop/src/pages/ConfigPreferences.tsx:810
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Atualizações do banco de dados"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:793
+#: desktop/src/pages/ConfigPreferences.tsx:815
 msgid "Paths"
 msgstr "Caminhos"
 
-#: desktop/src/pages/ConfigPreferences.tsx:794
+#: desktop/src/pages/ConfigPreferences.tsx:816
 msgid "Database Directory"
 msgstr "Diretório do banco de dados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:795
+#: desktop/src/pages/ConfigPreferences.tsx:817
 msgid "Update Log File"
 msgstr "Arquivo de registro de atualização"
 
-#: desktop/src/pages/ConfigPreferences.tsx:796
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "PID File"
 msgstr "Arquivo PID"
 
-#: desktop/src/pages/ConfigPreferences.tsx:797
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "Notify ClamD Config"
 msgstr "Notificar configuração do ClamD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:798
+#: desktop/src/pages/ConfigPreferences.tsx:820
 msgid "Log timestamps"
 msgstr "Carimbos de data e hora nos registros"
 
-#: desktop/src/pages/ConfigPreferences.tsx:799
+#: desktop/src/pages/ConfigPreferences.tsx:821
 msgid "Verbose logging"
 msgstr "Registro detalhado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:800
+#: desktop/src/pages/ConfigPreferences.tsx:822
 msgid "Syslog logging"
 msgstr "Registro no Syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:802
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Update Behavior"
 msgstr "Comportamento de atualização"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "Checks per day"
 msgstr "Verificações por dia"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "0 disables automatic checks."
 msgstr "0 desativa as verificações automáticas."
 
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid "Database Mirror"
 msgstr "Espelho do banco de dados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Suggested"
 msgstr "Sugerido"
 
-#. Translators: Suggested and Save & Apply are button labels; use their translations. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid ""
-"Suggested adds three InterServer databases to this draft. Save & Apply is "
-"still required."
+"Suggested adds three InterServer databases to this draft. They are saved "
+"automatically when you leave this section."
 msgstr ""
-"Sugerido adiciona três bancos de dados do InterServer a este rascunho. "
-"Salvar e aplicar ainda é necessário."
+"\"Sugerido\" adiciona três bancos de dados InterServer a este rascunho. Eles "
+"são salvos automaticamente ao sair desta seção."
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Signature Providers"
 msgstr "Provedores de assinaturas"
 
-#: desktop/src/pages/ConfigPreferences.tsx:820
+#: desktop/src/pages/ConfigPreferences.tsx:842
 msgid "Registration is required; URLs include your personal API key."
 msgstr "É necessário cadastro; as URLs incluem sua chave de API pessoal."
 
-#: desktop/src/pages/ConfigPreferences.tsx:820
-#: desktop/src/pages/ConfigPreferences.tsx:824
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Open provider"
 msgstr "Abrir provedor"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:821
+#: desktop/src/pages/ConfigPreferences.tsx:843
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3585,185 +3600,185 @@ msgstr ""
 "Use fangfrisch ou clamav-unofficial-sigs; não é um provedor direto de URLs "
 "personalizadas."
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr ""
 "Bancos de dados comunitários de assinaturas de hash, web shell e malware em "
 "geral."
 
-#: desktop/src/pages/ConfigPreferences.tsx:828
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Proxy Settings"
 msgstr "Configurações de proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:829
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Proxy Server"
 msgstr "Servidor proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:830
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "Proxy Port"
 msgstr "Porta do proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:830
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "0 disables the proxy port."
 msgstr "0 desativa a porta do proxy."
 
-#: desktop/src/pages/ConfigPreferences.tsx:831
+#: desktop/src/pages/ConfigPreferences.tsx:853
 msgid "Proxy Username"
 msgstr "Nome de usuário do proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:832
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Proxy Password"
 msgstr "Senha do proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:837
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "Scanner Settings"
 msgstr "Configurações do scanner"
 
-#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Scan Backend"
 msgstr "Mecanismo de verificação"
 
-#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Auto (prefer daemon)"
 msgstr "Automático (preferir daemon)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "ClamAV Daemon (clamd)"
 msgstr "Daemon do ClamAV (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:864
 msgid "Standalone Scanner (clamscan)"
 msgstr "Scanner independente (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Daemon Status"
 msgstr "Status do daemon"
 
-#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Refresh Status"
 msgstr "Atualizar status"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:869
 msgid "Documentation"
 msgstr "Documentação"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:849
-#: desktop/src/pages/ConfigPreferences.tsx:870
+#: desktop/src/pages/ConfigPreferences.tsx:871
+#: desktop/src/pages/ConfigPreferences.tsx:892
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "File Type Scanning"
 msgstr "Verificação por tipo de arquivo"
 
-#: desktop/src/pages/ConfigPreferences.tsx:856
+#: desktop/src/pages/ConfigPreferences.tsx:878
 msgid "Performance and Limits"
 msgstr "Desempenho e limites"
 
-#: desktop/src/pages/ConfigPreferences.tsx:857
-#: desktop/src/pages/ConfigPreferences.tsx:883
+#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "Max File Size (MB)"
 msgstr "Tamanho máximo de arquivo (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:857
-#: desktop/src/pages/ConfigPreferences.tsx:858
-#: desktop/src/pages/ConfigPreferences.tsx:860
-#: desktop/src/pages/ConfigPreferences.tsx:883
+#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:880
+#: desktop/src/pages/ConfigPreferences.tsx:882
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "0 means unlimited."
 msgstr "0 significa ilimitado."
 
-#: desktop/src/pages/ConfigPreferences.tsx:858
+#: desktop/src/pages/ConfigPreferences.tsx:880
 msgid "Max Scan Size (MB)"
 msgstr "Tamanho máximo de verificação (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:859
+#: desktop/src/pages/ConfigPreferences.tsx:881
 msgid "Max Archive Recursion"
 msgstr "Recursão máxima em arquivos compactados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:860
+#: desktop/src/pages/ConfigPreferences.tsx:882
 msgid "Max Files in Archive"
 msgstr "Máximo de arquivos no arquivo compactado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:862
+#: desktop/src/pages/ConfigPreferences.tsx:884
 msgid "Logging"
 msgstr "Registro"
 
-#: desktop/src/pages/ConfigPreferences.tsx:863
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "Log File Path"
 msgstr "Caminho do arquivo de registro"
 
-#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:886
 msgid "Verbose Logging"
 msgstr "Registro detalhado"
 
-#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:886
 msgid "Syslog Logging"
 msgstr "Registro no Syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:869
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "On-Access Scanning"
 msgstr "Verificação em acesso"
 
-#: desktop/src/pages/ConfigPreferences.tsx:874
+#: desktop/src/pages/ConfigPreferences.tsx:896
 msgid "Monitored Paths"
 msgstr "Caminhos monitorados"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:897
 msgid "Include Paths"
 msgstr "Incluir caminhos"
 
-#: desktop/src/pages/ConfigPreferences.tsx:876
+#: desktop/src/pages/ConfigPreferences.tsx:898
 msgid "Exclude Paths"
 msgstr "Excluir caminhos"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:900
 msgid "Behavior Settings"
 msgstr "Configurações de comportamento"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Prevention Mode"
 msgstr "Modo de prevenção"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Extra Scanning"
 msgstr "Verificação extra"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Deny on Error"
 msgstr "Negar em caso de erro"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Disable DDD"
 msgstr "Desativar DDD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:881
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Performance Settings"
 msgstr "Configurações de desempenho"
 
-#: desktop/src/pages/ConfigPreferences.tsx:882
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Max Threads"
 msgstr "Máximo de threads"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:906
 msgid "Curl Timeout (seconds)"
 msgstr "Tempo limite do Curl (segundos)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:906
 msgid "0 disables the timeout."
 msgstr "0 desativa o tempo limite."
 
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:907
 msgid "Retry Attempts"
 msgstr "Tentativas de nova execução"
 
-#: desktop/src/pages/ConfigPreferences.tsx:887
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Scan Loop Prevention"
 msgstr "Prevenção de loops de verificação"
 
-#: desktop/src/pages/ConfigPreferences.tsx:888
+#: desktop/src/pages/ConfigPreferences.tsx:910
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3771,60 +3786,60 @@ msgstr ""
 "É necessária pelo menos uma exclusão para prevenir loops. Exclua a conta de "
 "serviço clamav, seu UID ou root para evitar verificações recursivas."
 
-#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "Exclude Username"
 msgstr "Excluir nome de usuário"
 
-#: desktop/src/pages/ConfigPreferences.tsx:890
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "Exclude User ID"
 msgstr "Excluir ID de usuário"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Exclude Root User"
 msgstr "Excluir usuário root"
 
-#: desktop/src/pages/ConfigPreferences.tsx:896
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Scheduled Scans"
 msgstr "Verificações agendadas"
 
-#: desktop/src/pages/ConfigPreferences.tsx:897
+#: desktop/src/pages/ConfigPreferences.tsx:919
 msgid "Schedule"
 msgstr "Agendamento"
 
-#: desktop/src/pages/ConfigPreferences.tsx:898
+#: desktop/src/pages/ConfigPreferences.tsx:920
 msgid "Enable Scheduled Scans"
 msgstr "Ativar verificações agendadas"
 
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:921
 msgid "Scan Frequency"
 msgstr "Frequência da verificação"
 
-#: desktop/src/pages/ConfigPreferences.tsx:900
+#: desktop/src/pages/ConfigPreferences.tsx:922
 msgid "Scan Time (24-hour)"
 msgstr "Horário da verificação (24 horas)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Day of Week"
 msgstr "Dia da semana"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Used for weekly scans."
 msgstr "Usado para verificações semanais."
 
-#: desktop/src/pages/ConfigPreferences.tsx:902
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Day of Month"
 msgstr "Dia do mês"
 
-#: desktop/src/pages/ConfigPreferences.tsx:902
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Used for monthly scans."
 msgstr "Usado para verificações mensais."
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:925
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Alvos de varredura"
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3832,57 +3847,24 @@ msgstr ""
 "Nenhum alvo está configurado. A verificação agendada usará seu diretório "
 "pessoal sem salvá-lo como alvo explícito."
 
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:927
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Pular na bateria"
 
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Não iniciar verificações agendadas quando estiver usando a bateria."
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Auto-Quarantine"
 msgstr "Quarentena automática"
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr ""
 "Colocar automaticamente em quarentena as ameaças encontradas por "
 "verificações agendadas."
-
-#: desktop/src/pages/ConfigPreferences.tsx:911
-#: desktop/src/pages/ConfigPreferences.tsx:921
-msgid "Save & Apply"
-msgstr "Salvar e aplicar"
-
-#: desktop/src/pages/ConfigPreferences.tsx:912
-msgid "Apply Configuration"
-msgstr "Aplicar configuração"
-
-#. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:913
-msgid ""
-"All edited forms are captured at the moment you click Save & Apply. Every "
-"configured file is validated before any write or authorization request."
-msgstr ""
-"Todos os formulários editados são capturados ao clicar em Salvar e aplicar. "
-"Cada arquivo configurado é validado antes de qualquer gravação ou pedido de "
-"autorização."
-
-#. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:917
-msgid ""
-"Scanner and On-Access changes share one clamd.conf proposal; neither form "
-"can overwrite the other's detached changes."
-msgstr ""
-"As alterações de Scanner e Em acesso compartilham uma proposta de clamd."
-"conf; nenhum formulário pode sobrescrever as alterações separadas do outro."
-
-#: desktop/src/pages/ConfigPreferences.tsx:921
-#: desktop/src/pages/Profiles.tsx:109 desktop/src/pages/Scan.tsx:192
-msgid "Saving…"
-msgstr "Salvando…"
 
 #: desktop/src/pages/Dashboard.tsx:31
 msgid "Dashboard updates are unavailable: {error}"
@@ -4528,58 +4510,54 @@ msgstr ""
 msgid "Opening…"
 msgstr "Abrindo…"
 
-#: desktop/src/pages/Preferences.tsx:13
+#: desktop/src/pages/Preferences.tsx:14
 #: desktop/src/pages/SettingsPreferences.tsx:385
 msgid "Behavior"
 msgstr "Comportamento"
 
-#: desktop/src/pages/Preferences.tsx:14 desktop/src/pages/Profiles.tsx:100
+#: desktop/src/pages/Preferences.tsx:15 desktop/src/pages/Profiles.tsx:100
 msgid "Exclusions"
 msgstr "Exclusões"
 
-#: desktop/src/pages/Preferences.tsx:16
+#: desktop/src/pages/Preferences.tsx:17
 msgid "Scanner"
 msgstr "Scanner"
 
-#: desktop/src/pages/Preferences.tsx:17
+#: desktop/src/pages/Preferences.tsx:18
 msgid "Scheduled"
 msgstr "Agendado"
 
-#: desktop/src/pages/Preferences.tsx:18
+#: desktop/src/pages/Preferences.tsx:19
 msgid "Device Scan"
 msgstr "Verificação do dispositivo"
 
-#: desktop/src/pages/Preferences.tsx:19
+#: desktop/src/pages/Preferences.tsx:20
 msgid "On-Access"
 msgstr "Acesso em tempo real"
 
-#: desktop/src/pages/Preferences.tsx:20
+#: desktop/src/pages/Preferences.tsx:21
 msgid "VirusTotal"
 msgstr "VirusTotal"
 
-#: desktop/src/pages/Preferences.tsx:21
+#: desktop/src/pages/Preferences.tsx:22
 msgid "Debug"
 msgstr "Depuração"
 
-#: desktop/src/pages/Preferences.tsx:22
-msgid "Save"
-msgstr "Salvar"
-
-#: desktop/src/pages/Preferences.tsx:47
+#: desktop/src/pages/Preferences.tsx:62
 #: desktop/src/pages/SettingsPreferences.tsx:147
 msgid "Unable to load preferences: {error}"
 msgstr "Não foi possível carregar as preferências: {error}"
 
-#: desktop/src/pages/Preferences.tsx:95
+#: desktop/src/pages/Preferences.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:161
 msgid "Could not save preference: {error}"
 msgstr "Não foi possível salvar a preferência: {error}"
 
-#: desktop/src/pages/Preferences.tsx:112
+#: desktop/src/pages/Preferences.tsx:159
 msgid "Loading preferences…"
 msgstr "Carregando preferências…"
 
-#: desktop/src/pages/Preferences.tsx:119
+#: desktop/src/pages/Preferences.tsx:166
 msgid "Preference categories"
 msgstr "Categorias de preferências"
 
@@ -6270,6 +6248,57 @@ msgstr ""
 msgid "Scan of the user's home directory and personal files"
 msgstr ""
 "Verificação do diretório pessoal do usuário e de seus arquivos pessoais"
+
+#~ msgid ""
+#~ "Selecting a file keeps the path in this pending proposal. Save & Apply "
+#~ "persists it only after the complete proposal is valid. Authorization is "
+#~ "requested only when you explicitly choose Authorize read."
+#~ msgstr ""
+#~ "Selecionar um arquivo mantém o caminho nesta proposta pendente. Salvar e "
+#~ "aplicar o persiste somente depois que a proposta completa for válida. A "
+#~ "autorização é solicitada somente quando você escolhe explicitamente "
+#~ "Autorizar leitura."
+
+#~ msgid "Configuration file selection is pending Save & Apply."
+#~ msgstr "A seleção do arquivo de configuração aguarda Salvar e aplicar."
+
+#~ msgid "No changes to apply."
+#~ msgstr "Nenhuma alteração a aplicar."
+
+#~ msgid "Configuration saved and applied."
+#~ msgstr "Configuração salva e aplicada."
+
+#~ msgid "Saved groups"
+#~ msgstr "Grupos salvos"
+
+#~ msgid ""
+#~ "Suggested adds three InterServer databases to this draft. Save & Apply is "
+#~ "still required."
+#~ msgstr ""
+#~ "Sugerido adiciona três bancos de dados do InterServer a este rascunho. "
+#~ "Salvar e aplicar ainda é necessário."
+
+#~ msgid "Save & Apply"
+#~ msgstr "Salvar e aplicar"
+
+#~ msgid "Apply Configuration"
+#~ msgstr "Aplicar configuração"
+
+#~ msgid ""
+#~ "All edited forms are captured at the moment you click Save & Apply. Every "
+#~ "configured file is validated before any write or authorization request."
+#~ msgstr ""
+#~ "Todos os formulários editados são capturados ao clicar em Salvar e "
+#~ "aplicar. Cada arquivo configurado é validado antes de qualquer gravação "
+#~ "ou pedido de autorização."
+
+#~ msgid ""
+#~ "Scanner and On-Access changes share one clamd.conf proposal; neither form "
+#~ "can overwrite the other's detached changes."
+#~ msgstr ""
+#~ "As alterações de Scanner e Em acesso compartilham uma proposta de clamd."
+#~ "conf; nenhum formulário pode sobrescrever as alterações separadas do "
+#~ "outro."
 
 #~ msgid "Portmaster"
 #~ msgstr "Portmaster"

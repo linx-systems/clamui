@@ -13,6 +13,7 @@
 
 ### Changed
 
+- Preferences now save automatically instead of requiring a separate Save section: non-privileged changes save when you leave a settings section, and all pending changes save when you close the Preferences window or click the new persistent Save button in its header (enabled only while changes are pending). Changes needing the privileged helper are batched into a single authorization prompt rather than one per section; a failed privileged save keeps your edits pending and shows a persistent error, while a successful save shows a brief confirmation toast. (#346)
 - Improved the signature database editor and provider list with full-width URLs, clearer actions, and external-link indicators.
 - Removed the unavailable URLhaus database recommendation; existing custom databases are unchanged.
 - Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
@@ -30,8 +31,8 @@
 
 ### Fixed
 
+- Fixed the On-Access **Authorize read** action discarding unsaved paths and options: it now only refreshes the baseline it just read with elevated privileges, keeping pending form edits when there are any, instead of always replacing them. (#343)
 - Fixed On-Access configuration failing with trusted system-tool symlinks such as Ubuntu uutils `chown`; local tool execution now resolves symlinks, checks root ownership and safe permissions for the executable and every resolved parent directory, and reports the failing path and check. (#341)
-
 - Fixed copying Fail2ban installation commands and other text in native Wayland Flatpak sessions by using the application's GTK clipboard connection. (#328)
 - Fixed Lynis audits waiting for ENTER after Homebrew ownership warnings by closing stdin while retaining cron mode. (#317)
 - Daemon (clamd) scans now use clamd's thread pool instead of a single scanning thread: ClamUI splits its file list across up to 16 concurrent `clamdscan` workers, bounded by clamd's `MaxThreads`, the CPU count and the number of files. Exclusions, per-file progress, threat reporting and cancellation are unchanged, and the workers' output is combined into one scan report with a single summary and whole-scan warnings. (#225)
