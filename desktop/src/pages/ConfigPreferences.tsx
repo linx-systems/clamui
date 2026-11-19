@@ -531,8 +531,8 @@ const ConfigPreferences = forwardRef<ConfigPreferencesHandle, ConfigPreferencesP
       notify(
         dirty
           ? _(
-            // Translators: Save & Apply is a button label; use its translation.
-            "Configuration authorized. Your unsaved changes were kept; use Save & Apply to persist them.",
+            // Translators: Save is the button label in the Preferences header; use its translation.
+            "Configuration authorized. Your unsaved changes were kept; use Save to persist them.",
           )
           : _("Configuration loaded with administrator authorization."),
         "success",

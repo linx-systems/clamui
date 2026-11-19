@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 09:08+0100\n"
+"POT-Creation-Date: 2026-11-19 15:21+0100\n"
 "PO-Revision-Date: 2026-09-13 09:59+0200\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -1581,63 +1581,73 @@ msgid "Not running as Flatpak"
 msgstr "Nem Flatpakként fut"
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1052
+#: crates/clamui-core/src/privileged.rs:1204
 msgid "Authorization was cancelled while {operation}."
 msgstr "Az engedélykérést megszakították eközben: {operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1058
+#: crates/clamui-core/src/privileged.rs:1210
 msgid "The privileged helper is unavailable while {operation}."
 msgstr "A jogosultságemelt segédprogram nem érhető el eközben: {operation}."
 
 #. Translators: PKEXEC_UID is a technical environment-variable name; keep it unchanged.
-#: crates/clamui-core/src/privileged.rs:1064
+#: crates/clamui-core/src/privileged.rs:1216
 msgid "The privileged helper rejected PKEXEC_UID while {operation}."
 msgstr ""
 "A jogosultságemelt segédprogram elutasította a PKEXEC_UID értéket eközben: "
 "{operation}."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1070
+#: crates/clamui-core/src/privileged.rs:1222
 msgid "The privileged helper reported a protocol mismatch while {operation}."
 msgstr ""
 "A jogosultságemelt segédprogram protokolleltérést jelzett eközben: "
 "{operation}."
 
 #. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:1076
+#: crates/clamui-core/src/privileged.rs:1229
+msgid ""
+"The privileged helper could not use a required system tool while "
+"{operation}. Exit code: {code}. Details: {detail}"
+msgstr ""
+"A jogosultságokkal rendelkező segéd nem tudott használni egy szükséges "
+"rendszereszközt a következő művelet során: {operation}. Kilépési kód: "
+"{code}. Részletek: {detail}"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:1238
 msgid "The privileged helper failed while {operation} (exit {code}): {detail}."
 msgstr ""
 "A jogosultságemelt segédprogram hibát észlelt eközben: {operation} (kilépési "
 "kód: {code}): {detail}."
 
 #. Translators: keep the {operation} and numeric {code} placeholders.
-#: crates/clamui-core/src/privileged.rs:1084
+#: crates/clamui-core/src/privileged.rs:1246
 msgid "The privileged helper failed while {operation} (exit {code})."
 msgstr ""
 "A jogosultságemelt segédprogram hibát észlelt eközben: {operation} (kilépési "
 "kód: {code})."
 
 #. Translators: keep the {operation} placeholder; it is a localized operation name.
-#: crates/clamui-core/src/privileged.rs:1091
+#: crates/clamui-core/src/privileged.rs:1253
 msgid "The privileged helper was terminated while {operation}."
 msgstr "A jogosultságemelt segédprogram leállt eközben: {operation}."
 
-#: crates/clamui-core/src/privileged.rs:1150
+#: crates/clamui-core/src/privileged.rs:1312
 msgid "Applying configuration"
 msgstr "Konfiguráció alkalmazása"
 
 #. Translators: keep {message}; it is the complete preceding helper error.
-#: crates/clamui-core/src/privileged.rs:1152
+#: crates/clamui-core/src/privileged.rs:1314
 msgid "{message} One or more earlier replacements may have succeeded."
 msgstr "{message} Egy vagy több korábbi csere sikeres lehetett."
 
-#: crates/clamui-core/src/privileged.rs:1394
+#: crates/clamui-core/src/privileged.rs:1556
 msgid "Reading configuration"
 msgstr "Konfiguráció olvasása"
 
 #. Translators: "privileged-helper" identifies the ClamUI helper component.
-#: crates/clamui-core/src/privileged.rs:2963
+#: crates/clamui-core/src/privileged.rs:3123
 msgid ""
 "The privileged-helper installation failed. Try again or install it manually."
 msgstr ""
@@ -2298,7 +2308,7 @@ msgstr "Profilok"
 msgid "Results"
 msgstr "Eredmények"
 
-#: desktop/src/App.tsx:322 desktop/src/pages/ConfigPreferences.tsx:589
+#: desktop/src/App.tsx:322 desktop/src/pages/ConfigPreferences.tsx:566
 msgid "Could not open link"
 msgstr "Nem sikerült megnyitni a hivatkozást"
 
@@ -3269,72 +3279,72 @@ msgstr "Parancsok a támogatott disztribúciókhoz:"
 msgid "Copied"
 msgstr "Másolva"
 
-#: desktop/src/pages/ConfigPreferences.tsx:79
+#: desktop/src/pages/ConfigPreferences.tsx:68
 msgid "Monday"
 msgstr "Hétfő"
 
-#: desktop/src/pages/ConfigPreferences.tsx:80
+#: desktop/src/pages/ConfigPreferences.tsx:69
 msgid "Tuesday"
 msgstr "Kedd"
 
-#: desktop/src/pages/ConfigPreferences.tsx:81
+#: desktop/src/pages/ConfigPreferences.tsx:70
 msgid "Wednesday"
 msgstr "Szerda"
 
-#: desktop/src/pages/ConfigPreferences.tsx:82
+#: desktop/src/pages/ConfigPreferences.tsx:71
 msgid "Thursday"
 msgstr "Csütörtök"
 
-#: desktop/src/pages/ConfigPreferences.tsx:83
+#: desktop/src/pages/ConfigPreferences.tsx:72
 msgid "Friday"
 msgstr "Péntek"
 
-#: desktop/src/pages/ConfigPreferences.tsx:84
+#: desktop/src/pages/ConfigPreferences.tsx:73
 msgid "Saturday"
 msgstr "Szombat"
 
-#: desktop/src/pages/ConfigPreferences.tsx:85
+#: desktop/src/pages/ConfigPreferences.tsx:74
 msgid "Sunday"
 msgstr "Vasárnap"
 
-#: desktop/src/pages/ConfigPreferences.tsx:88
+#: desktop/src/pages/ConfigPreferences.tsx:77
 msgid "Hourly"
 msgstr "Óránként"
 
-#: desktop/src/pages/ConfigPreferences.tsx:89
+#: desktop/src/pages/ConfigPreferences.tsx:78
 msgid "Daily"
 msgstr "Naponta"
 
-#: desktop/src/pages/ConfigPreferences.tsx:90
+#: desktop/src/pages/ConfigPreferences.tsx:79
 msgid "Weekly"
 msgstr "Hetente"
 
-#: desktop/src/pages/ConfigPreferences.tsx:91
+#: desktop/src/pages/ConfigPreferences.tsx:80
 msgid "Monthly"
 msgstr "Havonta"
 
-#: desktop/src/pages/ConfigPreferences.tsx:203
+#: desktop/src/pages/ConfigPreferences.tsx:180
 msgid "No configuration file selected"
 msgstr "Nincs konfigurációs fájl kiválasztva"
 
-#: desktop/src/pages/ConfigPreferences.tsx:210
+#: desktop/src/pages/ConfigPreferences.tsx:187
 msgid "The file is not currently readable."
 msgstr "A fájl jelenleg nem olvasható."
 
-#: desktop/src/pages/ConfigPreferences.tsx:213
+#: desktop/src/pages/ConfigPreferences.tsx:190
 msgid "Detect"
 msgstr "Felismerés"
 
-#: desktop/src/pages/ConfigPreferences.tsx:214
+#: desktop/src/pages/ConfigPreferences.tsx:191
 msgid "Browse"
 msgstr "Tallózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:215
+#: desktop/src/pages/ConfigPreferences.tsx:192
 msgid "Authorize read"
 msgstr "Olvasás engedélyezése"
 
 #. Translators: Authorize read is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:218
+#: desktop/src/pages/ConfigPreferences.tsx:195
 msgid ""
 "Selecting a file keeps the path in this pending proposal, which is validated "
 "and saved automatically when you leave this section. Authorization is "
@@ -3345,27 +3355,27 @@ msgstr ""
 "elhagyja ezt a szakaszt. Engedélyezés csak akkor szükséges, ha kifejezetten "
 "az „Olvasás engedélyezése” lehetőséget választja."
 
-#: desktop/src/pages/ConfigPreferences.tsx:310
-#: desktop/src/pages/ConfigPreferences.tsx:396
+#: desktop/src/pages/ConfigPreferences.tsx:287
+#: desktop/src/pages/ConfigPreferences.tsx:373
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Hozzáadás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:317
-#: desktop/src/pages/ConfigPreferences.tsx:318
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:295
 msgid "Drag to reorder"
 msgstr "Húzza az átrendezéshez"
 
-#: desktop/src/pages/ConfigPreferences.tsx:338
+#: desktop/src/pages/ConfigPreferences.tsx:315
 msgid "Move up"
 msgstr "Mozgatás felfelé"
 
-#: desktop/src/pages/ConfigPreferences.tsx:339
+#: desktop/src/pages/ConfigPreferences.tsx:316
 msgid "Move down"
 msgstr "Mozgatás lefelé"
 
-#: desktop/src/pages/ConfigPreferences.tsx:340
-#: desktop/src/pages/ConfigPreferences.tsx:385
+#: desktop/src/pages/ConfigPreferences.tsx:317
+#: desktop/src/pages/ConfigPreferences.tsx:362
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3373,21 +3383,21 @@ msgid "Remove"
 msgstr "Eltávolítás"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:370
+#: desktop/src/pages/ConfigPreferences.tsx:347
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Adjon meg http, https, ftp, ftps vagy file URL-t."
 
-#: desktop/src/pages/ConfigPreferences.tsx:382
-#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:359
+#: desktop/src/pages/ConfigPreferences.tsx:830
 msgid "Custom Signature Databases"
 msgstr "Egyéni aláírás-adatbázisok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:389
+#: desktop/src/pages/ConfigPreferences.tsx:366
 msgid "Add URLs"
 msgstr "URL-ek hozzáadása"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:392
+#: desktop/src/pages/ConfigPreferences.tsx:369
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3395,7 +3405,7 @@ msgstr ""
 "Támogatott URL-sémák: http, https, ftp, ftps és file. Minden szolgáltatói "
 "URL-t külön bejegyzésként illesszen be."
 
-#: desktop/src/pages/ConfigPreferences.tsx:505
+#: desktop/src/pages/ConfigPreferences.tsx:482
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
@@ -3403,27 +3413,36 @@ msgstr ""
 "A konfigurációs fájl kiválasztása automatikusan mentésre kerül, amikor "
 "elhagyja ezt a szakaszt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:512
+#: desktop/src/pages/ConfigPreferences.tsx:489
 msgid "No configuration file was found."
 msgstr "Nem található konfigurációs fájl."
 
-#: desktop/src/pages/ConfigPreferences.tsx:526
+#: desktop/src/pages/ConfigPreferences.tsx:503
 msgid "Select a .conf configuration file."
 msgstr "Válasszon egy .conf konfigurációs fájlt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:562
+#. Translators: Save is the button label in the Preferences header; use its translation.
+#: desktop/src/pages/ConfigPreferences.tsx:533
+msgid ""
+"Configuration authorized. Your unsaved changes were kept; use Save to "
+"persist them."
+msgstr ""
+"A konfiguráció engedélyezve. A nem mentett módosításai megmaradtak; a "
+"végleges mentéshez használja a Mentés gombot."
+
+#: desktop/src/pages/ConfigPreferences.tsx:537
 msgid "Configuration loaded with administrator authorization."
 msgstr "A konfiguráció rendszergazdai engedéllyel betöltve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:599
+#: desktop/src/pages/ConfigPreferences.tsx:576
 msgid "Scan backend saved."
 msgstr "Vizsgálati háttérprogram mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:663
+#: desktop/src/pages/ConfigPreferences.tsx:640
 msgid "Choose a configuration file before applying its changes."
 msgstr "A módosítások alkalmazása előtt válasszon ki egy konfigurációs fájlt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:675
+#: desktop/src/pages/ConfigPreferences.tsx:652
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3431,127 +3450,127 @@ msgstr ""
 "A valós idejű vizsgálathoz a vizsgálati hurkok elkerülése érdekében ki kell "
 "zárni egy felhasználónevet, UID-t vagy a root felhasználót."
 
-#: desktop/src/pages/ConfigPreferences.tsx:689
+#: desktop/src/pages/ConfigPreferences.tsx:666
 msgid "Configuration validation failed."
 msgstr "A konfiguráció ellenőrzése sikertelen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:768
+#: desktop/src/pages/ConfigPreferences.tsx:745
 msgid "All settings saved."
 msgstr "Minden beállítás mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:768
+#: desktop/src/pages/ConfigPreferences.tsx:745
 msgid "Changes saved."
 msgstr "Módosítások mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:774
-#: desktop/src/pages/ConfigPreferences.tsx:786
+#: desktop/src/pages/ConfigPreferences.tsx:751
+#: desktop/src/pages/ConfigPreferences.tsx:763
 msgid "Some changes could not be applied."
 msgstr "Egyes módosításokat nem sikerült alkalmazni."
 
-#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:786
 msgid "Checking scanner status…"
 msgstr "A kereső állapotának ellenőrzése…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:788
 msgid "Daemon connected"
 msgstr "A démon csatlakoztatva"
 
-#: desktop/src/pages/ConfigPreferences.tsx:812
+#: desktop/src/pages/ConfigPreferences.tsx:789
 msgid "Scanner available"
 msgstr "A kereső elérhető"
 
-#: desktop/src/pages/ConfigPreferences.tsx:812
+#: desktop/src/pages/ConfigPreferences.tsx:789
 msgid "Scanner unavailable"
 msgstr "A kereső nem érhető el"
 
-#: desktop/src/pages/ConfigPreferences.tsx:822
+#: desktop/src/pages/ConfigPreferences.tsx:799
 msgid "Scan PE Files"
 msgstr "PE-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:823
+#: desktop/src/pages/ConfigPreferences.tsx:800
 msgid "Scan ELF Files"
 msgstr "ELF-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:801
 msgid "Scan OLE2 Files"
 msgstr "OLE2-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:802
 msgid "Scan PDF Files"
 msgstr "PDF-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:803
 msgid "Scan HTML Files"
 msgstr "HTML-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:827
+#: desktop/src/pages/ConfigPreferences.tsx:804
 msgid "Scan Archive Files"
 msgstr "Archív fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:810
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Adatbázis-frissítések"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:834
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:838
+#: desktop/src/pages/ConfigPreferences.tsx:815
 msgid "Paths"
 msgstr "Elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:816
 msgid "Database Directory"
 msgstr "Adatbáziskönyvtár"
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:817
 msgid "Update Log File"
 msgstr "Frissítési naplófájl"
 
-#: desktop/src/pages/ConfigPreferences.tsx:841
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "PID File"
 msgstr "PID-fájl"
 
-#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "Notify ClamD Config"
 msgstr "ClamD-konfiguráció értesítése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:820
 msgid "Log timestamps"
 msgstr "Időbélyegek a naplóban"
 
-#: desktop/src/pages/ConfigPreferences.tsx:844
+#: desktop/src/pages/ConfigPreferences.tsx:821
 msgid "Verbose logging"
 msgstr "Részletes naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:822
 msgid "Syslog logging"
 msgstr "Syslog-naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Update Behavior"
 msgstr "Frissítési viselkedés"
 
-#: desktop/src/pages/ConfigPreferences.tsx:848
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "Checks per day"
 msgstr "Ellenőrzések naponta"
 
-#: desktop/src/pages/ConfigPreferences.tsx:848
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "0 disables automatic checks."
 msgstr "A 0 letiltja az automatikus ellenőrzéseket."
 
-#: desktop/src/pages/ConfigPreferences.tsx:849
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid "Database Mirror"
 msgstr "Adatbázistükör"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Suggested"
 msgstr "Javasolt"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:856
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3559,22 +3578,22 @@ msgstr ""
 "A „Javasolt” három InterServer adatbázist ad hozzá ehhez a piszkozathoz. "
 "Ezek automatikusan mentésre kerülnek, amikor elhagyja ezt a szakaszt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:863
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Signature Providers"
 msgstr "Aláírásszolgáltatók"
 
-#: desktop/src/pages/ConfigPreferences.tsx:865
+#: desktop/src/pages/ConfigPreferences.tsx:842
 msgid "Registration is required; URLs include your personal API key."
 msgstr "Regisztráció szükséges; az URL-ek tartalmazzák személyes API-kulcsát."
 
-#: desktop/src/pages/ConfigPreferences.tsx:865
-#: desktop/src/pages/ConfigPreferences.tsx:869
-#: desktop/src/pages/ConfigPreferences.tsx:870
+#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Open provider"
 msgstr "Szolgáltató megnyitása"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:866
+#: desktop/src/pages/ConfigPreferences.tsx:843
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3582,183 +3601,183 @@ msgstr ""
 "Használja a fangfrisch vagy a clamav-unofficial-sigs eszközt; ez nem "
 "közvetlen egyéni URL-szolgáltató."
 
-#: desktop/src/pages/ConfigPreferences.tsx:870
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr "Közösségi hash-, webhéj- és általános kártevő-aláírás-adatbázisok."
 
-#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid "Proxy Settings"
 msgstr "Proxybeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:874
+#: desktop/src/pages/ConfigPreferences.tsx:851
 msgid "Proxy Server"
 msgstr "Proxyszerver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "Proxy Port"
 msgstr "Proxyport"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "0 disables the proxy port."
 msgstr "A 0 letiltja a proxyportot."
 
-#: desktop/src/pages/ConfigPreferences.tsx:876
+#: desktop/src/pages/ConfigPreferences.tsx:853
 msgid "Proxy Username"
 msgstr "Proxy felhasználónév"
 
-#: desktop/src/pages/ConfigPreferences.tsx:877
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Proxy Password"
 msgstr "Proxyjelszó"
 
-#: desktop/src/pages/ConfigPreferences.tsx:882
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "Scanner Settings"
 msgstr "Keresőbeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Scan Backend"
 msgstr "Vizsgálati háttérprogram"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Auto (prefer daemon)"
 msgstr "Automatikus (a démont részesíti előnyben)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV démon (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:887
+#: desktop/src/pages/ConfigPreferences.tsx:864
 msgid "Standalone Scanner (clamscan)"
 msgstr "Önálló kereső (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Daemon Status"
 msgstr "Démon állapota"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Refresh Status"
 msgstr "Állapot frissítése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:892
+#: desktop/src/pages/ConfigPreferences.tsx:869
 msgid "Documentation"
 msgstr "Dokumentáció"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:894
-#: desktop/src/pages/ConfigPreferences.tsx:915
+#: desktop/src/pages/ConfigPreferences.tsx:871
+#: desktop/src/pages/ConfigPreferences.tsx:892
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:898
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "File Type Scanning"
 msgstr "Fájltípusok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:878
 msgid "Performance and Limits"
 msgstr "Teljesítmény és korlátok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:902
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "Max File Size (MB)"
 msgstr "Max. fájlméret (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:902
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:880
+#: desktop/src/pages/ConfigPreferences.tsx:882
 #: desktop/src/pages/ConfigPreferences.tsx:905
-#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "0 means unlimited."
 msgstr "A 0 korlátlant jelent."
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:880
 msgid "Max Scan Size (MB)"
 msgstr "Max. vizsgálati méret (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:881
 msgid "Max Archive Recursion"
 msgstr "Max. archívumrekurzió"
 
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:882
 msgid "Max Files in Archive"
 msgstr "Max. fájlszám az archívumban"
 
-#: desktop/src/pages/ConfigPreferences.tsx:907
+#: desktop/src/pages/ConfigPreferences.tsx:884
 msgid "Logging"
 msgstr "Naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:908
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "Log File Path"
 msgstr "Naplófájl elérési útja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:886
 msgid "Verbose Logging"
 msgstr "Részletes naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:886
 msgid "Syslog Logging"
 msgstr "Syslog-naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:914
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "On-Access Scanning"
 msgstr "Hozzáféréskori vizsgálat"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:896
 msgid "Monitored Paths"
 msgstr "Figyelt elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:920
+#: desktop/src/pages/ConfigPreferences.tsx:897
 msgid "Include Paths"
 msgstr "Beleértett elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:921
+#: desktop/src/pages/ConfigPreferences.tsx:898
 msgid "Exclude Paths"
 msgstr "Kizárt elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:923
+#: desktop/src/pages/ConfigPreferences.tsx:900
 msgid "Behavior Settings"
 msgstr "Működési beállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Prevention Mode"
 msgstr "Megelőzési mód"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Extra Scanning"
 msgstr "Extra vizsgálat"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Deny on Error"
 msgstr "Hiba esetén tiltás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:901
 msgid "Disable DDD"
 msgstr "DDD letiltása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Performance Settings"
 msgstr "Teljesítménybeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Max Threads"
 msgstr "Max. szálak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:906
 msgid "Curl Timeout (seconds)"
 msgstr "Curl időtúllépés (másodperc)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:906
 msgid "0 disables the timeout."
 msgstr "A 0 letiltja az időtúllépést."
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:907
 msgid "Retry Attempts"
 msgstr "Újrapróbálkozási kísérletek"
 
-#: desktop/src/pages/ConfigPreferences.tsx:932
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Scan Loop Prevention"
 msgstr "Vizsgálati ciklusok megelőzése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:910
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3767,60 +3786,60 @@ msgstr ""
 "megelőzéséhez zárja ki a clamav szolgáltatásfiókot, annak UID-ját vagy a "
 "root felhasználót."
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "Exclude Username"
 msgstr "Felhasználónév kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:935
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "Exclude User ID"
 msgstr "Felhasználói azonosító kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:936
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Exclude Root User"
 msgstr "Root felhasználó kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:941
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Scheduled Scans"
 msgstr "Ütemezett vizsgálatok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:942
+#: desktop/src/pages/ConfigPreferences.tsx:919
 msgid "Schedule"
 msgstr "Ütemezés"
 
-#: desktop/src/pages/ConfigPreferences.tsx:943
+#: desktop/src/pages/ConfigPreferences.tsx:920
 msgid "Enable Scheduled Scans"
 msgstr "Ütemezett vizsgálatok engedélyezése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:944
+#: desktop/src/pages/ConfigPreferences.tsx:921
 msgid "Scan Frequency"
 msgstr "Vizsgálat gyakorisága"
 
-#: desktop/src/pages/ConfigPreferences.tsx:945
+#: desktop/src/pages/ConfigPreferences.tsx:922
 msgid "Scan Time (24-hour)"
 msgstr "Vizsgálat ideje (24 órás)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:946
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Day of Week"
 msgstr "A hét napja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:946
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Used for weekly scans."
 msgstr "Heti vizsgálatokhoz használatos."
 
-#: desktop/src/pages/ConfigPreferences.tsx:947
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Day of Month"
 msgstr "A hónap napja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:947
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Used for monthly scans."
 msgstr "Havi vizsgálatokhoz használatos."
 
-#: desktop/src/pages/ConfigPreferences.tsx:948
+#: desktop/src/pages/ConfigPreferences.tsx:925
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
 msgid "Scan Targets"
 msgstr "Vizsgálati célok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:949
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3828,20 +3847,20 @@ msgstr ""
 "Nincsenek célok beállítva. Az ütemezett vizsgálat a saját könyvtárát "
 "használja anélkül, hogy azt külön célként mentené."
 
-#: desktop/src/pages/ConfigPreferences.tsx:950
+#: desktop/src/pages/ConfigPreferences.tsx:927
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Kihagyás akkumulátoros használatkor"
 
-#: desktop/src/pages/ConfigPreferences.tsx:950
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Ne indítsa el az ütemezett vizsgálatokat akkumulátoros üzemmódban."
 
-#: desktop/src/pages/ConfigPreferences.tsx:951
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Auto-Quarantine"
 msgstr "Automatikus karantén"
 
-#: desktop/src/pages/ConfigPreferences.tsx:951
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr ""
 "Az ütemezett vizsgálatok által talált fenyegetések automatikus karanténba "
@@ -6202,25 +6221,6 @@ msgstr "Az összes elérhető könyvtár átfogó, rendszerszintű vizsgálata"
 #: desktop/src/profilePresentation.ts:38
 msgid "Scan of the user's home directory and personal files"
 msgstr "A felhasználó saját könyvtárának és személyes fájljainak vizsgálata"
-
-#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
-#: crates/clamui-core/src/privileged.rs:1232
-msgid ""
-"The privileged helper could not use a required system tool while "
-"{operation}. Exit code: {code}. Details: {detail}"
-msgstr ""
-"A jogosultságokkal rendelkező segéd nem tudott használni egy szükséges "
-"rendszereszközt a következő művelet során: {operation}. Kilépési kód: "
-"{code}. Részletek: {detail}"
-
-#. Translators: Save & Apply is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:529
-msgid ""
-"Configuration authorized. Your unsaved changes were kept; use Save & Apply "
-"to persist them."
-msgstr ""
-"A konfiguráció engedélyezve. A nem mentett módosításai megmaradtak; a "
-"végleges mentéshez használja a Mentés és alkalmazás lehetőséget."
 
 #~ msgid ""
 #~ "Selecting a file keeps the path in this pending proposal. Save & Apply "
