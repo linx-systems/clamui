@@ -239,9 +239,10 @@ small,
 }
 
 div.header-title {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
   overflow: visible;
   white-space: normal;
@@ -256,6 +257,7 @@ div.header-title > h1 {
 }
 
 .header-title .back-button { flex: 0 0 auto; }
+.header-title .preferences-save-button { flex: 0 0 auto; margin-inline-start: auto; }
 
 .header-actions,
 .toolbar,
