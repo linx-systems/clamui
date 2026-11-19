@@ -86,6 +86,10 @@ jobs:
         working-directory: desktop
         run: bun run check
 
+      - name: Run frontend unit tests
+        working-directory: desktop
+        run: bun run test
+
       - name: Build frontend
         working-directory: desktop
         run: bun run build
