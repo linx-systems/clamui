@@ -6226,3 +6226,8 @@ msgstr "Mover para cima"
 
 msgid "Move down"
 msgstr "Mover para baixo"
+
+#. Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+#: crates/clamui-core/src/privileged.rs:1232
+msgid "The privileged helper could not use a required system tool while {operation}. Exit code: {code}. Details: {detail}"
+msgstr "O auxiliar privilegiado não conseguiu usar uma ferramenta de sistema necessária durante {operation}. Código de saída: {code}. Detalhes: {detail}"

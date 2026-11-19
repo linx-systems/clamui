@@ -297,17 +297,14 @@ fn trusted_host_program(path: &str, executable: bool, flatpak: bool) -> bool {
     })
 }
 
-fn trusted_tool_in_environment<'a>(candidates: &'a [&'a str], flatpak: bool) -> AppResult<&'a str> {
+fn trusted_tool_in_environment(candidates: &[&str], flatpak: bool) -> AppResult<String> {
+    if !flatpak {
+        return canonical_local_tool(candidates);
+    }
     candidates
         .iter()
-        .copied()
-        .find(|path| {
-            if flatpak {
-                trusted_host_program(path, true, flatpak)
-            } else {
-                root_owned_regular(Path::new(path), true)
-            }
-        })
+        .find(|path| trusted_host_program(path, true, flatpak))
+        .map(|path| (*path).to_owned())
         .ok_or_else(|| {
             format!(
                 "required trusted tool is unavailable: {}",
@@ -316,17 +313,64 @@ fn trusted_tool_in_environment<'a>(candidates: &'a [&'a str], flatpak: bool) -> 
         })
 }
 
-fn canonical_local_tool<'a>(candidates: &'a [&'a str]) -> AppResult<&'a str> {
-    candidates
-        .iter()
-        .copied()
-        .find(|path| root_owned_regular(Path::new(path), true))
-        .ok_or_else(|| {
-            format!(
-                "required trusted tool is unavailable: {}",
-                candidates.join(" or ")
-            )
-        })
+fn canonical_local_tool(candidates: &[&str]) -> AppResult<String> {
+    let mut failures = Vec::new();
+    for candidate in candidates {
+        match resolved_local_tool(Path::new(candidate)) {
+            Ok(path) => return Ok(path),
+            Err(error) => failures.push(format!("{candidate}: {error}")),
+        }
+    }
+    Err(format!(
+        "required trusted tool is unavailable: {}",
+        failures.join("; ")
+    ))
+}
+
+fn resolved_local_tool(candidate: &Path) -> AppResult<String> {
+    let resolved = fs::canonicalize(candidate)
+        .map_err(|error| format!("cannot resolve {}: {error}", candidate.display()))?;
+    // Execute this resolved path, never the original symlink. Validate from the
+    // root down so an unprivileged user cannot replace any checked component
+    // between inspection and execution. A concurrent root change is trusted.
+    let ancestors: Vec<_> = resolved.ancestors().skip(1).collect();
+    for directory in ancestors.into_iter().rev() {
+        validate_local_tool_metadata(directory, &safe_metadata(directory)?, true)?;
+    }
+    validate_local_tool_metadata(&resolved, &safe_metadata(&resolved)?, false)?;
+    resolved.into_os_string().into_string().map_err(|path| {
+        format!(
+            "resolved tool path is not UTF-8: {}",
+            path.to_string_lossy()
+        )
+    })
+}
+
+fn validate_local_tool_metadata(
+    path: &Path,
+    metadata: &fs::Metadata,
+    directory: bool,
+) -> AppResult<()> {
+    match local_tool_metadata_failure(metadata.mode(), metadata.uid(), directory) {
+        Some(reason) => Err(format!("{}: {reason}", path.display())),
+        None => Ok(()),
+    }
+}
+
+fn local_tool_metadata_failure(mode: u32, uid: u32, directory: bool) -> Option<&'static str> {
+    if directory && mode & libc::S_IFMT != libc::S_IFDIR {
+        Some("not a directory")
+    } else if !directory && mode & libc::S_IFMT != libc::S_IFREG {
+        Some("not a regular file")
+    } else if uid != 0 {
+        Some("not owned by root")
+    } else if mode & 0o022 != 0 {
+        Some("group or world writable")
+    } else if !directory && mode & 0o100 == 0 {
+        Some("not executable by root")
+    } else {
+        None
+    }
 }
 
 fn command_in_environment(program: &str, flatpak: bool) -> Command {
@@ -366,7 +410,7 @@ fn passwd_home(uid: u32) -> AppResult<PathBuf> {
     let getent = trusted_tool_in_environment(&GETENT_CANDIDATES, flatpak)
         .map_err(|_| "trusted getent is unavailable for passwd lookup".to_owned())?;
     let uid = uid.to_string();
-    let output = command_in_environment(getent, flatpak)
+    let output = command_in_environment(&getent, flatpak)
         .args(["passwd", &uid])
         .output()
         .map_err(|error| format!("cannot query passwd entry for uid {uid}: {error}"))?;
@@ -627,17 +671,15 @@ mod helper_trust_tests {
         let candidate = candidate.to_str().expect("checksum candidate is UTF-8");
         let candidates = [candidate];
         assert!(trusted_host_program(candidate, true, flatpak));
-        let selected = if flatpak {
-            let selected = trusted_tool_in_environment(&candidates, flatpak)
-                .expect("select checksum candidate");
+        let selected =
+            trusted_tool_in_environment(&candidates, flatpak).expect("select checksum candidate");
+        if flatpak {
             assert_eq!(selected, candidate);
-            selected
         } else {
-            assert!(trusted_tool_in_environment(&candidates, flatpak).is_err());
-            candidate
-        };
+            assert_eq!(Path::new(&selected), fs::canonicalize(candidate).unwrap());
+        }
 
-        let output = command_in_environment(selected, flatpak)
+        let output = command_in_environment(&selected, flatpak)
             .arg(&input)
             .output()
             .expect("run selected checksum candidate");
@@ -675,6 +717,116 @@ mod helper_trust_tests {
             true,
             flatpak
         ));
+    }
+
+    #[test]
+    fn local_tool_resolves_symlink_chain_and_executes_validated_checksum() {
+        let root = TempDir::new().unwrap();
+        let intermediate = root.path().join("host-sha256sum");
+        let candidate = root.path().join("sha256sum");
+        std::os::unix::fs::symlink("/usr/bin/sha256sum", &intermediate).unwrap();
+        std::os::unix::fs::symlink(&intermediate, &candidate).unwrap();
+        let selected = canonical_local_tool(&[candidate.to_str().unwrap()]).unwrap();
+        assert_eq!(Path::new(&selected), fs::canonicalize(&candidate).unwrap());
+        // Replacing the original link after validation must not change execution.
+        fs::remove_file(&candidate).unwrap();
+        std::os::unix::fs::symlink("/missing-tool", &candidate).unwrap();
+        assert_eq!(
+            hash_bytes(&selected, b"abc", false).unwrap(),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
+
+    #[test]
+    fn local_tool_accepts_chown_symlink_for_on_access_configuration() {
+        let root = TempDir::new().unwrap();
+        let candidate = root.path().join("chown");
+        std::os::unix::fs::symlink("/usr/bin/chown", &candidate).unwrap();
+        let selected = canonical_local_tool(&[candidate.to_str().unwrap()]).unwrap();
+        assert_eq!(
+            Path::new(&selected),
+            fs::canonicalize("/usr/bin/chown").unwrap()
+        );
+        assert!(Command::new(selected)
+            .arg("--version")
+            .output()
+            .unwrap()
+            .status
+            .success());
+        // The helper executable itself must still reject symlinks.
+        assert!(!root_owned_regular(&candidate, true));
+    }
+
+    #[test]
+    fn local_tool_rejects_symlink_to_writable_target() {
+        let root = TempDir::new().unwrap();
+        let target = root.path().join("untrusted-tool");
+        let candidate = root.path().join("link");
+        fs::write(&target, b"untrusted executable").unwrap();
+        fs::set_permissions(&target, fs::Permissions::from_mode(0o777)).unwrap();
+        std::os::unix::fs::symlink(&target, &candidate).unwrap();
+        assert!(canonical_local_tool(&[candidate.to_str().unwrap()]).is_err());
+        let metadata = fs::symlink_metadata(&target).unwrap();
+        assert!(validate_local_tool_metadata(&target, &metadata, false).is_err());
+    }
+
+    #[test]
+    fn local_tool_rejects_dangling_and_cyclic_symlinks_with_path_diagnostics() {
+        let root = TempDir::new().unwrap();
+        let dangling = root.path().join("dangling");
+        let cycle = root.path().join("cycle");
+        std::os::unix::fs::symlink(root.path().join("missing"), &dangling).unwrap();
+        std::os::unix::fs::symlink(&cycle, &cycle).unwrap();
+        let error = canonical_local_tool(&[dangling.to_str().unwrap(), cycle.to_str().unwrap()])
+            .unwrap_err();
+        assert!(error.contains("cannot resolve"));
+        assert!(error.contains(dangling.to_str().unwrap()));
+        assert!(error.contains(cycle.to_str().unwrap()));
+    }
+
+    #[test]
+    fn local_tool_falls_back_to_next_trusted_candidate() {
+        let selected = canonical_local_tool(&["/missing-tool", "/usr/bin/chown"]).unwrap();
+        assert_eq!(
+            Path::new(&selected),
+            fs::canonicalize("/usr/bin/chown").unwrap()
+        );
+    }
+
+    #[test]
+    fn local_tool_rejects_target_below_writable_directory() {
+        // /tmp is root-owned but writable even when the fixture itself is 0755.
+        let root = TempDir::new_in("/tmp").unwrap();
+        let target = root.path().join("tool");
+        let candidate = root.path().join("link");
+        fs::write(&target, b"untrusted executable").unwrap();
+        fs::set_permissions(&target, fs::Permissions::from_mode(0o755)).unwrap();
+        std::os::unix::fs::symlink(&target, &candidate).unwrap();
+        let error = resolved_local_tool(&candidate).unwrap_err();
+        assert!(error.contains("/tmp: group or world writable"), "{error}");
+    }
+
+    #[test]
+    fn local_tool_metadata_rejects_untrusted_file_and_directory_properties() {
+        for (mode, uid, directory, reason) in [
+            (0o100755, 1000, false, "not owned by root"),
+            (0o100775, 0, false, "group or world writable"),
+            (0o100757, 0, false, "group or world writable"),
+            (0o100644, 0, false, "not executable by root"),
+            (0o040755, 0, false, "not a regular file"),
+            (0o120755, 0, false, "not a regular file"),
+            (0o040755, 1000, true, "not owned by root"),
+            (0o040775, 0, true, "group or world writable"),
+            (0o041777, 0, true, "group or world writable"),
+            (0o120755, 0, true, "not a directory"),
+        ] {
+            assert_eq!(
+                local_tool_metadata_failure(mode, uid, directory),
+                Some(reason)
+            );
+        }
+        assert_eq!(local_tool_metadata_failure(0o100755, 0, false), None);
+        assert_eq!(local_tool_metadata_failure(0o040755, 0, true), None);
     }
 
     #[test]
@@ -1073,6 +1225,16 @@ fn client_helper_failure(
             "The privileged helper reported a protocol mismatch while {operation}.",
         )
         .replace("{operation}", operation),
+        Some(code) if detail.starts_with("Error: required trusted tool is unavailable:") => {
+            crate::i18n::translate(
+                ctx,
+                // Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
+                "The privileged helper could not use a required system tool while {operation}. Exit code: {code}. Details: {detail}",
+            )
+            .replace("{operation}", operation)
+            .replace("{code}", &code.to_string())
+            .replace("{detail}", &detail)
+        }
         Some(code) if !detail.is_empty() => crate::i18n::translate(
             ctx,
             // Translators: keep {operation}, numeric {code}, and sanitized diagnostic {detail}.
@@ -1597,10 +1759,8 @@ fn read_allowlisted_config(path: &Path) -> AppResult<Vec<u8>> {
     Ok(content)
 }
 
-fn service_path() -> Option<&'static str> {
-    ["/usr/bin/systemctl", "/bin/systemctl"]
-        .into_iter()
-        .find(|path| root_owned_regular(Path::new(path), true))
+fn service_path() -> Option<String> {
+    canonical_local_tool(&["/usr/bin/systemctl", "/bin/systemctl"]).ok()
 }
 
 fn restart_services(destinations: &[PathBuf]) -> AppResult<()> {
@@ -1623,12 +1783,12 @@ fn restart_services(destinations: &[PathBuf]) -> AppResult<()> {
         }
     }
     for unit in units {
-        let active = Command::new(systemctl)
+        let active = Command::new(&systemctl)
             .args(["is-active", "--quiet", unit])
             .status()
             .map_err(|error| format!("cannot check {unit}: {error}"))?;
         if active.success() {
-            let restarted = Command::new(systemctl)
+            let restarted = Command::new(&systemctl)
                 .args(["restart", unit])
                 .output()
                 .map_err(|error| format!("cannot restart {unit}: {error}"))?;
@@ -1691,7 +1851,7 @@ fn hex_digest(value: &str) -> bool {
 fn sha256_file(path: &Path) -> AppResult<String> {
     let flatpak = flatpak();
     let tool = trusted_tool_in_environment(&["/usr/bin/sha256sum", "/bin/sha256sum"], flatpak)?;
-    let output = command_in_environment(tool, flatpak)
+    let output = command_in_environment(&tool, flatpak)
         .arg(path)
         .output()
         .map_err(|error| format!("cannot hash helper package: {error}"))?;
@@ -1967,8 +2127,8 @@ fn signed_members_match(signature: &str, members: &BTreeMap<String, Vec<u8>>) ->
             .get(fields[3])
             .ok_or_else(|| "helper signature names a missing member".to_owned())?;
         if fields[2].parse::<usize>().ok() != Some(bytes.len())
-            || hash_bytes(md5, bytes, flatpak)? != fields[0]
-            || hash_bytes(sha1, bytes, flatpak)? != fields[1]
+            || hash_bytes(&md5, bytes, flatpak)? != fields[0]
+            || hash_bytes(&sha1, bytes, flatpak)? != fields[1]
         {
             return Err("helper signature does not match archive members".to_owned());
         }
@@ -2048,7 +2208,7 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
         let signature_text = signature_path.to_string_lossy().into_owned();
         let key_text = key_path.to_string_lossy().into_owned();
         let (import_status, _, _) = host_bounded_output_in_environment(
-            gpg,
+            &gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -2065,7 +2225,7 @@ fn verify_deb_signature(path: &Path) -> AppResult<()> {
             return Err("cannot import ClamUI signing key".to_owned());
         }
         let (verify_status, verified_stdout, verified_stderr) = host_bounded_output_in_environment(
-            gpg,
+            &gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -2107,7 +2267,7 @@ fn write_pinned_signing_key(path: &Path) -> AppResult<()> {
         .map_err(|error| format!("cannot sync pinned signing key: {error}"))
 }
 
-fn host_gpg(flatpak: bool) -> AppResult<&'static str> {
+fn host_gpg(flatpak: bool) -> AppResult<String> {
     trusted_tool_in_environment(&GPG_CANDIDATES, flatpak)
         .map_err(|_| "GnuPG is unavailable for helper signature verification".to_owned())
 }
@@ -2173,13 +2333,13 @@ fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<
     let key_path = home.join("clamui-signing-key.asc");
     let outcome = (|| -> AppResult<()> {
         write_pinned_signing_key(&key_path)?;
-        verify_pinned_key_material(gpg, &key_path, flatpak)?;
+        verify_pinned_key_material(&gpg, &key_path, flatpak)?;
         let home_text = home.to_string_lossy().into_owned();
         let key_text = key_path.to_string_lossy().into_owned();
         let signature_text = signature.to_string_lossy().into_owned();
         let package_text = package.to_string_lossy().into_owned();
         let (import_status, _, _) = host_bounded_output_in_environment(
-            gpg,
+            &gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -2196,7 +2356,7 @@ fn verify_rpm_detached_signature(package: &Path, signature: &Path) -> AppResult<
             return Err("cannot import ClamUI signing key".to_owned());
         }
         let (verify_status, _, verified_stderr) = host_bounded_output_in_environment(
-            gpg,
+            &gpg,
             &[
                 "--batch",
                 "--no-options",
@@ -3494,6 +3654,21 @@ mod helper_failure_tests {
             context,
             _root: root,
         }
+    }
+
+    #[test]
+    fn tool_failure_keeps_resolved_path_and_check_in_localized_error() {
+        let fixture = context();
+        fixture
+            .context
+            .update_settings(serde_json::json!({"language": "de"}))
+            .unwrap();
+        let diagnostic = b"Error: required trusted tool is unavailable: /usr/bin/chown: /usr/lib/chown: not owned by root";
+        let message = client_helper_failure(&fixture.context, Some(1), diagnostic, "Anwenden");
+        assert!(message.contains("Systemwerkzeug"), "{message}");
+        assert!(message.contains("Anwenden"));
+        assert!(message.contains("1"));
+        assert!(message.contains("/usr/lib/chown: not owned by root"));
     }
 
     #[test]
