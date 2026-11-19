@@ -2161,6 +2161,9 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
 @media (max-width: 1100px) {
   .header-action-label { display: none; }
   .header-actions { flex-wrap: nowrap; }
+  /* Below this width the header already shows a compact Quick Scan icon button
+     top-right; the dashboard's own large card would otherwise add an extra row. */
+  .status-hero .dashboard-quick-scan { display: none; }
   .profile-action-secondary {
     inline-size: 32px;
     min-width: 32px;
@@ -2246,7 +2249,6 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
   .dashboard-metrics { grid-template-columns: minmax(0, 1fr); }
   .status-hero { padding: 26px; }
   .status-hero-copy { flex-basis: 100%; }
-  .status-hero .dashboard-quick-scan { margin-inline-start: auto; }
   .quarantine-page .search-field {
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
