@@ -1,25 +1,14 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { notify, openExternal, openPaths, request } from "../api";
+import { cloneValues, isConfigDirty, mergeAuthorizedConfig, type ConfigDocument, type ConfigValues, valuesEqual } from "../configAuthorize";
 import { type ManualConfiguration, useConfigurationRecovery } from "../ConfigurationRecovery";
 import { isHelperTrustError } from "../helperTrustError";
 import { Icon } from "../Icon";
 import { _ } from "../i18n";
 import { addNewestFirst, moveEntry, parseListDraft } from "../pathList";
 
-type ConfigKind = "freshclam" | "clamd";
-type ConfigValues = Record<string, string[]>;
-
-type ConfigDocument = {
-  kind: ConfigKind;
-  path: string;
-  baselinePath: string;
-  values: ConfigValues;
-  baseline: ConfigValues;
-  needsSizeUnitMigration: boolean;
-  readable: boolean;
-  error?: string;
-};
+type ConfigKind = ConfigDocument["kind"];
 
 type LoadResult = {
   kind?: ConfigKind;
@@ -116,18 +105,6 @@ const defaultSchedule = (): Schedule => ({
   schedule_day_of_week: 0,
   schedule_day_of_month: 1,
 });
-
-function cloneValues(values: ConfigValues): ConfigValues {
-  return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, [...value]]));
-}
-
-function valuesEqual(left: ConfigValues, right: ConfigValues): boolean {
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
-  return leftKeys.length === rightKeys.length && leftKeys.every((key, index) =>
-    key === rightKeys[index] && left[key].length === right[key].length && left[key].every((value, valueIndex) => value === right[key][valueIndex]),
-  );
-}
 
 function schedulesEqual(left: Schedule, right: Schedule): boolean {
   return left.scheduled_scans_enabled === right.scheduled_scans_enabled
@@ -542,20 +519,20 @@ export default function ConfigPreferences({ section }: { section: string }) {
       if (!persistedConfigPaths.current[kind]) {
         persistedConfigPaths.current[kind] = document.baselinePath;
       }
-      const next: ConfigDocument = {
-        kind,
-        path: loaded.path ?? document.path,
-        baselinePath: persistedConfigPaths.current[kind],
-        values: cloneValues(loaded.values ?? EMPTY_VALUES),
-        baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
-        needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
-        readable: loaded.readable ?? true,
-        error: loaded.error,
-      };
+      const dirty = isConfigDirty(document);
+      const next = mergeAuthorizedConfig(document, loaded, persistedConfigPaths.current[kind]);
       changeConfigContext();
       if (kind === "freshclam") setFreshclam(next);
       else setClamd(next);
-      notify(_("Configuration loaded with administrator authorization."), "success");
+      notify(
+        dirty
+          ? _(
+            // Translators: Save & Apply is a button label; use its translation.
+            "Configuration authorized. Your unsaved changes were kept; use Save & Apply to persist them.",
+          )
+          : _("Configuration loaded with administrator authorization."),
+        "success",
+      );
     } catch (error) {
       if (requestId === loadRequests.current[kind]) {
         notify(String(error), "error");
