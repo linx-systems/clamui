@@ -13,6 +13,7 @@
 
 ### Changed
 
+- Preferences now save automatically instead of requiring a separate Save section: non-privileged changes save when you leave a settings section, and all pending changes save when you close the Preferences window or click the new persistent Save button in its header (enabled only while changes are pending). Changes needing the privileged helper are batched into a single authorization prompt rather than one per section; a failed privileged save keeps your edits pending and shows a persistent error, while a successful save shows a brief confirmation toast. (#346)
 - Improved the signature database editor and provider list with full-width URLs, clearer actions, and external-link indicators.
 - Removed the unavailable URLhaus database recommendation; existing custom databases are unchanged.
 - Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.

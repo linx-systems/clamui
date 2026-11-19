@@ -3,7 +3,7 @@ title: Set preferences
 description: Choose app behavior, host ClamAV options, device scans, and diagnostics.
 ---
 
-Open **Preferences** with `Ctrl+,`. Most app preferences and exclusions save immediately. **Scheduled Scans** need **Save & Apply** to persist their settings and provision the scheduler; changes to host `freshclam.conf` or `clamd.conf` also need **Save & Apply** and elevated host access.
+Open **Preferences** with `Ctrl+,`. Most app preferences and exclusions save immediately. **Scheduled Scans**, and changes to host `freshclam.conf` or `clamd.conf`, save automatically when you leave their section or close Preferences; you can also click **Save** in the header at any time. Provisioning the scheduler or writing host configuration may need elevated host access, requested once in a single batch rather than on every change.
 
 ## Choose the right page
 
