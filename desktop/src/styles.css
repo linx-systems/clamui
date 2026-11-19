@@ -352,6 +352,8 @@ div.header-title > h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Inherited button line-height (1.3) clips descenders (g, y, p, j, ß...) once overflow is hidden. */
+  line-height: 1.6;
 }
 
 .application-menu {
