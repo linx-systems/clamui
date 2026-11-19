@@ -55,7 +55,7 @@ export function ScanOverview({ available, databaseAvailable, scanning, result, o
     {latest && <section className="grouped-list overview-summary" aria-labelledby="overview-latest">
       <header className="overview-summary-header"><h2 id="overview-latest">{_("Latest scan")}</h2><span className={`status-badge ${latest.status === "clean" ? "success" : "warning"}`}>{scanStatusLabel(latest.status)}</span></header>
       {latest.summary && <p className="overview-summary-copy">{latest.summary}</p>}
-      {latest.threat_details?.slice(0, 3).map((threat) => <div className="group-row" key={threat.file_path}><Icon name="warning" /><div className="row-copy"><strong>{threat.threat_name}</strong><code className="path-value">{threat.file_path}</code></div></div>)}
+      {latest.threat_details?.slice(0, 3).map((threat) => <div className="group-row" key={threat.file_path}><Icon name="warning" /><div className="row-copy"><strong>{threat.threat_name}</strong><code className="path-value" title={threat.file_path}>{threat.file_path}</code></div></div>)}
       <div className="overview-summary-actions"><button className="button" onClick={() => result ? navigate("results", { result }) : navigate("logs")}>{result ? _("View Results") : _("Logs")}</button></div>
     </section>}
   </>;

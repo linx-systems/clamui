@@ -476,6 +476,10 @@ div.header-title > h1 {
 .overview-summary-header h2 { margin: 0; }
 .overview-summary-copy { padding: 14px 18px 0; overflow-wrap: anywhere; }
 .overview-summary-actions { display: flex; justify-content: flex-end; padding: 14px 18px; }
+/* .group-row > :last-child:not(:first-child) (line ~841) sets flex:0 0 auto at the
+   same (0,3,0) specificity and comes later in the file, so it wins this rule by
+   source order; the "section." tag bumps specificity to (0,3,1) so this always wins. */
+section.overview-summary .group-row > .row-copy { flex: 1 1 auto; min-width: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -813,6 +817,12 @@ p.success,
 .row-copy,
 .log-row-copy,
 .quarantine-entry-content { display: grid; gap: 2px; }
+/* grid items default to min-width:auto (their min-content), so a long
+   unbroken path still blows out its row instead of wrapping; this is what
+   let the "Latest scan" path overflow even once .row-copy itself could shrink. */
+.row-copy > *,
+.log-row-copy > *,
+.quarantine-entry-content > * { min-width: 0; }
 
 .row-copy,
 .log-row-copy,
@@ -1628,7 +1638,10 @@ button.log-row:hover:not(:disabled),
 .threats-panel { margin-bottom: 18px; border: 1px solid var(--border); border-radius: var(--radius-group); background: var(--surface); box-shadow: var(--card-shadow); }
 .threats-panel > .section-header { margin: 0; padding: 14px 18px; border-bottom: 1px solid var(--border); }
 .threats-panel > .grouped-list { margin: 0; border: 0; background: transparent; box-shadow: none; }
-.threat-symbol { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
+.threat-symbol { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
+/* .result-threat-row > :first-child sets flex:1 1 auto with equal (0,2,0) specificity;
+   target the icon through the row to win on source order instead of !important. */
+.result-threat-row > .threat-symbol { flex: 0 0 38px; }
 
 .preferences-shell .header-title { flex: 1 1 auto; padding-inline-end: 88px; }
 
