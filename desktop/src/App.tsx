@@ -25,6 +25,7 @@ import { _, activeCatalog } from "./i18n";
 import { Modal } from "./Modal";
 import Audit from "./pages/Audit";
 import Components from "./pages/Components";
+import Dashboard from "./pages/Dashboard";
 import Database from "./pages/Database";
 import Logs from "./pages/Logs";
 import Network from "./pages/Network";
@@ -36,6 +37,7 @@ import Scan from "./pages/Scan";
 import Statistics from "./pages/Statistics";
 
 type PageId =
+  | "dashboard"
   | "scan"
   | "database"
   | "logs"
@@ -59,7 +61,7 @@ type HelperStatus = {
   needsOnboarding: boolean;
 };
 
-const pageComponents: Record<Exclude<PageId, "database">, ComponentType<{ active: boolean }>> = {
+const pageComponents: Record<Exclude<PageId, "database" | "dashboard">, ComponentType<{ active: boolean }>> = {
   scan: Scan,
   logs: Logs,
   components: Components,
@@ -77,14 +79,15 @@ const destinations: Array<{
   shortcut: string;
   icon: IconName;
 }> = [
-  { id: "scan", shortcut: "Ctrl+1", icon: "search" },
-  { id: "database", shortcut: "Ctrl+2", icon: "database" },
-  { id: "logs", shortcut: "Ctrl+3", icon: "logs" },
-  { id: "components", shortcut: "Ctrl+4", icon: "components" },
-  { id: "quarantine", shortcut: "Ctrl+5", icon: "shield" },
-  { id: "statistics", shortcut: "Ctrl+6", icon: "statistics" },
-  { id: "audit", shortcut: "Ctrl+7", icon: "audit" },
-  { id: "network", shortcut: "Ctrl+8", icon: "network" },
+  { id: "dashboard", shortcut: "Ctrl+1", icon: "home" },
+  { id: "scan", shortcut: "Ctrl+2", icon: "search" },
+  { id: "database", shortcut: "Ctrl+3", icon: "database" },
+  { id: "logs", shortcut: "Ctrl+4", icon: "logs" },
+  { id: "components", shortcut: "Ctrl+5", icon: "components" },
+  { id: "quarantine", shortcut: "Ctrl+6", icon: "shield" },
+  { id: "statistics", shortcut: "Ctrl+7", icon: "statistics" },
+  { id: "audit", shortcut: "Ctrl+8", icon: "audit" },
+  { id: "network", shortcut: "Ctrl+9", icon: "network" },
 ];
 
 const PROJECT_URL = "https://github.com/linx-systems/clamui";
@@ -115,6 +118,8 @@ function contributorCredit(line: string): { name: string; url: string | null } {
 
 function pageLabel(page: PageId): string {
   switch (page) {
+    case "dashboard":
+      return _("Dashboard");
     case "scan":
       return _("Scan");
     case "database":
@@ -141,6 +146,7 @@ function pageLabel(page: PageId): string {
 }
 function isPageId(value: unknown): value is PageId {
   switch (value) {
+    case "dashboard":
     case "scan":
     case "database":
     case "logs":
@@ -225,10 +231,10 @@ function helperStatusFrom(value: unknown): HelperStatus | null {
 }
 
 export default function App(): ReactNode {
-  const [activePage, setActivePage] = useState<PageId>("scan");
-  const activePageRef = useRef<PageId>("scan");
-  const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("scan");
-  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(["scan"]));
+  const [activePage, setActivePage] = useState<PageId>("dashboard");
+  const activePageRef = useRef<PageId>("dashboard");
+  const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("dashboard");
+  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(["dashboard"]));
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [helperTrustError, setHelperTrustError] = useState<string | null>(null);
   const [recoveryConfigurations, setRecoveryConfigurations] = useState<readonly ManualConfiguration[] | null>(null);
@@ -863,6 +869,13 @@ export default function App(): ReactNode {
           </section>
         );
       }
+      if (page === "dashboard") {
+        return (
+          <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
+            <Dashboard active={selected} scanning={scanJobId !== null} />
+          </section>
+        );
+      }
       const Page = pageComponents[page];
       return (
         <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
@@ -870,7 +883,7 @@ export default function App(): ReactNode {
         </section>
       );
     });
-  }, [activePage, mountedPages, updateStartRequest]);
+  }, [activePage, mountedPages, scanJobId, updateStartRequest]);
 
   const catalog = activeCatalog();
   const translatorCredits = aboutCredits?.translator_credits?.trim();
@@ -889,7 +902,7 @@ export default function App(): ReactNode {
           </div>
         ) : null}
         {!preferencesOpen ? (
-          <h1 className="header-title">{activePage === "scan" ? _("Overview") : pageLabel(activePage)}</h1>
+          <h1 className="header-title">{activePage === "dashboard" ? _("Overview") : pageLabel(activePage)}</h1>
         ) : null}
         {!preferencesOpen ? (
           <div className="header-actions">

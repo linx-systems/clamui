@@ -9,7 +9,6 @@ import { ScanLogViewport } from "../ScanLogViewport";
 import { ScanProgressPanel } from "../ScanProgressPanel";
 import type { ScanProgress, Threat } from "../ScanProgressPanel";
 import { profileDescription, profileLabel } from "../profilePresentation";
-import { ScanOverview } from "./ScanOverview";
 
 
 type Profile = { id: string; name: string; targets: string[]; exclusions: { paths?: string[]; patterns?: string[] }; is_default: boolean; description: string; options: Record<string, unknown> };
@@ -209,7 +208,6 @@ export default function Scan() {
   const [progress, setProgress] = useState<ScanProgress>({});
   const [liveThreats, setLiveThreats] = useState<Threat[]>([]);
   const [result, setResult] = useState<ScanResult | null>(null);
-  const [latestScan, setLatestScan] = useState<(ScanResult & { timestamp: string }) | null>(null);
   const [notice, setNotice] = useState<StatusNotice | null>(null);
   const [missingDatabase, setMissingDatabase] = useState(false);
   const [vtPath, setVtPath] = useState<string | null>(null);
@@ -240,7 +238,6 @@ export default function Scan() {
   const finish = useCallback((scanResult: ScanResult) => {
     const completedId = activeIdRef.current;
     setResult(scanResult);
-    setLatestScan({ ...scanResult, timestamp: new Date().toISOString() });
     setNotice(resultNotice(scanResult));
     setActiveId(null);
     activeIdRef.current = null;
@@ -540,7 +537,6 @@ export default function Scan() {
   const resultStatus = result?.status === "infected" ? "warning" : result?.status === "error" ? "error" : result?.status === "clean" ? "success" : "";
 
   return <section className="page scan-page" onDragOver={(event) => event.preventDefault()} onDrop={drop} aria-label={_("Scan")}>
-    <ScanOverview available={scanner?.available} databaseAvailable={scanner?.database_available} scanning={scanning} result={latestScan} onQuickScan={() => applyProfile({ name: "Quick Scan", start: true })} />
     {notice && <div className={`notice ${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"}><strong>{notice.message}</strong>{notice.detail && <details><summary>{_("Details")}</summary><pre className="monospace">{notice.detail}</pre></details>}</div>}
 
     <header className="page-header">

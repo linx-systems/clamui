@@ -43,6 +43,6 @@ Quarantine an unfamiliar or high-severity file first. It is reversible and ClamU
 
 ## Main views and shortcuts
 
-The sidebar contains Scan, Database, Logs, Components, Quarantine, Statistics, Audit, and Preferences. `Ctrl+1` opens Scan, `Ctrl+2` Database, `Ctrl+3` Logs, `Ctrl+4` Components, `Ctrl+5` Quarantine, `Ctrl+6` Statistics, `Ctrl+7` Audit, and `Ctrl+,` Preferences. Choose scan profiles in the Scan view.
+The sidebar contains Dashboard, Scan, Database, Logs, Components, Quarantine, Statistics, Audit, and Preferences. `Ctrl+1` opens the Dashboard, `Ctrl+2` Scan, `Ctrl+3` Database, `Ctrl+4` Logs, `Ctrl+5` Components, `Ctrl+6` Quarantine, `Ctrl+7` Statistics, `Ctrl+8` Audit, and `Ctrl+,` Preferences. ClamUI opens on the Dashboard; choose scan profiles in the Scan view.
 
 Next: [scan targets and results](/docs/guides/scanning/), [scan profiles](/docs/guides/profiles/), or [scheduled scans](/docs/guides/scheduling/).

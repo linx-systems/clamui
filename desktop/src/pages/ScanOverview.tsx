@@ -1,31 +1,34 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { navigate, request } from "../api";
 import { Icon } from "../Icon";
 import { _, scanStatusLabel } from "../i18n";
 
 import { parseLatestScan, type LatestScan } from "../scanHistory";
+import { useActivityRefresh } from "./useActivityRefresh";
 
-export function ScanOverview({ available, databaseAvailable, scanning, result, onQuickScan }: {
+export function ScanOverview({ available, databaseAvailable, scanning, result, active = true, onQuickScan }: {
   available?: boolean;
   databaseAvailable?: boolean;
   scanning: boolean;
   result: LatestScan | null;
+  active?: boolean;
   onQuickScan: () => void;
 }) {
   const [history, setHistory] = useState<LatestScan | null>(null);
   const [historyState, setHistoryState] = useState<"loading" | "ready" | "error">("loading");
-  useEffect(() => {
-    let active = true;
-    void request<unknown>("logs.list", { log_type: "scan", limit: 1 }).then((entries) => {
-      if (!active) return;
+  const loadHistory = useCallback(async () => {
+    try {
+      const entries = await request<unknown>("logs.list", { log_type: "scan", limit: 1 });
       if (!Array.isArray(entries)) throw new Error("Invalid scan history response");
       const latest = parseLatestScan(entries[0]);
       if (entries.length > 0 && !latest) throw new Error("Invalid scan history entry");
       setHistory(latest);
       setHistoryState("ready");
-    }).catch(() => { if (active) setHistoryState("error"); });
-    return () => { active = false; };
+    } catch {
+      setHistoryState("error");
+    }
   }, []);
+  useActivityRefresh(active, loadHistory);
 
   const latest = result ?? history;
   const ready = available === true && databaseAvailable === true;
