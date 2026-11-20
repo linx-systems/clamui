@@ -26,6 +26,8 @@ describe("applyAccentColor", () => {
     expect(Object.fromEntries(root.values)).toEqual({
       "--accent": "#9141ac",
       "--accent-hover": "#7d3894",
+      "--accent-fg": "#ffffff",
+      "--accent-hover-fg": "#ffffff",
       "--focus": "#9141ac",
     });
   });
@@ -34,8 +36,11 @@ describe("applyAccentColor", () => {
     const root = fakeRoot();
     applyAccentColor("#FFFFFF", root);
     expect(root.values.get("--accent-hover")).toBe("#dbdbdb");
+    expect(root.values.get("--accent-fg")).toBe("#000000");
+    expect(root.values.get("--accent-hover-fg")).toBe("#000000");
     applyAccentColor("#000000", root);
     expect(root.values.get("--accent-hover")).toBe("#000000");
+    expect(root.values.get("--accent-fg")).toBe("#ffffff");
   });
 
   test("ignores malformed values and keeps the current accent", () => {
@@ -45,6 +50,13 @@ describe("applyAccentColor", () => {
       applyAccentColor(invalid, root);
     }
     expect(root.values.get("--accent")).toBe("#e66100");
+  });
+
+  test("keeps button text readable when hover crosses the luminance threshold", () => {
+    const root = fakeRoot();
+    applyAccentColor("#777777", root);
+    expect(root.values.get("--accent-fg")).toBe("#000000");
+    expect(root.values.get("--accent-hover-fg")).toBe("#ffffff");
   });
 
   test("restores stylesheet defaults when the system accent is unset", () => {

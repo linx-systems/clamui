@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 15:21+0100\n"
+"POT-Creation-Date: 2026-11-19 17:14+0100\n"
 "PO-Revision-Date: 2026-08-09 00:00-0300\n"
 "Last-Translator: ClamUI Contributors\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
@@ -1002,7 +1002,7 @@ msgstr ""
 "\n"
 "Falha na quarentena:"
 
-#: crates/clamui-core/src/cli.rs:777 crates/clamui-core/src/logs.rs:1406
+#: crates/clamui-core/src/cli.rs:777 crates/clamui-core/src/logs.rs:1402
 msgid "Threats Detected"
 msgstr "Ameaças detectadas"
 
@@ -1042,7 +1042,7 @@ msgstr "Uso: clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "Nenhum arquivo em quarentena."
 
-#: crates/clamui-core/src/cli.rs:864 crates/clamui-core/src/logs.rs:1108
+#: crates/clamui-core/src/cli.rs:864 crates/clamui-core/src/logs.rs:1104
 msgid "ID"
 msgstr "ID"
 
@@ -1291,15 +1291,15 @@ msgstr "Falha ao carregar o histórico: {error}"
 msgid "No scan history found."
 msgstr "Nenhum histórico de verificação encontrado."
 
-#: crates/clamui-core/src/cli.rs:1662 crates/clamui-core/src/logs.rs:1118
+#: crates/clamui-core/src/cli.rs:1662 crates/clamui-core/src/logs.rs:1114
 msgid "Type"
 msgstr "Tipo"
 
-#: crates/clamui-core/src/cli.rs:1663 crates/clamui-core/src/logs.rs:1123
+#: crates/clamui-core/src/cli.rs:1663 crates/clamui-core/src/logs.rs:1119
 msgid "Status"
 msgstr "Status"
 
-#: crates/clamui-core/src/cli.rs:1664 crates/clamui-core/src/logs.rs:1142
+#: crates/clamui-core/src/cli.rs:1664 crates/clamui-core/src/logs.rs:1138
 msgid "Summary"
 msgstr "Resumo"
 
@@ -1458,66 +1458,66 @@ msgstr ""
 "{binary} não está instalado. Instale o pacote ClamAV necessário para sua "
 "distribuição."
 
-#: crates/clamui-core/src/logs.rs:1101
+#: crates/clamui-core/src/logs.rs:1097
 msgid "SCAN LOG"
 msgstr "REGISTRO DE VERIFICAÇÃO"
 
-#: crates/clamui-core/src/logs.rs:1103
+#: crates/clamui-core/src/logs.rs:1099
 msgid "UPDATE LOG"
 msgstr "REGISTRO DE ATUALIZAÇÃO"
 
-#: crates/clamui-core/src/logs.rs:1113
+#: crates/clamui-core/src/logs.rs:1109
 msgid "Timestamp"
 msgstr "Carimbo de data e hora"
 
-#: crates/clamui-core/src/logs.rs:1128
+#: crates/clamui-core/src/logs.rs:1124
 msgid "Duration"
 msgstr "Duração"
 
-#: crates/clamui-core/src/logs.rs:1136
+#: crates/clamui-core/src/logs.rs:1132
 msgid "Full Output"
 msgstr "Saída completa"
 
-#: crates/clamui-core/src/logs.rs:1167
+#: crates/clamui-core/src/logs.rs:1163
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} segundo"
 msgstr[1] "{count} segundos"
 
-#: crates/clamui-core/src/logs.rs:1393
+#: crates/clamui-core/src/logs.rs:1389
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "Verificação concluída"
 
-#: crates/clamui-core/src/logs.rs:1396
+#: crates/clamui-core/src/logs.rs:1392
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "Encontrada {count} ameaça{suffix}"
 msgstr[1] "Encontradas {count} ameaças{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1411
+#: crates/clamui-core/src/logs.rs:1407
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "Verificação cancelada"
 
-#: crates/clamui-core/src/logs.rs:1414
+#: crates/clamui-core/src/logs.rs:1410
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "Erro de verificação"
 
-#: crates/clamui-core/src/logs.rs:1425
+#: crates/clamui-core/src/logs.rs:1421
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "Verificado: {count} arquivo"
 msgstr[1] "Verificados: {count} arquivos"
 
-#: crates/clamui-core/src/logs.rs:1432
+#: crates/clamui-core/src/logs.rs:1428
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} diretório"
 msgstr[1] "{count} diretórios"
 
-#: crates/clamui-core/src/logs.rs:1443
+#: crates/clamui-core/src/logs.rs:1439
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Ameaça encontrada: {count}"
@@ -2257,187 +2257,195 @@ msgstr "Exportar"
 msgid "Open"
 msgstr "Abrir"
 
-#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:539
-#: desktop/src/pages/Scan.tsx:541
+#: desktop/src/App.tsx:109 desktop/src/pages/Dashboard.tsx:38
+msgid "Dashboard"
+msgstr "Painel"
+
+#: desktop/src/App.tsx:111 desktop/src/pages/Scan.tsx:539
 msgid "Scan"
 msgstr "Verificação"
 
-#: desktop/src/App.tsx:120 desktop/src/pages/Database.tsx:263
+#: desktop/src/App.tsx:113 desktop/src/pages/Database.tsx:263
 #: desktop/src/pages/Preferences.tsx:16
 msgid "Database"
 msgstr "Banco de dados"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:358
+#: desktop/src/App.tsx:115 desktop/src/pages/Logs.tsx:358
+#: desktop/src/pages/ScanOverview.tsx:80
 msgid "Logs"
 msgstr "Registros"
 
-#: desktop/src/App.tsx:124
+#: desktop/src/App.tsx:117
 msgid "Components"
 msgstr "Componentes"
 
-#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:233
+#: desktop/src/App.tsx:121 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Estatísticas"
 
-#: desktop/src/App.tsx:130
+#: desktop/src/App.tsx:123
 msgid "Audit"
 msgstr "Auditoria"
 
-#: desktop/src/App.tsx:132
+#: desktop/src/App.tsx:125
 msgid "Network"
 msgstr "Rede"
 
-#: desktop/src/App.tsx:134 desktop/src/App.tsx:911 desktop/src/App.tsx:1005
+#: desktop/src/App.tsx:127 desktop/src/App.tsx:912 desktop/src/App.tsx:1011
 #: desktop/src/pages/Preferences.tsx:164
 msgid "Preferences"
 msgstr "Preferências"
 
-#: desktop/src/App.tsx:136
+#: desktop/src/App.tsx:129
 msgid "Profiles"
 msgstr "Perfis"
 
-#: desktop/src/App.tsx:138 desktop/src/pages/Results.tsx:295
+#: desktop/src/App.tsx:131 desktop/src/pages/Results.tsx:295
 #: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr "Resultados"
 
-#: desktop/src/App.tsx:322 desktop/src/pages/ConfigPreferences.tsx:566
+#: desktop/src/App.tsx:316 desktop/src/pages/ConfigPreferences.tsx:566
 msgid "Could not open link"
 msgstr "Não foi possível abrir o link"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:405 desktop/src/App.tsx:420 desktop/src/App.tsx:438
+#: desktop/src/App.tsx:399 desktop/src/App.tsx:414 desktop/src/App.tsx:432
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Verificação em andamento — aguarde seu término antes de alterar os destinos"
 
-#: desktop/src/App.tsx:484
+#: desktop/src/App.tsx:478
 msgid "The privileged-helper installation returned an invalid status."
 msgstr "A instalação do auxiliar com privilégios retornou um status inválido."
 
-#: desktop/src/App.tsx:491
+#: desktop/src/App.tsx:485
 msgid "The privileged helper was installed successfully."
 msgstr "O auxiliar com privilégios foi instalado com sucesso."
 
-#: desktop/src/App.tsx:493
+#: desktop/src/App.tsx:487
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
 msgstr ""
 "O auxiliar com privilégios ainda não está disponível. Tente novamente ou "
 "instale-o manualmente."
 
-#: desktop/src/App.tsx:797
+#: desktop/src/App.tsx:791
 msgid "The privileged-helper status returned an invalid response."
 msgstr "O status do auxiliar com privilégios retornou uma resposta inválida."
 
-#: desktop/src/App.tsx:909
+#: desktop/src/App.tsx:910
 msgid "Back"
 msgstr "Voltar"
 
-#: desktop/src/App.tsx:917 desktop/src/pages/Profiles.tsx:109
+#: desktop/src/App.tsx:918 desktop/src/pages/Profiles.tsx:109
 #: desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "Salvando…"
 
-#: desktop/src/App.tsx:917
+#: desktop/src/App.tsx:918
 msgid "Save"
 msgstr "Salvar"
 
-#: desktop/src/App.tsx:940
+#: desktop/src/App.tsx:922
+msgid "Overview"
+msgstr "Visão geral"
+
+#: desktop/src/App.tsx:931 desktop/src/App.tsx:932 desktop/src/App.tsx:946
 msgid "Scan File or Folder"
 msgstr "Verificar arquivo ou pasta"
 
-#: desktop/src/App.tsx:947
+#: desktop/src/App.tsx:953
 msgid "Choose scan targets"
 msgstr "Escolha os alvos da verificação"
 
-#: desktop/src/App.tsx:957
+#: desktop/src/App.tsx:963
 msgid "Scan Files"
 msgstr "Verificar arquivos"
 
-#: desktop/src/App.tsx:961
+#: desktop/src/App.tsx:967
 msgid "Scan Folders"
 msgstr "Verificar pastas"
 
-#: desktop/src/App.tsx:968
+#: desktop/src/App.tsx:972 desktop/src/App.tsx:974
 msgid "Scan System (Quick Scan)"
 msgstr "Verificar sistema (verificação rápida)"
 
-#: desktop/src/App.tsx:975 desktop/src/App.tsx:976
+#: desktop/src/App.tsx:981 desktop/src/App.tsx:982 desktop/src/App.tsx:1046
 msgid "Menu"
 msgstr "Menu"
 
-#: desktop/src/App.tsx:995
+#: desktop/src/App.tsx:1001
 msgid "Application menu"
 msgstr "Menu do aplicativo"
 
-#: desktop/src/App.tsx:1009
+#: desktop/src/App.tsx:1015
 msgid "About"
 msgstr "Sobre"
 
-#: desktop/src/App.tsx:1022
+#: desktop/src/App.tsx:1027
 msgid "Main navigation"
 msgstr "Navegação principal"
 
-#: desktop/src/App.tsx:1023
+#: desktop/src/App.tsx:1029
 msgid "Views"
 msgstr "Visualizações"
 
-#: desktop/src/App.tsx:1043 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1057 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Dispensar"
 
-#: desktop/src/App.tsx:1065
+#: desktop/src/App.tsx:1079
 msgid "About ClamUI"
 msgstr "Sobre o ClamUI"
 
-#: desktop/src/App.tsx:1066
+#: desktop/src/App.tsx:1080
 msgid "A native desktop interface for ClamAV."
 msgstr "Uma interface de desktop nativa para o ClamAV."
 
-#: desktop/src/App.tsx:1068
+#: desktop/src/App.tsx:1082
 msgid "Version"
 msgstr "Versão"
 
-#: desktop/src/App.tsx:1069 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1083 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "Idioma"
 
-#: desktop/src/App.tsx:1070
+#: desktop/src/App.tsx:1084
 msgid "License"
 msgstr "Licença"
 
-#: desktop/src/App.tsx:1073
+#: desktop/src/App.tsx:1087
 msgid "Project website"
 msgstr "Site do projeto"
 
-#: desktop/src/App.tsx:1074
+#: desktop/src/App.tsx:1088
 msgid "Issue tracker"
 msgstr "Rastreador de problemas"
 
-#: desktop/src/App.tsx:1076
+#: desktop/src/App.tsx:1090
 msgid "Could not load contributor credits: {error}"
 msgstr "Não foi possível carregar os créditos dos colaboradores: {error}"
 
-#: desktop/src/App.tsx:1081
+#: desktop/src/App.tsx:1095
 msgid "Contributors"
 msgstr "Colaboradores"
 
-#: desktop/src/App.tsx:1090
+#: desktop/src/App.tsx:1104
 msgid "Translator credits"
 msgstr "Créditos dos tradutores"
 
-#: desktop/src/App.tsx:1093
+#: desktop/src/App.tsx:1107
 msgid "Loading contributor credits…"
 msgstr "Carregando créditos dos colaboradores…"
 
-#: desktop/src/App.tsx:1095
+#: desktop/src/App.tsx:1109
 msgid "Close ClamUI?"
 msgstr "Fechar o ClamUI?"
 
-#: desktop/src/App.tsx:1096
+#: desktop/src/App.tsx:1110
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
@@ -2445,66 +2453,66 @@ msgstr ""
 "Escolha se o ClamUI deve permanecer disponível na bandeja do sistema ou ser "
 "encerrado completamente."
 
-#: desktop/src/App.tsx:1097 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1111 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Lembre-se da minha escolha"
 
-#: desktop/src/App.tsx:1098 desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1112 desktop/src/App.tsx:1116
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:569
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: desktop/src/App.tsx:1098
+#: desktop/src/App.tsx:1112
 msgid "Minimize to tray"
 msgstr "Minimizar para bandeja"
 
-#: desktop/src/App.tsx:1100
+#: desktop/src/App.tsx:1114 desktop/src/pages/ScanOverview.tsx:66
 msgid "Scan in Progress"
 msgstr "Verificação em andamento"
 
-#: desktop/src/App.tsx:1101
+#: desktop/src/App.tsx:1115
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr ""
 "Uma verificação ainda está em execução. Cancelá-la pode deixar resultados "
 "parciais."
 
-#: desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1116
 msgid "Keep Scanning"
 msgstr "Continuar verificando"
 
-#: desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1116
 msgid "Cancel Scan and Close"
 msgstr "Cancelar verificação e fechar"
 
-#: desktop/src/App.tsx:1102 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1116 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "Fechar"
 
-#: desktop/src/App.tsx:1104
+#: desktop/src/App.tsx:1118
 msgid "Install Privileged Helper"
 msgstr "Instalar auxiliar com privilégios"
 
-#: desktop/src/App.tsx:1105
+#: desktop/src/App.tsx:1119
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr ""
 "O ClamUI precisa do auxiliar com privilégios correspondente para salvar a "
 "configuração do sistema."
 
-#: desktop/src/App.tsx:1107 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1121 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr "A instalação do auxiliar requer autorização de administrador."
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1108 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
@@ -2512,27 +2520,27 @@ msgstr ""
 "No Fedora com DNF, a instalação também adiciona a chave de assinatura do "
 "ClamUI ao chaveiro RPM do sistema."
 
-#: desktop/src/App.tsx:1113 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1127 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr "Instalando auxiliar com privilégios…"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1129
 msgid "Not now"
 msgstr "Agora não"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr "Instalando…"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr "Tentar novamente"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr "Instalar auxiliar"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1129
 msgid "Open Preferences"
 msgstr "Abrir preferências"
 
@@ -2697,13 +2705,13 @@ msgstr "Aguardando dados da verificação…"
 msgid "Scan progress"
 msgstr "Progresso da verificação"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
 msgid "{count} file scanned"
 msgid_plural "{count} files scanned"
 msgstr[0] "{count} arquivo verificado"
 msgstr[1] "{count} arquivos verificados"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
 #: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
@@ -2763,6 +2771,7 @@ msgstr "Cancelado"
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
 #: desktop/src/pages/SettingsPreferences.tsx:448
 #: desktop/src/pages/SettingsPreferences.tsx:472
 #: desktop/src/pages/Statistics.tsx:142
@@ -3096,7 +3105,7 @@ msgstr "Não foi possível copiar o comando: {error}"
 
 #: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Copiar"
@@ -3228,7 +3237,7 @@ msgid "Checking…"
 msgstr "Verificando…"
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:542
+#: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr "Atualizar status"
 
@@ -3365,7 +3374,7 @@ msgstr "Mover para baixo"
 #: desktop/src/pages/ConfigPreferences.tsx:317
 #: desktop/src/pages/ConfigPreferences.tsx:362
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Remover"
@@ -3464,10 +3473,12 @@ msgid "Daemon connected"
 msgstr "Daemon conectado"
 
 #: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Scanner disponível"
 
 #: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Scanner indisponível"
 
@@ -3824,7 +3835,7 @@ msgid "Used for monthly scans."
 msgstr "Usado para verificações mensais."
 
 #: desktop/src/pages/ConfigPreferences.tsx:925
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Alvos de varredura"
 
@@ -3854,6 +3865,10 @@ msgid "Automatically quarantine threats found by scheduled scans."
 msgstr ""
 "Colocar automaticamente em quarentena as ameaças encontradas por "
 "verificações agendadas."
+
+#: desktop/src/pages/Dashboard.tsx:31
+msgid "Dashboard updates are unavailable: {error}"
+msgstr "As atualizações do painel estão indisponíveis: {error}"
 
 #: desktop/src/pages/Database.tsx:58
 msgid "Active (PID {pid})"
@@ -4248,7 +4263,7 @@ msgid "Export JSON"
 msgstr "Exportar JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:559
 msgid "Clear All"
 msgstr "Limpar tudo"
 
@@ -4283,7 +4298,7 @@ msgid "Export Text"
 msgstr "Exportar texto"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:567
 msgid "Fullscreen"
 msgstr "Tela cheia"
 
@@ -4409,7 +4424,8 @@ msgstr ""
 msgid "Refreshing…"
 msgstr "Atualizando…"
 
-#: desktop/src/pages/Network.tsx:397
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/ScanOverview.tsx:59
+#: desktop/src/pages/ScanOverview.tsx:66
 #: desktop/src/pages/SettingsPreferences.tsx:464
 #: desktop/src/pages/SettingsPreferences.tsx:467
 msgid "Loading…"
@@ -4573,7 +4589,7 @@ msgstr "Os nomes dos perfis padrão são protegidos"
 msgid "Description"
 msgstr "Descrição"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:560
 msgid "No targets added"
 msgstr "Nenhuma meta adicionada"
 
@@ -5058,7 +5074,7 @@ msgstr "Copiar ou exportar"
 msgid "Quarantine All"
 msgstr "Colocar tudo em quarentena"
 
-#: desktop/src/pages/Results.tsx:195
+#: desktop/src/pages/Results.tsx:195 desktop/src/pages/ScanOverview.tsx:73
 msgid "Files scanned"
 msgstr "Arquivos verificados"
 
@@ -5066,7 +5082,7 @@ msgstr "Arquivos verificados"
 msgid "Directories"
 msgstr "Diretórios"
 
-#: desktop/src/pages/Results.tsx:197
+#: desktop/src/pages/Results.tsx:197 desktop/src/pages/ScanOverview.tsx:74
 msgid "Threats found"
 msgstr "Ameaças encontradas"
 
@@ -5103,7 +5119,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr "Arquivos inacessíveis adicionais não são exibidos nesta visualização."
 
 #: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 msgid "Scan details"
 msgstr "Detalhes da verificação"
 
@@ -5142,7 +5158,7 @@ msgstr "Resultados do VirusTotal"
 msgid "Detections"
 msgstr "Detecções"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:239 desktop/src/pages/ScanOverview.tsx:72
 msgid "Last scanned"
 msgstr "Última verificação"
 
@@ -5237,11 +5253,11 @@ msgstr ""
 msgid "API key available"
 msgstr "Chave de API disponível"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
 msgid "Scanning…"
 msgstr "Verificando…"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
 msgid "Scan with VirusTotal"
 msgstr "Verificar com o VirusTotal"
 
@@ -5313,61 +5329,73 @@ msgstr "Não foi possível cancelar a verificação"
 msgid "Running EICAR test…"
 msgstr "Executando o teste EICAR…"
 
-#: desktop/src/pages/Scan.tsx:541
-msgid "Backend"
-msgstr "Backend"
-
-#: desktop/src/pages/Scan.tsx:542
-msgid "Manage Profiles"
-msgstr "Gerenciar perfis"
-
-#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:540 desktop/src/pages/Scan.tsx:567
 msgid "Details"
 msgstr "Detalhes"
 
-#: desktop/src/pages/Scan.tsx:548
+#: desktop/src/pages/Scan.tsx:543
+msgid "Backend"
+msgstr "Backend"
+
+#: desktop/src/pages/Scan.tsx:544
+msgid "Manage Profiles"
+msgstr "Gerenciar perfis"
+
+#: desktop/src/pages/Scan.tsx:549
 msgid "Profile"
 msgstr "Perfil"
 
-#: desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Scan.tsx:555
 msgid "No Profile (Manual)"
 msgstr "Nenhum perfil (manual)"
 
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:559
 msgid "Drop local files or folders here, or add them below."
 msgstr "Solte arquivos ou pastas locais aqui ou adicione-os abaixo."
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Start Scan"
 msgstr "Iniciar verificação"
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Run EICAR Test"
 msgstr "Executar teste EICAR"
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Select one file before using VirusTotal"
 msgstr "Selecione um arquivo antes de usar o VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:77
 msgid "Latest scan"
 msgstr "Verificação mais recente"
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:80
 msgid "View Results"
 msgstr "Ver resultados"
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569
 msgid "Virus database is not available"
 msgstr "O banco de dados de vírus não está disponível"
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569 desktop/src/pages/ScanOverview.tsx:67
 msgid "Update the database before starting a scan."
 msgstr "Atualize o banco de dados antes de iniciar uma verificação."
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569
 msgid "Open Database Updates"
 msgstr "Abrir atualizações do banco de dados"
+
+#: desktop/src/pages/ScanOverview.tsx:44
+msgid "Scan overview updates are unavailable: {error}"
+msgstr "As atualizações da visão geral da verificação estão indisponíveis: {error}"
+
+#: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/Statistics.tsx:120
+msgid "No scans recorded"
+msgstr "Nenhuma verificação registrada"
+
+#: desktop/src/pages/ScanOverview.tsx:67
+msgid "Scan files and folders with ClamAV."
+msgstr "Verifique arquivos e pastas com o ClamAV."
 
 #: desktop/src/pages/SettingsPreferences.tsx:47
 msgid "Node.js dependencies"
@@ -5975,10 +6003,6 @@ msgstr[1] ""
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Delete Logs"
 msgstr "Excluir registros"
-
-#: desktop/src/pages/Statistics.tsx:120
-msgid "No scans recorded"
-msgstr "Nenhuma verificação registrada"
 
 #: desktop/src/pages/Statistics.tsx:123
 msgid "less than an hour ago"

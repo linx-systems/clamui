@@ -537,11 +537,12 @@ export default function Scan() {
   const resultStatus = result?.status === "infected" ? "warning" : result?.status === "error" ? "error" : result?.status === "clean" ? "success" : "";
 
   return <section className="page scan-page" onDragOver={(event) => event.preventDefault()} onDrop={drop} aria-label={_("Scan")}>
+    {notice && <div className={`notice ${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"}><strong>{notice.message}</strong>{notice.detail && <details><summary>{_("Details")}</summary><pre className="monospace">{notice.detail}</pre></details>}</div>}
+
     <header className="page-header">
-      <div><h1>{_("Scan")}</h1><p className="muted">{scanner?.active_backend || scanner?.backend ? `${_("Backend")}: ${scanner.active_backend ?? scanner.backend}` : ""}</p></div>
+      <div><p className="muted">{scanner?.active_backend || scanner?.backend ? `${_("Backend")}: ${scanner.active_backend ?? scanner.backend}` : ""}</p></div>
       <div className="actions"><button className="button" onClick={() => void refreshStatus()} disabled={scanning}>{_("Refresh status")}</button><button className="button" onClick={() => navigate("profiles")}>{_("Manage Profiles")}</button></div>
     </header>
-    {notice && <div className={`notice ${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"}><strong>{notice.message}</strong>{notice.detail && <details><summary>{_("Details")}</summary><pre className="monospace">{notice.detail}</pre></details>}</div>}
 
     <section aria-labelledby="scan-profile-title">
       <h2 id="scan-profile-title" className="section-heading">{_("Scan Profile")}</h2>

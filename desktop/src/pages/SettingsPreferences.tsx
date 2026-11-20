@@ -124,7 +124,7 @@ function addPickedExclusions(current: Exclusion[], paths: string[], type: "direc
 }
 
 function Field({ label, children, detail }: { label: string; children: ReactNode; detail?: string }) {
-  return <label className="preference-row setting-row"><span className="row-copy"><strong>{label}</strong>{detail && <small>{detail}</small>}</span><span className="field-control">{children}</span></label>;
+  return <label className="preference-row setting-row"><span className="row-copy"><strong>{label}</strong>{detail && <small>{detail}</small>}</span><span className="field-control switch-control">{children}</span></label>;
 }
 
 function Section({ title, children, description }: { title: string; children?: ReactNode; description?: string }) {

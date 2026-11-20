@@ -22,9 +22,12 @@ import { HelperTrustErrorDialog } from "./HelperTrustErrorDialog";
 import { helperTrustFailure, isHelperTrustError } from "./helperTrustError";
 import { Icon, type IconName } from "./Icon";
 import { _, activeCatalog } from "./i18n";
+import { INITIAL_MOUNTED_PAGES } from "./initialMountedPages";
 import { Modal } from "./Modal";
+import type { PageId } from "./pageId";
 import Audit from "./pages/Audit";
 import Components from "./pages/Components";
+import Dashboard from "./pages/Dashboard";
 import Database from "./pages/Database";
 import Logs from "./pages/Logs";
 import Network from "./pages/Network";
@@ -34,19 +37,6 @@ import Quarantine from "./pages/Quarantine";
 import Results from "./pages/Results";
 import Scan from "./pages/Scan";
 import Statistics from "./pages/Statistics";
-
-type PageId =
-  | "scan"
-  | "database"
-  | "logs"
-  | "components"
-  | "quarantine"
-  | "statistics"
-  | "audit"
-  | "network"
-  | "preferences"
-  | "profiles"
-  | "results";
 
 type NavigationDetail = { page: PageId; args: Record<string, unknown> };
 type Toast = { id: number; message: string; type: "success" | "error" | "info" | "warning" };
@@ -59,7 +49,7 @@ type HelperStatus = {
   needsOnboarding: boolean;
 };
 
-const pageComponents: Record<Exclude<PageId, "database" | "preferences">, ComponentType<{ active: boolean }>> = {
+const pageComponents: Record<Exclude<PageId, "database" | "dashboard" | "preferences">, ComponentType<{ active: boolean }>> = {
   scan: Scan,
   logs: Logs,
   components: Components,
@@ -76,14 +66,15 @@ const destinations: Array<{
   shortcut: string;
   icon: IconName;
 }> = [
-  { id: "scan", shortcut: "Ctrl+1", icon: "folder" },
-  { id: "database", shortcut: "Ctrl+2", icon: "database" },
-  { id: "logs", shortcut: "Ctrl+3", icon: "logs" },
-  { id: "components", shortcut: "Ctrl+4", icon: "components" },
-  { id: "quarantine", shortcut: "Ctrl+5", icon: "shield" },
-  { id: "statistics", shortcut: "Ctrl+6", icon: "statistics" },
-  { id: "audit", shortcut: "Ctrl+7", icon: "audit" },
-  { id: "network", shortcut: "Ctrl+8", icon: "network" },
+  { id: "dashboard", shortcut: "Ctrl+1", icon: "home" },
+  { id: "scan", shortcut: "Ctrl+2", icon: "search" },
+  { id: "database", shortcut: "Ctrl+3", icon: "database" },
+  { id: "logs", shortcut: "Ctrl+4", icon: "logs" },
+  { id: "components", shortcut: "Ctrl+5", icon: "components" },
+  { id: "quarantine", shortcut: "Ctrl+6", icon: "shield" },
+  { id: "statistics", shortcut: "Ctrl+7", icon: "statistics" },
+  { id: "audit", shortcut: "Ctrl+8", icon: "audit" },
+  { id: "network", shortcut: "Ctrl+9", icon: "network" },
 ];
 
 const PROJECT_URL = "https://github.com/linx-systems/clamui";
@@ -114,6 +105,8 @@ function contributorCredit(line: string): { name: string; url: string | null } {
 
 function pageLabel(page: PageId): string {
   switch (page) {
+    case "dashboard":
+      return _("Dashboard");
     case "scan":
       return _("Scan");
     case "database":
@@ -140,6 +133,7 @@ function pageLabel(page: PageId): string {
 }
 function isPageId(value: unknown): value is PageId {
   switch (value) {
+    case "dashboard":
     case "scan":
     case "database":
     case "logs":
@@ -224,10 +218,10 @@ function helperStatusFrom(value: unknown): HelperStatus | null {
 }
 
 export default function App(): ReactNode {
-  const [activePage, setActivePage] = useState<PageId>("scan");
-  const activePageRef = useRef<PageId>("scan");
-  const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("scan");
-  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(["scan"]));
+  const [activePage, setActivePage] = useState<PageId>("dashboard");
+  const activePageRef = useRef<PageId>("dashboard");
+  const [previousPage, setPreviousPage] = useState<Exclude<PageId, "preferences">>("dashboard");
+  const [mountedPages, setMountedPages] = useState<Set<PageId>>(() => new Set(INITIAL_MOUNTED_PAGES));
   const preferencesRef = useRef<PreferencesHandle>(null);
   const [preferencesSaveStatus, setPreferencesSaveStatus] = useState<{ dirty: boolean; busy: boolean }>({ dirty: false, busy: false });
   const flushPreferencesBeforeClose = useCallback(async (): Promise<void> => {
@@ -879,6 +873,13 @@ export default function App(): ReactNode {
           </section>
         );
       }
+      if (page === "dashboard") {
+        return (
+          <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
+            <Dashboard active={selected} scanning={scanJobId !== null} />
+          </section>
+        );
+      }
       if (page === "preferences") {
         return (
           <section className="content-page" key={page} hidden={!selected} aria-hidden={!selected} aria-label={pageLabel(page)}>
@@ -893,7 +894,7 @@ export default function App(): ReactNode {
         </section>
       );
     });
-  }, [activePage, mountedPages, updateStartRequest]);
+  }, [activePage, mountedPages, scanJobId, updateStartRequest]);
 
   const catalog = activeCatalog();
   const translatorCredits = aboutCredits?.translator_credits?.trim();
@@ -918,12 +919,17 @@ export default function App(): ReactNode {
           </div>
         ) : null}
         {!preferencesOpen ? (
+          <h1 className="header-title">{activePage === "dashboard" ? _("Overview") : pageLabel(activePage)}</h1>
+        ) : null}
+        {!preferencesOpen ? (
           <div className="header-actions">
             <div className="application-menu" ref={targetMenuRef}>
               <button
                 className="button"
                 type="button"
                 ref={targetMenuButtonRef}
+                aria-label={_("Scan File or Folder")}
+                title={_("Scan File or Folder")}
                 aria-haspopup="menu"
                 aria-expanded={openMenu === "targets"}
                 aria-controls="scan-targets-menu"
@@ -937,7 +943,7 @@ export default function App(): ReactNode {
                 disabled={scanJobId !== null}
               >
                 <Icon name="folder" className="header-action-icon" />
-                {_("Scan File or Folder")}
+                <span className="header-action-label">{_("Scan File or Folder")}</span>
               </button>
               {openMenu === "targets" ? (
                 <div
@@ -963,9 +969,9 @@ export default function App(): ReactNode {
                 </div>
               ) : null}
             </div>
-            <button className="button primary" type="button" onClick={quickScan} disabled={scanJobId !== null}>
-              <Icon name="system" className="header-action-icon" />
-              {_("Scan System (Quick Scan)")}
+            <button className="button primary" type="button" title={_("Scan System (Quick Scan)")} aria-label={_("Scan System (Quick Scan)")} onClick={quickScan} disabled={scanJobId !== null}>
+              <Icon name="bolt" className="header-action-icon" />
+              <span className="header-action-label">{_("Scan System (Quick Scan)")}</span>
             </button>
             <div className="application-menu" ref={applicationMenuRef}>
               <button
@@ -1018,8 +1024,8 @@ export default function App(): ReactNode {
           </div>
         ) : null}
       </header>
-      {!preferencesOpen ? (
         <aside className="sidebar" aria-label={_("Main navigation")}>
+          <div className="brand" aria-label="ClamUI"><span className="brand-mark" aria-hidden="true">C</span><span className="brand-name">ClamUI</span></div>
           <nav className="navigation" aria-label={_("Views")}>
             {destinations.map((destination) => (
               <button
@@ -1028,7 +1034,8 @@ export default function App(): ReactNode {
                 type="button"
                 aria-current={activePage === destination.id ? "page" : undefined}
                 aria-keyshortcuts={destination.shortcut.replace("Ctrl", "Control")}
-                title={destination.shortcut}
+                aria-label={pageLabel(destination.id)}
+                title={`${pageLabel(destination.id)} (${destination.shortcut})`}
                 onClick={() => selectPage(destination.id)}
               >
                 <Icon name={destination.icon} />
@@ -1036,8 +1043,15 @@ export default function App(): ReactNode {
               </button>
             ))}
           </nav>
+          <nav className="sidebar-footer" aria-label={_("Menu")}>
+            {(["results", "profiles", "preferences"] as const).map((page) => (
+              <button className="navigation-item" key={page} type="button" aria-current={activePage === page ? "page" : undefined} aria-label={pageLabel(page)} title={pageLabel(page)} onClick={() => selectPage(page)}>
+                <Icon name={page === "preferences" ? "settings" : page === "profiles" ? "folder" : "logs"} />
+                <span className="navigation-label">{pageLabel(page)}</span>
+              </button>
+            ))}
+          </nav>
         </aside>
-      ) : null}
       <ConfigurationRecoveryProvider actions={configurationRecoveryActions}>
         <main className="main-content">
           {activity ? <div className="activity-banner notice" role="status"><span>{activity}</span><button className="button" type="button" onClick={() => setActivity(null)}>{_("Dismiss")}</button></div> : null}

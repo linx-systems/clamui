@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 15:21+0100\n"
+"POT-Creation-Date: 2026-11-19 17:14+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -1012,7 +1012,7 @@ msgstr ""
 "\n"
 "Không thể cách ly:"
 
-#: crates/clamui-core/src/cli.rs:777 crates/clamui-core/src/logs.rs:1406
+#: crates/clamui-core/src/cli.rs:777 crates/clamui-core/src/logs.rs:1402
 msgid "Threats Detected"
 msgstr "Phát hiện mối đe dọa"
 
@@ -1052,7 +1052,7 @@ msgstr "Cách dùng: clamui quarantine delete ID"
 msgid "No quarantined files."
 msgstr "Không có tệp nào đã cách ly."
 
-#: crates/clamui-core/src/cli.rs:864 crates/clamui-core/src/logs.rs:1108
+#: crates/clamui-core/src/cli.rs:864 crates/clamui-core/src/logs.rs:1104
 msgid "ID"
 msgstr "ID"
 
@@ -1300,15 +1300,15 @@ msgstr "Không thể tải lịch sử: {error}"
 msgid "No scan history found."
 msgstr "Không tìm thấy lịch sử quét."
 
-#: crates/clamui-core/src/cli.rs:1662 crates/clamui-core/src/logs.rs:1118
+#: crates/clamui-core/src/cli.rs:1662 crates/clamui-core/src/logs.rs:1114
 msgid "Type"
 msgstr "Loại"
 
-#: crates/clamui-core/src/cli.rs:1663 crates/clamui-core/src/logs.rs:1123
+#: crates/clamui-core/src/cli.rs:1663 crates/clamui-core/src/logs.rs:1119
 msgid "Status"
 msgstr "Trạng thái"
 
-#: crates/clamui-core/src/cli.rs:1664 crates/clamui-core/src/logs.rs:1142
+#: crates/clamui-core/src/cli.rs:1664 crates/clamui-core/src/logs.rs:1138
 msgid "Summary"
 msgstr "Tóm tắt"
 
@@ -1463,62 +1463,62 @@ msgstr ""
 "{binary} chưa được cài đặt. Hãy cài đặt gói ClamAV cần thiết cho bản phân "
 "phối đang dùng."
 
-#: crates/clamui-core/src/logs.rs:1101
+#: crates/clamui-core/src/logs.rs:1097
 msgid "SCAN LOG"
 msgstr "NHẬT KÝ QUÉT"
 
-#: crates/clamui-core/src/logs.rs:1103
+#: crates/clamui-core/src/logs.rs:1099
 msgid "UPDATE LOG"
 msgstr "NHẬT KÝ CẬP NHẬT"
 
-#: crates/clamui-core/src/logs.rs:1113
+#: crates/clamui-core/src/logs.rs:1109
 msgid "Timestamp"
 msgstr "Thời điểm"
 
-#: crates/clamui-core/src/logs.rs:1128
+#: crates/clamui-core/src/logs.rs:1124
 msgid "Duration"
 msgstr "Thời lượng"
 
-#: crates/clamui-core/src/logs.rs:1136
+#: crates/clamui-core/src/logs.rs:1132
 msgid "Full Output"
 msgstr "Toàn bộ đầu ra"
 
-#: crates/clamui-core/src/logs.rs:1167
+#: crates/clamui-core/src/logs.rs:1163
 msgid "{count} second"
 msgid_plural "{count} seconds"
 msgstr[0] "{count} giây"
 
-#: crates/clamui-core/src/logs.rs:1393
+#: crates/clamui-core/src/logs.rs:1389
 #: desktop/src-tauri/src/notifications.rs:107
 msgid "Scan Complete"
 msgstr "Quét hoàn tất"
 
-#: crates/clamui-core/src/logs.rs:1396
+#: crates/clamui-core/src/logs.rs:1392
 msgid "Found {count} threat{suffix}"
 msgid_plural "Found {count} threats{suffix}"
 msgstr[0] "Tìm thấy {count} mối đe dọa{suffix}"
 
-#: crates/clamui-core/src/logs.rs:1411
+#: crates/clamui-core/src/logs.rs:1407
 #: desktop/src-tauri/src/notifications.rs:109
 msgid "Scan Cancelled"
 msgstr "Đã hủy quét"
 
-#: crates/clamui-core/src/logs.rs:1414
+#: crates/clamui-core/src/logs.rs:1410
 #: desktop/src-tauri/src/notifications.rs:111
 msgid "Scan Error"
 msgstr "Lỗi quét"
 
-#: crates/clamui-core/src/logs.rs:1425
+#: crates/clamui-core/src/logs.rs:1421
 msgid "Scanned: {count} file"
 msgid_plural "Scanned: {count} files"
 msgstr[0] "Đã quét: {count} tệp"
 
-#: crates/clamui-core/src/logs.rs:1432
+#: crates/clamui-core/src/logs.rs:1428
 msgid "{count} directory"
 msgid_plural "{count} directories"
 msgstr[0] "{count} thư mục"
 
-#: crates/clamui-core/src/logs.rs:1443
+#: crates/clamui-core/src/logs.rs:1439
 msgid "Threat found: {count}"
 msgid_plural "Threats found: {count}"
 msgstr[0] "Số mối đe dọa tìm thấy: {count}"
@@ -2226,252 +2226,260 @@ msgstr "Xuất"
 msgid "Open"
 msgstr "Mở"
 
-#: desktop/src/App.tsx:118 desktop/src/pages/Scan.tsx:539
-#: desktop/src/pages/Scan.tsx:541
+#: desktop/src/App.tsx:109 desktop/src/pages/Dashboard.tsx:38
+msgid "Dashboard"
+msgstr "Bảng điều khiển"
+
+#: desktop/src/App.tsx:111 desktop/src/pages/Scan.tsx:539
 msgid "Scan"
 msgstr "Quét"
 
-#: desktop/src/App.tsx:120 desktop/src/pages/Database.tsx:263
+#: desktop/src/App.tsx:113 desktop/src/pages/Database.tsx:263
 #: desktop/src/pages/Preferences.tsx:16
 msgid "Database"
 msgstr "Cơ sở dữ liệu"
 
-#: desktop/src/App.tsx:122 desktop/src/pages/Logs.tsx:358
+#: desktop/src/App.tsx:115 desktop/src/pages/Logs.tsx:358
+#: desktop/src/pages/ScanOverview.tsx:80
 msgid "Logs"
 msgstr "Nhật ký"
 
-#: desktop/src/App.tsx:124
+#: desktop/src/App.tsx:117
 msgid "Components"
 msgstr "Thành phần"
 
-#: desktop/src/App.tsx:128 desktop/src/pages/Statistics.tsx:233
+#: desktop/src/App.tsx:121 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Thống kê"
 
-#: desktop/src/App.tsx:130
+#: desktop/src/App.tsx:123
 msgid "Audit"
 msgstr "Kiểm tra bảo mật"
 
-#: desktop/src/App.tsx:132
+#: desktop/src/App.tsx:125
 msgid "Network"
 msgstr "Mạng"
 
-#: desktop/src/App.tsx:134 desktop/src/App.tsx:911 desktop/src/App.tsx:1005
+#: desktop/src/App.tsx:127 desktop/src/App.tsx:912 desktop/src/App.tsx:1011
 #: desktop/src/pages/Preferences.tsx:164
 msgid "Preferences"
 msgstr "Tùy chọn"
 
-#: desktop/src/App.tsx:136
+#: desktop/src/App.tsx:129
 msgid "Profiles"
 msgstr "Hồ sơ quét"
 
-#: desktop/src/App.tsx:138 desktop/src/pages/Results.tsx:295
+#: desktop/src/App.tsx:131 desktop/src/pages/Results.tsx:295
 #: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr "Kết quả"
 
-#: desktop/src/App.tsx:322 desktop/src/pages/ConfigPreferences.tsx:566
+#: desktop/src/App.tsx:316 desktop/src/pages/ConfigPreferences.tsx:566
 msgid "Could not open link"
 msgstr "Không thể mở liên kết"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:405 desktop/src/App.tsx:420 desktop/src/App.tsx:438
+#: desktop/src/App.tsx:399 desktop/src/App.tsx:414 desktop/src/App.tsx:432
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Đang quét — hãy đợi quá trình quét hoàn tất trước khi thay đổi mục tiêu"
 
-#: desktop/src/App.tsx:484
+#: desktop/src/App.tsx:478
 msgid "The privileged-helper installation returned an invalid status."
 msgstr ""
 "Quá trình cài đặt trình trợ giúp đặc quyền trả về trạng thái không hợp lệ."
 
-#: desktop/src/App.tsx:491
+#: desktop/src/App.tsx:485
 msgid "The privileged helper was installed successfully."
 msgstr "Đã cài đặt trình trợ giúp đặc quyền thành công."
 
-#: desktop/src/App.tsx:493
+#: desktop/src/App.tsx:487
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
 msgstr ""
 "Trình trợ giúp đặc quyền vẫn chưa khả dụng. Hãy thử lại hoặc cài đặt thủ "
 "công."
 
-#: desktop/src/App.tsx:797
+#: desktop/src/App.tsx:791
 msgid "The privileged-helper status returned an invalid response."
 msgstr ""
 "Yêu cầu kiểm tra trạng thái trình trợ giúp đặc quyền trả về phản hồi không "
 "hợp lệ."
 
-#: desktop/src/App.tsx:909
+#: desktop/src/App.tsx:910
 msgid "Back"
 msgstr "Quay lại"
 
-#: desktop/src/App.tsx:917 desktop/src/pages/Profiles.tsx:109
+#: desktop/src/App.tsx:918 desktop/src/pages/Profiles.tsx:109
 #: desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "Đang lưu…"
 
-#: desktop/src/App.tsx:917
+#: desktop/src/App.tsx:918
 msgid "Save"
 msgstr "Lưu"
 
-#: desktop/src/App.tsx:940
+#: desktop/src/App.tsx:922
+msgid "Overview"
+msgstr "Tổng quan"
+
+#: desktop/src/App.tsx:931 desktop/src/App.tsx:932 desktop/src/App.tsx:946
 msgid "Scan File or Folder"
 msgstr "Quét tệp hoặc thư mục"
 
-#: desktop/src/App.tsx:947
+#: desktop/src/App.tsx:953
 msgid "Choose scan targets"
 msgstr "Chọn mục tiêu quét"
 
-#: desktop/src/App.tsx:957
+#: desktop/src/App.tsx:963
 msgid "Scan Files"
 msgstr "Quét tệp"
 
-#: desktop/src/App.tsx:961
+#: desktop/src/App.tsx:967
 msgid "Scan Folders"
 msgstr "Quét thư mục"
 
-#: desktop/src/App.tsx:968
+#: desktop/src/App.tsx:972 desktop/src/App.tsx:974
 msgid "Scan System (Quick Scan)"
 msgstr "Quét hệ thống (quét nhanh)"
 
-#: desktop/src/App.tsx:975 desktop/src/App.tsx:976
+#: desktop/src/App.tsx:981 desktop/src/App.tsx:982 desktop/src/App.tsx:1046
 msgid "Menu"
 msgstr "Menu"
 
-#: desktop/src/App.tsx:995
+#: desktop/src/App.tsx:1001
 msgid "Application menu"
 msgstr "Menu ứng dụng"
 
-#: desktop/src/App.tsx:1009
+#: desktop/src/App.tsx:1015
 msgid "About"
 msgstr "Giới thiệu"
 
-#: desktop/src/App.tsx:1022
+#: desktop/src/App.tsx:1027
 msgid "Main navigation"
 msgstr "Điều hướng chính"
 
-#: desktop/src/App.tsx:1023
+#: desktop/src/App.tsx:1029
 msgid "Views"
 msgstr "Các trang"
 
-#: desktop/src/App.tsx:1043 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1057 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Bỏ qua"
 
-#: desktop/src/App.tsx:1065
+#: desktop/src/App.tsx:1079
 msgid "About ClamUI"
 msgstr "Giới thiệu về ClamUI"
 
-#: desktop/src/App.tsx:1066
+#: desktop/src/App.tsx:1080
 msgid "A native desktop interface for ClamAV."
 msgstr "Giao diện máy tính để bàn gốc dành cho ClamAV."
 
-#: desktop/src/App.tsx:1068
+#: desktop/src/App.tsx:1082
 msgid "Version"
 msgstr "Phiên bản"
 
-#: desktop/src/App.tsx:1069 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1083 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "Ngôn ngữ"
 
-#: desktop/src/App.tsx:1070
+#: desktop/src/App.tsx:1084
 msgid "License"
 msgstr "Giấy phép"
 
-#: desktop/src/App.tsx:1073
+#: desktop/src/App.tsx:1087
 msgid "Project website"
 msgstr "Trang web dự án"
 
-#: desktop/src/App.tsx:1074
+#: desktop/src/App.tsx:1088
 msgid "Issue tracker"
 msgstr "Trình theo dõi sự cố"
 
-#: desktop/src/App.tsx:1076
+#: desktop/src/App.tsx:1090
 msgid "Could not load contributor credits: {error}"
 msgstr "Không thể tải danh sách người đóng góp: {error}"
 
-#: desktop/src/App.tsx:1081
+#: desktop/src/App.tsx:1095
 msgid "Contributors"
 msgstr "Người đóng góp"
 
-#: desktop/src/App.tsx:1090
+#: desktop/src/App.tsx:1104
 msgid "Translator credits"
 msgstr "Người dịch"
 
-#: desktop/src/App.tsx:1093
+#: desktop/src/App.tsx:1107
 msgid "Loading contributor credits…"
 msgstr "Đang tải danh sách người đóng góp…"
 
-#: desktop/src/App.tsx:1095
+#: desktop/src/App.tsx:1109
 msgid "Close ClamUI?"
 msgstr "Đóng ClamUI?"
 
-#: desktop/src/App.tsx:1096
+#: desktop/src/App.tsx:1110
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
 msgstr "Chọn giữ ClamUI chạy trong khay hệ thống hay thoát hoàn toàn."
 
-#: desktop/src/App.tsx:1097 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1111 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Ghi nhớ lựa chọn của tôi"
 
-#: desktop/src/App.tsx:1098 desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1112 desktop/src/App.tsx:1116
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:569
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
 msgstr "Hủy"
 
-#: desktop/src/App.tsx:1098
+#: desktop/src/App.tsx:1112
 msgid "Minimize to tray"
 msgstr "Thu nhỏ xuống khay hệ thống"
 
-#: desktop/src/App.tsx:1100
+#: desktop/src/App.tsx:1114 desktop/src/pages/ScanOverview.tsx:66
 msgid "Scan in Progress"
 msgstr "Đang quét"
 
-#: desktop/src/App.tsx:1101
+#: desktop/src/App.tsx:1115
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr "Quá trình quét vẫn đang chạy. Nếu hủy, kết quả có thể không đầy đủ."
 
-#: desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1116
 msgid "Keep Scanning"
 msgstr "Tiếp tục quét"
 
-#: desktop/src/App.tsx:1102
+#: desktop/src/App.tsx:1116
 msgid "Cancel Scan and Close"
 msgstr "Hủy quét và đóng"
 
-#: desktop/src/App.tsx:1102 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1116 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "Đóng"
 
-#: desktop/src/App.tsx:1104
+#: desktop/src/App.tsx:1118
 msgid "Install Privileged Helper"
 msgstr "Cài đặt trình trợ giúp đặc quyền"
 
-#: desktop/src/App.tsx:1105
+#: desktop/src/App.tsx:1119
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr ""
 "ClamUI cần trình trợ giúp đặc quyền tương ứng để lưu cấu hình hệ thống."
 
-#: desktop/src/App.tsx:1107 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1121 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr "Việc cài đặt trình trợ giúp cần được cấp quyền quản trị."
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1108 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
@@ -2479,27 +2487,27 @@ msgstr ""
 "Trên Fedora dùng DNF, quá trình cài đặt cũng thêm khóa ký của ClamUI vào kho "
 "khóa RPM của hệ thống."
 
-#: desktop/src/App.tsx:1113 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1127 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr "Đang cài đặt trình trợ giúp đặc quyền…"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1129
 msgid "Not now"
 msgstr "Để sau"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr "Đang cài đặt…"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr "Thử lại"
 
-#: desktop/src/App.tsx:1115 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr "Cài đặt trình trợ giúp"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1129
 msgid "Open Preferences"
 msgstr "Mở Tùy chọn"
 
@@ -2665,12 +2673,12 @@ msgstr "Đang chờ dữ liệu quét…"
 msgid "Scan progress"
 msgstr "Tiến trình quét"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
 msgid "{count} file scanned"
 msgid_plural "{count} files scanned"
 msgstr[0] "Đã quét {count} tệp"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:566
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
 #: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
@@ -2729,6 +2737,7 @@ msgstr "Đã hủy"
 #: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
 #: desktop/src/pages/SettingsPreferences.tsx:448
 #: desktop/src/pages/SettingsPreferences.tsx:472
 #: desktop/src/pages/Statistics.tsx:142
@@ -3055,7 +3064,7 @@ msgstr "Không thể sao chép lệnh: {error}"
 
 #: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Sao chép"
@@ -3187,7 +3196,7 @@ msgid "Checking…"
 msgstr "Đang kiểm tra…"
 
 #: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:542
+#: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr "Làm mới trạng thái"
 
@@ -3324,7 +3333,7 @@ msgstr "Di chuyển xuống"
 #: desktop/src/pages/ConfigPreferences.tsx:317
 #: desktop/src/pages/ConfigPreferences.tsx:362
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Gỡ bỏ"
@@ -3421,10 +3430,12 @@ msgid "Daemon connected"
 msgstr "Đã kết nối dịch vụ"
 
 #: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Trình quét khả dụng"
 
 #: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Trình quét không khả dụng"
 
@@ -3781,7 +3792,7 @@ msgid "Used for monthly scans."
 msgstr "Dùng cho quét hằng tháng."
 
 #: desktop/src/pages/ConfigPreferences.tsx:925
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Mục tiêu quét"
 
@@ -3809,6 +3820,10 @@ msgstr "Tự động cách ly"
 #: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "Tự động cách ly các mối đe dọa được phát hiện khi quét theo lịch."
+
+#: desktop/src/pages/Dashboard.tsx:31
+msgid "Dashboard updates are unavailable: {error}"
+msgstr "Không thể nhận cập nhật bảng điều khiển: {error}"
 
 #: desktop/src/pages/Database.tsx:58
 msgid "Active (PID {pid})"
@@ -4194,7 +4209,7 @@ msgid "Export JSON"
 msgstr "Xuất JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:559
 msgid "Clear All"
 msgstr "Xóa tất cả"
 
@@ -4228,7 +4243,7 @@ msgid "Export Text"
 msgstr "Xuất văn bản"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:567
 msgid "Fullscreen"
 msgstr "Toàn màn hình"
 
@@ -4353,7 +4368,8 @@ msgstr ""
 msgid "Refreshing…"
 msgstr "Đang làm mới…"
 
-#: desktop/src/pages/Network.tsx:397
+#: desktop/src/pages/Network.tsx:397 desktop/src/pages/ScanOverview.tsx:59
+#: desktop/src/pages/ScanOverview.tsx:66
 #: desktop/src/pages/SettingsPreferences.tsx:464
 #: desktop/src/pages/SettingsPreferences.tsx:467
 msgid "Loading…"
@@ -4514,7 +4530,7 @@ msgstr "Tên hồ sơ quét mặc định được bảo vệ"
 msgid "Description"
 msgstr "Mô tả"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:560
 msgid "No targets added"
 msgstr "Chưa thêm mục tiêu nào"
 
@@ -4989,7 +5005,7 @@ msgstr "Sao chép hoặc xuất"
 msgid "Quarantine All"
 msgstr "Cách ly tất cả"
 
-#: desktop/src/pages/Results.tsx:195
+#: desktop/src/pages/Results.tsx:195 desktop/src/pages/ScanOverview.tsx:73
 msgid "Files scanned"
 msgstr "Tệp đã quét"
 
@@ -4997,7 +5013,7 @@ msgstr "Tệp đã quét"
 msgid "Directories"
 msgstr "Thư mục"
 
-#: desktop/src/pages/Results.tsx:197
+#: desktop/src/pages/Results.tsx:197 desktop/src/pages/ScanOverview.tsx:74
 msgid "Threats found"
 msgstr "Mối đe dọa tìm thấy"
 
@@ -5034,7 +5050,7 @@ msgid "Additional inaccessible files are omitted from this view."
 msgstr "Các tệp không truy cập được khác đã bị lược bỏ khỏi chế độ xem này."
 
 #: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
-#: desktop/src/pages/Scan.tsx:566 desktop/src/pages/Scan.tsx:570
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 msgid "Scan details"
 msgstr "Chi tiết lượt quét"
 
@@ -5072,7 +5088,7 @@ msgstr "Kết quả VirusTotal"
 msgid "Detections"
 msgstr "Lượt phát hiện"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:239 desktop/src/pages/ScanOverview.tsx:72
 msgid "Last scanned"
 msgstr "Lần quét gần nhất"
 
@@ -5163,11 +5179,11 @@ msgstr ""
 msgid "API key available"
 msgstr "Đã có khóa API"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
 msgid "Scanning…"
 msgstr "Đang quét…"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
 msgid "Scan with VirusTotal"
 msgstr "Quét bằng VirusTotal"
 
@@ -5235,61 +5251,73 @@ msgstr "Không thể hủy quét"
 msgid "Running EICAR test…"
 msgstr "Đang chạy thử nghiệm EICAR…"
 
-#: desktop/src/pages/Scan.tsx:541
-msgid "Backend"
-msgstr "Cơ chế quét"
-
-#: desktop/src/pages/Scan.tsx:542
-msgid "Manage Profiles"
-msgstr "Quản lý hồ sơ quét"
-
-#: desktop/src/pages/Scan.tsx:544 desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:540 desktop/src/pages/Scan.tsx:567
 msgid "Details"
 msgstr "Chi tiết"
 
-#: desktop/src/pages/Scan.tsx:548
+#: desktop/src/pages/Scan.tsx:543
+msgid "Backend"
+msgstr "Cơ chế quét"
+
+#: desktop/src/pages/Scan.tsx:544
+msgid "Manage Profiles"
+msgstr "Quản lý hồ sơ quét"
+
+#: desktop/src/pages/Scan.tsx:549
 msgid "Profile"
 msgstr "Hồ sơ quét"
 
-#: desktop/src/pages/Scan.tsx:554
+#: desktop/src/pages/Scan.tsx:555
 msgid "No Profile (Manual)"
 msgstr "Không dùng hồ sơ (thủ công)"
 
-#: desktop/src/pages/Scan.tsx:558
+#: desktop/src/pages/Scan.tsx:559
 msgid "Drop local files or folders here, or add them below."
 msgstr "Thả tệp hoặc thư mục cục bộ vào đây, hoặc thêm ở bên dưới."
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Start Scan"
 msgstr "Bắt đầu quét"
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Run EICAR Test"
 msgstr "Chạy thử nghiệm EICAR"
 
-#: desktop/src/pages/Scan.tsx:564
+#: desktop/src/pages/Scan.tsx:565
 msgid "Select one file before using VirusTotal"
 msgstr "Hãy chọn một tệp trước khi dùng VirusTotal"
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:77
 msgid "Latest scan"
 msgstr "Lượt quét gần nhất"
 
-#: desktop/src/pages/Scan.tsx:566
+#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:80
 msgid "View Results"
 msgstr "Xem kết quả"
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569
 msgid "Virus database is not available"
 msgstr "Không có cơ sở dữ liệu virus"
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569 desktop/src/pages/ScanOverview.tsx:67
 msgid "Update the database before starting a scan."
 msgstr "Hãy cập nhật cơ sở dữ liệu virus trước khi bắt đầu quét."
 
-#: desktop/src/pages/Scan.tsx:568
+#: desktop/src/pages/Scan.tsx:569
 msgid "Open Database Updates"
 msgstr "Mở trang cập nhật cơ sở dữ liệu"
+
+#: desktop/src/pages/ScanOverview.tsx:44
+msgid "Scan overview updates are unavailable: {error}"
+msgstr "Không thể nhận cập nhật tổng quan quét: {error}"
+
+#: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/Statistics.tsx:120
+msgid "No scans recorded"
+msgstr "Chưa có lượt quét nào được ghi nhận"
+
+#: desktop/src/pages/ScanOverview.tsx:67
+msgid "Scan files and folders with ClamAV."
+msgstr "Quét tập tin và thư mục bằng ClamAV."
 
 #: desktop/src/pages/SettingsPreferences.tsx:47
 msgid "Node.js dependencies"
@@ -5876,10 +5904,6 @@ msgstr[0] ""
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Delete Logs"
 msgstr "Xóa nhật ký"
-
-#: desktop/src/pages/Statistics.tsx:120
-msgid "No scans recorded"
-msgstr "Chưa có lượt quét nào được ghi nhận"
 
 #: desktop/src/pages/Statistics.tsx:123
 msgid "less than an hour ago"
