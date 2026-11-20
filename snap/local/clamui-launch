@@ -4,6 +4,13 @@
 # variables again before running host ClamAV, systemctl, pkexec or xdg-open.
 set -eu
 
+# The bundled WebKitGTK helper path and pixbuf loader cache point at
+# /snap/clamui, so parallel instances (clamui_<key>) cannot work.
+if [ -n "${SNAP_INSTANCE_KEY:-}" ]; then
+  echo "clamui: parallel snap instances are not supported; install the snap as \"clamui\"" >&2
+  exit 1
+fi
+
 case "$(uname -m)" in
   x86_64) triplet=x86_64-linux-gnu ;;
   aarch64) triplet=aarch64-linux-gnu ;;

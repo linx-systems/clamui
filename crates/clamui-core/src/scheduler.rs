@@ -716,8 +716,9 @@ fn shell_words(input: &str) -> Vec<String> {
     words
 }
 
-/// Snap commands are exported as `/snap/bin/<instance>.scheduled-scan`, where
-/// the instance is `clamui` or a parallel install such as `clamui_beta`.
+/// The snap exports its command as `/snap/bin/clamui.scheduled-scan`. Parallel
+/// snap instances (`clamui_<key>`) are unsupported: the bundled WebKitGTK and
+/// pixbuf loaders are built for `/snap/clamui`.
 fn is_snap_scheduled_scan_command(program: &str) -> bool {
     let path = Path::new(program);
     let in_snap_bin = path.parent().is_some_and(|parent| {
@@ -730,32 +731,23 @@ fn is_snap_scheduled_scan_command(program: &str) -> bool {
     else {
         return false;
     };
-    in_snap_bin && (instance == "clamui" || instance.starts_with("clamui_"))
+    in_snap_bin && instance == "clamui"
 }
 
 /// The revision-independent snap command. `$SNAP` contains the revision and
 /// changes on every refresh, so timers must not point at the executable path.
 fn snap_launcher_command() -> Option<Vec<String>> {
     crate::common::snap_root()?;
-    let instance = env::var("SNAP_INSTANCE_NAME")
-        .or_else(|_| env::var("SNAP_NAME"))
-        .ok()
-        .filter(|name| {
-            !name.is_empty()
-                && name.chars().all(|character| {
-                    character.is_ascii_alphanumeric() || matches!(character, '-' | '_')
-                })
-        })?;
-    let name = format!("{instance}.scheduled-scan");
+    let name = "clamui.scheduled-scan";
     let candidates = [
         PathBuf::from("/snap/bin"),
         PathBuf::from("/var/lib/snapd/snap/bin"),
     ];
     let command = candidates
         .iter()
-        .map(|directory| directory.join(&name))
+        .map(|directory| directory.join(name))
         .find(|path| path.exists())
-        .unwrap_or_else(|| candidates[0].join(&name));
+        .unwrap_or_else(|| candidates[0].join(name));
     Some(vec![command.display().to_string()])
 }
 

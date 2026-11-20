@@ -165,7 +165,10 @@ fn cron_cleanup_removes_only_a_marker_with_a_recognized_clamui_command() {
         "0 2 * * * /snap/bin/clamui.scheduled-scan --target /home"
     ));
     assert!(is_clamui_cron_command(
-        "0 2 * * * /var/lib/snapd/snap/bin/clamui_beta.scheduled-scan"
+        "0 2 * * * /var/lib/snapd/snap/bin/clamui.scheduled-scan"
+    ));
+    assert!(!is_clamui_cron_command(
+        "0 2 * * * /snap/bin/clamui_beta.scheduled-scan"
     ));
     assert!(!is_clamui_cron_command(
         "0 2 * * * /usr/bin/user-task clamui-scheduled-scan"

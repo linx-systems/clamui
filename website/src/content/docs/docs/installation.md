@@ -110,7 +110,7 @@ sudo snap install --dangerous --classic ./clamui_0.5.1_amd64.snap
 
 Protected ClamAV preferences need the host helper. On Debian-family hosts, install the matching `clamui-privileged-helper_0.5.1_<debarch>.deb` from the [Debian packages](#debian-packages) section; ClamUI checks that package version. On other hosts, `sudo clamui install-privileged-helper` installs it from the snap.
 
-Scheduled scans started from the snap call `/snap/bin/clamui.scheduled-scan`, which stays valid across snap refreshes. To build the snap yourself, run `snapcraft pack` from the repository root.
+Scheduled scans started from the snap call `/snap/bin/clamui.scheduled-scan`, which stays valid across snap refreshes. Parallel snap instances such as `clamui_beta` are not supported. To build the snap yourself, run `snapcraft pack` from the repository root.
 
 ## Source
 
