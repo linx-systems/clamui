@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 
+import clamuiLogo from "./assets/clamui-logo.svg";
 import { applyAccentColor } from "./accentColor";
 import {
   closeApplication,
@@ -1025,7 +1026,7 @@ export default function App(): ReactNode {
         ) : null}
       </header>
         <aside className="sidebar" aria-label={_("Main navigation")}>
-          <div className="brand" aria-label="ClamUI"><span className="brand-mark" aria-hidden="true">C</span><span className="brand-name">ClamUI</span></div>
+          <div className="brand" aria-label="ClamUI"><img className="brand-mark" src={clamuiLogo} alt="" aria-hidden="true" /><span className="brand-name">ClamUI</span></div>
           <nav className="navigation" aria-label={_("Views")}>
             {destinations.map((destination) => (
               <button
