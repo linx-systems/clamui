@@ -14,7 +14,7 @@ A modern Linux desktop interface for ClamAV, built with Rust, Tauri, and a React
 
 ## ClamUI v0.6.0
 
-v0.6.0 is the current release. Download the native packages, AppImage, or Flatpak bundle from [GitHub Releases](https://github.com/linx-systems/clamui/releases) and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
+v0.6.0 is a minor release. Download the native packages, AppImage, or Flatpak bundle for your architecture from [GitHub Releases](https://github.com/linx-systems/clamui/releases), and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
 
 Every package format uses **host** ClamAV. Install host `clamscan` and `freshclam`; daemon scans also require host `clamd` and `clamdscan`.
 
@@ -33,7 +33,7 @@ sudo apt install "./clamui_0.6.0_${DEB_ARCH}.deb" \
 
 The v0.6.0 helper RPM asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with a matching `.rpm.asc`. The x86_64 AppImage asset name is `ClamUI-0.6.0-x86_64.AppImage` (with `.zsync` metadata). The Flatpak bundle asset names are `clamui-x86_64.flatpak` and `clamui-aarch64.flatpak`.
 
-Flathub publishes ClamUI v0.6.0 as `io.github.linx_systems.ClamUI`; the GitHub Flatpak bundles carry the same release.
+Flathub is published separately; GitHub drafts and Flatpak bundles do not update the store. Check the store version with `flatpak remote-info --user flathub io.github.linx_systems.ClamUI` (use `--system` for a system remote).
 
 For source development, clone `master`. The Rust/Tauri desktop uses WebKitGTK 4.1, GTK 3, a native StatusNotifierItem tray, and no Python application runtime. Protected host ClamAV configuration remains behind the version-matched `clamui-apply-preferences` helper and Polkit policy.
 
