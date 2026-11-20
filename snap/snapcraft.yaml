@@ -1,0 +1,176 @@
+name: clamui
+title: ClamUI
+base: core22
+adopt-info: clamui
+summary: Native desktop interface for the ClamAV antivirus scanner
+description: |
+  ClamUI is a Rust/Tauri desktop application that provides a graphical
+  interface for the host-provided ClamAV antivirus command-line tools.
+
+  ClamUI does not ship a scanner engine or virus database. Install ClamAV
+  from your distribution first, for example `sudo apt install clamav
+  clamav-freshclam`. Daemon scanning additionally needs the host `clamd`
+  service. Protected ClamAV settings are applied through the host
+  `clamui-privileged-helper`; install it with
+  `sudo clamui install-privileged-helper` or from the Debian/RPM packages.
+license: MIT
+website: https://clamui.com
+source-code: https://github.com/linx-systems/clamui
+issues: https://github.com/linx-systems/clamui/issues
+contact: clamui@rooki.xyz
+icon: icons/io.github.linx_systems.ClamUI.svg
+grade: stable
+compression: lzo
+
+# ClamUI is a frontend for the host ClamAV installation: it runs the host
+# clamscan, clamdscan and freshclam, reads and edits the host ClamAV
+# configuration through pkexec, scans arbitrary paths and manages user
+# systemd timers or crontab entries. Strict confinement cannot execute host
+# binaries, so the snap uses classic confinement, like the Debian package.
+confinement: classic
+
+architectures:
+  - build-on: [amd64]
+  - build-on: [arm64]
+
+apps:
+  clamui:
+    command: bin/clamui-launch
+    desktop: usr/share/applications/io.github.linx_systems.ClamUI.desktop
+    common-id: io.github.linx_systems.ClamUI
+  scheduled-scan:
+    command: bin/clamui-scheduled-scan
+
+parts:
+  launcher:
+    plugin: dump
+    source: snap/local
+    organize:
+      clamui-launch: bin/clamui-launch
+
+  privileged-helper:
+    # Bundled so `sudo clamui install-privileged-helper` can install the
+    # matching helper on the host, as with the AppImage. It is a separate part
+    # without enable-patchelf: the copy on the host must keep the host's ELF
+    # interpreter rather than one inside this snap.
+    after: [clamui]
+    plugin: nil
+    override-build: |
+      install -Dm755 "$CRAFT_PART_BUILD/../../clamui/build/target/release/clamui-apply-preferences" \
+        "$CRAFT_PART_INSTALL/bin/clamui-apply-preferences"
+
+  mesa-drivers:
+    # Mesa's DRI drivers read their own ELF notes at load time and crash after
+    # snapcraft's ELF patching, so this part stages them unmodified. Their
+    # libraries come from the patched clamui part through the launcher's
+    # LD_LIBRARY_PATH.
+    plugin: nil
+    stage-packages:
+      - libgl1-mesa-dri
+    stage:
+      - usr/lib/*/dri
+
+  clamui:
+    plugin: nil
+    source: .
+    source-type: local
+    build-attributes:
+      - enable-patchelf
+    build-packages:
+      - build-essential
+      - curl
+      - unzip
+      - pkg-config
+      - libjavascriptcoregtk-4.1-dev
+      - libgtk-3-dev
+      - librsvg2-dev
+      - libssl-dev
+      - libwebkit2gtk-4.1-dev
+      - libsoup-3.0-dev
+      - libxdo-dev
+    stage-packages:
+      - libwebkit2gtk-4.1-0
+      - libjavascriptcoregtk-4.1-0
+      - libgtk-3-0
+      - libgtk-3-common
+      - libsoup-3.0-0
+      - librsvg2-2
+      - librsvg2-common
+      - libgdk-pixbuf-2.0-0
+      - libgdk-pixbuf2.0-common
+      - libxdo3
+      - libegl1
+      - libgl1
+      - libgles2
+      - libgl1-mesa-dri
+      - libglx-mesa0
+      - libegl-mesa0
+      - libglib2.0-bin
+      - gsettings-desktop-schemas
+      - adwaita-icon-theme
+      - hicolor-icon-theme
+      - shared-mime-info
+      - gstreamer1.0-plugins-base
+      - glib-networking
+    stage:
+      - "*"
+      - -usr/lib/*/dri
+    override-pull: |
+      craftctl default
+      version="$(sed -n 's/^version[[:space:]]*=[[:space:]]*"\(.*\)"/\1/p' Cargo.toml | head -n 1)"
+      craftctl set version="$version"
+    override-build: |
+      set -eu
+      export RUSTUP_HOME="$CRAFT_PART_BUILD/.rustup" CARGO_HOME="$CRAFT_PART_BUILD/.cargo"
+      if [ ! -x "$CARGO_HOME/bin/cargo" ]; then
+        curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable --no-modify-path
+      fi
+      export BUN_INSTALL="$CRAFT_PART_BUILD/.bun"
+      if [ ! -x "$BUN_INSTALL/bin/bun" ]; then
+        curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.14"
+      fi
+      export PATH="$CARGO_HOME/bin:$BUN_INSTALL/bin:$PATH"
+
+      ( cd desktop && bun install --frozen-lockfile && bun run build )
+      cargo build --release --locked -p clamui --bin clamui
+      cargo build --release --locked -p clamui-core --bin clamui-scheduled-scan --bin clamui-apply-preferences
+
+      install -Dm755 target/release/clamui "$CRAFT_PART_INSTALL/bin/clamui"
+      install -Dm755 target/release/clamui-scheduled-scan "$CRAFT_PART_INSTALL/bin/clamui-scheduled-scan"
+
+      install -Dm644 data/io.github.linx_systems.ClamUI.metainfo.xml \
+        "$CRAFT_PART_INSTALL/usr/share/metainfo/io.github.linx_systems.ClamUI.metainfo.xml"
+      install -Dm644 icons/io.github.linx_systems.ClamUI.svg \
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.svg"
+      install -Dm644 icons/io.github.linx_systems.ClamUI.png \
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/128x128/apps/io.github.linx_systems.ClamUI.png"
+      install -d "$CRAFT_PART_INSTALL/usr/share/applications"
+      sed 's|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.svg|' \
+        data/io.github.linx_systems.ClamUI.desktop \
+        > "$CRAFT_PART_INSTALL/usr/share/applications/io.github.linx_systems.ClamUI.desktop"
+
+      # Runtime fix-ups for the bundled GTK/WebKitGTK. They run here rather
+      # than in override-prime, which would disable enable-patchelf.
+      triplet="$CRAFT_ARCH_TRIPLET_BUILD_FOR"
+
+      # WebKitGTK starts WebKitWebProcess/WebKitNetworkProcess from a path
+      # compiled into the library. Rewrite it in place, keeping the byte
+      # length, to a stable path inside this snap: /snap/clamui/current///wk.
+      old="/usr/lib/$triplet/webkit2gtk-4.1"
+      prefix="/snap/clamui/current"
+      pad=$(( ${#old} - ${#prefix} - 3 ))
+      new="$prefix$(printf '/%.0s' $(seq 1 "$pad"))/wk"
+      test "${#new}" -eq "${#old}"
+      library="$(readlink -f "$CRAFT_PART_INSTALL/usr/lib/$triplet/libwebkit2gtk-4.1.so.0")"
+      grep -q -a -F "$old" "$library"
+      OLD="$old" NEW="$new" perl -0777 -pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/g' "$library"
+      ! grep -q -a -F "$old" "$library"
+      ln -sfn "usr/lib/$triplet/webkit2gtk-4.1" "$CRAFT_PART_INSTALL/wk"
+
+      # Loader caches and schemas with paths inside this snap.
+      loaders="$CRAFT_PART_INSTALL/usr/lib/$triplet/gdk-pixbuf-2.0/2.10.0"
+      GDK_PIXBUF_MODULEDIR="$loaders/loaders" \
+        /usr/lib/$triplet/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders \
+        | sed "s|$CRAFT_PART_INSTALL|/snap/clamui/current|g" > "$loaders/loaders.cache"
+      glib-compile-schemas "$CRAFT_PART_INSTALL/usr/share/glib-2.0/schemas"
+      update-mime-database "$CRAFT_PART_INSTALL/usr/share/mime" >/dev/null 2>&1 || true

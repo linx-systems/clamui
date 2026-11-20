@@ -515,12 +515,33 @@ async fn copy_text(app: AppHandle, text: String) -> Result<(), String> {
     }
 }
 
+/// Opens a validated URL or path with the desktop's default handler. Inside
+/// the classic snap the handler is a host program, so it is started through
+/// the host-command environment that drops the snap's library and GTK paths.
+fn open_with_desktop(target: &std::ffi::OsStr) -> Result<(), String> {
+    if !clamui_core::common::is_snap() {
+        return open::that(target).map_err(|error| error.to_string());
+    }
+    let status = clamui_core::common::host_command("xdg-open", &[])
+        .arg(target)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .map_err(|error| error.to_string())?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("xdg-open failed with {status}"))
+    }
+}
+
 #[tauri::command]
 async fn open_external(state: State<'_, AppState>, url: String) -> Result<(), String> {
     let _operation = state.active_jobs.register("native.open_external".into())?;
     let url = is_safe_external_url(&url)?;
     tauri::async_runtime::spawn_blocking(move || {
-        open::that(url.as_str()).map_err(|error| error.to_string())
+        open_with_desktop(std::ffi::OsStr::new(url.as_str()))
     })
     .await
     .map_err(|error| error.to_string())?
@@ -535,11 +556,9 @@ async fn open_path(state: State<'_, AppState>, path: String) -> Result<(), Strin
     if !metadata.file_type().is_file() && !metadata.file_type().is_dir() {
         return Err("requested path is not a regular file or directory".into());
     }
-    tauri::async_runtime::spawn_blocking(move || {
-        open::that(path).map_err(|error| error.to_string())
-    })
-    .await
-    .map_err(|error| error.to_string())?
+    tauri::async_runtime::spawn_blocking(move || open_with_desktop(path.as_os_str()))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]

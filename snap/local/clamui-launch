@@ -1,0 +1,32 @@
+#!/bin/sh
+# Classic-snap launcher: point the bundled GTK/WebKitGTK runtime at the files
+# inside this snap. Host-command execution in clamui-core removes these
+# variables again before running host ClamAV, systemctl, pkexec or xdg-open.
+set -eu
+
+case "$(uname -m)" in
+  x86_64) triplet=x86_64-linux-gnu ;;
+  aarch64) triplet=aarch64-linux-gnu ;;
+  *) echo "clamui: unsupported architecture $(uname -m)" >&2; exit 1 ;;
+esac
+lib="$SNAP/usr/lib/$triplet"
+
+export GDK_PIXBUF_MODULE_FILE="$lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+export GDK_PIXBUF_MODULEDIR="$lib/gdk-pixbuf-2.0/2.10.0/loaders"
+export GIO_MODULE_DIR="$lib/gio/modules"
+export GSETTINGS_SCHEMA_DIR="$SNAP/usr/share/glib-2.0/schemas"
+export GTK_PATH="$lib/gtk-3.0"
+export GTK_EXE_PREFIX="$SNAP/usr"
+export GTK_DATA_PREFIX="$SNAP/usr"
+export LIBGL_DRIVERS_PATH="$lib/dri"
+# Only the unpatched Mesa drivers need this; clamui-core removes it from
+# host commands and the desktop opener.
+export LD_LIBRARY_PATH="$lib"
+export __EGL_VENDOR_LIBRARY_DIRS="$SNAP/usr/share/glvnd/egl_vendor.d"
+export GST_PLUGIN_SYSTEM_PATH="$lib/gstreamer-1.0"
+export GST_PLUGIN_SCANNER="$lib/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner"
+export XDG_DATA_DIRS="$SNAP/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+# Same WebKitGTK rendering workaround as the Flatpak (#282, #315).
+export WEBKIT_DMABUF_RENDERER_FORCE_SHM=1
+
+exec "$SNAP/bin/clamui" "$@"

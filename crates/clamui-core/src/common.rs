@@ -287,6 +287,32 @@ pub fn is_flatpak() -> bool {
     Path::new("/.flatpak-info").is_file()
 }
 
+/// Root of the running snap (`$SNAP`), when this executable was started from
+/// it. The executable must live below `$SNAP`: other classic snaps such as
+/// editors leak `SNAP*` variables into terminals that start unrelated builds.
+pub fn snap_root() -> Option<PathBuf> {
+    env::var_os("SNAP_NAME")?;
+    let root = PathBuf::from(env::var_os("SNAP")?);
+    let executable = env::current_exe().ok()?;
+    (root.is_absolute() && executable.starts_with(&root)).then_some(root)
+}
+
+pub fn is_snap() -> bool {
+    snap_root().is_some()
+}
+
+/// Variables the classic-snap launcher sets so the bundled GTK/WebKitGTK
+/// runtime loads its modules from the snap. Host tools must not inherit them.
+const SNAP_RUNTIME_VARIABLES: &[&str] = &[
+    "GDK_PIXBUF_MODULEDIR",
+    "GIO_MODULE_DIR",
+    "LIBGL_DRIVERS_PATH",
+    "__EGL_VENDOR_LIBRARY_DIRS",
+    "GST_PLUGIN_SYSTEM_PATH",
+    "GST_PLUGIN_SCANNER",
+    "WEBKIT_DMABUF_RENDERER_FORCE_SHM",
+];
+
 pub fn host_command(program: &str, args: &[String]) -> Command {
     build_host_command(program, args, false)
 }
@@ -326,6 +352,19 @@ fn build_host_command(program: &str, args: &[String], watch_bus: bool) -> Comman
     ] {
         command.env_remove(variable);
     }
+    if let Some(root) = snap_root() {
+        for variable in SNAP_RUNTIME_VARIABLES {
+            command.env_remove(variable);
+        }
+        if let Some(data_dirs) = env::var_os("XDG_DATA_DIRS") {
+            let host_dirs = without_snap_entries(&data_dirs.to_string_lossy(), &root);
+            if host_dirs.is_empty() {
+                command.env_remove("XDG_DATA_DIRS");
+            } else {
+                command.env("XDG_DATA_DIRS", host_dirs);
+            }
+        }
+    }
     for (key, _) in env::vars_os() {
         if key.to_string_lossy().starts_with("APPIMAGE")
             || key.to_string_lossy().starts_with("APPDIR")
@@ -334,6 +373,15 @@ fn build_host_command(program: &str, args: &[String], watch_bus: bool) -> Comman
         }
     }
     command
+}
+
+/// Drops the entries below the snap root from a colon-separated search path.
+pub fn without_snap_entries(search_path: &str, snap_root: &Path) -> String {
+    search_path
+        .split(':')
+        .filter(|entry| !entry.is_empty() && !Path::new(entry).starts_with(snap_root))
+        .collect::<Vec<_>>()
+        .join(":")
 }
 
 pub fn expand_path(path: &str) -> PathBuf {
