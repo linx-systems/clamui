@@ -307,6 +307,8 @@ fn system_info() -> Value {
     let executable = std::env::current_exe().ok();
     let installation_type = if flatpak {
         "Flatpak".to_owned()
+    } else if crate::common::is_snap() {
+        "Snap".to_owned()
     } else if std::env::var_os("APPIMAGE").is_some() {
         "AppImage".to_owned()
     } else if executable

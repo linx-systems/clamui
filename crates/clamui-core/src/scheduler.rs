@@ -646,6 +646,9 @@ pub fn is_clamui_cron_command(line: &str) -> bool {
     if Path::new(&command[0]).file_name() == Some(OsStr::new("clamui-scheduled-scan")) {
         return true;
     }
+    if is_snap_scheduled_scan_command(&command[0]) {
+        return true;
+    }
     if command[0] == "flatpak"
         && command[1..]
             .iter()
@@ -713,6 +716,41 @@ fn shell_words(input: &str) -> Vec<String> {
     words
 }
 
+/// The snap exports its command as `/snap/bin/clamui.scheduled-scan`. Parallel
+/// snap instances (`clamui_<key>`) are unsupported: the bundled WebKitGTK and
+/// pixbuf loaders are built for `/snap/clamui`.
+fn is_snap_scheduled_scan_command(program: &str) -> bool {
+    let path = Path::new(program);
+    let in_snap_bin = path.parent().is_some_and(|parent| {
+        parent == Path::new("/snap/bin") || parent == Path::new("/var/lib/snapd/snap/bin")
+    });
+    let Some(instance) = path
+        .file_name()
+        .and_then(OsStr::to_str)
+        .and_then(|name| name.strip_suffix(".scheduled-scan"))
+    else {
+        return false;
+    };
+    in_snap_bin && instance == "clamui"
+}
+
+/// The revision-independent snap command. `$SNAP` contains the revision and
+/// changes on every refresh, so timers must not point at the executable path.
+fn snap_launcher_command() -> Option<Vec<String>> {
+    crate::common::snap_root()?;
+    let name = "clamui.scheduled-scan";
+    let candidates = [
+        PathBuf::from("/snap/bin"),
+        PathBuf::from("/var/lib/snapd/snap/bin"),
+    ];
+    let command = candidates
+        .iter()
+        .map(|directory| directory.join(name))
+        .find(|path| path.exists())
+        .unwrap_or_else(|| candidates[0].join(name));
+    Some(vec![command.display().to_string()])
+}
+
 fn launcher_command() -> Option<Vec<String>> {
     if is_flatpak() {
         let app_id =
@@ -723,6 +761,9 @@ fn launcher_command() -> Option<Vec<String>> {
             "--command=clamui-scheduled-scan".to_owned(),
             app_id,
         ]);
+    }
+    if let Some(command) = snap_launcher_command() {
+        return Some(command);
     }
     if let Some(appimage) = env::var_os("APPIMAGE")
         .map(PathBuf::from)
@@ -1253,15 +1294,23 @@ fn notify(title: &str, body: &str, urgency: &str) -> AppResult<()> {
     let user_icon = env::var_os("HOME").map(PathBuf::from).map(|home| {
         home.join(".local/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.png")
     });
-    let icon = [
-        PathBuf::from("/app/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.png"),
-        PathBuf::from("/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.png"),
-    ]
-    .into_iter()
-    .chain(user_icon)
-    .find(|path| path.exists())
-    .map(|path| path.display().to_string())
-    .unwrap_or_else(|| "dialog-warning".to_owned());
+    let snap_icon = crate::common::snap_root().map(|root| {
+        root.join("usr/share/icons/hicolor/128x128/apps/io.github.linx_systems.ClamUI.png")
+    });
+    let icon = snap_icon
+        .into_iter()
+        .chain([
+            PathBuf::from(
+                "/app/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.png",
+            ),
+            PathBuf::from(
+                "/usr/share/icons/hicolor/scalable/apps/io.github.linx_systems.ClamUI.png",
+            ),
+        ])
+        .chain(user_icon)
+        .find(|path| path.exists())
+        .map(|path| path.display().to_string())
+        .unwrap_or_else(|| "dialog-warning".to_owned());
     args.push(format!("--icon={icon}"));
     args.push(title.to_owned());
     args.push(body.to_owned());

@@ -1,0 +1,57 @@
+name: Build Snap
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+    branches: [master]
+    paths:
+      - "snap/**"
+      - ".github/workflows/build-snap.yml"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build-snap:
+    name: Build snap (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-22.04
+          - architecture: arm64
+            runner: ubuntu-22.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build snap
+        id: snapcraft
+        uses: snapcore/action-build@v1
+
+      - name: Check snap contents
+        run: |
+          set -euo pipefail
+          snap="${{ steps.snapcraft.outputs.snap }}"
+          unsquashfs -l "$snap" | grep -q 'squashfs-root/bin/clamui$'
+          unsquashfs -l "$snap" | grep -q 'squashfs-root/bin/clamui-scheduled-scan$'
+          unsquashfs -l "$snap" | grep -q 'squashfs-root/bin/clamui-apply-preferences$'
+          unsquashfs -l "$snap" | grep -q 'squashfs-root/wk$'
+
+      - name: Install and run headless CLI
+        run: |
+          set -euo pipefail
+          sudo snap install --dangerous --classic "${{ steps.snapcraft.outputs.snap }}"
+          /snap/bin/clamui --help >/dev/null
+
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: snap-${{ matrix.architecture }}
+          path: ${{ steps.snapcraft.outputs.snap }}
