@@ -305,16 +305,11 @@ div.header-title > h1 {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   inline-size: 30px;
   block-size: 30px;
   flex: 0 0 30px;
   border-radius: 9px;
-  background: var(--brand-accent);
-  background-image: linear-gradient(135deg, var(--brand-accent), var(--brand-end));
-  color: #fff;
-  font-size: 12px;
 }
 
 .navigation,
