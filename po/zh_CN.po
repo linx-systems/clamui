@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 17:14+0100\n"
+"POT-Creation-Date: 2026-11-24 12:08-0500\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -1479,7 +1479,7 @@ msgid ""
 "installed and try again."
 msgstr "无法获取网络套接字列表。请检查系统套接字工具是否已安装，然后重试。"
 
-#: crates/clamui-core/src/platform.rs:452
+#: crates/clamui-core/src/platform.rs:454
 msgid "Not running as Flatpak"
 msgstr "未以 Flatpak 方式运行"
 
@@ -1750,12 +1750,12 @@ msgid_plural ""
 "partially scanned"
 msgstr[0] "扫描期间出现 {count} 条非致命警告；部分文件可能未被完整扫描"
 
-#: crates/clamui-core/src/scheduler.rs:805
+#: crates/clamui-core/src/scheduler.rs:846
 msgid "Scheduled scan cancelled"
 msgstr "定时扫描已取消"
 
 #. Translators: Keep `clamui-scheduled-scan`, flags, `PATH`, and command syntax unchanged; translate the `Usage:` label.
-#: crates/clamui-core/src/scheduler.rs:824
+#: crates/clamui-core/src/scheduler.rs:865
 msgid ""
 "Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
 "target PATH] [--dry-run] [--verbose|-v]"
@@ -1764,125 +1764,125 @@ msgstr ""
 "target PATH] [--dry-run] [--verbose|-v]"
 
 #. Translators: The ellipsis indicates that the scheduled scan is starting.
-#: crates/clamui-core/src/scheduler.rs:865
+#: crates/clamui-core/src/scheduler.rs:906
 msgid "ClamUI scheduled scan starting…"
 msgstr "ClamUI 计划扫描正在启动…"
 
-#: crates/clamui-core/src/scheduler.rs:874
+#: crates/clamui-core/src/scheduler.rs:915
 msgid "Scheduled scan skipped (on battery power)"
 msgstr "已跳过定时扫描（使用电池供电）"
 
-#: crates/clamui-core/src/scheduler.rs:891
+#: crates/clamui-core/src/scheduler.rs:932
 msgid "Warning: Target does not exist: {target}"
 msgstr "警告：目标不存在：{target}"
 
-#: crates/clamui-core/src/scheduler.rs:903
+#: crates/clamui-core/src/scheduler.rs:944
 msgid "Error: No valid scan targets found"
 msgstr "错误：未找到有效的扫描目标"
 
 #. Translators: The em dash separates the dry-run state from its consequence.
-#: crates/clamui-core/src/scheduler.rs:907
+#: crates/clamui-core/src/scheduler.rs:948
 msgid "Dry run mode — scan not executed"
 msgstr "试运行模式 — 未执行扫描"
 
-#: crates/clamui-core/src/scheduler.rs:915
+#: crates/clamui-core/src/scheduler.rs:956
 msgid "  Skip on battery: {value}"
 msgstr "  电池供电时跳过扫描：{value}"
 
-#: crates/clamui-core/src/scheduler.rs:920
+#: crates/clamui-core/src/scheduler.rs:961
 msgid "  Auto quarantine: {value}"
 msgstr "  自动隔离：{value}"
 
-#: crates/clamui-core/src/scheduler.rs:928
+#: crates/clamui-core/src/scheduler.rs:969
 msgid "  {count} target: {targets:?}"
 msgid_plural "  {count} targets: {targets:?}"
 msgstr[0] "  {count} 个目标：{targets:?}"
 
-#: crates/clamui-core/src/scheduler.rs:952
+#: crates/clamui-core/src/scheduler.rs:993
 msgid "Scheduled scan failed: ClamAV not available"
 msgstr "定时扫描失败：ClamAV 不可用"
 
 #. Translators: The em dash separates the unavailable component from `{error}`; preserve the raw diagnostic placeholder.
-#: crates/clamui-core/src/scheduler.rs:962
+#: crates/clamui-core/src/scheduler.rs:1003
 msgid "Error: ClamAV not available — {error}"
 msgstr "错误：ClamAV 不可用 — {error}"
 
-#: crates/clamui-core/src/scheduler.rs:971
+#: crates/clamui-core/src/scheduler.rs:1012
 msgid "Scheduled Scan Failed"
 msgstr "定时扫描失败"
 
-#: crates/clamui-core/src/scheduler.rs:972
+#: crates/clamui-core/src/scheduler.rs:1013
 msgid "ClamAV is not available. Please install ClamAV."
 msgstr "ClamAV 不可用。请安装 ClamAV。"
 
-#: crates/clamui-core/src/scheduler.rs:1035
+#: crates/clamui-core/src/scheduler.rs:1076
 msgid "Scheduled scan found {infected} threat, {quarantined} quarantined"
 msgid_plural ""
 "Scheduled scan found {infected} threats, {quarantined} quarantined"
 msgstr[0] "定时扫描发现 {infected} 个威胁，已隔离 {quarantined} 个"
 
-#: crates/clamui-core/src/scheduler.rs:1046
+#: crates/clamui-core/src/scheduler.rs:1087
 msgid "Scheduled scan found {count} threat"
 msgid_plural "Scheduled scan found {count} threats"
 msgstr[0] "定时扫描发现 {count} 个威胁"
 
-#: crates/clamui-core/src/scheduler.rs:1055
+#: crates/clamui-core/src/scheduler.rs:1096
 msgid "Scheduled scan completed with errors"
 msgstr "定时扫描已完成，但有错误"
 
 #. Translators: The em dash separates the summary from the count; preserve `{count}`.
 #. Translators: The em dash separates the summary from the count; preserve `{count}`.
-#: crates/clamui-core/src/scheduler.rs:1058
+#: crates/clamui-core/src/scheduler.rs:1099
 msgid "Scheduled scan completed — {count} file scanned, no threats"
 msgid_plural "Scheduled scan completed — {count} files scanned, no threats"
 msgstr[0] "计划扫描已完成 — 已扫描 {count} 个文件，未发现威胁"
 
-#: crates/clamui-core/src/scheduler.rs:1073
+#: crates/clamui-core/src/scheduler.rs:1114
 msgid "Scan Duration: {duration:.1f} seconds"
 msgstr "扫描耗时：{duration:.1f} 秒"
 
-#: crates/clamui-core/src/scheduler.rs:1075
+#: crates/clamui-core/src/scheduler.rs:1116
 msgid "Files Scanned: {count}"
 msgstr "已扫描文件：{count} 个"
 
-#: crates/clamui-core/src/scheduler.rs:1076
+#: crates/clamui-core/src/scheduler.rs:1117
 msgid "Threats Found: {count}"
 msgstr "发现威胁：{count} 个"
 
-#: crates/clamui-core/src/scheduler.rs:1077
+#: crates/clamui-core/src/scheduler.rs:1118
 msgid "Targets: {targets}"
 msgstr "目标：{targets}"
 
-#: crates/clamui-core/src/scheduler.rs:1081
+#: crates/clamui-core/src/scheduler.rs:1122
 msgid "Quarantined: {count}"
 msgstr "已隔离：{count} 个"
 
-#: crates/clamui-core/src/scheduler.rs:1086
+#: crates/clamui-core/src/scheduler.rs:1127
 msgid "Quarantine Failed: {count}"
 msgstr "隔离失败：{count} 个"
 
-#: crates/clamui-core/src/scheduler.rs:1114
+#: crates/clamui-core/src/scheduler.rs:1155
 msgid "Scheduled Scan: Threats Detected!"
 msgstr "定时扫描：检测到威胁！"
 
-#: crates/clamui-core/src/scheduler.rs:1120
+#: crates/clamui-core/src/scheduler.rs:1161
 msgid "Scheduled Scan Completed"
 msgstr "定时扫描已完成"
 
-#: crates/clamui-core/src/scheduler.rs:1121
+#: crates/clamui-core/src/scheduler.rs:1162
 msgid "Scan completed with some errors. Check logs for details."
 msgstr "扫描已完成，但出现了一些错误。详情请查看日志。"
 
-#: crates/clamui-core/src/scheduler.rs:1129
+#: crates/clamui-core/src/scheduler.rs:1170
 msgid "Scheduled Scan Complete"
 msgstr "定时扫描已完成"
 
-#: crates/clamui-core/src/scheduler.rs:1142
+#: crates/clamui-core/src/scheduler.rs:1183
 msgid "Failed to quarantine: {count} file"
 msgid_plural "Failed to quarantine: {count} files"
 msgstr[0] "隔离失败：{count} 个文件"
 
-#: crates/clamui-core/src/scheduler.rs:1168
+#: crates/clamui-core/src/scheduler.rs:1209
 msgid ""
 "Battery level: {percent:.0f}%\n"
 "Scan skipped due to battery-aware settings."
@@ -1890,15 +1890,15 @@ msgstr ""
 "电量：{percent:.0f}%\n"
 "已根据电池供电设置跳过扫描。"
 
-#: crates/clamui-core/src/scheduler.rs:1173
+#: crates/clamui-core/src/scheduler.rs:1214
 msgid "Scan skipped due to battery-aware settings."
 msgstr "已根据电池供电设置跳过扫描。"
 
-#: crates/clamui-core/src/scheduler.rs:1179
+#: crates/clamui-core/src/scheduler.rs:1220
 msgid "Skipping scan: running on battery power ({percent:.0f}%)"
 msgstr "跳过扫描：当前使用电池供电（电量 {percent:.0f}%）"
 
-#: crates/clamui-core/src/scheduler.rs:1184
+#: crates/clamui-core/src/scheduler.rs:1225
 msgid "Skipping scan: running on battery power"
 msgstr "跳过扫描：当前使用电池供电"
 
@@ -2119,206 +2119,206 @@ msgstr "添加文件"
 msgid "Export"
 msgstr "导出"
 
-#: desktop/src-tauri/src/runtime.rs:615
+#: desktop/src-tauri/src/runtime.rs:634
 msgid "Open"
 msgstr "打开"
 
-#: desktop/src/App.tsx:109 desktop/src/pages/Dashboard.tsx:38
+#: desktop/src/App.tsx:110 desktop/src/pages/Dashboard.tsx:38
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: desktop/src/App.tsx:111 desktop/src/pages/Scan.tsx:539
+#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:539
 msgid "Scan"
 msgstr "扫描"
 
-#: desktop/src/App.tsx:113 desktop/src/pages/Database.tsx:263
+#: desktop/src/App.tsx:114 desktop/src/pages/Database.tsx:263
 #: desktop/src/pages/Preferences.tsx:16
 msgid "Database"
 msgstr "数据库"
 
-#: desktop/src/App.tsx:115 desktop/src/pages/Logs.tsx:358
+#: desktop/src/App.tsx:116 desktop/src/pages/Logs.tsx:358
 #: desktop/src/pages/ScanOverview.tsx:80
 msgid "Logs"
 msgstr "日志"
 
-#: desktop/src/App.tsx:117
+#: desktop/src/App.tsx:118
 msgid "Components"
 msgstr "组件"
 
-#: desktop/src/App.tsx:121 desktop/src/pages/Statistics.tsx:233
+#: desktop/src/App.tsx:122 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "统计信息"
 
-#: desktop/src/App.tsx:123
+#: desktop/src/App.tsx:124
 msgid "Audit"
 msgstr "审计"
 
-#: desktop/src/App.tsx:125
+#: desktop/src/App.tsx:126
 msgid "Network"
 msgstr "网络"
 
-#: desktop/src/App.tsx:127 desktop/src/App.tsx:912 desktop/src/App.tsx:1011
+#: desktop/src/App.tsx:128 desktop/src/App.tsx:913 desktop/src/App.tsx:1012
 #: desktop/src/pages/Preferences.tsx:164
 msgid "Preferences"
 msgstr "首选项"
 
-#: desktop/src/App.tsx:129
+#: desktop/src/App.tsx:130
 msgid "Profiles"
 msgstr "配置方案"
 
-#: desktop/src/App.tsx:131 desktop/src/pages/Results.tsx:295
+#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:295
 #: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr "结果"
 
-#: desktop/src/App.tsx:316 desktop/src/pages/ConfigPreferences.tsx:566
+#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:559
 msgid "Could not open link"
 msgstr "无法打开链接"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:399 desktop/src/App.tsx:414 desktop/src/App.tsx:432
+#: desktop/src/App.tsx:400 desktop/src/App.tsx:415 desktop/src/App.tsx:433
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr "正在扫描——请等待扫描完成后再更改扫描目标"
 
-#: desktop/src/App.tsx:478
+#: desktop/src/App.tsx:479
 msgid "The privileged-helper installation returned an invalid status."
 msgstr "安装特权辅助程序时返回了无效状态。"
 
-#: desktop/src/App.tsx:485
+#: desktop/src/App.tsx:486
 msgid "The privileged helper was installed successfully."
 msgstr "特权辅助程序已成功安装。"
 
-#: desktop/src/App.tsx:487
+#: desktop/src/App.tsx:488
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
 msgstr "特权辅助程序仍不可用。请重试或手动安装。"
 
-#: desktop/src/App.tsx:791
+#: desktop/src/App.tsx:792
 msgid "The privileged-helper status returned an invalid response."
 msgstr "查询特权辅助程序状态时返回了无效响应。"
 
-#: desktop/src/App.tsx:910
+#: desktop/src/App.tsx:911
 msgid "Back"
 msgstr "返回"
 
-#: desktop/src/App.tsx:918 desktop/src/pages/Profiles.tsx:109
+#: desktop/src/App.tsx:919 desktop/src/pages/Profiles.tsx:109
 #: desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "正在保存…"
 
-#: desktop/src/App.tsx:918
+#: desktop/src/App.tsx:919
 msgid "Save"
 msgstr "保存"
 
-#: desktop/src/App.tsx:922
+#: desktop/src/App.tsx:923
 msgid "Overview"
 msgstr "概览"
 
-#: desktop/src/App.tsx:931 desktop/src/App.tsx:932 desktop/src/App.tsx:946
+#: desktop/src/App.tsx:932 desktop/src/App.tsx:933 desktop/src/App.tsx:947
 msgid "Scan File or Folder"
 msgstr "扫描文件或文件夹"
 
-#: desktop/src/App.tsx:953
+#: desktop/src/App.tsx:954
 msgid "Choose scan targets"
 msgstr "选择扫描目标"
 
-#: desktop/src/App.tsx:963
+#: desktop/src/App.tsx:964
 msgid "Scan Files"
 msgstr "扫描文件"
 
-#: desktop/src/App.tsx:967
+#: desktop/src/App.tsx:968
 msgid "Scan Folders"
 msgstr "扫描文件夹"
 
-#: desktop/src/App.tsx:972 desktop/src/App.tsx:974
+#: desktop/src/App.tsx:973 desktop/src/App.tsx:975
 msgid "Scan System (Quick Scan)"
 msgstr "扫描系统（快速扫描）"
 
-#: desktop/src/App.tsx:981 desktop/src/App.tsx:982 desktop/src/App.tsx:1046
+#: desktop/src/App.tsx:982 desktop/src/App.tsx:983 desktop/src/App.tsx:1047
 msgid "Menu"
 msgstr "菜单"
 
-#: desktop/src/App.tsx:1001
+#: desktop/src/App.tsx:1002
 msgid "Application menu"
 msgstr "应用程序菜单"
 
-#: desktop/src/App.tsx:1015
+#: desktop/src/App.tsx:1016
 msgid "About"
 msgstr "关于"
 
-#: desktop/src/App.tsx:1027
+#: desktop/src/App.tsx:1028
 msgid "Main navigation"
 msgstr "主导航"
 
-#: desktop/src/App.tsx:1029
+#: desktop/src/App.tsx:1030
 msgid "Views"
 msgstr "视图"
 
-#: desktop/src/App.tsx:1057 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1058 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "关闭"
 
-#: desktop/src/App.tsx:1079
+#: desktop/src/App.tsx:1080
 msgid "About ClamUI"
 msgstr "关于 ClamUI"
 
-#: desktop/src/App.tsx:1080
+#: desktop/src/App.tsx:1081
 msgid "A native desktop interface for ClamAV."
 msgstr "ClamAV 的原生桌面界面。"
 
-#: desktop/src/App.tsx:1082
+#: desktop/src/App.tsx:1083
 msgid "Version"
 msgstr "版本"
 
-#: desktop/src/App.tsx:1083 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1084 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "语言"
 
-#: desktop/src/App.tsx:1084
+#: desktop/src/App.tsx:1085
 msgid "License"
 msgstr "许可证"
 
-#: desktop/src/App.tsx:1087
+#: desktop/src/App.tsx:1088
 msgid "Project website"
 msgstr "项目网站"
 
-#: desktop/src/App.tsx:1088
+#: desktop/src/App.tsx:1089
 msgid "Issue tracker"
 msgstr "问题跟踪器"
 
-#: desktop/src/App.tsx:1090
+#: desktop/src/App.tsx:1091
 msgid "Could not load contributor credits: {error}"
 msgstr "无法加载贡献者鸣谢：{error}"
 
-#: desktop/src/App.tsx:1095
+#: desktop/src/App.tsx:1096
 msgid "Contributors"
 msgstr "贡献者"
 
-#: desktop/src/App.tsx:1104
+#: desktop/src/App.tsx:1105
 msgid "Translator credits"
 msgstr "翻译者鸣谢"
 
-#: desktop/src/App.tsx:1107
+#: desktop/src/App.tsx:1108
 msgid "Loading contributor credits…"
 msgstr "正在加载贡献者鸣谢…"
 
-#: desktop/src/App.tsx:1109
+#: desktop/src/App.tsx:1110
 msgid "Close ClamUI?"
 msgstr "关闭 ClamUI？"
 
-#: desktop/src/App.tsx:1110
+#: desktop/src/App.tsx:1111
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
 msgstr "选择将 ClamUI 保留在系统托盘中，或完全退出。"
 
-#: desktop/src/App.tsx:1111 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "记住我的选择"
 
-#: desktop/src/App.tsx:1112 desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1113 desktop/src/App.tsx:1117
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
@@ -2329,74 +2329,74 @@ msgstr "记住我的选择"
 msgid "Cancel"
 msgstr "取消"
 
-#: desktop/src/App.tsx:1112
+#: desktop/src/App.tsx:1113
 msgid "Minimize to tray"
 msgstr "最小化到系统托盘"
 
-#: desktop/src/App.tsx:1114 desktop/src/pages/ScanOverview.tsx:66
+#: desktop/src/App.tsx:1115 desktop/src/pages/ScanOverview.tsx:66
 msgid "Scan in Progress"
 msgstr "正在扫描"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1116
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr "扫描仍在进行。取消扫描可能会导致结果不完整。"
 
-#: desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1117
 msgid "Keep Scanning"
 msgstr "继续扫描"
 
-#: desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1117
 msgid "Cancel Scan and Close"
 msgstr "取消扫描并关闭"
 
-#: desktop/src/App.tsx:1116 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1117 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "关闭"
 
-#: desktop/src/App.tsx:1118
+#: desktop/src/App.tsx:1119
 msgid "Install Privileged Helper"
 msgstr "安装特权辅助程序"
 
-#: desktop/src/App.tsx:1119
+#: desktop/src/App.tsx:1120
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr "ClamUI 需要配套的特权辅助程序才能保存系统配置。"
 
-#: desktop/src/App.tsx:1121 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr "安装该辅助程序需要管理员授权。"
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1123 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
 msgstr ""
 "在使用 DNF 的 Fedora 上，安装还会将 ClamUI 签名密钥添加到系统 RPM 密钥环中。"
 
-#: desktop/src/App.tsx:1127 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1128 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr "正在安装特权辅助程序…"
 
-#: desktop/src/App.tsx:1129
+#: desktop/src/App.tsx:1130
 msgid "Not now"
 msgstr "暂不"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr "正在安装…"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr "重试"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr "安装辅助程序"
 
-#: desktop/src/App.tsx:1129
+#: desktop/src/App.tsx:1130
 msgid "Open Preferences"
 msgstr "打开首选项"
 
@@ -3135,28 +3135,28 @@ msgstr "每周"
 msgid "Monthly"
 msgstr "每月"
 
-#: desktop/src/pages/ConfigPreferences.tsx:180
+#: desktop/src/pages/ConfigPreferences.tsx:173
 msgid "No configuration file selected"
 msgstr "未选择配置文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:187
+#: desktop/src/pages/ConfigPreferences.tsx:180
 msgid "The file is not currently readable."
 msgstr "目前无法读取此文件。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:190
+#: desktop/src/pages/ConfigPreferences.tsx:183
 msgid "Detect"
 msgstr "检测"
 
-#: desktop/src/pages/ConfigPreferences.tsx:191
+#: desktop/src/pages/ConfigPreferences.tsx:184
 msgid "Browse"
 msgstr "浏览"
 
-#: desktop/src/pages/ConfigPreferences.tsx:192
+#: desktop/src/pages/ConfigPreferences.tsx:185
 msgid "Authorize read"
 msgstr "授权读取"
 
 #. Translators: Authorize read is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:195
+#: desktop/src/pages/ConfigPreferences.tsx:188
 msgid ""
 "Selecting a file keeps the path in this pending proposal, which is validated "
 "and saved automatically when you leave this section. Authorization is "
@@ -3165,27 +3165,27 @@ msgstr ""
 "选择文件后，路径会保留在此待处理的提议中，系统会在您离开此部分时对其进行验证"
 "并自动保存。只有在您明确选择“授权读取”时，才会请求授权。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:287
-#: desktop/src/pages/ConfigPreferences.tsx:373
+#: desktop/src/pages/ConfigPreferences.tsx:280
+#: desktop/src/pages/ConfigPreferences.tsx:366
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "添加"
 
-#: desktop/src/pages/ConfigPreferences.tsx:294
-#: desktop/src/pages/ConfigPreferences.tsx:295
+#: desktop/src/pages/ConfigPreferences.tsx:287
+#: desktop/src/pages/ConfigPreferences.tsx:288
 msgid "Drag to reorder"
 msgstr "拖动以重新排序"
 
-#: desktop/src/pages/ConfigPreferences.tsx:315
+#: desktop/src/pages/ConfigPreferences.tsx:308
 msgid "Move up"
 msgstr "上移"
 
-#: desktop/src/pages/ConfigPreferences.tsx:316
+#: desktop/src/pages/ConfigPreferences.tsx:309
 msgid "Move down"
 msgstr "下移"
 
-#: desktop/src/pages/ConfigPreferences.tsx:317
-#: desktop/src/pages/ConfigPreferences.tsx:362
+#: desktop/src/pages/ConfigPreferences.tsx:310
+#: desktop/src/pages/ConfigPreferences.tsx:355
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3193,21 +3193,21 @@ msgid "Remove"
 msgstr "移除"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:347
+#: desktop/src/pages/ConfigPreferences.tsx:340
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "请输入 http、https、ftp、ftps 或 file 协议的链接。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:359
-#: desktop/src/pages/ConfigPreferences.tsx:830
+#: desktop/src/pages/ConfigPreferences.tsx:352
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Custom Signature Databases"
 msgstr "自定义特征库"
 
-#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:359
 msgid "Add URLs"
 msgstr "添加链接"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:369
+#: desktop/src/pages/ConfigPreferences.tsx:362
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3215,169 +3215,169 @@ msgstr ""
 "支持的网址协议：http、https、ftp、ftps 和 file。请将提供商的每个网址粘贴为单"
 "独的条目。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:482
+#: desktop/src/pages/ConfigPreferences.tsx:475
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
 msgstr "离开此部分时，配置文件的选择会自动保存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:489
+#: desktop/src/pages/ConfigPreferences.tsx:482
 msgid "No configuration file was found."
 msgstr "未找到配置文件。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:503
+#: desktop/src/pages/ConfigPreferences.tsx:496
 msgid "Select a .conf configuration file."
 msgstr "请选择一个 .conf 配置文件。"
 
 #. Translators: Save is the button label in the Preferences header; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:533
+#: desktop/src/pages/ConfigPreferences.tsx:526
 msgid ""
 "Configuration authorized. Your unsaved changes were kept; use Save to "
 "persist them."
 msgstr "配置已获授权。您未保存的更改已保留；请使用“保存”以永久保存这些更改。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:537
+#: desktop/src/pages/ConfigPreferences.tsx:530
 msgid "Configuration loaded with administrator authorization."
 msgstr "已通过管理员授权加载配置。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:576
+#: desktop/src/pages/ConfigPreferences.tsx:569
 msgid "Scan backend saved."
 msgstr "扫描后端设置已保存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:640
+#: desktop/src/pages/ConfigPreferences.tsx:633
 msgid "Choose a configuration file before applying its changes."
 msgstr "请先选择配置文件，再应用更改。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:652
+#: desktop/src/pages/ConfigPreferences.tsx:645
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
 msgstr ""
 "访问时扫描需要指定要排除的用户名、UID 或 root 用户，以防止扫描陷入循环。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:666
+#: desktop/src/pages/ConfigPreferences.tsx:659
 msgid "Configuration validation failed."
 msgstr "配置验证失败。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "All settings saved."
 msgstr "所有设置已保存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "Changes saved."
 msgstr "更改已保存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:751
-#: desktop/src/pages/ConfigPreferences.tsx:763
+#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:756
 msgid "Some changes could not be applied."
 msgstr "部分更改未能应用。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:786
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "Checking scanner status…"
 msgstr "正在检查扫描器状态…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:788
+#: desktop/src/pages/ConfigPreferences.tsx:781
 msgid "Daemon connected"
 msgstr "已连接到守护进程"
 
-#: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ConfigPreferences.tsx:782
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "扫描器可用"
 
-#: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ConfigPreferences.tsx:782
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "扫描器不可用"
 
-#: desktop/src/pages/ConfigPreferences.tsx:799
+#: desktop/src/pages/ConfigPreferences.tsx:792
 msgid "Scan PE Files"
 msgstr "扫描 PE 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:800
+#: desktop/src/pages/ConfigPreferences.tsx:793
 msgid "Scan ELF Files"
 msgstr "扫描 ELF 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:801
+#: desktop/src/pages/ConfigPreferences.tsx:794
 msgid "Scan OLE2 Files"
 msgstr "扫描 OLE2 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:802
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Scan PDF Files"
 msgstr "扫描 PDF 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:796
 msgid "Scan HTML Files"
 msgstr "扫描 HTML 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:797
 msgid "Scan Archive Files"
 msgstr "扫描归档文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:810
+#: desktop/src/pages/ConfigPreferences.tsx:803
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "病毒库更新"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:804
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:815
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Paths"
 msgstr "路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:816
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Database Directory"
 msgstr "病毒库目录"
 
-#: desktop/src/pages/ConfigPreferences.tsx:817
+#: desktop/src/pages/ConfigPreferences.tsx:810
 msgid "Update Log File"
 msgstr "更新日志文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "PID File"
 msgstr "PID 文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:819
+#: desktop/src/pages/ConfigPreferences.tsx:812
 msgid "Notify ClamD Config"
 msgstr "通知 ClamD 时使用的配置文件"
 
-#: desktop/src/pages/ConfigPreferences.tsx:820
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Log timestamps"
 msgstr "记录日志时间戳"
 
-#: desktop/src/pages/ConfigPreferences.tsx:821
+#: desktop/src/pages/ConfigPreferences.tsx:814
 msgid "Verbose logging"
 msgstr "记录详细日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:822
+#: desktop/src/pages/ConfigPreferences.tsx:815
 msgid "Syslog logging"
 msgstr "记录到系统日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:817
 msgid "Update Behavior"
 msgstr "更新行为"
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "Checks per day"
 msgstr "每日检查次数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "0 disables automatic checks."
 msgstr "设为 0 可禁用自动检查。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "Database Mirror"
 msgstr "病毒库镜像服务器"
 
-#: desktop/src/pages/ConfigPreferences.tsx:831
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Suggested"
 msgstr "推荐"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3385,22 +3385,22 @@ msgstr ""
 "“推荐”会将三个 InterServer 数据库添加到此草稿中。离开此部分时，它们会自动保"
 "存。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Signature Providers"
 msgstr "特征库提供商"
 
-#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:835
 msgid "Registration is required; URLs include your personal API key."
 msgstr "需要注册；网址中包含您的个人 API 密钥。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:842
-#: desktop/src/pages/ConfigPreferences.tsx:846
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:835
+#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Open provider"
 msgstr "访问提供商网站"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:836
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3408,183 +3408,209 @@ msgstr ""
 "请使用 fangfrisch 或 clamav-unofficial-sigs；此提供商不提供可直接添加的自定义"
 "网址。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr "社区提供的哈希、网页后门和通用恶意软件特征库。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:850
+#: desktop/src/pages/ConfigPreferences.tsx:843
 msgid "Proxy Settings"
 msgstr "代理设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:851
+#: desktop/src/pages/ConfigPreferences.tsx:844
 msgid "Proxy Server"
 msgstr "代理服务器"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "Proxy Port"
 msgstr "代理端口"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "0 disables the proxy port."
 msgstr "设为 0 可禁用代理端口。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:846
 msgid "Proxy Username"
 msgstr "代理用户名"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Proxy Password"
 msgstr "代理密码"
 
-#: desktop/src/pages/ConfigPreferences.tsx:859
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "Scanner Settings"
 msgstr "扫描器设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Scan Backend"
 msgstr "扫描后端"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Auto (prefer daemon)"
 msgstr "自动（优先使用守护进程）"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV 守护进程（clamd）"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:857
 msgid "Standalone Scanner (clamscan)"
 msgstr "独立扫描器（clamscan）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Daemon Status"
 msgstr "守护进程状态"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Refresh Status"
 msgstr "刷新状态"
 
-#: desktop/src/pages/ConfigPreferences.tsx:869
+#: desktop/src/pages/ConfigPreferences.tsx:862
 msgid "Documentation"
 msgstr "文档"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:871
-#: desktop/src/pages/ConfigPreferences.tsx:892
+#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "File Type Scanning"
 msgstr "文件类型扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:871
 msgid "Performance and Limits"
 msgstr "性能与限制"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:872
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "Max File Size (MB)"
 msgstr "最大文件大小（兆字节）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
-#: desktop/src/pages/ConfigPreferences.tsx:880
-#: desktop/src/pages/ConfigPreferences.tsx:882
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:872
+#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "0 means unlimited."
 msgstr "0 表示无限制。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:880
+#: desktop/src/pages/ConfigPreferences.tsx:873
 msgid "Max Scan Size (MB)"
 msgstr "最大扫描大小（兆字节）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:881
+#: desktop/src/pages/ConfigPreferences.tsx:874
 msgid "Max Archive Recursion"
 msgstr "压缩包最大递归深度"
 
-#: desktop/src/pages/ConfigPreferences.tsx:882
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Max Files in Archive"
 msgstr "压缩包内最大文件数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:877
 msgid "Logging"
 msgstr "日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:878
 msgid "Log File Path"
 msgstr "日志文件路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:879
 msgid "Verbose Logging"
 msgstr "详细日志"
 
-#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:879
 msgid "Syslog Logging"
 msgstr "系统日志记录"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:884
 msgid "On-Access Scanning"
 msgstr "访问时扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:896
+#: desktop/src/pages/ConfigPreferences.tsx:889
 msgid "Monitored Paths"
 msgstr "监控路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:897
+#: desktop/src/pages/ConfigPreferences.tsx:890
 msgid "Include Paths"
 msgstr "包含路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:898
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "Exclude Paths"
 msgstr "排除路径"
 
-#: desktop/src/pages/ConfigPreferences.tsx:900
+#: desktop/src/pages/ConfigPreferences.tsx:894
 msgid "Behavior Settings"
 msgstr "行为设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:895
 msgid "Prevention Mode"
 msgstr "防护模式"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#. Translators: Keep fanotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:895
+msgid ""
+"Block access to infected files instead of only reporting them. Denies file "
+"opens via fanotify."
+msgstr "阻止访问受感染的文件，而不仅仅是报告它们。通过 fanotify 拒绝打开文件。"
+
+#: desktop/src/pages/ConfigPreferences.tsx:899
 msgid "Extra Scanning"
 msgstr "附加扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#. Translators: Keep inotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:899
+msgid ""
+"Also scan newly created or moved files in monitored directories via inotify."
+msgstr "同时通过 inotify 扫描受监控目录中新创建或移动的文件。"
+
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Deny on Error"
 msgstr "出错时拒绝访问"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:903
+msgid "Block file access if scanning fails or encounters an error."
+msgstr "如果扫描失败或遇到错误，则阻止文件访问。"
+
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Disable DDD"
 msgstr "禁用 DDD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#. Translators: Keep inotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:904
+msgid ""
+"Disable Dynamic Directory Determination for recursive subdirectory tracking. "
+"Useful if large directory trees hit inotify watch limits."
+msgstr ""
+"禁用用于递归跟踪子目录的动态目录确定（DDD）。当大型目录树达到 inotify 监控"
+"上限时很有用。"
+
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Performance Settings"
 msgstr "性能设置"
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:910
 msgid "Max Threads"
 msgstr "最大线程数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "Curl Timeout (seconds)"
 msgstr "Curl 超时（秒）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "0 disables the timeout."
 msgstr "设为 0 可禁用超时。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:907
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Retry Attempts"
 msgstr "重试次数"
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:915
 msgid "Scan Loop Prevention"
 msgstr "防止循环扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:910
+#: desktop/src/pages/ConfigPreferences.tsx:916
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3592,80 +3618,80 @@ msgstr ""
 "必须至少设置一项用于防止循环扫描的排除规则。请排除 clamav 服务账户、其 UID "
 "或 root 用户，以防止递归扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Exclude Username"
 msgstr "排除的用户名"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Exclude User ID"
 msgstr "排除的用户编号"
 
-#: desktop/src/pages/ConfigPreferences.tsx:913
+#: desktop/src/pages/ConfigPreferences.tsx:919
 msgid "Exclude Root User"
 msgstr "排除超级用户"
 
-#: desktop/src/pages/ConfigPreferences.tsx:918
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Scheduled Scans"
 msgstr "计划扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "Schedule"
 msgstr "计划"
 
-#: desktop/src/pages/ConfigPreferences.tsx:920
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "Enable Scheduled Scans"
 msgstr "启用计划扫描"
 
-#: desktop/src/pages/ConfigPreferences.tsx:921
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Scan Frequency"
 msgstr "扫描频率"
 
-#: desktop/src/pages/ConfigPreferences.tsx:922
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Scan Time (24-hour)"
 msgstr "扫描时间（24 小时制）"
 
-#: desktop/src/pages/ConfigPreferences.tsx:923
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Day of Week"
 msgstr "每周扫描日"
 
-#: desktop/src/pages/ConfigPreferences.tsx:923
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Used for weekly scans."
 msgstr "用于每周扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid "Day of Month"
 msgstr "每月扫描日"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid "Used for monthly scans."
 msgstr "用于每月扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:925
+#: desktop/src/pages/ConfigPreferences.tsx:931
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "扫描目标"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:932
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
 msgstr ""
 "尚未配置扫描目标。计划扫描将使用您的主目录，但不会将其保存为显式指定的目标。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:933
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "使用电池时跳过"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:933
 msgid "Do not start scheduled scans while on battery power."
 msgstr "使用电池供电时，不启动计划扫描。"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:934
 msgid "Auto-Quarantine"
 msgstr "自动隔离"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:934
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "自动隔离计划扫描发现的威胁。"
 

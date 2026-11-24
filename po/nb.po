@@ -61,7 +61,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-19 17:14+0100\n"
+"POT-Creation-Date: 2026-11-24 12:08-0500\n"
 "PO-Revision-Date: 2026-10-17 12:00+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: Norwegian Bokmål\n"
@@ -1610,7 +1610,7 @@ msgstr ""
 "Nettverkssokkellisten er utilgjengelig. Kontroller at systemets "
 "sokkelverktøy er installert, og prøv igjen."
 
-#: crates/clamui-core/src/platform.rs:452
+#: crates/clamui-core/src/platform.rs:454
 msgid "Not running as Flatpak"
 msgstr "Kjører ikke som Flatpak"
 
@@ -1898,12 +1898,12 @@ msgstr[1] ""
 "{count} ikke-dødelige advarsler under skanning; noen filer kan bare ha blitt "
 "skannet delvis"
 
-#: crates/clamui-core/src/scheduler.rs:805
+#: crates/clamui-core/src/scheduler.rs:846
 msgid "Scheduled scan cancelled"
 msgstr "Planlagt skanning avbrutt"
 
 #. Translators: Keep `clamui-scheduled-scan`, flags, `PATH`, and command syntax unchanged; translate the `Usage:` label.
-#: crates/clamui-core/src/scheduler.rs:824
+#: crates/clamui-core/src/scheduler.rs:865
 msgid ""
 "Usage: clamui-scheduled-scan [--skip-on-battery] [--auto-quarantine] [--"
 "target PATH] [--dry-run] [--verbose|-v]"
@@ -1912,59 +1912,59 @@ msgstr ""
 "target PATH] [--dry-run] [--verbose|-v]"
 
 #. Translators: The ellipsis indicates that the scheduled scan is starting.
-#: crates/clamui-core/src/scheduler.rs:865
+#: crates/clamui-core/src/scheduler.rs:906
 msgid "ClamUI scheduled scan starting…"
 msgstr "Planlagt ClamUI-skanning starter…"
 
-#: crates/clamui-core/src/scheduler.rs:874
+#: crates/clamui-core/src/scheduler.rs:915
 msgid "Scheduled scan skipped (on battery power)"
 msgstr "Planlagt skanning ble hoppet over (går på batteri)"
 
-#: crates/clamui-core/src/scheduler.rs:891
+#: crates/clamui-core/src/scheduler.rs:932
 msgid "Warning: Target does not exist: {target}"
 msgstr "Advarsel: Målet finnes ikke: {target}"
 
-#: crates/clamui-core/src/scheduler.rs:903
+#: crates/clamui-core/src/scheduler.rs:944
 msgid "Error: No valid scan targets found"
 msgstr "Feil: Fant ingen gyldig mål for skanning"
 
 #. Translators: The em dash separates the dry-run state from its consequence.
-#: crates/clamui-core/src/scheduler.rs:907
+#: crates/clamui-core/src/scheduler.rs:948
 msgid "Dry run mode — scan not executed"
 msgstr "Tørrkjøringsmodus — skanning ikke utført"
 
-#: crates/clamui-core/src/scheduler.rs:915
+#: crates/clamui-core/src/scheduler.rs:956
 msgid "  Skip on battery: {value}"
 msgstr "  Hopp over på batteri: {value}"
 
-#: crates/clamui-core/src/scheduler.rs:920
+#: crates/clamui-core/src/scheduler.rs:961
 msgid "  Auto quarantine: {value}"
 msgstr "  Automatisk karantene: {value}"
 
-#: crates/clamui-core/src/scheduler.rs:928
+#: crates/clamui-core/src/scheduler.rs:969
 msgid "  {count} target: {targets:?}"
 msgid_plural "  {count} targets: {targets:?}"
 msgstr[0] "  {count} mål: {targets:?}"
 msgstr[1] "  {count} mål: {targets:?}"
 
-#: crates/clamui-core/src/scheduler.rs:952
+#: crates/clamui-core/src/scheduler.rs:993
 msgid "Scheduled scan failed: ClamAV not available"
 msgstr "Planlagt skanning mislyktes: ClamAV er utilgjengelig"
 
 #. Translators: The em dash separates the unavailable component from `{error}`; preserve the raw diagnostic placeholder.
-#: crates/clamui-core/src/scheduler.rs:962
+#: crates/clamui-core/src/scheduler.rs:1003
 msgid "Error: ClamAV not available — {error}"
 msgstr "Feil: ClamAV er ikke tilgjengelig — {error}"
 
-#: crates/clamui-core/src/scheduler.rs:971
+#: crates/clamui-core/src/scheduler.rs:1012
 msgid "Scheduled Scan Failed"
 msgstr "Planlagt skanning mislyktes"
 
-#: crates/clamui-core/src/scheduler.rs:972
+#: crates/clamui-core/src/scheduler.rs:1013
 msgid "ClamAV is not available. Please install ClamAV."
 msgstr "ClamAV er utilgjengelig. Installer ClamAV."
 
-#: crates/clamui-core/src/scheduler.rs:1035
+#: crates/clamui-core/src/scheduler.rs:1076
 msgid "Scheduled scan found {infected} threat, {quarantined} quarantined"
 msgid_plural ""
 "Scheduled scan found {infected} threats, {quarantined} quarantined"
@@ -1973,71 +1973,71 @@ msgstr[0] ""
 msgstr[1] ""
 "Planlagt skanning fant {infected} trusler, {quarantined} satt i karantene"
 
-#: crates/clamui-core/src/scheduler.rs:1046
+#: crates/clamui-core/src/scheduler.rs:1087
 msgid "Scheduled scan found {count} threat"
 msgid_plural "Scheduled scan found {count} threats"
 msgstr[0] "Planlagt skanning fant {count} trussel"
 msgstr[1] "Planlagt skanning fant {count} trusler"
 
-#: crates/clamui-core/src/scheduler.rs:1055
+#: crates/clamui-core/src/scheduler.rs:1096
 msgid "Scheduled scan completed with errors"
 msgstr "Planlagt skanning ble fullført med feil"
 
 #. Translators: The em dash separates the summary from the count; preserve `{count}`.
 #. Translators: The em dash separates the summary from the count; preserve `{count}`.
-#: crates/clamui-core/src/scheduler.rs:1058
+#: crates/clamui-core/src/scheduler.rs:1099
 msgid "Scheduled scan completed — {count} file scanned, no threats"
 msgid_plural "Scheduled scan completed — {count} files scanned, no threats"
 msgstr[0] "Planlagt skanning fullført – {count} fil skannet, ingen trusler"
 msgstr[1] "Planlagt skanning fullført – {count} filer skannet, ingen trusler"
 
-#: crates/clamui-core/src/scheduler.rs:1073
+#: crates/clamui-core/src/scheduler.rs:1114
 msgid "Scan Duration: {duration:.1f} seconds"
 msgstr "Skannetid: {duration:.1f} sekunder"
 
-#: crates/clamui-core/src/scheduler.rs:1075
+#: crates/clamui-core/src/scheduler.rs:1116
 msgid "Files Scanned: {count}"
 msgstr "Filer skannet: {count}"
 
-#: crates/clamui-core/src/scheduler.rs:1076
+#: crates/clamui-core/src/scheduler.rs:1117
 msgid "Threats Found: {count}"
 msgstr "Trusler funnet: {count}"
 
-#: crates/clamui-core/src/scheduler.rs:1077
+#: crates/clamui-core/src/scheduler.rs:1118
 msgid "Targets: {targets}"
 msgstr "Mål: {targets}"
 
-#: crates/clamui-core/src/scheduler.rs:1081
+#: crates/clamui-core/src/scheduler.rs:1122
 msgid "Quarantined: {count}"
 msgstr "Satt i karantene: {count}"
 
-#: crates/clamui-core/src/scheduler.rs:1086
+#: crates/clamui-core/src/scheduler.rs:1127
 msgid "Quarantine Failed: {count}"
 msgstr "Mislykket karantene: {count}"
 
-#: crates/clamui-core/src/scheduler.rs:1114
+#: crates/clamui-core/src/scheduler.rs:1155
 msgid "Scheduled Scan: Threats Detected!"
 msgstr "Planlagt skanning: trusler oppdaget!"
 
-#: crates/clamui-core/src/scheduler.rs:1120
+#: crates/clamui-core/src/scheduler.rs:1161
 msgid "Scheduled Scan Completed"
 msgstr "Planlagt skanning er fullført"
 
-#: crates/clamui-core/src/scheduler.rs:1121
+#: crates/clamui-core/src/scheduler.rs:1162
 msgid "Scan completed with some errors. Check logs for details."
 msgstr "Skanning fullført med noen feil. Se loggene for detaljer."
 
-#: crates/clamui-core/src/scheduler.rs:1129
+#: crates/clamui-core/src/scheduler.rs:1170
 msgid "Scheduled Scan Complete"
 msgstr "Planlagt skanning fullført"
 
-#: crates/clamui-core/src/scheduler.rs:1142
+#: crates/clamui-core/src/scheduler.rs:1183
 msgid "Failed to quarantine: {count} file"
 msgid_plural "Failed to quarantine: {count} files"
 msgstr[0] "Kunne ikke sette i karantene: {count} fil"
 msgstr[1] "Kunne ikke sette i karantene: {count} filer"
 
-#: crates/clamui-core/src/scheduler.rs:1168
+#: crates/clamui-core/src/scheduler.rs:1209
 msgid ""
 "Battery level: {percent:.0f}%\n"
 "Scan skipped due to battery-aware settings."
@@ -2045,15 +2045,15 @@ msgstr ""
 "Batterinivå: {percent:.0f} %\n"
 "Skanningen ble hoppet over på grunn av batteriinnstillingene."
 
-#: crates/clamui-core/src/scheduler.rs:1173
+#: crates/clamui-core/src/scheduler.rs:1214
 msgid "Scan skipped due to battery-aware settings."
 msgstr "Skanning hoppet over på grunn av batteribevisste innstillinger."
 
-#: crates/clamui-core/src/scheduler.rs:1179
+#: crates/clamui-core/src/scheduler.rs:1220
 msgid "Skipping scan: running on battery power ({percent:.0f}%)"
 msgstr "Hopper over skanningen: maskinen går på batteri ({percent:.0f} %)"
 
-#: crates/clamui-core/src/scheduler.rs:1184
+#: crates/clamui-core/src/scheduler.rs:1225
 msgid "Skipping scan: running on battery power"
 msgstr "Hopper over skanning: kjører på batteristrøm"
 
@@ -2281,199 +2281,199 @@ msgstr "Legg til filer"
 msgid "Export"
 msgstr "Eksporter"
 
-#: desktop/src-tauri/src/runtime.rs:615
+#: desktop/src-tauri/src/runtime.rs:634
 msgid "Open"
 msgstr "Åpne"
 
-#: desktop/src/App.tsx:109 desktop/src/pages/Dashboard.tsx:38
+#: desktop/src/App.tsx:110 desktop/src/pages/Dashboard.tsx:38
 msgid "Dashboard"
 msgstr "Oversikt"
 
-#: desktop/src/App.tsx:111 desktop/src/pages/Scan.tsx:539
+#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:539
 msgid "Scan"
 msgstr "Skanning"
 
-#: desktop/src/App.tsx:113 desktop/src/pages/Database.tsx:263
+#: desktop/src/App.tsx:114 desktop/src/pages/Database.tsx:263
 #: desktop/src/pages/Preferences.tsx:16
 msgid "Database"
 msgstr "Database"
 
-#: desktop/src/App.tsx:115 desktop/src/pages/Logs.tsx:358
+#: desktop/src/App.tsx:116 desktop/src/pages/Logs.tsx:358
 #: desktop/src/pages/ScanOverview.tsx:80
 msgid "Logs"
 msgstr "Logger"
 
-#: desktop/src/App.tsx:117
+#: desktop/src/App.tsx:118
 msgid "Components"
 msgstr "Komponenter"
 
-#: desktop/src/App.tsx:121 desktop/src/pages/Statistics.tsx:233
+#: desktop/src/App.tsx:122 desktop/src/pages/Statistics.tsx:233
 msgid "Statistics"
 msgstr "Statistikk"
 
-#: desktop/src/App.tsx:123
+#: desktop/src/App.tsx:124
 msgid "Audit"
 msgstr "Revisjon"
 
-#: desktop/src/App.tsx:125
+#: desktop/src/App.tsx:126
 msgid "Network"
 msgstr "Nettverk"
 
-#: desktop/src/App.tsx:127 desktop/src/App.tsx:912 desktop/src/App.tsx:1011
+#: desktop/src/App.tsx:128 desktop/src/App.tsx:913 desktop/src/App.tsx:1012
 #: desktop/src/pages/Preferences.tsx:164
 msgid "Preferences"
 msgstr "Brukervalg"
 
-#: desktop/src/App.tsx:129
+#: desktop/src/App.tsx:130
 msgid "Profiles"
 msgstr "Profiler"
 
-#: desktop/src/App.tsx:131 desktop/src/pages/Results.tsx:295
+#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:295
 #: desktop/src/pages/Results.tsx:296
 msgid "Results"
 msgstr "Resultater"
 
-#: desktop/src/App.tsx:316 desktop/src/pages/ConfigPreferences.tsx:566
+#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:559
 msgid "Could not open link"
 msgstr "Kunne ikke åpne linken"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/App.tsx:399 desktop/src/App.tsx:414 desktop/src/App.tsx:432
+#: desktop/src/App.tsx:400 desktop/src/App.tsx:415 desktop/src/App.tsx:433
 #: desktop/src/pages/Scan.tsx:330
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr "Skanning pågår – vent til den er ferdig før du endrer mål"
 
-#: desktop/src/App.tsx:478
+#: desktop/src/App.tsx:479
 msgid "The privileged-helper installation returned an invalid status."
 msgstr ""
 "Installasjonen av den privilegerte hjelperen returnerte en ugyldig status."
 
-#: desktop/src/App.tsx:485
+#: desktop/src/App.tsx:486
 msgid "The privileged helper was installed successfully."
 msgstr "Den privilegerte hjelperen er installert."
 
-#: desktop/src/App.tsx:487
+#: desktop/src/App.tsx:488
 msgid ""
 "The privileged helper is still unavailable. Try again or install it manually."
 msgstr ""
 "Den privilegerte hjelperen er fortsatt utilgjengelig. Prøv på nytt eller "
 "installer den manuelt."
 
-#: desktop/src/App.tsx:791
+#: desktop/src/App.tsx:792
 msgid "The privileged-helper status returned an invalid response."
 msgstr "Statusen for den privilegerte hjelperen returnerte et ugyldig svar."
 
-#: desktop/src/App.tsx:910
+#: desktop/src/App.tsx:911
 msgid "Back"
 msgstr "Tilbake"
 
-#: desktop/src/App.tsx:918 desktop/src/pages/Profiles.tsx:109
+#: desktop/src/App.tsx:919 desktop/src/pages/Profiles.tsx:109
 #: desktop/src/pages/Scan.tsx:192
 msgid "Saving…"
 msgstr "Lagrer …"
 
-#: desktop/src/App.tsx:918
+#: desktop/src/App.tsx:919
 msgid "Save"
 msgstr "Lagre"
 
-#: desktop/src/App.tsx:922
+#: desktop/src/App.tsx:923
 msgid "Overview"
 msgstr "Oversikt"
 
-#: desktop/src/App.tsx:931 desktop/src/App.tsx:932 desktop/src/App.tsx:946
+#: desktop/src/App.tsx:932 desktop/src/App.tsx:933 desktop/src/App.tsx:947
 msgid "Scan File or Folder"
 msgstr "Skann fil eller mappe"
 
-#: desktop/src/App.tsx:953
+#: desktop/src/App.tsx:954
 msgid "Choose scan targets"
 msgstr "Velg skannemål"
 
-#: desktop/src/App.tsx:963
+#: desktop/src/App.tsx:964
 msgid "Scan Files"
 msgstr "Skann filer"
 
-#: desktop/src/App.tsx:967
+#: desktop/src/App.tsx:968
 msgid "Scan Folders"
 msgstr "Skann mapper"
 
-#: desktop/src/App.tsx:972 desktop/src/App.tsx:974
+#: desktop/src/App.tsx:973 desktop/src/App.tsx:975
 msgid "Scan System (Quick Scan)"
 msgstr "Skann systemet (rask skanning)"
 
-#: desktop/src/App.tsx:981 desktop/src/App.tsx:982 desktop/src/App.tsx:1046
+#: desktop/src/App.tsx:982 desktop/src/App.tsx:983 desktop/src/App.tsx:1047
 msgid "Menu"
 msgstr "Meny"
 
-#: desktop/src/App.tsx:1001
+#: desktop/src/App.tsx:1002
 msgid "Application menu"
 msgstr "Applikasjonsmeny"
 
-#: desktop/src/App.tsx:1015
+#: desktop/src/App.tsx:1016
 msgid "About"
 msgstr "Om"
 
-#: desktop/src/App.tsx:1027
+#: desktop/src/App.tsx:1028
 msgid "Main navigation"
 msgstr "Hovednavigasjon"
 
-#: desktop/src/App.tsx:1029
+#: desktop/src/App.tsx:1030
 msgid "Views"
 msgstr "Visninger"
 
-#: desktop/src/App.tsx:1057 desktop/src/pages/Quarantine.tsx:282
+#: desktop/src/App.tsx:1058 desktop/src/pages/Quarantine.tsx:282
 msgid "Dismiss"
 msgstr "Lukk"
 
-#: desktop/src/App.tsx:1079
+#: desktop/src/App.tsx:1080
 msgid "About ClamUI"
 msgstr "Om ClamUI"
 
-#: desktop/src/App.tsx:1080
+#: desktop/src/App.tsx:1081
 msgid "A native desktop interface for ClamAV."
 msgstr "Et grafisk grensesnitt for antivirusprogrammet ClamAV"
 
-#: desktop/src/App.tsx:1082
+#: desktop/src/App.tsx:1083
 msgid "Version"
 msgstr "Versjon"
 
-#: desktop/src/App.tsx:1083 desktop/src/pages/SettingsPreferences.tsx:230
+#: desktop/src/App.tsx:1084 desktop/src/pages/SettingsPreferences.tsx:230
 #: desktop/src/pages/SettingsPreferences.tsx:231
 msgid "Language"
 msgstr "Språk"
 
-#: desktop/src/App.tsx:1084
+#: desktop/src/App.tsx:1085
 msgid "License"
 msgstr "Lisens"
 
-#: desktop/src/App.tsx:1087
+#: desktop/src/App.tsx:1088
 msgid "Project website"
 msgstr "Prosjektets nettside"
 
-#: desktop/src/App.tsx:1088
+#: desktop/src/App.tsx:1089
 msgid "Issue tracker"
 msgstr "Problemsporing"
 
-#: desktop/src/App.tsx:1090
+#: desktop/src/App.tsx:1091
 msgid "Could not load contributor credits: {error}"
 msgstr "Kunne ikke laste inn bidragsyterkrediteringer: {error}"
 
-#: desktop/src/App.tsx:1095
+#: desktop/src/App.tsx:1096
 msgid "Contributors"
 msgstr "Bidragsytere"
 
-#: desktop/src/App.tsx:1104
+#: desktop/src/App.tsx:1105
 msgid "Translator credits"
 msgstr "Oversetterkrediteringer"
 
-#: desktop/src/App.tsx:1107
+#: desktop/src/App.tsx:1108
 msgid "Loading contributor credits…"
 msgstr "Laster inn bidragsyterkrediteringer…"
 
-#: desktop/src/App.tsx:1109
+#: desktop/src/App.tsx:1110
 msgid "Close ClamUI?"
 msgstr "Vil du lukke ClamUI?"
 
-#: desktop/src/App.tsx:1110
+#: desktop/src/App.tsx:1111
 msgid ""
 "Choose whether to keep ClamUI available in the system tray or quit it "
 "completely."
@@ -2481,11 +2481,11 @@ msgstr ""
 "Velg om du vil beholde ClamUI tilgjengelig i varslingsområdet eller avslutte "
 "det helt."
 
-#: desktop/src/App.tsx:1111 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:193
 msgid "Remember my choice"
 msgstr "Husk valget mitt"
 
-#: desktop/src/App.tsx:1112 desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1113 desktop/src/App.tsx:1117
 #: desktop/src/ScanProgressPanel.tsx:32 desktop/src/pages/Database.tsx:313
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
@@ -2496,49 +2496,49 @@ msgstr "Husk valget mitt"
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: desktop/src/App.tsx:1112
+#: desktop/src/App.tsx:1113
 msgid "Minimize to tray"
 msgstr "Minimer til varslingsområdet"
 
-#: desktop/src/App.tsx:1114 desktop/src/pages/ScanOverview.tsx:66
+#: desktop/src/App.tsx:1115 desktop/src/pages/ScanOverview.tsx:66
 msgid "Scan in Progress"
 msgstr "Skanning pågår"
 
-#: desktop/src/App.tsx:1115
+#: desktop/src/App.tsx:1116
 msgid "A scan is still running. Cancelling it may leave partial results."
 msgstr "En skanning kjører fortsatt. Avbryting kan gi delvise resultater."
 
-#: desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1117
 msgid "Keep Scanning"
 msgstr "Fortsett skanningen"
 
-#: desktop/src/App.tsx:1116
+#: desktop/src/App.tsx:1117
 msgid "Cancel Scan and Close"
 msgstr "Avbryt skanningen og lukk"
 
-#: desktop/src/App.tsx:1116 desktop/src/ConfigurationRecovery.tsx:94
+#: desktop/src/App.tsx:1117 desktop/src/ConfigurationRecovery.tsx:94
 #: desktop/src/HelperTrustErrorDialog.tsx:85 desktop/src/Modal.tsx:110
 #: desktop/src/pages/SettingsPreferences.tsx:274
 msgid "Close"
 msgstr "Lukk"
 
-#: desktop/src/App.tsx:1118
+#: desktop/src/App.tsx:1119
 msgid "Install Privileged Helper"
 msgstr "Installer privilegert hjelper"
 
-#: desktop/src/App.tsx:1119
+#: desktop/src/App.tsx:1120
 msgid ""
 "ClamUI needs its matching privileged helper to save system configuration."
 msgstr ""
 "ClamUI trenger sin matchende privilegerte hjelper for å lagre "
 "systemkonfigurasjon."
 
-#: desktop/src/App.tsx:1121 desktop/src/HelperTrustErrorDialog.tsx:52
+#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:52
 msgid "Installing the helper requires administrator authorization."
 msgstr "Installasjon av hjelperen krever administratorautorisasjon."
 
 #. Translators: Keep Fedora, DNF, and ClamUI unchanged; DNF is Fedora's package manager.
-#: desktop/src/App.tsx:1122 desktop/src/HelperTrustErrorDialog.tsx:53
+#: desktop/src/App.tsx:1123 desktop/src/HelperTrustErrorDialog.tsx:53
 msgid ""
 "On Fedora with DNF, installation also adds the ClamUI signing key to the "
 "system RPM keyring."
@@ -2546,27 +2546,27 @@ msgstr ""
 "På Fedora med DNF legger installasjonen også ClamUIs signeringsnøkkel til i "
 "systemets RPM-nøkkelring."
 
-#: desktop/src/App.tsx:1127 desktop/src/HelperTrustErrorDialog.tsx:76
+#: desktop/src/App.tsx:1128 desktop/src/HelperTrustErrorDialog.tsx:76
 msgid "Installing privileged helper…"
 msgstr "Installerer privilegert hjelper …"
 
-#: desktop/src/App.tsx:1129
+#: desktop/src/App.tsx:1130
 msgid "Not now"
 msgstr "Ikke nå"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Installing…"
 msgstr "Installerer …"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Try Again"
 msgstr "Prøv igjen"
 
-#: desktop/src/App.tsx:1129 desktop/src/HelperTrustErrorDialog.tsx:84
+#: desktop/src/App.tsx:1130 desktop/src/HelperTrustErrorDialog.tsx:84
 msgid "Install Helper"
 msgstr "Installer hjelper"
 
-#: desktop/src/App.tsx:1129
+#: desktop/src/App.tsx:1130
 msgid "Open Preferences"
 msgstr "Åpne Brukervalg"
 
@@ -3346,28 +3346,28 @@ msgstr "Ukentlig"
 msgid "Monthly"
 msgstr "Månedlig"
 
-#: desktop/src/pages/ConfigPreferences.tsx:180
+#: desktop/src/pages/ConfigPreferences.tsx:173
 msgid "No configuration file selected"
 msgstr "Ingen konfigurasjonsfil valgt"
 
-#: desktop/src/pages/ConfigPreferences.tsx:187
+#: desktop/src/pages/ConfigPreferences.tsx:180
 msgid "The file is not currently readable."
 msgstr "Filen er for øyeblikket ikke lesbar."
 
-#: desktop/src/pages/ConfigPreferences.tsx:190
+#: desktop/src/pages/ConfigPreferences.tsx:183
 msgid "Detect"
 msgstr "Finn"
 
-#: desktop/src/pages/ConfigPreferences.tsx:191
+#: desktop/src/pages/ConfigPreferences.tsx:184
 msgid "Browse"
 msgstr "Bla gjennom"
 
-#: desktop/src/pages/ConfigPreferences.tsx:192
+#: desktop/src/pages/ConfigPreferences.tsx:185
 msgid "Authorize read"
 msgstr "Autoriser lesing"
 
 #. Translators: Authorize read is a button label; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:195
+#: desktop/src/pages/ConfigPreferences.tsx:188
 msgid ""
 "Selecting a file keeps the path in this pending proposal, which is validated "
 "and saved automatically when you leave this section. Authorization is "
@@ -3377,27 +3377,27 @@ msgstr ""
 "valideres og lagres automatisk når du forlater denne seksjonen. Autorisasjon "
 "forespørres kun når du eksplisitt velger «Autoriser lesing»."
 
-#: desktop/src/pages/ConfigPreferences.tsx:287
-#: desktop/src/pages/ConfigPreferences.tsx:373
+#: desktop/src/pages/ConfigPreferences.tsx:280
+#: desktop/src/pages/ConfigPreferences.tsx:366
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Legg til"
 
-#: desktop/src/pages/ConfigPreferences.tsx:294
-#: desktop/src/pages/ConfigPreferences.tsx:295
+#: desktop/src/pages/ConfigPreferences.tsx:287
+#: desktop/src/pages/ConfigPreferences.tsx:288
 msgid "Drag to reorder"
 msgstr "Dra for å endre rekkefølge"
 
-#: desktop/src/pages/ConfigPreferences.tsx:315
+#: desktop/src/pages/ConfigPreferences.tsx:308
 msgid "Move up"
 msgstr "Flytt opp"
 
-#: desktop/src/pages/ConfigPreferences.tsx:316
+#: desktop/src/pages/ConfigPreferences.tsx:309
 msgid "Move down"
 msgstr "Flytt ned"
 
-#: desktop/src/pages/ConfigPreferences.tsx:317
-#: desktop/src/pages/ConfigPreferences.tsx:362
+#: desktop/src/pages/ConfigPreferences.tsx:310
+#: desktop/src/pages/ConfigPreferences.tsx:355
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3405,21 +3405,21 @@ msgid "Remove"
 msgstr "Fjern"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:347
+#: desktop/src/pages/ConfigPreferences.tsx:340
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Skriv inn en http-, https-, ftp-, ftps- eller file-URL."
 
-#: desktop/src/pages/ConfigPreferences.tsx:359
-#: desktop/src/pages/ConfigPreferences.tsx:830
+#: desktop/src/pages/ConfigPreferences.tsx:352
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Custom Signature Databases"
 msgstr "Egendefinerte signaturdatabaser"
 
-#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:359
 msgid "Add URLs"
 msgstr "Legg til URL-er"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:369
+#: desktop/src/pages/ConfigPreferences.tsx:362
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3427,23 +3427,23 @@ msgstr ""
 "Støttede URL-skjemaer: http, https, ftp, ftps og file. Lim inn hver "
 "leverandør-URL som en egen oppføring."
 
-#: desktop/src/pages/ConfigPreferences.tsx:482
+#: desktop/src/pages/ConfigPreferences.tsx:475
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
 msgstr ""
 "Valg av konfigurasjonsfil lagres automatisk når du forlater denne seksjonen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:489
+#: desktop/src/pages/ConfigPreferences.tsx:482
 msgid "No configuration file was found."
 msgstr "Ingen konfigurasjonsfil ble funnet."
 
-#: desktop/src/pages/ConfigPreferences.tsx:503
+#: desktop/src/pages/ConfigPreferences.tsx:496
 msgid "Select a .conf configuration file."
 msgstr "Velg en .conf-konfigurasjonsfil."
 
 #. Translators: Save is the button label in the Preferences header; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:533
+#: desktop/src/pages/ConfigPreferences.tsx:526
 msgid ""
 "Configuration authorized. Your unsaved changes were kept; use Save to "
 "persist them."
@@ -3451,19 +3451,19 @@ msgstr ""
 "Konfigurasjonen er autorisert. Ulagrede endringer ble beholdt; bruk Lagre "
 "for å lagre dem permanent."
 
-#: desktop/src/pages/ConfigPreferences.tsx:537
+#: desktop/src/pages/ConfigPreferences.tsx:530
 msgid "Configuration loaded with administrator authorization."
 msgstr "Konfigurasjonen er lastet med administratorautorisasjon."
 
-#: desktop/src/pages/ConfigPreferences.tsx:576
+#: desktop/src/pages/ConfigPreferences.tsx:569
 msgid "Scan backend saved."
 msgstr "Skannemotor lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:640
+#: desktop/src/pages/ConfigPreferences.tsx:633
 msgid "Choose a configuration file before applying its changes."
 msgstr "Velg en konfigurasjonsfil før du bruker endringene."
 
-#: desktop/src/pages/ConfigPreferences.tsx:652
+#: desktop/src/pages/ConfigPreferences.tsx:645
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3471,129 +3471,129 @@ msgstr ""
 "Sanntidsskanning krever et ekskludert brukernavn, UID eller root-bruker for "
 "å forhindre skanneløkker."
 
-#: desktop/src/pages/ConfigPreferences.tsx:666
+#: desktop/src/pages/ConfigPreferences.tsx:659
 msgid "Configuration validation failed."
 msgstr "Konfigurasjonsvalidering mislyktes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "All settings saved."
 msgstr "Alle innstillinger lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:745
+#: desktop/src/pages/ConfigPreferences.tsx:738
 msgid "Changes saved."
 msgstr "Endringer lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:751
-#: desktop/src/pages/ConfigPreferences.tsx:763
+#: desktop/src/pages/ConfigPreferences.tsx:744
+#: desktop/src/pages/ConfigPreferences.tsx:756
 msgid "Some changes could not be applied."
 msgstr "Enkelte endringer kunne ikke brukes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:786
+#: desktop/src/pages/ConfigPreferences.tsx:779
 msgid "Checking scanner status…"
 msgstr "Sjekker skannerstatus …"
 
-#: desktop/src/pages/ConfigPreferences.tsx:788
+#: desktop/src/pages/ConfigPreferences.tsx:781
 msgid "Daemon connected"
 msgstr "Tjenesten er tilkoblet"
 
-#: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ConfigPreferences.tsx:782
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Skanner tilgjengelig"
 
-#: desktop/src/pages/ConfigPreferences.tsx:789
+#: desktop/src/pages/ConfigPreferences.tsx:782
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Skanner utilgjengelig"
 
-#: desktop/src/pages/ConfigPreferences.tsx:799
+#: desktop/src/pages/ConfigPreferences.tsx:792
 msgid "Scan PE Files"
 msgstr "Skann PE-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:800
+#: desktop/src/pages/ConfigPreferences.tsx:793
 msgid "Scan ELF Files"
 msgstr "Skann ELF-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:801
+#: desktop/src/pages/ConfigPreferences.tsx:794
 msgid "Scan OLE2 Files"
 msgstr "Skann OLE2-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:802
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Scan PDF Files"
 msgstr "Skann PDF-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:796
 msgid "Scan HTML Files"
 msgstr "Skann HTML-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:797
 msgid "Scan Archive Files"
 msgstr "Skann arkivfiler"
 
-#: desktop/src/pages/ConfigPreferences.tsx:810
+#: desktop/src/pages/ConfigPreferences.tsx:803
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Databaseoppdateringer"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:804
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:815
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Paths"
 msgstr "Stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:816
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Database Directory"
 msgstr "Databasemappe"
 
-#: desktop/src/pages/ConfigPreferences.tsx:817
+#: desktop/src/pages/ConfigPreferences.tsx:810
 msgid "Update Log File"
 msgstr "Logg for oppdateringer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "PID File"
 msgstr "PID-fil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:819
+#: desktop/src/pages/ConfigPreferences.tsx:812
 msgid "Notify ClamD Config"
 msgstr "clamd-konfigurasjon som skal varsles"
 
-#: desktop/src/pages/ConfigPreferences.tsx:820
+#: desktop/src/pages/ConfigPreferences.tsx:813
 msgid "Log timestamps"
 msgstr "Logg tidsstempler"
 
-#: desktop/src/pages/ConfigPreferences.tsx:821
+#: desktop/src/pages/ConfigPreferences.tsx:814
 msgid "Verbose logging"
 msgstr "Utførlig logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:822
+#: desktop/src/pages/ConfigPreferences.tsx:815
 msgid "Syslog logging"
 msgstr "Syslog logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:817
 msgid "Update Behavior"
 msgstr "Oppdateringsoppførsel"
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "Checks per day"
 msgstr "Sjekker per dag"
 
-#: desktop/src/pages/ConfigPreferences.tsx:825
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "0 disables automatic checks."
 msgstr "0 deaktiverer automatiske kontroller."
 
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:819
 msgid "Database Mirror"
 msgstr "Nedlastingsserver for databasen"
 
-#: desktop/src/pages/ConfigPreferences.tsx:831
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Suggested"
 msgstr "Foreslåtte"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3601,23 +3601,23 @@ msgstr ""
 "«Foreslåtte» legger til tre InterServer-databaser i dette utkastet. De "
 "lagres automatisk når du forlater denne seksjonen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Signature Providers"
 msgstr "Signaturleverandører"
 
-#: desktop/src/pages/ConfigPreferences.tsx:842
+#: desktop/src/pages/ConfigPreferences.tsx:835
 msgid "Registration is required; URLs include your personal API key."
 msgstr ""
 "Registrering er nødvendig; URL-er inkluderer din personlige API-nøkkel."
 
-#: desktop/src/pages/ConfigPreferences.tsx:842
-#: desktop/src/pages/ConfigPreferences.tsx:846
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:835
+#: desktop/src/pages/ConfigPreferences.tsx:839
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Open provider"
 msgstr "Åpne leverandør"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:836
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3625,185 +3625,214 @@ msgstr ""
 "Bruk fangfrisch eller clamav-unofficial-sigs; dette er ikke en direkte "
 "leverandør av egendefinerte URL-er."
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr ""
 "Fellesskaps-hash, web-shell og generelle signaturdatabaser for skadelig "
 "programvare."
 
-#: desktop/src/pages/ConfigPreferences.tsx:850
+#: desktop/src/pages/ConfigPreferences.tsx:843
 msgid "Proxy Settings"
 msgstr "Proxyinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:851
+#: desktop/src/pages/ConfigPreferences.tsx:844
 msgid "Proxy Server"
 msgstr "Proxyserver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "Proxy Port"
 msgstr "Proxyport"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:845
 msgid "0 disables the proxy port."
 msgstr "0 deaktiverer proxy-porten."
 
-#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:846
 msgid "Proxy Username"
 msgstr "Brukernavn for proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Proxy Password"
 msgstr "Passord for proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:859
+#: desktop/src/pages/ConfigPreferences.tsx:852
 msgid "Scanner Settings"
 msgstr "Skannerinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Scan Backend"
 msgstr "Skannemotor"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Auto (prefer daemon)"
 msgstr "Automatisk (foretrekk tjenesten)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV-tjeneste (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:857
 msgid "Standalone Scanner (clamscan)"
 msgstr "Frittstående skanner (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Daemon Status"
 msgstr "Tjenestestatus"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Refresh Status"
 msgstr "Oppdater status"
 
-#: desktop/src/pages/ConfigPreferences.tsx:869
+#: desktop/src/pages/ConfigPreferences.tsx:862
 msgid "Documentation"
 msgstr "Dokumentasjon"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:871
-#: desktop/src/pages/ConfigPreferences.tsx:892
+#: desktop/src/pages/ConfigPreferences.tsx:864
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "File Type Scanning"
 msgstr "Skanning etter filtype"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:871
 msgid "Performance and Limits"
 msgstr "Ytelse og grenser"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:872
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "Max File Size (MB)"
 msgstr "Maks filstørrelse (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
-#: desktop/src/pages/ConfigPreferences.tsx:880
-#: desktop/src/pages/ConfigPreferences.tsx:882
-#: desktop/src/pages/ConfigPreferences.tsx:905
+#: desktop/src/pages/ConfigPreferences.tsx:872
+#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:911
 msgid "0 means unlimited."
 msgstr "0 betyr ubegrenset."
 
-#: desktop/src/pages/ConfigPreferences.tsx:880
+#: desktop/src/pages/ConfigPreferences.tsx:873
 msgid "Max Scan Size (MB)"
 msgstr "Maks skannestørrelse (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:881
+#: desktop/src/pages/ConfigPreferences.tsx:874
 msgid "Max Archive Recursion"
 msgstr "Maks rekursjonsdybde i arkiver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:882
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Max Files in Archive"
 msgstr "Maks antall filer i arkiv"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:877
 msgid "Logging"
 msgstr "Logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:878
 msgid "Log File Path"
 msgstr "Sti til loggfil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:879
 msgid "Verbose Logging"
 msgstr "Detaljert logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:879
 msgid "Syslog Logging"
 msgstr "Logging til syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:884
 msgid "On-Access Scanning"
 msgstr "Sanntidsskanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:896
+#: desktop/src/pages/ConfigPreferences.tsx:889
 msgid "Monitored Paths"
 msgstr "Overvåkede stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:897
+#: desktop/src/pages/ConfigPreferences.tsx:890
 msgid "Include Paths"
 msgstr "Ta med stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:898
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "Exclude Paths"
 msgstr "Unnta stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:900
+#: desktop/src/pages/ConfigPreferences.tsx:894
 msgid "Behavior Settings"
 msgstr "Innstillinger for oppførsel"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:895
 msgid "Prevention Mode"
 msgstr "Blokkeringsmodus"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#. Translators: Keep fanotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:895
+msgid ""
+"Block access to infected files instead of only reporting them. Denies file "
+"opens via fanotify."
+msgstr ""
+"Blokker tilgang til infiserte filer i stedet for bare å rapportere dem. "
+"Nekter filåpninger via fanotify."
+
+#: desktop/src/pages/ConfigPreferences.tsx:899
 msgid "Extra Scanning"
 msgstr "Ekstra skanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#. Translators: Keep inotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:899
+msgid ""
+"Also scan newly created or moved files in monitored directories via inotify."
+msgstr ""
+"Skann også nyopprettede eller flyttede filer i overvåkede mapper via inotify."
+
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Deny on Error"
 msgstr "Nekt ved feil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:901
+#: desktop/src/pages/ConfigPreferences.tsx:903
+msgid "Block file access if scanning fails or encounters an error."
+msgstr "Blokker filtilgang hvis skanningen mislykkes eller støter på en feil."
+
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Disable DDD"
 msgstr "Slå av DDD"
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#. Translators: Keep inotify unchanged; it is a Linux kernel API name.
+#: desktop/src/pages/ConfigPreferences.tsx:904
+msgid ""
+"Disable Dynamic Directory Determination for recursive subdirectory tracking. "
+"Useful if large directory trees hit inotify watch limits."
+msgstr ""
+"Slå av dynamisk mappebestemmelse (DDD) for rekursiv sporing av undermapper. "
+"Nyttig hvis store mappetrær treffer inotify-overvåkingsgrenser."
+
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Performance Settings"
 msgstr "Ytelsesinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:910
 msgid "Max Threads"
 msgstr "Maks antall tråder"
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "Curl Timeout (seconds)"
 msgstr "Tidsavbrudd for curl (sekunder)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:906
+#: desktop/src/pages/ConfigPreferences.tsx:912
 msgid "0 disables the timeout."
 msgstr "0 deaktiverer tidsavbruddet."
 
-#: desktop/src/pages/ConfigPreferences.tsx:907
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Retry Attempts"
 msgstr "Antall nye forsøk"
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:915
 msgid "Scan Loop Prevention"
 msgstr "Hindring av skanneløkker"
 
-#: desktop/src/pages/ConfigPreferences.tsx:910
+#: desktop/src/pages/ConfigPreferences.tsx:916
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3811,60 +3840,60 @@ msgstr ""
 "Minst én sløyfeforebyggende ekskludering er nødvendig. Ekskluder clamav-"
 "tjenestekontoen, dens UID eller root for å forhindre rekursive skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Exclude Username"
 msgstr "Unnta brukernavn"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Exclude User ID"
 msgstr "Unnta bruker-ID"
 
-#: desktop/src/pages/ConfigPreferences.tsx:913
+#: desktop/src/pages/ConfigPreferences.tsx:919
 msgid "Exclude Root User"
 msgstr "Unnta root-brukeren"
 
-#: desktop/src/pages/ConfigPreferences.tsx:918
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Scheduled Scans"
 msgstr "Planlagte skanninger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "Schedule"
 msgstr "Rute"
 
-#: desktop/src/pages/ConfigPreferences.tsx:920
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "Enable Scheduled Scans"
 msgstr "Slå på planlagte skanninger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:921
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Scan Frequency"
 msgstr "Skannehyppighet"
 
-#: desktop/src/pages/ConfigPreferences.tsx:922
+#: desktop/src/pages/ConfigPreferences.tsx:928
 msgid "Scan Time (24-hour)"
 msgstr "Skannetid (24 timer)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:923
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Day of Week"
 msgstr "Ukedag"
 
-#: desktop/src/pages/ConfigPreferences.tsx:923
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Used for weekly scans."
 msgstr "Brukes til ukentlige skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid "Day of Month"
 msgstr "Dag i måneden"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid "Used for monthly scans."
 msgstr "Brukes til månedlige skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:925
+#: desktop/src/pages/ConfigPreferences.tsx:931
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Skannemål"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:932
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3872,20 +3901,20 @@ msgstr ""
 "Ingen mål er konfigurert. Den planlagte skanningen vil bruke hjemmemappen "
 "din uten å lagre den som et eksplisitt mål."
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:933
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Hopp over på batteri"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:933
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Ikke start planlagte skanninger mens du er på batteri."
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:934
 msgid "Auto-Quarantine"
 msgstr "Automatisk karantene"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:934
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "Sett automatisk trusler som planlagte skanninger finner, i karantene."
 

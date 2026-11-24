@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, type ReactNode, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import { notify, openExternal, openPaths, request } from "../api";
 import { cloneValues, isConfigDirty, mergeAuthorizedConfig, type ConfigDocument, type ConfigValues, valuesEqual } from "../configAuthorize";
@@ -82,13 +82,6 @@ const FREQUENCY_LABELS: Record<Schedule["schedule_frequency"], () => string> = {
 const FREQUENCIES: Schedule["schedule_frequency"][] = ["hourly", "daily", "weekly", "monthly"];
 const FILE_TYPE_FIELDS = ["ScanPE", "ScanELF", "ScanOLE2", "ScanPDF", "ScanHTML", "ScanArchive"] as const;
 const SCANNER_BOOLEAN_FIELDS = ["LogVerbose", "LogSyslog"] as const;
-const ONACCESS_BOOLEAN_FIELDS = [
-  "OnAccessPrevention",
-  "OnAccessExtraScanning",
-  "OnAccessDenyOnError",
-  "OnAccessDisableDDD",
-  "OnAccessExcludeRootUID",
-] as const;
 
 const SUGGESTED_SIGNATURE_URLS = [
   "http://sigs.interserver.net/interserver256.hdb",
@@ -231,12 +224,26 @@ function NumberField({ label, field, value: currentValue, min, max, onChange, no
   </label>;
 }
 
+/**
+ * Wrap exact literal technical terms (e.g. kernel API names kept untranslated
+ * in gettext catalogs) in `<code className="monospace">` elements without
+ * requiring HTML markup in translatable strings.
+ */
+function formatCodeTerms(text: string, terms: readonly string[]): ReactNode {
+  if (terms.length === 0) return text;
+  const escaped = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const parts = text.split(new RegExp(`(${escaped.join("|")})`, "g"));
+  return parts.map((part, index) => (
+    terms.includes(part) ? <code key={index} className="monospace">{part}</code> : part
+  ));
+}
+
 function BooleanField({ label, field, checked, onChange, note }: {
   label: string;
   field: string;
   checked: boolean;
   onChange: (next: boolean) => void;
-  note?: string;
+  note?: ReactNode;
 }) {
   const id = fieldId(field);
   return <label className="preference-row setting-row switch-control" htmlFor={id}>
@@ -897,8 +904,21 @@ const ConfigPreferences = forwardRef<ConfigPreferencesHandle, ConfigPreferencesP
         <StringListField label={_("Include Paths")} field="OnAccessIncludePath" values={clamdValues.OnAccessIncludePath ?? []} placeholder="/home" onChange={(next) => setClamdMany("OnAccessIncludePath", next)} />
         <StringListField label={_("Exclude Paths")} field="OnAccessExcludePath" values={clamdValues.OnAccessExcludePath ?? []} placeholder="/proc" onChange={(next) => setClamdMany("OnAccessExcludePath", next)} />
       </section>
-      <section className="preference-section form-section"><h3 className="section-heading">{_("Behavior Settings")}</h3>
-        {ONACCESS_BOOLEAN_FIELDS.slice(0, 4).map((key) => <BooleanField key={key} label={key === "OnAccessPrevention" ? _("Prevention Mode") : key === "OnAccessExtraScanning" ? _("Extra Scanning") : key === "OnAccessDenyOnError" ? _("Deny on Error") : _("Disable DDD")} field={key} checked={enabled(clamdValues, key)} onChange={(next) => setClamdField(key, next ? "yes" : "no")} />)}
+      <section className="preference-section form-section">
+        <h3 className="section-heading">{_("Behavior Settings")}</h3>
+        <BooleanField label={_("Prevention Mode")} field="OnAccessPrevention" checked={enabled(clamdValues, "OnAccessPrevention")} note={formatCodeTerms(_(
+          // Translators: Keep fanotify unchanged; it is a Linux kernel API name.
+          "Block access to infected files instead of only reporting them. Denies file opens via fanotify.",
+        ), ["fanotify"])} onChange={(next) => setClamdField("OnAccessPrevention", next ? "yes" : "no")} />
+        <BooleanField label={_("Extra Scanning")} field="OnAccessExtraScanning" checked={enabled(clamdValues, "OnAccessExtraScanning")} note={formatCodeTerms(_(
+          // Translators: Keep inotify unchanged; it is a Linux kernel API name.
+          "Also scan newly created or moved files in monitored directories via inotify.",
+        ), ["inotify"])} onChange={(next) => setClamdField("OnAccessExtraScanning", next ? "yes" : "no")} />
+        <BooleanField label={_("Deny on Error")} field="OnAccessDenyOnError" checked={enabled(clamdValues, "OnAccessDenyOnError")} note={_("Block file access if scanning fails or encounters an error.")} onChange={(next) => setClamdField("OnAccessDenyOnError", next ? "yes" : "no")} />
+        <BooleanField label={_("Disable DDD")} field="OnAccessDisableDDD" checked={enabled(clamdValues, "OnAccessDisableDDD")} note={formatCodeTerms(_(
+          // Translators: Keep inotify unchanged; it is a Linux kernel API name.
+          "Disable Dynamic Directory Determination for recursive subdirectory tracking. Useful if large directory trees hit inotify watch limits.",
+        ), ["inotify"])} onChange={(next) => setClamdField("OnAccessDisableDDD", next ? "yes" : "no")} />
       </section>
       <section className="preference-section form-section"><h3 className="section-heading">{_("Performance Settings")}</h3>
         <NumberField label={_("Max Threads")} field="OnAccessMaxThreads" value={numberValue(clamdValues, "OnAccessMaxThreads", 1)} min={1} max={64} onChange={(next) => setClamdField("OnAccessMaxThreads", String(next))} />
