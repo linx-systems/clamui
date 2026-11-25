@@ -59,6 +59,7 @@ jobs:
           REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          FORCED: ${{ github.event.forced }}
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.sha }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -74,7 +75,8 @@ jobs:
             exit 0
           }
 
-          # When in doubt (label, API error, new branch) everything is built.
+          # When in doubt (label, API error, new branch, force push, unexpected
+          # compare status, empty file list) everything is built.
           case ",$PR_LABELS," in
             *,build-packages,*) all_on "label build-packages is set" ;;
           esac
@@ -93,12 +95,28 @@ jobs:
           case "$from" in
             ''|0000000000000000000000000000000000000000) all_on "no previous commit" ;;
           esac
+          # A force push can rewrite history: the compare API then answers
+          # "behind" or "diverged" with an empty file list, which must not be
+          # read as "nothing changed".
+          [ "$FORCED" != true ] || all_on "force push"
+          status="$(gh api "repos/$REPO/compare/$from...$to?per_page=1" --jq .status)" \
+            || all_on "commit comparison unreadable"
+          case "$status" in
+            ahead|identical) ;;
+            # A pull request head that branched before the base moved on is
+            # "diverged"; the three-dot compare still returns exactly the
+            # pull request changes, so this is the normal case there.
+            diverged) [ "$EVENT_NAME" = pull_request ] || all_on "history diverged" ;;
+            *) all_on "compare status is '$status'" ;;
+          esac
           gh api --paginate "repos/$REPO/compare/$from...$to" \
             --jq '.files[] | .filename, (.previous_filename // empty)' > "$files" \
             || all_on "commit comparison unreadable"
           # Lines are at least as many as files, so fewer than 300 lines
           # guarantees that the list is complete.
           [ "$(wc -l < "$files")" -lt 300 ] || all_on "file list possibly truncated"
+          # Commits without any file list (empty commits, odd histories): build.
+          [ -s "$files" ] || all_on "no changed files reported"
 
           echo "Changed files:"
           sed 's/^/  /' "$files"
