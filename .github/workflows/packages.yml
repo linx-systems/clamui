@@ -45,7 +45,6 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: read
     outputs:
       deb: ${{ steps.filter.outputs.deb }}
       rpm: ${{ steps.filter.outputs.rpm }}
@@ -59,10 +58,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
@@ -79,22 +79,26 @@ jobs:
             *,build-packages,*) all_on "label build-packages is set" ;;
           esac
 
+          # The compare API returns at most 300 files. Both branches below
+          # compare the SHAs of the triggering event (not the live pull request
+          # diff), so a re-run of an older run sees the diff of that run.
           files="$(mktemp)"
           if [ "$EVENT_NAME" = pull_request ]; then
-            gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
-              --jq '.[] | .filename, (.previous_filename // empty)' > "$files" \
-              || all_on "pull request file list unreadable"
-            # The API returns at most 3000 files: do not guess beyond that.
-            [ "$(wc -l < "$files")" -lt 3000 ] || all_on "file list possibly truncated"
+            from="$PR_BASE_SHA"
+            to="$PR_HEAD_SHA"
           else
-            case "$BEFORE_SHA" in
-              ''|0000000000000000000000000000000000000000) all_on "no previous commit" ;;
-            esac
-            gh api --paginate "repos/$REPO/compare/$BEFORE_SHA...$AFTER_SHA" \
-              --jq '.files[] | .filename, (.previous_filename // empty)' > "$files" \
-              || all_on "commit comparison unreadable"
-            [ "$(wc -l < "$files")" -lt 1000 ] || all_on "file list possibly truncated"
+            from="$BEFORE_SHA"
+            to="$AFTER_SHA"
           fi
+          case "$from" in
+            ''|0000000000000000000000000000000000000000) all_on "no previous commit" ;;
+          esac
+          gh api --paginate "repos/$REPO/compare/$from...$to" \
+            --jq '.files[] | .filename, (.previous_filename // empty)' > "$files" \
+            || all_on "commit comparison unreadable"
+          # Lines are at least as many as files, so fewer than 300 lines
+          # guarantees that the list is complete.
+          [ "$(wc -l < "$files")" -lt 300 ] || all_on "file list possibly truncated"
 
           echo "Changed files:"
           sed 's/^/  /' "$files"
@@ -123,9 +127,9 @@ jobs:
               common "$path" && return 0
               case "$package:$path" in
                 deb:debian/*|deb:scripts/clamui-*|deb:.github/workflows/build-deb.yml) return 0 ;;
-                rpm:rpm/*|rpm:.github/workflows/build-rpm.yml) return 0 ;;
+                rpm:rpm/*|rpm:crates/clamui-core/src/privileged.rs|rpm:.github/workflows/build-rpm.yml) return 0 ;;
                 appimage:appimage/*|appimage:.github/workflows/build-appimage.yml) return 0 ;;
-                flatpak:flathub/*|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
+                flatpak:flathub/*|flatpak:desktop/yarn.lock|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
                 snap:snap/*|snap:.github/workflows/build-snap.yml) return 0 ;;
               esac
             done < "$files"
