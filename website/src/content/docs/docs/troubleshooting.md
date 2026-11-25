@@ -74,7 +74,11 @@ flatpak run --env=WEBKIT_INSPECTOR_HTTP_SERVER=127.0.0.1:9222 io.github.linx_sys
 python3 scripts/inspect-blank-window.py
 ```
 
-The script is [`scripts/inspect-blank-window.py`](https://github.com/linx-systems/clamui/blob/master/scripts/inspect-blank-window.py) in the source repository. If it reports that the inspector port never answered the handshake, the native UI thread is blocked.
+The script is [`scripts/inspect-blank-window.py`](https://github.com/linx-systems/clamui/blob/master/scripts/inspect-blank-window.py) in the source repository. If it reports that the inspector port never answered the handshake, either the native UI thread is blocked or the inspector itself froze the start.
+
+:::caution
+`WEBKIT_INSPECTOR_HTTP_SERVER` can freeze ClamUI's start on some systems: WebKit and GLib can deadlock while the inspector server connects, before the window exists (reproduced on Zorin OS 17.3 with the GNOME 51 runtime, with and without this release's diagnostics). A hang with the inspector enabled is therefore not evidence for a blank-window bug. Check by starting ClamUI again without the inspector variable but with `CLAMUI_STARTUP_TRACE=1`. If that start reaches `frontend mounted`, the inspector caused the hang; if it stops, the `startup-watchdog` line names the stage.
+:::
 
 ## Daemon backend unavailable
 

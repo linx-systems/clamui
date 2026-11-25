@@ -11,6 +11,15 @@ It prints the page state, the console messages WebKit kept, uncaught errors, whe
 the bundle was fetched and whether the native side answers a request. Nothing is
 modified and nothing leaves the computer: the connection is local to 127.0.0.1.
 Paste the whole output into the GitHub issue.
+
+Caution: WEBKIT_INSPECTOR_HTTP_SERVER can itself freeze ClamUI's start on some systems
+(a lock-order deadlock inside WebKit and GLib while the inspector server connects, seen on
+Zorin OS 17.3 with the GNOME 51 runtime). A hang with the inspector enabled is therefore
+no evidence for a blank-window bug. Compare with a start without the inspector:
+
+    flatpak run --env=CLAMUI_STARTUP_TRACE=1 io.github.linx_systems.ClamUI
+
+If that start reaches "frontend mounted", the inspector was the cause of the hang.
 """
 
 import base64
@@ -93,7 +102,10 @@ def connect():
     except socket.timeout:
         fail(
             "the inspector port accepts connections but never answered the handshake. "
-            "The native UI thread is probably blocked."
+            "Either the native UI thread is blocked, or the inspector itself froze the start "
+            "(a known WebKit/GLib deadlock on some systems). This alone does not show the "
+            "blank-window bug. Start ClamUI again WITHOUT WEBKIT_INSPECTOR_HTTP_SERVER but "
+            "with CLAMUI_STARTUP_TRACE=1 and compare."
         )
     if b" 101 " not in header.split(b"\r\n", 1)[0] + b" ":
         fail("unexpected handshake answer: " + header[:200].decode(errors="replace"))
@@ -195,7 +207,11 @@ def main():
         pass
 
     if answer is None:
-        fail("the page did not answer the probe in time (web process hung or UI thread blocked).")
+        fail(
+            "the page did not answer the probe in time (web process hung or UI thread blocked). "
+            "If ClamUI froze only with the inspector enabled, compare with a start without it "
+            "(CLAMUI_STARTUP_TRACE=1)."
+        )
     result = answer.get("result", {})
     if result.get("wasThrown"):
         fail("the probe itself threw: " + json.dumps(result.get("result"))[:400])
