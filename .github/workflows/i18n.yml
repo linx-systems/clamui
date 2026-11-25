@@ -41,9 +41,16 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels the older run. Runs on master,
+# manual runs and schedules are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate-translations:
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - name: Verify dispatched commit
         if: inputs.expected_sha != ''

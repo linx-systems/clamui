@@ -1,11 +1,10 @@
 name: Build Flatpak
 
 on:
+  # Pull requests and pushes to master are started by packages.yml, which only
+  # builds when package-relevant paths changed.
   push:
-    branches: [master]
     tags: ['v*']
-  pull_request:
-    branches: [master]
   workflow_dispatch:
   workflow_call:
 
@@ -22,6 +21,7 @@ jobs:
             runner: ubuntu-24.04-arm
       fail-fast: false
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
       options: --privileged
