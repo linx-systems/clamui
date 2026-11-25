@@ -1,14 +1,10 @@
 name: Build Snap
 
 on:
+  # Pull requests and pushes to master are started by packages.yml, which only
+  # builds when package-relevant paths changed.
   push:
-    branches: [master]
     tags: ["v*"]
-  pull_request:
-    branches: [master]
-    paths:
-      - "snap/**"
-      - ".github/workflows/build-snap.yml"
   workflow_dispatch:
   workflow_call:
 
@@ -19,6 +15,7 @@ jobs:
   build-snap:
     name: Build snap (${{ matrix.architecture }})
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

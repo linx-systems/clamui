@@ -11,10 +11,17 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels the older run. Runs on master,
+# manual runs and schedules are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     name: Validate Starlight site
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
