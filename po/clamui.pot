@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-24 16:48-0500\n"
+"POT-Creation-Date: 2026-11-25 21:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2061,43 +2061,43 @@ msgstr ""
 msgid "Security Audit Complete"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:200
+#: desktop/src-tauri/src/runtime.rs:212
 msgid "Quick Scan"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:201
+#: desktop/src-tauri/src/runtime.rs:213
 msgid "Full Scan"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:202
+#: desktop/src-tauri/src/runtime.rs:214
 msgid "Home Folder"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:203
+#: desktop/src-tauri/src/runtime.rs:215
 msgid "Update Database"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:204
+#: desktop/src-tauri/src/runtime.rs:216
 msgid "Scan Profile"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:205
+#: desktop/src-tauri/src/runtime.rs:217
 msgid "Quit"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:409
+#: desktop/src-tauri/src/runtime.rs:483
 msgid "Add Folders"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:411
+#: desktop/src-tauri/src/runtime.rs:485
 msgid "Add Files"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:455
+#: desktop/src-tauri/src/runtime.rs:529
 msgid "Export"
 msgstr ""
 
-#: desktop/src-tauri/src/runtime.rs:634
+#: desktop/src-tauri/src/runtime.rs:708
 msgid "Open"
 msgstr ""
 
@@ -2548,6 +2548,15 @@ msgstr ""
 msgid "Cancel All"
 msgstr ""
 
+#: desktop/src/StartupBoundary.tsx:18 desktop/src/main.tsx:39
+msgid "ClamUI could not start"
+msgstr ""
+
+#: desktop/src/StartupBoundary.tsx:21 desktop/src/main.tsx:42
+#: desktop/src/pages/Network.tsx:402 desktop/src/pages/Network.tsx:403
+msgid "Retry"
+msgstr ""
+
 #: desktop/src/api.ts:75
 msgid "The contributor credits response was invalid."
 msgstr ""
@@ -2590,15 +2599,6 @@ msgstr ""
 #: desktop/src/pages/SettingsPreferences.tsx:472
 #: desktop/src/pages/Statistics.tsx:142
 msgid "Unknown"
-msgstr ""
-
-#: desktop/src/main.tsx:27
-msgid "ClamUI could not start"
-msgstr ""
-
-#: desktop/src/main.tsx:30 desktop/src/pages/Network.tsx:402
-#: desktop/src/pages/Network.tsx:403
-msgid "Retry"
 msgstr ""
 
 #: desktop/src/pages/Audit.tsx:49

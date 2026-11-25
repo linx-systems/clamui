@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-frontend-report"
+description = "Enables the frontend_report command without any pre-configured scope."
+commands.allow = ["frontend_report"]
+
+[[permission]]
+identifier = "deny-frontend-report"
+description = "Denies the frontend_report command without any pre-configured scope."
+commands.deny = ["frontend_report"]

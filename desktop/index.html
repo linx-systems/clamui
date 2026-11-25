@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <title>ClamUI</title>
+    <script src="/boot-diagnostics.js"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Replaced by React on first render. boot-diagnostics.js reveals it only if startup fails. -->
+      <main class="startup-error" data-boot-placeholder hidden>
+        <section class="card">
+          <h1 data-boot-status>ClamUI</h1>
+          <pre class="startup-error-details" data-boot-detail hidden></pre>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

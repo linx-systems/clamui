@@ -9,6 +9,8 @@ fn main() {
             "open_path",
             "app_close",
             "startup_state",
+            "frontend_ready",
+            "frontend_report",
         ]),
     ))
     .expect("failed to generate Tauri command bindings");

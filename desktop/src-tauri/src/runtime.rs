@@ -3,6 +3,7 @@ use crate::{
     notifications::Notifications,
     policy::{decode_open_target, is_safe_external_url, select_close_action, CloseAction},
     scan_progress::ScanProgressCoalescer,
+    startup_trace::{self, StartupTrace},
     tray::{TrayController, TrayEvent, TrayLabels},
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -137,6 +138,8 @@ impl AppState {
 }
 
 pub fn run(arguments: Vec<String>) -> Result<(), String> {
+    let trace = StartupTrace::new();
+    trace.mark("native runtime started");
     let targets = parse_startup_targets(
         &arguments,
         &env::current_dir().map_err(|error| error.to_string())?,
@@ -167,6 +170,14 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
         }
     });
 
+    trace.mark("core context created");
+    startup_trace::spawn_watchdog(trace.clone(), app_slot.clone(), {
+        let ctx = ctx.clone();
+        move |level, message| {
+            let _ = clamui_core::logs::write_debug(&ctx, level, "startup-watchdog", message);
+        }
+    });
+
     let tray_events: TrayEvent = Arc::new({
         let slot = app_slot.clone();
         move |event, data| {
@@ -193,6 +204,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             }
         }
     });
+    trace.mark("tray start requested");
     let tray = TrayController::start(
         tray_events,
         TrayLabels {
@@ -209,6 +221,10 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             .default_window_icon()
             .expect("Tauri context must contain the bundled application icon"),
     );
+    trace.mark(format!(
+        "tray start returned (available={})",
+        tray.available()
+    ));
     let state = AppState {
         ctx: ctx.clone(),
         initial: Mutex::new(StartupState {
@@ -253,7 +269,20 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
         .plugin(tauri_plugin_notification::init())
         .manage(state)
         .manage(crate::accent_color::AccentColor::default())
+        .manage(trace.clone())
+        .on_page_load({
+            let trace = trace.clone();
+            move |_, payload| {
+                let stage = match payload.event() {
+                    tauri::webview::PageLoadEvent::Started => "started",
+                    tauri::webview::PageLoadEvent::Finished => "finished",
+                };
+                trace.mark(format!("page load {stage}"));
+            }
+        })
         .invoke_handler(tauri::generate_handler![
+            frontend_ready,
+            frontend_report,
             request,
             choose_paths,
             save_export,
@@ -277,7 +306,10 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             }
             _ => {}
         })
-        .setup(move |app| {
+        .setup({
+            let trace = trace.clone();
+            move |app| {
+            trace.mark("setup entered");
             WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
                 .title("ClamUI")
                 .inner_size(900.0, 700.0)
@@ -287,9 +319,11 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 .on_new_window(|_, _| NewWindowResponse::Deny)
                 .build()
                 .map_err(|error| error.to_string())?;
+            trace.mark("main window created");
             *app_slot.lock().expect("app handle poisoned") = Some(app.handle().clone());
             let state = app.state::<AppState>();
             crate::accent_color::init(app.handle().clone(), state.ctx.clone());
+            trace.mark("accent color initialised");
             let _ = clamui_core::logs::write_debug(
                 &state.ctx,
                 "INFO",
@@ -297,6 +331,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 "native runtime startup completed",
             );
             install_notification_actions(app.handle(), &state.ctx);
+            trace.mark("notification actions registered");
             match clamui_core::platform::start_monitor(state.ctx.clone()) {
                 Ok(handle) => *state.monitor.lock().expect("monitor state poisoned") = Some(handle),
                 Err(error) => {
@@ -315,7 +350,9 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                     );
                 }
             }
+            trace.mark("device monitor started");
             sync_profiles(&state.ctx, &state.tray);
+            trace.mark("profiles synced");
             let startup = state
                 .initial
                 .lock()
@@ -332,17 +369,51 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 Ordering::Release,
             );
             apply_start_minimize(app.handle());
+            trace.mark("setup finished");
             Ok(())
+            }
         });
 
+    trace.mark("builder configured");
     let app = builder
         .build(tauri_context)
         .map_err(|error| error.to_string())?;
-    app.run(move |handle, event| {
-        if let RunEvent::Exit = event {
-            handle.state::<AppState>().shutdown();
-        }
+    trace.mark("app built");
+    app.run(move |handle, event| match event {
+        RunEvent::Ready => trace.mark("event loop ready"),
+        RunEvent::Exit => handle.state::<AppState>().shutdown(),
+        _ => {}
     });
+    Ok(())
+}
+
+/// The frontend calls this once React has committed its first render.
+#[tauri::command]
+fn frontend_ready(trace: State<'_, Arc<StartupTrace>>) {
+    trace.frontend_ready();
+}
+
+/// Lets the frontend leave a diagnostic line in the debug log when it fails to
+/// start. Arguments are untrusted: the kind is an allowlist, the text is
+/// stripped and truncated, and the number of reports per run is capped.
+#[tauri::command]
+fn frontend_report(
+    state: State<'_, AppState>,
+    trace: State<'_, Arc<StartupTrace>>,
+    kind: String,
+    message: String,
+) -> Result<(), String> {
+    let (kind, message) = startup_trace::sanitize_report(&kind, &message)?;
+    if !trace.take_report_slot() {
+        return Ok(());
+    }
+    trace.mark(format!("frontend report: {kind}"));
+    let _ = clamui_core::logs::write_debug(
+        &state.ctx,
+        "WARNING",
+        "frontend-startup",
+        &format!("{kind}: {message}"),
+    );
     Ok(())
 }
 
@@ -353,6 +424,7 @@ async fn request(
     action: String,
     args: Value,
 ) -> Result<Value, String> {
+    app.state::<Arc<StartupTrace>>().note_request(&action);
     let _operation = state.active_jobs.register(action.clone())?;
     let progress_registration = if action == "scanner.scan" {
         match args.get("id").and_then(Value::as_str) {
@@ -373,6 +445,8 @@ async fn request(
         tauri::async_runtime::spawn_blocking(move || dispatch(&ctx, &action_for_work, args))
             .await
             .map_err(|error| format!("operation task failed: {error}"));
+    app.state::<Arc<StartupTrace>>()
+        .note_response(&action, matches!(&result, Ok(Ok(_))));
     if let Some((operation_id, registration)) = progress_registration {
         state
             .scan_progress
