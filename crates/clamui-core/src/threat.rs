@@ -1,3 +1,4 @@
+// CI-Demo: reine Code-Aenderung ohne Paketbezug (Wegwerf-Branch).
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
