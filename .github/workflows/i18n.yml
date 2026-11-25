@@ -2,7 +2,7 @@ name: Translations
 
 on:
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "po/**"
       - "crates/clamui-core/**"
@@ -17,7 +17,7 @@ on:
       - "scripts/extract-typescript-gettext.ts"
       - ".github/workflows/i18n.yml"
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "po/**"
       - "crates/clamui-core/**"

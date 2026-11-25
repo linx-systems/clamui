@@ -14,9 +14,9 @@ name: Packages
 
 on:
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     types: [opened, synchronize, reopened, labeled]
 
 permissions:

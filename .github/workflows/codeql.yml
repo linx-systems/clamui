@@ -4,7 +4,7 @@ on:
   # Pull requests and pushes are only analysed when code CodeQL scans changed.
   # The weekly schedule below covers everything else.
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "crates/**"
       - "desktop/**"
@@ -14,7 +14,7 @@ on:
       - "Cargo.lock"
       - ".github/workflows/codeql.yml"
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "crates/**"
       - "desktop/**"
@@ -84,7 +84,7 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          save-if: ${{ github.ref == 'refs/heads/master' }}
+          save-if: ${{ github.ref == 'refs/heads/ci-demo/base' }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4

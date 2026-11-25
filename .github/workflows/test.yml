@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
   workflow_dispatch:
     inputs:
       expected_sha:
@@ -46,7 +46,7 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          save-if: ${{ github.ref == 'refs/heads/master' }}
+          save-if: ${{ github.ref == 'refs/heads/ci-demo/base' }}
 
       - name: Run headless core tests
         run: cargo test -p clamui-core --locked
@@ -94,7 +94,7 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          save-if: ${{ github.ref == 'refs/heads/master' }}
+          save-if: ${{ github.ref == 'refs/heads/ci-demo/base' }}
 
       - name: Install frontend dependencies
         working-directory: desktop

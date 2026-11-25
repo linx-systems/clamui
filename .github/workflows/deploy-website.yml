@@ -2,7 +2,7 @@ name: Deploy website
 
 on:
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "website/**"
       - ".github/workflows/deploy-website.yml"

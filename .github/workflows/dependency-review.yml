@@ -4,7 +4,7 @@ on:
   # Only pull requests that touch dependency manifests, lockfiles or workflow
   # files (GitHub Actions versions) need a dependency review.
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "**/Cargo.toml"
       - "**/Cargo.lock"

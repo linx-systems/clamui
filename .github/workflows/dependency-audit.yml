@@ -4,7 +4,7 @@ on:
   # Pull requests and pushes only run when dependency manifests or lockfiles
   # change. The weekly schedule catches newly published advisories.
   push:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
@@ -14,7 +14,7 @@ on:
       - "desktop/bun.lock"
       - ".github/workflows/dependency-audit.yml"
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "Cargo.toml"
       - "Cargo.lock"

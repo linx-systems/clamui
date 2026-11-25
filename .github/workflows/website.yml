@@ -2,7 +2,7 @@ name: Validate Website
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, "ci-demo/base"]
     paths:
       - "website/**"
       - ".github/workflows/website.yml"
