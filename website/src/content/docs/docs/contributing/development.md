@@ -119,7 +119,7 @@ Do not use `-g` or bulk-install an upstream repository. Imported payloads belong
 
 The project-only OMP filter is `.omp/config.yml` under `skills.ignoredSkills`; it excludes irrelevant global skills without deleting their global payloads. Start OMP from the repository root because project configuration is current-working-directory scoped.
 
-ClamAV and gettext guidance is authored for this project; the contributor rules and the existing [architecture](/docs/contributing/architecture/) and [translation](/docs/contributing/translating/) pages remain authoritative. The React guidance applies to the client UI: exclude Next.js and other server-only changes. Check native accessibility in Tauri/WebKitGTK—Chrome accessibility scores alone do not prove the desktop application is accessible.
+ClamAV and gettext guidance is authored for this project; the contributor rules and the existing [architecture](/docs/contributing/architecture/) and [translation](/docs/contributing/translating/) pages remain authoritative. The React guidance applies to the client UI: exclude Next.js and other server-only changes. Check native accessibility in Tauri/WebKitGTK - Chrome accessibility scores alone do not prove the desktop application is accessible.
 
 ### Data compatibility
 

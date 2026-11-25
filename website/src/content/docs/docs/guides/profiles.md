@@ -25,7 +25,7 @@ Global exclusions apply to every scan. Profile exclusions apply only to that pro
 
 ## Import and export
 
-Export profiles as JSON to back them up or share them. Exports can reveal user names and filesystem layout—review them before sharing. Imported profiles receive a new ID and are always non-default.
+Export profiles as JSON to back them up or share them. Exports can reveal user names and filesystem layout - review them before sharing. Imported profiles receive a new ID and are always non-default.
 
 Use the CLI for automation:
 
