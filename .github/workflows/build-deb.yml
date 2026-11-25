@@ -74,7 +74,7 @@ jobs:
       # Release and signed builds start from a clean target directory.
       - name: Cache Rust build
         if: ${{ !startsWith(github.ref, 'refs/tags/') && inputs.sign != true }}
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: ${{ matrix.architecture }}
           save-if: ${{ github.ref == 'refs/heads/master' }}
