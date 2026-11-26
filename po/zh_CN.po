@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-26 18:16+0100\n"
+"POT-Creation-Date: 2026-11-26 18:51+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -1360,31 +1360,31 @@ msgstr "存储在设置文件中（密钥环不可用 — 安全性较低）"
 msgid "translator-credits"
 msgstr "Markson Hosben <marksonhosben@proton.me>"
 
-#: crates/clamui-core/src/host.rs:896
+#: crates/clamui-core/src/host.rs:913
 msgid "Daemon not responding: {error}"
 msgstr "守护进程未响应：{error}"
 
-#: crates/clamui-core/src/host.rs:899
+#: crates/clamui-core/src/host.rs:916
 msgid "{binary} found but returned error: {error}"
 msgstr "已找到 {binary}，但返回错误：{error}"
 
-#: crates/clamui-core/src/host.rs:904
+#: crates/clamui-core/src/host.rs:921
 msgid "{service} is active"
 msgstr "{service} 正在运行"
 
-#: crates/clamui-core/src/host.rs:907
+#: crates/clamui-core/src/host.rs:924
 msgid "No virus database files found in {path}"
 msgstr "未在 {path} 中找到病毒数据库文件"
 
-#: crates/clamui-core/src/host.rs:913
+#: crates/clamui-core/src/host.rs:930
 msgid "Error accessing database {path}: {error}"
 msgstr "访问数据库 {path} 时出错：{error}"
 
-#: crates/clamui-core/src/host.rs:919
+#: crates/clamui-core/src/host.rs:936
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "未安装 {binary}。请使用以下命令安装：{command}"
 
-#: crates/clamui-core/src/host.rs:929
+#: crates/clamui-core/src/host.rs:946
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
