@@ -1922,7 +1922,7 @@ fn helper_backend() -> Option<HelperBackend> {
         Some(crate::host::Distro::Debian) => Some(HelperBackend::Debian),
         Some(crate::host::Distro::Fedora) => Some(HelperBackend::FedoraDnf),
         Some(crate::host::Distro::FedoraAtomic) => Some(HelperBackend::FedoraAtomic),
-        Some(crate::host::Distro::Arch) => None,
+        Some(crate::host::Distro::Arch | crate::host::Distro::Suse) => None,
         None => debian_host().then_some(HelperBackend::Debian),
     }
 }

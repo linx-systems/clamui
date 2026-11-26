@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-24 12:08-0500\n"
+"POT-Creation-Date: 2026-11-26 18:16+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -45,359 +45,367 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:350
 msgid "ClamAV is not installed"
 msgstr "ClamAV chưa được cài đặt"
 
-#: crates/clamui-core/src/audit.rs:349
+#: crates/clamui-core/src/audit.rs:352
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Cài đặt ClamAV để có thể quét virus"
 
-#: crates/clamui-core/src/audit.rs:367
+#: crates/clamui-core/src/audit.rs:370
 msgid "Installed: {version}"
 msgstr "Đã cài đặt: {version}"
 
-#: crates/clamui-core/src/audit.rs:379
+#: crates/clamui-core/src/audit.rs:382
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "Đã cập nhật ({days} ngày tuổi, tạo ngày {date})"
 
-#: crates/clamui-core/src/audit.rs:397 crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:400 crates/clamui-core/src/audit.rs:420
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "Cơ sở dữ liệu đã {days} ngày tuổi (tạo ngày {date})"
 
-#: crates/clamui-core/src/audit.rs:405
+#: crates/clamui-core/src/audit.rs:408
 msgid "Update virus database to ensure protection"
 msgstr "Cập nhật cơ sở dữ liệu virus để đảm bảo được bảo vệ"
 
-#: crates/clamui-core/src/audit.rs:425
+#: crates/clamui-core/src/audit.rs:428
 msgid "Database is critically outdated. Update immediately."
 msgstr "Cơ sở dữ liệu đã lỗi thời nghiêm trọng. Hãy cập nhật ngay."
 
-#: crates/clamui-core/src/audit.rs:446
+#: crates/clamui-core/src/audit.rs:449
 msgid "Database files exist but age could not be determined"
 msgstr "Đã có tệp cơ sở dữ liệu nhưng không xác định được tuổi của chúng"
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:451
 msgid "No virus database found"
 msgstr "Không tìm thấy cơ sở dữ liệu virus"
 
-#: crates/clamui-core/src/audit.rs:452
+#: crates/clamui-core/src/audit.rs:455
 msgid "Download virus database"
 msgstr "Tải xuống cơ sở dữ liệu virus"
 
-#: crates/clamui-core/src/audit.rs:470
+#: crates/clamui-core/src/audit.rs:473
 msgid "Service {name} is running"
 msgstr "Dịch vụ {name} đang chạy"
 
-#: crates/clamui-core/src/audit.rs:482
+#: crates/clamui-core/src/audit.rs:485
 msgid "Daemon is responding"
 msgstr "Dịch vụ đang phản hồi"
 
-#: crates/clamui-core/src/audit.rs:490
+#: crates/clamui-core/src/audit.rs:493
 msgid "ClamAV daemon is not running"
 msgstr "Dịch vụ ClamAV không chạy"
 
-#: crates/clamui-core/src/audit.rs:492
+#: crates/clamui-core/src/audit.rs:495
 msgid "Start the daemon for faster scanning"
 msgstr "Khởi động dịch vụ để quét nhanh hơn"
 
-#: crates/clamui-core/src/audit.rs:509
+#: crates/clamui-core/src/audit.rs:512
 msgid "Freshclam service is active"
 msgstr "Dịch vụ Freshclam đang hoạt động"
 
-#: crates/clamui-core/src/audit.rs:517
+#: crates/clamui-core/src/audit.rs:520
 msgid "Freshclam automatic update service is not running"
 msgstr "Dịch vụ cập nhật tự động Freshclam không chạy"
 
-#: crates/clamui-core/src/audit.rs:519
+#: crates/clamui-core/src/audit.rs:522
 msgid "Enable automatic database updates"
 msgstr "Bật cập nhật cơ sở dữ liệu tự động"
 
-#: crates/clamui-core/src/audit.rs:543
+#: crates/clamui-core/src/audit.rs:546
 msgid "Scheduled scans are enabled"
 msgstr "Quét theo lịch đang được bật"
 
-#: crates/clamui-core/src/audit.rs:551
+#: crates/clamui-core/src/audit.rs:554
 msgid "Scheduled scans are not enabled"
 msgstr "Quét theo lịch chưa được bật"
 
-#: crates/clamui-core/src/audit.rs:553
+#: crates/clamui-core/src/audit.rs:556
 msgid "Enable scheduled scans in Preferences → Schedule"
 msgstr "Hãy bật quét theo lịch trong Tùy chọn → Lịch quét"
 
-#: crates/clamui-core/src/audit.rs:561
+#: crates/clamui-core/src/audit.rs:564
 msgid "No scheduling backend is available on this system"
 msgstr "Không có dịch vụ lập lịch nào khả dụng trên hệ thống này"
 
-#: crates/clamui-core/src/audit.rs:563
+#: crates/clamui-core/src/audit.rs:566
 msgid "Scheduled scans require a systemd user session or cron"
 msgstr "Quét theo lịch yêu cầu một phiên người dùng systemd hoặc cron"
 
-#: crates/clamui-core/src/audit.rs:749
+#: crates/clamui-core/src/audit.rs:752
 msgid "Open Ports"
 msgstr "Các cổng đang mở"
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:758
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} cổng đang lắng nghe, các cổng rủi ro: {ports}"
 
-#: crates/clamui-core/src/audit.rs:766
+#: crates/clamui-core/src/audit.rs:769
 msgid "Review if these services need to be exposed"
 msgstr "Xem xét liệu các dịch vụ này có thật sự cần được mở ra ngoài hay không"
 
-#: crates/clamui-core/src/audit.rs:773
+#: crates/clamui-core/src/audit.rs:776
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] "{count} cổng đang lắng nghe"
 
-#: crates/clamui-core/src/audit.rs:781
+#: crates/clamui-core/src/audit.rs:784
 msgid "Review open ports and close unnecessary services"
 msgstr "Xem lại các cổng đang mở và tắt các dịch vụ không cần thiết"
 
-#: crates/clamui-core/src/audit.rs:791 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:794 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr "Không thể đọc một số dòng socket mạng."
 
-#: crates/clamui-core/src/audit.rs:798
+#: crates/clamui-core/src/audit.rs:801
 msgid "No open ports detected"
 msgstr "Không phát hiện cổng nào đang mở"
 
-#: crates/clamui-core/src/audit.rs:832
+#: crates/clamui-core/src/audit.rs:835
 msgid "AppArmor is enabled"
 msgstr "AppArmor đã bật"
 
-#: crates/clamui-core/src/audit.rs:840
+#: crates/clamui-core/src/audit.rs:843
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Mô-đun AppArmor đã được nạp nhưng chưa bật"
 
-#: crates/clamui-core/src/audit.rs:842
+#: crates/clamui-core/src/audit.rs:845
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Bật AppArmor để chạy ứng dụng trong môi trường cô lập"
 
-#: crates/clamui-core/src/audit.rs:858
+#: crates/clamui-core/src/audit.rs:861
 msgid "SELinux is enforcing"
 msgstr "SELinux đang ở chế độ thực thi (enforcing)"
 
-#: crates/clamui-core/src/audit.rs:866
+#: crates/clamui-core/src/audit.rs:869
 msgid "SELinux is in permissive mode"
 msgstr "SELinux đang ở chế độ cho phép (permissive)"
 
-#: crates/clamui-core/src/audit.rs:868
+#: crates/clamui-core/src/audit.rs:871
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Nên cân nhắc chuyển sang chế độ thực thi (enforcing) để bảo vệ tốt hơn"
 
-#: crates/clamui-core/src/audit.rs:880
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is disabled"
 msgstr "SELinux đã tắt"
 
-#: crates/clamui-core/src/audit.rs:882
+#: crates/clamui-core/src/audit.rs:885
 msgid "Enable SELinux for mandatory access control"
 msgstr "Bật SELinux để kiểm soát truy cập bắt buộc"
 
-#: crates/clamui-core/src/audit.rs:897
+#: crates/clamui-core/src/audit.rs:900
 msgid "No mandatory access control framework detected"
 msgstr "Không phát hiện cơ chế kiểm soát truy cập bắt buộc nào"
 
-#: crates/clamui-core/src/audit.rs:899
+#: crates/clamui-core/src/audit.rs:902
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Nên cân nhắc bật AppArmor hoặc SELinux"
 
-#: crates/clamui-core/src/audit.rs:925
+#: crates/clamui-core/src/audit.rs:928
 msgid "Automatic security updates are enabled"
 msgstr "Cập nhật bảo mật tự động đã bật"
 
-#: crates/clamui-core/src/audit.rs:936
+#: crates/clamui-core/src/audit.rs:939
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Unattended upgrades đã được cài đặt nhưng đang tắt"
 
-#: crates/clamui-core/src/audit.rs:938
+#: crates/clamui-core/src/audit.rs:941
 msgid "Enable automatic security updates"
 msgstr "Bật cập nhật bảo mật tự động"
 
-#: crates/clamui-core/src/audit.rs:952
+#: crates/clamui-core/src/audit.rs:955
 msgid "DNF automatic updates are enabled"
 msgstr "Cập nhật tự động của DNF đã bật"
 
-#: crates/clamui-core/src/audit.rs:963
+#: crates/clamui-core/src/audit.rs:966
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF automatic đã được cài đặt nhưng bộ hẹn giờ chưa hoạt động"
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
 msgid "Enable automatic updates"
 msgstr "Bật cập nhật tự động"
 
-#: crates/clamui-core/src/audit.rs:979
+#: crates/clamui-core/src/audit.rs:983
+msgid "os-update automatic updates are enabled"
+msgstr "Cập nhật tự động của os-update đã được bật"
+
+#: crates/clamui-core/src/audit.rs:994
+msgid "os-update is installed but timer is not active"
+msgstr "os-update đã được cài đặt nhưng bộ hẹn giờ chưa hoạt động"
+
+#: crates/clamui-core/src/audit.rs:1009
 msgid "Could not determine automatic update status"
 msgstr "Không thể xác định trạng thái cập nhật tự động"
 
-#: crates/clamui-core/src/audit.rs:981
+#: crates/clamui-core/src/audit.rs:1011
 msgid "Configure automatic security updates"
 msgstr "Cấu hình cập nhật bảo mật tự động"
 
-#: crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:1030
 msgid "System reboot required to apply updates"
 msgstr "Cần khởi động lại hệ thống để áp dụng bản cập nhật"
 
-#: crates/clamui-core/src/audit.rs:998
+#: crates/clamui-core/src/audit.rs:1032
 msgid "Reboot the system to apply pending security updates"
 msgstr "Khởi động lại hệ thống để áp dụng các bản cập nhật bảo mật đang chờ"
 
-#: crates/clamui-core/src/audit.rs:1044
+#: crates/clamui-core/src/audit.rs:1078
 msgid "{name} is installed but not running"
 msgstr "{name} đã được cài đặt nhưng không chạy"
 
-#: crates/clamui-core/src/audit.rs:1063
+#: crates/clamui-core/src/audit.rs:1097
 msgid "No intrusion detection system found"
 msgstr "Không tìm thấy hệ thống phát hiện xâm nhập"
 
-#: crates/clamui-core/src/audit.rs:1065
+#: crates/clamui-core/src/audit.rs:1099
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "Cài đặt fail2ban hoặc CrowdSec để bảo vệ trước các cuộc tấn công"
 
-#: crates/clamui-core/src/audit.rs:1092
+#: crates/clamui-core/src/audit.rs:1126
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "Máy chủ SSH không chạy (không có bề mặt tấn công từ xa)"
 
-#: crates/clamui-core/src/audit.rs:1103
+#: crates/clamui-core/src/audit.rs:1137
 msgid "SSH server is running"
 msgstr "Máy chủ SSH đang chạy"
 
-#: crates/clamui-core/src/audit.rs:1113
+#: crates/clamui-core/src/audit.rs:1147
 msgid "Could not read SSH configuration"
 msgstr "Không thể đọc cấu hình SSH"
 
-#: crates/clamui-core/src/audit.rs:1132
+#: crates/clamui-core/src/audit.rs:1166
 msgid "Root login: {value}"
 msgstr "Đăng nhập root: {value}"
 
-#: crates/clamui-core/src/audit.rs:1140
+#: crates/clamui-core/src/audit.rs:1174
 msgid "Root login is allowed ({value})"
 msgstr "Đăng nhập root đang được cho phép ({value})"
 
-#: crates/clamui-core/src/audit.rs:1146
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Disable root SSH login for security"
 msgstr "Tắt đăng nhập SSH bằng root để bảo mật"
 
-#: crates/clamui-core/src/audit.rs:1161
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Password authentication is disabled (key-only)"
 msgstr "Xác thực bằng mật khẩu đã tắt (chỉ dùng khóa)"
 
-#: crates/clamui-core/src/audit.rs:1169
+#: crates/clamui-core/src/audit.rs:1203
 msgid "Password authentication is enabled"
 msgstr "Xác thực bằng mật khẩu đã bật"
 
-#: crates/clamui-core/src/audit.rs:1171
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Nên cân nhắc tắt xác thực bằng mật khẩu và chuyển sang dùng khóa SSH"
 
-#: crates/clamui-core/src/audit.rs:1189
+#: crates/clamui-core/src/audit.rs:1223
 msgid "X11 forwarding is disabled"
 msgstr "Chuyển tiếp X11 đã tắt"
 
-#: crates/clamui-core/src/audit.rs:1197
+#: crates/clamui-core/src/audit.rs:1231
 msgid "X11 forwarding is enabled"
 msgstr "Chuyển tiếp X11 đã bật"
 
-#: crates/clamui-core/src/audit.rs:1199
+#: crates/clamui-core/src/audit.rs:1233
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Tắt chuyển tiếp X11 để thu hẹp bề mặt tấn công"
 
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1293
 msgid "Application firewalls"
 msgstr "Tường lửa ứng dụng"
 
-#: crates/clamui-core/src/audit.rs:1282
+#: crates/clamui-core/src/audit.rs:1316
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster đang chạy và bảo vệ các kết nối"
 
-#: crates/clamui-core/src/audit.rs:1305
+#: crates/clamui-core/src/audit.rs:1339
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 "Cấp quyền cho ClamUI trong Portmaster để xem tình trạng của từng mô-đun"
 
-#: crates/clamui-core/src/audit.rs:1308
+#: crates/clamui-core/src/audit.rs:1342
 msgid "Authorize"
 msgstr "Cấp quyền"
 
-#: crates/clamui-core/src/audit.rs:1319
+#: crates/clamui-core/src/audit.rs:1353
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster đã được cài đặt nhưng không chạy"
 
-#: crates/clamui-core/src/audit.rs:1321
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Start the Portmaster service to enable network protection"
 msgstr "Khởi động dịch vụ Portmaster để bật bảo vệ mạng"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1335
+#: crates/clamui-core/src/audit.rs:1369
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Không phát hiện — trình giám sát mạng và tường lửa ứng dụng tùy chọn"
 
-#: crates/clamui-core/src/audit.rs:1351
+#: crates/clamui-core/src/audit.rs:1385
 msgid "Could not probe Portmaster: {error}"
 msgstr "Không thể kiểm tra Portmaster: {error}"
 
-#: crates/clamui-core/src/audit.rs:1401
+#: crates/clamui-core/src/audit.rs:1435
 msgid "{name} is not installed"
 msgstr "{name} chưa được cài đặt"
 
-#: crates/clamui-core/src/audit.rs:1408
+#: crates/clamui-core/src/audit.rs:1442
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Cài đặt {name} để kiểm tra bảo mật toàn diện"
 
-#: crates/clamui-core/src/audit.rs:1414
+#: crates/clamui-core/src/audit.rs:1448
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Cài đặt chkrootkit để phát hiện rootkit"
 
-#: crates/clamui-core/src/audit.rs:1434
+#: crates/clamui-core/src/audit.rs:1468
 msgid "Authentication was cancelled"
 msgstr "Đã hủy xác thực"
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1476
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "Kiểm tra bảo mật bằng Lynis đã hết thời gian chờ sau 5 phút"
 
-#: crates/clamui-core/src/audit.rs:1444
+#: crates/clamui-core/src/audit.rs:1478
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "Quét rootkit đã hết thời gian chờ sau 5 phút"
 
-#: crates/clamui-core/src/audit.rs:1463 crates/clamui-core/src/audit.rs:1509
+#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
 msgid "Failed to run Lynis: {error}"
 msgstr "Không thể chạy Lynis: {error}"
 
-#: crates/clamui-core/src/audit.rs:1469
+#: crates/clamui-core/src/audit.rs:1503
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Không thể chạy chkrootkit: {error}"
 
-#: crates/clamui-core/src/audit.rs:1538
+#: crates/clamui-core/src/audit.rs:1572
 msgid "Score: {score}/100"
 msgstr "Điểm: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1541
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "Chạy “sudo lynis audit system” để xem các khuyến nghị chi tiết"
 
-#: crates/clamui-core/src/audit.rs:1558
+#: crates/clamui-core/src/audit.rs:1592
 msgid "Audit completed (exit code {code})"
 msgstr "Đã hoàn tất kiểm tra bảo mật (mã thoát {code})"
 
-#: crates/clamui-core/src/audit.rs:1596 crates/clamui-core/src/audit.rs:1610
+#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "Không thể hoàn tất quét rootkit (mã thoát {code})"
 
-#: crates/clamui-core/src/audit.rs:1647
+#: crates/clamui-core/src/audit.rs:1681
 msgid "No rootkits detected"
 msgstr "Không phát hiện rootkit nào"
 
-#: crates/clamui-core/src/audit.rs:1659
+#: crates/clamui-core/src/audit.rs:1693
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "Phát hiện {count} rootkit tiềm ẩn"
 
-#: crates/clamui-core/src/audit.rs:1667
+#: crates/clamui-core/src/audit.rs:1701
 msgid "Investigate the detected threats immediately"
 msgstr "Hãy điều tra ngay các mối đe dọa đã phát hiện"
 
@@ -1431,31 +1439,31 @@ msgstr "Lưu trong tệp cài đặt (kho khóa không khả dụng — kém an 
 msgid "translator-credits"
 msgstr "dinhkarate"
 
-#: crates/clamui-core/src/host.rs:868
+#: crates/clamui-core/src/host.rs:896
 msgid "Daemon not responding: {error}"
 msgstr "Dịch vụ không phản hồi: {error}"
 
-#: crates/clamui-core/src/host.rs:871
+#: crates/clamui-core/src/host.rs:899
 msgid "{binary} found but returned error: {error}"
 msgstr "Đã tìm thấy {binary} nhưng chương trình trả về lỗi: {error}"
 
-#: crates/clamui-core/src/host.rs:876
+#: crates/clamui-core/src/host.rs:904
 msgid "{service} is active"
 msgstr "{service} đang hoạt động"
 
-#: crates/clamui-core/src/host.rs:879
+#: crates/clamui-core/src/host.rs:907
 msgid "No virus database files found in {path}"
 msgstr "Không tìm thấy tệp cơ sở dữ liệu virus nào trong {path}"
 
-#: crates/clamui-core/src/host.rs:885
+#: crates/clamui-core/src/host.rs:913
 msgid "Error accessing database {path}: {error}"
 msgstr "Lỗi khi truy cập cơ sở dữ liệu {path}: {error}"
 
-#: crates/clamui-core/src/host.rs:891
+#: crates/clamui-core/src/host.rs:919
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "{binary} chưa được cài đặt. Hãy cài đặt bằng lệnh: {command}"
 
-#: crates/clamui-core/src/host.rs:901
+#: crates/clamui-core/src/host.rs:929
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -2274,7 +2282,7 @@ msgstr "Hồ sơ quét"
 msgid "Results"
 msgstr "Kết quả"
 
-#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:559
+#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:573
 msgid "Could not open link"
 msgstr "Không thể mở liên kết"
 
@@ -2734,7 +2742,7 @@ msgid "Cancelled"
 msgstr "Đã hủy"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
@@ -3054,15 +3062,15 @@ msgstr "PID {pid}"
 msgid "Process information unavailable"
 msgstr "Không có thông tin tiến trình"
 
-#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:192
 msgid "Command copied to clipboard"
 msgstr "Đã sao chép lệnh vào bộ nhớ tạm"
 
-#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:195
 msgid "Could not copy command: {error}"
 msgstr "Không thể sao chép lệnh: {error}"
 
-#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -3094,49 +3102,49 @@ msgstr "Đang xác nhận…"
 msgid "Acknowledge"
 msgstr "Xác nhận"
 
-#: desktop/src/pages/Components.tsx:78
+#: desktop/src/pages/Components.tsx:82
 msgid "Virus Scanner"
 msgstr "Trình quét virus"
 
-#: desktop/src/pages/Components.tsx:80
+#: desktop/src/pages/Components.tsx:84
 msgid "Database Updater"
 msgstr "Trình cập nhật cơ sở dữ liệu"
 
-#: desktop/src/pages/Components.tsx:82
+#: desktop/src/pages/Components.tsx:86
 msgid "Daemon Scanner Client"
 msgstr "Trình khách quét qua dịch vụ"
 
-#: desktop/src/pages/Components.tsx:84
+#: desktop/src/pages/Components.tsx:88
 msgid "Scanner Daemon"
 msgstr "Dịch vụ quét"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/Components.tsx:91
+#: desktop/src/pages/Components.tsx:95
 msgid "clamscan performs on-demand virus scans."
 msgstr "clamscan thực hiện quét virus theo yêu cầu."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:96
+#: desktop/src/pages/Components.tsx:100
 msgid "freshclam downloads current virus definitions."
 msgstr "freshclam tải xuống cơ sở dữ liệu virus mới nhất."
 
 #. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
-#: desktop/src/pages/Components.tsx:101
+#: desktop/src/pages/Components.tsx:105
 msgid "clamdscan uses the clamd daemon for faster scanning."
 msgstr "clamdscan dùng dịch vụ clamd để quét nhanh hơn."
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:106
+#: desktop/src/pages/Components.tsx:110
 msgid "clamd is the ClamAV daemon for faster scans."
 msgstr "clamd là dịch vụ ClamAV giúp quét nhanh hơn."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:116
+#: desktop/src/pages/Components.tsx:120
 msgid "After installation, update virus definitions with freshclam."
 msgstr "Sau khi cài đặt, hãy cập nhật cơ sở dữ liệu virus bằng freshclam."
 
 #. Translators: Keep the embedded shell commands and service name unchanged.
-#: desktop/src/pages/Components.tsx:121
+#: desktop/src/pages/Components.tsx:125
 msgid ""
 "Enable the service for automatic updates: sudo systemctl enable clamav-"
 "freshclam; sudo systemctl start clamav-freshclam"
@@ -3145,12 +3153,12 @@ msgstr ""
 "sudo systemctl start clamav-freshclam"
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:126
+#: desktop/src/pages/Components.tsx:130
 msgid "Requires the clamd daemon to be running."
 msgstr "Yêu cầu dịch vụ clamd đang chạy."
 
 #. Translators: Keep the embedded file path, command, and command-line options unchanged.
-#: desktop/src/pages/Components.tsx:131
+#: desktop/src/pages/Components.tsx:135
 msgid ""
 "Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
 "clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
@@ -3161,78 +3169,78 @@ msgstr ""
 "tra quyền của socket và chạy: clamdscan --config-file=/etc/clamd.d/scan.conf "
 "--ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
+#: desktop/src/pages/Components.tsx:147 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "Đang chạy"
 
-#: desktop/src/pages/Components.tsx:143
+#: desktop/src/pages/Components.tsx:147
 #: desktop/src/pages/SettingsPreferences.tsx:265
 msgid "Installed"
 msgstr "Đã cài đặt"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
+#: desktop/src/pages/Components.tsx:148 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "Đã dừng"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
+#: desktop/src/pages/Components.tsx:149 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:267
 msgid "Not installed"
 msgstr "Chưa cài đặt"
 
-#: desktop/src/pages/Components.tsx:200
+#: desktop/src/pages/Components.tsx:204
 msgid "ClamAV components"
 msgstr "Thành phần ClamAV"
 
-#: desktop/src/pages/Components.tsx:201
+#: desktop/src/pages/Components.tsx:205
 msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
 msgstr ""
 "Kiểm tra các công cụ ClamAV trên hệ thống chủ và sao chép lệnh thiết lập "
 "dành riêng cho từng bản phân phối."
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Components.tsx:231
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
 msgid "Checking…"
 msgstr "Đang kiểm tra…"
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
 #: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr "Làm mới trạng thái"
 
-#: desktop/src/pages/Components.tsx:208
+#: desktop/src/pages/Components.tsx:212
 msgid "Could not check component status: {error}"
 msgstr "Không thể kiểm tra trạng thái thành phần: {error}"
 
-#: desktop/src/pages/Components.tsx:209
+#: desktop/src/pages/Components.tsx:213
 msgid "Detected host family: {distro}."
 msgstr "Dòng hệ điều hành đã phát hiện: {distro}."
 
-#: desktop/src/pages/Components.tsx:214
+#: desktop/src/pages/Components.tsx:218
 msgid "Components Status"
 msgstr "Trạng thái thành phần"
 
-#: desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:231
 msgid "Version unavailable"
 msgstr "Không có thông tin phiên bản"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Hide details"
 msgstr "Ẩn chi tiết"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Show details"
 msgstr "Hiện chi tiết"
 
-#: desktop/src/pages/Components.tsx:251
+#: desktop/src/pages/Components.tsx:255
 msgid "Suggested for the detected system:"
 msgstr "Đề xuất cho hệ thống đã phát hiện:"
 
-#: desktop/src/pages/Components.tsx:254
+#: desktop/src/pages/Components.tsx:258
 msgid "Commands for supported distributions:"
 msgstr "Lệnh cho các bản phân phối được hỗ trợ:"
 
-#: desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Components.tsx:277
 msgid "Copied"
 msgstr "Đã sao chép"
 
@@ -3311,27 +3319,27 @@ msgstr ""
 "xuất này được xác thực và lưu tự động khi bạn rời khỏi phần này. Việc cấp "
 "quyền chỉ được yêu cầu khi bạn chọn rõ \"Cấp quyền đọc\"."
 
-#: desktop/src/pages/ConfigPreferences.tsx:280
-#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:380
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Thêm"
 
-#: desktop/src/pages/ConfigPreferences.tsx:287
-#: desktop/src/pages/ConfigPreferences.tsx:288
+#: desktop/src/pages/ConfigPreferences.tsx:301
+#: desktop/src/pages/ConfigPreferences.tsx:302
 msgid "Drag to reorder"
 msgstr "Kéo để sắp xếp lại"
 
-#: desktop/src/pages/ConfigPreferences.tsx:308
+#: desktop/src/pages/ConfigPreferences.tsx:322
 msgid "Move up"
 msgstr "Di chuyển lên"
 
-#: desktop/src/pages/ConfigPreferences.tsx:309
+#: desktop/src/pages/ConfigPreferences.tsx:323
 msgid "Move down"
 msgstr "Di chuyển xuống"
 
-#: desktop/src/pages/ConfigPreferences.tsx:310
-#: desktop/src/pages/ConfigPreferences.tsx:355
+#: desktop/src/pages/ConfigPreferences.tsx:324
+#: desktop/src/pages/ConfigPreferences.tsx:369
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3339,21 +3347,21 @@ msgid "Remove"
 msgstr "Gỡ bỏ"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:340
+#: desktop/src/pages/ConfigPreferences.tsx:354
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Nhập URL http, https, ftp, ftps hoặc file."
 
-#: desktop/src/pages/ConfigPreferences.tsx:352
-#: desktop/src/pages/ConfigPreferences.tsx:823
+#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:837
 msgid "Custom Signature Databases"
 msgstr "Cơ sở dữ liệu chữ ký virus tùy chỉnh"
 
-#: desktop/src/pages/ConfigPreferences.tsx:359
+#: desktop/src/pages/ConfigPreferences.tsx:373
 msgid "Add URLs"
 msgstr "Thêm URL"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:362
+#: desktop/src/pages/ConfigPreferences.tsx:376
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3361,22 +3369,22 @@ msgstr ""
 "Các giao thức URL được hỗ trợ: http, https, ftp, ftps và file. Dán từng URL "
 "của nhà cung cấp thành một mục riêng."
 
-#: desktop/src/pages/ConfigPreferences.tsx:475
+#: desktop/src/pages/ConfigPreferences.tsx:489
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
 msgstr "Lựa chọn tệp cấu hình được lưu tự động khi bạn rời khỏi phần này."
 
-#: desktop/src/pages/ConfigPreferences.tsx:482
+#: desktop/src/pages/ConfigPreferences.tsx:496
 msgid "No configuration file was found."
 msgstr "Không tìm thấy tệp cấu hình nào."
 
-#: desktop/src/pages/ConfigPreferences.tsx:496
+#: desktop/src/pages/ConfigPreferences.tsx:510
 msgid "Select a .conf configuration file."
 msgstr "Chọn một tệp cấu hình .conf."
 
 #. Translators: Save is the button label in the Preferences header; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:526
+#: desktop/src/pages/ConfigPreferences.tsx:540
 msgid ""
 "Configuration authorized. Your unsaved changes were kept; use Save to "
 "persist them."
@@ -3384,19 +3392,19 @@ msgstr ""
 "Đã cấp quyền cho cấu hình. Các thay đổi chưa lưu của bạn vẫn được giữ lại; "
 "hãy dùng “Lưu” để lưu lại."
 
-#: desktop/src/pages/ConfigPreferences.tsx:530
+#: desktop/src/pages/ConfigPreferences.tsx:544
 msgid "Configuration loaded with administrator authorization."
 msgstr "Đã tải cấu hình bằng quyền quản trị."
 
-#: desktop/src/pages/ConfigPreferences.tsx:569
+#: desktop/src/pages/ConfigPreferences.tsx:583
 msgid "Scan backend saved."
 msgstr "Đã lưu cơ chế quét."
 
-#: desktop/src/pages/ConfigPreferences.tsx:633
+#: desktop/src/pages/ConfigPreferences.tsx:647
 msgid "Choose a configuration file before applying its changes."
 msgstr "Hãy chọn tệp cấu hình trước khi áp dụng thay đổi."
 
-#: desktop/src/pages/ConfigPreferences.tsx:645
+#: desktop/src/pages/ConfigPreferences.tsx:659
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3404,129 +3412,129 @@ msgstr ""
 "Quét thời gian thực yêu cầu loại trừ một tên người dùng, UID hoặc người dùng "
 "root để tránh vòng lặp quét."
 
-#: desktop/src/pages/ConfigPreferences.tsx:659
+#: desktop/src/pages/ConfigPreferences.tsx:673
 msgid "Configuration validation failed."
 msgstr "Kiểm tra tính hợp lệ của cấu hình không thành công."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "All settings saved."
 msgstr "Đã lưu tất cả cài đặt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "Changes saved."
 msgstr "Đã lưu thay đổi."
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
-#: desktop/src/pages/ConfigPreferences.tsx:756
+#: desktop/src/pages/ConfigPreferences.tsx:758
+#: desktop/src/pages/ConfigPreferences.tsx:770
 msgid "Some changes could not be applied."
 msgstr "Không thể áp dụng một số thay đổi."
 
-#: desktop/src/pages/ConfigPreferences.tsx:779
+#: desktop/src/pages/ConfigPreferences.tsx:793
 msgid "Checking scanner status…"
 msgstr "Đang kiểm tra trạng thái trình quét…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:781
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Daemon connected"
 msgstr "Đã kết nối dịch vụ"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Trình quét khả dụng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Trình quét không khả dụng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:792
+#: desktop/src/pages/ConfigPreferences.tsx:806
 msgid "Scan PE Files"
 msgstr "Quét tệp PE"
 
-#: desktop/src/pages/ConfigPreferences.tsx:793
+#: desktop/src/pages/ConfigPreferences.tsx:807
 msgid "Scan ELF Files"
 msgstr "Quét tệp ELF"
 
-#: desktop/src/pages/ConfigPreferences.tsx:794
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Scan OLE2 Files"
 msgstr "Quét tệp OLE2"
 
-#: desktop/src/pages/ConfigPreferences.tsx:795
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Scan PDF Files"
 msgstr "Quét tệp PDF"
 
-#: desktop/src/pages/ConfigPreferences.tsx:796
+#: desktop/src/pages/ConfigPreferences.tsx:810
 msgid "Scan HTML Files"
 msgstr "Quét tệp HTML"
 
-#: desktop/src/pages/ConfigPreferences.tsx:797
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "Scan Archive Files"
 msgstr "Quét tệp nén"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:817
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Cập nhật cơ sở dữ liệu"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:808
+#: desktop/src/pages/ConfigPreferences.tsx:822
 msgid "Paths"
 msgstr "Đường dẫn"
 
-#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Database Directory"
 msgstr "Thư mục cơ sở dữ liệu"
 
-#: desktop/src/pages/ConfigPreferences.tsx:810
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Update Log File"
 msgstr "Tệp nhật ký cập nhật"
 
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "PID File"
 msgstr "Tệp PID"
 
-#: desktop/src/pages/ConfigPreferences.tsx:812
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid "Notify ClamD Config"
 msgstr "Cấu hình ClamD cần thông báo"
 
-#: desktop/src/pages/ConfigPreferences.tsx:813
+#: desktop/src/pages/ConfigPreferences.tsx:827
 msgid "Log timestamps"
 msgstr "Ghi dấu thời gian vào nhật ký"
 
-#: desktop/src/pages/ConfigPreferences.tsx:814
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Verbose logging"
 msgstr "Ghi nhật ký chi tiết"
 
-#: desktop/src/pages/ConfigPreferences.tsx:815
+#: desktop/src/pages/ConfigPreferences.tsx:829
 msgid "Syslog logging"
 msgstr "Ghi nhật ký vào syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:817
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Update Behavior"
 msgstr "Hành vi cập nhật"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "Checks per day"
 msgstr "Số lần kiểm tra mỗi ngày"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "0 disables automatic checks."
 msgstr "0 sẽ tắt kiểm tra tự động."
 
-#: desktop/src/pages/ConfigPreferences.tsx:819
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Database Mirror"
 msgstr "Máy chủ tải xuống cơ sở dữ liệu"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Suggested"
 msgstr "Đề xuất"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3534,22 +3542,22 @@ msgstr ""
 "\"Đề xuất\" thêm ba cơ sở dữ liệu InterServer vào bản nháp này. Chúng được "
 "lưu tự động khi bạn rời khỏi phần này."
 
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Signature Providers"
 msgstr "Nhà cung cấp chữ ký virus"
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
+#: desktop/src/pages/ConfigPreferences.tsx:849
 msgid "Registration is required; URLs include your personal API key."
 msgstr "Cần đăng ký; URL chứa khóa API cá nhân của bạn."
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
-#: desktop/src/pages/ConfigPreferences.tsx:839
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:849
+#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Open provider"
 msgstr "Mở trang nhà cung cấp"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:836
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3557,150 +3565,150 @@ msgstr ""
 "Hãy dùng fangfrisch hoặc clamav-unofficial-sigs; nhà cung cấp này không hỗ "
 "trợ thêm trực tiếp bằng URL tùy chỉnh."
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr ""
 "Cơ sở dữ liệu chữ ký virus cộng đồng cho mã băm, web shell và phần mềm độc "
 "hại nói chung."
 
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:857
 msgid "Proxy Settings"
 msgstr "Cài đặt proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:844
+#: desktop/src/pages/ConfigPreferences.tsx:858
 msgid "Proxy Server"
 msgstr "Máy chủ proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "Proxy Port"
 msgstr "Cổng proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "0 disables the proxy port."
 msgstr "0 sẽ tắt cổng proxy."
 
-#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:860
 msgid "Proxy Username"
 msgstr "Tên người dùng proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Proxy Password"
 msgstr "Mật khẩu proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:866
 msgid "Scanner Settings"
 msgstr "Cài đặt trình quét"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Scan Backend"
 msgstr "Cơ chế quét"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Auto (prefer daemon)"
 msgstr "Tự động (ưu tiên dịch vụ)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "ClamAV Daemon (clamd)"
 msgstr "Dịch vụ ClamAV (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:857
+#: desktop/src/pages/ConfigPreferences.tsx:871
 msgid "Standalone Scanner (clamscan)"
 msgstr "Trình quét độc lập (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Daemon Status"
 msgstr "Trạng thái dịch vụ"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Refresh Status"
 msgstr "Làm mới trạng thái"
 
-#: desktop/src/pages/ConfigPreferences.tsx:862
+#: desktop/src/pages/ConfigPreferences.tsx:876
 msgid "Documentation"
 msgstr "Tài liệu"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:864
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:899
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:882
 msgid "File Type Scanning"
 msgstr "Quét theo loại tệp"
 
-#: desktop/src/pages/ConfigPreferences.tsx:871
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "Performance and Limits"
 msgstr "Hiệu năng và giới hạn"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "Max File Size (MB)"
 msgstr "Kích thước tệp tối đa (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:873
-#: desktop/src/pages/ConfigPreferences.tsx:875
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:887
+#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "0 means unlimited."
 msgstr "0 nghĩa là không giới hạn."
 
-#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:887
 msgid "Max Scan Size (MB)"
 msgstr "Dung lượng quét tối đa (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:874
+#: desktop/src/pages/ConfigPreferences.tsx:888
 msgid "Max Archive Recursion"
 msgstr "Độ sâu lồng tối đa của tệp nén"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:889
 msgid "Max Files in Archive"
 msgstr "Số tệp tối đa trong tệp nén"
 
-#: desktop/src/pages/ConfigPreferences.tsx:877
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "Logging"
 msgstr "Ghi nhật ký"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:892
 msgid "Log File Path"
 msgstr "Đường dẫn tệp nhật ký"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Verbose Logging"
 msgstr "Ghi nhật ký chi tiết"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Syslog Logging"
 msgstr "Ghi nhật ký vào syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:898
 msgid "On-Access Scanning"
 msgstr "Quét thời gian thực"
 
-#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Monitored Paths"
 msgstr "Đường dẫn được giám sát"
 
-#: desktop/src/pages/ConfigPreferences.tsx:890
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Include Paths"
 msgstr "Đường dẫn bao gồm"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "Exclude Paths"
 msgstr "Đường dẫn loại trừ"
 
-#: desktop/src/pages/ConfigPreferences.tsx:894
+#: desktop/src/pages/ConfigPreferences.tsx:908
 msgid "Behavior Settings"
 msgstr "Cài đặt hành vi"
 
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Prevention Mode"
 msgstr "Chế độ ngăn chặn"
 
 #. Translators: Keep fanotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid ""
 "Block access to infected files instead of only reporting them. Denies file "
 "opens via fanotify."
@@ -3708,32 +3716,32 @@ msgstr ""
 "Chặn quyền truy cập vào tệp bị nhiễm thay vì chỉ báo cáo. Từ chối mở tệp "
 "thông qua fanotify."
 
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Extra Scanning"
 msgstr "Quét bổ sung"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid ""
 "Also scan newly created or moved files in monitored directories via inotify."
 msgstr ""
 "Quét thêm các tệp mới tạo hoặc di chuyển trong các thư mục được giám sát "
 "thông qua inotify."
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Deny on Error"
 msgstr "Chặn truy cập khi gặp lỗi"
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Block file access if scanning fails or encounters an error."
 msgstr "Chặn quyền truy cập tệp nếu quá trình quét thất bại hoặc gặp lỗi."
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Disable DDD"
 msgstr "Tắt DDD"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid ""
 "Disable Dynamic Directory Determination for recursive subdirectory tracking. "
 "Useful if large directory trees hit inotify watch limits."
@@ -3741,31 +3749,31 @@ msgstr ""
 "Tắt tính năng xác định thư mục động (DDD) để theo dõi đệ quy các thư mục "
 "con. Hữu ích nếu cây thư mục lớn chạm giới hạn theo dõi của inotify."
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Performance Settings"
 msgstr "Cài đặt hiệu năng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:910
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Max Threads"
 msgstr "Số luồng tối đa"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "Curl Timeout (seconds)"
 msgstr "Thời gian chờ Curl (giây)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "0 disables the timeout."
 msgstr "0 sẽ tắt thời gian chờ."
 
-#: desktop/src/pages/ConfigPreferences.tsx:913
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Retry Attempts"
 msgstr "Số lần thử lại"
 
-#: desktop/src/pages/ConfigPreferences.tsx:915
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Scan Loop Prevention"
 msgstr "Chống quét lặp vòng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:916
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3773,60 +3781,60 @@ msgstr ""
 "Cần ít nhất một ngoại lệ chống lặp vòng. Hãy loại trừ tài khoản dịch vụ "
 "clamav, UID của tài khoản đó hoặc root để tránh quét đệ quy."
 
-#: desktop/src/pages/ConfigPreferences.tsx:917
+#: desktop/src/pages/ConfigPreferences.tsx:931
 msgid "Exclude Username"
 msgstr "Loại trừ tên người dùng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:918
+#: desktop/src/pages/ConfigPreferences.tsx:932
 msgid "Exclude User ID"
 msgstr "Loại trừ ID người dùng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:933
 msgid "Exclude Root User"
 msgstr "Loại trừ người dùng root"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:938
 msgid "Scheduled Scans"
 msgstr "Quét theo lịch"
 
-#: desktop/src/pages/ConfigPreferences.tsx:925
+#: desktop/src/pages/ConfigPreferences.tsx:939
 msgid "Schedule"
 msgstr "Lịch quét"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:940
 msgid "Enable Scheduled Scans"
 msgstr "Bật quét theo lịch"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:941
 msgid "Scan Frequency"
 msgstr "Tần suất quét"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:942
 msgid "Scan Time (24-hour)"
 msgstr "Thời gian quét (định dạng 24 giờ)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Day of Week"
 msgstr "Ngày trong tuần"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Used for weekly scans."
 msgstr "Dùng cho quét hằng tuần."
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Day of Month"
 msgstr "Ngày trong tháng"
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Used for monthly scans."
 msgstr "Dùng cho quét hằng tháng."
 
-#: desktop/src/pages/ConfigPreferences.tsx:931
+#: desktop/src/pages/ConfigPreferences.tsx:945
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Mục tiêu quét"
 
-#: desktop/src/pages/ConfigPreferences.tsx:932
+#: desktop/src/pages/ConfigPreferences.tsx:946
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3834,20 +3842,20 @@ msgstr ""
 "Chưa cấu hình mục tiêu nào. Lượt quét theo lịch sẽ dùng thư mục cá nhân của "
 "bạn mà không lưu thư mục đó thành mục tiêu cụ thể."
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Bỏ qua khi dùng pin"
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Không bắt đầu quét theo lịch khi máy đang chạy bằng pin."
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Auto-Quarantine"
 msgstr "Tự động cách ly"
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "Tự động cách ly các mối đe dọa được phát hiện khi quét theo lịch."
 
