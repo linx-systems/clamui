@@ -61,8 +61,8 @@ After ten seconds without an interface the terminal and the debug log (`~/.var/a
 
 | Message | Meaning |
 | --- | --- |
-| `native startup did not finish; the last milestone was ...` | The native side is stuck before or inside `setup()`; the last milestone names the stage that completed. |
-| `the UI thread did not run a queued task` | The GTK thread is blocked, typically in a synchronous D-Bus, portal, or accessibility call. |
+| `native startup did not finish; the last milestone was ...` | The native side is stuck before or inside `setup()`, including its later steps after the window exists (accent colour, notification actions, device monitor, profile sync); the last milestone names the stage that completed. |
+| `the UI thread did not run a queued task` | Native startup finished (`setup finished` is in the timeline), but the GTK thread is blocked afterwards, typically in a synchronous D-Bus, portal, or accessibility call. |
 | `... but the web page never reported that it mounted` | Native startup finished and the UI thread is responsive; the problem is in the web view: a bundle that did not load, a JavaScript error, or IPC that does not answer. |
 
 A `frontend-startup` line in the same log carries the JavaScript error when the page itself reported one.

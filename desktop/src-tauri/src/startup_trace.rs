@@ -44,6 +44,7 @@ const REPORT_KINDS: [&str; 5] = [
 pub struct StartupTrace {
     started: Instant,
     milestones: Mutex<Vec<(Duration, String)>>,
+    setup_finished: AtomicBool,
     frontend_ready: AtomicBool,
     first_request: AtomicBool,
     first_response: AtomicBool,
@@ -56,6 +57,7 @@ impl StartupTrace {
         Arc::new(Self {
             started: Instant::now(),
             milestones: Mutex::new(Vec::new()),
+            setup_finished: AtomicBool::new(false),
             frontend_ready: AtomicBool::new(false),
             first_request: AtomicBool::new(false),
             first_response: AtomicBool::new(false),
@@ -89,6 +91,17 @@ impl StartupTrace {
             let outcome = if succeeded { "ok" } else { "error" };
             self.mark(format!("first IPC request answered ({action}: {outcome})"));
         }
+    }
+
+    /// Record that `setup()` ran to its end. The main window exists long before
+    /// that, so the watchdog cannot infer completion from the window handle.
+    pub fn setup_finished(&self) {
+        self.setup_finished.store(true, Ordering::Release);
+        self.mark("setup finished");
+    }
+
+    pub fn is_setup_finished(&self) -> bool {
+        self.setup_finished.load(Ordering::Acquire)
     }
 
     /// Record that the frontend mounted. Returns `true` the first time.
@@ -156,9 +169,12 @@ pub fn sanitize_report(kind: &str, message: &str) -> Result<(String, String), St
 /// Where the startup got stuck, derived from what the watchdog can observe.
 #[derive(Debug, PartialEq, Eq)]
 pub enum Verdict {
-    /// `setup()` had not completed: native startup itself is stuck.
+    /// `setup()` had not reached its end: native startup itself is stuck, whether
+    /// before the window exists or in a later step such as the accent colour,
+    /// notification actions, device monitor or profile sync.
     SetupUnfinished,
-    /// A task queued on the main thread did not run: the UI thread is blocked.
+    /// `setup()` finished, but a task queued on the main thread did not run: the
+    /// UI thread is blocked afterwards.
     MainThreadBlocked,
     /// The main thread is alive but the frontend never mounted.
     FrontendMissing,
@@ -209,10 +225,9 @@ pub fn spawn_watchdog(
                 return;
             }
             let handle = app_slot.lock().unwrap_or_else(|p| p.into_inner()).clone();
-            let verdict = match handle {
-                None => Verdict::SetupUnfinished,
-                Some(app) => probe_main_thread(&app),
-            };
+            let verdict = pick_verdict(trace.is_setup_finished(), handle, |app| {
+                probe_main_thread(&app)
+            });
             let message = format!(
                 "ClamUI window is not showing content after {}s: {}. Timeline: {}",
                 WATCHDOG_DELAY.as_secs(),
@@ -236,6 +251,22 @@ pub fn spawn_watchdog(
                 thread::sleep(Duration::from_millis(250));
             }
         });
+}
+
+/// The window handle is stored right after the window is built, which is well
+/// before `setup()` ends, so it only tells that the window exists. While setup
+/// has not finished, the verdict is `SetupUnfinished` and the main thread is
+/// not probed: a hang in a late setup step blocks the main thread too, and
+/// would otherwise be reported as a blocked UI thread.
+fn pick_verdict<T>(
+    setup_finished: bool,
+    handle: Option<T>,
+    probe: impl FnOnce(T) -> Verdict,
+) -> Verdict {
+    match handle {
+        Some(app) if setup_finished => probe(app),
+        _ => Verdict::SetupUnfinished,
+    }
 }
 
 fn probe_main_thread(app: &AppHandle) -> Verdict {
@@ -317,6 +348,46 @@ mod tests {
         let summary = trace.summary();
         assert_eq!(summary.matches("first IPC request received").count(), 1);
         assert_eq!(summary.matches("first IPC request answered").count(), 1);
+    }
+
+    #[test]
+    fn setup_finished_is_recorded_as_a_milestone() {
+        let trace = StartupTrace::new();
+        assert!(!trace.is_setup_finished());
+        trace.setup_finished();
+        assert!(trace.is_setup_finished());
+        assert_eq!(trace.last_milestone(), "setup finished");
+    }
+
+    #[test]
+    fn a_hang_after_the_window_exists_is_still_setup_unfinished() {
+        // The handle exists (window built) but setup never finished: the probe
+        // must not run, because the stalled main thread would make it report
+        // "UI thread blocked".
+        let verdict = pick_verdict(false, Some(()), |_| {
+            panic!("the main thread must not be probed while setup is unfinished")
+        });
+        assert_eq!(verdict, Verdict::SetupUnfinished);
+    }
+
+    #[test]
+    fn no_window_handle_is_setup_unfinished() {
+        let verdict = pick_verdict::<()>(false, None, |_| Verdict::FrontendMissing);
+        assert_eq!(verdict, Verdict::SetupUnfinished);
+        let verdict = pick_verdict::<()>(true, None, |_| Verdict::FrontendMissing);
+        assert_eq!(verdict, Verdict::SetupUnfinished);
+    }
+
+    #[test]
+    fn finished_setup_hands_the_verdict_to_the_main_thread_probe() {
+        assert_eq!(
+            pick_verdict(true, Some(()), |_| Verdict::MainThreadBlocked),
+            Verdict::MainThreadBlocked
+        );
+        assert_eq!(
+            pick_verdict(true, Some(()), |_| Verdict::FrontendMissing),
+            Verdict::FrontendMissing
+        );
     }
 
     #[test]

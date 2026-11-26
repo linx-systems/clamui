@@ -369,7 +369,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 Ordering::Release,
             );
             apply_start_minimize(app.handle());
-            trace.mark("setup finished");
+            trace.setup_finished();
             Ok(())
             }
         });
@@ -397,7 +397,7 @@ fn frontend_ready(trace: State<'_, Arc<StartupTrace>>) {
 /// start. Arguments are untrusted: the kind is an allowlist, the text is
 /// stripped and truncated, and the number of reports per run is capped.
 #[tauri::command]
-fn frontend_report(
+async fn frontend_report(
     state: State<'_, AppState>,
     trace: State<'_, Arc<StartupTrace>>,
     kind: String,
@@ -408,12 +408,18 @@ fn frontend_report(
         return Ok(());
     }
     trace.mark(format!("frontend report: {kind}"));
-    let _ = clamui_core::logs::write_debug(
-        &state.ctx,
-        "WARNING",
-        "frontend-startup",
-        &format!("{kind}: {message}"),
-    );
+    // write_debug reads the settings file and appends to the log, so keep that
+    // disk I/O off the UI thread, which is the one that may already be struggling.
+    let ctx = state.ctx.clone();
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        clamui_core::logs::write_debug(
+            &ctx,
+            "WARNING",
+            "frontend-startup",
+            &format!("{kind}: {message}"),
+        )
+    })
+    .await;
     Ok(())
 }
 
