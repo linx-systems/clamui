@@ -178,6 +178,16 @@ impl StreamEvidence {
         }
     }
 
+    /// clamd names a file it could not scan after the transport instead of the
+    /// path when the file arrives on stdin (`fd[10]: ... ERROR` with
+    /// `--fdpass`, `stream: ... ERROR` with `--stream`). Once the real path is
+    /// known those lines are rewritten to `<path>: ... ERROR`.
+    pub(crate) fn attribute_anonymous_errors(&mut self, path: &str) {
+        for (line, _) in &mut self.warnings.hard_errors {
+            *line = attribute_anonymous_error(line, path);
+        }
+    }
+
     pub(crate) fn merge_stderr(&mut self, stderr: Self) {
         for path in stderr.warnings.skipped_files {
             if !self.warnings.skipped_files.contains(&path) {
@@ -351,6 +361,25 @@ fn skipped_path(line: &str) -> Option<&str> {
             .and_then(|(path, _)| nonempty_path(path));
     }
     None
+}
+
+/// The message of a pathless clamd error line such as
+/// `fd[10]: Not a regular file ERROR` or `stream: size limit exceeded ERROR`.
+pub(crate) fn anonymous_error_message(line: &str) -> Option<&str> {
+    let body = line.trim_end().strip_suffix(" ERROR")?;
+    let message = body.strip_prefix("stream: ").or_else(|| {
+        let (digits, message) = body.strip_prefix("fd[")?.split_once("]: ")?;
+        (!digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())).then_some(message)
+    })?;
+    Some(message.trim()).filter(|message| !message.is_empty())
+}
+
+/// Rewrites a pathless clamd error line to name `path`; other lines are kept.
+pub(crate) fn attribute_anonymous_error(line: &str, path: &str) -> String {
+    anonymous_error_message(line).map_or_else(
+        || line.to_owned(),
+        |message| format!("{path}: {message} ERROR"),
+    )
 }
 
 fn nonempty_path(value: &str) -> Option<&str> {

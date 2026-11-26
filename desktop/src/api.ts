@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { _ } from "./i18n";
+import { resultStore } from "./resultStore";
 
 
 export type NotificationType = "success" | "error" | "info" | "warning";
@@ -115,6 +116,12 @@ export function notify(message: string, type: NotificationType = "info"): void {
 
 /** Ask the shell to switch pages without coupling pages to App. */
 export function navigate(page: string, args: Record<string, unknown> = {}): void {
+  // The Results page is mounted lazily and misses this event on first visit, so
+  // the result travels through the store instead of only through the event.
+  if (page === "results") {
+    if (args.result) resultStore.remember("scan", args.result);
+    if (args.virusTotal) resultStore.remember("virustotal", args.virusTotal);
+  }
   window.dispatchEvent(new CustomEvent("clamui-navigate", { detail: { page, args } }));
 }
 
