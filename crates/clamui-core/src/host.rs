@@ -90,16 +90,33 @@ pub fn host_binary(binary: &str) -> Option<String> {
         return None;
     }
     let args = vec![binary.to_owned()];
-    let output = run_host("which", &args, Some(5)).ok()?;
-    if output.status.success() {
-        let path = String::from_utf8_lossy(&output.stdout).trim().to_owned();
-        if !path.is_empty() {
-            return Some(path);
+    // A missing `which` makes the spawn itself fail; fall through to the
+    // fixed system directories instead of giving up.
+    if let Ok(output) = run_host("which", &args, Some(5)) {
+        if output.status.success() {
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
-    [format!("/usr/sbin/{binary}"), format!("/sbin/{binary}")]
+    fallback_binary_paths(binary)
         .into_iter()
         .find(|candidate| host_regular_executable(candidate))
+}
+
+/// Standard system directories probed when `which` is unavailable or fails.
+///
+/// Minimal installs (for example the openSUSE Tumbleweed Minimal VM image) do
+/// not ship `which`, so package-manager binaries such as `/usr/bin/zypper`
+/// must still be found without it.
+fn fallback_binary_paths(binary: &str) -> [String; 4] {
+    [
+        format!("/usr/sbin/{binary}"),
+        format!("/usr/bin/{binary}"),
+        format!("/sbin/{binary}"),
+        format!("/bin/{binary}"),
+    ]
 }
 
 fn host_regular_executable(path: &str) -> bool {
@@ -1017,6 +1034,19 @@ ID_LIKE="suse opensuse"
 VERSION_ID="16.0"
 PRETTY_NAME="openSUSE Leap 16.0"
 "#;
+
+    #[test]
+    fn host_binary_fallback_covers_usr_bin_and_bin() {
+        assert_eq!(
+            fallback_binary_paths("zypper"),
+            [
+                "/usr/sbin/zypper",
+                "/usr/bin/zypper",
+                "/sbin/zypper",
+                "/bin/zypper",
+            ]
+        );
+    }
 
     #[test]
     fn opensuse_tumbleweed_and_leap_resolve_to_suse_family() {
