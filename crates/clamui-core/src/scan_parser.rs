@@ -197,6 +197,32 @@ impl StreamEvidence {
             .extend(stderr.warnings.hard_errors);
     }
 
+    /// Combines evidence from concurrent clamdscan workers that scanned disjoint
+    /// shards of one file list, so the result is interpreted as if a single
+    /// clamdscan process had produced all of it.
+    pub(crate) fn absorb_shard(&mut self, shard: Self) {
+        let Self {
+            warnings,
+            threats,
+            daemon: _,
+            scanned_files,
+            scanned_dirs,
+            total_errors,
+            first_stdout_line,
+        } = shard;
+        self.merge_stderr(Self {
+            warnings,
+            ..Self::default()
+        });
+        self.threats.extend(threats);
+        self.scanned_files = sum_counts(self.scanned_files, scanned_files);
+        self.scanned_dirs += scanned_dirs;
+        self.total_errors = sum_counts(self.total_errors, total_errors);
+        if self.first_stdout_line.is_none() {
+            self.first_stdout_line = first_stdout_line;
+        }
+    }
+
     pub(crate) fn finish(
         self,
         backend: BackendEvidence,
@@ -220,6 +246,13 @@ impl StreamEvidence {
             scanned_dirs,
             stream: self,
         })
+    }
+}
+
+fn sum_counts(left: Option<u64>, right: Option<u64>) -> Option<u64> {
+    match (left, right) {
+        (Some(left), Some(right)) => Some(left.saturating_add(right)),
+        (left, right) => left.or(right),
     }
 }
 

@@ -1,24 +1,15 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { forwardRef, type ReactNode, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import { notify, openExternal, openPaths, request } from "../api";
+import { cloneValues, isConfigDirty, mergeAuthorizedConfig, type ConfigDocument, type ConfigValues, valuesEqual } from "../configAuthorize";
 import { type ManualConfiguration, useConfigurationRecovery } from "../ConfigurationRecovery";
 import { isHelperTrustError } from "../helperTrustError";
 import { Icon } from "../Icon";
 import { _ } from "../i18n";
+import { addNewestFirst, moveEntry, parseListDraft } from "../pathList";
+import { type ConfigProposal, isDocumentPending, partitionByElevation, pendingProposals } from "../savePlan";
 
-type ConfigKind = "freshclam" | "clamd";
-type ConfigValues = Record<string, string[]>;
-
-type ConfigDocument = {
-  kind: ConfigKind;
-  path: string;
-  baselinePath: string;
-  values: ConfigValues;
-  baseline: ConfigValues;
-  needsSizeUnitMigration: boolean;
-  readable: boolean;
-  error?: string;
-};
+type ConfigKind = ConfigDocument["kind"];
 
 type LoadResult = {
   kind?: ConfigKind;
@@ -69,8 +60,8 @@ type ApplyResult = {
   config_paths?: { changed: boolean; durable: boolean; durable_keys: string[] };
 };
 
-type ReportTone = "success" | "warning" | "error" | "info";
-type SaveReport = { tone: ReportTone; message: string; technicalDetails?: string } | null;
+export type ReportTone = "success" | "warning" | "error" | "info";
+export type SaveReport = { tone: ReportTone; message: string; technicalDetails?: string } | null;
 
 const EMPTY_VALUES: ConfigValues = {};
 const DAY_LABELS = [
@@ -91,13 +82,6 @@ const FREQUENCY_LABELS: Record<Schedule["schedule_frequency"], () => string> = {
 const FREQUENCIES: Schedule["schedule_frequency"][] = ["hourly", "daily", "weekly", "monthly"];
 const FILE_TYPE_FIELDS = ["ScanPE", "ScanELF", "ScanOLE2", "ScanPDF", "ScanHTML", "ScanArchive"] as const;
 const SCANNER_BOOLEAN_FIELDS = ["LogVerbose", "LogSyslog"] as const;
-const ONACCESS_BOOLEAN_FIELDS = [
-  "OnAccessPrevention",
-  "OnAccessExtraScanning",
-  "OnAccessDenyOnError",
-  "OnAccessDisableDDD",
-  "OnAccessExcludeRootUID",
-] as const;
 
 const SUGGESTED_SIGNATURE_URLS = [
   "http://sigs.interserver.net/interserver256.hdb",
@@ -115,18 +99,6 @@ const defaultSchedule = (): Schedule => ({
   schedule_day_of_week: 0,
   schedule_day_of_month: 1,
 });
-
-function cloneValues(values: ConfigValues): ConfigValues {
-  return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, [...value]]));
-}
-
-function valuesEqual(left: ConfigValues, right: ConfigValues): boolean {
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
-  return leftKeys.length === rightKeys.length && leftKeys.every((key, index) =>
-    key === rightKeys[index] && left[key].length === right[key].length && left[key].every((value, valueIndex) => value === right[key][valueIndex]),
-  );
-}
 
 function schedulesEqual(left: Schedule, right: Schedule): boolean {
   return left.scheduled_scans_enabled === right.scheduled_scans_enabled
@@ -199,8 +171,8 @@ function ConfigLocation({
   onAuthorize: (kind: ConfigKind) => Promise<void>;
 }) {
   const description = document?.path || _("No configuration file selected");
-  return <section className="preference-section form-section config-path-row">
-    <div className="setting-row">
+  return <section className="preference-section form-section">
+    <div className="setting-row config-path-row">
       <div className="row-copy">
         <h3 className="section-heading">{label}</h3>
         <p className="muted monospace">{description}</p>
@@ -214,8 +186,8 @@ function ConfigLocation({
       </div>
     </div>
     <p className="muted">{_(
-      // Translators: Save & Apply and Authorize read are button labels; use their translations.
-      "Selecting a file keeps the path in this pending proposal. Save & Apply persists it only after the complete proposal is valid. Authorization is requested only when you explicitly choose Authorize read.",
+      // Translators: Authorize read is a button label; use its translation.
+      "Selecting a file keeps the path in this pending proposal, which is validated and saved automatically when you leave this section. Authorization is requested only when you explicitly choose Authorize read.",
     )}</p>
   </section>;
 }
@@ -252,12 +224,26 @@ function NumberField({ label, field, value: currentValue, min, max, onChange, no
   </label>;
 }
 
+/**
+ * Wrap exact literal technical terms (e.g. kernel API names kept untranslated
+ * in gettext catalogs) in `<code className="monospace">` elements without
+ * requiring HTML markup in translatable strings.
+ */
+function formatCodeTerms(text: string, terms: readonly string[]): ReactNode {
+  if (terms.length === 0) return text;
+  const escaped = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const parts = text.split(new RegExp(`(${escaped.join("|")})`, "g"));
+  return parts.map((part, index) => (
+    terms.includes(part) ? <code key={index} className="monospace">{part}</code> : part
+  ));
+}
+
 function BooleanField({ label, field, checked, onChange, note }: {
   label: string;
   field: string;
   checked: boolean;
   onChange: (next: boolean) => void;
-  note?: string;
+  note?: ReactNode;
 }) {
   const id = fieldId(field);
   return <label className="preference-row setting-row switch-control" htmlFor={id}>
@@ -275,14 +261,28 @@ function StringListField({ label, field, values, onChange, placeholder }: {
   placeholder: string;
 }) {
   const [draft, setDraft] = useState("");
+  const [dragging, setDragging] = useState<string | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const id = fieldId(field);
   const add = () => {
-    const candidates = draft.split(",").map((candidate) => candidate.trim()).filter(Boolean);
+    const candidates = parseListDraft(draft);
     if (candidates.length === 0) return;
-    onChange([...values, ...candidates.filter((candidate) => !values.includes(candidate))]);
+    onChange(addNewestFirst(values, candidates));
     setDraft("");
   };
-  return <div className="form-grid">
+  const move = (from: number, to: number) => {
+    const next = moveEntry(values, from, to);
+    if (next !== values) onChange(next);
+  };
+  const dragTo = (clientY: number) => {
+    if (dragging === null || !listRef.current) return;
+    const from = values.indexOf(dragging);
+    const rows = Array.from(listRef.current.children);
+    let to = rows.findIndex((row) => clientY < row.getBoundingClientRect().bottom);
+    if (to < 0) to = rows.length - 1;
+    move(from, to);
+  };
+  return <div className="form-grid string-list-field">
     <label className="field field-control" htmlFor={id}>{label}</label>
     <div className="inline-form">
       <input id={id} value={draft} placeholder={placeholder} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => {
@@ -293,10 +293,36 @@ function StringListField({ label, field, values, onChange, placeholder }: {
       }} />
       <button className="button" type="button" onClick={add}>{_("Add")}</button>
     </div>
-    {values.length > 0 && <ul className="table">
-      {values.map((item) => <li className="row setting-row" key={item}>
+    {values.length > 0 && <ul className="table string-list" ref={listRef}>
+      {values.map((item, index) => <li className={`row setting-row string-list-row${dragging === item ? " dragging" : ""}`} key={item}>
+        <button
+          className="button icon-button drag-handle"
+          type="button"
+          title={_("Drag to reorder")}
+          aria-label={_("Drag to reorder")}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            setDragging(item);
+          }}
+          onPointerMove={(event) => dragTo(event.clientY)}
+          onPointerUp={() => setDragging(null)}
+          onPointerCancel={() => setDragging(null)}
+          onLostPointerCapture={() => setDragging(null)}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+              event.preventDefault();
+              move(index, index + (event.key === "ArrowUp" ? -1 : 1));
+            }
+          }}
+        ><Icon name="grip" className="grip-icon" /></button>
         <code className="monospace">{item}</code>
-        <button className="button danger" type="button" onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}>{_("Remove")}</button>
+        <div className="actions string-list-actions">
+          <button className="button icon-button" type="button" title={_("Move up")} aria-label={_("Move up")} disabled={index === 0} onClick={() => move(index, index - 1)}><Icon name="chevron-up" /></button>
+          <button className="button icon-button" type="button" title={_("Move down")} aria-label={_("Move down")} disabled={index === values.length - 1} onClick={() => move(index, index + 1)}><Icon name="chevron-down" /></button>
+          <button className="button danger" type="button" onClick={() => onChange(values.filter((valueItem) => valueItem !== item))}>{_("Remove")}</button>
+        </div>
       </li>)}
     </ul>}
   </div>;
@@ -357,8 +383,17 @@ function CustomUrlListField({ values, onChange }: { values: string[]; onChange: 
   </div>;
 }
 
-export default function ConfigPreferences({ section }: { section: string }) {
-  const { clear: clearConfigurationRecovery, helperFailed, open: openConfigurationRecovery } = useConfigurationRecovery();
+export type ConfigPreferencesHandle = { flush: (mode: "direct" | "full") => Promise<void> };
+
+export type ConfigPreferencesProps = {
+  section: string;
+  onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
+  onReportChange?: (report: SaveReport, manualConfigurations: readonly ManualConfiguration[]) => void;
+};
+
+const ConfigPreferences = forwardRef<ConfigPreferencesHandle, ConfigPreferencesProps>(function ConfigPreferences({ section, onDirtyChange, onBusyChange, onReportChange }, ref) {
+  const { clear: clearConfigurationRecovery, helperFailed } = useConfigurationRecovery();
   const [freshclam, setFreshclam] = useState<ConfigDocument | null>(null);
   const [clamd, setClamd] = useState<ConfigDocument | null>(null);
   const [scanner, setScanner] = useState<ScannerStatus | null>(null);
@@ -451,13 +486,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
     const existing = kind === "freshclam" ? freshclam : clamd;
     changeConfigContext();
     await loadConfig(kind, path, existing?.baselinePath ?? "");
-    notify(
-      _(
-        // Translators: Save & Apply is a button label; use its translation.
-        "Configuration file selection is pending Save & Apply.",
-      ),
-      "info",
-    );
+    notify(_("Configuration file selection is saved automatically when you leave this section."), "info");
   }, [changeConfigContext, clamd, freshclam, loadConfig]);
 
   const detectConfig = useCallback(async (kind: ConfigKind) => {
@@ -501,20 +530,20 @@ export default function ConfigPreferences({ section }: { section: string }) {
       if (!persistedConfigPaths.current[kind]) {
         persistedConfigPaths.current[kind] = document.baselinePath;
       }
-      const next: ConfigDocument = {
-        kind,
-        path: loaded.path ?? document.path,
-        baselinePath: persistedConfigPaths.current[kind],
-        values: cloneValues(loaded.values ?? EMPTY_VALUES),
-        baseline: cloneValues(loaded.values ?? EMPTY_VALUES),
-        needsSizeUnitMigration: loaded.needs_size_unit_migration === true,
-        readable: loaded.readable ?? true,
-        error: loaded.error,
-      };
+      const dirty = isConfigDirty(document);
+      const next = mergeAuthorizedConfig(document, loaded, persistedConfigPaths.current[kind]);
       changeConfigContext();
       if (kind === "freshclam") setFreshclam(next);
       else setClamd(next);
-      notify(_("Configuration loaded with administrator authorization."), "success");
+      notify(
+        dirty
+          ? _(
+            // Translators: Save is the button label in the Preferences header; use its translation.
+            "Configuration authorized. Your unsaved changes were kept; use Save to persist them.",
+          )
+          : _("Configuration loaded with administrator authorization."),
+        "success",
+      );
     } catch (error) {
       if (requestId === loadRequests.current[kind]) {
         notify(String(error), "error");
@@ -558,14 +587,23 @@ export default function ConfigPreferences({ section }: { section: string }) {
     }
   }, [backend, refreshScanner]);
 
-  const saveAndApply = useCallback(async () => {
+  /**
+   * Flushes pending edits. "direct" (triggered automatically when the user
+   * leaves a settings section) only ever writes documents the backend
+   * confirms are user-writable, so it can never trigger a pkexec/polkit
+   * authorization prompt. Anything that would need elevation stays dirty and
+   * is deferred to a "full" flush, which batches every remaining change into
+   * a single `config.apply` call (and therefore at most one authorization
+   * prompt) — triggered only by the explicit header Save button or by
+   * leaving/closing the Preferences page entirely.
+   */
+  const flush = useCallback(async (mode: "direct" | "full") => {
     if (configLoadCount > 0) {
       return;
     }
     const attempt = ++saveAttempt.current;
     const saveContext = contextVersion.current;
     const isCurrentAttempt = (): boolean => attempt === saveAttempt.current && saveContext === contextVersion.current;
-    clearRecovery();
     const freshclamSnapshot = freshclam && {
       ...freshclam,
       values: cloneValues(freshclam.values),
@@ -577,37 +615,50 @@ export default function ConfigPreferences({ section }: { section: string }) {
       baseline: cloneValues(clamd.baseline),
     };
     const scheduleSnapshot = { ...schedule, schedule_targets: [...schedule.schedule_targets] };
-    const configs = [freshclamSnapshot, clamdSnapshot].filter((document): document is ConfigDocument => Boolean(document && (
-      !valuesEqual(document.values, document.baseline)
-      || document.path !== document.baselinePath
-      || (document.kind === "clamd" && document.needsSizeUnitMigration)
-    )));
-    const unselected = configs.find((document) => !document.path);
-    if (unselected) {
-      const message = _("Choose a configuration file before applying its changes.");
-      setReport({ tone: "error", message });
-      notify(message, "error");
-      return;
+    const allProposals = pendingProposals([freshclamSnapshot, clamdSnapshot]);
+    let changedConfigs: ConfigProposal[];
+    if (mode === "direct") {
+      const needsElevation = new Map<string, boolean>();
+      for (const proposal of allProposals) {
+        if (needsElevation.has(proposal.path)) continue;
+        try {
+          const probe = await request<{ needs_elevation: boolean }>("config.needs_elevation", { path: proposal.path });
+          needsElevation.set(proposal.path, probe.needs_elevation);
+        } catch {
+          // If the probe itself fails, err on the side of deferring to a full,
+          // explicit flush rather than risking a surprise authorization prompt.
+          needsElevation.set(proposal.path, true);
+        }
+      }
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      changedConfigs = partitionByElevation(allProposals, needsElevation).direct;
+    } else {
+      changedConfigs = allProposals;
     }
-    const onAccessIncluded = (clamdSnapshot?.values.OnAccessIncludePath?.length ?? 0) > 0;
-    const hasLoopPrevention = Boolean(
-      value(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeUname").trim()
-      || value(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeUID").trim()
-      || enabled(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeRootUID"),
-    );
-    if (onAccessIncluded && !hasLoopPrevention) {
-      const message = _("On-Access scanning requires an excluded username, UID, or root user to prevent scan loops.");
-      setReport({ tone: "error", message });
-      notify(message, "error");
-      return;
-    }
-    const changedConfigs = configs.map((document) => ({ kind: document.kind, path: document.path, values: document.values }));
     const scheduleChanged = !schedulesEqual(scheduleSnapshot, scheduleBaseline);
     if (changedConfigs.length === 0 && !scheduleChanged) {
-      const message = _("No changes to apply.");
-      setReport({ tone: "info", message });
-      notify(message, "info");
       return;
+    }
+    clearRecovery();
+    const unselected = changedConfigs.find((proposal) => !proposal.path);
+    if (unselected) {
+      setReport({ tone: "error", message: _("Choose a configuration file before applying its changes.") });
+      return;
+    }
+    const clamdIncluded = changedConfigs.some((proposal) => proposal.kind === "clamd");
+    if (clamdIncluded) {
+      const onAccessIncluded = (clamdSnapshot?.values.OnAccessIncludePath?.length ?? 0) > 0;
+      const hasLoopPrevention = Boolean(
+        value(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeUname").trim()
+        || value(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeUID").trim()
+        || enabled(clamdSnapshot?.values ?? EMPTY_VALUES, "OnAccessExcludeRootUID"),
+      );
+      if (onAccessIncluded && !hasLoopPrevention) {
+        setReport({ tone: "error", message: _("On-Access scanning requires an excluded username, UID, or root user to prevent scan loops.") });
+        return;
+      }
     }
 
     setBusy(true);
@@ -621,7 +672,6 @@ export default function ConfigPreferences({ section }: { section: string }) {
           const technicalDetails = validation.errors.join("\n");
           const message = _("Configuration validation failed.");
           setReport({ tone: "error", message, ...(technicalDetails ? { technicalDetails } : {}) });
-          notify(message, "error");
           return;
         }
       }
@@ -674,8 +724,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
         return;
       }
 
-      const durable = (result.durable_groups ?? []).join(", ");
-      const tone: ReportTone = result.status === "applied" ? "success" : result.status === "no_changes" ? "info" : result.status === "partially_applied" ? "warning" : "error";
+      const tone: ReportTone = result.status === "partially_applied" ? "warning" : result.status === "failed" ? "error" : "success";
       const diagnostics = [
         ...(result.failures ?? []).map((failure) => ({
           context: `${failure.group}${failure.path ? ` (${failure.path})` : ""}`,
@@ -693,31 +742,52 @@ export default function ConfigPreferences({ section }: { section: string }) {
         .map(({ context, rawError }) => `${context}: ${rawError}`)
         .filter((failure, index, allFailures) => allFailures.indexOf(failure) === index)
         .join("\n");
-      const message = [
-        result.status === "applied" ? _("Configuration saved and applied.") : result.status === "no_changes" ? _("No changes to apply.") : _("Some changes could not be applied."),
-        durable && `${_("Saved groups")}: ${durable}`,
-      ].filter(Boolean).join("\n");
       const hasUnconfirmedConfiguration = (result.configs ?? []).some((config) => config.changed && !config.written);
       const recoveryConfigurations = hasUnconfirmedConfiguration ? result.manual_configurations : [];
-      setManualConfigurations(recoveryConfigurations);
-      setReport({ tone, message, ...(technicalDetails ? { technicalDetails } : {}) });
-      if (helperFailure) {
-        helperFailed(helperFailure, recoveryConfigurations);
+      if (tone === "success") {
+        // Edits are durably saved: clear any earlier sticky error and show a
+        // brief, auto-dismissing confirmation instead of a lingering banner.
+        setManualConfigurations([]);
+        setReport(null);
+        notify(mode === "full" ? _("All settings saved.") : _("Changes saved."), "success");
       } else {
-        notify(tone === "warning" || tone === "error" ? message.split("\n", 1)[0] : message, tone);
+        // A failed or partially failed privileged apply must never silently
+        // drop the user's edits: keep them pending (the baseline updates
+        // above only applied to documents the backend actually wrote) and
+        // surface a persistent, non-dismissing error instead of a toast.
+        const message = _("Some changes could not be applied.");
+        setManualConfigurations(recoveryConfigurations);
+        setReport({ tone, message, ...(technicalDetails ? { technicalDetails } : {}) });
+        if (helperFailure) {
+          helperFailed(helperFailure, recoveryConfigurations);
+        }
       }
     } catch (error) {
       if (!isCurrentAttempt()) {
         return;
       }
       const technicalDetails = String(error);
-      const message = _("Some changes could not be applied.");
-      setReport({ tone: "error", message, technicalDetails });
-      notify(isHelperTrustError(technicalDetails) ? technicalDetails : message, "error");
+      setReport({ tone: "error", message: _("Some changes could not be applied."), technicalDetails });
     } finally {
       setBusy(false);
     }
   }, [clamd, clearRecovery, configLoadCount, freshclam, helperFailed, schedule, scheduleBaseline]);
+
+  useImperativeHandle(ref, () => ({ flush }), [flush]);
+
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
+
+  useEffect(() => {
+    onReportChange?.(report, manualConfigurations);
+  }, [report, manualConfigurations, onReportChange]);
+
+  useEffect(() => {
+    const scheduleSnapshot = { ...schedule, schedule_targets: [...schedule.schedule_targets] };
+    const dirty = isDocumentPending(freshclam) || isDocumentPending(clamd) || !schedulesEqual(scheduleSnapshot, scheduleBaseline);
+    onDirtyChange?.(dirty);
+  }, [freshclam, clamd, schedule, scheduleBaseline, onDirtyChange]);
 
   const scannerSummary = useMemo(() => {
     if (!scanner) return _("Checking scanner status…");
@@ -768,8 +838,8 @@ export default function ConfigPreferences({ section }: { section: string }) {
           <button className="button" type="button" aria-describedby="signature-suggestions-note" onClick={addSuggestedUrls}><Icon name="plus" />{_("Suggested")}</button>
         </div>
         <p id="signature-suggestions-note" className="muted signature-note">{_(
-          // Translators: Suggested and Save & Apply are button labels; use their translations. Keep InterServer unchanged.
-          "Suggested adds three InterServer databases to this draft. Save & Apply is still required.",
+          // Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
+          "Suggested adds three InterServer databases to this draft. They are saved automatically when you leave this section.",
         )}</p>
         <CustomUrlListField values={freshclamValues.DatabaseCustomURL ?? []} onChange={(next) => updateConfig("freshclam", (values) => valuesForMany(values, "DatabaseCustomURL", next))} />
       </section>
@@ -834,8 +904,21 @@ export default function ConfigPreferences({ section }: { section: string }) {
         <StringListField label={_("Include Paths")} field="OnAccessIncludePath" values={clamdValues.OnAccessIncludePath ?? []} placeholder="/home" onChange={(next) => setClamdMany("OnAccessIncludePath", next)} />
         <StringListField label={_("Exclude Paths")} field="OnAccessExcludePath" values={clamdValues.OnAccessExcludePath ?? []} placeholder="/proc" onChange={(next) => setClamdMany("OnAccessExcludePath", next)} />
       </section>
-      <section className="preference-section form-section"><h3 className="section-heading">{_("Behavior Settings")}</h3>
-        {ONACCESS_BOOLEAN_FIELDS.slice(0, 4).map((key) => <BooleanField key={key} label={key === "OnAccessPrevention" ? _("Prevention Mode") : key === "OnAccessExtraScanning" ? _("Extra Scanning") : key === "OnAccessDenyOnError" ? _("Deny on Error") : _("Disable DDD")} field={key} checked={enabled(clamdValues, key)} onChange={(next) => setClamdField(key, next ? "yes" : "no")} />)}
+      <section className="preference-section form-section">
+        <h3 className="section-heading">{_("Behavior Settings")}</h3>
+        <BooleanField label={_("Prevention Mode")} field="OnAccessPrevention" checked={enabled(clamdValues, "OnAccessPrevention")} note={formatCodeTerms(_(
+          // Translators: Keep fanotify unchanged; it is a Linux kernel API name.
+          "Block access to infected files instead of only reporting them. Denies file opens via fanotify.",
+        ), ["fanotify"])} onChange={(next) => setClamdField("OnAccessPrevention", next ? "yes" : "no")} />
+        <BooleanField label={_("Extra Scanning")} field="OnAccessExtraScanning" checked={enabled(clamdValues, "OnAccessExtraScanning")} note={formatCodeTerms(_(
+          // Translators: Keep inotify unchanged; it is a Linux kernel API name.
+          "Also scan newly created or moved files in monitored directories via inotify.",
+        ), ["inotify"])} onChange={(next) => setClamdField("OnAccessExtraScanning", next ? "yes" : "no")} />
+        <BooleanField label={_("Deny on Error")} field="OnAccessDenyOnError" checked={enabled(clamdValues, "OnAccessDenyOnError")} note={_("Block file access if scanning fails or encounters an error.")} onChange={(next) => setClamdField("OnAccessDenyOnError", next ? "yes" : "no")} />
+        <BooleanField label={_("Disable DDD")} field="OnAccessDisableDDD" checked={enabled(clamdValues, "OnAccessDisableDDD")} note={formatCodeTerms(_(
+          // Translators: Keep inotify unchanged; it is a Linux kernel API name.
+          "Disable Dynamic Directory Determination for recursive subdirectory tracking. Useful if large directory trees hit inotify watch limits.",
+        ), ["inotify"])} onChange={(next) => setClamdField("OnAccessDisableDDD", next ? "yes" : "no")} />
       </section>
       <section className="preference-section form-section"><h3 className="section-heading">{_("Performance Settings")}</h3>
         <NumberField label={_("Max Threads")} field="OnAccessMaxThreads" value={numberValue(clamdValues, "OnAccessMaxThreads", 1)} min={1} max={64} onChange={(next) => setClamdField("OnAccessMaxThreads", String(next))} />
@@ -865,35 +948,7 @@ export default function ConfigPreferences({ section }: { section: string }) {
         <BooleanField label={_("Auto-Quarantine")} field="schedule_auto_quarantine" checked={schedule.schedule_auto_quarantine} note={_("Automatically quarantine threats found by scheduled scans.")} onChange={(next) => setSchedule((current) => ({ ...current, schedule_auto_quarantine: next }))} />
       </section>
     </>}
-
-    {section === "save" && <>
-      <h2 className="section-heading">{_("Save & Apply")}</h2>
-      <section className="preference-section form-section"><h3 className="section-heading">{_("Apply Configuration")}</h3>
-        <p>{_(
-          // Translators: Save & Apply is a button label; use its translation.
-          "All edited forms are captured at the moment you click Save & Apply. Every configured file is validated before any write or authorization request.",
-        )}</p>
-        <p className="muted">{_(
-          // Translators: Keep clamd.conf unchanged; it is a configuration file name.
-          "Scanner and On-Access changes share one clamd.conf proposal; neither form can overwrite the other's detached changes.",
-        )}</p>
-        <button className="button primary" type="button" disabled={busy || configLoadCount > 0} onClick={() => void saveAndApply()}>{busy ? _("Saving…") : _("Save & Apply")}</button>
-      </section>
-      {report && <section className={`notice ${report.tone} preferences-save-report`} aria-live="polite">
-        <div className="preferences-save-report-content">
-          <p className="preferences-save-report-message">{report.message}</p>
-          {report.technicalDetails && <details className="preferences-save-report-details">
-            <summary>{_("Technical details")}</summary>
-            <pre>{report.technicalDetails}</pre>
-          </details>}
-          {manualConfigurations.length > 0 ? <div className="preferences-save-report-actions">
-            <button className="button" type="button" onClick={() => openConfigurationRecovery(manualConfigurations)}>{_(
-              // Translators: This button opens the failed native configuration snapshot.
-              "See Configuration",
-            )}</button>
-          </div> : null}
-        </div>
-      </section>}
-    </>}
   </div>;
-}
+});
+
+export default ConfigPreferences;

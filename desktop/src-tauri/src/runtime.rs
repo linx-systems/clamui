@@ -26,6 +26,7 @@ use tauri::{
     webview::NewWindowResponse, AppHandle, DragDropEvent, Emitter, Manager, RunEvent, State,
     WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+#[cfg(not(target_os = "linux"))]
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_notification::{Action, ActionType, NotificationExt};
 
@@ -216,6 +217,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
             tray_available: false,
             version: env!("CARGO_PKG_VERSION").into(),
             active_jobs: Vec::new(),
+            accent: None,
         }),
         active_jobs: RunningJobs {
             entries: Mutex::new(HashMap::new()),
@@ -250,6 +252,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .manage(state)
+        .manage(crate::accent_color::AccentColor::default())
         .invoke_handler(tauri::generate_handler![
             request,
             choose_paths,
@@ -286,6 +289,7 @@ pub fn run(arguments: Vec<String>) -> Result<(), String> {
                 .map_err(|error| error.to_string())?;
             *app_slot.lock().expect("app handle poisoned") = Some(app.handle().clone());
             let state = app.state::<AppState>();
+            crate::accent_color::init(app.handle().clone(), state.ctx.clone());
             let _ = clamui_core::logs::write_debug(
                 &state.ctx,
                 "INFO",
@@ -472,15 +476,64 @@ async fn save_export(
 }
 
 #[tauri::command]
-async fn copy_text(state: State<'_, AppState>, app: AppHandle, text: String) -> Result<(), String> {
-    let _operation = state.active_jobs.register("native.copy_text".into())?;
-    tauri::async_runtime::spawn_blocking(move || {
-        app.clipboard()
-            .write_text(text)
-            .map_err(|error| error.to_string())
-    })
-    .await
-    .map_err(|error| error.to_string())?
+async fn copy_text(app: AppHandle, text: String) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        // Arboard needs Wayland data-control or an X11 fallback. GNOME Flatpak
+        // sessions may expose neither; GTK already owns a usable display and
+        // uses the normal Wayland selection protocol. GTK must run on its thread.
+        let (sender, mut receiver) = tauri::async_runtime::channel(1);
+        let clipboard_app = app.clone();
+        app.run_on_main_thread(move || {
+            let state = clipboard_app.state::<AppState>();
+            // Register only while executing: shutdown waits for active jobs on
+            // this thread and must never wait for work queued behind itself.
+            let result = state
+                .active_jobs
+                .register("native.copy_text".into())
+                .and_then(|_operation| crate::clipboard::write_text(&text));
+            let _ = sender.try_send(result);
+        })
+        .map_err(|error| error.to_string())?;
+        receiver
+            .recv()
+            .await
+            .ok_or_else(|| "clipboard operation did not complete".to_owned())?
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let state_app = app.clone();
+        let state = state_app.state::<AppState>();
+        let _operation = state.active_jobs.register("native.copy_text".into())?;
+        tauri::async_runtime::spawn_blocking(move || {
+            app.clipboard()
+                .write_text(text)
+                .map_err(|error| error.to_string())
+        })
+        .await
+        .map_err(|error| error.to_string())?
+    }
+}
+
+/// Opens a validated URL or path with the desktop's default handler. Inside
+/// the classic snap the handler is a host program, so it is started through
+/// the host-command environment that drops the snap's library and GTK paths.
+fn open_with_desktop(target: &std::ffi::OsStr) -> Result<(), String> {
+    if !clamui_core::common::is_snap() {
+        return open::that(target).map_err(|error| error.to_string());
+    }
+    let status = clamui_core::common::host_command("xdg-open", &[])
+        .arg(target)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .map_err(|error| error.to_string())?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("xdg-open failed with {status}"))
+    }
 }
 
 #[tauri::command]
@@ -488,7 +541,7 @@ async fn open_external(state: State<'_, AppState>, url: String) -> Result<(), St
     let _operation = state.active_jobs.register("native.open_external".into())?;
     let url = is_safe_external_url(&url)?;
     tauri::async_runtime::spawn_blocking(move || {
-        open::that(url.as_str()).map_err(|error| error.to_string())
+        open_with_desktop(std::ffi::OsStr::new(url.as_str()))
     })
     .await
     .map_err(|error| error.to_string())?
@@ -503,11 +556,9 @@ async fn open_path(state: State<'_, AppState>, path: String) -> Result<(), Strin
     if !metadata.file_type().is_file() && !metadata.file_type().is_dir() {
         return Err("requested path is not a regular file or directory".into());
     }
-    tauri::async_runtime::spawn_blocking(move || {
-        open::that(path).map_err(|error| error.to_string())
-    })
-    .await
-    .map_err(|error| error.to_string())?
+    tauri::async_runtime::spawn_blocking(move || open_with_desktop(path.as_os_str()))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
@@ -567,7 +618,7 @@ fn request_close(
 }
 
 #[tauri::command]
-fn startup_state(state: State<'_, AppState>) -> StartupState {
+fn startup_state(app: AppHandle, state: State<'_, AppState>) -> StartupState {
     let mut startup = state
         .initial
         .lock()
@@ -575,6 +626,7 @@ fn startup_state(state: State<'_, AppState>) -> StartupState {
         .clone();
     startup.tray_available = state.tray.available();
     startup.active_jobs = state.active_jobs.snapshot();
+    startup.accent = app.state::<crate::accent_color::AccentColor>().current();
     startup
 }
 

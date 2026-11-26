@@ -11,6 +11,7 @@ description: Install ClamUI, its native desktop runtime, and host ClamAV.
 | Debian-family host | The matching v0.5.1 architecture-specific Debian application and helper pair |
 | Fedora host | GitHub Flatpak bundle or AppImage, plus the matching signed v0.5.1 Fedora helper RPM for protected preferences |
 | Portable x86_64 use | `ClamUI-0.5.1-x86_64.AppImage` |
+| Snap users (preview) | Classic-confinement [snap](#snap-preview) built from `snap/snapcraft.yaml` |
 | Rust/Tauri development | Rust, Bun, and a `master` [source checkout](#source) |
 
 ClamUI v0.5.1 is a patch release. Its native desktop build uses the system WebKitGTK 4.1 and GTK 3 runtime; its Flatpak configuration targets GNOME Platform 51. The Rust/Tauri application is not a Python/PyGObject runtime. The separate Flathub store remains on the historical Python 0.4.1 release until a later submission and rollout.
@@ -65,7 +66,7 @@ Database, Scanner, and On-Access preferences target host ClamAV configuration, n
 
 After you click, automatic installation can complete only when the official matching published package is available. Before requesting graphical administrator authorization through Polkit, ClamUI verifies its signature, identity, version, size, digest, and compatible architecture; a missing or invalid asset fails safely before authorization. On Debian, a signed same-version architecture-independent helper remains an accepted legacy fallback only when no exact-architecture helper exists. The UI never runs as root or collects an administrator password.
 
-If authorization is cancelled or installation fails, the settings draft remains available and you can retry or use the manual repair guidance. After installation succeeds, explicitly choose **Save & Apply** again; ClamUI does not automatically apply the protected changes.
+If authorization is cancelled or installation fails, the settings draft remains available and you can retry or use the manual repair guidance. After installation succeeds, leave the section again or click **Save** in the Preferences header to retry; ClamUI does not automatically apply the protected changes on its own.
 
 ## Debian packages
 
@@ -97,6 +98,19 @@ chmod +x ClamUI-0.5.1-x86_64.AppImage
 ```
 
 The AppImage packages ClamUI but still uses host ClamAV. Its matching `.zsync` metadata is `ClamUI-0.5.1-x86_64.AppImage.zsync`.
+
+## Snap (preview)
+
+ClamUI is not yet published in the Snap Store. The `snap/snapcraft.yaml` recipe builds a classic-confinement snap for amd64 and arm64; CI uploads it as the `snap-<arch>` workflow artifact. Classic confinement is required because ClamUI runs the host `clamscan`, `clamdscan` and `freshclam`, edits the host ClamAV configuration through pkexec, and manages user systemd timers. The snap bundles its own GTK 3 and WebKitGTK 4.1 runtime but never ClamAV.
+
+```bash
+sudo apt install clamav clamav-freshclam
+sudo snap install --dangerous --classic ./clamui_0.5.1_amd64.snap
+```
+
+Protected ClamAV preferences need the host helper. On Debian-family hosts, install the matching `clamui-privileged-helper_0.5.1_<debarch>.deb` from the [Debian packages](#debian-packages) section; ClamUI checks that package version. On other hosts, `sudo clamui install-privileged-helper` installs it from the snap.
+
+Scheduled scans started from the snap call `/snap/bin/clamui.scheduled-scan`, which stays valid across snap refreshes. Parallel snap instances such as `clamui_beta` are not supported. To build the snap yourself, run `snapcraft pack` from the repository root.
 
 ## Source
 

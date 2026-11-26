@@ -1,8 +1,20 @@
 name: Dependency Review
 
 on:
+  # Only pull requests that touch dependency manifests, lockfiles or workflow
+  # files (GitHub Actions versions) need a dependency review.
   pull_request:
     branches: [master]
+    paths:
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "**/package.json"
+      - "**/bun.lock"
+      - "**/yarn.lock"
+      - "**/pyproject.toml"
+      - "**/uv.lock"
+      - "**/requirements*.txt"
+      - ".github/workflows/**"
   workflow_dispatch:
     inputs:
       base_ref:
@@ -15,9 +27,16 @@ on:
         type: string
 
 
+# A newer push to the same pull request cancels the older run. Runs on master,
+# manual runs and schedules are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:

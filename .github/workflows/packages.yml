@@ -1,0 +1,195 @@
+name: Packages
+
+# Gates the package builds on pull requests and pushes to master.
+#
+# The five package workflows (build-deb, build-rpm, build-appimage,
+# build-flatpak, build-snap) are only called from here when package-relevant
+# paths changed or the pull request carries the "build-packages" label. Plain
+# code without package impact is already compiled by the "Test" workflow
+# (Tauri desktop build).
+#
+# Not affected: tags (release.yml and the tag triggers of the package
+# workflows), build-all.yml and manual runs. They keep calling the package
+# workflows directly with the same inputs (sign, expected_sha) as before.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+
+# Pull requests: a running build is cancelled by a newer push. Every other
+# event (master) gets its own group per run and is never cancelled. A foreign
+# label (not "build-packages") also gets its own group so it cannot cancel a
+# running build.
+concurrency:
+  group: >-
+    packages-${{
+      github.event_name == 'pull_request'
+      && (github.event.action != 'labeled' || github.event.label.name == 'build-packages')
+      && format('pr-{0}', github.event.pull_request.number)
+      || github.run_id
+    }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Detect package-relevant changes
+    # Any label other than build-packages starts nothing.
+    if: github.event.action != 'labeled' || github.event.label.name == 'build-packages'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      deb: ${{ steps.filter.outputs.deb }}
+      rpm: ${{ steps.filter.outputs.rpm }}
+      appimage: ${{ steps.filter.outputs.appimage }}
+      flatpak: ${{ steps.filter.outputs.flatpak }}
+      snap: ${{ steps.filter.outputs.snap }}
+    steps:
+      - name: List changed files and select package builds
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          FORCED: ${{ github.event.forced }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          all_on() {
+            for package in deb rpm appimage flatpak snap; do
+              echo "$package=true" >> "$GITHUB_OUTPUT"
+            done
+            echo "Building all packages: $1"
+            exit 0
+          }
+
+          # When in doubt (label, API error, new branch, force push, unexpected
+          # compare status, empty file list) everything is built.
+          case ",$PR_LABELS," in
+            *,build-packages,*) all_on "label build-packages is set" ;;
+          esac
+
+          # The compare API returns at most 300 files. Both branches below
+          # compare the SHAs of the triggering event (not the live pull request
+          # diff), so a re-run of an older run sees the diff of that run.
+          files="$(mktemp)"
+          if [ "$EVENT_NAME" = pull_request ]; then
+            from="$PR_BASE_SHA"
+            to="$PR_HEAD_SHA"
+          else
+            from="$BEFORE_SHA"
+            to="$AFTER_SHA"
+          fi
+          case "$from" in
+            ''|0000000000000000000000000000000000000000) all_on "no previous commit" ;;
+          esac
+          # A force push can rewrite history: the compare API then answers
+          # "behind" or "diverged" with an empty file list, which must not be
+          # read as "nothing changed".
+          [ "$FORCED" != true ] || all_on "force push"
+          status="$(gh api "repos/$REPO/compare/$from...$to?per_page=1" --jq .status)" \
+            || all_on "commit comparison unreadable"
+          case "$status" in
+            ahead|identical) ;;
+            # A pull request head that branched before the base moved on is
+            # "diverged"; the three-dot compare still returns exactly the
+            # pull request changes, so this is the normal case there.
+            diverged) [ "$EVENT_NAME" = pull_request ] || all_on "history diverged" ;;
+            *) all_on "compare status is '$status'" ;;
+          esac
+          gh api --paginate "repos/$REPO/compare/$from...$to" \
+            --jq '.files[] | .filename, (.previous_filename // empty)' > "$files" \
+            || all_on "commit comparison unreadable"
+          # Lines are at least as many as files, so fewer than 300 lines
+          # guarantees that the list is complete.
+          [ "$(wc -l < "$files")" -lt 300 ] || all_on "file list possibly truncated"
+          # Commits without any file list (empty commits, odd histories): build.
+          [ -s "$files" ] || all_on "no changed files reported"
+
+          echo "Changed files:"
+          sed 's/^/  /' "$files"
+
+          # Paths that affect every package: dependencies, Tauri configuration,
+          # installed files (data, icons, po, integrations) and shipped binaries.
+          common() {
+            case "$1" in
+              Cargo.toml|Cargo.lock|crates/*/Cargo.toml|crates/*/build.rs) return 0 ;;
+              desktop/src-tauri/Cargo.toml|desktop/src-tauri/build.rs) return 0 ;;
+              desktop/src-tauri/tauri.conf.json) return 0 ;;
+              desktop/src-tauri/capabilities/*|desktop/src-tauri/permissions/*) return 0 ;;
+              desktop/src-tauri/icons/*) return 0 ;;
+              desktop/package.json|desktop/bun.lock|desktop/vite.config.ts) return 0 ;;
+              crates/*/src/bin/*|crates/*/assets/*) return 0 ;;
+              data/*|icons/*|po/*|signing-key.asc) return 0 ;;
+              .github/workflows/packages.yml) return 0 ;;
+            esac
+            return 1
+          }
+
+          matches() {
+            package="$1"
+            while IFS= read -r path; do
+              [ -n "$path" ] || continue
+              common "$path" && return 0
+              case "$package:$path" in
+                deb:debian/*|deb:scripts/clamui-*|deb:.github/workflows/build-deb.yml) return 0 ;;
+                rpm:rpm/*|rpm:crates/clamui-core/src/privileged.rs|rpm:.github/workflows/build-rpm.yml) return 0 ;;
+                appimage:appimage/*|appimage:.github/workflows/build-appimage.yml) return 0 ;;
+                flatpak:flathub/*|flatpak:desktop/yarn.lock|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
+                snap:snap/*|snap:.github/workflows/build-snap.yml) return 0 ;;
+              esac
+            done < "$files"
+            return 1
+          }
+
+          for package in deb rpm appimage flatpak snap; do
+            if matches "$package"; then
+              echo "$package=true" >> "$GITHUB_OUTPUT"
+              echo "$package: build (package-relevant change)"
+            else
+              echo "$package=false" >> "$GITHUB_OUTPUT"
+              echo "$package: skipped (no package impact)"
+            fi
+          done
+
+  deb:
+    name: Debian
+    needs: changes
+    if: needs.changes.outputs.deb == 'true'
+    uses: ./.github/workflows/build-deb.yml
+
+  rpm:
+    name: RPM
+    needs: changes
+    if: needs.changes.outputs.rpm == 'true'
+    uses: ./.github/workflows/build-rpm.yml
+
+  appimage:
+    name: AppImage
+    needs: changes
+    if: needs.changes.outputs.appimage == 'true'
+    uses: ./.github/workflows/build-appimage.yml
+
+  flatpak:
+    name: Flatpak
+    needs: changes
+    if: needs.changes.outputs.flatpak == 'true'
+    uses: ./.github/workflows/build-flatpak.yml
+
+  snap:
+    name: Snap
+    needs: changes
+    if: needs.changes.outputs.snap == 'true'
+    uses: ./.github/workflows/build-snap.yml

@@ -203,11 +203,7 @@ pub fn save(ctx: &Context, entry: Value) -> AppResult<Value> {
     Ok(public_entry(stored))
 }
 
-fn public_entry(mut entry: Value) -> Value {
-    if let Some(object) = entry.as_object_mut() {
-        object.remove("scanned_files");
-        object.remove("infected_count");
-    }
+fn public_entry(entry: Value) -> Value {
     entry
 }
 

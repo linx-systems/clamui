@@ -1,10 +1,28 @@
 name: Dependency Audit
 
 on:
+  # Pull requests and pushes only run when dependency manifests or lockfiles
+  # change. The weekly schedule catches newly published advisories.
   push:
     branches: [master]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/*/Cargo.toml"
+      - "desktop/src-tauri/Cargo.toml"
+      - "desktop/package.json"
+      - "desktop/bun.lock"
+      - ".github/workflows/dependency-audit.yml"
   pull_request:
     branches: [master]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/*/Cargo.toml"
+      - "desktop/src-tauri/Cargo.toml"
+      - "desktop/package.json"
+      - "desktop/bun.lock"
+      - ".github/workflows/dependency-audit.yml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
@@ -17,9 +35,16 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels the older run. Runs on master,
+# manual runs and schedules are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   audit:
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - name: Verify dispatched commit
         if: inputs.expected_sha != ''
@@ -51,4 +76,8 @@ jobs:
 
       - name: Audit frontend dependencies
         working-directory: desktop
-        run: bun audit
+        # GHSA-fc5q-39xc-vjpf affects picomatch used only by the Vite build
+        # tooling, not the shipped frontend. No patched release exists for the
+        # affected versions <=4.0.7. Remove this exception when picomatch or
+        # Vite publishes a fix; keep all other advisories enforced.
+        run: bun audit --ignore GHSA-fc5q-39xc-vjpf

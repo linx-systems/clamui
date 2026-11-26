@@ -90,7 +90,7 @@ On Fedora Workstation or Server, the offer presents the persistent system RPM-ke
 
 If a helper exists but is untrusted, ClamUI keeps it blocked unless it is a regular executable file, owned by root, not a symbolic link, executable by its owner, and not writable by its group or other users. The error does not identify which individual trust check failed. ClamUI does not execute an untrusted helper or offer an automatic replacement for it.
 
-If authorization is cancelled or the installation fails, the settings draft stays available: retry the offer or use the manual repair route below. After a successful installation, explicitly retry **Save & Apply**; protected changes are never applied automatically.
+If authorization is cancelled or the installation fails, the settings draft stays available: retry the offer or use the manual repair route below. After a successful installation, leave the section again or click **Save** in the Preferences header to retry; protected changes are never applied automatically on their own.
 
 Use the manual repair route when the helper is untrusted, the host is unsupported, or a source/development release has no eligible published package:
 
@@ -124,9 +124,9 @@ Do not change an unknown executable's ownership or permissions to bypass this ch
 
 When a protected write is blocked, that protected write remains unapplied; settings already saved before it may still have succeeded. After completing the supported repair for your package format, retry the pending settings draft.
 
-## Recover a failed Save & Apply
+## Recover a failed save
 
-If a configuration **Save & Apply** attempt fails after ClamUI has prepared native ClamAV files, select **See Configuration** in the failure report. The read-only recovery view lists every full target path and the exact `clamd.conf` or `freshclam.conf` content from that failed attempt. Use **Copy Path** and **Copy Configuration** separately, then open the target with an administrative editor appropriate for that path—for example, `sudoedit /full/path/to/clamd.conf`.
+If a configuration save attempt fails after ClamUI has prepared native ClamAV files, select **See Configuration** in the failure report. The read-only recovery view lists every full target path and the exact `clamd.conf` or `freshclam.conf` content from that failed attempt. Use **Copy Path** and **Copy Configuration** separately, then open the target with an administrative editor appropriate for that path - for example, `sudoedit /full/path/to/clamd.conf`.
 
 The view is a frozen record of the failed attempt, not later edits in the Preferences page. A helper error can happen after it has written some files, so inspect each existing target before replacing anything manually. **See Configuration** does not write or apply files, bypass helper trust checks, or expose application settings, VirusTotal data, or a general JSON dump.
 
@@ -146,7 +146,7 @@ The tray needs an SNI watcher. GNOME requires [AppIndicator Support](https://ext
 
 ## Quarantine, schedules, and logs
 
-A restore refusal can mean the destination already exists or integrity verification failed; do not bypass the latter. Export important logs before using **Clear All**—clearing is permanent. Scheduled scans require either a user systemd timer or cron and a powered-on machine at run time. Test configuration without changing data:
+A restore refusal can mean the destination already exists or integrity verification failed; do not bypass the latter. Export important logs before using **Clear All** - clearing is permanent. Scheduled scans require either a user systemd timer or cron and a powered-on machine at run time. Test configuration without changing data:
 
 ```bash
 clamui-scheduled-scan --dry-run

@@ -1,3 +1,6 @@
+mod accent_color;
+#[cfg(target_os = "linux")]
+mod clipboard;
 mod model;
 mod notifications;
 mod policy;
