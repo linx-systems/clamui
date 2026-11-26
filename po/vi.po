@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-26 18:16+0100\n"
+"POT-Creation-Date: 2026-11-26 18:51+0100\n"
 "PO-Revision-Date: 2026-11-03 21:00+0700\n"
 "Last-Translator: dinhkarate <dinhkarat@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -1439,31 +1439,31 @@ msgstr "Lưu trong tệp cài đặt (kho khóa không khả dụng — kém an 
 msgid "translator-credits"
 msgstr "dinhkarate"
 
-#: crates/clamui-core/src/host.rs:896
+#: crates/clamui-core/src/host.rs:913
 msgid "Daemon not responding: {error}"
 msgstr "Dịch vụ không phản hồi: {error}"
 
-#: crates/clamui-core/src/host.rs:899
+#: crates/clamui-core/src/host.rs:916
 msgid "{binary} found but returned error: {error}"
 msgstr "Đã tìm thấy {binary} nhưng chương trình trả về lỗi: {error}"
 
-#: crates/clamui-core/src/host.rs:904
+#: crates/clamui-core/src/host.rs:921
 msgid "{service} is active"
 msgstr "{service} đang hoạt động"
 
-#: crates/clamui-core/src/host.rs:907
+#: crates/clamui-core/src/host.rs:924
 msgid "No virus database files found in {path}"
 msgstr "Không tìm thấy tệp cơ sở dữ liệu virus nào trong {path}"
 
-#: crates/clamui-core/src/host.rs:913
+#: crates/clamui-core/src/host.rs:930
 msgid "Error accessing database {path}: {error}"
 msgstr "Lỗi khi truy cập cơ sở dữ liệu {path}: {error}"
 
-#: crates/clamui-core/src/host.rs:919
+#: crates/clamui-core/src/host.rs:936
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "{binary} chưa được cài đặt. Hãy cài đặt bằng lệnh: {command}"
 
-#: crates/clamui-core/src/host.rs:929
+#: crates/clamui-core/src/host.rs:946
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
