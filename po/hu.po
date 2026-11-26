@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-24 12:08-0500\n"
+"POT-Creation-Date: 2026-11-26 18:16+0100\n"
 "PO-Revision-Date: 2026-09-13 09:59+0200\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -17,372 +17,380 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:350
 msgid "ClamAV is not installed"
 msgstr "A ClamAV nincs telepítve"
 
-#: crates/clamui-core/src/audit.rs:349
+#: crates/clamui-core/src/audit.rs:352
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Telepítse a ClamAV-ot a víruskeresés engedélyezéséhez"
 
-#: crates/clamui-core/src/audit.rs:367
+#: crates/clamui-core/src/audit.rs:370
 msgid "Installed: {version}"
 msgstr "Telepítve: {version}"
 
-#: crates/clamui-core/src/audit.rs:379
+#: crates/clamui-core/src/audit.rs:382
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "Naprakész ({days} napos, létrehozva: {date})"
 msgstr[1] "Naprakész ({days} napos, létrehozva: {date})"
 
-#: crates/clamui-core/src/audit.rs:397 crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:400 crates/clamui-core/src/audit.rs:420
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "Az adatbázis {days} napos (létrehozva: {date})"
 msgstr[1] "Az adatbázis {days} napos (létrehozva: {date})"
 
-#: crates/clamui-core/src/audit.rs:405
+#: crates/clamui-core/src/audit.rs:408
 msgid "Update virus database to ensure protection"
 msgstr "Frissítse a vírusadatbázist a védelem biztosításához"
 
-#: crates/clamui-core/src/audit.rs:425
+#: crates/clamui-core/src/audit.rs:428
 msgid "Database is critically outdated. Update immediately."
 msgstr "Az adatbázis kritikusan elavult. Azonnal frissítse."
 
-#: crates/clamui-core/src/audit.rs:446
+#: crates/clamui-core/src/audit.rs:449
 msgid "Database files exist but age could not be determined"
 msgstr "Léteznek adatbázisfájlok, de a koruk nem állapítható meg"
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:451
 msgid "No virus database found"
 msgstr "Nem található vírusadatbázis"
 
-#: crates/clamui-core/src/audit.rs:452
+#: crates/clamui-core/src/audit.rs:455
 msgid "Download virus database"
 msgstr "Vírusadatbázis letöltése"
 
-#: crates/clamui-core/src/audit.rs:470
+#: crates/clamui-core/src/audit.rs:473
 msgid "Service {name} is running"
 msgstr "A(z) {name} szolgáltatás fut"
 
-#: crates/clamui-core/src/audit.rs:482
+#: crates/clamui-core/src/audit.rs:485
 msgid "Daemon is responding"
 msgstr "A démon válaszol"
 
-#: crates/clamui-core/src/audit.rs:490
+#: crates/clamui-core/src/audit.rs:493
 msgid "ClamAV daemon is not running"
 msgstr "A ClamAV démon nem fut"
 
-#: crates/clamui-core/src/audit.rs:492
+#: crates/clamui-core/src/audit.rs:495
 msgid "Start the daemon for faster scanning"
 msgstr "Indítsa el a démont a gyorsabb vizsgálathoz"
 
-#: crates/clamui-core/src/audit.rs:509
+#: crates/clamui-core/src/audit.rs:512
 msgid "Freshclam service is active"
 msgstr "A freshclam szolgáltatás aktív"
 
-#: crates/clamui-core/src/audit.rs:517
+#: crates/clamui-core/src/audit.rs:520
 msgid "Freshclam automatic update service is not running"
 msgstr "A freshclam automatikus frissítő szolgáltatás nem fut"
 
-#: crates/clamui-core/src/audit.rs:519
+#: crates/clamui-core/src/audit.rs:522
 msgid "Enable automatic database updates"
 msgstr "Automatikus adatbázis-frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:543
+#: crates/clamui-core/src/audit.rs:546
 msgid "Scheduled scans are enabled"
 msgstr "Az ütemezett vizsgálatok engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:551
+#: crates/clamui-core/src/audit.rs:554
 msgid "Scheduled scans are not enabled"
 msgstr "Az ütemezett vizsgálatok nincsenek engedélyezve"
 
-#: crates/clamui-core/src/audit.rs:553
+#: crates/clamui-core/src/audit.rs:556
 msgid "Enable scheduled scans in Preferences → Schedule"
 msgstr "Engedélyezze az ütemezett vizsgálatokat itt: Beállítások → Ütemezés"
 
-#: crates/clamui-core/src/audit.rs:561
+#: crates/clamui-core/src/audit.rs:564
 msgid "No scheduling backend is available on this system"
 msgstr "Ezen a rendszeren nem áll rendelkezésre ütemező szolgáltatás"
 
-#: crates/clamui-core/src/audit.rs:563
+#: crates/clamui-core/src/audit.rs:566
 msgid "Scheduled scans require a systemd user session or cron"
 msgstr ""
 "Az ütemezett vizsgálatokhoz systemd felhasználói munkamenet vagy cron "
 "szükséges"
 
-#: crates/clamui-core/src/audit.rs:749
+#: crates/clamui-core/src/audit.rs:752
 msgid "Open Ports"
 msgstr "Nyitott portok"
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:758
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} port figyel, kockázatos portok: {ports}"
 msgstr[1] "{count} port figyel, kockázatos portok: {ports}"
 
-#: crates/clamui-core/src/audit.rs:766
+#: crates/clamui-core/src/audit.rs:769
 msgid "Review if these services need to be exposed"
 msgstr ""
 "Ellenőrizze, hogy ezeket a szolgáltatásokat szükséges-e elérhetővé tenni"
 
-#: crates/clamui-core/src/audit.rs:773
+#: crates/clamui-core/src/audit.rs:776
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] "{count} port figyel"
 msgstr[1] "{count} port figyel"
 
-#: crates/clamui-core/src/audit.rs:781
+#: crates/clamui-core/src/audit.rs:784
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 "Ellenőrizze a nyitott portokat, és zárja le a felesleges szolgáltatásokat"
 
-#: crates/clamui-core/src/audit.rs:791 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:794 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr "Néhány hálózati foglalatsor nem volt olvasható."
 
-#: crates/clamui-core/src/audit.rs:798
+#: crates/clamui-core/src/audit.rs:801
 msgid "No open ports detected"
 msgstr "Nem található nyitott port"
 
-#: crates/clamui-core/src/audit.rs:832
+#: crates/clamui-core/src/audit.rs:835
 msgid "AppArmor is enabled"
 msgstr "Az AppArmor engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:840
+#: crates/clamui-core/src/audit.rs:843
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Az AppArmor modul betöltve, de nincs engedélyezve"
 
-#: crates/clamui-core/src/audit.rs:842
+#: crates/clamui-core/src/audit.rs:845
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Engedélyezze az AppArmort az alkalmazások elszigeteléséhez"
 
-#: crates/clamui-core/src/audit.rs:858
+#: crates/clamui-core/src/audit.rs:861
 msgid "SELinux is enforcing"
 msgstr "A SELinux kikényszerítő (enforcing) módban van"
 
-#: crates/clamui-core/src/audit.rs:866
+#: crates/clamui-core/src/audit.rs:869
 msgid "SELinux is in permissive mode"
 msgstr "A SELinux megengedő (permissive) módban van"
 
-#: crates/clamui-core/src/audit.rs:868
+#: crates/clamui-core/src/audit.rs:871
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Fontolja meg az enforcing módra váltást a fokozott védelem érdekében"
 
-#: crates/clamui-core/src/audit.rs:880
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is disabled"
 msgstr "A SELinux le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:882
+#: crates/clamui-core/src/audit.rs:885
 msgid "Enable SELinux for mandatory access control"
 msgstr "Engedélyezze a SELinuxot a kötelező hozzáférés-vezérléshez"
 
-#: crates/clamui-core/src/audit.rs:897
+#: crates/clamui-core/src/audit.rs:900
 msgid "No mandatory access control framework detected"
 msgstr "Nem található kötelező hozzáférés-vezérlési keretrendszer"
 
-#: crates/clamui-core/src/audit.rs:899
+#: crates/clamui-core/src/audit.rs:902
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Érdemes engedélyezni az AppArmort vagy a SELinuxot"
 
-#: crates/clamui-core/src/audit.rs:925
+#: crates/clamui-core/src/audit.rs:928
 msgid "Automatic security updates are enabled"
 msgstr "Az automatikus biztonsági frissítések engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:936
+#: crates/clamui-core/src/audit.rs:939
 msgid "Unattended upgrades is installed but disabled"
 msgstr "A felügyelet nélküli frissítések telepítve vannak, de le vannak tiltva"
 
-#: crates/clamui-core/src/audit.rs:938
+#: crates/clamui-core/src/audit.rs:941
 msgid "Enable automatic security updates"
 msgstr "Automatikus biztonsági frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:952
+#: crates/clamui-core/src/audit.rs:955
 msgid "DNF automatic updates are enabled"
 msgstr "A DNF automatikus frissítései engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:963
+#: crates/clamui-core/src/audit.rs:966
 msgid "DNF automatic is installed but timer is not active"
 msgstr "A DNF automatic telepítve van, de az időzítő nem aktív"
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
 msgid "Enable automatic updates"
 msgstr "Automatikus frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:979
+#: crates/clamui-core/src/audit.rs:983
+msgid "os-update automatic updates are enabled"
+msgstr "Az os-update automatikus frissítései engedélyezve vannak"
+
+#: crates/clamui-core/src/audit.rs:994
+msgid "os-update is installed but timer is not active"
+msgstr "Az os-update telepítve van, de az időzítő nem aktív"
+
+#: crates/clamui-core/src/audit.rs:1009
 msgid "Could not determine automatic update status"
 msgstr "Nem sikerült megállapítani az automatikus frissítés állapotát"
 
-#: crates/clamui-core/src/audit.rs:981
+#: crates/clamui-core/src/audit.rs:1011
 msgid "Configure automatic security updates"
 msgstr "Automatikus biztonsági frissítések beállítása"
 
-#: crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:1030
 msgid "System reboot required to apply updates"
 msgstr "A frissítések alkalmazásához újra kell indítani a rendszert"
 
-#: crates/clamui-core/src/audit.rs:998
+#: crates/clamui-core/src/audit.rs:1032
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 "Indítsa újra a rendszert a függőben lévő biztonsági frissítések "
 "alkalmazásához"
 
-#: crates/clamui-core/src/audit.rs:1044
+#: crates/clamui-core/src/audit.rs:1078
 msgid "{name} is installed but not running"
 msgstr "A(z) {name} telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:1063
+#: crates/clamui-core/src/audit.rs:1097
 msgid "No intrusion detection system found"
 msgstr "Nem található behatolásészlelő rendszer"
 
-#: crates/clamui-core/src/audit.rs:1065
+#: crates/clamui-core/src/audit.rs:1099
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 "Telepítse a fail2ban vagy CrowdSec programot a támadások elleni védelemhez"
 
-#: crates/clamui-core/src/audit.rs:1092
+#: crates/clamui-core/src/audit.rs:1126
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "Az SSH-kiszolgáló nem fut (nincs távoli támadási felület)"
 
-#: crates/clamui-core/src/audit.rs:1103
+#: crates/clamui-core/src/audit.rs:1137
 msgid "SSH server is running"
 msgstr "Az SSH-kiszolgáló fut"
 
-#: crates/clamui-core/src/audit.rs:1113
+#: crates/clamui-core/src/audit.rs:1147
 msgid "Could not read SSH configuration"
 msgstr "Nem sikerült beolvasni az SSH-beállításokat"
 
-#: crates/clamui-core/src/audit.rs:1132
+#: crates/clamui-core/src/audit.rs:1166
 msgid "Root login: {value}"
 msgstr "Root bejelentkezés: {value}"
 
-#: crates/clamui-core/src/audit.rs:1140
+#: crates/clamui-core/src/audit.rs:1174
 msgid "Root login is allowed ({value})"
 msgstr "A root bejelentkezés engedélyezett ({value})"
 
-#: crates/clamui-core/src/audit.rs:1146
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Disable root SSH login for security"
 msgstr "Biztonsági okból tiltsa le a root SSH-bejelentkezést"
 
-#: crates/clamui-core/src/audit.rs:1161
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Password authentication is disabled (key-only)"
 msgstr "A jelszavas hitelesítés le van tiltva (csak kulcs alapú)"
 
-#: crates/clamui-core/src/audit.rs:1169
+#: crates/clamui-core/src/audit.rs:1203
 msgid "Password authentication is enabled"
 msgstr "A jelszavas hitelesítés engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1171
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Fontolja meg a jelszavas hitelesítés letiltását SSH-kulcsok javára"
 
-#: crates/clamui-core/src/audit.rs:1189
+#: crates/clamui-core/src/audit.rs:1223
 msgid "X11 forwarding is disabled"
 msgstr "Az X11-továbbítás le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:1197
+#: crates/clamui-core/src/audit.rs:1231
 msgid "X11 forwarding is enabled"
 msgstr "Az X11-továbbítás engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1199
+#: crates/clamui-core/src/audit.rs:1233
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Tiltsa le az X11-továbbítást a támadási felület csökkentéséhez"
 
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1293
 msgid "Application firewalls"
 msgstr "Alkalmazástűzfalak"
 
-#: crates/clamui-core/src/audit.rs:1282
+#: crates/clamui-core/src/audit.rs:1316
 msgid "Portmaster is running and protecting connections"
 msgstr "A Portmaster fut, és védi a kapcsolatokat"
 
-#: crates/clamui-core/src/audit.rs:1305
+#: crates/clamui-core/src/audit.rs:1339
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 "Engedélyezze a ClamUI-t a Portmasterben a modulonkénti állapotlekérdezéshez"
 
-#: crates/clamui-core/src/audit.rs:1308
+#: crates/clamui-core/src/audit.rs:1342
 msgid "Authorize"
 msgstr "Engedélyezés"
 
-#: crates/clamui-core/src/audit.rs:1319
+#: crates/clamui-core/src/audit.rs:1353
 msgid "Portmaster is installed but not running"
 msgstr "A Portmaster telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:1321
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 "Indítsa el a Portmaster szolgáltatást a hálózati védelem engedélyezéséhez"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1335
+#: crates/clamui-core/src/audit.rs:1369
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Nem található — opcionális hálózati megfigyelő és alkalmazástűzfal"
 
-#: crates/clamui-core/src/audit.rs:1351
+#: crates/clamui-core/src/audit.rs:1385
 msgid "Could not probe Portmaster: {error}"
 msgstr "A Portmaster nem ellenőrizhető: {error}"
 
-#: crates/clamui-core/src/audit.rs:1401
+#: crates/clamui-core/src/audit.rs:1435
 msgid "{name} is not installed"
 msgstr "A(z) {name} nincs telepítve"
 
-#: crates/clamui-core/src/audit.rs:1408
+#: crates/clamui-core/src/audit.rs:1442
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Telepítse a(z) {name} programot az átfogó biztonsági ellenőrzéshez"
 
-#: crates/clamui-core/src/audit.rs:1414
+#: crates/clamui-core/src/audit.rs:1448
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Telepítse a chkrootkitet a rootkitek észleléséhez"
 
-#: crates/clamui-core/src/audit.rs:1434
+#: crates/clamui-core/src/audit.rs:1468
 msgid "Authentication was cancelled"
 msgstr "A hitelesítés megszakítva"
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1476
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "A Lynis ellenőrzés 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1444
+#: crates/clamui-core/src/audit.rs:1478
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "A rootkitvizsgálat 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1463 crates/clamui-core/src/audit.rs:1509
+#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
 msgid "Failed to run Lynis: {error}"
 msgstr "Nem sikerült futtatni a Lynis programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1469
+#: crates/clamui-core/src/audit.rs:1503
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Nem sikerült futtatni a chkrootkit programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1538
+#: crates/clamui-core/src/audit.rs:1572
 msgid "Score: {score}/100"
 msgstr "Pontszám: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1541
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "A részletes javaslatokért futtassa: 'sudo lynis audit system'"
 
-#: crates/clamui-core/src/audit.rs:1558
+#: crates/clamui-core/src/audit.rs:1592
 msgid "Audit completed (exit code {code})"
 msgstr "Az ellenőrzés befejeződött (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1596 crates/clamui-core/src/audit.rs:1610
+#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "A rootkitvizsgálat nem fejezhető be (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1647
+#: crates/clamui-core/src/audit.rs:1681
 msgid "No rootkits detected"
 msgstr "Nem található rootkit"
 
-#: crates/clamui-core/src/audit.rs:1659
+#: crates/clamui-core/src/audit.rs:1693
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "{count} lehetséges rootkit észlelve"
 msgstr[1] "{count} lehetséges rootkit észlelve"
 
-#: crates/clamui-core/src/audit.rs:1667
+#: crates/clamui-core/src/audit.rs:1701
 msgid "Investigate the detected threats immediately"
 msgstr "Vizsgálja ki azonnal az észlelt fenyegetéseket"
 
@@ -1433,31 +1441,31 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Kálmán „KAMI” Szalai"
 
-#: crates/clamui-core/src/host.rs:868
+#: crates/clamui-core/src/host.rs:896
 msgid "Daemon not responding: {error}"
 msgstr "A démon nem válaszol: {error}"
 
-#: crates/clamui-core/src/host.rs:871
+#: crates/clamui-core/src/host.rs:899
 msgid "{binary} found but returned error: {error}"
 msgstr "A(z) {binary} megtalálható, de hibát adott vissza: {error}"
 
-#: crates/clamui-core/src/host.rs:876
+#: crates/clamui-core/src/host.rs:904
 msgid "{service} is active"
 msgstr "A(z) {service} aktív"
 
-#: crates/clamui-core/src/host.rs:879
+#: crates/clamui-core/src/host.rs:907
 msgid "No virus database files found in {path}"
 msgstr "Nem találhatók vírusadatbázis-fájlok itt: {path}"
 
-#: crates/clamui-core/src/host.rs:885
+#: crates/clamui-core/src/host.rs:913
 msgid "Error accessing database {path}: {error}"
 msgstr "Hiba az adatbázis elérésekor ({path}): {error}"
 
-#: crates/clamui-core/src/host.rs:891
+#: crates/clamui-core/src/host.rs:919
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "A(z) {binary} nincs telepítve. Telepítse ezzel: {command}"
 
-#: crates/clamui-core/src/host.rs:901
+#: crates/clamui-core/src/host.rs:929
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -2312,7 +2320,7 @@ msgstr "Profilok"
 msgid "Results"
 msgstr "Eredmények"
 
-#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:559
+#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:573
 msgid "Could not open link"
 msgstr "Nem sikerült megnyitni a hivatkozást"
 
@@ -2782,7 +2790,7 @@ msgid "Cancelled"
 msgstr "Megszakítva"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
@@ -3105,15 +3113,15 @@ msgstr "PID: {pid}"
 msgid "Process information unavailable"
 msgstr "A folyamat adatai nem érhetők el"
 
-#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:192
 msgid "Command copied to clipboard"
 msgstr "A parancs a vágólapra másolva"
 
-#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:195
 msgid "Could not copy command: {error}"
 msgstr "Nem másolható a parancs: {error}"
 
-#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -3145,50 +3153,50 @@ msgstr "Nyugtázás…"
 msgid "Acknowledge"
 msgstr "Nyugtázás"
 
-#: desktop/src/pages/Components.tsx:78
+#: desktop/src/pages/Components.tsx:82
 msgid "Virus Scanner"
 msgstr "Víruskereső"
 
-#: desktop/src/pages/Components.tsx:80
+#: desktop/src/pages/Components.tsx:84
 msgid "Database Updater"
 msgstr "Adatbázis-frissítő"
 
-#: desktop/src/pages/Components.tsx:82
+#: desktop/src/pages/Components.tsx:86
 msgid "Daemon Scanner Client"
 msgstr "Démonkereső kliens"
 
-#: desktop/src/pages/Components.tsx:84
+#: desktop/src/pages/Components.tsx:88
 msgid "Scanner Daemon"
 msgstr "Keresődémon"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/Components.tsx:91
+#: desktop/src/pages/Components.tsx:95
 msgid "clamscan performs on-demand virus scans."
 msgstr "A clamscan igény szerinti vírusvizsgálatokat végez."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:96
+#: desktop/src/pages/Components.tsx:100
 msgid "freshclam downloads current virus definitions."
 msgstr "A freshclam letölti az aktuális vírusdefiníciókat."
 
 #. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
-#: desktop/src/pages/Components.tsx:101
+#: desktop/src/pages/Components.tsx:105
 msgid "clamdscan uses the clamd daemon for faster scanning."
 msgstr "A clamdscan a gyorsabb vizsgálathoz a clamd démont használja."
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:106
+#: desktop/src/pages/Components.tsx:110
 msgid "clamd is the ClamAV daemon for faster scans."
 msgstr "A clamd a ClamAV démona a gyorsabb vizsgálatokhoz."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:116
+#: desktop/src/pages/Components.tsx:120
 msgid "After installation, update virus definitions with freshclam."
 msgstr ""
 "Telepítés után frissítse a vírusdefiníciókat a freshclam használatával."
 
 #. Translators: Keep the embedded shell commands and service name unchanged.
-#: desktop/src/pages/Components.tsx:121
+#: desktop/src/pages/Components.tsx:125
 msgid ""
 "Enable the service for automatic updates: sudo systemctl enable clamav-"
 "freshclam; sudo systemctl start clamav-freshclam"
@@ -3197,12 +3205,12 @@ msgstr ""
 "enable clamav-freshclam; sudo systemctl start clamav-freshclam"
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:126
+#: desktop/src/pages/Components.tsx:130
 msgid "Requires the clamd daemon to be running."
 msgstr "A clamd démon futását igényli."
 
 #. Translators: Keep the embedded file path, command, and command-line options unchanged.
-#: desktop/src/pages/Components.tsx:131
+#: desktop/src/pages/Components.tsx:135
 msgid ""
 "Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
 "clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
@@ -3213,78 +3221,78 @@ msgstr ""
 "érhető el, ellenőrizze a socket jogosultságait, és futtassa: clamdscan --"
 "config-file=/etc/clamd.d/scan.conf --ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
+#: desktop/src/pages/Components.tsx:147 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "Fut"
 
-#: desktop/src/pages/Components.tsx:143
+#: desktop/src/pages/Components.tsx:147
 #: desktop/src/pages/SettingsPreferences.tsx:265
 msgid "Installed"
 msgstr "Telepítve"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
+#: desktop/src/pages/Components.tsx:148 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "Leállítva"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
+#: desktop/src/pages/Components.tsx:149 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:267
 msgid "Not installed"
 msgstr "Nincs telepítve"
 
-#: desktop/src/pages/Components.tsx:200
+#: desktop/src/pages/Components.tsx:204
 msgid "ClamAV components"
 msgstr "ClamAV-összetevők"
 
-#: desktop/src/pages/Components.tsx:201
+#: desktop/src/pages/Components.tsx:205
 msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
 msgstr ""
 "Ellenőrizze a gazdarendszer ClamAV-eszközeit, és másolja ki a "
 "disztribúcióhoz tartozó beállítási parancsokat."
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Components.tsx:231
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
 msgid "Checking…"
 msgstr "Ellenőrzés…"
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
 #: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr "Állapot frissítése"
 
-#: desktop/src/pages/Components.tsx:208
+#: desktop/src/pages/Components.tsx:212
 msgid "Could not check component status: {error}"
 msgstr "Nem ellenőrizhető az összetevő állapota: {error}"
 
-#: desktop/src/pages/Components.tsx:209
+#: desktop/src/pages/Components.tsx:213
 msgid "Detected host family: {distro}."
 msgstr "Észlelt gazdarendszercsalád: {distro}."
 
-#: desktop/src/pages/Components.tsx:214
+#: desktop/src/pages/Components.tsx:218
 msgid "Components Status"
 msgstr "Összetevők állapota"
 
-#: desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:231
 msgid "Version unavailable"
 msgstr "A verzió nem érhető el"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Hide details"
 msgstr "Részletek elrejtése"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Show details"
 msgstr "Részletek megjelenítése"
 
-#: desktop/src/pages/Components.tsx:251
+#: desktop/src/pages/Components.tsx:255
 msgid "Suggested for the detected system:"
 msgstr "Javasolt az észlelt rendszerhez:"
 
-#: desktop/src/pages/Components.tsx:254
+#: desktop/src/pages/Components.tsx:258
 msgid "Commands for supported distributions:"
 msgstr "Parancsok a támogatott disztribúciókhoz:"
 
-#: desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Components.tsx:277
 msgid "Copied"
 msgstr "Másolva"
 
@@ -3364,27 +3372,27 @@ msgstr ""
 "elhagyja ezt a szakaszt. Engedélyezés csak akkor szükséges, ha kifejezetten "
 "az „Olvasás engedélyezése” lehetőséget választja."
 
-#: desktop/src/pages/ConfigPreferences.tsx:280
-#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:380
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Hozzáadás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:287
-#: desktop/src/pages/ConfigPreferences.tsx:288
+#: desktop/src/pages/ConfigPreferences.tsx:301
+#: desktop/src/pages/ConfigPreferences.tsx:302
 msgid "Drag to reorder"
 msgstr "Húzza az átrendezéshez"
 
-#: desktop/src/pages/ConfigPreferences.tsx:308
+#: desktop/src/pages/ConfigPreferences.tsx:322
 msgid "Move up"
 msgstr "Mozgatás felfelé"
 
-#: desktop/src/pages/ConfigPreferences.tsx:309
+#: desktop/src/pages/ConfigPreferences.tsx:323
 msgid "Move down"
 msgstr "Mozgatás lefelé"
 
-#: desktop/src/pages/ConfigPreferences.tsx:310
-#: desktop/src/pages/ConfigPreferences.tsx:355
+#: desktop/src/pages/ConfigPreferences.tsx:324
+#: desktop/src/pages/ConfigPreferences.tsx:369
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3392,21 +3400,21 @@ msgid "Remove"
 msgstr "Eltávolítás"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:340
+#: desktop/src/pages/ConfigPreferences.tsx:354
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Adjon meg http, https, ftp, ftps vagy file URL-t."
 
-#: desktop/src/pages/ConfigPreferences.tsx:352
-#: desktop/src/pages/ConfigPreferences.tsx:823
+#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:837
 msgid "Custom Signature Databases"
 msgstr "Egyéni aláírás-adatbázisok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:359
+#: desktop/src/pages/ConfigPreferences.tsx:373
 msgid "Add URLs"
 msgstr "URL-ek hozzáadása"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:362
+#: desktop/src/pages/ConfigPreferences.tsx:376
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3414,7 +3422,7 @@ msgstr ""
 "Támogatott URL-sémák: http, https, ftp, ftps és file. Minden szolgáltatói "
 "URL-t külön bejegyzésként illesszen be."
 
-#: desktop/src/pages/ConfigPreferences.tsx:475
+#: desktop/src/pages/ConfigPreferences.tsx:489
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
@@ -3422,16 +3430,16 @@ msgstr ""
 "A konfigurációs fájl kiválasztása automatikusan mentésre kerül, amikor "
 "elhagyja ezt a szakaszt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:482
+#: desktop/src/pages/ConfigPreferences.tsx:496
 msgid "No configuration file was found."
 msgstr "Nem található konfigurációs fájl."
 
-#: desktop/src/pages/ConfigPreferences.tsx:496
+#: desktop/src/pages/ConfigPreferences.tsx:510
 msgid "Select a .conf configuration file."
 msgstr "Válasszon egy .conf konfigurációs fájlt."
 
 #. Translators: Save is the button label in the Preferences header; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:526
+#: desktop/src/pages/ConfigPreferences.tsx:540
 msgid ""
 "Configuration authorized. Your unsaved changes were kept; use Save to "
 "persist them."
@@ -3439,19 +3447,19 @@ msgstr ""
 "A konfiguráció engedélyezve. A nem mentett módosításai megmaradtak; a "
 "végleges mentéshez használja a Mentés gombot."
 
-#: desktop/src/pages/ConfigPreferences.tsx:530
+#: desktop/src/pages/ConfigPreferences.tsx:544
 msgid "Configuration loaded with administrator authorization."
 msgstr "A konfiguráció rendszergazdai engedéllyel betöltve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:569
+#: desktop/src/pages/ConfigPreferences.tsx:583
 msgid "Scan backend saved."
 msgstr "Vizsgálati háttérprogram mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:633
+#: desktop/src/pages/ConfigPreferences.tsx:647
 msgid "Choose a configuration file before applying its changes."
 msgstr "A módosítások alkalmazása előtt válasszon ki egy konfigurációs fájlt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:645
+#: desktop/src/pages/ConfigPreferences.tsx:659
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3459,129 +3467,129 @@ msgstr ""
 "A valós idejű vizsgálathoz a vizsgálati hurkok elkerülése érdekében ki kell "
 "zárni egy felhasználónevet, UID-t vagy a root felhasználót."
 
-#: desktop/src/pages/ConfigPreferences.tsx:659
+#: desktop/src/pages/ConfigPreferences.tsx:673
 msgid "Configuration validation failed."
 msgstr "A konfiguráció ellenőrzése sikertelen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "All settings saved."
 msgstr "Minden beállítás mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "Changes saved."
 msgstr "Módosítások mentve."
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
-#: desktop/src/pages/ConfigPreferences.tsx:756
+#: desktop/src/pages/ConfigPreferences.tsx:758
+#: desktop/src/pages/ConfigPreferences.tsx:770
 msgid "Some changes could not be applied."
 msgstr "Egyes módosításokat nem sikerült alkalmazni."
 
-#: desktop/src/pages/ConfigPreferences.tsx:779
+#: desktop/src/pages/ConfigPreferences.tsx:793
 msgid "Checking scanner status…"
 msgstr "A kereső állapotának ellenőrzése…"
 
-#: desktop/src/pages/ConfigPreferences.tsx:781
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Daemon connected"
 msgstr "A démon csatlakoztatva"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "A kereső elérhető"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "A kereső nem érhető el"
 
-#: desktop/src/pages/ConfigPreferences.tsx:792
+#: desktop/src/pages/ConfigPreferences.tsx:806
 msgid "Scan PE Files"
 msgstr "PE-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:793
+#: desktop/src/pages/ConfigPreferences.tsx:807
 msgid "Scan ELF Files"
 msgstr "ELF-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:794
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Scan OLE2 Files"
 msgstr "OLE2-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:795
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Scan PDF Files"
 msgstr "PDF-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:796
+#: desktop/src/pages/ConfigPreferences.tsx:810
 msgid "Scan HTML Files"
 msgstr "HTML-fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:797
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "Scan Archive Files"
 msgstr "Archív fájlok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:817
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Adatbázis-frissítések"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:808
+#: desktop/src/pages/ConfigPreferences.tsx:822
 msgid "Paths"
 msgstr "Elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Database Directory"
 msgstr "Adatbáziskönyvtár"
 
-#: desktop/src/pages/ConfigPreferences.tsx:810
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Update Log File"
 msgstr "Frissítési naplófájl"
 
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "PID File"
 msgstr "PID-fájl"
 
-#: desktop/src/pages/ConfigPreferences.tsx:812
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid "Notify ClamD Config"
 msgstr "ClamD-konfiguráció értesítése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:813
+#: desktop/src/pages/ConfigPreferences.tsx:827
 msgid "Log timestamps"
 msgstr "Időbélyegek a naplóban"
 
-#: desktop/src/pages/ConfigPreferences.tsx:814
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Verbose logging"
 msgstr "Részletes naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:815
+#: desktop/src/pages/ConfigPreferences.tsx:829
 msgid "Syslog logging"
 msgstr "Syslog-naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:817
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Update Behavior"
 msgstr "Frissítési viselkedés"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "Checks per day"
 msgstr "Ellenőrzések naponta"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "0 disables automatic checks."
 msgstr "A 0 letiltja az automatikus ellenőrzéseket."
 
-#: desktop/src/pages/ConfigPreferences.tsx:819
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Database Mirror"
 msgstr "Adatbázistükör"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Suggested"
 msgstr "Javasolt"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3589,22 +3597,22 @@ msgstr ""
 "A „Javasolt” három InterServer adatbázist ad hozzá ehhez a piszkozathoz. "
 "Ezek automatikusan mentésre kerülnek, amikor elhagyja ezt a szakaszt."
 
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Signature Providers"
 msgstr "Aláírásszolgáltatók"
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
+#: desktop/src/pages/ConfigPreferences.tsx:849
 msgid "Registration is required; URLs include your personal API key."
 msgstr "Regisztráció szükséges; az URL-ek tartalmazzák személyes API-kulcsát."
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
-#: desktop/src/pages/ConfigPreferences.tsx:839
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:849
+#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Open provider"
 msgstr "Szolgáltató megnyitása"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:836
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3612,148 +3620,148 @@ msgstr ""
 "Használja a fangfrisch vagy a clamav-unofficial-sigs eszközt; ez nem "
 "közvetlen egyéni URL-szolgáltató."
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr "Közösségi hash-, webhéj- és általános kártevő-aláírás-adatbázisok."
 
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:857
 msgid "Proxy Settings"
 msgstr "Proxybeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:844
+#: desktop/src/pages/ConfigPreferences.tsx:858
 msgid "Proxy Server"
 msgstr "Proxyszerver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "Proxy Port"
 msgstr "Proxyport"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "0 disables the proxy port."
 msgstr "A 0 letiltja a proxyportot."
 
-#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:860
 msgid "Proxy Username"
 msgstr "Proxy felhasználónév"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Proxy Password"
 msgstr "Proxyjelszó"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:866
 msgid "Scanner Settings"
 msgstr "Keresőbeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Scan Backend"
 msgstr "Vizsgálati háttérprogram"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Auto (prefer daemon)"
 msgstr "Automatikus (a démont részesíti előnyben)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV démon (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:857
+#: desktop/src/pages/ConfigPreferences.tsx:871
 msgid "Standalone Scanner (clamscan)"
 msgstr "Önálló kereső (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Daemon Status"
 msgstr "Démon állapota"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Refresh Status"
 msgstr "Állapot frissítése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:862
+#: desktop/src/pages/ConfigPreferences.tsx:876
 msgid "Documentation"
 msgstr "Dokumentáció"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:864
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:899
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:882
 msgid "File Type Scanning"
 msgstr "Fájltípusok vizsgálata"
 
-#: desktop/src/pages/ConfigPreferences.tsx:871
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "Performance and Limits"
 msgstr "Teljesítmény és korlátok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "Max File Size (MB)"
 msgstr "Max. fájlméret (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:873
-#: desktop/src/pages/ConfigPreferences.tsx:875
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:887
+#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "0 means unlimited."
 msgstr "A 0 korlátlant jelent."
 
-#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:887
 msgid "Max Scan Size (MB)"
 msgstr "Max. vizsgálati méret (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:874
+#: desktop/src/pages/ConfigPreferences.tsx:888
 msgid "Max Archive Recursion"
 msgstr "Max. archívumrekurzió"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:889
 msgid "Max Files in Archive"
 msgstr "Max. fájlszám az archívumban"
 
-#: desktop/src/pages/ConfigPreferences.tsx:877
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "Logging"
 msgstr "Naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:892
 msgid "Log File Path"
 msgstr "Naplófájl elérési útja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Verbose Logging"
 msgstr "Részletes naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Syslog Logging"
 msgstr "Syslog-naplózás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:898
 msgid "On-Access Scanning"
 msgstr "Hozzáféréskori vizsgálat"
 
-#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Monitored Paths"
 msgstr "Figyelt elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:890
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Include Paths"
 msgstr "Beleértett elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "Exclude Paths"
 msgstr "Kizárt elérési utak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:894
+#: desktop/src/pages/ConfigPreferences.tsx:908
 msgid "Behavior Settings"
 msgstr "Működési beállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Prevention Mode"
 msgstr "Megelőzési mód"
 
 #. Translators: Keep fanotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid ""
 "Block access to infected files instead of only reporting them. Denies file "
 "opens via fanotify."
@@ -3761,33 +3769,33 @@ msgstr ""
 "A fertőzött fájlokhoz való hozzáférés blokkolása a puszta jelentés helyett. "
 "A fanotify segítségével megtagadja a fájlok megnyitását."
 
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Extra Scanning"
 msgstr "Extra vizsgálat"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid ""
 "Also scan newly created or moved files in monitored directories via inotify."
 msgstr ""
 "Az újonnan létrehozott vagy áthelyezett fájlok vizsgálata is a figyelt "
 "könyvtárakban az inotify segítségével."
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Deny on Error"
 msgstr "Hiba esetén tiltás"
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Block file access if scanning fails or encounters an error."
 msgstr ""
 "Fájlhozzáférés blokkolása, ha a vizsgálat sikertelen vagy hibába ütközik."
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Disable DDD"
 msgstr "DDD letiltása"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid ""
 "Disable Dynamic Directory Determination for recursive subdirectory tracking. "
 "Useful if large directory trees hit inotify watch limits."
@@ -3796,31 +3804,31 @@ msgstr ""
 "követéséhez. Hasznos, ha nagy könyvtárfák elérik az inotify figyelési "
 "korlátait."
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Performance Settings"
 msgstr "Teljesítménybeállítások"
 
-#: desktop/src/pages/ConfigPreferences.tsx:910
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Max Threads"
 msgstr "Max. szálak"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "Curl Timeout (seconds)"
 msgstr "Curl időtúllépés (másodperc)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "0 disables the timeout."
 msgstr "A 0 letiltja az időtúllépést."
 
-#: desktop/src/pages/ConfigPreferences.tsx:913
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Retry Attempts"
 msgstr "Újrapróbálkozási kísérletek"
 
-#: desktop/src/pages/ConfigPreferences.tsx:915
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Scan Loop Prevention"
 msgstr "Vizsgálati ciklusok megelőzése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:916
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3829,60 +3837,60 @@ msgstr ""
 "megelőzéséhez zárja ki a clamav szolgáltatásfiókot, annak UID-ját vagy a "
 "root felhasználót."
 
-#: desktop/src/pages/ConfigPreferences.tsx:917
+#: desktop/src/pages/ConfigPreferences.tsx:931
 msgid "Exclude Username"
 msgstr "Felhasználónév kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:918
+#: desktop/src/pages/ConfigPreferences.tsx:932
 msgid "Exclude User ID"
 msgstr "Felhasználói azonosító kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:933
 msgid "Exclude Root User"
 msgstr "Root felhasználó kizárása"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:938
 msgid "Scheduled Scans"
 msgstr "Ütemezett vizsgálatok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:925
+#: desktop/src/pages/ConfigPreferences.tsx:939
 msgid "Schedule"
 msgstr "Ütemezés"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:940
 msgid "Enable Scheduled Scans"
 msgstr "Ütemezett vizsgálatok engedélyezése"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:941
 msgid "Scan Frequency"
 msgstr "Vizsgálat gyakorisága"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:942
 msgid "Scan Time (24-hour)"
 msgstr "Vizsgálat ideje (24 órás)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Day of Week"
 msgstr "A hét napja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Used for weekly scans."
 msgstr "Heti vizsgálatokhoz használatos."
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Day of Month"
 msgstr "A hónap napja"
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Used for monthly scans."
 msgstr "Havi vizsgálatokhoz használatos."
 
-#: desktop/src/pages/ConfigPreferences.tsx:931
+#: desktop/src/pages/ConfigPreferences.tsx:945
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Vizsgálati célok"
 
-#: desktop/src/pages/ConfigPreferences.tsx:932
+#: desktop/src/pages/ConfigPreferences.tsx:946
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3890,20 +3898,20 @@ msgstr ""
 "Nincsenek célok beállítva. Az ütemezett vizsgálat a saját könyvtárát "
 "használja anélkül, hogy azt külön célként mentené."
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Kihagyás akkumulátoros használatkor"
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Ne indítsa el az ütemezett vizsgálatokat akkumulátoros üzemmódban."
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Auto-Quarantine"
 msgstr "Automatikus karantén"
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr ""
 "Az ütemezett vizsgálatok által talált fenyegetések automatikus karanténba "

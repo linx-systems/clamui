@@ -21,6 +21,7 @@ mod tests;
 
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 const DEEP_SCAN_TIMEOUT: Duration = Duration::from_secs(300);
+const REBOOT_FLAG_FILES: [&str; 2] = ["/var/run/reboot-required", "/run/reboot-needed"];
 
 const URL_CLAMAV: &str = "https://docs.clamav.net/";
 const URL_FRESHCLAM: &str = "https://docs.clamav.net/manual/Usage/SignatureManagement.html";
@@ -32,6 +33,8 @@ const URL_APPARMOR: &str = "https://wiki.archlinux.org/title/AppArmor";
 const URL_SELINUX: &str = "https://wiki.archlinux.org/title/SELinux";
 const URL_UNATTENDED: &str = "https://wiki.debian.org/UnattendedUpgrades";
 const URL_DNF: &str = "https://dnf.readthedocs.io/en/latest/automatic.html";
+const URL_OS_UPDATE: &str =
+    "https://manpages.opensuse.org/Tumbleweed/os-update/os-update.8.en.html";
 const URL_FAIL2BAN: &str = "https://github.com/fail2ban/fail2ban/wiki";
 const URL_CROWDSEC: &str = "https://docs.crowdsec.net/";
 const URL_SSH: &str = "https://wiki.archlinux.org/title/OpenSSH#Protection";
@@ -970,6 +973,33 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
             found = true;
         }
     }
+    if !found && host_binary("zypper").is_some() {
+        if service_active("os-update.timer").0 {
+            let mut row = check(
+                ctx,
+                "os_update",
+                "os-update",
+                AuditStatus::Pass,
+                tr(ctx, "os-update automatic updates are enabled"),
+            );
+            row.info_url = Some(URL_OS_UPDATE.to_owned());
+            section.push(row);
+            found = true;
+        } else if service_installed("os-update.timer") {
+            let mut row = check(
+                ctx,
+                "os_update",
+                "os-update",
+                AuditStatus::Warning,
+                tr(ctx, "os-update is installed but timer is not active"),
+            );
+            row.recommendation = Some(tr(ctx, "Enable automatic updates"));
+            row.install_command = Some("sudo systemctl enable --now os-update.timer".to_owned());
+            row.info_url = Some(URL_OS_UPDATE.to_owned());
+            section.push(row);
+            found = true;
+        }
+    }
     if !found {
         let mut row = check(
             ctx,
@@ -982,11 +1012,15 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         row.install_command = install_command("automatic_updates");
         section.push(row);
     }
-    let reboot_required = if is_flatpak() {
-        command_ok("test", &["-f", "/var/run/reboot-required"])
-    } else {
-        fs::metadata("/var/run/reboot-required").is_ok()
-    };
+    // Debian/Ubuntu write /var/run/reboot-required; libzypp (openSUSE/SLE)
+    // touches /run/reboot-needed instead.
+    let reboot_required = REBOOT_FLAG_FILES.iter().any(|path| {
+        if is_flatpak() {
+            command_ok("test", &["-f", path])
+        } else {
+            fs::metadata(path).is_ok()
+        }
+    });
     if reboot_required {
         let mut row = check(
             ctx,
