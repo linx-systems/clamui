@@ -1,25 +1,32 @@
 ---
 const tabs = [
   {
+    id: "flathub",
+    label: "Flathub",
+    sub: "Recommended",
+    desc: "Install the current release from Flathub on x86_64 or aarch64 and get updates through your software center or flatpak update. The sandboxed app calls host ClamAV through flatpak-spawn --host.",
+    code: "flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo\nflatpak install --user flathub io.github.linx_systems.ClamUI\nflatpak run io.github.linx_systems.ClamUI",
+  },
+  {
     id: "flatpak",
     label: "Flatpak",
     sub: "GitHub bundle",
-    desc: "After the v0.5.1 GitHub bundles are attached, choose the x86_64 or aarch64 asset. The Flathub store remains on the Python 0.4.1 release until its separate rollout. All Flatpaks call host ClamAV through flatpak-spawn --host.",
+    desc: "Offline alternative to Flathub: download the v0.6.0 bundle for your architecture from GitHub Releases. Bundles do not update on their own.",
     code: "# Choose clamui-x86_64.flatpak or clamui-aarch64.flatpak\nflatpak install --user ./clamui-x86_64.flatpak\nflatpak run io.github.linx_systems.ClamUI",
   },
   {
     id: "deb",
     label: "Debian / Ubuntu",
     sub: ".deb",
-    desc: "Download and verify the matching v0.5.1 application and privileged-helper packages for your architecture before installing.",
-    code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.5.1_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.5.1_${DEB_ARCH}.deb\"",
+    desc: "Download and verify the matching v0.6.0 application and privileged-helper packages for your architecture before installing.",
+    code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.6.0_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb\"",
   },
   {
     id: "appimage",
     label: "AppImage",
     sub: "Portable",
-    desc: "After it is attached to GitHub Releases, use the v0.5.1 x86_64 UI bundle. It uses host ClamAV.",
-    code: "chmod +x ClamUI-0.5.1-x86_64.AppImage\n./ClamUI-0.5.1-x86_64.AppImage",
+    desc: "Download the v0.6.0 x86_64 AppImage from GitHub Releases. It uses host ClamAV.",
+    code: "chmod +x ClamUI-0.6.0-x86_64.AppImage\n./ClamUI-0.6.0-x86_64.AppImage",
   },
   {
     id: "source",
@@ -194,9 +201,9 @@ const tabs = [
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
         <p>
-          <span class="text-white/85 font-medium">Flatpak</span> repository signatures cover the
-          historical Flathub 0.4.1 package. GitHub Flatpak bundles are separate release assets;
-          verify their release provenance and follow the
+          <span class="text-white/85 font-medium">Flathub</span> signs the store package itself, so
+          no extra step is needed. GitHub Flatpak bundles are separate release assets;
+          verify them against the release's SHA256SUMS and follow the
           <a href="/docs/contributing/signing/" class="text-clam-sage hover:text-white transition-colors">signing policy</a>
           before installation.
         </p>
