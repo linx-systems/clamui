@@ -7,7 +7,7 @@ description: Install ClamUI, its native desktop runtime, and host ClamAV.
 
 | System | Recommended package |
 | --- | --- |
-| Most Linux desktops | [Flathub](#flathub) (`io.github.linx_systems.ClamUI`) |
+| Most Linux desktops | [Flathub](#flathub) (`io.github.linx_systems.ClamUI`), x86_64 and aarch64 |
 | Offline Flatpak install | GitHub v0.6.0 Flatpak bundle for the host architecture |
 | Debian-family host | The matching v0.6.0 architecture-specific Debian application and helper pair |
 | Fedora host | Flathub or AppImage, plus the matching signed v0.6.0 Fedora helper RPM for protected preferences |
@@ -19,29 +19,59 @@ The current release is ClamUI v0.6.0, published on Flathub and on [GitHub Releas
 
 ## Required host software
 
-Every format uses **host** `clamscan` and `freshclam`; ClamUI does not bundle the ClamAV engine or its definitions. Daemon scanning also needs host `clamd` and `clamdscan`.
+Every format uses **host** `clamscan` and `freshclam`; ClamUI does not bundle the ClamAV engine or its definitions. The scan daemon (`clamd` with `clamdscan`) is optional: it keeps the engine loaded so repeat scans start faster, and ClamUI uses it automatically when it is running.
+
+### Debian or Ubuntu
 
 ```bash
-# Debian or Ubuntu
 sudo apt install clamav clamav-freshclam
+sudo systemctl enable --now clamav-freshclam
 
-# Fedora
-sudo dnf install clamav clamav-freshclam
-
-# Arch Linux
-sudo pacman -S clamav
-
-# openSUSE Tumbleweed or Leap
-sudo zypper install clamav
+# Optional daemon, once the definitions have finished downloading
+sudo apt install clamav-daemon
+sudo systemctl enable --now clamav-daemon
 ```
 
-Update definitions before the first scan:
+The `clamav-freshclam` service downloads the definitions in the background. While it runs, a manual `sudo freshclam` reports a locked log file; that is expected.
+
+### Fedora
 
 ```bash
+sudo dnf install clamav clamav-freshclam
 sudo freshclam
+sudo systemctl enable --now clamav-freshclam
+
+# Optional daemon: Fedora ships its socket switched off
+sudo dnf install clamd
+sudo sed -i 's/^#LocalSocket /LocalSocket /' /etc/clamd.d/scan.conf
+sudo systemctl enable --now clamd@scan
 ```
 
-You can also update them from ClamUI's **Database** view. See [scan backends](/docs/reference/scan-backends/) for daemon setup.
+On Fedora Atomic desktops (Silverblue, Kinoite), use `rpm-ostree install` with the same package names and reboot.
+
+### Arch Linux
+
+```bash
+sudo pacman -S clamav
+sudo freshclam
+sudo systemctl enable --now clamav-freshclam
+
+# Optional daemon (included in the clamav package)
+sudo systemctl enable --now clamav-daemon
+```
+
+### openSUSE Tumbleweed or Leap
+
+```bash
+sudo zypper install clamav
+sudo freshclam
+sudo systemctl enable --now freshclam.timer
+
+# Optional daemon (included in the clamav package)
+sudo systemctl enable --now clamd
+```
+
+You can also update definitions from ClamUI's **Database** view, and the **Components** view shows what was found. See [scan backends](/docs/reference/scan-backends/) for daemon details.
 
 ## Flathub
 

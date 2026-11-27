@@ -1,41 +1,144 @@
 ---
-const tabs = [
+import InstallTabGroup, { type Tab } from "./InstallTabGroup.astro";
+
+/* Step 1: ClamAV from the distribution. Package and service names were
+   checked against each distribution's packaging (Debian, Fedora rawhide
+   spec, Arch PKGBUILD, openSUSE pool) and match ClamUI's own hints in
+   crates/clamui-core/src/host.rs. */
+const clamav: Tab[] = [
+  {
+    id: "debian",
+    label: "Debian / Ubuntu",
+    blocks: [
+      {
+        title: "Scanner and virus definitions",
+        badge: "Required",
+        note: "The freshclam service downloads the definitions in the background and keeps them current. The first download takes a few minutes.",
+        code: "sudo apt install clamav clamav-freshclam\nsudo systemctl enable --now clamav-freshclam",
+      },
+      {
+        title: "Scan daemon",
+        badge: "Optional",
+        note: "Keeps the engine loaded, so repeat scans start in seconds. Start it once the definitions have finished downloading.",
+        code: "sudo apt install clamav-daemon\nsudo systemctl enable --now clamav-daemon",
+      },
+    ],
+  },
+  {
+    id: "fedora",
+    label: "Fedora",
+    blocks: [
+      {
+        title: "Scanner and virus definitions",
+        badge: "Required",
+        code: "sudo dnf install clamav clamav-freshclam\nsudo freshclam\nsudo systemctl enable --now clamav-freshclam",
+      },
+      {
+        title: "Scan daemon",
+        badge: "Optional",
+        note: "Fedora ships the daemon's socket switched off; the second line turns it on.",
+        code: "sudo dnf install clamd\nsudo sed -i 's/^#LocalSocket /LocalSocket /' /etc/clamd.d/scan.conf\nsudo systemctl enable --now clamd@scan",
+      },
+    ],
+    footnote: "Silverblue or Kinoite: use rpm-ostree install with the same package names, then reboot.",
+  },
+  {
+    id: "arch",
+    label: "Arch Linux",
+    blocks: [
+      {
+        title: "Scanner and virus definitions",
+        badge: "Required",
+        code: "sudo pacman -S clamav\nsudo freshclam\nsudo systemctl enable --now clamav-freshclam",
+      },
+      {
+        title: "Scan daemon",
+        badge: "Optional",
+        note: "Already part of the clamav package.",
+        code: "sudo systemctl enable --now clamav-daemon",
+      },
+    ],
+  },
+  {
+    id: "opensuse",
+    label: "openSUSE",
+    blocks: [
+      {
+        title: "Scanner and virus definitions",
+        badge: "Required",
+        code: "sudo zypper install clamav\nsudo freshclam\nsudo systemctl enable --now freshclam.timer",
+      },
+      {
+        title: "Scan daemon",
+        badge: "Optional",
+        note: "Already part of the clamav package.",
+        code: "sudo systemctl enable --now clamd",
+      },
+    ],
+  },
+];
+
+/* Step 2: ClamUI itself. */
+const clamui: Tab[] = [
   {
     id: "flathub",
     label: "Flathub",
     sub: "Recommended",
-    desc: "Install the current release from Flathub on x86_64 or aarch64 and get updates through your software center or flatpak update. The sandboxed app calls host ClamAV through flatpak-spawn --host.",
-    code: "flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo\nflatpak install --user flathub io.github.linx_systems.ClamUI\nflatpak run io.github.linx_systems.ClamUI",
-  },
-  {
-    id: "flatpak",
-    label: "Flatpak",
-    sub: "GitHub bundle",
-    desc: "Offline alternative to Flathub: download the v0.6.0 bundle for your architecture from GitHub Releases. Bundles do not update on their own.",
-    code: "# Choose clamui-x86_64.flatpak or clamui-aarch64.flatpak\nflatpak install --user ./clamui-x86_64.flatpak\nflatpak run io.github.linx_systems.ClamUI",
+    intro: "Works on any distribution, on x86_64 and aarch64, and updates with the rest of your apps. You can also search for ClamUI in GNOME Software or KDE Discover.",
+    blocks: [
+      {
+        code: "flatpak install flathub io.github.linx_systems.ClamUI",
+      },
+    ],
+    footnote: "Flathub not set up yet? Run flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo first.",
   },
   {
     id: "deb",
     label: "Debian / Ubuntu",
     sub: ".deb",
-    desc: "Download and verify the matching v0.6.0 application and privileged-helper packages for your architecture before installing.",
-    code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.6.0_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb\"",
+    intro: "Download both v0.6.0 packages for your architecture from GitHub Releases, then install them together. The helper lets ClamUI change ClamAV settings with your administrator password.",
+    blocks: [
+      {
+        code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.6.0_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb\"",
+      },
+    ],
   },
   {
     id: "appimage",
     label: "AppImage",
-    sub: "Portable",
-    desc: "Download the v0.6.0 x86_64 AppImage from GitHub Releases. It uses host ClamAV.",
-    code: "chmod +x ClamUI-0.6.0-x86_64.AppImage\n./ClamUI-0.6.0-x86_64.AppImage",
+    sub: "x86_64",
+    intro: "A single file that runs without installing. Download it from GitHub Releases.",
+    blocks: [
+      {
+        code: "chmod +x ClamUI-0.6.0-x86_64.AppImage\n./ClamUI-0.6.0-x86_64.AppImage",
+      },
+    ],
+  },
+  {
+    id: "bundle",
+    label: "Flatpak bundle",
+    sub: "Offline",
+    intro: "The same app as Flathub as a single file, for machines without Flathub access. Pick clamui-x86_64.flatpak or clamui-aarch64.flatpak. It does not update on its own.",
+    blocks: [
+      {
+        code: "flatpak install --user ./clamui-x86_64.flatpak",
+      },
+    ],
   },
   {
     id: "source",
     label: "From source",
-    sub: "Rust + Bun dev",
-    desc: "The current source is on master. Requires Rust, Bun, WebKitGTK 4.1, and GTK 3; build native release artifacts on the Ubuntu 22.04-compatible baseline.",
-    code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\n( cd desktop && bun install --frozen-lockfile )\nbun run --cwd desktop tauri dev",
+    sub: "Developers",
+    intro: "Needs Rust, Bun, WebKitGTK 4.1 and GTK 3 development packages.",
+    blocks: [
+      {
+        code: "git clone https://github.com/linx-systems/clamui.git\ncd clamui\n( cd desktop && bun install --frozen-lockfile )\nbun run --cwd desktop tauri dev",
+      },
+    ],
   },
 ];
+
+const releaseUrl = "https://github.com/linx-systems/clamui/releases/tag/v0.6.0";
 ---
 
 <section id="install" class="container-tight py-20 sm:py-28">
@@ -43,235 +146,61 @@ const tabs = [
     <span class="eyebrow">Get it running</span>
     <h2 class="mt-3 section-title">Install</h2>
     <p class="mt-4 lede">
-      All formats use host ClamAV and do not bundle its engine or database. Install host
-      <span class="font-mono text-white/80">clamscan</span> and
-      <span class="font-mono text-white/80">freshclam</span> first; daemon mode also needs
-      <span class="font-mono text-white/80">clamd</span> and
-      <span class="font-mono text-white/80">clamdscan</span>.
+      Two steps. ClamUI is the interface; the virus scanner itself is ClamAV from your
+      distribution, so it gets security updates like the rest of your system.
     </p>
   </div>
 
-  <div
-    class="mt-10 rounded-2xl border hairline bg-white/[0.02] overflow-hidden"
-    data-install-tabs
-  >
-    <div
-      role="tablist"
-      aria-label="Install method"
-      class="flex overflow-x-auto border-b hairline"
-    >
-      {
-        tabs.map((t, i) => (
-          <button
-            role="tab"
-            type="button"
-            id={`tab-${t.id}`}
-            aria-controls={`panel-${t.id}`}
-            aria-selected={i === 0 ? "true" : "false"}
-            tabindex={i === 0 ? "0" : "-1"}
-            data-target={t.id}
-            class="relative px-5 py-4 text-sm whitespace-nowrap text-white/60 hover:text-white focus-visible:outline-none focus-visible:bg-white/[0.04] data-[active=true]:text-white"
-          >
-            <span class="font-medium">{t.label}</span>
-            <span class="ml-2 text-[10px] font-mono uppercase tracking-wider text-white/60">
-              {t.sub}
-            </span>
-            <span
-              class="absolute left-4 right-4 bottom-0 h-px bg-clam-sage opacity-0 data-[active=true]:opacity-100"
-              data-active={i === 0 ? "true" : "false"}
-            />
-          </button>
-        ))
-      }
-    </div>
-
-    {
-      tabs.map((t, i) => (
-        <div
-          role="tabpanel"
-          id={`panel-${t.id}`}
-          aria-labelledby={`tab-${t.id}`}
-          data-panel={t.id}
-          hidden={i !== 0}
-          class="p-5 sm:p-7"
-        >
-          <p class="text-sm text-white/70 mb-4">{t.desc}</p>
-          <div class="relative group">
-            <pre
-              class="term term-body !m-0 whitespace-pre overflow-x-auto text-[13px] leading-relaxed"
-            ><code>{t.code}</code></pre>
-            <button
-              type="button"
-              data-copy
-              data-copy-text={t.code}
-              class="absolute top-3 right-3 text-[11px] font-mono uppercase tracking-wider px-2.5 py-1.5 rounded-md border border-white/10 bg-black/40 text-white/70 hover:text-white hover:bg-black/60 transition"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-      ))
-    }
-  </div>
-
-  <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/50">
-    <a
-      href="https://github.com/linx-systems/clamui/releases"
-      rel="noopener"
-      class="inline-flex items-center gap-1.5 text-clam-sage hover:text-white transition-colors"
-    >
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-        <line x1="7" y1="7" x2="7.01" y2="7"></line>
-      </svg>
-      <span>Releases · <span class="font-mono">.deb</span> · <span class="font-mono">AppImage</span></span>
-    </a>
-    <a
-      href="/docs/installation/"
-      class="hover:text-white transition-colors"
-    >
-      Installation guide
-    </a>
-    <a
-      href="/docs/contributing/signing/"
-      class="hover:text-white transition-colors"
-    >
-      Signing policy
-    </a>
-  </div>
-
-  <details class="mt-6 group rounded-xl border hairline bg-white/[0.02] open:bg-white/[0.03]">
-    <summary
-      class="flex items-center gap-3 cursor-pointer list-none px-5 py-4 sm:px-6"
-    >
-      <span class="grid place-items-center w-8 h-8 rounded-lg bg-clam-forest/15 border border-clam-forest/25 text-clam-sage shrink-0">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          <path d="m9 12 2 2 4-4"></path>
-        </svg>
-      </span>
-      <div class="flex-1">
-        <div class="font-medium text-white">Verify release artifacts</div>
-        <div class="text-xs text-white/55 mt-0.5">
-          Follow the current artifact-specific signing instructions before installing.
+  <ol class="mt-10 space-y-12">
+    <li>
+      <div class="flex items-start gap-4 mb-5">
+        <span class="grid place-items-center w-8 h-8 rounded-full bg-clam-forest/15 border border-clam-forest/25 text-clam-sage font-mono text-sm shrink-0" aria-hidden="true">1</span>
+        <div>
+          <h3 class="text-lg font-semibold text-white">Install ClamAV</h3>
+          <p class="text-sm text-white/60 mt-1">
+            Pick your distribution. The daemon is optional; ClamUI uses it automatically when it is running.
+          </p>
         </div>
       </div>
-      <svg
-        class="w-4 h-4 text-white/40 transition-transform group-open:rotate-180 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="m6 9 6 6 6-6"></path>
-      </svg>
-    </summary>
+      <InstallTabGroup group="clamav" label="Your distribution" tabs={clamav} />
+    </li>
 
-    <div class="px-5 pb-6 sm:px-6 space-y-6 border-t hairline pt-5">
+    <li>
+      <div class="flex items-start gap-4 mb-5">
+        <span class="grid place-items-center w-8 h-8 rounded-full bg-clam-forest/15 border border-clam-forest/25 text-clam-sage font-mono text-sm shrink-0" aria-hidden="true">2</span>
+        <div>
+          <h3 class="text-lg font-semibold text-white">Install ClamUI</h3>
+          <p class="text-sm text-white/60 mt-1">
+            Flathub is the easiest choice on every distribution. Downloads for the other formats are on
+            <a href={releaseUrl} rel="noopener" class="text-clam-sage hover:text-white transition-colors">GitHub Releases (v0.6.0)</a>.
+          </p>
+        </div>
+      </div>
+      <InstallTabGroup group="clamui" label="Install method" tabs={clamui} />
+    </li>
+
+    <li class="flex items-start gap-4">
+      <span class="grid place-items-center w-8 h-8 rounded-full bg-clam-forest/15 border border-clam-forest/25 text-clam-sage font-mono text-sm shrink-0" aria-hidden="true">3</span>
       <div>
-        <h4 class="text-sm font-semibold text-white flex items-center gap-2">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-white/40 border border-white/10 rounded px-1.5 py-0.5">.deb</span>
-          Debian / Ubuntu - package signature
-        </h4>
-        <p class="text-sm text-white/65 mt-2">
-          Verify both packages with the pinned ClamUI signing-key fingerprint. Treat any
-          <span class="font-mono text-white/80">dpkg-sig</span> error or non-
-          <span class="font-mono text-white/80">GOODSIG</span> result as a failed verification.
+        <h3 class="text-lg font-semibold text-white">Open ClamUI</h3>
+        <p class="text-sm text-white/60 mt-1 max-w-2xl">
+          Start it from your app menu. The <span class="text-white/80">Components</span> page shows
+          whether ClamAV, the virus definitions and the daemon were found, with the exact command
+          for anything that is missing.
         </p>
       </div>
+    </li>
+  </ol>
 
-      <div>
-        <h4 class="text-sm font-semibold text-white flex items-center gap-2">
-          <span class="text-[10px] font-mono uppercase tracking-wider text-white/40 border border-white/10 rounded px-1.5 py-0.5">AppImage</span>
-          Embedded signature
-        </h4>
-        <p class="text-sm text-white/65 mt-2">
-          Tagged AppImage releases can include an embedded signature. Follow the signing policy
-          to inspect it and validate the expected signing key.
-        </p>
-      </div>
-
-      <div class="flex items-start gap-3 text-sm text-white/60 border hairline rounded-lg p-3.5 bg-black/20">
-        <svg class="w-4 h-4 mt-0.5 text-clam-amber shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="13"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <p>
-          <span class="text-white/85 font-medium">Flathub</span> signs the store package itself, so
-          no extra step is needed. GitHub Flatpak bundles are separate release assets;
-          verify them against the release's SHA256SUMS and follow the
-          <a href="/docs/contributing/signing/" class="text-clam-sage hover:text-white transition-colors">signing policy</a>
-          before installation.
-        </p>
-      </div>
-    </div>
-  </details>
+  <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/50">
+    <a href="/docs/installation/" class="text-clam-sage hover:text-white transition-colors">
+      Full installation guide
+    </a>
+    <a href="/docs/reference/scan-backends/" class="hover:text-white transition-colors">
+      Daemon setup in detail
+    </a>
+    <a href="/docs/contributing/signing/" class="hover:text-white transition-colors">
+      Verify downloads
+    </a>
+  </div>
 </section>
-
-<script>
-  const bind = () => {
-    document.querySelectorAll("[data-install-tabs]").forEach((root) => {
-      if ((root as any).dataset.bound) return;
-      (root as any).dataset.bound = "1";
-
-      const tabs = root.querySelectorAll<HTMLButtonElement>("[role=tab]");
-      const panels = root.querySelectorAll<HTMLElement>("[role=tabpanel]");
-
-      const select = (id: string) => {
-        tabs.forEach((t) => {
-          const active = t.dataset.target === id;
-          t.setAttribute("aria-selected", active ? "true" : "false");
-          t.setAttribute("tabindex", active ? "0" : "-1");
-          t.dataset.active = active ? "true" : "false";
-          const underline = t.querySelector<HTMLElement>("[data-active]");
-          if (underline) underline.dataset.active = active ? "true" : "false";
-        });
-        panels.forEach((p) => {
-          p.hidden = p.dataset.panel !== id;
-        });
-      };
-
-      tabs.forEach((t, index) => {
-        t.addEventListener("click", () => t.dataset.target && select(t.dataset.target));
-        t.addEventListener("keydown", (event) => {
-          let nextIndex: number | undefined;
-          if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
-          if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
-          if (event.key === "Home") nextIndex = 0;
-          if (event.key === "End") nextIndex = tabs.length - 1;
-          if (nextIndex === undefined) return;
-
-          event.preventDefault();
-          const nextTab = tabs[nextIndex];
-          if (!nextTab.dataset.target) return;
-          select(nextTab.dataset.target);
-          nextTab.focus();
-        });
-      });
-
-      root.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const text = btn.dataset.copyText || "";
-          try {
-            await navigator.clipboard.writeText(text);
-            const original = btn.textContent;
-            btn.textContent = "Copied";
-            btn.classList.add("text-clam-sage", "border-clam-sage/40");
-            setTimeout(() => {
-              btn.textContent = original;
-              btn.classList.remove("text-clam-sage", "border-clam-sage/40");
-            }, 1400);
-          } catch (_) {
-            btn.textContent = "Select + copy";
-          }
-        });
-      });
-    });
-  };
-  bind();
-  document.addEventListener("astro:page-load", bind);
-</script>

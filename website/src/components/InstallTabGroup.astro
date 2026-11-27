@@ -1,0 +1,163 @@
+---
+/* One tab bar with panels. Each panel holds an intro line and one or more
+   labelled command blocks with a copy button. Used twice by InstallTabs. */
+export interface Block {
+  title?: string;
+  badge?: string;
+  note?: string;
+  code: string;
+}
+export interface Tab {
+  id: string;
+  label: string;
+  sub?: string;
+  intro?: string;
+  blocks: Block[];
+  footnote?: string;
+}
+interface Props {
+  group: string;
+  label: string;
+  tabs: Tab[];
+}
+const { group, label, tabs } = Astro.props;
+---
+
+<div
+  class="rounded-2xl border hairline bg-white/[0.02] overflow-hidden"
+  data-install-tabs
+>
+  <div role="tablist" aria-label={label} class="flex overflow-x-auto border-b hairline">
+    {
+      tabs.map((t, i) => (
+        <button
+          role="tab"
+          type="button"
+          id={`tab-${group}-${t.id}`}
+          aria-controls={`panel-${group}-${t.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? "0" : "-1"}
+          data-target={t.id}
+          class="relative px-5 py-4 text-sm whitespace-nowrap text-white/60 hover:text-white focus-visible:outline-none focus-visible:bg-white/[0.04] data-[active=true]:text-white"
+        >
+          <span class="font-medium">{t.label}</span>
+          {t.sub && (
+            <span class="ml-2 text-[10px] font-mono uppercase tracking-wider text-white/60">
+              {t.sub}
+            </span>
+          )}
+          <span
+            class="absolute left-4 right-4 bottom-0 h-px bg-clam-sage opacity-0 data-[active=true]:opacity-100"
+            data-active={i === 0 ? "true" : "false"}
+          />
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    tabs.map((t, i) => (
+      <div
+        role="tabpanel"
+        id={`panel-${group}-${t.id}`}
+        aria-labelledby={`tab-${group}-${t.id}`}
+        data-panel={t.id}
+        hidden={i !== 0}
+        class="p-5 sm:p-7 space-y-5"
+      >
+        {t.intro && <p class="text-sm text-white/70">{t.intro}</p>}
+        {t.blocks.map((b) => (
+          <div>
+            {b.title && (
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-white">{b.title}</span>
+                {b.badge && (
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-white/50 border border-white/10 rounded px-1.5 py-0.5">
+                    {b.badge}
+                  </span>
+                )}
+              </div>
+            )}
+            {b.note && <p class="text-sm text-white/60 mb-3">{b.note}</p>}
+            <div class="relative group">
+              <pre class="term term-body !m-0 whitespace-pre overflow-x-auto text-[13px] leading-relaxed pr-20"><code>{b.code}</code></pre>
+              <button
+                type="button"
+                data-copy
+                data-copy-text={b.code}
+                class="absolute top-3 right-3 text-[11px] font-mono uppercase tracking-wider px-2.5 py-1.5 rounded-md border border-white/10 bg-black/40 text-white/70 hover:text-white hover:bg-black/60 transition"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        ))}
+        {t.footnote && <p class="text-xs text-white/50">{t.footnote}</p>}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  const bind = () => {
+    document.querySelectorAll("[data-install-tabs]").forEach((root) => {
+      if ((root as any).dataset.bound) return;
+      (root as any).dataset.bound = "1";
+
+      const tabs = root.querySelectorAll<HTMLButtonElement>("[role=tab]");
+      const panels = root.querySelectorAll<HTMLElement>("[role=tabpanel]");
+
+      const select = (id: string) => {
+        tabs.forEach((t) => {
+          const active = t.dataset.target === id;
+          t.setAttribute("aria-selected", active ? "true" : "false");
+          t.setAttribute("tabindex", active ? "0" : "-1");
+          t.dataset.active = active ? "true" : "false";
+          const underline = t.querySelector<HTMLElement>("[data-active]");
+          if (underline) underline.dataset.active = active ? "true" : "false";
+        });
+        panels.forEach((p) => {
+          p.hidden = p.dataset.panel !== id;
+        });
+      };
+
+      tabs.forEach((t, index) => {
+        t.addEventListener("click", () => t.dataset.target && select(t.dataset.target));
+        t.addEventListener("keydown", (event) => {
+          let nextIndex: number | undefined;
+          if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+          if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+          if (event.key === "Home") nextIndex = 0;
+          if (event.key === "End") nextIndex = tabs.length - 1;
+          if (nextIndex === undefined) return;
+
+          event.preventDefault();
+          const nextTab = tabs[nextIndex];
+          if (!nextTab.dataset.target) return;
+          select(nextTab.dataset.target);
+          nextTab.focus();
+        });
+      });
+
+      root.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const text = btn.dataset.copyText || "";
+          try {
+            await navigator.clipboard.writeText(text);
+            const original = btn.textContent;
+            btn.textContent = "Copied";
+            btn.classList.add("text-clam-sage", "border-clam-sage/40");
+            setTimeout(() => {
+              btn.textContent = original;
+              btn.classList.remove("text-clam-sage", "border-clam-sage/40");
+            }, 1400);
+          } catch (_) {
+            btn.textContent = "Select + copy";
+          }
+        });
+      });
+    });
+  };
+  bind();
+  document.addEventListener("astro:page-load", bind);
+</script>
