@@ -6,6 +6,7 @@ import { copyText, navigate, notify, onEvent, openExternal, openPaths, request, 
 import { formatScanOutput } from "../scanOutput";
 import { scanLogChunks } from "../scanLog";
 import { ScanLogViewport } from "../ScanLogViewport";
+import { resultStore } from "../resultStore";
 import { ScanProgressPanel } from "../ScanProgressPanel";
 import type { ScanProgress, Threat } from "../ScanProgressPanel";
 import { profileDescription, profileLabel } from "../profilePresentation";
@@ -136,11 +137,7 @@ function VirusTotalDialog({ path, onClose }: { path: string; onClose: () => void
     setError(null);
     try {
       const result = await request<Record<string, unknown>>("virustotal.scan", { id: `vt-${crypto.randomUUID()}`, path });
-      try {
-        sessionStorage.setItem("clamui-last-vt-result", JSON.stringify(result));
-      } catch {
-        // Result remains available through navigation.
-      }
+      resultStore.remember("virustotal", result);
       window.dispatchEvent(new CustomEvent("clamui-vt-result", { detail: result }));
       onClose();
     } catch (reason) {
@@ -242,11 +239,7 @@ export default function Scan() {
     setActiveId(null);
     activeIdRef.current = null;
     setProgress({});
-    try {
-      sessionStorage.setItem("clamui-last-scan-result", JSON.stringify(scanResult));
-    } catch {
-      // Result remains available in the mounted page.
-    }
+    resultStore.remember("scan", scanResult);
     if (completedId) window.dispatchEvent(new CustomEvent("clamui-scan-state", { detail: { id: completedId, active: false } }));
     window.dispatchEvent(new CustomEvent("clamui-scan-result", { detail: scanResult }));
   }, []);

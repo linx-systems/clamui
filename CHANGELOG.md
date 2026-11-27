@@ -32,6 +32,8 @@
 
 ### Fixed
 
+- Daemon scans of files on FUSE mounts (squashfuse, AppImage `/tmp/.mount_*`, sshfs, rclone) no longer fail with "Not a regular file ERROR": clamd cannot `fstat` descriptors from a user-owned FUSE mount, so those files are now sent with `--stream`. Pathless `fd[N]: ... ERROR` lines from clamdscan are attributed to the scanned file instead of being shown raw. (#369)
+- "View Results" no longer shows "No results yet" after very large scans: the latest result is kept in memory, and only a size-bounded copy goes to session storage. (#369)
 - Fixed the On-Access **Authorize read** action discarding unsaved paths and options: it now only refreshes the baseline it just read with elevated privileges, keeping pending form edits when there are any, instead of always replacing them. (#343)
 - Fixed On-Access configuration failing with trusted system-tool symlinks such as Ubuntu uutils `chown`; local tool execution now resolves symlinks, checks root ownership and safe permissions for the executable and every resolved parent directory, and reports the failing path and check. (#341)
 - Fixed copying Fail2ban installation commands and other text in native Wayland Flatpak sessions by using the application's GTK clipboard connection. (#328)

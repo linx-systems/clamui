@@ -21,6 +21,7 @@ mod tests;
 
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 const DEEP_SCAN_TIMEOUT: Duration = Duration::from_secs(300);
+const REBOOT_FLAG_FILES: [&str; 2] = ["/var/run/reboot-required", "/run/reboot-needed"];
 
 const URL_CLAMAV: &str = "https://docs.clamav.net/";
 const URL_FRESHCLAM: &str = "https://docs.clamav.net/manual/Usage/SignatureManagement.html";
@@ -32,6 +33,8 @@ const URL_APPARMOR: &str = "https://wiki.archlinux.org/title/AppArmor";
 const URL_SELINUX: &str = "https://wiki.archlinux.org/title/SELinux";
 const URL_UNATTENDED: &str = "https://wiki.debian.org/UnattendedUpgrades";
 const URL_DNF: &str = "https://dnf.readthedocs.io/en/latest/automatic.html";
+const URL_OS_UPDATE: &str =
+    "https://manpages.opensuse.org/Tumbleweed/os-update/os-update.8.en.html";
 const URL_FAIL2BAN: &str = "https://github.com/fail2ban/fail2ban/wiki";
 const URL_CROWDSEC: &str = "https://docs.crowdsec.net/";
 const URL_SSH: &str = "https://wiki.archlinux.org/title/OpenSSH#Protection";
@@ -805,13 +808,6 @@ fn open_ports_check(ctx: &Context, snapshot: NetworkSnapshot) -> AuditCheck {
 }
 
 fn check_mac_framework(ctx: &Context) -> AuditSection {
-    let mut section = AuditSection::new(
-        ctx,
-        AuditCategory::MacFramework,
-        "Access Control",
-        "system-lock-screen-symbolic",
-    );
-    let mut found = false;
     let apparmor = if is_flatpak() {
         let output = run_command(
             "cat",
@@ -822,6 +818,29 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
     } else {
         fs::read_to_string("/sys/module/apparmor/parameters/enabled").ok()
     };
+    // getenforce lives in /usr/sbin, which is not on the PATH of regular users
+    // on some distributions (e.g. openSUSE) nor in the environment used by
+    // `flatpak-spawn --host`. Resolve it like the other sbin tools.
+    let selinux = host_binary("getenforce").and_then(|path| {
+        let output = run_command(&path, &[], COMMAND_TIMEOUT);
+        (output.code == Some(0)).then(|| output.stdout.trim().to_ascii_lowercase())
+    });
+    build_mac_section(ctx, apparmor.as_deref(), selinux.as_deref())
+}
+
+fn build_mac_section(
+    ctx: &Context,
+    apparmor: Option<&str>,
+    selinux_mode: Option<&str>,
+) -> AuditSection {
+    let mut section = AuditSection::new(
+        ctx,
+        AuditCategory::MacFramework,
+        "Access Control",
+        "system-lock-screen-symbolic",
+    );
+    let selinux_active = matches!(selinux_mode, Some("enforcing" | "permissive"));
+    let apparmor_active = apparmor.is_some_and(|value| value.trim() == "Y");
     if let Some(value) = apparmor {
         let mut row = if value.trim() == "Y" {
             check(
@@ -830,6 +849,16 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
                 "AppArmor",
                 AuditStatus::Pass,
                 tr(ctx, "AppArmor is enabled"),
+            )
+        } else if selinux_active {
+            // Only one major LSM can be active. A built-in but inactive
+            // AppArmor is expected when SELinux is in use, not a weakness.
+            check(
+                ctx,
+                "apparmor",
+                "AppArmor",
+                AuditStatus::Skipped,
+                tr(ctx, "AppArmor is not in use because SELinux is active"),
             )
         } else {
             let mut row = check(
@@ -844,51 +873,56 @@ fn check_mac_framework(ctx: &Context) -> AuditSection {
         };
         row.info_url = Some(URL_APPARMOR.to_owned());
         section.push(row);
-        found = true;
     }
-    let selinux = run_command("getenforce", &[], COMMAND_TIMEOUT);
-    if selinux.code.is_some() {
-        let mode = selinux.stdout.trim().to_ascii_lowercase();
-        let mut row = match mode.as_str() {
-            "enforcing" => check(
+    let selinux_row = match selinux_mode {
+        Some("enforcing") => Some(check(
+            ctx,
+            "selinux",
+            "SELinux",
+            AuditStatus::Pass,
+            tr(ctx, "SELinux is enforcing"),
+        )),
+        Some("permissive") => {
+            let mut row = check(
                 ctx,
                 "selinux",
                 "SELinux",
-                AuditStatus::Pass,
-                tr(ctx, "SELinux is enforcing"),
-            ),
-            "permissive" => {
-                let mut row = check(
-                    ctx,
-                    "selinux",
-                    "SELinux",
-                    AuditStatus::Warning,
-                    tr(ctx, "SELinux is in permissive mode"),
-                );
-                row.recommendation = Some(tr(
-                    ctx,
-                    "Consider switching to enforcing mode for stronger protection",
-                ));
-                row
-            }
-            "disabled" => {
-                let mut row = check(
-                    ctx,
-                    "selinux",
-                    "SELinux",
-                    AuditStatus::Fail,
-                    tr(ctx, "SELinux is disabled"),
-                );
-                row.recommendation = Some(tr(ctx, "Enable SELinux for mandatory access control"));
-                row
-            }
-            _ => return section,
-        };
+                AuditStatus::Warning,
+                tr(ctx, "SELinux is in permissive mode"),
+            );
+            row.recommendation = Some(tr(
+                ctx,
+                "Consider switching to enforcing mode for stronger protection",
+            ));
+            Some(row)
+        }
+        // A disabled SELinux is expected when AppArmor is the active LSM
+        // (Debian, Ubuntu, openSUSE Leap), not a weakness.
+        Some("disabled") if apparmor_active => Some(check(
+            ctx,
+            "selinux",
+            "SELinux",
+            AuditStatus::Skipped,
+            tr(ctx, "SELinux is not in use because AppArmor is active"),
+        )),
+        Some("disabled") => {
+            let mut row = check(
+                ctx,
+                "selinux",
+                "SELinux",
+                AuditStatus::Fail,
+                tr(ctx, "SELinux is disabled"),
+            );
+            row.recommendation = Some(tr(ctx, "Enable SELinux for mandatory access control"));
+            Some(row)
+        }
+        _ => None,
+    };
+    if let Some(mut row) = selinux_row {
         row.info_url = Some(URL_SELINUX.to_owned());
         section.push(row);
-        found = true;
     }
-    if !found {
+    if section.checks.is_empty() {
         let mut row = check(
             ctx,
             "mac_framework",
@@ -970,6 +1004,33 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
             found = true;
         }
     }
+    if !found && host_binary("zypper").is_some() {
+        if service_active("os-update.timer").0 {
+            let mut row = check(
+                ctx,
+                "os_update",
+                "os-update",
+                AuditStatus::Pass,
+                tr(ctx, "os-update automatic updates are enabled"),
+            );
+            row.info_url = Some(URL_OS_UPDATE.to_owned());
+            section.push(row);
+            found = true;
+        } else if service_installed("os-update.timer") {
+            let mut row = check(
+                ctx,
+                "os_update",
+                "os-update",
+                AuditStatus::Warning,
+                tr(ctx, "os-update is installed but timer is not active"),
+            );
+            row.recommendation = Some(tr(ctx, "Enable automatic updates"));
+            row.install_command = Some("sudo systemctl enable --now os-update.timer".to_owned());
+            row.info_url = Some(URL_OS_UPDATE.to_owned());
+            section.push(row);
+            found = true;
+        }
+    }
     if !found {
         let mut row = check(
             ctx,
@@ -982,11 +1043,15 @@ fn check_auto_updates(ctx: &Context) -> AuditSection {
         row.install_command = install_command("automatic_updates");
         section.push(row);
     }
-    let reboot_required = if is_flatpak() {
-        command_ok("test", &["-f", "/var/run/reboot-required"])
-    } else {
-        fs::metadata("/var/run/reboot-required").is_ok()
-    };
+    // Debian/Ubuntu write /var/run/reboot-required; libzypp (openSUSE/SLE)
+    // touches /run/reboot-needed instead.
+    let reboot_required = REBOOT_FLAG_FILES.iter().any(|path| {
+        if is_flatpak() {
+            command_ok("test", &["-f", path])
+        } else {
+            fs::metadata(path).is_ok()
+        }
+    });
     if reboot_required {
         let mut row = check(
             ctx,
@@ -1946,5 +2011,74 @@ mod open_ports_tests {
         assert_eq!(snapshot.sockets.len(), 1);
         assert_eq!(snapshot.sockets[0].local.port, Some(8080));
         assert!(snapshot.message.is_some());
+    }
+}
+
+#[cfg(test)]
+mod mac_framework_tests {
+    use super::*;
+    use crate::common::Paths;
+    use tempfile::TempDir;
+
+    fn context(temp: &TempDir) -> Context {
+        Context::with_paths(Paths {
+            home: temp.path().join("home"),
+            config_dir: temp.path().join("config"),
+            data_dir: temp.path().join("data"),
+        })
+        .expect("test context")
+    }
+
+    fn status_of(section: &AuditSection, id: &str) -> Option<AuditStatus> {
+        section
+            .checks
+            .iter()
+            .find(|row| row.id == id)
+            .map(|row| row.status)
+    }
+
+    #[test]
+    fn inactive_apparmor_is_not_flagged_when_selinux_enforces() {
+        let temp = TempDir::new().expect("temp dir");
+        let ctx = context(&temp);
+        let section = build_mac_section(&ctx, Some("N\n"), Some("enforcing"));
+        assert_eq!(status_of(&section, "selinux"), Some(AuditStatus::Pass));
+        assert_eq!(status_of(&section, "apparmor"), Some(AuditStatus::Skipped));
+        assert_eq!(section.overall_status, AuditStatus::Pass);
+    }
+
+    #[test]
+    fn inactive_apparmor_without_selinux_still_warns() {
+        let temp = TempDir::new().expect("temp dir");
+        let ctx = context(&temp);
+        let section = build_mac_section(&ctx, Some("N\n"), None);
+        assert_eq!(status_of(&section, "apparmor"), Some(AuditStatus::Warning));
+        assert_eq!(status_of(&section, "selinux"), None);
+    }
+
+    #[test]
+    fn enabled_apparmor_passes_and_missing_frameworks_are_unknown() {
+        let temp = TempDir::new().expect("temp dir");
+        let ctx = context(&temp);
+        let apparmor = build_mac_section(&ctx, Some("Y\n"), None);
+        assert_eq!(status_of(&apparmor, "apparmor"), Some(AuditStatus::Pass));
+        let none = build_mac_section(&ctx, None, None);
+        assert_eq!(status_of(&none, "selinux"), None);
+        assert_eq!(
+            status_of(&none, "mac_framework"),
+            Some(AuditStatus::Unknown)
+        );
+    }
+
+    #[test]
+    fn disabled_selinux_is_not_flagged_when_apparmor_is_active() {
+        let temp = TempDir::new().expect("temp dir");
+        let ctx = context(&temp);
+        let section = build_mac_section(&ctx, Some("Y\n"), Some("disabled"));
+        assert_eq!(status_of(&section, "apparmor"), Some(AuditStatus::Pass));
+        assert_eq!(status_of(&section, "selinux"), Some(AuditStatus::Skipped));
+        assert_eq!(section.overall_status, AuditStatus::Pass);
+        let alone = build_mac_section(&ctx, None, Some("disabled"));
+        assert_eq!(status_of(&alone, "selinux"), Some(AuditStatus::Fail));
     }
 }
