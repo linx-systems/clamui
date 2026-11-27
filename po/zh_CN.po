@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-26 18:51+0100\n"
+"POT-Creation-Date: 2026-11-27 10:13+0100\n"
 "PO-Revision-Date: 2026-07-22 21:29+0800\n"
 "Last-Translator: Markson Hosben <marksonhosben@proton.me>\n"
 "Language-Team: Chinese <>\n"
@@ -137,246 +137,254 @@ msgstr "部分网络套接字记录无法读取。"
 msgid "No open ports detected"
 msgstr "未检测到开放端口"
 
-#: crates/clamui-core/src/audit.rs:835
+#: crates/clamui-core/src/audit.rs:851
 msgid "AppArmor is enabled"
 msgstr "AppArmor 已启用"
 
-#: crates/clamui-core/src/audit.rs:843
+#: crates/clamui-core/src/audit.rs:861
+msgid "AppArmor is not in use because SELinux is active"
+msgstr "由于 SELinux 已启用，AppArmor 未被使用"
+
+#: crates/clamui-core/src/audit.rs:869
 msgid "AppArmor module is loaded but not enabled"
 msgstr "AppArmor 模块已加载但未启用"
 
-#: crates/clamui-core/src/audit.rs:845
+#: crates/clamui-core/src/audit.rs:871
 msgid "Enable AppArmor for application sandboxing"
 msgstr "启用 AppArmor 以实现应用程序沙箱隔离"
 
-#: crates/clamui-core/src/audit.rs:861
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is enforcing"
 msgstr "SELinux 处于强制模式"
 
-#: crates/clamui-core/src/audit.rs:869
+#: crates/clamui-core/src/audit.rs:891
 msgid "SELinux is in permissive mode"
 msgstr "SELinux 处于宽容模式"
 
-#: crates/clamui-core/src/audit.rs:871
+#: crates/clamui-core/src/audit.rs:893
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "建议切换到强制模式以增强防护"
 
-#: crates/clamui-core/src/audit.rs:883
+#: crates/clamui-core/src/audit.rs:906
+msgid "SELinux is not in use because AppArmor is active"
+msgstr "由于 AppArmor 已启用，SELinux 未被使用"
+
+#: crates/clamui-core/src/audit.rs:914
 msgid "SELinux is disabled"
 msgstr "SELinux 已禁用"
 
-#: crates/clamui-core/src/audit.rs:885
+#: crates/clamui-core/src/audit.rs:916
 msgid "Enable SELinux for mandatory access control"
 msgstr "启用 SELinux 以实施强制访问控制"
 
-#: crates/clamui-core/src/audit.rs:900
+#: crates/clamui-core/src/audit.rs:931
 msgid "No mandatory access control framework detected"
 msgstr "未检测到强制访问控制框架"
 
-#: crates/clamui-core/src/audit.rs:902
+#: crates/clamui-core/src/audit.rs:933
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "建议启用 AppArmor 或 SELinux"
 
-#: crates/clamui-core/src/audit.rs:928
+#: crates/clamui-core/src/audit.rs:959
 msgid "Automatic security updates are enabled"
 msgstr "已启用自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:939
+#: crates/clamui-core/src/audit.rs:970
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Unattended upgrades 已安装但已禁用"
 
-#: crates/clamui-core/src/audit.rs:941
+#: crates/clamui-core/src/audit.rs:972
 msgid "Enable automatic security updates"
 msgstr "启用自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:955
+#: crates/clamui-core/src/audit.rs:986
 msgid "DNF automatic updates are enabled"
 msgstr "已启用 DNF 自动更新"
 
-#: crates/clamui-core/src/audit.rs:966
+#: crates/clamui-core/src/audit.rs:997
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF automatic 已安装，但定时器未激活"
 
-#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:999 crates/clamui-core/src/audit.rs:1027
 msgid "Enable automatic updates"
 msgstr "启用自动更新"
 
-#: crates/clamui-core/src/audit.rs:983
+#: crates/clamui-core/src/audit.rs:1014
 msgid "os-update automatic updates are enabled"
 msgstr "os-update 自动更新已启用"
 
-#: crates/clamui-core/src/audit.rs:994
+#: crates/clamui-core/src/audit.rs:1025
 msgid "os-update is installed but timer is not active"
 msgstr "os-update 已安装，但定时器未启用"
 
-#: crates/clamui-core/src/audit.rs:1009
+#: crates/clamui-core/src/audit.rs:1040
 msgid "Could not determine automatic update status"
 msgstr "无法确定自动更新状态"
 
-#: crates/clamui-core/src/audit.rs:1011
+#: crates/clamui-core/src/audit.rs:1042
 msgid "Configure automatic security updates"
 msgstr "配置自动安全更新"
 
-#: crates/clamui-core/src/audit.rs:1030
+#: crates/clamui-core/src/audit.rs:1061
 msgid "System reboot required to apply updates"
 msgstr "需要重启系统以应用更新"
 
-#: crates/clamui-core/src/audit.rs:1032
+#: crates/clamui-core/src/audit.rs:1063
 msgid "Reboot the system to apply pending security updates"
 msgstr "重启系统以应用待处理的安全更新"
 
-#: crates/clamui-core/src/audit.rs:1078
+#: crates/clamui-core/src/audit.rs:1109
 msgid "{name} is installed but not running"
 msgstr "{name} 已安装但未运行"
 
-#: crates/clamui-core/src/audit.rs:1097
+#: crates/clamui-core/src/audit.rs:1128
 msgid "No intrusion detection system found"
 msgstr "未找到入侵检测系统"
 
-#: crates/clamui-core/src/audit.rs:1099
+#: crates/clamui-core/src/audit.rs:1130
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "安装 fail2ban 或 CrowdSec 以抵御攻击"
 
-#: crates/clamui-core/src/audit.rs:1126
+#: crates/clamui-core/src/audit.rs:1157
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "SSH 服务器未运行（无远程攻击面）"
 
-#: crates/clamui-core/src/audit.rs:1137
+#: crates/clamui-core/src/audit.rs:1168
 msgid "SSH server is running"
 msgstr "SSH 服务器正在运行"
 
-#: crates/clamui-core/src/audit.rs:1147
+#: crates/clamui-core/src/audit.rs:1178
 msgid "Could not read SSH configuration"
 msgstr "无法读取 SSH 配置"
 
-#: crates/clamui-core/src/audit.rs:1166
+#: crates/clamui-core/src/audit.rs:1197
 msgid "Root login: {value}"
 msgstr "root 登录：{value}"
 
-#: crates/clamui-core/src/audit.rs:1174
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Root login is allowed ({value})"
 msgstr "允许 root 登录（{value}）"
 
-#: crates/clamui-core/src/audit.rs:1180
+#: crates/clamui-core/src/audit.rs:1211
 msgid "Disable root SSH login for security"
 msgstr "禁用 root 用户的 SSH 登录以提高安全性"
 
-#: crates/clamui-core/src/audit.rs:1195
+#: crates/clamui-core/src/audit.rs:1226
 msgid "Password authentication is disabled (key-only)"
 msgstr "已禁用密码认证（仅允许密钥认证）"
 
-#: crates/clamui-core/src/audit.rs:1203
+#: crates/clamui-core/src/audit.rs:1234
 msgid "Password authentication is enabled"
 msgstr "已启用密码认证"
 
-#: crates/clamui-core/src/audit.rs:1205
+#: crates/clamui-core/src/audit.rs:1236
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "建议禁用密码认证，改用 SSH 密钥"
 
-#: crates/clamui-core/src/audit.rs:1223
+#: crates/clamui-core/src/audit.rs:1254
 msgid "X11 forwarding is disabled"
 msgstr "已禁用 X11 转发"
 
-#: crates/clamui-core/src/audit.rs:1231
+#: crates/clamui-core/src/audit.rs:1262
 msgid "X11 forwarding is enabled"
 msgstr "已启用 X11 转发"
 
-#: crates/clamui-core/src/audit.rs:1233
+#: crates/clamui-core/src/audit.rs:1264
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "禁用 X11 转发以缩小攻击面"
 
-#: crates/clamui-core/src/audit.rs:1293
+#: crates/clamui-core/src/audit.rs:1324
 msgid "Application firewalls"
 msgstr "应用程序防火墙"
 
-#: crates/clamui-core/src/audit.rs:1316
+#: crates/clamui-core/src/audit.rs:1347
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster 正在运行并保护网络连接"
 
-#: crates/clamui-core/src/audit.rs:1339
+#: crates/clamui-core/src/audit.rs:1370
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr "在 Portmaster 中授权 ClamUI，以查看各模块的运行状况"
 
-#: crates/clamui-core/src/audit.rs:1342
+#: crates/clamui-core/src/audit.rs:1373
 msgid "Authorize"
 msgstr "授权"
 
-#: crates/clamui-core/src/audit.rs:1353
+#: crates/clamui-core/src/audit.rs:1384
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster 已安装但未运行"
 
-#: crates/clamui-core/src/audit.rs:1355
+#: crates/clamui-core/src/audit.rs:1386
 msgid "Start the Portmaster service to enable network protection"
 msgstr "启动 Portmaster 服务以启用网络保护"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1369
+#: crates/clamui-core/src/audit.rs:1400
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "未检测到 — 可选的网络监控工具和应用程序防火墙"
 
-#: crates/clamui-core/src/audit.rs:1385
+#: crates/clamui-core/src/audit.rs:1416
 msgid "Could not probe Portmaster: {error}"
 msgstr "无法探测 Portmaster：{error}"
 
-#: crates/clamui-core/src/audit.rs:1435
+#: crates/clamui-core/src/audit.rs:1466
 msgid "{name} is not installed"
 msgstr "未安装 {name}"
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1473
 msgid "Install {name} for comprehensive security auditing"
 msgstr "安装 {name} 以进行全面的安全审计"
 
-#: crates/clamui-core/src/audit.rs:1448
+#: crates/clamui-core/src/audit.rs:1479
 msgid "Install chkrootkit for rootkit detection"
 msgstr "安装 chkrootkit 以检测 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1468
+#: crates/clamui-core/src/audit.rs:1499
 msgid "Authentication was cancelled"
 msgstr "身份验证已取消"
 
-#: crates/clamui-core/src/audit.rs:1476
+#: crates/clamui-core/src/audit.rs:1507
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "Lynis 审计在 5 分钟后超时"
 
-#: crates/clamui-core/src/audit.rs:1478
+#: crates/clamui-core/src/audit.rs:1509
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "rootkit 扫描在 5 分钟后超时"
 
-#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
+#: crates/clamui-core/src/audit.rs:1528 crates/clamui-core/src/audit.rs:1574
 msgid "Failed to run Lynis: {error}"
 msgstr "运行 Lynis 失败：{error}"
 
-#: crates/clamui-core/src/audit.rs:1503
+#: crates/clamui-core/src/audit.rs:1534
 msgid "Failed to run chkrootkit: {error}"
 msgstr "运行 chkrootkit 失败：{error}"
 
-#: crates/clamui-core/src/audit.rs:1572
+#: crates/clamui-core/src/audit.rs:1603
 msgid "Score: {score}/100"
 msgstr "得分：{score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1575
+#: crates/clamui-core/src/audit.rs:1606
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "运行 'sudo lynis audit system' 以获取详细建议"
 
-#: crates/clamui-core/src/audit.rs:1592
+#: crates/clamui-core/src/audit.rs:1623
 msgid "Audit completed (exit code {code})"
 msgstr "审计已完成（退出码 {code}）"
 
-#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
+#: crates/clamui-core/src/audit.rs:1661 crates/clamui-core/src/audit.rs:1675
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "无法完成 rootkit 扫描（退出码 {code}）"
 
-#: crates/clamui-core/src/audit.rs:1681
+#: crates/clamui-core/src/audit.rs:1712
 msgid "No rootkits detected"
 msgstr "未检测到 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1693
+#: crates/clamui-core/src/audit.rs:1724
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "检测到 {count} 个疑似 rootkit"
 
-#: crates/clamui-core/src/audit.rs:1701
+#: crates/clamui-core/src/audit.rs:1732
 msgid "Investigate the detected threats immediately"
 msgstr "请立即调查检测到的威胁"
 
@@ -1715,41 +1723,41 @@ msgstr "无法隔离 {path}：{error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "文件哈希值不匹配 — 文件可能已损坏"
 
-#: crates/clamui-core/src/scanner.rs:461
+#: crates/clamui-core/src/scanner.rs:516
 msgid "No ClamAV database files were found in standard host locations"
 msgstr "未在宿主机的标准位置找到 ClamAV 数据库文件"
 
-#: crates/clamui-core/src/scanner.rs:2179
+#: crates/clamui-core/src/scanner.rs:2285
 msgid "Scan cancelled by user"
 msgstr "用户已取消扫描"
 
-#: crates/clamui-core/src/scanner.rs:2186
+#: crates/clamui-core/src/scanner.rs:2292
 msgid "No files could be scanned"
 msgstr "未能扫描任何文件"
 
-#: crates/clamui-core/src/scanner.rs:2192
+#: crates/clamui-core/src/scanner.rs:2298
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "扫描目标不存在或包含无效的 NUL 字节"
 
-#: crates/clamui-core/src/scanner.rs:2199
+#: crates/clamui-core/src/scanner.rs:2305
 msgid "Scan target is not a regular file or directory"
 msgstr "扫描目标不是普通文件或目录"
 
-#: crates/clamui-core/src/scanner.rs:2208
+#: crates/clamui-core/src/scanner.rs:2314
 msgid "Threats were detected, but details are unavailable."
 msgstr "检测到威胁，但无法提供详细信息。"
 
-#: crates/clamui-core/src/scanner.rs:2220
+#: crates/clamui-core/src/scanner.rs:2326
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "无法访问 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:2233
+#: crates/clamui-core/src/scanner.rs:2339
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "无法读取 {count} 个文件"
 
-#: crates/clamui-core/src/scanner.rs:2252
+#: crates/clamui-core/src/scanner.rs:2358
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2135,7 +2143,7 @@ msgstr "打开"
 msgid "Dashboard"
 msgstr "仪表盘"
 
-#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:539
+#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:532
 msgid "Scan"
 msgstr "扫描"
 
@@ -2174,8 +2182,8 @@ msgstr "首选项"
 msgid "Profiles"
 msgstr "配置方案"
 
-#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:295
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:285
+#: desktop/src/pages/Results.tsx:286
 msgid "Results"
 msgstr "结果"
 
@@ -2185,7 +2193,7 @@ msgstr "无法打开链接"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:400 desktop/src/App.tsx:415 desktop/src/App.tsx:433
-#: desktop/src/pages/Scan.tsx:330
+#: desktop/src/pages/Scan.tsx:323
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr "正在扫描——请等待扫描完成后再更改扫描目标"
 
@@ -2211,7 +2219,7 @@ msgid "Back"
 msgstr "返回"
 
 #: desktop/src/App.tsx:919 desktop/src/pages/Profiles.tsx:109
-#: desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Scan.tsx:189
 msgid "Saving…"
 msgstr "正在保存…"
 
@@ -2322,7 +2330,7 @@ msgid ""
 "completely."
 msgstr "选择将 ClamUI 保留在系统托盘中，或完全退出。"
 
-#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:190
 msgid "Remember my choice"
 msgstr "记住我的选择"
 
@@ -2331,7 +2339,7 @@ msgstr "记住我的选择"
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Results.tsx:210 desktop/src/pages/Scan.tsx:562
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2435,8 +2443,8 @@ msgstr "配置路径已复制到剪贴板"
 msgid "Could not copy configuration path."
 msgstr "无法复制配置路径。"
 
-#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:210
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:200
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy Path"
 msgstr "复制路径"
 
@@ -2534,8 +2542,8 @@ msgstr "查看配置"
 msgid "Target {index}/{count}: {path}"
 msgstr "目标 {index}/{count}：{path}"
 
-#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:120
-#: desktop/src/pages/Results.tsx:187 desktop/src/pages/Scan.tsx:530
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
+#: desktop/src/pages/Results.tsx:177 desktop/src/pages/Scan.tsx:523
 msgid "Scan target"
 msgstr "扫描目标"
 
@@ -2556,12 +2564,12 @@ msgstr "正在等待扫描数据…"
 msgid "Scan progress"
 msgstr "扫描进度"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:560
 msgid "{count} file scanned"
 msgid_plural "{count} files scanned"
 msgstr[0] "已扫描 {count} 个文件"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
@@ -2580,23 +2588,23 @@ msgstr "实时进度已禁用。扫描完成后仍可查看结果。"
 msgid "Cancel All"
 msgstr "全部取消"
 
-#: desktop/src/api.ts:75
+#: desktop/src/api.ts:76
 msgid "The contributor credits response was invalid."
 msgstr "贡献者鸣谢响应无效。"
 
-#: desktop/src/api.ts:178
+#: desktop/src/api.ts:185
 msgid "Enter a valid HTTP(S) address"
 msgstr "请输入有效的 HTTP(S) 地址"
 
-#: desktop/src/api.ts:181
+#: desktop/src/api.ts:188
 msgid "Only HTTP(S) addresses may be opened externally"
 msgstr "仅 HTTP(S) 地址可通过外部应用打开"
 
-#: desktop/src/api.ts:190
+#: desktop/src/api.ts:197
 msgid "Choose a file or folder first"
 msgstr "请先选择文件或文件夹"
 
-#: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62
+#: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:63
 msgid "Clean"
 msgstr "未发现威胁"
 
@@ -2604,7 +2612,7 @@ msgstr "未发现威胁"
 msgid "Infected"
 msgstr "已感染"
 
-#: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
+#: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:65
 #: desktop/src/pages/Statistics.tsx:141
 msgid "Error"
 msgstr "错误"
@@ -2615,8 +2623,8 @@ msgstr "已取消"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
 #: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
-#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
-#: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:56
+#: desktop/src/pages/Results.tsx:70 desktop/src/pages/Results.tsx:77
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
 #: desktop/src/pages/SettingsPreferences.tsx:448
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -2930,7 +2938,7 @@ msgstr "无法复制命令：{error}"
 
 #: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/Scan.tsx:564
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "复制"
@@ -3059,7 +3067,7 @@ msgid "Checking…"
 msgstr "正在检查…"
 
 #: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:544
+#: desktop/src/pages/Scan.tsx:537
 msgid "Refresh status"
 msgstr "刷新状态"
 
@@ -3195,7 +3203,7 @@ msgstr "下移"
 #: desktop/src/pages/ConfigPreferences.tsx:324
 #: desktop/src/pages/ConfigPreferences.tsx:369
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:553
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "移除"
@@ -3675,7 +3683,7 @@ msgid "Used for monthly scans."
 msgstr "用于每月扫描。"
 
 #: desktop/src/pages/ConfigPreferences.tsx:945
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:552
 msgid "Scan Targets"
 msgstr "扫描目标"
 
@@ -4078,12 +4086,12 @@ msgid "Export CSV"
 msgstr "导出 CSV"
 
 #: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Export JSON"
 msgstr "导出 JSON"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:552
 msgid "Clear All"
 msgstr "全部清除"
 
@@ -4117,7 +4125,7 @@ msgid "Export Text"
 msgstr "导出文本"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:567
+#: desktop/src/pages/Results.tsx:204 desktop/src/pages/Scan.tsx:560
 msgid "Fullscreen"
 msgstr "全屏"
 
@@ -4400,7 +4408,7 @@ msgstr "默认配置文件的名称受保护"
 msgid "Description"
 msgstr "描述"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:560
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:553
 msgid "No targets added"
 msgstr "未添加目标"
 
@@ -4448,7 +4456,7 @@ msgstr "配置方案已导入"
 msgid "Profile export did not return data"
 msgstr "导出配置方案时未返回数据"
 
-#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:231
+#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:221
 msgid "JSON Files"
 msgstr "JSON 文件"
 
@@ -4678,7 +4686,7 @@ msgid "Unknown Threat"
 msgstr "未知威胁"
 
 #: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Quarantined"
 msgstr "已隔离"
 
@@ -4718,452 +4726,452 @@ msgstr "来自 {path} 的已隔离文件（“{threat}”）将被永久删除�
 msgid "Restore Anyway"
 msgstr "仍然还原"
 
-#: desktop/src/pages/Results.tsx:37
+#: desktop/src/pages/Results.tsx:38
 msgid "Critical"
 msgstr "严重"
 
-#: desktop/src/pages/Results.tsx:38
+#: desktop/src/pages/Results.tsx:39
 msgid "High"
 msgstr "高"
 
-#: desktop/src/pages/Results.tsx:39
+#: desktop/src/pages/Results.tsx:40
 msgid "Medium"
 msgstr "中"
 
-#: desktop/src/pages/Results.tsx:40
+#: desktop/src/pages/Results.tsx:41
 msgid "Low"
 msgstr "低"
 
-#: desktop/src/pages/Results.tsx:41
+#: desktop/src/pages/Results.tsx:42
 msgid "Ransomware"
 msgstr "勒索软件"
 
-#: desktop/src/pages/Results.tsx:42
+#: desktop/src/pages/Results.tsx:43
 msgid "Rootkit"
 msgstr "隐匿工具包"
 
-#: desktop/src/pages/Results.tsx:43
+#: desktop/src/pages/Results.tsx:44
 msgid "Trojan"
 msgstr "木马"
 
-#: desktop/src/pages/Results.tsx:44
+#: desktop/src/pages/Results.tsx:45
 msgid "Worm"
 msgstr "蠕虫"
 
-#: desktop/src/pages/Results.tsx:45
+#: desktop/src/pages/Results.tsx:46
 msgid "Backdoor"
 msgstr "后门"
 
-#: desktop/src/pages/Results.tsx:46
+#: desktop/src/pages/Results.tsx:47
 msgid "Exploit"
 msgstr "漏洞利用"
 
-#: desktop/src/pages/Results.tsx:47
+#: desktop/src/pages/Results.tsx:48
 msgid "Adware"
 msgstr "广告软件"
 
-#: desktop/src/pages/Results.tsx:48
+#: desktop/src/pages/Results.tsx:49
 msgid "Spyware"
 msgstr "间谍软件"
 
-#: desktop/src/pages/Results.tsx:49
+#: desktop/src/pages/Results.tsx:50
 msgid "Test"
 msgstr "测试"
 
-#: desktop/src/pages/Results.tsx:50
+#: desktop/src/pages/Results.tsx:51
 msgid "Macro"
 msgstr "宏"
 
-#: desktop/src/pages/Results.tsx:51
+#: desktop/src/pages/Results.tsx:52
 msgid "Phishing"
 msgstr "网络钓鱼"
 
-#: desktop/src/pages/Results.tsx:52
+#: desktop/src/pages/Results.tsx:53
 msgid "Heuristic"
 msgstr "启发式检测"
 
-#: desktop/src/pages/Results.tsx:53
+#: desktop/src/pages/Results.tsx:54
 msgid "PUA"
 msgstr "潜在不受欢迎的应用"
 
-#: desktop/src/pages/Results.tsx:54
+#: desktop/src/pages/Results.tsx:55
 msgid "Virus"
 msgstr "病毒"
 
-#: desktop/src/pages/Results.tsx:63
+#: desktop/src/pages/Results.tsx:64
 msgid "Detected"
 msgstr "已检测到"
 
-#: desktop/src/pages/Results.tsx:65
+#: desktop/src/pages/Results.tsx:66
 msgid "Pending"
 msgstr "待处理"
 
-#: desktop/src/pages/Results.tsx:66
+#: desktop/src/pages/Results.tsx:67
 msgid "Rate limited"
 msgstr "请求频率受限"
 
-#: desktop/src/pages/Results.tsx:67
+#: desktop/src/pages/Results.tsx:68
 msgid "Not found"
 msgstr "未找到"
 
-#: desktop/src/pages/Results.tsx:68
+#: desktop/src/pages/Results.tsx:69
 msgid "File too large"
 msgstr "文件过大"
 
-#: desktop/src/pages/Results.tsx:74
+#: desktop/src/pages/Results.tsx:75
 msgid "Malicious"
 msgstr "恶意"
 
-#: desktop/src/pages/Results.tsx:75
+#: desktop/src/pages/Results.tsx:76
 msgid "Suspicious"
 msgstr "可疑"
 
-#: desktop/src/pages/Results.tsx:95
+#: desktop/src/pages/Results.tsx:85
 msgid "{count} threat found"
 msgid_plural "{count} threats found"
 msgstr[0] "发现 {count} 个威胁"
 
-#: desktop/src/pages/Results.tsx:95
+#: desktop/src/pages/Results.tsx:85
 msgid "Review the files below and move them to quarantine or exclude them."
 msgstr "请查看下方文件，并将其移至隔离区或排除。"
 
-#: desktop/src/pages/Results.tsx:96
+#: desktop/src/pages/Results.tsx:86
 msgid "No threats found"
 msgstr "未发现威胁"
 
-#: desktop/src/pages/Results.tsx:96
+#: desktop/src/pages/Results.tsx:86
 msgid "ClamAV checked the scanned files and found nothing harmful."
 msgstr "ClamAV 已检查扫描的文件，未发现任何有害内容。"
 
-#: desktop/src/pages/Results.tsx:97
+#: desktop/src/pages/Results.tsx:87
 msgid ""
 "The scan was stopped before it finished, so these results are incomplete."
 msgstr "扫描在完成前已停止，因此这些结果不完整。"
 
-#: desktop/src/pages/Results.tsx:98
+#: desktop/src/pages/Results.tsx:88
 msgid "Scan failed"
 msgstr "扫描失败"
 
-#: desktop/src/pages/Results.tsx:98
+#: desktop/src/pages/Results.tsx:88
 msgid ""
 "The scan could not finish. Open the scan details below for more information."
 msgstr "扫描无法完成。请打开下方的扫描详情了解更多信息。"
 
-#: desktop/src/pages/Results.tsx:126
+#: desktop/src/pages/Results.tsx:116
 msgid "No scan output is available"
 msgstr "无可用的扫描输出"
 
-#: desktop/src/pages/Results.tsx:128
+#: desktop/src/pages/Results.tsx:118
 msgid "Text Files"
 msgstr "文本文件"
 
-#: desktop/src/pages/Results.tsx:190 desktop/src/pages/Results.tsx:214
-#: desktop/src/pages/Results.tsx:252
+#: desktop/src/pages/Results.tsx:180 desktop/src/pages/Results.tsx:204
+#: desktop/src/pages/Results.tsx:242
 msgid "Copy or Export"
 msgstr "复制或导出"
 
-#: desktop/src/pages/Results.tsx:191
+#: desktop/src/pages/Results.tsx:181
 msgid "Quarantine All"
 msgstr "全部隔离"
 
-#: desktop/src/pages/Results.tsx:195 desktop/src/pages/ScanOverview.tsx:73
+#: desktop/src/pages/Results.tsx:185 desktop/src/pages/ScanOverview.tsx:73
 msgid "Files scanned"
 msgstr "已扫描文件数"
 
-#: desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:186
 msgid "Directories"
 msgstr "目录"
 
-#: desktop/src/pages/Results.tsx:197 desktop/src/pages/ScanOverview.tsx:74
+#: desktop/src/pages/Results.tsx:187 desktop/src/pages/ScanOverview.tsx:74
 msgid "Threats found"
 msgstr "发现的威胁"
 
-#: desktop/src/pages/Results.tsx:198
+#: desktop/src/pages/Results.tsx:188
 msgid "Not accessible"
 msgstr "无法访问"
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:196
 msgid "Detected Threats"
 msgstr "检测到的威胁"
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:196
 msgid "Large result set: displaying threats in batches."
 msgstr "结果较多，正在分批显示威胁。"
 
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Excluded"
 msgstr "已排除"
 
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Exclude"
 msgstr "排除"
 
-#: desktop/src/pages/Results.tsx:211 desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:201 desktop/src/pages/Results.tsx:232
 msgid "Show {count} more"
 msgstr "再显示 {count} 项"
 
-#: desktop/src/pages/Results.tsx:213
+#: desktop/src/pages/Results.tsx:203
 msgid "Files Not Accessible"
 msgstr "无法访问的文件"
 
-#: desktop/src/pages/Results.tsx:213
+#: desktop/src/pages/Results.tsx:203
 msgid "Additional inaccessible files are omitted from this view."
 msgstr "其他无法访问的文件未在此视图中显示。"
 
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
+#: desktop/src/pages/Results.tsx:204 desktop/src/pages/Results.tsx:205
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/Scan.tsx:564
 msgid "Scan details"
 msgstr "扫描详情"
 
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Quarantine File"
 msgstr "隔离文件"
 
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Quarantine All Threats"
 msgstr "隔离所有威胁"
 
 #. Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Move '{path}' to quarantine?"
 msgstr "将“{path}”移至隔离区吗？"
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "Move {count} detected file to quarantine?"
 msgid_plural "Move {count} detected files to quarantine?"
 msgstr[0] "将检测到的 {count} 个文件移至隔离区吗？"
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "This removes each original file from its current location."
 msgstr "此操作会将每个原始文件从当前位置移除。"
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "Quarantining…"
 msgstr "正在隔离…"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "VirusTotal Results"
 msgstr "VirusTotal 检测结果"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Detections"
 msgstr "检出数"
 
-#: desktop/src/pages/Results.tsx:239 desktop/src/pages/ScanOverview.tsx:72
+#: desktop/src/pages/Results.tsx:229 desktop/src/pages/ScanOverview.tsx:72
 msgid "Last scanned"
 msgstr "上次扫描时间"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy JSON"
 msgstr "复制 JSON"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy Hash"
 msgstr "复制哈希值"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "View on VirusTotal"
 msgstr "在 VirusTotal 上查看"
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "Detection Details"
 msgstr "检测详情"
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "Large result set: displaying detections in batches."
 msgstr "结果较多，正在分批显示检测结果。"
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "No result"
 msgstr "无结果"
 
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/pages/Results.tsx:286
 msgid "Review scan findings and take action on detected threats."
 msgstr "查看扫描结果，并处理检测到的威胁。"
 
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/pages/Results.tsx:286
 msgid "Back to Scan"
 msgstr "返回扫描"
 
-#: desktop/src/pages/Results.tsx:297
+#: desktop/src/pages/Results.tsx:287
 msgid "No results yet"
 msgstr "暂无结果"
 
-#: desktop/src/pages/Results.tsx:297
+#: desktop/src/pages/Results.tsx:287
 msgid "Start a scan to see its results here."
 msgstr "开始扫描后即可在此查看结果。"
 
-#: desktop/src/pages/Scan.tsx:96
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete with warnings"
 msgstr "扫描完成，但有警告"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:97
+#: desktop/src/pages/Scan.tsx:98
 msgid "Scan complete — no threats found"
 msgstr "扫描完成——未发现威胁"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:105
+#: desktop/src/pages/Scan.tsx:106
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "扫描完成——检测到 {count} 个威胁"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:115
+#: desktop/src/pages/Scan.tsx:116
 msgid "Scan cancelled — partial results are available"
 msgstr "扫描已取消——可查看部分结果"
 
-#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
+#: desktop/src/pages/Scan.tsx:121 desktop/src/pages/Scan.tsx:525
 msgid "Scan error"
 msgstr "扫描出错"
 
-#: desktop/src/pages/Scan.tsx:120
+#: desktop/src/pages/Scan.tsx:121
 msgid "Unknown error"
 msgstr "未知错误"
 
-#: desktop/src/pages/Scan.tsx:155
+#: desktop/src/pages/Scan.tsx:152
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr "API 密钥必须由 64 个十六进制字符组成"
 
-#: desktop/src/pages/Scan.tsx:183
+#: desktop/src/pages/Scan.tsx:180
 msgid "VirusTotal Scan"
 msgstr "VirusTotal 扫描"
 
-#: desktop/src/pages/Scan.tsx:184
+#: desktop/src/pages/Scan.tsx:181
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
 msgstr "VirusTotal 每次只能上传一个文件。请仅上传您有权共享的文件。"
 
-#: desktop/src/pages/Scan.tsx:188
+#: desktop/src/pages/Scan.tsx:185
 msgid "API key available"
 msgstr "API 密钥可用"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:186 desktop/src/pages/Scan.tsx:558
 msgid "Scanning…"
 msgstr "正在扫描…"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:186 desktop/src/pages/Scan.tsx:558
 msgid "Scan with VirusTotal"
 msgstr "使用 VirusTotal 扫描"
 
-#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:188 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "API 密钥"
 
-#: desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Scan.tsx:189
 msgid "Save & Scan"
 msgstr "保存并扫描"
 
-#: desktop/src/pages/Scan.tsx:194
+#: desktop/src/pages/Scan.tsx:191
 msgid "Upload file manually"
 msgstr "手动上传文件"
 
-#: desktop/src/pages/Scan.tsx:226
+#: desktop/src/pages/Scan.tsx:223
 msgid "Unable to load scan profiles"
 msgstr "无法加载扫描配置文件"
 
-#: desktop/src/pages/Scan.tsx:233
+#: desktop/src/pages/Scan.tsx:230
 msgid "Unable to check scanner status"
 msgstr "无法检查扫描器状态"
 
-#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:260 desktop/src/pages/Scan.tsx:341
 msgid "Please select a file or folder to scan"
 msgstr "请选择要扫描的文件或文件夹"
 
-#: desktop/src/pages/Scan.tsx:281
+#: desktop/src/pages/Scan.tsx:274
 msgid "Starting scan…"
 msgstr "正在启动扫描…"
 
-#: desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:341
 msgid "Quick Scan profile has no valid targets"
 msgstr "“快速扫描”配置文件中没有有效的扫描目标"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
-#: desktop/src/pages/Scan.tsx:516
+#: desktop/src/pages/Scan.tsx:355 desktop/src/pages/Scan.tsx:458
+#: desktop/src/pages/Scan.tsx:509
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr "正在扫描——请等待扫描完成后再添加目标"
 
-#: desktop/src/pages/Scan.tsx:382
+#: desktop/src/pages/Scan.tsx:375
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
 msgstr[0] "VirusTotal 每次只能扫描一个文件；已忽略 {count} 个选中项。"
 
-#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
+#: desktop/src/pages/Scan.tsx:390 desktop/src/pages/Scan.tsx:518
 msgid "Only local files and folders can be scanned"
 msgstr "只能扫描本地文件和文件夹"
 
-#: desktop/src/pages/Scan.tsx:474
+#: desktop/src/pages/Scan.tsx:467
 msgid "Unable to choose scan targets"
 msgstr "无法选择扫描目标"
 
-#: desktop/src/pages/Scan.tsx:481
+#: desktop/src/pages/Scan.tsx:474
 msgid "Cancelling scan…"
 msgstr "正在取消扫描…"
 
-#: desktop/src/pages/Scan.tsx:483
+#: desktop/src/pages/Scan.tsx:476
 msgid "Unable to cancel scan"
 msgstr "无法取消扫描"
 
-#: desktop/src/pages/Scan.tsx:499
+#: desktop/src/pages/Scan.tsx:492
 msgid "Running EICAR test…"
 msgstr "正在运行 EICAR 测试…"
 
-#: desktop/src/pages/Scan.tsx:540 desktop/src/pages/Scan.tsx:567
+#: desktop/src/pages/Scan.tsx:533 desktop/src/pages/Scan.tsx:560
 msgid "Details"
 msgstr "详情"
 
-#: desktop/src/pages/Scan.tsx:543
+#: desktop/src/pages/Scan.tsx:536
 msgid "Backend"
 msgstr "后端"
 
-#: desktop/src/pages/Scan.tsx:544
+#: desktop/src/pages/Scan.tsx:537
 msgid "Manage Profiles"
 msgstr "管理配置文件"
 
-#: desktop/src/pages/Scan.tsx:549
+#: desktop/src/pages/Scan.tsx:542
 msgid "Profile"
 msgstr "配置文件"
 
-#: desktop/src/pages/Scan.tsx:555
+#: desktop/src/pages/Scan.tsx:548
 msgid "No Profile (Manual)"
 msgstr "无配置文件（手动）"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:552
 msgid "Drop local files or folders here, or add them below."
 msgstr "将本地文件或文件夹拖放到此处，或在下方添加。"
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Start Scan"
 msgstr "开始扫描"
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Run EICAR Test"
 msgstr "运行 EICAR 测试"
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Select one file before using VirusTotal"
 msgstr "使用 VirusTotal 前请先选择一个文件"
 
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:77
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/ScanOverview.tsx:77
 msgid "Latest scan"
 msgstr "最近一次扫描"
 
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:80
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/ScanOverview.tsx:80
 msgid "View Results"
 msgstr "查看结果"
 
-#: desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Scan.tsx:562
 msgid "Virus database is not available"
 msgstr "病毒库不可用"
 
-#: desktop/src/pages/Scan.tsx:569 desktop/src/pages/ScanOverview.tsx:67
+#: desktop/src/pages/Scan.tsx:562 desktop/src/pages/ScanOverview.tsx:67
 msgid "Update the database before starting a scan."
 msgstr "开始扫描前请先更新病毒库。"
 
-#: desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Scan.tsx:562
 msgid "Open Database Updates"
 msgstr "打开病毒库更新页面"
 

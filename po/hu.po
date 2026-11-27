@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-26 18:51+0100\n"
+"POT-Creation-Date: 2026-11-27 10:13+0100\n"
 "PO-Revision-Date: 2026-09-13 09:59+0200\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -145,252 +145,260 @@ msgstr "Néhány hálózati foglalatsor nem volt olvasható."
 msgid "No open ports detected"
 msgstr "Nem található nyitott port"
 
-#: crates/clamui-core/src/audit.rs:835
+#: crates/clamui-core/src/audit.rs:851
 msgid "AppArmor is enabled"
 msgstr "Az AppArmor engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:843
+#: crates/clamui-core/src/audit.rs:861
+msgid "AppArmor is not in use because SELinux is active"
+msgstr "Az AppArmor nincs használatban, mert a SELinux aktív"
+
+#: crates/clamui-core/src/audit.rs:869
 msgid "AppArmor module is loaded but not enabled"
 msgstr "Az AppArmor modul betöltve, de nincs engedélyezve"
 
-#: crates/clamui-core/src/audit.rs:845
+#: crates/clamui-core/src/audit.rs:871
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Engedélyezze az AppArmort az alkalmazások elszigeteléséhez"
 
-#: crates/clamui-core/src/audit.rs:861
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is enforcing"
 msgstr "A SELinux kikényszerítő (enforcing) módban van"
 
-#: crates/clamui-core/src/audit.rs:869
+#: crates/clamui-core/src/audit.rs:891
 msgid "SELinux is in permissive mode"
 msgstr "A SELinux megengedő (permissive) módban van"
 
-#: crates/clamui-core/src/audit.rs:871
+#: crates/clamui-core/src/audit.rs:893
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr "Fontolja meg az enforcing módra váltást a fokozott védelem érdekében"
 
-#: crates/clamui-core/src/audit.rs:883
+#: crates/clamui-core/src/audit.rs:906
+msgid "SELinux is not in use because AppArmor is active"
+msgstr "A SELinux nincs használatban, mert az AppArmor aktív"
+
+#: crates/clamui-core/src/audit.rs:914
 msgid "SELinux is disabled"
 msgstr "A SELinux le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:885
+#: crates/clamui-core/src/audit.rs:916
 msgid "Enable SELinux for mandatory access control"
 msgstr "Engedélyezze a SELinuxot a kötelező hozzáférés-vezérléshez"
 
-#: crates/clamui-core/src/audit.rs:900
+#: crates/clamui-core/src/audit.rs:931
 msgid "No mandatory access control framework detected"
 msgstr "Nem található kötelező hozzáférés-vezérlési keretrendszer"
 
-#: crates/clamui-core/src/audit.rs:902
+#: crates/clamui-core/src/audit.rs:933
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Érdemes engedélyezni az AppArmort vagy a SELinuxot"
 
-#: crates/clamui-core/src/audit.rs:928
+#: crates/clamui-core/src/audit.rs:959
 msgid "Automatic security updates are enabled"
 msgstr "Az automatikus biztonsági frissítések engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:939
+#: crates/clamui-core/src/audit.rs:970
 msgid "Unattended upgrades is installed but disabled"
 msgstr "A felügyelet nélküli frissítések telepítve vannak, de le vannak tiltva"
 
-#: crates/clamui-core/src/audit.rs:941
+#: crates/clamui-core/src/audit.rs:972
 msgid "Enable automatic security updates"
 msgstr "Automatikus biztonsági frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:955
+#: crates/clamui-core/src/audit.rs:986
 msgid "DNF automatic updates are enabled"
 msgstr "A DNF automatikus frissítései engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:966
+#: crates/clamui-core/src/audit.rs:997
 msgid "DNF automatic is installed but timer is not active"
 msgstr "A DNF automatic telepítve van, de az időzítő nem aktív"
 
-#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:999 crates/clamui-core/src/audit.rs:1027
 msgid "Enable automatic updates"
 msgstr "Automatikus frissítések engedélyezése"
 
-#: crates/clamui-core/src/audit.rs:983
+#: crates/clamui-core/src/audit.rs:1014
 msgid "os-update automatic updates are enabled"
 msgstr "Az os-update automatikus frissítései engedélyezve vannak"
 
-#: crates/clamui-core/src/audit.rs:994
+#: crates/clamui-core/src/audit.rs:1025
 msgid "os-update is installed but timer is not active"
 msgstr "Az os-update telepítve van, de az időzítő nem aktív"
 
-#: crates/clamui-core/src/audit.rs:1009
+#: crates/clamui-core/src/audit.rs:1040
 msgid "Could not determine automatic update status"
 msgstr "Nem sikerült megállapítani az automatikus frissítés állapotát"
 
-#: crates/clamui-core/src/audit.rs:1011
+#: crates/clamui-core/src/audit.rs:1042
 msgid "Configure automatic security updates"
 msgstr "Automatikus biztonsági frissítések beállítása"
 
-#: crates/clamui-core/src/audit.rs:1030
+#: crates/clamui-core/src/audit.rs:1061
 msgid "System reboot required to apply updates"
 msgstr "A frissítések alkalmazásához újra kell indítani a rendszert"
 
-#: crates/clamui-core/src/audit.rs:1032
+#: crates/clamui-core/src/audit.rs:1063
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 "Indítsa újra a rendszert a függőben lévő biztonsági frissítések "
 "alkalmazásához"
 
-#: crates/clamui-core/src/audit.rs:1078
+#: crates/clamui-core/src/audit.rs:1109
 msgid "{name} is installed but not running"
 msgstr "A(z) {name} telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:1097
+#: crates/clamui-core/src/audit.rs:1128
 msgid "No intrusion detection system found"
 msgstr "Nem található behatolásészlelő rendszer"
 
-#: crates/clamui-core/src/audit.rs:1099
+#: crates/clamui-core/src/audit.rs:1130
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 "Telepítse a fail2ban vagy CrowdSec programot a támadások elleni védelemhez"
 
-#: crates/clamui-core/src/audit.rs:1126
+#: crates/clamui-core/src/audit.rs:1157
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "Az SSH-kiszolgáló nem fut (nincs távoli támadási felület)"
 
-#: crates/clamui-core/src/audit.rs:1137
+#: crates/clamui-core/src/audit.rs:1168
 msgid "SSH server is running"
 msgstr "Az SSH-kiszolgáló fut"
 
-#: crates/clamui-core/src/audit.rs:1147
+#: crates/clamui-core/src/audit.rs:1178
 msgid "Could not read SSH configuration"
 msgstr "Nem sikerült beolvasni az SSH-beállításokat"
 
-#: crates/clamui-core/src/audit.rs:1166
+#: crates/clamui-core/src/audit.rs:1197
 msgid "Root login: {value}"
 msgstr "Root bejelentkezés: {value}"
 
-#: crates/clamui-core/src/audit.rs:1174
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Root login is allowed ({value})"
 msgstr "A root bejelentkezés engedélyezett ({value})"
 
-#: crates/clamui-core/src/audit.rs:1180
+#: crates/clamui-core/src/audit.rs:1211
 msgid "Disable root SSH login for security"
 msgstr "Biztonsági okból tiltsa le a root SSH-bejelentkezést"
 
-#: crates/clamui-core/src/audit.rs:1195
+#: crates/clamui-core/src/audit.rs:1226
 msgid "Password authentication is disabled (key-only)"
 msgstr "A jelszavas hitelesítés le van tiltva (csak kulcs alapú)"
 
-#: crates/clamui-core/src/audit.rs:1203
+#: crates/clamui-core/src/audit.rs:1234
 msgid "Password authentication is enabled"
 msgstr "A jelszavas hitelesítés engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1205
+#: crates/clamui-core/src/audit.rs:1236
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Fontolja meg a jelszavas hitelesítés letiltását SSH-kulcsok javára"
 
-#: crates/clamui-core/src/audit.rs:1223
+#: crates/clamui-core/src/audit.rs:1254
 msgid "X11 forwarding is disabled"
 msgstr "Az X11-továbbítás le van tiltva"
 
-#: crates/clamui-core/src/audit.rs:1231
+#: crates/clamui-core/src/audit.rs:1262
 msgid "X11 forwarding is enabled"
 msgstr "Az X11-továbbítás engedélyezve van"
 
-#: crates/clamui-core/src/audit.rs:1233
+#: crates/clamui-core/src/audit.rs:1264
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Tiltsa le az X11-továbbítást a támadási felület csökkentéséhez"
 
-#: crates/clamui-core/src/audit.rs:1293
+#: crates/clamui-core/src/audit.rs:1324
 msgid "Application firewalls"
 msgstr "Alkalmazástűzfalak"
 
-#: crates/clamui-core/src/audit.rs:1316
+#: crates/clamui-core/src/audit.rs:1347
 msgid "Portmaster is running and protecting connections"
 msgstr "A Portmaster fut, és védi a kapcsolatokat"
 
-#: crates/clamui-core/src/audit.rs:1339
+#: crates/clamui-core/src/audit.rs:1370
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 "Engedélyezze a ClamUI-t a Portmasterben a modulonkénti állapotlekérdezéshez"
 
-#: crates/clamui-core/src/audit.rs:1342
+#: crates/clamui-core/src/audit.rs:1373
 msgid "Authorize"
 msgstr "Engedélyezés"
 
-#: crates/clamui-core/src/audit.rs:1353
+#: crates/clamui-core/src/audit.rs:1384
 msgid "Portmaster is installed but not running"
 msgstr "A Portmaster telepítve van, de nem fut"
 
-#: crates/clamui-core/src/audit.rs:1355
+#: crates/clamui-core/src/audit.rs:1386
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 "Indítsa el a Portmaster szolgáltatást a hálózati védelem engedélyezéséhez"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1369
+#: crates/clamui-core/src/audit.rs:1400
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Nem található — opcionális hálózati megfigyelő és alkalmazástűzfal"
 
-#: crates/clamui-core/src/audit.rs:1385
+#: crates/clamui-core/src/audit.rs:1416
 msgid "Could not probe Portmaster: {error}"
 msgstr "A Portmaster nem ellenőrizhető: {error}"
 
-#: crates/clamui-core/src/audit.rs:1435
+#: crates/clamui-core/src/audit.rs:1466
 msgid "{name} is not installed"
 msgstr "A(z) {name} nincs telepítve"
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1473
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Telepítse a(z) {name} programot az átfogó biztonsági ellenőrzéshez"
 
-#: crates/clamui-core/src/audit.rs:1448
+#: crates/clamui-core/src/audit.rs:1479
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Telepítse a chkrootkitet a rootkitek észleléséhez"
 
-#: crates/clamui-core/src/audit.rs:1468
+#: crates/clamui-core/src/audit.rs:1499
 msgid "Authentication was cancelled"
 msgstr "A hitelesítés megszakítva"
 
-#: crates/clamui-core/src/audit.rs:1476
+#: crates/clamui-core/src/audit.rs:1507
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "A Lynis ellenőrzés 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1478
+#: crates/clamui-core/src/audit.rs:1509
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "A rootkitvizsgálat 5 perc után időtúllépés miatt leállt"
 
-#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
+#: crates/clamui-core/src/audit.rs:1528 crates/clamui-core/src/audit.rs:1574
 msgid "Failed to run Lynis: {error}"
 msgstr "Nem sikerült futtatni a Lynis programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1503
+#: crates/clamui-core/src/audit.rs:1534
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Nem sikerült futtatni a chkrootkit programot: {error}"
 
-#: crates/clamui-core/src/audit.rs:1572
+#: crates/clamui-core/src/audit.rs:1603
 msgid "Score: {score}/100"
 msgstr "Pontszám: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1575
+#: crates/clamui-core/src/audit.rs:1606
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "A részletes javaslatokért futtassa: 'sudo lynis audit system'"
 
-#: crates/clamui-core/src/audit.rs:1592
+#: crates/clamui-core/src/audit.rs:1623
 msgid "Audit completed (exit code {code})"
 msgstr "Az ellenőrzés befejeződött (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
+#: crates/clamui-core/src/audit.rs:1661 crates/clamui-core/src/audit.rs:1675
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr "A rootkitvizsgálat nem fejezhető be (kilépési kód: {code})"
 
-#: crates/clamui-core/src/audit.rs:1681
+#: crates/clamui-core/src/audit.rs:1712
 msgid "No rootkits detected"
 msgstr "Nem található rootkit"
 
-#: crates/clamui-core/src/audit.rs:1693
+#: crates/clamui-core/src/audit.rs:1724
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "{count} lehetséges rootkit észlelve"
 msgstr[1] "{count} lehetséges rootkit észlelve"
 
-#: crates/clamui-core/src/audit.rs:1701
+#: crates/clamui-core/src/audit.rs:1732
 msgid "Investigate the detected threats immediately"
 msgstr "Vizsgálja ki azonnal az észlelt fenyegetéseket"
 
@@ -1828,44 +1836,44 @@ msgstr "A(z) {path} nem helyezhető karanténba: {error}"
 msgid "File hash mismatch — file may be corrupted"
 msgstr "A fájl kivonata nem egyezik — a fájl sérült lehet"
 
-#: crates/clamui-core/src/scanner.rs:461
+#: crates/clamui-core/src/scanner.rs:516
 msgid "No ClamAV database files were found in standard host locations"
 msgstr ""
 "Nem találhatók ClamAV-adatbázisfájlok a szokásos gazdarendszerbeli helyeken"
 
-#: crates/clamui-core/src/scanner.rs:2179
+#: crates/clamui-core/src/scanner.rs:2285
 msgid "Scan cancelled by user"
 msgstr "A felhasználó megszakította a vizsgálatot"
 
-#: crates/clamui-core/src/scanner.rs:2186
+#: crates/clamui-core/src/scanner.rs:2292
 msgid "No files could be scanned"
 msgstr "Egyetlen fájl sem volt megvizsgálható"
 
-#: crates/clamui-core/src/scanner.rs:2192
+#: crates/clamui-core/src/scanner.rs:2298
 msgid "Scan target does not exist or contains an invalid NUL byte"
 msgstr "A vizsgálati cél nem létezik, vagy érvénytelen NUL bájtot tartalmaz"
 
-#: crates/clamui-core/src/scanner.rs:2199
+#: crates/clamui-core/src/scanner.rs:2305
 msgid "Scan target is not a regular file or directory"
 msgstr "A vizsgálati cél nem szabályos fájl vagy könyvtár"
 
-#: crates/clamui-core/src/scanner.rs:2208
+#: crates/clamui-core/src/scanner.rs:2314
 msgid "Threats were detected, but details are unavailable."
 msgstr "Fenyegetéseket észleltünk, de a részletek nem érhetők el."
 
-#: crates/clamui-core/src/scanner.rs:2220
+#: crates/clamui-core/src/scanner.rs:2326
 msgid "{count} file could not be accessed"
 msgid_plural "{count} files could not be accessed"
 msgstr[0] "{count} fájl nem volt elérhető"
 msgstr[1] "{count} fájl nem volt elérhető"
 
-#: crates/clamui-core/src/scanner.rs:2233
+#: crates/clamui-core/src/scanner.rs:2339
 msgid "{count} file could not be read"
 msgid_plural "{count} files could not be read"
 msgstr[0] "{count} fájl nem volt olvasható"
 msgstr[1] "{count} fájl nem volt olvasható"
 
-#: crates/clamui-core/src/scanner.rs:2252
+#: crates/clamui-core/src/scanner.rs:2358
 msgid ""
 "{count} non-fatal warning during scan; some files may have been only "
 "partially scanned"
@@ -2276,7 +2284,7 @@ msgstr "Megnyitás"
 msgid "Dashboard"
 msgstr "Irányítópult"
 
-#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:539
+#: desktop/src/App.tsx:112 desktop/src/pages/Scan.tsx:532
 msgid "Scan"
 msgstr "Vizsgálat"
 
@@ -2315,8 +2323,8 @@ msgstr "Beállítások"
 msgid "Profiles"
 msgstr "Profilok"
 
-#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:295
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/App.tsx:132 desktop/src/pages/Results.tsx:285
+#: desktop/src/pages/Results.tsx:286
 msgid "Results"
 msgstr "Eredmények"
 
@@ -2326,7 +2334,7 @@ msgstr "Nem sikerült megnyitni a hivatkozást"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
 #: desktop/src/App.tsx:400 desktop/src/App.tsx:415 desktop/src/App.tsx:433
-#: desktop/src/pages/Scan.tsx:330
+#: desktop/src/pages/Scan.tsx:323
 msgid "Scan in progress — wait for it to finish before changing targets"
 msgstr ""
 "Vizsgálat folyamatban — a célok módosítása előtt várja meg a befejezését"
@@ -2358,7 +2366,7 @@ msgid "Back"
 msgstr "Vissza"
 
 #: desktop/src/App.tsx:919 desktop/src/pages/Profiles.tsx:109
-#: desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Scan.tsx:189
 msgid "Saving…"
 msgstr "Mentés…"
 
@@ -2471,7 +2479,7 @@ msgstr ""
 "Válassza ki, hogy a ClamUI maradjon-e elérhető a rendszertálcán, vagy "
 "teljesen kilépjen."
 
-#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:193
+#: desktop/src/App.tsx:1112 desktop/src/pages/Scan.tsx:190
 msgid "Remember my choice"
 msgstr "Válaszom megjegyzése"
 
@@ -2480,7 +2488,7 @@ msgstr "Válaszom megjegyzése"
 #: desktop/src/pages/Database.tsx:339 desktop/src/pages/Logs.tsx:412
 #: desktop/src/pages/Network.tsx:441 desktop/src/pages/Profiles.tsx:245
 #: desktop/src/pages/Profiles.tsx:246 desktop/src/pages/Quarantine.tsx:319
-#: desktop/src/pages/Results.tsx:220 desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Results.tsx:210 desktop/src/pages/Scan.tsx:562
 #: desktop/src/pages/SettingsPreferences.tsx:385
 #: desktop/src/pages/SettingsPreferences.tsx:474
 msgid "Cancel"
@@ -2592,8 +2600,8 @@ msgstr "Konfigurációs útvonal a vágólapra másolva"
 msgid "Could not copy configuration path."
 msgstr "Nem sikerült a konfigurációs útvonalat a vágólapra másolni."
 
-#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:210
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/ConfigurationRecovery.tsx:81 desktop/src/pages/Results.tsx:200
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy Path"
 msgstr "Elérési út másolása"
 
@@ -2703,8 +2711,8 @@ msgstr "Konfiguráció megtekintése"
 msgid "Target {index}/{count}: {path}"
 msgstr "Cél {index}/{count}: {path}"
 
-#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:120
-#: desktop/src/pages/Results.tsx:187 desktop/src/pages/Scan.tsx:530
+#: desktop/src/ScanProgressPanel.tsx:19 desktop/src/pages/Results.tsx:110
+#: desktop/src/pages/Results.tsx:177 desktop/src/pages/Scan.tsx:523
 msgid "Scan target"
 msgstr "Vizsgálati cél"
 
@@ -2726,13 +2734,13 @@ msgstr "Várakozás a vizsgálati adatokra…"
 msgid "Scan progress"
 msgstr "Vizsgálat előrehaladása"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:560
 msgid "{count} file scanned"
 msgid_plural "{count} files scanned"
 msgstr[0] "{count} fájl ellenőrizve"
 msgstr[1] "{count} fájl ellenőrizve"
 
-#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:567
+#: desktop/src/ScanProgressPanel.tsx:28 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/Statistics.tsx:161
 msgid "{count} threat"
 msgid_plural "{count} threats"
@@ -2756,23 +2764,23 @@ msgstr ""
 msgid "Cancel All"
 msgstr "Összes megszakítása"
 
-#: desktop/src/api.ts:75
+#: desktop/src/api.ts:76
 msgid "The contributor credits response was invalid."
 msgstr "A közreműködői névsor válasza érvénytelen volt."
 
-#: desktop/src/api.ts:178
+#: desktop/src/api.ts:185
 msgid "Enter a valid HTTP(S) address"
 msgstr "Adjon meg érvényes HTTP(S)-címet"
 
-#: desktop/src/api.ts:181
+#: desktop/src/api.ts:188
 msgid "Only HTTP(S) addresses may be opened externally"
 msgstr "Külsőleg csak HTTP(S)-címek nyithatók meg"
 
-#: desktop/src/api.ts:190
+#: desktop/src/api.ts:197
 msgid "Choose a file or folder first"
 msgstr "Előbb válasszon ki egy fájlt vagy mappát"
 
-#: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:62
+#: desktop/src/i18n.ts:92 desktop/src/pages/Results.tsx:63
 msgid "Clean"
 msgstr "Tiszta"
 
@@ -2780,7 +2788,7 @@ msgstr "Tiszta"
 msgid "Infected"
 msgstr "Fertőzött"
 
-#: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:64
+#: desktop/src/i18n.ts:94 desktop/src/pages/Results.tsx:65
 #: desktop/src/pages/Statistics.tsx:141
 msgid "Error"
 msgstr "Hiba"
@@ -2791,8 +2799,8 @@ msgstr "Megszakítva"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
 #: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
-#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
-#: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
+#: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:56
+#: desktop/src/pages/Results.tsx:70 desktop/src/pages/Results.tsx:77
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
 #: desktop/src/pages/SettingsPreferences.tsx:448
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -3123,7 +3131,7 @@ msgstr "Nem másolható a parancs: {error}"
 
 #: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/Scan.tsx:564
 #: desktop/src/pages/SettingsPreferences.tsx:472
 msgid "Copy"
 msgstr "Másolás"
@@ -3256,7 +3264,7 @@ msgid "Checking…"
 msgstr "Ellenőrzés…"
 
 #: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
-#: desktop/src/pages/Scan.tsx:544
+#: desktop/src/pages/Scan.tsx:537
 msgid "Refresh status"
 msgstr "Állapot frissítése"
 
@@ -3394,7 +3402,7 @@ msgstr "Mozgatás lefelé"
 #: desktop/src/pages/ConfigPreferences.tsx:324
 #: desktop/src/pages/ConfigPreferences.tsx:369
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
-#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
+#: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:553
 #: desktop/src/pages/SettingsPreferences.tsx:271
 msgid "Remove"
 msgstr "Eltávolítás"
@@ -3886,7 +3894,7 @@ msgid "Used for monthly scans."
 msgstr "Havi vizsgálatokhoz használatos."
 
 #: desktop/src/pages/ConfigPreferences.tsx:945
-#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:552
 msgid "Scan Targets"
 msgstr "Vizsgálati célok"
 
@@ -4306,12 +4314,12 @@ msgid "Export CSV"
 msgstr "CSV exportálása"
 
 #: desktop/src/pages/Logs.tsx:369 desktop/src/pages/Logs.tsx:391
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Export JSON"
 msgstr "JSON exportálása"
 
 #: desktop/src/pages/Logs.tsx:370 desktop/src/pages/Logs.tsx:412
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:552
 msgid "Clear All"
 msgstr "Összes törlése"
 
@@ -4346,7 +4354,7 @@ msgid "Export Text"
 msgstr "Szöveg exportálása"
 
 #: desktop/src/pages/Logs.tsx:392 desktop/src/pages/Logs.tsx:402
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Scan.tsx:567
+#: desktop/src/pages/Results.tsx:204 desktop/src/pages/Scan.tsx:560
 msgid "Fullscreen"
 msgstr "Teljes képernyő"
 
@@ -4636,7 +4644,7 @@ msgstr "Az alapértelmezett profilnevek védettek"
 msgid "Description"
 msgstr "Leírás"
 
-#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:560
+#: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Scan.tsx:553
 msgid "No targets added"
 msgstr "Nincs hozzáadott cél"
 
@@ -4684,7 +4692,7 @@ msgstr "Profil importálva"
 msgid "Profile export did not return data"
 msgstr "A profil exportálása nem adott vissza adatot"
 
-#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:231
+#: desktop/src/pages/Profiles.tsx:203 desktop/src/pages/Results.tsx:221
 msgid "JSON Files"
 msgstr "JSON-fájlok"
 
@@ -4923,7 +4931,7 @@ msgid "Unknown Threat"
 msgstr "Ismeretlen fenyegetés"
 
 #: desktop/src/pages/Quarantine.tsx:303 desktop/src/pages/Quarantine.tsx:305
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Quarantined"
 msgstr "Karanténba helyezve"
 
@@ -4966,329 +4974,329 @@ msgstr ""
 msgid "Restore Anyway"
 msgstr "Visszaállítás mégis"
 
-#: desktop/src/pages/Results.tsx:37
+#: desktop/src/pages/Results.tsx:38
 msgid "Critical"
 msgstr "Kritikus"
 
-#: desktop/src/pages/Results.tsx:38
+#: desktop/src/pages/Results.tsx:39
 msgid "High"
 msgstr "Magas"
 
-#: desktop/src/pages/Results.tsx:39
+#: desktop/src/pages/Results.tsx:40
 msgid "Medium"
 msgstr "Közepes"
 
-#: desktop/src/pages/Results.tsx:40
+#: desktop/src/pages/Results.tsx:41
 msgid "Low"
 msgstr "Alacsony"
 
-#: desktop/src/pages/Results.tsx:41
+#: desktop/src/pages/Results.tsx:42
 msgid "Ransomware"
 msgstr "Zsarolóvírus"
 
-#: desktop/src/pages/Results.tsx:42
+#: desktop/src/pages/Results.tsx:43
 msgid "Rootkit"
 msgstr "Rootkit"
 
-#: desktop/src/pages/Results.tsx:43
+#: desktop/src/pages/Results.tsx:44
 msgid "Trojan"
 msgstr "Trójai"
 
-#: desktop/src/pages/Results.tsx:44
+#: desktop/src/pages/Results.tsx:45
 msgid "Worm"
 msgstr "Féreg"
 
-#: desktop/src/pages/Results.tsx:45
+#: desktop/src/pages/Results.tsx:46
 msgid "Backdoor"
 msgstr "Hátsó ajtó"
 
-#: desktop/src/pages/Results.tsx:46
+#: desktop/src/pages/Results.tsx:47
 msgid "Exploit"
 msgstr "Exploit"
 
-#: desktop/src/pages/Results.tsx:47
+#: desktop/src/pages/Results.tsx:48
 msgid "Adware"
 msgstr "Reklámprogram"
 
-#: desktop/src/pages/Results.tsx:48
+#: desktop/src/pages/Results.tsx:49
 msgid "Spyware"
 msgstr "Kémprogram"
 
-#: desktop/src/pages/Results.tsx:49
+#: desktop/src/pages/Results.tsx:50
 msgid "Test"
 msgstr "Teszt"
 
-#: desktop/src/pages/Results.tsx:50
+#: desktop/src/pages/Results.tsx:51
 msgid "Macro"
 msgstr "Makró"
 
-#: desktop/src/pages/Results.tsx:51
+#: desktop/src/pages/Results.tsx:52
 msgid "Phishing"
 msgstr "Adathalászat"
 
-#: desktop/src/pages/Results.tsx:52
+#: desktop/src/pages/Results.tsx:53
 msgid "Heuristic"
 msgstr "Heurisztikus"
 
-#: desktop/src/pages/Results.tsx:53
+#: desktop/src/pages/Results.tsx:54
 msgid "PUA"
 msgstr "PUA"
 
-#: desktop/src/pages/Results.tsx:54
+#: desktop/src/pages/Results.tsx:55
 msgid "Virus"
 msgstr "Vírus"
 
-#: desktop/src/pages/Results.tsx:63
+#: desktop/src/pages/Results.tsx:64
 msgid "Detected"
 msgstr "Észlelve"
 
-#: desktop/src/pages/Results.tsx:65
+#: desktop/src/pages/Results.tsx:66
 msgid "Pending"
 msgstr "Függőben"
 
-#: desktop/src/pages/Results.tsx:66
+#: desktop/src/pages/Results.tsx:67
 msgid "Rate limited"
 msgstr "Lekérdezési korlát elérve"
 
-#: desktop/src/pages/Results.tsx:67
+#: desktop/src/pages/Results.tsx:68
 msgid "Not found"
 msgstr "Nem található"
 
-#: desktop/src/pages/Results.tsx:68
+#: desktop/src/pages/Results.tsx:69
 msgid "File too large"
 msgstr "Túl nagy fájl"
 
-#: desktop/src/pages/Results.tsx:74
+#: desktop/src/pages/Results.tsx:75
 msgid "Malicious"
 msgstr "Rosszindulatú"
 
-#: desktop/src/pages/Results.tsx:75
+#: desktop/src/pages/Results.tsx:76
 msgid "Suspicious"
 msgstr "Gyanús"
 
-#: desktop/src/pages/Results.tsx:95
+#: desktop/src/pages/Results.tsx:85
 msgid "{count} threat found"
 msgid_plural "{count} threats found"
 msgstr[0] "{count} fenyegetés található"
 msgstr[1] "{count} fenyegetés található"
 
-#: desktop/src/pages/Results.tsx:95
+#: desktop/src/pages/Results.tsx:85
 msgid "Review the files below and move them to quarantine or exclude them."
 msgstr ""
 "Tekintse át az alábbi fájlokat, és helyezze őket karanténba, vagy zárja ki "
 "őket."
 
-#: desktop/src/pages/Results.tsx:96
+#: desktop/src/pages/Results.tsx:86
 msgid "No threats found"
 msgstr "Nem található fenyegetés"
 
-#: desktop/src/pages/Results.tsx:96
+#: desktop/src/pages/Results.tsx:86
 msgid "ClamAV checked the scanned files and found nothing harmful."
 msgstr ""
 "A ClamAV ellenőrizte a vizsgált fájlokat, és nem talált semmi ártalmasat."
 
-#: desktop/src/pages/Results.tsx:97
+#: desktop/src/pages/Results.tsx:87
 msgid ""
 "The scan was stopped before it finished, so these results are incomplete."
 msgstr ""
 "A vizsgálat a befejezés előtt leállt, ezért ezek az eredmények hiányosak."
 
-#: desktop/src/pages/Results.tsx:98
+#: desktop/src/pages/Results.tsx:88
 msgid "Scan failed"
 msgstr "A vizsgálat sikertelen"
 
-#: desktop/src/pages/Results.tsx:98
+#: desktop/src/pages/Results.tsx:88
 msgid ""
 "The scan could not finish. Open the scan details below for more information."
 msgstr ""
 "A vizsgálat nem tudott befejeződni. További információért nyissa meg alább a "
 "vizsgálat részleteit."
 
-#: desktop/src/pages/Results.tsx:126
+#: desktop/src/pages/Results.tsx:116
 msgid "No scan output is available"
 msgstr "Nincs elérhető vizsgálati kimenet"
 
-#: desktop/src/pages/Results.tsx:128
+#: desktop/src/pages/Results.tsx:118
 msgid "Text Files"
 msgstr "Szövegfájlok"
 
-#: desktop/src/pages/Results.tsx:190 desktop/src/pages/Results.tsx:214
-#: desktop/src/pages/Results.tsx:252
+#: desktop/src/pages/Results.tsx:180 desktop/src/pages/Results.tsx:204
+#: desktop/src/pages/Results.tsx:242
 msgid "Copy or Export"
 msgstr "Másolás vagy exportálás"
 
-#: desktop/src/pages/Results.tsx:191
+#: desktop/src/pages/Results.tsx:181
 msgid "Quarantine All"
 msgstr "Összes karanténba helyezése"
 
-#: desktop/src/pages/Results.tsx:195 desktop/src/pages/ScanOverview.tsx:73
+#: desktop/src/pages/Results.tsx:185 desktop/src/pages/ScanOverview.tsx:73
 msgid "Files scanned"
 msgstr "Vizsgált fájlok"
 
-#: desktop/src/pages/Results.tsx:196
+#: desktop/src/pages/Results.tsx:186
 msgid "Directories"
 msgstr "Mappák"
 
-#: desktop/src/pages/Results.tsx:197 desktop/src/pages/ScanOverview.tsx:74
+#: desktop/src/pages/Results.tsx:187 desktop/src/pages/ScanOverview.tsx:74
 msgid "Threats found"
 msgstr "Talált fenyegetések"
 
-#: desktop/src/pages/Results.tsx:198
+#: desktop/src/pages/Results.tsx:188
 msgid "Not accessible"
 msgstr "Nem hozzáférhető"
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:196
 msgid "Detected Threats"
 msgstr "Észlelt fenyegetések"
 
-#: desktop/src/pages/Results.tsx:206
+#: desktop/src/pages/Results.tsx:196
 msgid "Large result set: displaying threats in batches."
 msgstr "Nagy eredményhalmaz: a fenyegetések kötegekben jelennek meg."
 
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Excluded"
 msgstr "Kizárva"
 
-#: desktop/src/pages/Results.tsx:210
+#: desktop/src/pages/Results.tsx:200
 msgid "Exclude"
 msgstr "Kizárás"
 
-#: desktop/src/pages/Results.tsx:211 desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:201 desktop/src/pages/Results.tsx:232
 msgid "Show {count} more"
 msgstr "További {count} megjelenítése"
 
-#: desktop/src/pages/Results.tsx:213
+#: desktop/src/pages/Results.tsx:203
 msgid "Files Not Accessible"
 msgstr "Nem hozzáférhető fájlok"
 
-#: desktop/src/pages/Results.tsx:213
+#: desktop/src/pages/Results.tsx:203
 msgid "Additional inaccessible files are omitted from this view."
 msgstr "További nem hozzáférhető fájlok nem jelennek meg ebben a nézetben."
 
-#: desktop/src/pages/Results.tsx:214 desktop/src/pages/Results.tsx:215
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
+#: desktop/src/pages/Results.tsx:204 desktop/src/pages/Results.tsx:205
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/Scan.tsx:564
 msgid "Scan details"
 msgstr "Vizsgálat részletei"
 
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Quarantine File"
 msgstr "Fájl karanténba helyezése"
 
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Quarantine All Threats"
 msgstr "Minden fenyegetés karanténba helyezése"
 
 #. Translators: Preserve the {path} placeholder; it is a file path, not translatable. Use quotation marks appropriate for your language.
-#: desktop/src/pages/Results.tsx:216
+#: desktop/src/pages/Results.tsx:206
 msgid "Move '{path}' to quarantine?"
 msgstr "Áthelyezi a(z) „{path}” fájlt karanténba?"
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "Move {count} detected file to quarantine?"
 msgid_plural "Move {count} detected files to quarantine?"
 msgstr[0] "Áthelyezi {count} észlelt fájlt karanténba?"
 msgstr[1] "Áthelyezi {count} észlelt fájlt karanténba?"
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "This removes each original file from its current location."
 msgstr "Ezzel minden eredeti fájl eltávolításra kerül a jelenlegi helyéről."
 
-#: desktop/src/pages/Results.tsx:220
+#: desktop/src/pages/Results.tsx:210
 msgid "Quarantining…"
 msgstr "Karanténba helyezés…"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "VirusTotal Results"
 msgstr "VirusTotal-eredmények"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Detections"
 msgstr "Észlelések"
 
-#: desktop/src/pages/Results.tsx:239 desktop/src/pages/ScanOverview.tsx:72
+#: desktop/src/pages/Results.tsx:229 desktop/src/pages/ScanOverview.tsx:72
 msgid "Last scanned"
 msgstr "Legutóbbi vizsgálat"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy JSON"
 msgstr "JSON másolása"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "Copy Hash"
 msgstr "Hash másolása"
 
-#: desktop/src/pages/Results.tsx:239
+#: desktop/src/pages/Results.tsx:229
 msgid "View on VirusTotal"
 msgstr "Megtekintés a VirusTotalon"
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "Detection Details"
 msgstr "Észlelés részletei"
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "Large result set: displaying detections in batches."
 msgstr "Nagy eredményhalmaz: az észlelések kötegekben jelennek meg."
 
-#: desktop/src/pages/Results.tsx:242
+#: desktop/src/pages/Results.tsx:232
 msgid "No result"
 msgstr "Nincs találat"
 
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/pages/Results.tsx:286
 msgid "Review scan findings and take action on detected threats."
 msgstr ""
 "Tekintse át a vizsgálat eredményeit, és intézkedjen az észlelt "
 "fenyegetésekkel kapcsolatban."
 
-#: desktop/src/pages/Results.tsx:296
+#: desktop/src/pages/Results.tsx:286
 msgid "Back to Scan"
 msgstr "Vissza a vizsgálathoz"
 
-#: desktop/src/pages/Results.tsx:297
+#: desktop/src/pages/Results.tsx:287
 msgid "No results yet"
 msgstr "Még nincsenek eredmények"
 
-#: desktop/src/pages/Results.tsx:297
+#: desktop/src/pages/Results.tsx:287
 msgid "Start a scan to see its results here."
 msgstr "Indítson vizsgálatot az eredmények itt való megtekintéséhez."
 
-#: desktop/src/pages/Scan.tsx:96
+#: desktop/src/pages/Scan.tsx:97
 msgid "Scan complete with warnings"
 msgstr "A vizsgálat figyelmeztetésekkel befejeződött"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:97
+#: desktop/src/pages/Scan.tsx:98
 msgid "Scan complete — no threats found"
 msgstr "Vizsgálat befejezve — nem találhatók fenyegetések"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:105
+#: desktop/src/pages/Scan.tsx:106
 msgid "Scan complete — {count} threat detected"
 msgid_plural "Scan complete — {count} threats detected"
 msgstr[0] "Vizsgálat befejezve — {count} fenyegetés észlelve"
 msgstr[1] "Vizsgálat befejezve — {count} fenyegetés észlelve"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:115
+#: desktop/src/pages/Scan.tsx:116
 msgid "Scan cancelled — partial results are available"
 msgstr "A vizsgálat megszakítva — részleges eredmények érhetők el"
 
-#: desktop/src/pages/Scan.tsx:120 desktop/src/pages/Scan.tsx:532
+#: desktop/src/pages/Scan.tsx:121 desktop/src/pages/Scan.tsx:525
 msgid "Scan error"
 msgstr "Vizsgálati hiba"
 
-#: desktop/src/pages/Scan.tsx:120
+#: desktop/src/pages/Scan.tsx:121
 msgid "Unknown error"
 msgstr "Ismeretlen hiba"
 
-#: desktop/src/pages/Scan.tsx:155
+#: desktop/src/pages/Scan.tsx:152
 msgid "API key must contain exactly 64 hexadecimal characters"
 msgstr "Az API-kulcsnak pontosan 64 hexadecimális karaktert kell tartalmaznia"
 
-#: desktop/src/pages/Scan.tsx:183
+#: desktop/src/pages/Scan.tsx:180
 msgid "VirusTotal Scan"
 msgstr "VirusTotal-vizsgálat"
 
-#: desktop/src/pages/Scan.tsx:184
+#: desktop/src/pages/Scan.tsx:181
 msgid ""
 "VirusTotal uploads one file at a time. Only send files you are authorized to "
 "share."
@@ -5296,58 +5304,58 @@ msgstr ""
 "A VirusTotal egyszerre egy fájlt tölt fel. Csak olyan fájlokat küldjön, "
 "amelyek megosztására jogosult."
 
-#: desktop/src/pages/Scan.tsx:188
+#: desktop/src/pages/Scan.tsx:185
 msgid "API key available"
 msgstr "API-kulcs elérhető"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:186 desktop/src/pages/Scan.tsx:558
 msgid "Scanning…"
 msgstr "Vizsgálat folyamatban…"
 
-#: desktop/src/pages/Scan.tsx:189 desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:186 desktop/src/pages/Scan.tsx:558
 msgid "Scan with VirusTotal"
 msgstr "Vizsgálat a VirusTotal használatával"
 
-#: desktop/src/pages/Scan.tsx:191 desktop/src/pages/SettingsPreferences.tsx:385
+#: desktop/src/pages/Scan.tsx:188 desktop/src/pages/SettingsPreferences.tsx:385
 msgid "API Key"
 msgstr "API-kulcs"
 
-#: desktop/src/pages/Scan.tsx:192
+#: desktop/src/pages/Scan.tsx:189
 msgid "Save & Scan"
 msgstr "Mentés & vizsgálat"
 
-#: desktop/src/pages/Scan.tsx:194
+#: desktop/src/pages/Scan.tsx:191
 msgid "Upload file manually"
 msgstr "Fájl manuális feltöltése"
 
-#: desktop/src/pages/Scan.tsx:226
+#: desktop/src/pages/Scan.tsx:223
 msgid "Unable to load scan profiles"
 msgstr "Nem sikerült betölteni a vizsgálati profilokat"
 
-#: desktop/src/pages/Scan.tsx:233
+#: desktop/src/pages/Scan.tsx:230
 msgid "Unable to check scanner status"
 msgstr "Nem sikerült ellenőrizni a víruskereső állapotát"
 
-#: desktop/src/pages/Scan.tsx:267 desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:260 desktop/src/pages/Scan.tsx:341
 msgid "Please select a file or folder to scan"
 msgstr "Válasszon ki egy vizsgálandó fájlt vagy mappát"
 
-#: desktop/src/pages/Scan.tsx:281
+#: desktop/src/pages/Scan.tsx:274
 msgid "Starting scan…"
 msgstr "Vizsgálat indítása…"
 
-#: desktop/src/pages/Scan.tsx:348
+#: desktop/src/pages/Scan.tsx:341
 msgid "Quick Scan profile has no valid targets"
 msgstr "A Gyors vizsgálat profil nem tartalmaz érvényes célokat"
 
 #. Translators: The em dash separates the two clauses; use your language's usual dash and spacing.
-#: desktop/src/pages/Scan.tsx:362 desktop/src/pages/Scan.tsx:465
-#: desktop/src/pages/Scan.tsx:516
+#: desktop/src/pages/Scan.tsx:355 desktop/src/pages/Scan.tsx:458
+#: desktop/src/pages/Scan.tsx:509
 msgid "Scan in progress — wait for it to finish before adding targets"
 msgstr ""
 "Vizsgálat folyamatban van — új célok hozzáadása előtt várja meg a befejezését"
 
-#: desktop/src/pages/Scan.tsx:382
+#: desktop/src/pages/Scan.tsx:375
 msgid "VirusTotal scans one file at a time; {count} selection was ignored."
 msgid_plural ""
 "VirusTotal scans one file at a time; {count} selections were ignored."
@@ -5358,79 +5366,79 @@ msgstr[1] ""
 "A VirusTotal egyszerre csak egy fájlt vizsgál; {count} kijelölést figyelmen "
 "kívül hagytunk."
 
-#: desktop/src/pages/Scan.tsx:397 desktop/src/pages/Scan.tsx:525
+#: desktop/src/pages/Scan.tsx:390 desktop/src/pages/Scan.tsx:518
 msgid "Only local files and folders can be scanned"
 msgstr "Csak helyi fájlok és mappák vizsgálhatók"
 
-#: desktop/src/pages/Scan.tsx:474
+#: desktop/src/pages/Scan.tsx:467
 msgid "Unable to choose scan targets"
 msgstr "Nem sikerült kiválasztani a vizsgálati célokat"
 
-#: desktop/src/pages/Scan.tsx:481
+#: desktop/src/pages/Scan.tsx:474
 msgid "Cancelling scan…"
 msgstr "Vizsgálat megszakítása…"
 
-#: desktop/src/pages/Scan.tsx:483
+#: desktop/src/pages/Scan.tsx:476
 msgid "Unable to cancel scan"
 msgstr "A vizsgálat megszakítása nem sikerült"
 
-#: desktop/src/pages/Scan.tsx:499
+#: desktop/src/pages/Scan.tsx:492
 msgid "Running EICAR test…"
 msgstr "EICAR-teszt futtatása…"
 
-#: desktop/src/pages/Scan.tsx:540 desktop/src/pages/Scan.tsx:567
+#: desktop/src/pages/Scan.tsx:533 desktop/src/pages/Scan.tsx:560
 msgid "Details"
 msgstr "Részletek"
 
-#: desktop/src/pages/Scan.tsx:543
+#: desktop/src/pages/Scan.tsx:536
 msgid "Backend"
 msgstr "Háttérrendszer"
 
-#: desktop/src/pages/Scan.tsx:544
+#: desktop/src/pages/Scan.tsx:537
 msgid "Manage Profiles"
 msgstr "Profilok kezelése"
 
-#: desktop/src/pages/Scan.tsx:549
+#: desktop/src/pages/Scan.tsx:542
 msgid "Profile"
 msgstr "Profil"
 
-#: desktop/src/pages/Scan.tsx:555
+#: desktop/src/pages/Scan.tsx:548
 msgid "No Profile (Manual)"
 msgstr "Nincs profil (kézi)"
 
-#: desktop/src/pages/Scan.tsx:559
+#: desktop/src/pages/Scan.tsx:552
 msgid "Drop local files or folders here, or add them below."
 msgstr "Húzzon ide helyi fájlokat vagy mappákat, vagy adja hozzá őket alább."
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Start Scan"
 msgstr "Vizsgálat indítása"
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Run EICAR Test"
 msgstr "EICAR-teszt futtatása"
 
-#: desktop/src/pages/Scan.tsx:565
+#: desktop/src/pages/Scan.tsx:558
 msgid "Select one file before using VirusTotal"
 msgstr "A VirusTotal használata előtt válasszon ki egy fájlt"
 
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:77
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/ScanOverview.tsx:77
 msgid "Latest scan"
 msgstr "Legutóbbi vizsgálat"
 
-#: desktop/src/pages/Scan.tsx:567 desktop/src/pages/ScanOverview.tsx:80
+#: desktop/src/pages/Scan.tsx:560 desktop/src/pages/ScanOverview.tsx:80
 msgid "View Results"
 msgstr "Eredmények megtekintése"
 
-#: desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Scan.tsx:562
 msgid "Virus database is not available"
 msgstr "A vírusadatbázis nem érhető el"
 
-#: desktop/src/pages/Scan.tsx:569 desktop/src/pages/ScanOverview.tsx:67
+#: desktop/src/pages/Scan.tsx:562 desktop/src/pages/ScanOverview.tsx:67
 msgid "Update the database before starting a scan."
 msgstr "A vizsgálat indítása előtt frissítse az adatbázist."
 
-#: desktop/src/pages/Scan.tsx:569
+#: desktop/src/pages/Scan.tsx:562
 msgid "Open Database Updates"
 msgstr "Adatbázisfrissítések megnyitása"
 
