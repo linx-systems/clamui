@@ -3,7 +3,7 @@ use futures_util::StreamExt;
 use serde_json::json;
 use std::{sync::Mutex, time::Duration};
 use tauri::{AppHandle, Emitter, Manager};
-use zbus::zvariant::{OwnedValue, Value};
+use zbus::{OwnedVariant, Variant};
 
 const APPEARANCE: &str = "org.freedesktop.appearance";
 const ACCENT_COLOR: &str = "accent-color";
@@ -41,7 +41,7 @@ pub(crate) fn init(app: AppHandle, ctx: Context) {
 
 async fn watch(app: &AppHandle, ctx: &Context) -> zbus::Result<()> {
     let connection = tokio::time::timeout(PORTAL_TIMEOUT, async {
-        zbus::connection::Builder::session()?
+        zbus::connection::Builder::session()
             .method_timeout(PORTAL_TIMEOUT)
             .build()
             .await
@@ -61,7 +61,7 @@ async fn watch(app: &AppHandle, ctx: &Context) -> zbus::Result<()> {
         .receive_signal_with_args("SettingChanged", &[(0, APPEARANCE), (1, ACCENT_COLOR)])
         .await?;
     match proxy
-        .call::<_, _, OwnedValue>("Read", &(APPEARANCE, ACCENT_COLOR))
+        .call::<_, _, OwnedVariant>("Read", &(APPEARANCE, ACCENT_COLOR))
         .await
     {
         Ok(value) => publish(app, ctx, value),
@@ -73,7 +73,10 @@ async fn watch(app: &AppHandle, ctx: &Context) -> zbus::Result<()> {
     }
 
     while let Some(message) = changes.next().await {
-        match message.body().deserialize::<(String, String, OwnedValue)>() {
+        match message
+            .body()
+            .deserialize::<(String, String, OwnedVariant)>()
+        {
             Ok((namespace, key, value)) if namespace == APPEARANCE && key == ACCENT_COLOR => {
                 publish(app, ctx, value);
             }
@@ -88,7 +91,7 @@ async fn watch(app: &AppHandle, ctx: &Context) -> zbus::Result<()> {
     Ok(())
 }
 
-fn publish(app: &AppHandle, ctx: &Context, value: OwnedValue) {
+fn publish(app: &AppHandle, ctx: &Context, value: OwnedVariant) {
     let accent = match parse_portal_accent(value) {
         Some(PortalAccent::Color(hex)) => Some(hex),
         Some(PortalAccent::Unset) => None,
@@ -124,13 +127,13 @@ fn debug(ctx: &Context, level: &str, message: &str) {
     let _ = clamui_core::logs::write_debug(ctx, level, "accent-color", message);
 }
 
-fn parse_portal_accent(value: OwnedValue) -> Option<PortalAccent> {
-    let mut value = Value::from(value);
+fn parse_portal_accent(value: OwnedVariant) -> Option<PortalAccent> {
+    let mut value = Variant::from(value);
     // Read may wrap its result in an extra variant; SettingChanged does not.
-    while let Value::Value(inner) = value {
+    while let Variant::Variant(inner) = value {
         value = *inner;
     }
-    let Value::Structure(rgb) = value else {
+    let Variant::Structure(rgb) = value else {
         return None;
     };
     // Validate the arity before conversion: zvariant's tuple conversion can panic
@@ -205,9 +208,9 @@ mod tests {
 
     #[test]
     fn parses_signal_and_nested_read_variants() {
-        let rgb = Value::from((0.0, 0.5, 1.0));
+        let rgb = Variant::from((0.0, 0.5, 1.0));
         let direct = rgb.try_to_owned().unwrap();
-        let nested = Value::Value(Box::new(rgb)).try_to_owned().unwrap();
+        let nested = Variant::Variant(Box::new(rgb)).try_to_owned().unwrap();
         let expected = Some(PortalAccent::Color("#0080ff".into()));
         assert_eq!(parse_portal_accent(direct), expected);
         assert_eq!(parse_portal_accent(nested), expected);
@@ -216,9 +219,9 @@ mod tests {
     #[test]
     fn treats_out_of_range_rgb_as_unset() {
         for value in [
-            Value::from((-1.0, -1.0, -1.0)),
-            Value::from((0.5, 1.5, 0.5)),
-            Value::Value(Box::new(Value::from((-1.0, -1.0, -1.0)))),
+            Variant::from((-1.0, -1.0, -1.0)),
+            Variant::from((0.5, 1.5, 0.5)),
+            Variant::Variant(Box::new(Variant::from((-1.0, -1.0, -1.0)))),
         ] {
             assert_eq!(
                 parse_portal_accent(value.try_to_owned().unwrap()),
@@ -230,10 +233,10 @@ mod tests {
     #[test]
     fn rejects_wrong_dbus_types() {
         for value in [
-            Value::from((1u32, 0u32, 0u32)),
-            Value::from("blue"),
-            Value::from((0.0, 1.0)),
-            Value::from((0.0, 1.0, 0.5, 1.0)),
+            Variant::from((1u32, 0u32, 0u32)),
+            Variant::from("blue"),
+            Variant::from((0.0, 1.0)),
+            Variant::from((0.0, 1.0, 0.5, 1.0)),
         ] {
             assert_eq!(parse_portal_accent(value.try_to_owned().unwrap()), None);
         }
