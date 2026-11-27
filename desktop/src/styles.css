@@ -2147,8 +2147,18 @@ dialog.modal-dialog.about-dialog { width: min(720px, calc(100vw - 32px)); }
   .about-credit-list { columns: 1; }
 }
 
+.startup-error[hidden] { display: none; }
 .startup-error { display: grid; place-items: center; min-height: 100%; padding: 16px; }
 .startup-error .card { width: min(560px, 100%); }
+.startup-error-details {
+  max-height: 40vh;
+  overflow: auto;
+  padding: 8px;
+  font: 12px/1.4 ui-monospace, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
 
 .sr-only {
   position: absolute;

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-frontend-ready"
+description = "Enables the frontend_ready command without any pre-configured scope."
+commands.allow = ["frontend_ready"]
+
+[[permission]]
+identifier = "deny-frontend-ready"
+description = "Denies the frontend_ready command without any pre-configured scope."
+commands.deny = ["frontend_ready"]

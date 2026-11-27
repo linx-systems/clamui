@@ -10,6 +10,7 @@
 - Added independent OpenSnitch service and graphical-interface checks to the application-firewall audit, with an explicit GUI launch action when available; Portmaster remains a separate check. (#241)
 - Added a Vietnamese (`vi`) translation.
 - The desktop app now follows the system accent color from the XDG desktop portal (`org.freedesktop.appearance` `accent-color`), including live changes without a restart, and keeps the built-in blue when no accent is set. (#325)
+- Added startup diagnostics for a blank or gray window: the app now shows a JavaScript or render error in the window instead of leaving it blank, records its native startup stages, writes one `startup-watchdog` warning to the debug log when the interface has not appeared after ten seconds (naming whether native startup, the UI thread, or the web page is stuck), and ships `scripts/inspect-blank-window.py` to inspect the web view of a blank window (the WebKit inspector can itself freeze the start on some systems, so the script and the troubleshooting page say to compare with a start without it). Set `CLAMUI_STARTUP_TRACE=1` to print the stages. (#361)
 
 ### Changed
 

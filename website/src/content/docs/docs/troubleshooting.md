@@ -47,6 +47,39 @@ Existing persistent app-scoped overrides can affect later launches. Inspect them
 
 If the window is still blank, include the terminal output from the launch, ClamUI and Flatpak versions, GPU and driver, and desktop session type (Wayland or X11) when reporting it.
 
+#### Find out where startup stops
+
+A blank or gray window can also come from a stuck native start, a blocked UI thread, or a web page that failed before it drew anything. WebKit does not print JavaScript errors to the terminal, so a clean launch log does not rule these out. ClamUI records its startup stages and reports them if the interface has not appeared after ten seconds.
+
+If the interface fails to start, ClamUI shows the error in the window instead of leaving it blank. Include that text in your report. For a launch from a terminal, set `CLAMUI_STARTUP_TRACE=1` to print every native startup stage with its timing:
+
+```bash
+flatpak run --env=CLAMUI_STARTUP_TRACE=1 io.github.linx_systems.ClamUI
+```
+
+After ten seconds without an interface the terminal and the debug log (`~/.var/app/io.github.linx_systems.ClamUI/data/clamui/debug/clamui.log` for the Flatpak) contain a `startup-watchdog` line. Its first sentence says which stage stopped:
+
+| Message | Meaning |
+| --- | --- |
+| `native startup did not finish; the last milestone was ...` | The native side is stuck before or inside `setup()`, including its later steps after the window exists (accent colour, notification actions, device monitor, profile sync); the last milestone names the stage that completed. |
+| `the UI thread did not run a queued task` | Native startup finished (`setup finished` is in the timeline), but the GTK thread is blocked afterwards, typically in a synchronous D-Bus, portal, or accessibility call. |
+| `... but the web page never reported that it mounted` | Native startup finished and the UI thread is responsive; the problem is in the web view: a bundle that did not load, a JavaScript error, or IPC that does not answer. |
+
+A `frontend-startup` line in the same log carries the JavaScript error when the page itself reported one.
+
+To inspect the web view of a window that stays blank, start ClamUI with WebKit's local remote inspector and run the diagnostic script from a second terminal. It talks only to `127.0.0.1`, changes nothing, and prints the page state, WebKit's console messages, and whether the native side answers a request:
+
+```bash
+flatpak run --env=WEBKIT_INSPECTOR_HTTP_SERVER=127.0.0.1:9222 io.github.linx_systems.ClamUI
+python3 scripts/inspect-blank-window.py
+```
+
+The script is [`scripts/inspect-blank-window.py`](https://github.com/linx-systems/clamui/blob/master/scripts/inspect-blank-window.py) in the source repository. If it reports that the inspector port never answered the handshake, either the native UI thread is blocked or the inspector itself froze the start.
+
+:::caution
+`WEBKIT_INSPECTOR_HTTP_SERVER` can freeze ClamUI's start on some systems: WebKit and GLib can deadlock while the inspector server connects, before the window exists (reproduced on Zorin OS 17.3 with the GNOME 51 runtime, with and without this release's diagnostics). A hang with the inspector enabled is therefore not evidence for a blank-window bug. Check by starting ClamUI again without the inspector variable but with `CLAMUI_STARTUP_TRACE=1`. If that start reaches `frontend mounted`, the inspector caused the hang; if it stops, the `startup-watchdog` line names the stage.
+:::
+
 ## Daemon backend unavailable
 
 The daemon backend needs `clamd` and `clamdscan` running. Check its service, then choose **Auto** or **Clamscan** if you do not need a persistent daemon:
