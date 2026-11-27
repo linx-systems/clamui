@@ -6,6 +6,7 @@ import { copyText, navigate, onEvent, openExternal, request, saveText } from "..
 import { formatScanOutput } from "../scanOutput";
 import { scanLogChunks } from "../scanLog";
 import { ScanLogViewport } from "../ScanLogViewport";
+import { resultStore } from "../resultStore";
 
 type Threat = { file_path: string; threat_name: string; category?: string; severity?: string };
 type ScanResult = { id?: string; status: string; path?: string; stdout?: string; stderr?: string; scanned_files?: number; scanned_dirs?: number; infected_count?: number; threat_details?: Threat[]; skipped_files?: string[]; skipped_count?: number; warning_message?: string; nonfatal_warnings?: string[]; error_message?: string | null; per_target_results?: ScanResult[] };
@@ -79,17 +80,6 @@ function completedVT(value: unknown): VTResult | null {
   const record = asRecord(value);
   return record && isVTResult(record.result) ? record.result : null;
 }
-function storedResult<T>(key: string, guard: (value: unknown) => value is T): T | null {
-  const serialized = sessionStorage.getItem(key);
-  if (!serialized) return null;
-  try {
-    const parsed: unknown = JSON.parse(serialized);
-    return guard(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
 type ScanHero = { tone: "success" | "danger" | "warning" | "neutral"; icon: IconName; title: string; description: string };
 function scanHero(status: string, threatCount: number): ScanHero {
   if (status === "infected" || threatCount > 0) return { tone: "danger", icon: "warning", title: ngettext("{count} threat found", "{count} threats found", threatCount, { count: threatCount }), description: _("Review the files below and move them to quarantine or exclude them.") };
@@ -253,8 +243,8 @@ function FullscreenOutput({ title, chunks, onCopyOrExport, onClose }: { title: s
 }
 
 export default function Results() {
-  const [scan, setScan] = useState<ScanResult | null>(() => storedResult("clamui-last-scan-result", isScanResult));
-  const [virusTotal, setVirusTotal] = useState<VTResult | null>(() => storedResult("clamui-last-vt-result", isVTResult));
+  const [scan, setScan] = useState<ScanResult | null>(() => resultStore.recall("scan", isScanResult));
+  const [virusTotal, setVirusTotal] = useState<VTResult | null>(() => resultStore.recall("virustotal", isVTResult));
 
   useEffect(() => {
     const onScan = (event: Event) => {

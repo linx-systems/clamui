@@ -94,6 +94,17 @@ errors=0
 scanned=0
 scan_file() {
     file=$1
+    # clamd cannot fstat descriptors of FUSE files owned by another user.
+    if [ "$stream" -ne 1 ] && [ -n "${CLAMUI_FIXTURE_FUSE_ROOT:-}" ]; then
+        case "$file" in
+            "$CLAMUI_FIXTURE_FUSE_ROOT"/*)
+                printf '%s: Not a regular file ERROR\n' "$file"
+                errors=$((errors + 1))
+                scanned=$((scanned + 1))
+                return
+                ;;
+        esac
+    fi
     if [ ! -r "$file" ]; then
         printf '%s: Failed to open file ERROR\n' "$file"
         errors=$((errors + 1))
@@ -133,6 +144,12 @@ else
     fi
     if [ -n "${CLAMUI_FIXTURE_BLOCK:-}" ]; then
         while :; do sleep 1; done
+    fi
+    if [ "$stream" -ne 1 ] && [ -n "${CLAMUI_FIXTURE_FUSE_STDIN:-}" ]; then
+        # The stdin route names the descriptor, not the file, and exits 0.
+        printf 'fd[10]: Not a regular file ERROR\n'
+        printf 'Scanned files: 1\nInfected files: 0\n'
+        exit 0
     fi
     if grep -q INFECTED; then
         if [ "$stream" -eq 1 ]; then label=stream; else label=fd[0]; fi
@@ -1482,4 +1499,189 @@ fn daemon_crlf_rejects_invalid_nul_wire_target() {
     assert_eq!(result["scanned_files"], 0);
     assert_eq!(result["infected_count"], 0);
     assert_eq!(result["per_target_results"][0]["status"], "error");
+}
+
+/// A real user-owned FUSE mount (no `allow_other`), the situation of
+/// squashfuse, AppImage and sshfs mounts. `None` when no FUSE helper works.
+struct FuseMount {
+    mountpoint: std::path::PathBuf,
+}
+
+impl FuseMount {
+    fn overlay(temp: &TempDir, populate: impl FnOnce(&Path)) -> Option<Self> {
+        let lower = temp.path().join("fuse-lower");
+        let mountpoint = temp.path().join("fuse-mnt");
+        fs::create_dir_all(&lower).ok()?;
+        fs::create_dir_all(&mountpoint).ok()?;
+        fs::write(lower.join("clean.txt"), b"clean").ok()?;
+        fs::write(lower.join("infected.txt"), b"INFECTED").ok()?;
+        populate(&lower);
+        let mounted = std::process::Command::new("fuse-overlayfs")
+            .arg("-o")
+            .arg(format!("lowerdir={}", lower.display()))
+            .arg(&mountpoint)
+            .status()
+            .ok()?
+            .success();
+        mounted.then_some(Self { mountpoint })
+    }
+}
+
+impl Drop for FuseMount {
+    fn drop(&mut self) {
+        let _ = std::process::Command::new("fusermount3")
+            .arg("-u")
+            .arg(&self.mountpoint)
+            .status();
+    }
+}
+
+fn fuse_context(
+    temp: &TempDir,
+    context: &Context,
+    populate: impl FnOnce(&Path),
+) -> Option<FuseMount> {
+    let mount = FuseMount::overlay(temp, populate)?;
+    let magic = std::process::Command::new("stat")
+        .args(["-f", "-c", "%t"])
+        .arg(&mount.mountpoint)
+        .output()
+        .ok()?;
+    if String::from_utf8_lossy(&magic.stdout).trim() != "65735546" {
+        eprintln!("skipping: mount is not a FUSE filesystem");
+        return None;
+    }
+    context
+        .update_settings(json!({
+            "scan_backend": "daemon",
+            "exclusion_patterns": disabled_default_exclusions(),
+        }))
+        .expect("settings");
+    Some(mount)
+}
+
+#[test]
+fn daemon_scans_files_on_a_fuse_mount_through_the_stream_transport() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let Some(mount) = fuse_context(&temp, &context, |_| {}) else {
+        eprintln!("skipping: fuse-overlayfs is unavailable");
+        return;
+    };
+    let mut environment = install_daemon_fixture(&temp);
+    environment.set("CLAMUI_FIXTURE_FUSE_ROOT", &mount.mountpoint);
+    // A regular directory next to the mount must keep using --fdpass.
+    let plain = temp.path().join("plain");
+    fs::create_dir_all(&plain).expect("plain directory");
+    fs::write(plain.join("clean.txt"), b"clean").expect("plain file");
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "fuse-stream", "paths": [mount.mountpoint, plain]}),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["status"], "infected", "{result}");
+    assert_eq!(result["scanned_files"], 3);
+    assert_eq!(result["infected_count"], 1);
+    assert_eq!(result["skipped_count"], 0);
+    assert!(result["error_message"].is_null(), "{result}");
+    assert!(!result["stdout"]
+        .as_str()
+        .unwrap_or_default()
+        .contains("Not a regular file"));
+    assert_eq!(
+        result["threat_details"][0]["file_path"],
+        mount
+            .mountpoint
+            .join("infected.txt")
+            .to_string_lossy()
+            .as_ref()
+    );
+}
+
+#[test]
+fn daemon_scans_a_single_file_on_a_fuse_mount_through_the_stream_transport() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    let Some(mount) = fuse_context(&temp, &context, |_| {}) else {
+        eprintln!("skipping: fuse-overlayfs is unavailable");
+        return;
+    };
+    let mut environment = install_daemon_fixture(&temp);
+    environment.set("CLAMUI_FIXTURE_FUSE_ROOT", &mount.mountpoint);
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "fuse-file", "paths": [mount.mountpoint.join("clean.txt")]}),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["status"], "clean", "{result}");
+    assert_eq!(result["scanned_files"], 1);
+}
+
+#[test]
+fn daemon_fuse_files_with_long_paths_use_the_stream_transport_on_stdin() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    // The mount root is short, so a path above 1022 bytes needs deep directories
+    // inside the lower layer that the overlay exposes.
+    let relative = std::cell::RefCell::new(std::path::PathBuf::new());
+    let Some(mount) = fuse_context(&temp, &context, |lower| {
+        let long = file_with_path_length(&lower.join("long"), 1100, false);
+        fs::write(&long, b"clean").expect("long file");
+        *relative.borrow_mut() = long
+            .strip_prefix(lower)
+            .expect("relative path")
+            .to_path_buf();
+    }) else {
+        eprintln!("skipping: fuse-overlayfs is unavailable");
+        return;
+    };
+    let mut environment = install_daemon_fixture(&temp);
+    // Only a FUSE file sent over stdin with --fdpass would hit the fd[N] error.
+    environment.set("CLAMUI_FIXTURE_FUSE_STDIN", "1");
+    let target = mount.mountpoint.join(&*relative.borrow());
+    assert!(target.as_os_str().as_bytes().len() > 1022);
+
+    let result = scanner::dispatch(
+        &context,
+        "scan",
+        json!({"id": "fuse-stdin", "paths": [target]}),
+    )
+    .expect("scan result");
+
+    assert_eq!(result["status"], "clean", "{result}");
+    assert_eq!(result["scanned_files"], 1);
+    assert!(result["error_message"].is_null(), "{result}");
+}
+
+#[test]
+fn daemon_stdin_errors_without_a_path_are_attributed_to_the_scanned_file() {
+    let _environment = environment_lock();
+    let (temp, context) = fixture_context();
+    context
+        .update_settings(json!({
+            "scan_backend": "daemon",
+            "exclusion_patterns": disabled_default_exclusions(),
+        }))
+        .expect("settings");
+    let mut environment = install_daemon_fixture(&temp);
+    environment.set("CLAMUI_FIXTURE_FUSE_STDIN", "1");
+    let long = file_with_path_length(&temp.path().join("scan"), 1100, false);
+    fs::write(&long, b"clean").expect("long file");
+
+    let result = scanner::dispatch(&context, "scan", json!({"id": "fd-error", "paths": [long]}))
+        .expect("scan result");
+
+    assert_eq!(result["status"], "error", "{result}");
+    let expected = format!("{}: Not a regular file ERROR", long.display());
+    assert_eq!(result["error_message"], expected.as_str());
+    assert!(!result["stdout"]
+        .as_str()
+        .unwrap_or_default()
+        .contains("fd[10]"));
 }
