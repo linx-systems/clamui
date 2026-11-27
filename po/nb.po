@@ -61,7 +61,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-24 12:08-0500\n"
+"POT-Creation-Date: 2026-11-26 18:51+0100\n"
 "PO-Revision-Date: 2026-10-17 12:00+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: Norwegian Bokmål\n"
@@ -71,366 +71,374 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:350
 msgid "ClamAV is not installed"
 msgstr "ClamAV er ikke installert"
 
-#: crates/clamui-core/src/audit.rs:349
+#: crates/clamui-core/src/audit.rs:352
 msgid "Install ClamAV to enable virus scanning"
 msgstr "Installer ClamAV for å kunne skanne etter virus"
 
-#: crates/clamui-core/src/audit.rs:367
+#: crates/clamui-core/src/audit.rs:370
 msgid "Installed: {version}"
 msgstr "Installert: {version}"
 
-#: crates/clamui-core/src/audit.rs:379
+#: crates/clamui-core/src/audit.rs:382
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] "Oppdatert ({days} dag gammel, bygget {date})"
 msgstr[1] "Oppdatert ({days} dager gammel, bygget {date})"
 
-#: crates/clamui-core/src/audit.rs:397 crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:400 crates/clamui-core/src/audit.rs:420
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] "Databasen er {days} dag gammel (bygget {date})"
 msgstr[1] "Databasen er {days} dager gammel (bygget {date})"
 
-#: crates/clamui-core/src/audit.rs:405
+#: crates/clamui-core/src/audit.rs:408
 msgid "Update virus database to ensure protection"
 msgstr "Oppdater virusdatabasen for å sikre beskyttelsen"
 
-#: crates/clamui-core/src/audit.rs:425
+#: crates/clamui-core/src/audit.rs:428
 msgid "Database is critically outdated. Update immediately."
 msgstr "Databasen er kritisk utdatert. Oppdater den med en gang."
 
-#: crates/clamui-core/src/audit.rs:446
+#: crates/clamui-core/src/audit.rs:449
 msgid "Database files exist but age could not be determined"
 msgstr "Databasefilene finnes, men alderen kunne ikke fastslås"
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:451
 msgid "No virus database found"
 msgstr "Fant ingen virusdatabase"
 
-#: crates/clamui-core/src/audit.rs:452
+#: crates/clamui-core/src/audit.rs:455
 msgid "Download virus database"
 msgstr "Last ned virusdatabasen"
 
-#: crates/clamui-core/src/audit.rs:470
+#: crates/clamui-core/src/audit.rs:473
 msgid "Service {name} is running"
 msgstr "Tjenesten {name} kjører"
 
-#: crates/clamui-core/src/audit.rs:482
+#: crates/clamui-core/src/audit.rs:485
 msgid "Daemon is responding"
 msgstr "Tjenesten svarer"
 
-#: crates/clamui-core/src/audit.rs:490
+#: crates/clamui-core/src/audit.rs:493
 msgid "ClamAV daemon is not running"
 msgstr "ClamAV-tjenesten kjører ikke"
 
-#: crates/clamui-core/src/audit.rs:492
+#: crates/clamui-core/src/audit.rs:495
 msgid "Start the daemon for faster scanning"
 msgstr "Start tjenesten for raskere skanning"
 
-#: crates/clamui-core/src/audit.rs:509
+#: crates/clamui-core/src/audit.rs:512
 msgid "Freshclam service is active"
 msgstr "freshclam-tjenesten er aktiv"
 
-#: crates/clamui-core/src/audit.rs:517
+#: crates/clamui-core/src/audit.rs:520
 msgid "Freshclam automatic update service is not running"
 msgstr "freshclam-tjenesten for automatisk oppdatering kjører ikke"
 
-#: crates/clamui-core/src/audit.rs:519
+#: crates/clamui-core/src/audit.rs:522
 msgid "Enable automatic database updates"
 msgstr "Slå på automatisk oppdatering av databasen"
 
-#: crates/clamui-core/src/audit.rs:543
+#: crates/clamui-core/src/audit.rs:546
 msgid "Scheduled scans are enabled"
 msgstr "Planlagte skanninger er aktivert"
 
-#: crates/clamui-core/src/audit.rs:551
+#: crates/clamui-core/src/audit.rs:554
 msgid "Scheduled scans are not enabled"
 msgstr "Planlagte skanninger er ikke aktivert"
 
-#: crates/clamui-core/src/audit.rs:553
+#: crates/clamui-core/src/audit.rs:556
 msgid "Enable scheduled scans in Preferences → Schedule"
 msgstr "Aktiver planlagte skanninger under Brukervalg → Rute"
 
-#: crates/clamui-core/src/audit.rs:561
+#: crates/clamui-core/src/audit.rs:564
 msgid "No scheduling backend is available on this system"
 msgstr "Ingen planleggingstjeneste er tilgjengelig på dette systemet"
 
-#: crates/clamui-core/src/audit.rs:563
+#: crates/clamui-core/src/audit.rs:566
 msgid "Scheduled scans require a systemd user session or cron"
 msgstr "Planlagte skanninger krever en systemd-brukersesjon eller cron"
 
-#: crates/clamui-core/src/audit.rs:749
+#: crates/clamui-core/src/audit.rs:752
 msgid "Open Ports"
 msgstr "Åpne porter"
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:758
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] "{count} port lytter, risikable porter: {ports}"
 msgstr[1] "{count} porter lytter, risikable porter: {ports}"
 
-#: crates/clamui-core/src/audit.rs:766
+#: crates/clamui-core/src/audit.rs:769
 msgid "Review if these services need to be exposed"
 msgstr "Vurder om disse tjenestene må være tilgjengelige utenfra"
 
-#: crates/clamui-core/src/audit.rs:773
+#: crates/clamui-core/src/audit.rs:776
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] "{count} port lytter"
 msgstr[1] "{count} porter lytter"
 
-#: crates/clamui-core/src/audit.rs:781
+#: crates/clamui-core/src/audit.rs:784
 msgid "Review open ports and close unnecessary services"
 msgstr "Se over åpne porter og steng unødvendige tjenester"
 
-#: crates/clamui-core/src/audit.rs:791 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:794 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr "Noen nettverkssokkelrader kunne ikke leses."
 
-#: crates/clamui-core/src/audit.rs:798
+#: crates/clamui-core/src/audit.rs:801
 msgid "No open ports detected"
 msgstr "Fant ingen åpne porter"
 
-#: crates/clamui-core/src/audit.rs:832
+#: crates/clamui-core/src/audit.rs:835
 msgid "AppArmor is enabled"
 msgstr "AppArmor er slått på"
 
-#: crates/clamui-core/src/audit.rs:840
+#: crates/clamui-core/src/audit.rs:843
 msgid "AppArmor module is loaded but not enabled"
 msgstr "AppArmor-modulen er lastet, men ikke slått på"
 
-#: crates/clamui-core/src/audit.rs:842
+#: crates/clamui-core/src/audit.rs:845
 msgid "Enable AppArmor for application sandboxing"
 msgstr "Slå på AppArmor for å isolere programmer"
 
-#: crates/clamui-core/src/audit.rs:858
+#: crates/clamui-core/src/audit.rs:861
 msgid "SELinux is enforcing"
 msgstr "SELinux håndhever reglene (enforcing)"
 
-#: crates/clamui-core/src/audit.rs:866
+#: crates/clamui-core/src/audit.rs:869
 msgid "SELinux is in permissive mode"
 msgstr "SELinux er i tillatende modus (permissive)"
 
-#: crates/clamui-core/src/audit.rs:868
+#: crates/clamui-core/src/audit.rs:871
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 "Vurder å bytte til håndhevende modus (enforcing) for sterkere beskyttelse"
 
-#: crates/clamui-core/src/audit.rs:880
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is disabled"
 msgstr "SELinux er slått av"
 
-#: crates/clamui-core/src/audit.rs:882
+#: crates/clamui-core/src/audit.rs:885
 msgid "Enable SELinux for mandatory access control"
 msgstr "Slå på SELinux for obligatorisk tilgangskontroll"
 
-#: crates/clamui-core/src/audit.rs:897
+#: crates/clamui-core/src/audit.rs:900
 msgid "No mandatory access control framework detected"
 msgstr "Fant ikke noe rammeverk for obligatorisk tilgangskontroll (MAC)"
 
-#: crates/clamui-core/src/audit.rs:899
+#: crates/clamui-core/src/audit.rs:902
 msgid "Consider enabling AppArmor or SELinux"
 msgstr "Vurder å slå på AppArmor eller SELinux"
 
-#: crates/clamui-core/src/audit.rs:925
+#: crates/clamui-core/src/audit.rs:928
 msgid "Automatic security updates are enabled"
 msgstr "Automatiske sikkerhetsoppdateringer er slått på"
 
-#: crates/clamui-core/src/audit.rs:936
+#: crates/clamui-core/src/audit.rs:939
 msgid "Unattended upgrades is installed but disabled"
 msgstr "Unattended Upgrades er installert, men slått av"
 
-#: crates/clamui-core/src/audit.rs:938
+#: crates/clamui-core/src/audit.rs:941
 msgid "Enable automatic security updates"
 msgstr "Slå på automatiske sikkerhetsoppdateringer"
 
-#: crates/clamui-core/src/audit.rs:952
+#: crates/clamui-core/src/audit.rs:955
 msgid "DNF automatic updates are enabled"
 msgstr "Automatiske oppdateringer med DNF er slått på"
 
-#: crates/clamui-core/src/audit.rs:963
+#: crates/clamui-core/src/audit.rs:966
 msgid "DNF automatic is installed but timer is not active"
 msgstr "DNF Automatic er installert, men tidsuret er ikke aktivt"
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
 msgid "Enable automatic updates"
 msgstr "Slå på automatiske oppdateringer"
 
-#: crates/clamui-core/src/audit.rs:979
+#: crates/clamui-core/src/audit.rs:983
+msgid "os-update automatic updates are enabled"
+msgstr "Automatiske oppdateringer med os-update er aktivert"
+
+#: crates/clamui-core/src/audit.rs:994
+msgid "os-update is installed but timer is not active"
+msgstr "os-update er installert, men tidtakeren er ikke aktiv"
+
+#: crates/clamui-core/src/audit.rs:1009
 msgid "Could not determine automatic update status"
 msgstr "Kunne ikke fastslå status for automatiske oppdateringer"
 
-#: crates/clamui-core/src/audit.rs:981
+#: crates/clamui-core/src/audit.rs:1011
 msgid "Configure automatic security updates"
 msgstr "Sett opp automatiske sikkerhetsoppdateringer"
 
-#: crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:1030
 msgid "System reboot required to apply updates"
 msgstr "Systemet må startes på nytt for å ta i bruk oppdateringene"
 
-#: crates/clamui-core/src/audit.rs:998
+#: crates/clamui-core/src/audit.rs:1032
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 "Start systemet på nytt for å ta i bruk ventende sikkerhetsoppdateringer"
 
-#: crates/clamui-core/src/audit.rs:1044
+#: crates/clamui-core/src/audit.rs:1078
 msgid "{name} is installed but not running"
 msgstr "{name} er installert, men kjører ikke"
 
-#: crates/clamui-core/src/audit.rs:1063
+#: crates/clamui-core/src/audit.rs:1097
 msgid "No intrusion detection system found"
 msgstr "Fant ikke noe system for inntrengingsdeteksjon"
 
-#: crates/clamui-core/src/audit.rs:1065
+#: crates/clamui-core/src/audit.rs:1099
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr "Installer fail2ban eller CrowdSec for å beskytte mot angrep"
 
-#: crates/clamui-core/src/audit.rs:1092
+#: crates/clamui-core/src/audit.rs:1126
 msgid "SSH server is not running (no remote attack surface)"
 msgstr "SSH-serveren kjører ikke (ingen angrepsflate utenfra)"
 
-#: crates/clamui-core/src/audit.rs:1103
+#: crates/clamui-core/src/audit.rs:1137
 msgid "SSH server is running"
 msgstr "SSH-serveren kjører"
 
-#: crates/clamui-core/src/audit.rs:1113
+#: crates/clamui-core/src/audit.rs:1147
 msgid "Could not read SSH configuration"
 msgstr "Kunne ikke lese SSH-konfigurasjonen"
 
-#: crates/clamui-core/src/audit.rs:1132
+#: crates/clamui-core/src/audit.rs:1166
 msgid "Root login: {value}"
 msgstr "Innlogging som root: {value}"
 
-#: crates/clamui-core/src/audit.rs:1140
+#: crates/clamui-core/src/audit.rs:1174
 msgid "Root login is allowed ({value})"
 msgstr "Innlogging som root er tillatt ({value})"
 
-#: crates/clamui-core/src/audit.rs:1146
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Disable root SSH login for security"
 msgstr "Slå av innlogging som root over SSH av hensyn til sikkerheten"
 
-#: crates/clamui-core/src/audit.rs:1161
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Password authentication is disabled (key-only)"
 msgstr "Passordautentisering er slått av (bare nøkler)"
 
-#: crates/clamui-core/src/audit.rs:1169
+#: crates/clamui-core/src/audit.rs:1203
 msgid "Password authentication is enabled"
 msgstr "Passordautentisering er slått på"
 
-#: crates/clamui-core/src/audit.rs:1171
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr "Vurder å slå av passordautentisering og bruke SSH-nøkler i stedet"
 
-#: crates/clamui-core/src/audit.rs:1189
+#: crates/clamui-core/src/audit.rs:1223
 msgid "X11 forwarding is disabled"
 msgstr "X11-videresending er slått av"
 
-#: crates/clamui-core/src/audit.rs:1197
+#: crates/clamui-core/src/audit.rs:1231
 msgid "X11 forwarding is enabled"
 msgstr "X11-videresending er slått på"
 
-#: crates/clamui-core/src/audit.rs:1199
+#: crates/clamui-core/src/audit.rs:1233
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr "Slå av X11-videresending for å redusere angrepsflaten"
 
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1293
 msgid "Application firewalls"
 msgstr "Applikasjonsbrannmurer"
 
-#: crates/clamui-core/src/audit.rs:1282
+#: crates/clamui-core/src/audit.rs:1316
 msgid "Portmaster is running and protecting connections"
 msgstr "Portmaster kjører og beskytter tilkoblingene"
 
-#: crates/clamui-core/src/audit.rs:1305
+#: crates/clamui-core/src/audit.rs:1339
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr "Gi ClamUI tilgang i Portmaster for å se tilstanden til hver modul"
 
-#: crates/clamui-core/src/audit.rs:1308
+#: crates/clamui-core/src/audit.rs:1342
 msgid "Authorize"
 msgstr "Gi tilgang"
 
-#: crates/clamui-core/src/audit.rs:1319
+#: crates/clamui-core/src/audit.rs:1353
 msgid "Portmaster is installed but not running"
 msgstr "Portmaster er installert, men kjører ikke"
 
-#: crates/clamui-core/src/audit.rs:1321
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Start the Portmaster service to enable network protection"
 msgstr "Start Portmaster-tjenesten for å slå på nettverksbeskyttelsen"
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1335
+#: crates/clamui-core/src/audit.rs:1369
 msgid "Not detected — optional network monitor and application firewall"
 msgstr "Ikke funnet – valgfri nettverksovervåking og programbrannmur"
 
-#: crates/clamui-core/src/audit.rs:1351
+#: crates/clamui-core/src/audit.rs:1385
 msgid "Could not probe Portmaster: {error}"
 msgstr "Kunne ikke undersøke Portmaster: {error}"
 
-#: crates/clamui-core/src/audit.rs:1401
+#: crates/clamui-core/src/audit.rs:1435
 msgid "{name} is not installed"
 msgstr "{name} er ikke installert"
 
-#: crates/clamui-core/src/audit.rs:1408
+#: crates/clamui-core/src/audit.rs:1442
 msgid "Install {name} for comprehensive security auditing"
 msgstr "Installer {name} for omfattende sikkerhetsrevisjon"
 
-#: crates/clamui-core/src/audit.rs:1414
+#: crates/clamui-core/src/audit.rs:1448
 msgid "Install chkrootkit for rootkit detection"
 msgstr "Installer chkrootkit for å oppdage rootkits"
 
-#: crates/clamui-core/src/audit.rs:1434
+#: crates/clamui-core/src/audit.rs:1468
 msgid "Authentication was cancelled"
 msgstr "Autentisering avbrutt"
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1476
 msgid "Lynis audit timed out after 5 minutes"
 msgstr "Lynis-revisjon avbrutt etter 5 minutter"
 
-#: crates/clamui-core/src/audit.rs:1444
+#: crates/clamui-core/src/audit.rs:1478
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr "Skanningen etter rootkits ble avbrutt etter 5 minutter"
 
-#: crates/clamui-core/src/audit.rs:1463 crates/clamui-core/src/audit.rs:1509
+#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
 msgid "Failed to run Lynis: {error}"
 msgstr "Kunne ikke kjøre Lynis: {error}"
 
-#: crates/clamui-core/src/audit.rs:1469
+#: crates/clamui-core/src/audit.rs:1503
 msgid "Failed to run chkrootkit: {error}"
 msgstr "Kunne ikke kjøre chkrootkit: {error}"
 
-#: crates/clamui-core/src/audit.rs:1538
+#: crates/clamui-core/src/audit.rs:1572
 msgid "Score: {score}/100"
 msgstr "Poengsum: {score}/100"
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1541
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr "Kjør «sudo lynis audit system» for detaljerte anbefalinger"
 
-#: crates/clamui-core/src/audit.rs:1558
+#: crates/clamui-core/src/audit.rs:1592
 msgid "Audit completed (exit code {code})"
 msgstr "Revisjon fullført (statuskode {code})"
 
-#: crates/clamui-core/src/audit.rs:1596 crates/clamui-core/src/audit.rs:1610
+#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 "Skanningen etter rootkits kunne ikke fullføres (avslutningskode {code})"
 
-#: crates/clamui-core/src/audit.rs:1647
+#: crates/clamui-core/src/audit.rs:1681
 msgid "No rootkits detected"
 msgstr "Ingen rootkits oppdaget"
 
-#: crates/clamui-core/src/audit.rs:1659
+#: crates/clamui-core/src/audit.rs:1693
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] "{count} mulig rootkit oppdaget"
 msgstr[1] "{count} mulige rootkits oppdaget"
 
-#: crates/clamui-core/src/audit.rs:1667
+#: crates/clamui-core/src/audit.rs:1701
 msgid "Investigate the detected threats immediately"
 msgstr "Undersøk de oppdagede truslene med en gang"
 
@@ -1471,31 +1479,31 @@ msgstr ""
 msgid "translator-credits"
 msgstr "John Erling Blad https://github.com/jeblad"
 
-#: crates/clamui-core/src/host.rs:868
+#: crates/clamui-core/src/host.rs:913
 msgid "Daemon not responding: {error}"
 msgstr "Tjenesten svarer ikke: {error}"
 
-#: crates/clamui-core/src/host.rs:871
+#: crates/clamui-core/src/host.rs:916
 msgid "{binary} found but returned error: {error}"
 msgstr "{binary} ble funnet, men returnerte feil: {error}"
 
-#: crates/clamui-core/src/host.rs:876
+#: crates/clamui-core/src/host.rs:921
 msgid "{service} is active"
 msgstr "{service} er aktiv"
 
-#: crates/clamui-core/src/host.rs:879
+#: crates/clamui-core/src/host.rs:924
 msgid "No virus database files found in {path}"
 msgstr "Ingen virusdatabasefiler funnet i {path}"
 
-#: crates/clamui-core/src/host.rs:885
+#: crates/clamui-core/src/host.rs:930
 msgid "Error accessing database {path}: {error}"
 msgstr "Feil ved tilgang til databasen {path}: {error}"
 
-#: crates/clamui-core/src/host.rs:891
+#: crates/clamui-core/src/host.rs:936
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr "{binary} er ikke installert. Installer den med: {command}"
 
-#: crates/clamui-core/src/host.rs:901
+#: crates/clamui-core/src/host.rs:946
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -2333,7 +2341,7 @@ msgstr "Profiler"
 msgid "Results"
 msgstr "Resultater"
 
-#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:559
+#: desktop/src/App.tsx:317 desktop/src/pages/ConfigPreferences.tsx:573
 msgid "Could not open link"
 msgstr "Kunne ikke åpne linken"
 
@@ -2796,7 +2804,7 @@ msgid "Cancelled"
 msgstr "Kansellert"
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
@@ -3120,15 +3128,15 @@ msgstr "PID {pid}"
 msgid "Process information unavailable"
 msgstr "Prosessinformasjon er utilgjengelig"
 
-#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:192
 msgid "Command copied to clipboard"
 msgstr "Kommandoen er kopiert til utklippstavlen"
 
-#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:195
 msgid "Could not copy command: {error}"
 msgstr "Kunne ikke kopiere kommandoen: {error}"
 
-#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -3160,49 +3168,49 @@ msgstr "Bekrefter …"
 msgid "Acknowledge"
 msgstr "Bekreft"
 
-#: desktop/src/pages/Components.tsx:78
+#: desktop/src/pages/Components.tsx:82
 msgid "Virus Scanner"
 msgstr "Virusskanner"
 
-#: desktop/src/pages/Components.tsx:80
+#: desktop/src/pages/Components.tsx:84
 msgid "Database Updater"
 msgstr "Databaseoppdatering"
 
-#: desktop/src/pages/Components.tsx:82
+#: desktop/src/pages/Components.tsx:86
 msgid "Daemon Scanner Client"
 msgstr "Klient for ClamAV-tjenesten"
 
-#: desktop/src/pages/Components.tsx:84
+#: desktop/src/pages/Components.tsx:88
 msgid "Scanner Daemon"
 msgstr "Skannetjeneste"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/Components.tsx:91
+#: desktop/src/pages/Components.tsx:95
 msgid "clamscan performs on-demand virus scans."
 msgstr "clamscan utfører virusskanninger på forespørsel."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:96
+#: desktop/src/pages/Components.tsx:100
 msgid "freshclam downloads current virus definitions."
 msgstr "freshclam laster ned gjeldende virusdefinisjoner."
 
 #. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
-#: desktop/src/pages/Components.tsx:101
+#: desktop/src/pages/Components.tsx:105
 msgid "clamdscan uses the clamd daemon for faster scanning."
 msgstr "clamdscan bruker clamd-tjenesten for raskere skanning."
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:106
+#: desktop/src/pages/Components.tsx:110
 msgid "clamd is the ClamAV daemon for faster scans."
 msgstr "clamd er ClamAV-tjenesten for raskere skanninger."
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:116
+#: desktop/src/pages/Components.tsx:120
 msgid "After installation, update virus definitions with freshclam."
 msgstr "Etter installasjon, oppdater virusdefinisjoner med freshclam."
 
 #. Translators: Keep the embedded shell commands and service name unchanged.
-#: desktop/src/pages/Components.tsx:121
+#: desktop/src/pages/Components.tsx:125
 msgid ""
 "Enable the service for automatic updates: sudo systemctl enable clamav-"
 "freshclam; sudo systemctl start clamav-freshclam"
@@ -3211,12 +3219,12 @@ msgstr ""
 "clamav-freshclam; sudo systemctl start clamav-freshclam"
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:126
+#: desktop/src/pages/Components.tsx:130
 msgid "Requires the clamd daemon to be running."
 msgstr "Krever at clamd-tjenesten kjører."
 
 #. Translators: Keep the embedded file path, command, and command-line options unchanged.
-#: desktop/src/pages/Components.tsx:131
+#: desktop/src/pages/Components.tsx:135
 msgid ""
 "Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
 "clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
@@ -3227,78 +3235,78 @@ msgstr ""
 "kontroller sokkelrettighetene og kjør: clamdscan --config-file=/etc/clamd.d/"
 "scan.conf --ping 3"
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
+#: desktop/src/pages/Components.tsx:147 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr "Kjører"
 
-#: desktop/src/pages/Components.tsx:143
+#: desktop/src/pages/Components.tsx:147
 #: desktop/src/pages/SettingsPreferences.tsx:265
 msgid "Installed"
 msgstr "Installert"
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
+#: desktop/src/pages/Components.tsx:148 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr "Stoppet"
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
+#: desktop/src/pages/Components.tsx:149 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:267
 msgid "Not installed"
 msgstr "Ikke installert"
 
-#: desktop/src/pages/Components.tsx:200
+#: desktop/src/pages/Components.tsx:204
 msgid "ClamAV components"
 msgstr "ClamAV-komponenter"
 
-#: desktop/src/pages/Components.tsx:201
+#: desktop/src/pages/Components.tsx:205
 msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
 msgstr ""
 "Sjekk vertssiden ClamAV-verktøy og kopier distribusjonsspesifikke "
 "oppsettkommandoer."
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Components.tsx:231
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
 msgid "Checking…"
 msgstr "Sjekker …"
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
 #: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr "Oppdater status"
 
-#: desktop/src/pages/Components.tsx:208
+#: desktop/src/pages/Components.tsx:212
 msgid "Could not check component status: {error}"
 msgstr "Kunne ikke sjekke komponentstatus: {error}"
 
-#: desktop/src/pages/Components.tsx:209
+#: desktop/src/pages/Components.tsx:213
 msgid "Detected host family: {distro}."
 msgstr "Oppdaget vertsfamilie: {distro}."
 
-#: desktop/src/pages/Components.tsx:214
+#: desktop/src/pages/Components.tsx:218
 msgid "Components Status"
 msgstr "Status for komponenter"
 
-#: desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:231
 msgid "Version unavailable"
 msgstr "Versjon utilgjengelig"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Show details"
 msgstr "Vis detaljer"
 
-#: desktop/src/pages/Components.tsx:251
+#: desktop/src/pages/Components.tsx:255
 msgid "Suggested for the detected system:"
 msgstr "Foreslått for det oppdagede systemet:"
 
-#: desktop/src/pages/Components.tsx:254
+#: desktop/src/pages/Components.tsx:258
 msgid "Commands for supported distributions:"
 msgstr "Kommandoer for støttede distribusjoner:"
 
-#: desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Components.tsx:277
 msgid "Copied"
 msgstr "Kopiert"
 
@@ -3377,27 +3385,27 @@ msgstr ""
 "valideres og lagres automatisk når du forlater denne seksjonen. Autorisasjon "
 "forespørres kun når du eksplisitt velger «Autoriser lesing»."
 
-#: desktop/src/pages/ConfigPreferences.tsx:280
-#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:294
+#: desktop/src/pages/ConfigPreferences.tsx:380
 #: desktop/src/pages/SettingsPreferences.tsx:341
 msgid "Add"
 msgstr "Legg til"
 
-#: desktop/src/pages/ConfigPreferences.tsx:287
-#: desktop/src/pages/ConfigPreferences.tsx:288
+#: desktop/src/pages/ConfigPreferences.tsx:301
+#: desktop/src/pages/ConfigPreferences.tsx:302
 msgid "Drag to reorder"
 msgstr "Dra for å endre rekkefølge"
 
-#: desktop/src/pages/ConfigPreferences.tsx:308
+#: desktop/src/pages/ConfigPreferences.tsx:322
 msgid "Move up"
 msgstr "Flytt opp"
 
-#: desktop/src/pages/ConfigPreferences.tsx:309
+#: desktop/src/pages/ConfigPreferences.tsx:323
 msgid "Move down"
 msgstr "Flytt ned"
 
-#: desktop/src/pages/ConfigPreferences.tsx:310
-#: desktop/src/pages/ConfigPreferences.tsx:355
+#: desktop/src/pages/ConfigPreferences.tsx:324
+#: desktop/src/pages/ConfigPreferences.tsx:369
 #: desktop/src/pages/Profiles.tsx:96 desktop/src/pages/Profiles.tsx:103
 #: desktop/src/pages/Profiles.tsx:104 desktop/src/pages/Scan.tsx:560
 #: desktop/src/pages/SettingsPreferences.tsx:271
@@ -3405,21 +3413,21 @@ msgid "Remove"
 msgstr "Fjern"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:340
+#: desktop/src/pages/ConfigPreferences.tsx:354
 msgid "Enter an http, https, ftp, ftps, or file URL."
 msgstr "Skriv inn en http-, https-, ftp-, ftps- eller file-URL."
 
-#: desktop/src/pages/ConfigPreferences.tsx:352
-#: desktop/src/pages/ConfigPreferences.tsx:823
+#: desktop/src/pages/ConfigPreferences.tsx:366
+#: desktop/src/pages/ConfigPreferences.tsx:837
 msgid "Custom Signature Databases"
 msgstr "Egendefinerte signaturdatabaser"
 
-#: desktop/src/pages/ConfigPreferences.tsx:359
+#: desktop/src/pages/ConfigPreferences.tsx:373
 msgid "Add URLs"
 msgstr "Legg til URL-er"
 
 #. Translators: Keep the URI schemes unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:362
+#: desktop/src/pages/ConfigPreferences.tsx:376
 msgid ""
 "Supported URL schemes: http, https, ftp, ftps, and file. Paste each provider "
 "URL as a separate entry."
@@ -3427,23 +3435,23 @@ msgstr ""
 "Støttede URL-skjemaer: http, https, ftp, ftps og file. Lim inn hver "
 "leverandør-URL som en egen oppføring."
 
-#: desktop/src/pages/ConfigPreferences.tsx:475
+#: desktop/src/pages/ConfigPreferences.tsx:489
 msgid ""
 "Configuration file selection is saved automatically when you leave this "
 "section."
 msgstr ""
 "Valg av konfigurasjonsfil lagres automatisk når du forlater denne seksjonen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:482
+#: desktop/src/pages/ConfigPreferences.tsx:496
 msgid "No configuration file was found."
 msgstr "Ingen konfigurasjonsfil ble funnet."
 
-#: desktop/src/pages/ConfigPreferences.tsx:496
+#: desktop/src/pages/ConfigPreferences.tsx:510
 msgid "Select a .conf configuration file."
 msgstr "Velg en .conf-konfigurasjonsfil."
 
 #. Translators: Save is the button label in the Preferences header; use its translation.
-#: desktop/src/pages/ConfigPreferences.tsx:526
+#: desktop/src/pages/ConfigPreferences.tsx:540
 msgid ""
 "Configuration authorized. Your unsaved changes were kept; use Save to "
 "persist them."
@@ -3451,19 +3459,19 @@ msgstr ""
 "Konfigurasjonen er autorisert. Ulagrede endringer ble beholdt; bruk Lagre "
 "for å lagre dem permanent."
 
-#: desktop/src/pages/ConfigPreferences.tsx:530
+#: desktop/src/pages/ConfigPreferences.tsx:544
 msgid "Configuration loaded with administrator authorization."
 msgstr "Konfigurasjonen er lastet med administratorautorisasjon."
 
-#: desktop/src/pages/ConfigPreferences.tsx:569
+#: desktop/src/pages/ConfigPreferences.tsx:583
 msgid "Scan backend saved."
 msgstr "Skannemotor lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:633
+#: desktop/src/pages/ConfigPreferences.tsx:647
 msgid "Choose a configuration file before applying its changes."
 msgstr "Velg en konfigurasjonsfil før du bruker endringene."
 
-#: desktop/src/pages/ConfigPreferences.tsx:645
+#: desktop/src/pages/ConfigPreferences.tsx:659
 msgid ""
 "On-Access scanning requires an excluded username, UID, or root user to "
 "prevent scan loops."
@@ -3471,129 +3479,129 @@ msgstr ""
 "Sanntidsskanning krever et ekskludert brukernavn, UID eller root-bruker for "
 "å forhindre skanneløkker."
 
-#: desktop/src/pages/ConfigPreferences.tsx:659
+#: desktop/src/pages/ConfigPreferences.tsx:673
 msgid "Configuration validation failed."
 msgstr "Konfigurasjonsvalidering mislyktes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "All settings saved."
 msgstr "Alle innstillinger lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:738
+#: desktop/src/pages/ConfigPreferences.tsx:752
 msgid "Changes saved."
 msgstr "Endringer lagret."
 
-#: desktop/src/pages/ConfigPreferences.tsx:744
-#: desktop/src/pages/ConfigPreferences.tsx:756
+#: desktop/src/pages/ConfigPreferences.tsx:758
+#: desktop/src/pages/ConfigPreferences.tsx:770
 msgid "Some changes could not be applied."
 msgstr "Enkelte endringer kunne ikke brukes."
 
-#: desktop/src/pages/ConfigPreferences.tsx:779
+#: desktop/src/pages/ConfigPreferences.tsx:793
 msgid "Checking scanner status…"
 msgstr "Sjekker skannerstatus …"
 
-#: desktop/src/pages/ConfigPreferences.tsx:781
+#: desktop/src/pages/ConfigPreferences.tsx:795
 msgid "Daemon connected"
 msgstr "Tjenesten er tilkoblet"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner available"
 msgstr "Skanner tilgjengelig"
 
-#: desktop/src/pages/ConfigPreferences.tsx:782
+#: desktop/src/pages/ConfigPreferences.tsx:796
 #: desktop/src/pages/ScanOverview.tsx:66
 msgid "Scanner unavailable"
 msgstr "Skanner utilgjengelig"
 
-#: desktop/src/pages/ConfigPreferences.tsx:792
+#: desktop/src/pages/ConfigPreferences.tsx:806
 msgid "Scan PE Files"
 msgstr "Skann PE-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:793
+#: desktop/src/pages/ConfigPreferences.tsx:807
 msgid "Scan ELF Files"
 msgstr "Skann ELF-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:794
+#: desktop/src/pages/ConfigPreferences.tsx:808
 msgid "Scan OLE2 Files"
 msgstr "Skann OLE2-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:795
+#: desktop/src/pages/ConfigPreferences.tsx:809
 msgid "Scan PDF Files"
 msgstr "Skann PDF-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:796
+#: desktop/src/pages/ConfigPreferences.tsx:810
 msgid "Scan HTML Files"
 msgstr "Skann HTML-filer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:797
+#: desktop/src/pages/ConfigPreferences.tsx:811
 msgid "Scan Archive Files"
 msgstr "Skann arkivfiler"
 
-#: desktop/src/pages/ConfigPreferences.tsx:803
+#: desktop/src/pages/ConfigPreferences.tsx:817
 #: desktop/src/pages/SettingsPreferences.tsx:243
 msgid "Database Updates"
 msgstr "Databaseoppdateringer"
 
 #. Translators: Keep freshclam.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:804
+#: desktop/src/pages/ConfigPreferences.tsx:818
 msgid "freshclam.conf"
 msgstr "freshclam.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:808
+#: desktop/src/pages/ConfigPreferences.tsx:822
 msgid "Paths"
 msgstr "Stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:809
+#: desktop/src/pages/ConfigPreferences.tsx:823
 msgid "Database Directory"
 msgstr "Databasemappe"
 
-#: desktop/src/pages/ConfigPreferences.tsx:810
+#: desktop/src/pages/ConfigPreferences.tsx:824
 msgid "Update Log File"
 msgstr "Logg for oppdateringer"
 
-#: desktop/src/pages/ConfigPreferences.tsx:811
+#: desktop/src/pages/ConfigPreferences.tsx:825
 msgid "PID File"
 msgstr "PID-fil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:812
+#: desktop/src/pages/ConfigPreferences.tsx:826
 msgid "Notify ClamD Config"
 msgstr "clamd-konfigurasjon som skal varsles"
 
-#: desktop/src/pages/ConfigPreferences.tsx:813
+#: desktop/src/pages/ConfigPreferences.tsx:827
 msgid "Log timestamps"
 msgstr "Logg tidsstempler"
 
-#: desktop/src/pages/ConfigPreferences.tsx:814
+#: desktop/src/pages/ConfigPreferences.tsx:828
 msgid "Verbose logging"
 msgstr "Utførlig logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:815
+#: desktop/src/pages/ConfigPreferences.tsx:829
 msgid "Syslog logging"
 msgstr "Syslog logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:817
+#: desktop/src/pages/ConfigPreferences.tsx:831
 msgid "Update Behavior"
 msgstr "Oppdateringsoppførsel"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "Checks per day"
 msgstr "Sjekker per dag"
 
-#: desktop/src/pages/ConfigPreferences.tsx:818
+#: desktop/src/pages/ConfigPreferences.tsx:832
 msgid "0 disables automatic checks."
 msgstr "0 deaktiverer automatiske kontroller."
 
-#: desktop/src/pages/ConfigPreferences.tsx:819
+#: desktop/src/pages/ConfigPreferences.tsx:833
 msgid "Database Mirror"
 msgstr "Nedlastingsserver for databasen"
 
-#: desktop/src/pages/ConfigPreferences.tsx:824
+#: desktop/src/pages/ConfigPreferences.tsx:838
 msgid "Suggested"
 msgstr "Foreslåtte"
 
 #. Translators: Suggested is a button label; use its translation. Keep InterServer unchanged.
-#: desktop/src/pages/ConfigPreferences.tsx:826
+#: desktop/src/pages/ConfigPreferences.tsx:840
 msgid ""
 "Suggested adds three InterServer databases to this draft. They are saved "
 "automatically when you leave this section."
@@ -3601,23 +3609,23 @@ msgstr ""
 "«Foreslåtte» legger til tre InterServer-databaser i dette utkastet. De "
 "lagres automatisk når du forlater denne seksjonen."
 
-#: desktop/src/pages/ConfigPreferences.tsx:833
+#: desktop/src/pages/ConfigPreferences.tsx:847
 msgid "Signature Providers"
 msgstr "Signaturleverandører"
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
+#: desktop/src/pages/ConfigPreferences.tsx:849
 msgid "Registration is required; URLs include your personal API key."
 msgstr ""
 "Registrering er nødvendig; URL-er inkluderer din personlige API-nøkkel."
 
-#: desktop/src/pages/ConfigPreferences.tsx:835
-#: desktop/src/pages/ConfigPreferences.tsx:839
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:849
+#: desktop/src/pages/ConfigPreferences.tsx:853
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Open provider"
 msgstr "Åpne leverandør"
 
 #. Translators: Keep fangfrisch and clamav-unofficial-sigs unchanged; they are tool names.
-#: desktop/src/pages/ConfigPreferences.tsx:836
+#: desktop/src/pages/ConfigPreferences.tsx:850
 msgid ""
 "Use fangfrisch or clamav-unofficial-sigs; it is not a direct custom URL "
 "provider."
@@ -3625,150 +3633,150 @@ msgstr ""
 "Bruk fangfrisch eller clamav-unofficial-sigs; dette er ikke en direkte "
 "leverandør av egendefinerte URL-er."
 
-#: desktop/src/pages/ConfigPreferences.tsx:840
+#: desktop/src/pages/ConfigPreferences.tsx:854
 msgid "Community hash, web-shell, and general malware signature databases."
 msgstr ""
 "Fellesskaps-hash, web-shell og generelle signaturdatabaser for skadelig "
 "programvare."
 
-#: desktop/src/pages/ConfigPreferences.tsx:843
+#: desktop/src/pages/ConfigPreferences.tsx:857
 msgid "Proxy Settings"
 msgstr "Proxyinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:844
+#: desktop/src/pages/ConfigPreferences.tsx:858
 msgid "Proxy Server"
 msgstr "Proxyserver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "Proxy Port"
 msgstr "Proxyport"
 
-#: desktop/src/pages/ConfigPreferences.tsx:845
+#: desktop/src/pages/ConfigPreferences.tsx:859
 msgid "0 disables the proxy port."
 msgstr "0 deaktiverer proxy-porten."
 
-#: desktop/src/pages/ConfigPreferences.tsx:846
+#: desktop/src/pages/ConfigPreferences.tsx:860
 msgid "Proxy Username"
 msgstr "Brukernavn for proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:847
+#: desktop/src/pages/ConfigPreferences.tsx:861
 msgid "Proxy Password"
 msgstr "Passord for proxy"
 
-#: desktop/src/pages/ConfigPreferences.tsx:852
+#: desktop/src/pages/ConfigPreferences.tsx:866
 msgid "Scanner Settings"
 msgstr "Skannerinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Scan Backend"
 msgstr "Skannemotor"
 
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "Auto (prefer daemon)"
 msgstr "Automatisk (foretrekk tjenesten)"
 
 #. Translators: Keep clamd unchanged; it is the daemon command and service name.
-#: desktop/src/pages/ConfigPreferences.tsx:854
+#: desktop/src/pages/ConfigPreferences.tsx:868
 msgid "ClamAV Daemon (clamd)"
 msgstr "ClamAV-tjeneste (clamd)"
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/ConfigPreferences.tsx:857
+#: desktop/src/pages/ConfigPreferences.tsx:871
 msgid "Standalone Scanner (clamscan)"
 msgstr "Frittstående skanner (clamscan)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Daemon Status"
 msgstr "Tjenestestatus"
 
-#: desktop/src/pages/ConfigPreferences.tsx:861
+#: desktop/src/pages/ConfigPreferences.tsx:875
 msgid "Refresh Status"
 msgstr "Oppdater status"
 
-#: desktop/src/pages/ConfigPreferences.tsx:862
+#: desktop/src/pages/ConfigPreferences.tsx:876
 msgid "Documentation"
 msgstr "Dokumentasjon"
 
 #. Translators: Keep clamd.conf unchanged; it is a configuration file name.
-#: desktop/src/pages/ConfigPreferences.tsx:864
-#: desktop/src/pages/ConfigPreferences.tsx:885
+#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:899
 msgid "clamd.conf"
 msgstr "clamd.conf"
 
-#: desktop/src/pages/ConfigPreferences.tsx:868
+#: desktop/src/pages/ConfigPreferences.tsx:882
 msgid "File Type Scanning"
 msgstr "Skanning etter filtype"
 
-#: desktop/src/pages/ConfigPreferences.tsx:871
+#: desktop/src/pages/ConfigPreferences.tsx:885
 msgid "Performance and Limits"
 msgstr "Ytelse og grenser"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "Max File Size (MB)"
 msgstr "Maks filstørrelse (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:872
-#: desktop/src/pages/ConfigPreferences.tsx:873
-#: desktop/src/pages/ConfigPreferences.tsx:875
-#: desktop/src/pages/ConfigPreferences.tsx:911
+#: desktop/src/pages/ConfigPreferences.tsx:886
+#: desktop/src/pages/ConfigPreferences.tsx:887
+#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:925
 msgid "0 means unlimited."
 msgstr "0 betyr ubegrenset."
 
-#: desktop/src/pages/ConfigPreferences.tsx:873
+#: desktop/src/pages/ConfigPreferences.tsx:887
 msgid "Max Scan Size (MB)"
 msgstr "Maks skannestørrelse (MB)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:874
+#: desktop/src/pages/ConfigPreferences.tsx:888
 msgid "Max Archive Recursion"
 msgstr "Maks rekursjonsdybde i arkiver"
 
-#: desktop/src/pages/ConfigPreferences.tsx:875
+#: desktop/src/pages/ConfigPreferences.tsx:889
 msgid "Max Files in Archive"
 msgstr "Maks antall filer i arkiv"
 
-#: desktop/src/pages/ConfigPreferences.tsx:877
+#: desktop/src/pages/ConfigPreferences.tsx:891
 msgid "Logging"
 msgstr "Logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:878
+#: desktop/src/pages/ConfigPreferences.tsx:892
 msgid "Log File Path"
 msgstr "Sti til loggfil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Verbose Logging"
 msgstr "Detaljert logging"
 
-#: desktop/src/pages/ConfigPreferences.tsx:879
+#: desktop/src/pages/ConfigPreferences.tsx:893
 msgid "Syslog Logging"
 msgstr "Logging til syslog"
 
-#: desktop/src/pages/ConfigPreferences.tsx:884
+#: desktop/src/pages/ConfigPreferences.tsx:898
 msgid "On-Access Scanning"
 msgstr "Sanntidsskanning"
 
-#: desktop/src/pages/ConfigPreferences.tsx:889
+#: desktop/src/pages/ConfigPreferences.tsx:903
 msgid "Monitored Paths"
 msgstr "Overvåkede stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:890
+#: desktop/src/pages/ConfigPreferences.tsx:904
 msgid "Include Paths"
 msgstr "Ta med stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:891
+#: desktop/src/pages/ConfigPreferences.tsx:905
 msgid "Exclude Paths"
 msgstr "Unnta stier"
 
-#: desktop/src/pages/ConfigPreferences.tsx:894
+#: desktop/src/pages/ConfigPreferences.tsx:908
 msgid "Behavior Settings"
 msgstr "Innstillinger for oppførsel"
 
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid "Prevention Mode"
 msgstr "Blokkeringsmodus"
 
 #. Translators: Keep fanotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:895
+#: desktop/src/pages/ConfigPreferences.tsx:909
 msgid ""
 "Block access to infected files instead of only reporting them. Denies file "
 "opens via fanotify."
@@ -3776,31 +3784,31 @@ msgstr ""
 "Blokker tilgang til infiserte filer i stedet for bare å rapportere dem. "
 "Nekter filåpninger via fanotify."
 
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid "Extra Scanning"
 msgstr "Ekstra skanning"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:899
+#: desktop/src/pages/ConfigPreferences.tsx:913
 msgid ""
 "Also scan newly created or moved files in monitored directories via inotify."
 msgstr ""
 "Skann også nyopprettede eller flyttede filer i overvåkede mapper via inotify."
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Deny on Error"
 msgstr "Nekt ved feil"
 
-#: desktop/src/pages/ConfigPreferences.tsx:903
+#: desktop/src/pages/ConfigPreferences.tsx:917
 msgid "Block file access if scanning fails or encounters an error."
 msgstr "Blokker filtilgang hvis skanningen mislykkes eller støter på en feil."
 
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid "Disable DDD"
 msgstr "Slå av DDD"
 
 #. Translators: Keep inotify unchanged; it is a Linux kernel API name.
-#: desktop/src/pages/ConfigPreferences.tsx:904
+#: desktop/src/pages/ConfigPreferences.tsx:918
 msgid ""
 "Disable Dynamic Directory Determination for recursive subdirectory tracking. "
 "Useful if large directory trees hit inotify watch limits."
@@ -3808,31 +3816,31 @@ msgstr ""
 "Slå av dynamisk mappebestemmelse (DDD) for rekursiv sporing av undermapper. "
 "Nyttig hvis store mappetrær treffer inotify-overvåkingsgrenser."
 
-#: desktop/src/pages/ConfigPreferences.tsx:909
+#: desktop/src/pages/ConfigPreferences.tsx:923
 msgid "Performance Settings"
 msgstr "Ytelsesinnstillinger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:910
+#: desktop/src/pages/ConfigPreferences.tsx:924
 msgid "Max Threads"
 msgstr "Maks antall tråder"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "Curl Timeout (seconds)"
 msgstr "Tidsavbrudd for curl (sekunder)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:912
+#: desktop/src/pages/ConfigPreferences.tsx:926
 msgid "0 disables the timeout."
 msgstr "0 deaktiverer tidsavbruddet."
 
-#: desktop/src/pages/ConfigPreferences.tsx:913
+#: desktop/src/pages/ConfigPreferences.tsx:927
 msgid "Retry Attempts"
 msgstr "Antall nye forsøk"
 
-#: desktop/src/pages/ConfigPreferences.tsx:915
+#: desktop/src/pages/ConfigPreferences.tsx:929
 msgid "Scan Loop Prevention"
 msgstr "Hindring av skanneløkker"
 
-#: desktop/src/pages/ConfigPreferences.tsx:916
+#: desktop/src/pages/ConfigPreferences.tsx:930
 msgid ""
 "At least one loop-prevention exclusion is required. Exclude the clamav "
 "service account, its UID, or root to prevent recursive scans."
@@ -3840,60 +3848,60 @@ msgstr ""
 "Minst én sløyfeforebyggende ekskludering er nødvendig. Ekskluder clamav-"
 "tjenestekontoen, dens UID eller root for å forhindre rekursive skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:917
+#: desktop/src/pages/ConfigPreferences.tsx:931
 msgid "Exclude Username"
 msgstr "Unnta brukernavn"
 
-#: desktop/src/pages/ConfigPreferences.tsx:918
+#: desktop/src/pages/ConfigPreferences.tsx:932
 msgid "Exclude User ID"
 msgstr "Unnta bruker-ID"
 
-#: desktop/src/pages/ConfigPreferences.tsx:919
+#: desktop/src/pages/ConfigPreferences.tsx:933
 msgid "Exclude Root User"
 msgstr "Unnta root-brukeren"
 
-#: desktop/src/pages/ConfigPreferences.tsx:924
+#: desktop/src/pages/ConfigPreferences.tsx:938
 msgid "Scheduled Scans"
 msgstr "Planlagte skanninger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:925
+#: desktop/src/pages/ConfigPreferences.tsx:939
 msgid "Schedule"
 msgstr "Rute"
 
-#: desktop/src/pages/ConfigPreferences.tsx:926
+#: desktop/src/pages/ConfigPreferences.tsx:940
 msgid "Enable Scheduled Scans"
 msgstr "Slå på planlagte skanninger"
 
-#: desktop/src/pages/ConfigPreferences.tsx:927
+#: desktop/src/pages/ConfigPreferences.tsx:941
 msgid "Scan Frequency"
 msgstr "Skannehyppighet"
 
-#: desktop/src/pages/ConfigPreferences.tsx:928
+#: desktop/src/pages/ConfigPreferences.tsx:942
 msgid "Scan Time (24-hour)"
 msgstr "Skannetid (24 timer)"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Day of Week"
 msgstr "Ukedag"
 
-#: desktop/src/pages/ConfigPreferences.tsx:929
+#: desktop/src/pages/ConfigPreferences.tsx:943
 msgid "Used for weekly scans."
 msgstr "Brukes til ukentlige skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Day of Month"
 msgstr "Dag i måneden"
 
-#: desktop/src/pages/ConfigPreferences.tsx:930
+#: desktop/src/pages/ConfigPreferences.tsx:944
 msgid "Used for monthly scans."
 msgstr "Brukes til månedlige skanninger."
 
-#: desktop/src/pages/ConfigPreferences.tsx:931
+#: desktop/src/pages/ConfigPreferences.tsx:945
 #: desktop/src/pages/Profiles.tsx:95 desktop/src/pages/Scan.tsx:559
 msgid "Scan Targets"
 msgstr "Skannemål"
 
-#: desktop/src/pages/ConfigPreferences.tsx:932
+#: desktop/src/pages/ConfigPreferences.tsx:946
 msgid ""
 "No targets are configured. The scheduled scan will use your home directory "
 "without saving it as an explicit target."
@@ -3901,20 +3909,20 @@ msgstr ""
 "Ingen mål er konfigurert. Den planlagte skanningen vil bruke hjemmemappen "
 "din uten å lagre den som et eksplisitt mål."
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 #: desktop/src/pages/SettingsPreferences.tsx:363
 msgid "Skip on Battery"
 msgstr "Hopp over på batteri"
 
-#: desktop/src/pages/ConfigPreferences.tsx:933
+#: desktop/src/pages/ConfigPreferences.tsx:947
 msgid "Do not start scheduled scans while on battery power."
 msgstr "Ikke start planlagte skanninger mens du er på batteri."
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Auto-Quarantine"
 msgstr "Automatisk karantene"
 
-#: desktop/src/pages/ConfigPreferences.tsx:934
+#: desktop/src/pages/ConfigPreferences.tsx:948
 msgid "Automatically quarantine threats found by scheduled scans."
 msgstr "Sett automatisk trusler som planlagte skanninger finner, i karantene."
 

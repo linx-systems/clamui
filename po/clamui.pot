@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClamUI 0.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/linx-systems/clamui/issues\n"
-"POT-Creation-Date: 2026-11-24 16:48-0500\n"
+"POT-Creation-Date: 2026-11-26 18:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,363 +18,371 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: crates/clamui-core/src/audit.rs:347
+#: crates/clamui-core/src/audit.rs:350
 msgid "ClamAV is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:349
+#: crates/clamui-core/src/audit.rs:352
 msgid "Install ClamAV to enable virus scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:367
+#: crates/clamui-core/src/audit.rs:370
 msgid "Installed: {version}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:379
+#: crates/clamui-core/src/audit.rs:382
 msgid "Up to date ({days} day old, built {date})"
 msgid_plural "Up to date ({days} days old, built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:397 crates/clamui-core/src/audit.rs:417
+#: crates/clamui-core/src/audit.rs:400 crates/clamui-core/src/audit.rs:420
 msgid "Database is {days} day old (built {date})"
 msgid_plural "Database is {days} days old (built {date})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:405
+#: crates/clamui-core/src/audit.rs:408
 msgid "Update virus database to ensure protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:425
+#: crates/clamui-core/src/audit.rs:428
 msgid "Database is critically outdated. Update immediately."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:446
+#: crates/clamui-core/src/audit.rs:449
 msgid "Database files exist but age could not be determined"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:448
+#: crates/clamui-core/src/audit.rs:451
 msgid "No virus database found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:452
+#: crates/clamui-core/src/audit.rs:455
 msgid "Download virus database"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:470
+#: crates/clamui-core/src/audit.rs:473
 msgid "Service {name} is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:482
+#: crates/clamui-core/src/audit.rs:485
 msgid "Daemon is responding"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:490
+#: crates/clamui-core/src/audit.rs:493
 msgid "ClamAV daemon is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:492
+#: crates/clamui-core/src/audit.rs:495
 msgid "Start the daemon for faster scanning"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:509
+#: crates/clamui-core/src/audit.rs:512
 msgid "Freshclam service is active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:517
+#: crates/clamui-core/src/audit.rs:520
 msgid "Freshclam automatic update service is not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:519
+#: crates/clamui-core/src/audit.rs:522
 msgid "Enable automatic database updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:543
+#: crates/clamui-core/src/audit.rs:546
 msgid "Scheduled scans are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:551
+#: crates/clamui-core/src/audit.rs:554
 msgid "Scheduled scans are not enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:553
+#: crates/clamui-core/src/audit.rs:556
 msgid "Enable scheduled scans in Preferences → Schedule"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:561
+#: crates/clamui-core/src/audit.rs:564
 msgid "No scheduling backend is available on this system"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:563
+#: crates/clamui-core/src/audit.rs:566
 msgid "Scheduled scans require a systemd user session or cron"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:749
+#: crates/clamui-core/src/audit.rs:752
 msgid "Open Ports"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:755
+#: crates/clamui-core/src/audit.rs:758
 msgid "{count} port listening, risky ports: {ports}"
 msgid_plural "{count} ports listening, risky ports: {ports}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:766
+#: crates/clamui-core/src/audit.rs:769
 msgid "Review if these services need to be exposed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:773
+#: crates/clamui-core/src/audit.rs:776
 msgid "{count} port listening"
 msgid_plural "{count} ports listening"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:781
+#: crates/clamui-core/src/audit.rs:784
 msgid "Review open ports and close unnecessary services"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:791 crates/clamui-core/src/network.rs:220
+#: crates/clamui-core/src/audit.rs:794 crates/clamui-core/src/network.rs:220
 msgid "Some network socket rows could not be read."
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:798
+#: crates/clamui-core/src/audit.rs:801
 msgid "No open ports detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:832
+#: crates/clamui-core/src/audit.rs:835
 msgid "AppArmor is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:840
+#: crates/clamui-core/src/audit.rs:843
 msgid "AppArmor module is loaded but not enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:842
+#: crates/clamui-core/src/audit.rs:845
 msgid "Enable AppArmor for application sandboxing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:858
+#: crates/clamui-core/src/audit.rs:861
 msgid "SELinux is enforcing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:866
+#: crates/clamui-core/src/audit.rs:869
 msgid "SELinux is in permissive mode"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:868
+#: crates/clamui-core/src/audit.rs:871
 msgid "Consider switching to enforcing mode for stronger protection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:880
+#: crates/clamui-core/src/audit.rs:883
 msgid "SELinux is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:882
+#: crates/clamui-core/src/audit.rs:885
 msgid "Enable SELinux for mandatory access control"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:897
+#: crates/clamui-core/src/audit.rs:900
 msgid "No mandatory access control framework detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:899
+#: crates/clamui-core/src/audit.rs:902
 msgid "Consider enabling AppArmor or SELinux"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:925
+#: crates/clamui-core/src/audit.rs:928
 msgid "Automatic security updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:936
+#: crates/clamui-core/src/audit.rs:939
 msgid "Unattended upgrades is installed but disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:938
+#: crates/clamui-core/src/audit.rs:941
 msgid "Enable automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:952
+#: crates/clamui-core/src/audit.rs:955
 msgid "DNF automatic updates are enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:963
+#: crates/clamui-core/src/audit.rs:966
 msgid "DNF automatic is installed but timer is not active"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:965
+#: crates/clamui-core/src/audit.rs:968 crates/clamui-core/src/audit.rs:996
 msgid "Enable automatic updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:979
+#: crates/clamui-core/src/audit.rs:983
+msgid "os-update automatic updates are enabled"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:994
+msgid "os-update is installed but timer is not active"
+msgstr ""
+
+#: crates/clamui-core/src/audit.rs:1009
 msgid "Could not determine automatic update status"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:981
+#: crates/clamui-core/src/audit.rs:1011
 msgid "Configure automatic security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:996
+#: crates/clamui-core/src/audit.rs:1030
 msgid "System reboot required to apply updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:998
+#: crates/clamui-core/src/audit.rs:1032
 msgid "Reboot the system to apply pending security updates"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1044
+#: crates/clamui-core/src/audit.rs:1078
 msgid "{name} is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1063
+#: crates/clamui-core/src/audit.rs:1097
 msgid "No intrusion detection system found"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1065
+#: crates/clamui-core/src/audit.rs:1099
 msgid "Install fail2ban or CrowdSec to protect against attacks"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1092
+#: crates/clamui-core/src/audit.rs:1126
 msgid "SSH server is not running (no remote attack surface)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1103
+#: crates/clamui-core/src/audit.rs:1137
 msgid "SSH server is running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1113
+#: crates/clamui-core/src/audit.rs:1147
 msgid "Could not read SSH configuration"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1132
+#: crates/clamui-core/src/audit.rs:1166
 msgid "Root login: {value}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1140
+#: crates/clamui-core/src/audit.rs:1174
 msgid "Root login is allowed ({value})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1146
+#: crates/clamui-core/src/audit.rs:1180
 msgid "Disable root SSH login for security"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1161
+#: crates/clamui-core/src/audit.rs:1195
 msgid "Password authentication is disabled (key-only)"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1169
+#: crates/clamui-core/src/audit.rs:1203
 msgid "Password authentication is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1171
+#: crates/clamui-core/src/audit.rs:1205
 msgid "Consider disabling password auth in favor of SSH keys"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1189
+#: crates/clamui-core/src/audit.rs:1223
 msgid "X11 forwarding is disabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1197
+#: crates/clamui-core/src/audit.rs:1231
 msgid "X11 forwarding is enabled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1199
+#: crates/clamui-core/src/audit.rs:1233
 msgid "Disable X11 forwarding to reduce attack surface"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1259
+#: crates/clamui-core/src/audit.rs:1293
 msgid "Application firewalls"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1282
+#: crates/clamui-core/src/audit.rs:1316
 msgid "Portmaster is running and protecting connections"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1305
+#: crates/clamui-core/src/audit.rs:1339
 msgid "Authorize ClamUI in Portmaster for per-module health"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1308
+#: crates/clamui-core/src/audit.rs:1342
 msgid "Authorize"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1319
+#: crates/clamui-core/src/audit.rs:1353
 msgid "Portmaster is installed but not running"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1321
+#: crates/clamui-core/src/audit.rs:1355
 msgid "Start the Portmaster service to enable network protection"
 msgstr ""
 
 #. Translators: The em dash separates the detection result from the component description.
-#: crates/clamui-core/src/audit.rs:1335
+#: crates/clamui-core/src/audit.rs:1369
 msgid "Not detected — optional network monitor and application firewall"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1351
+#: crates/clamui-core/src/audit.rs:1385
 msgid "Could not probe Portmaster: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1401
+#: crates/clamui-core/src/audit.rs:1435
 msgid "{name} is not installed"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1408
+#: crates/clamui-core/src/audit.rs:1442
 msgid "Install {name} for comprehensive security auditing"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1414
+#: crates/clamui-core/src/audit.rs:1448
 msgid "Install chkrootkit for rootkit detection"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1434
+#: crates/clamui-core/src/audit.rs:1468
 msgid "Authentication was cancelled"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1442
+#: crates/clamui-core/src/audit.rs:1476
 msgid "Lynis audit timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1444
+#: crates/clamui-core/src/audit.rs:1478
 msgid "Rootkit scan timed out after 5 minutes"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1463 crates/clamui-core/src/audit.rs:1509
+#: crates/clamui-core/src/audit.rs:1497 crates/clamui-core/src/audit.rs:1543
 msgid "Failed to run Lynis: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1469
+#: crates/clamui-core/src/audit.rs:1503
 msgid "Failed to run chkrootkit: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1538
+#: crates/clamui-core/src/audit.rs:1572
 msgid "Score: {score}/100"
 msgstr ""
 
 #. Translators: Keep the quoted shell command unchanged.
-#: crates/clamui-core/src/audit.rs:1541
+#: crates/clamui-core/src/audit.rs:1575
 msgid "Run 'sudo lynis audit system' for detailed recommendations"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1558
+#: crates/clamui-core/src/audit.rs:1592
 msgid "Audit completed (exit code {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1596 crates/clamui-core/src/audit.rs:1610
+#: crates/clamui-core/src/audit.rs:1630 crates/clamui-core/src/audit.rs:1644
 msgid "Rootkit scan could not be completed (exit {code})"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1647
+#: crates/clamui-core/src/audit.rs:1681
 msgid "No rootkits detected"
 msgstr ""
 
-#: crates/clamui-core/src/audit.rs:1659
+#: crates/clamui-core/src/audit.rs:1693
 msgid "{count} potential rootkit detected"
 msgid_plural "{count} potential rootkits detected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: crates/clamui-core/src/audit.rs:1667
+#: crates/clamui-core/src/audit.rs:1701
 msgid "Investigate the detected threats immediately"
 msgstr ""
 
@@ -1336,31 +1344,31 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:868
+#: crates/clamui-core/src/host.rs:913
 msgid "Daemon not responding: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:871
+#: crates/clamui-core/src/host.rs:916
 msgid "{binary} found but returned error: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:876
+#: crates/clamui-core/src/host.rs:921
 msgid "{service} is active"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:879
+#: crates/clamui-core/src/host.rs:924
 msgid "No virus database files found in {path}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:885
+#: crates/clamui-core/src/host.rs:930
 msgid "Error accessing database {path}: {error}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:891
+#: crates/clamui-core/src/host.rs:936
 msgid "{binary} is not installed. Please install it with: {command}"
 msgstr ""
 
-#: crates/clamui-core/src/host.rs:901
+#: crates/clamui-core/src/host.rs:946
 msgid ""
 "{binary} is not installed. Install the required ClamAV package for your "
 "distribution."
@@ -2582,7 +2590,7 @@ msgid "Cancelled"
 msgstr ""
 
 #: desktop/src/i18n.ts:96 desktop/src/pages/Audit.tsx:70
-#: desktop/src/pages/Components.tsx:146 desktop/src/pages/Logs.tsx:104
+#: desktop/src/pages/Components.tsx:150 desktop/src/pages/Logs.tsx:104
 #: desktop/src/pages/Logs.tsx:121 desktop/src/pages/Results.tsx:55
 #: desktop/src/pages/Results.tsx:69 desktop/src/pages/Results.tsx:76
 #: desktop/src/pages/ScanOverview.tsx:59 desktop/src/pages/ScanOverview.tsx:60
@@ -2887,15 +2895,15 @@ msgstr ""
 msgid "Process information unavailable"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:188
+#: desktop/src/pages/Audit.tsx:655 desktop/src/pages/Components.tsx:192
 msgid "Command copied to clipboard"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:191
+#: desktop/src/pages/Audit.tsx:657 desktop/src/pages/Components.tsx:195
 msgid "Could not copy command: {error}"
 msgstr ""
 
-#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Audit.tsx:675 desktop/src/pages/Components.tsx:277
 #: desktop/src/pages/Logs.tsx:388 desktop/src/pages/Logs.tsx:413
 #: desktop/src/pages/Scan.tsx:567 desktop/src/pages/Scan.tsx:571
 #: desktop/src/pages/SettingsPreferences.tsx:472
@@ -2927,137 +2935,137 @@ msgstr ""
 msgid "Acknowledge"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:78
+#: desktop/src/pages/Components.tsx:82
 msgid "Virus Scanner"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:80
+#: desktop/src/pages/Components.tsx:84
 msgid "Database Updater"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:82
+#: desktop/src/pages/Components.tsx:86
 msgid "Daemon Scanner Client"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:84
+#: desktop/src/pages/Components.tsx:88
 msgid "Scanner Daemon"
 msgstr ""
 
 #. Translators: Keep clamscan unchanged; it is the scanner command name.
-#: desktop/src/pages/Components.tsx:91
+#: desktop/src/pages/Components.tsx:95
 msgid "clamscan performs on-demand virus scans."
 msgstr ""
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:96
+#: desktop/src/pages/Components.tsx:100
 msgid "freshclam downloads current virus definitions."
 msgstr ""
 
 #. Translators: Keep clamdscan and clamd unchanged; they are command and service names.
-#: desktop/src/pages/Components.tsx:101
+#: desktop/src/pages/Components.tsx:105
 msgid "clamdscan uses the clamd daemon for faster scanning."
 msgstr ""
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:106
+#: desktop/src/pages/Components.tsx:110
 msgid "clamd is the ClamAV daemon for faster scans."
 msgstr ""
 
 #. Translators: Keep freshclam unchanged; it is the database-updater command name.
-#: desktop/src/pages/Components.tsx:116
+#: desktop/src/pages/Components.tsx:120
 msgid "After installation, update virus definitions with freshclam."
 msgstr ""
 
 #. Translators: Keep the embedded shell commands and service name unchanged.
-#: desktop/src/pages/Components.tsx:121
+#: desktop/src/pages/Components.tsx:125
 msgid ""
 "Enable the service for automatic updates: sudo systemctl enable clamav-"
 "freshclam; sudo systemctl start clamav-freshclam"
 msgstr ""
 
 #. Translators: Keep clamd unchanged; it is the daemon service name.
-#: desktop/src/pages/Components.tsx:126
+#: desktop/src/pages/Components.tsx:130
 msgid "Requires the clamd daemon to be running."
 msgstr ""
 
 #. Translators: Keep the embedded file path, command, and command-line options unchanged.
-#: desktop/src/pages/Components.tsx:131
+#: desktop/src/pages/Components.tsx:135
 msgid ""
 "Configuration is auto-detected in Preferences. On Fedora, ClamUI uses /etc/"
 "clamd.d/scan.conf. If clamd is running but unavailable, verify socket "
 "permissions and run: clamdscan --config-file=/etc/clamd.d/scan.conf --ping 3"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:143 desktop/src/pages/Logs.tsx:98
+#: desktop/src/pages/Components.tsx:147 desktop/src/pages/Logs.tsx:98
 msgid "Running"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:143
+#: desktop/src/pages/Components.tsx:147
 #: desktop/src/pages/SettingsPreferences.tsx:265
 msgid "Installed"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:144 desktop/src/pages/Logs.tsx:100
+#: desktop/src/pages/Components.tsx:148 desktop/src/pages/Logs.tsx:100
 msgid "Stopped"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:145 desktop/src/pages/Logs.tsx:102
+#: desktop/src/pages/Components.tsx:149 desktop/src/pages/Logs.tsx:102
 #: desktop/src/pages/SettingsPreferences.tsx:267
 msgid "Not installed"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:200
+#: desktop/src/pages/Components.tsx:204
 msgid "ClamAV components"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:201
+#: desktop/src/pages/Components.tsx:205
 msgid ""
 "Check host-side ClamAV tools and copy distribution-specific setup commands."
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Components.tsx:231
 #: desktop/src/pages/Database.tsx:267 desktop/src/pages/Database.tsx:289
 msgid "Checking…"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:204 desktop/src/pages/Database.tsx:267
+#: desktop/src/pages/Components.tsx:208 desktop/src/pages/Database.tsx:267
 #: desktop/src/pages/Scan.tsx:544
 msgid "Refresh status"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:208
+#: desktop/src/pages/Components.tsx:212
 msgid "Could not check component status: {error}"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:209
+#: desktop/src/pages/Components.tsx:213
 msgid "Detected host family: {distro}."
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:214
+#: desktop/src/pages/Components.tsx:218
 msgid "Components Status"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:227
+#: desktop/src/pages/Components.tsx:231
 msgid "Version unavailable"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Hide details"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:244
+#: desktop/src/pages/Components.tsx:248
 msgid "Show details"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:251
+#: desktop/src/pages/Components.tsx:255
 msgid "Suggested for the detected system:"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:254
+#: desktop/src/pages/Components.tsx:258
 msgid "Commands for supported distributions:"
 msgstr ""
 
-#: desktop/src/pages/Components.tsx:273
+#: desktop/src/pages/Components.tsx:277
 msgid "Copied"
 msgstr ""
 

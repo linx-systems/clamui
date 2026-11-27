@@ -29,6 +29,9 @@ sudo dnf install clamav clamav-freshclam
 
 # Arch Linux
 sudo pacman -S clamav
+
+# openSUSE Tumbleweed or Leap
+sudo zypper install clamav
 ```
 
 Update definitions before the first scan:

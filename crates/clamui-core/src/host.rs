@@ -90,16 +90,33 @@ pub fn host_binary(binary: &str) -> Option<String> {
         return None;
     }
     let args = vec![binary.to_owned()];
-    let output = run_host("which", &args, Some(5)).ok()?;
-    if output.status.success() {
-        let path = String::from_utf8_lossy(&output.stdout).trim().to_owned();
-        if !path.is_empty() {
-            return Some(path);
+    // A missing `which` makes the spawn itself fail; fall through to the
+    // fixed system directories instead of giving up.
+    if let Ok(output) = run_host("which", &args, Some(5)) {
+        if output.status.success() {
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
-    [format!("/usr/sbin/{binary}"), format!("/sbin/{binary}")]
+    fallback_binary_paths(binary)
         .into_iter()
         .find(|candidate| host_regular_executable(candidate))
+}
+
+/// Standard system directories probed when `which` is unavailable or fails.
+///
+/// Minimal installs (for example the openSUSE Tumbleweed Minimal VM image) do
+/// not ship `which`, so package-manager binaries such as `/usr/bin/zypper`
+/// must still be found without it.
+fn fallback_binary_paths(binary: &str) -> [String; 4] {
+    [
+        format!("/usr/sbin/{binary}"),
+        format!("/usr/bin/{binary}"),
+        format!("/sbin/{binary}"),
+        format!("/bin/{binary}"),
+    ]
 }
 
 fn host_regular_executable(path: &str) -> bool {
@@ -672,10 +689,21 @@ pub(crate) enum Distro {
     Fedora,
     FedoraAtomic,
     Arch,
+    Suse,
 }
 
 pub(crate) fn distro() -> Option<Distro> {
     let source = read_host_file("/etc/os-release").ok()?;
+    parse_distro(&source)
+}
+
+/// Resolve a distribution family from an os-release document.
+///
+/// Only the exact `ID` is authoritative; `ID_LIKE` is deliberately ignored so
+/// that derivatives sharing a package manager but not package names are not
+/// misdetected (e.g. transactional openSUSE MicroOS/Aeon, which use
+/// `transactional-update` instead of `zypper`).
+pub(crate) fn parse_distro(source: &str) -> Option<Distro> {
     let values = source
         .lines()
         .filter_map(|line| {
@@ -707,12 +735,17 @@ pub(crate) fn distro() -> Option<Distro> {
         }
         Some("fedora") => Some(Distro::Fedora),
         Some("arch" | "manjaro") => Some(Distro::Arch),
+        Some("opensuse-tumbleweed" | "opensuse-leap") => Some(Distro::Suse),
         _ => None,
     }
 }
 
 pub fn install_command(target: &str) -> Option<String> {
-    let command = match (distro()?, target) {
+    install_command_for(distro()?, target)
+}
+
+pub(crate) fn install_command_for(distro: Distro, target: &str) -> Option<String> {
+    let command = match (distro, target) {
         (Distro::Debian, "clamav" | "clamscan") => "sudo apt install clamav clamav-daemon",
         (Distro::Debian, "freshclam") => "sudo apt install clamav-freshclam",
         (Distro::Debian, "clamdscan" | "clamd") => "sudo apt install clamav-daemon",
@@ -755,6 +788,18 @@ pub fn install_command(target: &str) -> Option<String> {
         (Distro::FedoraAtomic, "chkrootkit") => {
             "sudo rpm-ostree install chkrootkit\nsudo systemctl reboot"
         }
+        (Distro::Suse, "clamav" | "clamscan" | "freshclam" | "clamdscan" | "clamd") => {
+            "sudo zypper install clamav"
+        }
+        (Distro::Suse, "firewall") => {
+            "sudo zypper install firewalld && sudo systemctl enable --now firewalld"
+        }
+        (Distro::Suse, "firewall_gui") => "sudo zypper install firewall-config",
+        (Distro::Suse, "automatic_updates") => {
+            "sudo zypper install os-update && sudo systemctl enable --now os-update.timer"
+        }
+        (Distro::Suse, "intrusion_prevention") => "sudo zypper install fail2ban",
+        (Distro::Suse, "lynis") => "sudo zypper install lynis",
         _ => return None,
     };
     Some(command.to_owned())
@@ -957,6 +1002,7 @@ pub fn dispatch(ctx: &crate::common::Context, action: &str, args: Value) -> AppR
                 Some(Distro::Fedora) => "fedora",
                 Some(Distro::FedoraAtomic) => "fedora_atomic",
                 Some(Distro::Arch) => "arch",
+                Some(Distro::Suse) => "suse",
                 None => "unknown",
             };
             Ok(json!({"distro":distro,"commands":commands}))
@@ -971,6 +1017,68 @@ mod tests {
     use std::fs;
     use std::os::unix::fs::symlink;
     use std::time::{Duration, UNIX_EPOCH};
+
+    const TUMBLEWEED_OS_RELEASE: &str = r#"NAME="openSUSE Tumbleweed"
+# VERSION="20261124"
+ID="opensuse-tumbleweed"
+ID_LIKE="opensuse suse"
+VERSION_ID="20261124"
+PRETTY_NAME="openSUSE Tumbleweed"
+ANSI_COLOR="0;32"
+"#;
+
+    const LEAP_OS_RELEASE: &str = r#"NAME="openSUSE Leap"
+VERSION="16.0"
+ID="opensuse-leap"
+ID_LIKE="suse opensuse"
+VERSION_ID="16.0"
+PRETTY_NAME="openSUSE Leap 16.0"
+"#;
+
+    #[test]
+    fn host_binary_fallback_covers_usr_bin_and_bin() {
+        assert_eq!(
+            fallback_binary_paths("zypper"),
+            [
+                "/usr/sbin/zypper",
+                "/usr/bin/zypper",
+                "/sbin/zypper",
+                "/bin/zypper",
+            ]
+        );
+    }
+
+    #[test]
+    fn opensuse_tumbleweed_and_leap_resolve_to_suse_family() {
+        assert_eq!(parse_distro(TUMBLEWEED_OS_RELEASE), Some(Distro::Suse));
+        assert_eq!(parse_distro(LEAP_OS_RELEASE), Some(Distro::Suse));
+    }
+
+    #[test]
+    fn suse_id_like_alone_does_not_select_suse_family() {
+        let derivative =
+            "ID=\"opensuse-microos\"\nID_LIKE=\"suse opensuse opensuse-tumbleweed microos\"\n";
+        assert_eq!(parse_distro(derivative), None);
+    }
+
+    #[test]
+    fn suse_family_uses_zypper_commands() {
+        for target in ["clamav", "clamscan", "freshclam", "clamdscan", "clamd"] {
+            assert_eq!(
+                install_command_for(Distro::Suse, target).as_deref(),
+                Some("sudo zypper install clamav")
+            );
+        }
+        assert_eq!(
+            install_command_for(Distro::Suse, "firewall_gui").as_deref(),
+            Some("sudo zypper install firewall-config")
+        );
+        assert!(install_command_for(Distro::Suse, "automatic_updates")
+            .is_some_and(|command| command.contains("os-update.timer")));
+        // chkrootkit is not packaged in the official openSUSE repositories.
+        assert_eq!(install_command_for(Distro::Suse, "chkrootkit"), None);
+        assert_eq!(install_command_for(Distro::Suse, "unknown_target"), None);
+    }
 
     #[test]
     fn database_inventory_preserves_file_metadata_through_directory_symlinks() {

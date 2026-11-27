@@ -22,7 +22,7 @@ type ComponentsStatus = {
 };
 
 type InstallCommands = {
-  distro: "debian" | "fedora" | "fedora_atomic" | "arch" | "unknown";
+  distro: "debian" | "fedora" | "fedora_atomic" | "arch" | "suse" | "unknown";
   commands: Record<string, string>;
 };
 
@@ -41,6 +41,7 @@ const DEFINITIONS: ComponentDefinition[] = [
       { distro: "Fedora Workstation", command: "sudo dnf install clamav" },
       { distro: "Fedora Atomic", command: "sudo rpm-ostree install clamav\nsudo systemctl reboot" },
       { distro: "Arch Linux", command: "sudo pacman -S clamav" },
+      { distro: "openSUSE Tumbleweed/Leap", command: "sudo zypper install clamav" },
     ],
   },
   {
@@ -50,6 +51,7 @@ const DEFINITIONS: ComponentDefinition[] = [
       { distro: "Fedora Workstation", command: "sudo dnf install clamav-freshclam" },
       { distro: "Fedora Atomic", command: "sudo rpm-ostree install clamav-freshclam\nsudo systemctl reboot" },
       { distro: "Arch Linux", command: "sudo pacman -S clamav" },
+      { distro: "openSUSE Tumbleweed/Leap", command: "sudo zypper install clamav" },
     ],
   },
   {
@@ -59,6 +61,7 @@ const DEFINITIONS: ComponentDefinition[] = [
       { distro: "Fedora Workstation", command: "sudo dnf install clamd" },
       { distro: "Fedora Atomic", command: "sudo rpm-ostree install clamd\nsudo systemctl reboot" },
       { distro: "Arch Linux", command: "sudo pacman -S clamav" },
+      { distro: "openSUSE Tumbleweed/Leap", command: "sudo zypper install clamav" },
     ],
   },
   {
@@ -68,6 +71,7 @@ const DEFINITIONS: ComponentDefinition[] = [
       { distro: "Fedora Workstation", command: "sudo dnf install clamd clamav-freshclam\nsudo freshclam\nsudo systemctl enable clamd@scan\nsudo systemctl start clamd@scan" },
       { distro: "Fedora Atomic", command: "sudo rpm-ostree install clamd clamav-freshclam\nsudo systemctl reboot" },
       { distro: "Arch Linux", command: "sudo pacman -S clamav\nsudo systemctl enable clamav-daemon\nsudo systemctl start clamav-daemon" },
+      { distro: "openSUSE Tumbleweed/Leap", command: "sudo zypper install clamav\nsudo freshclam\nsudo systemctl enable --now clamd" },
     ],
   },
 ];
