@@ -278,6 +278,24 @@ html.light header.sticky {
   background-color: rgba(251, 252, 250, 0.78);
 }
 
+/* Nav hover states. The dark-mode hover utilities (white text, 4-6% white
+   background) are invisible on the light bar, and the blanket text-white/NN
+   overrides below outrank hover:text-white. These selectors (html.light +
+   header + attribute + :hover) win over both. */
+html.light header.sticky [class~="hover:text-white"]:hover {
+  color: #2d5c3a;
+}
+html.light header.sticky [class~="hover:bg-white/[0.04]"]:hover,
+html.light header.sticky [class~="hover:bg-white/[0.06]"]:hover {
+  background-color: rgba(61, 122, 78, 0.10);
+}
+html.light header.sticky [class~="hover:border-clam-sage/50"]:hover {
+  border-color: rgba(61, 122, 78, 0.45);
+}
+html.light header.sticky #theme-toggle:hover {
+  border-color: rgba(61, 122, 78, 0.35);
+}
+
 /* 1. Blanket utility-class overrides (white-on-dark → ink-on-paper).
    Uses [class~="…"] attribute selectors instead of escaped class selectors
    so Tailwind's dep analyzer doesn't treat these as utility redefinitions. */

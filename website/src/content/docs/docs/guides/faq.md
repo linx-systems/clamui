@@ -9,7 +9,7 @@ No. ClamUI is the desktop interface; [ClamAV](https://www.clamav.net/) performs 
 
 ## Can I use Ubuntu or Pop!_OS 22.04?
 
-Use the [Flatpak](/docs/installation/#flatpak) when it is available for your host. Native Tauri artifacts preserve their glibc floor only when built on the project's Ubuntu 22.04-compatible baseline; a newer-host build is not compatibility evidence. The Flatpak uses GNOME 51 for the UI but still needs the host ClamAV tools.
+Use the [Flatpak](/docs/installation/#flathub) when it is available for your host. Native Tauri artifacts preserve their glibc floor only when built on the project's Ubuntu 22.04-compatible baseline; a newer-host build is not compatibility evidence. The Flatpak uses GNOME 51 for the UI but still needs the host ClamAV tools.
 
 ## How often should I scan?
 

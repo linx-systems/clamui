@@ -151,7 +151,7 @@ Use the manual repair route when the helper is untrusted, the host is unsupporte
 
   This is a local source-built helper installation, not a signed published-package installer. Do not use it from Flatpak or to modify an immutable Fedora Atomic deployment.
 
-- **Flatpak:** On an eligible Debian-family or Fedora host, use the in-app offer for a missing helper. If the host is unsupported or automatic installation cannot complete because no eligible published asset exists, keep protected writes blocked and repair only through the verified package or mutable-host source route for the same release. Do not use `sudo flatpak`, the native host installer command, or a staging prefix as a Flatpak repair; see [installation](/docs/installation/#flatpak).
+- **Flatpak:** On an eligible Debian-family or Fedora host, use the in-app offer for a missing helper. If the host is unsupported or automatic installation cannot complete because no eligible published asset exists, keep protected writes blocked and repair only through the verified package or mutable-host source route for the same release. Do not use `sudo flatpak`, the native host installer command, or a staging prefix as a Flatpak repair; see [installation](/docs/installation/#flathub).
 
 Do not change an unknown executable's ownership or permissions to bypass this check. After a successful manual repair, restart ClamUI and repeat the requested operation. If it still fails, open the dialog's **Technical details** panel and include the exact error, package format, version, and architecture in a [GitHub issue](https://github.com/linx-systems/clamui/issues).
 
