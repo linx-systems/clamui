@@ -147,7 +147,7 @@ jobs:
                 deb:debian/*|deb:scripts/clamui-*|deb:.github/workflows/build-deb.yml) return 0 ;;
                 rpm:rpm/*|rpm:crates/clamui-core/src/privileged.rs|rpm:.github/workflows/build-rpm.yml) return 0 ;;
                 appimage:appimage/*|appimage:.github/workflows/build-appimage.yml) return 0 ;;
-                flatpak:flathub/*|flatpak:desktop/yarn.lock|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
+                flatpak:flathub/*|flatpak:desktop/yarn.lock|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/fix-yarn-lock-specs.py|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
                 snap:snap/*|snap:.github/workflows/build-snap.yml) return 0 ;;
               esac
             done < "$files"

@@ -109,6 +109,10 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 
+# Bun's Yarn export can drop a "=X" spec when another package requires "X";
+# offline Yarn in the Flatpak build then cannot resolve it.
+python3 -I "$SCRIPT_DIR/fix-yarn-lock-specs.py" "$YARN_LOCK" || die "desktop/yarn.lock has unresolved dependency specs"
+
 "$cargo_generator" "$CARGO_LOCK" -o "$work_dir/cargo-sources.json"
 "$node_generator" --no-requests-cache -o "$work_dir/bun-sources.json" yarn "$YARN_LOCK"
 
