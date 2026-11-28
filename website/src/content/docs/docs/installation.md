@@ -8,14 +8,14 @@ description: Install ClamUI, its native desktop runtime, and host ClamAV.
 | System | Recommended package |
 | --- | --- |
 | Most Linux desktops | [Flathub](#flathub) (`io.github.linx_systems.ClamUI`), x86_64 and aarch64 |
-| Offline Flatpak install | GitHub v0.6.1 Flatpak bundle for the host architecture |
-| Debian-family host | The matching v0.6.1 architecture-specific Debian application and helper pair |
-| Fedora host | Flathub or AppImage, plus the matching signed v0.6.1 Fedora helper RPM for protected preferences |
-| Portable x86_64 use | `ClamUI-0.6.1-x86_64.AppImage` |
+| Offline Flatpak install | GitHub v0.6.0 Flatpak bundle for the host architecture |
+| Debian-family host | The matching v0.6.0 architecture-specific Debian application and helper pair |
+| Fedora host | Flathub or AppImage, plus the matching signed v0.6.0 Fedora helper RPM for protected preferences |
+| Portable x86_64 use | `ClamUI-0.6.0-x86_64.AppImage` |
 | Snap users (preview) | Classic-confinement [snap](#snap-preview) built from `snap/snapcraft.yaml` |
 | Rust/Tauri development | Rust, Bun, and a `master` [source checkout](#source) |
 
-The current release is ClamUI v0.6.1, available from [GitHub Releases](https://github.com/linx-systems/clamui/releases/tag/v0.6.1); Flathub is updated separately and can briefly show an older version. Its native desktop build uses the system WebKitGTK 4.1 and GTK 3 runtime; its Flatpak configuration targets GNOME Platform 51. The Rust/Tauri application is not a Python/PyGObject runtime.
+The current release is ClamUI v0.6.0, published on Flathub and on [GitHub Releases](https://github.com/linx-systems/clamui/releases/tag/v0.6.0). Its native desktop build uses the system WebKitGTK 4.1 and GTK 3 runtime; its Flatpak configuration targets GNOME Platform 51. The Rust/Tauri application is not a Python/PyGObject runtime.
 
 ## Required host software
 
@@ -87,7 +87,7 @@ The Flatpak calls host ClamAV through `flatpak-spawn --host`; the sandboxed UI d
 
 ## Flatpak bundle
 
-For an offline install, download the v0.6.1 GitHub Flatpak bundle for your architecture, `clamui-x86_64.flatpak` or `clamui-aarch64.flatpak`, and check it against the release's `SHA256SUMS`. A bundle does not update on its own.
+For an offline install, download the v0.6.0 GitHub Flatpak bundle for your architecture, `clamui-x86_64.flatpak` or `clamui-aarch64.flatpak`, and check it against the release's `SHA256SUMS`. A bundle does not update on its own.
 
 ```bash
 flatpak install --user ./clamui-x86_64.flatpak
@@ -109,34 +109,34 @@ If authorization is cancelled or installation fails, the settings draft remains 
 
 ## Debian packages
 
-Download and [verify](/docs/contributing/signing/#debian-packages) the pair for the same Debian architecture. The asset patterns are `clamui_0.6.1_<debarch>.deb` and `clamui-privileged-helper_0.6.1_<debarch>.deb`; the application package provides `/usr/bin/clamui` and `/usr/bin/clamui-scheduled-scan`, while the companion package provides `/usr/bin/clamui-apply-preferences` and its polkit policy.
+Download and [verify](/docs/contributing/signing/#debian-packages) the pair for the same Debian architecture. The asset patterns are `clamui_0.6.0_<debarch>.deb` and `clamui-privileged-helper_0.6.0_<debarch>.deb`; the application package provides `/usr/bin/clamui` and `/usr/bin/clamui-scheduled-scan`, while the companion package provides `/usr/bin/clamui-apply-preferences` and its polkit policy.
 
 ```bash
 DEB_ARCH="$(dpkg --print-architecture)"
-sudo apt install "./clamui_0.6.1_${DEB_ARCH}.deb" \
-  "./clamui-privileged-helper_0.6.1_${DEB_ARCH}.deb"
+sudo apt install "./clamui_0.6.0_${DEB_ARCH}.deb" \
+  "./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb"
 ```
 
-Do not mix upstream release versions or substitute a foreign-architecture package. Installed Debian metadata accepts a conventional numeric-leading Debian revision after the exact application upstream version, such as `0.6.1-1`; other version or architecture mismatches need repair. The canonical helper keeps the protected-host protocol and data rules intact.
+Do not mix upstream release versions or substitute a foreign-architecture package. Installed Debian metadata accepts a conventional numeric-leading Debian revision after the exact application upstream version, such as `0.6.0-1`; other version or architecture mismatches need repair. The canonical helper keeps the protected-host protocol and data rules intact.
 
 ## Fedora helper RPM
 
-The v0.6.1 helper-only RPM asset names are `clamui-privileged-helper-0.6.1-1.x86_64.rpm` and `clamui-privileged-helper-0.6.1-1.aarch64.rpm`, each with a matching `.rpm.asc`. It contains `/usr/bin/clamui-apply-preferences` and its polkit policy, not the ClamUI GUI or ClamAV engine. Verify the RPM and detached signature first with the [package-signing guide](/docs/contributing/signing/#fedora-rpm-packages).
+The v0.6.0 helper-only RPM asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with a matching `.rpm.asc`. It contains `/usr/bin/clamui-apply-preferences` and its polkit policy, not the ClamUI GUI or ClamAV engine. Verify the RPM and detached signature first with the [package-signing guide](/docs/contributing/signing/#fedora-rpm-packages).
 
-On Fedora Workstation or Server, the explicit native or Flatpak-host offer uses DNF only after you accept its notice that the pinned ClamUI public key will become persistent system RPM-key trust. On [Fedora Atomic desktops](https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/) (such as Silverblue or Kinoite), it uses [`rpm-ostree install -y --apply-live ./clamui-privileged-helper-0.6.1-1.<ARCH>.rpm`](https://coreos.github.io/rpm-ostree/administrator-handbook/) only for an absent helper and no unrelated pending deployment. After a successful live install, it runs the bounded `systemctl try-restart polkit.service` refresh and verifies the ClamUI polkit action is available; it never imports a host RPM key or reboots automatically. An existing, outdated, corrupt, or unavailable live Atomic helper needs the verified manual layering-and-reboot repair in [troubleshooting](/docs/troubleshooting/#privileged-helper-is-not-trusted).
+On Fedora Workstation or Server, the explicit native or Flatpak-host offer uses DNF only after you accept its notice that the pinned ClamUI public key will become persistent system RPM-key trust. On [Fedora Atomic desktops](https://docs.fedoraproject.org/en-US/atomic-desktops/getting-started/) (such as Silverblue or Kinoite), it uses [`rpm-ostree install -y --apply-live ./clamui-privileged-helper-0.6.0-1.<ARCH>.rpm`](https://coreos.github.io/rpm-ostree/administrator-handbook/) only for an absent helper and no unrelated pending deployment. After a successful live install, it runs the bounded `systemctl try-restart polkit.service` refresh and verifies the ClamUI polkit action is available; it never imports a host RPM key or reboots automatically. An existing, outdated, corrupt, or unavailable live Atomic helper needs the verified manual layering-and-reboot repair in [troubleshooting](/docs/troubleshooting/#privileged-helper-is-not-trusted).
 
 A native Tauri build needs WebKitGTK 4.1 and GTK 3. Build release artifacts on the Ubuntu 22.04-compatible baseline used by CI to preserve the glibc floor; a successful build on a newer host is not evidence of old-distribution compatibility.
 
 ## AppImage
 
-Download `ClamUI-0.6.1-x86_64.AppImage` from [GitHub Releases](https://github.com/linx-systems/clamui/releases), verify it, make it executable, then run it:
+Download `ClamUI-0.6.0-x86_64.AppImage` from [GitHub Releases](https://github.com/linx-systems/clamui/releases), verify it, make it executable, then run it:
 
 ```bash
-chmod +x ClamUI-0.6.1-x86_64.AppImage
-./ClamUI-0.6.1-x86_64.AppImage
+chmod +x ClamUI-0.6.0-x86_64.AppImage
+./ClamUI-0.6.0-x86_64.AppImage
 ```
 
-The AppImage packages ClamUI but still uses host ClamAV. Its matching `.zsync` metadata is `ClamUI-0.6.1-x86_64.AppImage.zsync`.
+The AppImage packages ClamUI but still uses host ClamAV. Its matching `.zsync` metadata is `ClamUI-0.6.0-x86_64.AppImage.zsync`.
 
 ## Snap (preview)
 
@@ -144,10 +144,10 @@ ClamUI is not yet published in the Snap Store. The `snap/snapcraft.yaml` recipe 
 
 ```bash
 sudo apt install clamav clamav-freshclam
-sudo snap install --dangerous --classic ./clamui_0.6.1_amd64.snap
+sudo snap install --dangerous --classic ./clamui_0.6.0_amd64.snap
 ```
 
-Protected ClamAV preferences need the host helper. On Debian-family hosts, install the matching `clamui-privileged-helper_0.6.1_<debarch>.deb` from the [Debian packages](#debian-packages) section; ClamUI checks that package version. On other hosts, `sudo clamui install-privileged-helper` installs it from the snap.
+Protected ClamAV preferences need the host helper. On Debian-family hosts, install the matching `clamui-privileged-helper_0.6.0_<debarch>.deb` from the [Debian packages](#debian-packages) section; ClamUI checks that package version. On other hosts, `sudo clamui install-privileged-helper` installs it from the snap.
 
 Scheduled scans started from the snap call `/snap/bin/clamui.scheduled-scan`, which stays valid across snap refreshes. Parallel snap instances such as `clamui_beta` are not supported. To build the snap yourself, run `snapcraft pack` from the repository root.
 

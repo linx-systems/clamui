@@ -7,7 +7,7 @@
 ### Added
 
 - Modernized the desktop with a dashboard layout: a new Dashboard start page with Quick Scan hand-off to its own Scan page, refreshed navigation, and a results page that leads with a clear verdict banner and scan target. (#351, #340)
-- Added a clear security overview to Audit with a Protected / Action recommended summary derived from essential checks (virus database freshness, ClamAV daemon, scheduled scans, firewall), optional hardening collapsed by default, and no UFW warning while another firewall manager protects the system. (#322)
+- Added a clear security overview to Audit with a Protected / Action recommended summary derived from essential checks (virus database freshness, ClamAV daemon, firewall), optional hardening collapsed by default, and no UFW warning while another firewall manager protects the system. (#322)
 - Added acknowledgements for security audit warnings: acknowledge a warning for an unchanged check, review acknowledged checks in their own section, and revoke at any time. An unreadable acknowledgement store never aborts the audit. (#329)
 - Expanded the Audit Open Ports details with listener addresses, binding scope, and available process information.
 - Added an explicit administrator-authorized UFW status check for unknown Audit results without changing firewall settings.
