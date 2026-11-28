@@ -9,6 +9,7 @@ A modern Linux desktop interface for ClamAV, built with Rust, Tauri, and a React
 [Website](https://clamui.com) · [Documentation](https://clamui.com/docs/) · [Issues](https://github.com/linx-systems/clamui/issues) · [Security](SECURITY.md)
 
 [![Flathub](https://flathub.org/api/badge?locale=en)](https://flathub.org/en/apps/io.github.linx_systems.ClamUI)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/linx-systems/clamui/badge)](https://scorecard.dev/viewer/?uri=github.com/linx-systems/clamui)
 
 </div>
 
