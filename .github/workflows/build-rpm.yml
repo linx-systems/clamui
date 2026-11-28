@@ -46,8 +46,7 @@ jobs:
 
       - name: Install core helper build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo bash .github/workflows/install-ubuntu-build-deps.sh \
             binutils \
             build-essential \
             ca-certificates \

@@ -96,10 +96,10 @@ const clamui: Tab[] = [
     id: "deb",
     label: "Debian / Ubuntu",
     sub: ".deb",
-    intro: "Download both v0.6.0 packages for your architecture from GitHub Releases, then install them together. The helper lets ClamUI change ClamAV settings with your administrator password.",
+    intro: "Download both v0.6.1 packages for your architecture from GitHub Releases, then install them together. The helper lets ClamUI change ClamAV settings with your administrator password.",
     blocks: [
       {
-        code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.6.0_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb\"",
+        code: "DEB_ARCH=\"$(dpkg --print-architecture)\"\nsudo apt install \"./clamui_0.6.1_${DEB_ARCH}.deb\" \\\n  \"./clamui-privileged-helper_0.6.1_${DEB_ARCH}.deb\"",
       },
     ],
   },
@@ -110,7 +110,7 @@ const clamui: Tab[] = [
     intro: "A single file that runs without installing. Download it from GitHub Releases.",
     blocks: [
       {
-        code: "chmod +x ClamUI-0.6.0-x86_64.AppImage\n./ClamUI-0.6.0-x86_64.AppImage",
+        code: "chmod +x ClamUI-0.6.1-x86_64.AppImage\n./ClamUI-0.6.1-x86_64.AppImage",
       },
     ],
   },
@@ -138,7 +138,7 @@ const clamui: Tab[] = [
   },
 ];
 
-const releaseUrl = "https://github.com/linx-systems/clamui/releases/tag/v0.6.0";
+const releaseUrl = "https://github.com/linx-systems/clamui/releases/tag/v0.6.1";
 ---
 
 <section id="install" class="container-tight py-20 sm:py-28">
@@ -172,7 +172,7 @@ const releaseUrl = "https://github.com/linx-systems/clamui/releases/tag/v0.6.0";
           <h3 class="text-lg font-semibold text-white">Install ClamUI</h3>
           <p class="text-sm text-white/60 mt-1">
             Flathub is the easiest choice on every distribution. Downloads for the other formats are on
-            <a href={releaseUrl} rel="noopener" class="text-clam-sage hover:text-white transition-colors">GitHub Releases (v0.6.0)</a>.
+            <a href={releaseUrl} rel="noopener" class="text-clam-sage hover:text-white transition-colors">GitHub Releases (v0.6.1)</a>.
           </p>
         </div>
       </div>

@@ -2,36 +2,38 @@
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-28
+
 ### Added
 
+- Modernized the desktop with a dashboard layout: a new Dashboard start page with Quick Scan hand-off to its own Scan page, refreshed navigation, and a results page that leads with a clear verdict banner and scan target. (#351, #340)
+- Added a clear security overview to Audit with a Protected / Action recommended summary derived from essential checks (virus database freshness, ClamAV daemon, scheduled scans, firewall), optional hardening collapsed by default, and no UFW warning while another firewall manager protects the system. (#322)
+- Added acknowledgements for security audit warnings: acknowledge a warning for an unchanged check, review acknowledged checks in their own section, and revoke at any time. An unreadable acknowledgement store never aborts the audit. (#329)
 - Expanded the Audit Open Ports details with listener addresses, binding scope, and available process information.
 - Added an explicit administrator-authorized UFW status check for unknown Audit results without changing firewall settings.
 - Added an Audit checkbox to hide missing optional items without changing audit totals.
 - Added independent OpenSnitch service and graphical-interface checks to the application-firewall audit, with an explicit GUI launch action when available; Portmaster remains a separate check. (#241)
-- Added a Vietnamese (`vi`) translation.
-- The desktop app now follows the system accent color from the XDG desktop portal (`org.freedesktop.appearance` `accent-color`), including live changes without a restart, and keeps the built-in blue when no accent is set. (#325)
 - Added startup diagnostics for a blank or gray window: the app now shows a JavaScript or render error in the window instead of leaving it blank, records its native startup stages, writes one `startup-watchdog` warning to the debug log when the interface has not appeared after ten seconds (naming whether native startup, the UI thread, or the web page is stuck), and ships `scripts/inspect-blank-window.py` to inspect the web view of a blank window (the WebKit inspector can itself freeze the start on some systems, so the script and the troubleshooting page say to compare with a start without it). Set `CLAMUI_STARTUP_TRACE=1` to print the stages. (#361)
+- The desktop app now follows the system accent color from the XDG desktop portal (`org.freedesktop.appearance` `accent-color`), including live changes without a restart, and keeps the built-in blue when no accent is set. (#325)
+- Added openSUSE Tumbleweed and Leap to the distro-aware install commands (zypper) and Audit checks (automatic updates via `os-update.timer`, pending reboot via `/run/reboot-needed`). (#367)
+- Added a classic-confinement snap package build. (#357)
+- Added descriptive notes and code term formatting to the On-Access Behavior settings. (#362)
 
 ### Changed
 
 - Preferences now save automatically instead of requiring a separate Save section: non-privileged changes save when you leave a settings section, and all pending changes save when you close the Preferences window or click the new persistent Save button in its header (enabled only while changes are pending). Changes needing the privileged helper are batched into a single authorization prompt rather than one per section; a failed privileged save keeps your edits pending and shows a persistent error, while a successful save shows a brief confirmation toast. (#346)
+- Editable path lists (On-Access include and exclude lists, scheduled scan targets) now show new entries first, span the full width, and support reordering by dragging, with arrow keys on the handle, or with up and down buttons. (#342)
 - Improved the signature database editor and provider list with full-width URLs, clearer actions, and external-link indicators.
 - Removed the unavailable URLhaus database recommendation; existing custom databases are unchanged.
-- Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
-- Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
-- Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
-- Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
-- Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
-- Updated Rust dependencies: `glib` to 0.22.10, bundled `rusqlite` to 0.41.1, `base64` to 0.23.1, `rfd` to 0.17.2, and the locked `tauri` resolution to 2.12.5. The `rfd` update removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
-- Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@vitejs/plugin-react` to 5.2.0, and TypeScript to 7.0.2. Gettext extraction now uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
-- Updated Rust dependencies: `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, and `zip` to 9.4.1.
-- Updated desktop tooling: `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources.
-- Updated Rust dependencies to `gio` 0.22.10, `sha2` 0.11.1, `rfd` 0.18.0, `uuid` 1.29.2, and `zip` 9.5.1; preserved existing lowercase SHA-256 hashes for quarantine records and VirusTotal lookups.
-- Updated desktop tooling to `@vitejs/plugin-react` 6.3.0 and Vite 8.3.7, refreshed Flatpak dependency sources, and updated website dependencies with a matching Node.js 22.23.4 minimum.
+- The header bar now blends into the main content. (#330)
+- Added an icon to the About menu item.
+- Updated Rust dependencies, including `tauri` 2.12.7, `gio` and `glib` 0.22.11, `sha2` 0.11, `rfd` 0.18, `rusqlite` 0.43, `zbus` 6, `uuid` 1.29.3, and `zip` 9.8.2, with a refresh of all compatible Cargo, desktop, and website dependencies; preserved existing lowercase SHA-256 hashes for quarantine records and VirusTotal lookups.
+- Updated desktop tooling to Vite 8.4.0, `@vitejs/plugin-react` 6.3.0, `@babel/parser` 8.1.2, and `@tauri-apps/cli` 2.12.6, refreshed Flatpak dependency sources, and updated website dependencies with a matching Node.js 22.23.4 minimum.
 - Refreshed compatible website transitive dependencies to address security advisories without forcing unsupported dependency major versions.
 
 ### Fixed
 
+- Fixed a blank window in the Flatpak: the WebKit transport default now forces shared-memory rendering instead of fully disabling DMA-BUF, which left some WebKit versions without any usable buffer transport, while the Wayland `Error 71` mitigation is preserved. Users on the already released 0.6.0 Flatpak can follow the new troubleshooting steps. (#315, #282)
 - Daemon scans of files on FUSE mounts (squashfuse, AppImage `/tmp/.mount_*`, sshfs, rclone) no longer fail with "Not a regular file ERROR": clamd cannot `fstat` descriptors from a user-owned FUSE mount, so those files are now sent with `--stream`. Pathless `fd[N]: ... ERROR` lines from clamdscan are attributed to the scanned file instead of being shown raw. (#369)
 - "View Results" no longer shows "No results yet" after very large scans: the latest result is kept in memory, and only a size-bounded copy goes to session storage. (#369)
 - Fixed the On-Access **Authorize read** action discarding unsaved paths and options: it now only refreshes the baseline it just read with elevated privileges, keeping pending form edits when there are any, instead of always replacing them. (#343)
@@ -41,10 +43,40 @@
 - Daemon (clamd) scans now use clamd's thread pool instead of a single scanning thread: ClamUI splits its file list across up to 16 concurrent `clamdscan` workers, bounded by clamd's `MaxThreads`, the CPU count and the number of files. Exclusions, per-file progress, threat reporting and cancellation are unchanged, and the workers' output is combined into one scan report with a single summary and whole-scan warnings. (#225)
 - Fixed Flatpak standalone scan progress estimates to count host files, including hidden app data, while retaining valid partial counts when subdirectories are unreadable. Multi-target scans now label each target and preserve cumulative file and threat counters, incomplete or exceeded estimates remain approximate and indeterminate, and genuine estimate warnings and final per-target results are preserved. (#304)
 - Fixed active manual and forced database updates timing out after a fixed total duration; a configurable output-inactivity limit now stops stalled updates instead. (#307)
+- Fixed SELinux detection when `getenforce` is not on the user's PATH (openSUSE, Flatpak host calls), and Audit no longer flags the inactive Linux security module when another one is active. (#368)
+- Fixed host binary lookup on systems without `which`, such as minimal openSUSE images, by also probing `/usr/sbin`, `/usr/bin`, `/sbin`, and `/bin`; the automatic-updates audit check no longer reports an unknown status in that case. (#371)
+- Fixed the AppImage shipping an unreadable AppDir and outdated AppStream screenshots. (#378)
+- Fixed the Preferences clamd.conf section losing its card styling, sidebar labels clipping descenders, scan profile descriptions overlapping the profile dropdown, and the long "Latest scan" path overflowing its card.
+- Updated `cookie` to 0.18.3 and `url` to 2.5.9, resolving RUSTSEC-2026-0594 and RUSTSEC-2026-0592. (#365)
+
+### Maintenance
+
+- Package builds on pull requests and pushes to master now run only when package-relevant paths change or the `build-packages` label is set; added concurrency groups, Rust caching, and job timeouts across CI. (#363)
+- Brought the v0.6.0 native release mirror access fix (authenticated HTTPS Ubuntu Jammy mirrors for the Debian, RPM, and AppImage builds) back to master, which had diverged from the release branch.
+- Scoped the frontend audit exception to the build-only picomatch advisory. (#339)
+
+## [0.6.0] - 2026-11-11
+
+### Added
+
+- Added a Vietnamese (`vi`) translation.
+
+### Changed
+
+- Reduced historical-log loading to the requested entries using a validated, recoverable metadata index, retaining legacy JSON history, privacy migration, corruption recovery, external-file changes, and stable ordering; statistics now reuse parsed timestamps and aggregate trend buckets in one pass.
+- Inactive log, quarantine, and statistics views now defer completion-triggered refreshes until shown, keeping retained page state and coalescing pending refreshes without losing invalidations received during an in-flight request.
+- Coalesced ordinary desktop scan-progress snapshots at the native bridge while preserving every threat delta, the latest pending snapshot, terminal events, and operation-scoped cleanup; core and CLI progress remain unchanged.
+- Standalone ClamAV scans now count files without retaining unused file-path lists; daemon scan inputs, pre-counted totals, and progress estimates are unchanged.
+- Desktop quarantine browsing now retrieves bounded date/ID cursor pages with locale-aware literal Unicode search, stable insertion anchors, and stale-response guards; storage totals remain global and the headless CLI retains its complete legacy list.
+- Updated Rust dependencies: `glib` to 0.22.10, bundled `rusqlite` to 0.41.1, `base64` to 0.23.1, `rfd` to 0.17.2, `signal-hook` to 0.4.6, `globset` to 0.4.21, `icu_locale_core` to 2.4.0, `ksni` to 0.3.7, `log` to 0.4.35, `open` to 5.4.5, `tauri-plugin-notification` to 2.8.0, `tauri-plugin-single-instance` to 2.5.5, `uuid` to 1.29.1, `zip` to 9.4.1, and the locked `tauri` resolution to 2.12.5. The `rfd` update removes its `ashpd` portal chain (`async-fs`, `async-net`, and `urlencoding`) without altering existing `zbus` consumers, Flatpak permissions, or the native GTK 3/WebKitGTK 4.1 dependency boundary.
+- Updated desktop tooling: `@tauri-apps/cli` to 2.12.4, `@babel/parser` to 8.1.0, `@vitejs/plugin-react` to 6.2.1, TypeScript to 7.0.2, and Vite to 8.3.5; refreshed the Bun, Yarn, and Flatpak dependency sources. Gettext extraction uses the locked Babel parser because TypeScript 7 does not provide its former compiler API, and the desktop configuration declares Vite client types so stylesheet side-effect imports remain type-checkable.
+
+### Fixed
+
 - Fixed trusted native privileged helpers being marked unavailable when automatic installation or installed-package metadata is unavailable; accepted conventional numeric-leading Debian revisions after the exact application upstream version while retaining strict Flatpak package checks and signed-download and trusted-helper verification. (#278)
 - Fixed Flatpak scans being blocked by a false missing-virus-database warning when definitions are present on the host; scan preflight now inspects host-side database files while preserving configured directories and metadata. (#279)
 - Fixed Flatpak helper installation to support trusted system-tool symlinks, such as Ubuntu's uutils `sha256sum` wrapper, while retaining resolved-target regular-file, root-ownership, safe-write-permission, and execute checks. (#280)
-- Corrected the Flatpak WebKit transport default to force shared memory rather than fully disable DMA-BUF, avoiding an empty transport configuration while preserving the Wayland `Error 71` mitigation. (#315, #282)
+- Fixed Flatpak Wayland startup compatibility by disabling WebKitGTK's DMA-BUF renderer path by default while preserving explicit environment overrides. (#282)
 - Fixed large scans losing threats, skipped files, warnings, and summary counts after the 64 MiB output limit; final results and history now retain complete scan evidence for both ClamAV backends while keeping displayed output bounded, preserving exact filename identities, and preventing the CLI from reporting an infected scan as clean. (#285)
 - Fixed daemon scans splitting long file-list paths or reporting spurious errors by routing paths of 1,023 bytes or more through the existing protected stdin transport; preserved shorter-path batching, exact filenames, exclusions, progress, and cancellation. (#286)
 - Rejected VirusTotal uploads when the original pathname is substituted after lookup, retaining no-follow descriptor identity checks.
@@ -56,6 +88,7 @@
 
 ### Maintenance
 
+- Switched native Debian, RPM, and AppImage CI to authenticated HTTPS Ubuntu Jammy mirrors and made repository update errors fatal, retaining the Ubuntu 22.04 build baseline, dependencies, and package signing.
 - Updated GitHub Actions artifact upload to 7.0.2 and artifact download to 8.0.2.
 - Added concise GitHub bug report, feature request, and pull request templates.
 - Switched Dependabot's JavaScript projects to Bun, grouped weekly minor and patch updates, and automated the related Bun/Yarn and Flatpak dependency source refresh.
@@ -227,7 +260,11 @@
 - Hardened privileged configuration writes with canonical helper and destination validation that fails closed.
 - Built scheduled scan commands from tokens and sanitized AppImage environments for every host helper.
 
-[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/linx-systems/clamui/compare/v0.6.1...HEAD
+
+[0.6.1]: https://github.com/linx-systems/clamui/compare/v0.6.0...v0.6.1
+
+[0.6.0]: https://github.com/linx-systems/clamui/compare/v0.5.1...v0.6.0
 
 [0.5.1]: https://github.com/linx-systems/clamui/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/linx-systems/clamui/compare/v0.4.1...v0.5.0

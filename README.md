@@ -12,9 +12,9 @@ A modern Linux desktop interface for ClamAV, built with Rust, Tauri, and a React
 
 </div>
 
-## ClamUI v0.6.0
+## ClamUI v0.6.1
 
-v0.6.0 is a minor release. Download the native packages, AppImage, or Flatpak bundle for your architecture from [GitHub Releases](https://github.com/linx-systems/clamui/releases), and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
+v0.6.1 is a minor release. Download the native packages, AppImage, or Flatpak bundle for your architecture from [GitHub Releases](https://github.com/linx-systems/clamui/releases), and follow the [package-signing guide](https://clamui.com/docs/contributing/signing/) before installing native artifacts.
 
 Every package format uses **host** ClamAV. Install host `clamscan` and `freshclam`; daemon scans also require host `clamd` and `clamdscan`.
 
@@ -23,15 +23,15 @@ Every package format uses **host** ClamAV. Install host `clamscan` and `freshcla
 sudo apt install clamav clamav-freshclam
 ```
 
-Install the matching Debian application and helper pair for your architecture. Their asset patterns are `clamui_0.6.0_<debarch>.deb` and `clamui-privileged-helper_0.6.0_<debarch>.deb`:
+Install the matching Debian application and helper pair for your architecture. Their asset patterns are `clamui_0.6.1_<debarch>.deb` and `clamui-privileged-helper_0.6.1_<debarch>.deb`:
 
 ```bash
 DEB_ARCH="$(dpkg --print-architecture)"
-sudo apt install "./clamui_0.6.0_${DEB_ARCH}.deb" \
-  "./clamui-privileged-helper_0.6.0_${DEB_ARCH}.deb"
+sudo apt install "./clamui_0.6.1_${DEB_ARCH}.deb" \
+  "./clamui-privileged-helper_0.6.1_${DEB_ARCH}.deb"
 ```
 
-The v0.6.0 helper RPM asset names are `clamui-privileged-helper-0.6.0-1.x86_64.rpm` and `clamui-privileged-helper-0.6.0-1.aarch64.rpm`, each with a matching `.rpm.asc`. The x86_64 AppImage asset name is `ClamUI-0.6.0-x86_64.AppImage` (with `.zsync` metadata). The Flatpak bundle asset names are `clamui-x86_64.flatpak` and `clamui-aarch64.flatpak`.
+The v0.6.1 helper RPM asset names are `clamui-privileged-helper-0.6.1-1.x86_64.rpm` and `clamui-privileged-helper-0.6.1-1.aarch64.rpm`, each with a matching `.rpm.asc`. The x86_64 AppImage asset name is `ClamUI-0.6.1-x86_64.AppImage` (with `.zsync` metadata). The Flatpak bundle asset names are `clamui-x86_64.flatpak` and `clamui-aarch64.flatpak`.
 
 Flathub is published separately; GitHub drafts and Flatpak bundles do not update the store. Check the store version with `flatpak remote-info --user flathub io.github.linx_systems.ClamUI` (use `--system` for a system remote).
 
