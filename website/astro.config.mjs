@@ -82,6 +82,9 @@ export default defineConfig({
         processedDirs: [".."],
       },
       customCss: ["./src/styles/starlight.css"],
+      components: {
+        SocialIcons: "./src/components/StarlightSocialIcons.astro",
+      },
       routeMiddleware: "./src/starlight-route-data.ts",
     }),
   ],

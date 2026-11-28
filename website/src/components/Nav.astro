@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from "./ThemeToggle.astro";
 import { getLatestRelease } from "../content/latest-release";
+import { REPORT_ISSUE_URL } from "../content/links";
 
 const release = await getLatestRelease();
 ---
@@ -48,6 +49,14 @@ const release = await getLatestRelease();
       >
         <span class="sm:hidden">Docs</span>
         <span class="hidden sm:inline">Documentation</span>
+      </a>
+      <a
+        href={REPORT_ISSUE_URL}
+        rel="noopener"
+        class="btn-ghost text-sm px-2.5 py-1"
+      >
+        <span class="sm:hidden">Report</span>
+        <span class="hidden sm:inline">Report issue</span>
       </a>
       <ThemeToggle />
       <a
