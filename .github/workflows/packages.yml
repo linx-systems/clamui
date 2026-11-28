@@ -144,9 +144,9 @@ jobs:
               [ -n "$path" ] || continue
               common "$path" && return 0
               case "$package:$path" in
-                deb:debian/*|deb:scripts/clamui-*|deb:.github/workflows/build-deb.yml) return 0 ;;
-                rpm:rpm/*|rpm:crates/clamui-core/src/privileged.rs|rpm:.github/workflows/build-rpm.yml) return 0 ;;
-                appimage:appimage/*|appimage:.github/workflows/build-appimage.yml) return 0 ;;
+                deb:debian/*|deb:scripts/clamui-*|deb:.github/workflows/build-deb.yml|deb:.github/workflows/install-ubuntu-build-deps.sh) return 0 ;;
+                rpm:rpm/*|rpm:crates/clamui-core/src/privileged.rs|rpm:.github/workflows/build-rpm.yml|rpm:.github/workflows/install-ubuntu-build-deps.sh) return 0 ;;
+                appimage:appimage/*|appimage:.github/workflows/build-appimage.yml|appimage:.github/workflows/install-ubuntu-build-deps.sh) return 0 ;;
                 flatpak:flathub/*|flatpak:desktop/yarn.lock|flatpak:scripts/generate-flatpak-sources.sh|flatpak:scripts/fix-yarn-lock-specs.py|flatpak:scripts/flatpak-release-source.awk|flatpak:.github/workflows/build-flatpak.yml) return 0 ;;
                 snap:snap/*|snap:.github/workflows/build-snap.yml) return 0 ;;
               esac
