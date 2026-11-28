@@ -80,18 +80,6 @@ CI builds native artifacts on the Ubuntu 22.04-compatible baseline. A build on a
 - Set `build.removeUnusedCommands = true` in the Tauri configuration. Use the system WebKitGTK WebView; do not bundle a browser runtime.
 - Keep Tauri, Rust dependencies, and frontend packages current through the repository's locked dependency workflows. Run `cargo audit` and `bun audit` when updating dependencies and address relevant advisories.
 
-## Coding-agent skills
-
-Project-local coding-agent skills are optional development aids, not build or runtime dependencies. Their canonical imports are in `.agents/skills`; `.claude/skills` provides compatibility links. For installation details, see the published [Development guide](https://clamui.com/docs/contributing/development/).
-
-Refresh only a deliberately selected upstream skill. `skills-lock.json` records its source, selected path, and content hash; it does not pin a commit. Start OMP from the repository root: `.omp/config.yml` applies its cwd-scoped `ignoredSkills` filter while preserving global skill payloads.
-
-- Rust changes: use `rust-best-practices`.
-- React client changes: use `vercel-react-best-practices`; apply it to `desktop/src/`, not Next.js or server patterns.
-- Accessibility work: use `accessibility`, then validate the actual Tauri/WebKitGTK desktop rather than relying only on browser scores.
-- Gettext messages, catalogs, plural forms, translator notes, or extraction: use `clamui-gettext` and the translation guide it points to.
-- Globally managed IPC and release skills remain optional; contributors do not need them to work on ClamUI.
-
 ## Runtime, data, and security rules
 
 - **Host ClamAV:** every package format uses the host `clamscan` and `freshclam`; daemon scanning additionally needs host `clamd` and `clamdscan`. Flatpak reaches host tools through `flatpak-spawn --host`. Never bundle or substitute the engine or its definition database.
